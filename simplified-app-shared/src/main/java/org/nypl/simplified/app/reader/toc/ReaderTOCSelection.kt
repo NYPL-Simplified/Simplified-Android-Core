@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.reader.toc
 
-import org.nypl.simplified.books.reader.ReaderBookmark
+import org.nypl.simplified.books.api.Bookmark
 import java.io.Serializable
 
 sealed class ReaderTOCSelection : Serializable {
@@ -9,6 +9,6 @@ sealed class ReaderTOCSelection : Serializable {
     val readerTOCElement: ReaderTOCElement) : ReaderTOCSelection()
 
   data class ReaderSelectedBookmark(
-    val readerBookmark: ReaderBookmark) : ReaderTOCSelection()
+    val readerBookmark: Bookmark) : ReaderTOCSelection()
 
 }

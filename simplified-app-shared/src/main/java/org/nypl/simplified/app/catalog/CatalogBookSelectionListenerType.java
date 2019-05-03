@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
+import org.nypl.simplified.feeds.api.FeedEntry;
 
 /**
  * The type of book selection listeners.
@@ -17,5 +17,5 @@ public interface CatalogBookSelectionListenerType {
 
   void onSelectBook(
     final CatalogFeedBookCellView v,
-    final FeedEntryOPDS e);
+    final FeedEntry.FeedEntryOPDS e);
 }

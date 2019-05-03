@@ -7,14 +7,14 @@ import junit.framework.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.nypl.simplified.books.bundled_content.BundledURIs;
+import org.nypl.simplified.books.bundled.api.BundledURIs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
 /**
- * Contract for the {@link org.nypl.simplified.books.bundled_content.BundledURIs} class.
+ * Contract for the {@link org.nypl.simplified.books.bundled.api.BundledURIs} class.
  */
 
 public abstract class BundledURIsContract {

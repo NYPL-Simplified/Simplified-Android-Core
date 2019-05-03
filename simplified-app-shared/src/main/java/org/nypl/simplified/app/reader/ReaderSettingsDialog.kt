@@ -1,5 +1,6 @@
 package org.nypl.simplified.app.reader
 
+
 import android.app.DialogFragment
 import android.graphics.Typeface
 import android.os.Bundle
@@ -16,20 +17,14 @@ import com.io7m.jnull.Nullable
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
-import org.nypl.simplified.books.profiles.ProfilePreferencesChanged
-import org.nypl.simplified.books.reader.ReaderColorScheme
-import org.nypl.simplified.books.reader.ReaderColorScheme.SCHEME_BLACK_ON_BEIGE
-import org.nypl.simplified.books.reader.ReaderColorScheme.SCHEME_BLACK_ON_WHITE
-import org.nypl.simplified.books.reader.ReaderColorScheme.SCHEME_WHITE_ON_BLACK
-import org.nypl.simplified.books.reader.ReaderFontSelection
-import org.nypl.simplified.books.reader.ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC
-import org.nypl.simplified.books.reader.ReaderFontSelection.READER_FONT_SANS_SERIF
-import org.nypl.simplified.books.reader.ReaderFontSelection.READER_FONT_SERIF
-import org.nypl.simplified.books.reader.ReaderPreferences
 import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
+import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.reader.api.ReaderColorScheme
+import org.nypl.simplified.reader.api.ReaderFontSelection
+import org.nypl.simplified.reader.api.ReaderPreferences
 import org.slf4j.LoggerFactory
 
 /**
@@ -109,15 +104,15 @@ class ReaderSettingsDialog : DialogFragment() {
      */
 
     this.viewFontSerif.setOnClickListener {
-      this.readerPreferencesBuilder.setFontFamily(READER_FONT_SERIF)
+      this.readerPreferencesBuilder.setFontFamily(ReaderFontSelection.READER_FONT_SERIF)
       this.updatePreferences(this.readerPreferencesBuilder.build())
     }
     this.viewFontSans.setOnClickListener {
-      this.readerPreferencesBuilder.setFontFamily(READER_FONT_SANS_SERIF)
+      this.readerPreferencesBuilder.setFontFamily(ReaderFontSelection.READER_FONT_SANS_SERIF)
       this.updatePreferences(this.readerPreferencesBuilder.build())
     }
     this.viewFontOpenDyslexic.setOnClickListener {
-      this.readerPreferencesBuilder.setFontFamily(READER_FONT_OPEN_DYSLEXIC)
+      this.readerPreferencesBuilder.setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
       this.updatePreferences(this.readerPreferencesBuilder.build())
     }
 
@@ -126,17 +121,17 @@ class ReaderSettingsDialog : DialogFragment() {
     this.viewFontOpenDyslexic.typeface = openDyslexic
 
     this.viewBlackOnWhite.setOnClickListener {
-      this.readerPreferencesBuilder.setColorScheme(SCHEME_BLACK_ON_WHITE)
+      this.readerPreferencesBuilder.setColorScheme(ReaderColorScheme.SCHEME_BLACK_ON_WHITE)
       this.updatePreferences(this.readerPreferencesBuilder.build())
     }
 
     this.viewWhiteOnBlack.setOnClickListener {
-      this.readerPreferencesBuilder.setColorScheme(SCHEME_WHITE_ON_BLACK)
+      this.readerPreferencesBuilder.setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
       this.updatePreferences(this.readerPreferencesBuilder.build())
     }
 
     this.viewBlackOnBeige.setOnClickListener {
-      this.readerPreferencesBuilder.setColorScheme(SCHEME_BLACK_ON_BEIGE)
+      this.readerPreferencesBuilder.setColorScheme(ReaderColorScheme.SCHEME_BLACK_ON_BEIGE)
       this.updatePreferences(this.readerPreferencesBuilder.build())
     }
 
@@ -236,17 +231,17 @@ class ReaderSettingsDialog : DialogFragment() {
 
   private fun configureViewsForFont(fontFamily: ReaderFontSelection) {
     when (fontFamily) {
-      READER_FONT_SANS_SERIF -> {
+      ReaderFontSelection.READER_FONT_SANS_SERIF -> {
         this.viewFontOpenDyslexic.setBackgroundResource(R.drawable.reader_settings_font)
         this.viewFontSans.setBackgroundResource(R.drawable.reader_settings_font_active)
         this.viewFontSerif.setBackgroundResource(R.drawable.reader_settings_font)
       }
-      READER_FONT_OPEN_DYSLEXIC -> {
+      ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC -> {
         this.viewFontOpenDyslexic.setBackgroundResource(R.drawable.reader_settings_font_active)
         this.viewFontSans.setBackgroundResource(R.drawable.reader_settings_font)
         this.viewFontSerif.setBackgroundResource(R.drawable.reader_settings_font)
       }
-      READER_FONT_SERIF -> {
+      ReaderFontSelection.READER_FONT_SERIF -> {
         this.viewFontOpenDyslexic.setBackgroundResource(R.drawable.reader_settings_font)
         this.viewFontSans.setBackgroundResource(R.drawable.reader_settings_font)
         this.viewFontSerif.setBackgroundResource(R.drawable.reader_settings_font_active)
@@ -256,17 +251,17 @@ class ReaderSettingsDialog : DialogFragment() {
 
   private fun configureViewsForColorScheme(colorScheme: ReaderColorScheme) {
     when (colorScheme) {
-      SCHEME_BLACK_ON_BEIGE -> {
+      ReaderColorScheme.SCHEME_BLACK_ON_BEIGE -> {
         this.viewBlackOnBeige.setBackgroundResource(R.drawable.reader_settings_black_on_beige_active)
         this.viewBlackOnWhite.setBackgroundResource(R.drawable.reader_settings_black_on_white)
         this.viewWhiteOnBlack.setBackgroundResource(R.drawable.reader_settings_white_on_black)
       }
-      SCHEME_BLACK_ON_WHITE -> {
+      ReaderColorScheme.SCHEME_BLACK_ON_WHITE -> {
         this.viewBlackOnBeige.setBackgroundResource(R.drawable.reader_settings_black_on_beige)
         this.viewBlackOnWhite.setBackgroundResource(R.drawable.reader_settings_black_on_white_active)
         this.viewWhiteOnBlack.setBackgroundResource(R.drawable.reader_settings_white_on_black)
       }
-      SCHEME_WHITE_ON_BLACK -> {
+      ReaderColorScheme.SCHEME_WHITE_ON_BLACK -> {
         this.viewBlackOnBeige.setBackgroundResource(R.drawable.reader_settings_black_on_beige)
         this.viewBlackOnWhite.setBackgroundResource(R.drawable.reader_settings_black_on_white)
         this.viewWhiteOnBlack.setBackgroundResource(R.drawable.reader_settings_white_on_black_active)

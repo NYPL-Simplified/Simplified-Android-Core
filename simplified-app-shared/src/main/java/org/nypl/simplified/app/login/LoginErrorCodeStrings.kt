@@ -2,14 +2,14 @@ package org.nypl.simplified.app.login
 
 import android.content.res.Resources
 import org.nypl.simplified.app.R
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_ACCOUNT_NONEXISTENT
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_CREDENTIALS_INCORRECT
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_GENERAL
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_NETWORK_EXCEPTION
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_PROFILE_CONFIGURATION
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_SERVER_ERROR
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLogoutErrorCode
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode.ERROR_ACCOUNT_NONEXISTENT
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode.ERROR_CREDENTIALS_INCORRECT
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode.ERROR_GENERAL
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode.ERROR_NETWORK_EXCEPTION
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode.ERROR_PROFILE_CONFIGURATION
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode.ERROR_SERVER_ERROR
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorCode
 
 /**
  * Translated strings for login-related error codes.

@@ -2,11 +2,11 @@ package org.nypl.simplified.tests.books
 
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
+import org.nypl.simplified.documents.authentication.AuthenticationDocumentType
+import org.nypl.simplified.documents.eula.EULAType
+import org.nypl.simplified.documents.store.DocumentStoreType
+import org.nypl.simplified.documents.synced.SyncedDocumentType
 
-import org.nypl.simplified.books.core.AuthenticationDocumentType
-import org.nypl.simplified.books.core.DocumentStoreType
-import org.nypl.simplified.books.core.EULAType
-import org.nypl.simplified.books.core.SyncedDocumentType
 
 import java.io.InputStream
 

@@ -5,11 +5,11 @@ import com.io7m.jfunctional.Some;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
-import org.nypl.simplified.books.accounts.AccountBarcode;
-import org.nypl.simplified.books.accounts.AccountBundledCredentialsJSON;
-import org.nypl.simplified.books.accounts.AccountBundledCredentialsType;
-import org.nypl.simplified.books.accounts.AccountPIN;
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
+import org.nypl.simplified.accounts.api.AccountBarcode;
+import org.nypl.simplified.accounts.api.AccountBundledCredentialsType;
+import org.nypl.simplified.accounts.api.AccountPIN;
+import org.nypl.simplified.accounts.database.AccountBundledCredentialsJSON;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

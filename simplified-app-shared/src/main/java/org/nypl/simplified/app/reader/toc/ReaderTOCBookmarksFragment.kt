@@ -16,7 +16,7 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.reader.ReaderColorSchemes
 import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.ReaderSelectedBookmark
-import org.nypl.simplified.books.reader.ReaderBookmark
+import org.nypl.simplified.books.api.Bookmark
 import org.slf4j.LoggerFactory
 
 /**
@@ -28,7 +28,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
   private val logger = LoggerFactory.getLogger(ReaderTOCBookmarksFragment::class.java)
 
   private lateinit var inflater: LayoutInflater
-  private lateinit var adapter: ArrayAdapter<ReaderBookmark>
+  private lateinit var adapter: ArrayAdapter<Bookmark>
   private lateinit var listener: ReaderTOCSelectionListenerType
   private lateinit var bookmarksTOCLayout: View
   private lateinit var bookmarksTOCListView: ListView
@@ -169,7 +169,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     this.adapter.unregisterDataSetObserver(observer)
   }
 
-  private fun detailTextFrom(bookmark: ReaderBookmark): String {
+  private fun detailTextFrom(bookmark: Bookmark): String {
 
     val shortDateText =
       run {

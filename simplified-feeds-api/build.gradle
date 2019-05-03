@@ -1,0 +1,36 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 27
+  buildToolsVersion "28.0.2"
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+
+description = 'simplified-feeds-api'
+
+dependencies {
+  api project(":simplified-books-api")
+  api project(":simplified-books-registry-api")
+  api project(":simplified-books-bundled-api")
+  api project(":simplified-books-database-api")
+  api project(":simplified-http-core")
+  api project(":simplified-json-core")
+
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation "net.jodah:expiringmap:0.4.3"
+
+  api "com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)"
+
+  compileOnly "com.google.auto.value:auto-value:1.5"
+  annotationProcessor "com.google.auto.value:auto-value:1.5"
+}
+
+repositories {
+  mavenCentral()
+  jcenter()
+}

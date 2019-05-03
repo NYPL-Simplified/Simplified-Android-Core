@@ -11,20 +11,20 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import org.jetbrains.annotations.NotNull;
+import org.nypl.simplified.accounts.database.api.AccountType;
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.app.NavigationDrawerActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.login.LoginDialogListenerType;
-import org.nypl.simplified.books.accounts.AccountType;
-import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
 import org.nypl.simplified.books.book_registry.BookStatusEvent;
-import org.nypl.simplified.books.controller.ProfilesControllerType;
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.stack.ImmutableStack;
 
-import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
+import static org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 
 /**
  * An activity showing a full-screen book detail page.

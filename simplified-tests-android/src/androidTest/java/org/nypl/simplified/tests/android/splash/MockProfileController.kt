@@ -2,30 +2,28 @@ package org.nypl.simplified.tests.android.splash
 
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
-import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Unit
 import org.joda.time.LocalDate
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountEventCreation
-import org.nypl.simplified.books.accounts.AccountEventDeletion
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.accounts.AccountProvider
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.controller.ProfileFeedRequest
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.feeds.Feed
-import org.nypl.simplified.books.idle_timer.ProfileIdleTimerType
-import org.nypl.simplified.books.profiles.ProfileAccountSelectEvent
-import org.nypl.simplified.books.profiles.ProfileCreationEvent
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfileID
-import org.nypl.simplified.books.profiles.ProfilePreferences
-import org.nypl.simplified.books.profiles.ProfileReadableType
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType
-import org.nypl.simplified.books.reader.ReaderBookLocation
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventCreation
+import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.observable.ObservableReadableType
+import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
+import org.nypl.simplified.profiles.api.ProfileCreationEvent
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfilePreferences
+import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import java.net.URI
 import java.util.SortedMap
 
@@ -98,14 +96,6 @@ class MockProfileController : ProfilesControllerType {
   }
 
   override fun profileAccountCurrentCatalogRootURI(): URI {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun profileBookmarkSet(book_id: BookID?, new_location: ReaderBookLocation?): FluentFuture<Unit> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun profileBookmarkGet(book_id: BookID?): OptionType<ReaderBookLocation> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 

@@ -2,7 +2,7 @@ package org.nypl.simplified.app.reader;
 
 import com.io7m.jfunctional.OptionType;
 
-import org.nypl.simplified.books.reader.ReaderPreferences;
+import org.nypl.simplified.reader.api.ReaderPreferences;
 
 /**
  * The type of the JavaScript API exposed by Readium.

@@ -40,10 +40,8 @@ import org.nypl.audiobook.android.views.PlayerTOCFragmentParameters
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
-import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
-import org.nypl.simplified.books.feeds.FeedEntry
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
@@ -554,7 +552,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
     val screen = Simplified.getScreenSizeInformation()
     Simplified.getCoverProvider().loadCoverInto(
-      FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
+      org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
       view,
       screen.screenDPToPixels(300).toInt(),
       screen.screenDPToPixels(400).toInt())

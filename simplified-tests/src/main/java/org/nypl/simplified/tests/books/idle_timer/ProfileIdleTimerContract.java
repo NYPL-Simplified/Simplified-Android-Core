@@ -4,13 +4,13 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.nypl.simplified.books.idle_timer.ProfileIdleTimeOutSoon;
-import org.nypl.simplified.books.idle_timer.ProfileIdleTimedOut;
-import org.nypl.simplified.books.idle_timer.ProfileIdleTimer;
-import org.nypl.simplified.books.idle_timer.ProfileIdleTimerType;
-import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.observable.Observable;
 import org.nypl.simplified.observable.ObservableType;
+import org.nypl.simplified.profiles.api.ProfileEvent;
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon;
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut;
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer;
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType;
 import org.nypl.simplified.tests.EventAssertions;
 
 import java.util.ArrayList;

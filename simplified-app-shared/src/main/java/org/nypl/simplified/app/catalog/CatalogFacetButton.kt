@@ -3,7 +3,7 @@ package org.nypl.simplified.app.catalog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import com.google.common.base.Preconditions
-import org.nypl.simplified.books.feeds.FeedFacetType
+import org.nypl.simplified.feeds.api.FeedFacetType
 import java.util.ArrayList
 import java.util.Objects
 

@@ -28,11 +28,24 @@ class Analytics private constructor(
       return Analytics(LOG,
         ServiceLoader.load(AnalyticsSystemProvider::class.java)
           .toList()
-          .map { provider -> provider.create(configuration) }
+          .map { provider -> startProvider(provider, configuration) }
+          .filterNotNull()
           .map { system ->
             LOG.debug("created analytics system: ${system::class.java.canonicalName}")
             system
           })
+    }
+
+    private fun startProvider(
+      provider: AnalyticsSystemProvider,
+      configuration: AnalyticsConfiguration): AnalyticsSystem? {
+      return try {
+        provider.create(configuration)
+      } catch (e: Exception) {
+        LOG.error("{}: failed to start analytics system: {}",
+          provider::class.java.canonicalName, e)
+        null
+      }
     }
   }
 

@@ -42,36 +42,33 @@ import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.login.LoginDialogListenerType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_registry.BookStatusEvent
-import org.nypl.simplified.books.controller.ProfileFeedRequest
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.eula.EULAType
-import org.nypl.simplified.books.feeds.Feed
-import org.nypl.simplified.books.feeds.Feed.FeedWithGroups
-import org.nypl.simplified.books.feeds.Feed.FeedWithoutGroups
-import org.nypl.simplified.books.feeds.FeedBooksSelection
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
-import org.nypl.simplified.books.feeds.FeedFacetMatcherType
-import org.nypl.simplified.books.feeds.FeedFacetOPDS
-import org.nypl.simplified.books.feeds.FeedFacetPseudo
-import org.nypl.simplified.books.feeds.FeedFacetPseudo.FacetType
-import org.nypl.simplified.books.feeds.FeedFacetPseudo.FacetType.SORT_BY_TITLE
-import org.nypl.simplified.books.feeds.FeedFacetType
-import org.nypl.simplified.books.feeds.FeedFacets
-import org.nypl.simplified.books.feeds.FeedGroup
-import org.nypl.simplified.books.feeds.FeedLoaderResult
-import org.nypl.simplified.books.feeds.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
-import org.nypl.simplified.books.feeds.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
-import org.nypl.simplified.books.feeds.FeedLoaderResult.FeedLoaderSuccess
-import org.nypl.simplified.books.feeds.FeedLoaderType
-import org.nypl.simplified.books.feeds.FeedSearchLocal
-import org.nypl.simplified.books.feeds.FeedSearchMatcherType
-import org.nypl.simplified.books.feeds.FeedSearchOpen1_1
-import org.nypl.simplified.books.profiles.ProfileAccountSelectEvent
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
+import org.nypl.simplified.feeds.api.Feed
+import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
+import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
+import org.nypl.simplified.feeds.api.FeedBooksSelection
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.feeds.api.FeedFacetMatcherType
+import org.nypl.simplified.feeds.api.FeedFacetOPDS
+import org.nypl.simplified.feeds.api.FeedFacetPseudo
+import org.nypl.simplified.feeds.api.FeedFacetPseudo.FacetType
+import org.nypl.simplified.feeds.api.FeedFacetType
+import org.nypl.simplified.feeds.api.FeedFacets
+import org.nypl.simplified.feeds.api.FeedGroup
+import org.nypl.simplified.feeds.api.FeedLoaderResult
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
+import org.nypl.simplified.feeds.api.FeedLoaderType
+import org.nypl.simplified.feeds.api.FeedSearchLocal
+import org.nypl.simplified.feeds.api.FeedSearchOpen1_1
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
+import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
+import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.stack.ImmutableStack
 import org.nypl.simplified.theme.ThemeControl
 import org.slf4j.Logger
@@ -846,7 +843,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
       // Check that the search URI is of an understood type.
       searchOk = search.matchSearch(
-        object : FeedSearchMatcherType<Boolean, UnreachableCodeException> {
+        object : org.nypl.simplified.feeds.api.FeedSearchMatcherType<Boolean, UnreachableCodeException> {
           override fun onFeedSearchOpen1_1(
             fs: FeedSearchOpen1_1): Boolean? {
             this@CatalogFeedActivity.searchView!!.setOnQueryTextListener(
@@ -859,7 +856,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
             f: FeedSearchLocal): Boolean? {
             this@CatalogFeedActivity.searchView!!.setOnQueryTextListener(
               this@CatalogFeedActivity.BooksLocalSearchQueryHandler(
-                this@CatalogFeedActivity.resources, args, SORT_BY_TITLE))
+                this@CatalogFeedActivity.resources, args, FacetType.SORT_BY_TITLE))
             return java.lang.Boolean.TRUE
           }
         })
@@ -1244,13 +1241,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         object : CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException> {
           override fun onFeedArgumentsLocalBooks(c: CatalogFeedArgumentsLocalBooks): Unit {
             NavigationDrawerActivity.setActivityArguments(b, false)
-            CatalogActivity.setActivityArguments(b, c.upStack)
+            setActivityArguments(b, c.upStack)
             return Unit.unit()
           }
 
           override fun onFeedArgumentsRemote(c: CatalogFeedArgumentsRemote): Unit {
             NavigationDrawerActivity.setActivityArguments(b, c.isDrawerOpen)
-            CatalogActivity.setActivityArguments(b, c.upStack)
+            setActivityArguments(b, c.upStack)
             return Unit.unit()
           }
         })

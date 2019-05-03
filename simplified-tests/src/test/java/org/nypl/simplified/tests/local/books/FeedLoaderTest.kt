@@ -2,11 +2,8 @@ package org.nypl.simplified.tests.local.books
 
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.OptionType
-import org.nypl.simplified.books.book_database.BookFormats
+import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
-import org.nypl.simplified.books.bundled_content.BundledContentResolverType
-import org.nypl.simplified.books.feeds.FeedLoader
-import org.nypl.simplified.books.feeds.FeedLoaderType
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -18,7 +15,7 @@ import java.net.URI
 
 class FeedLoaderTest : FeedLoaderContract() {
 
-  override fun createFeedLoader(exec: ListeningExecutorService): FeedLoaderType {
+  override fun createFeedLoader(exec: ListeningExecutorService): org.nypl.simplified.feeds.api.FeedLoaderType {
 
     val entryParser =
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
@@ -30,11 +27,11 @@ class FeedLoaderTest : FeedLoaderContract() {
 
     val searchParser = OPDSSearchParser.newParser()
     val bookRegistry = BookRegistry.create()
-    val bundledContent = BundledContentResolverType {
-      uri -> throw FileNotFoundException(uri.toASCIIString())
+    val bundledContent = org.nypl.simplified.books.bundled.api.BundledContentResolverType { uri ->
+      throw FileNotFoundException(uri.toASCIIString())
     }
 
-    return FeedLoader.create(exec, parser, searchParser, transport, bookRegistry, bundledContent)
+    return org.nypl.simplified.feeds.api.FeedLoader.create(exec, parser, searchParser, transport, bookRegistry, bundledContent)
   }
 
   override fun resource(name: String): URI {

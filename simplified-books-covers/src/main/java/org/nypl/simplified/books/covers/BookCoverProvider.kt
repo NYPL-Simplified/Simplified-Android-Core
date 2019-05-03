@@ -11,7 +11,7 @@ import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.books.feeds.FeedEntry
+import org.nypl.simplified.feeds.api.FeedEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException

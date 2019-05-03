@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.reader;
 
-import org.nypl.simplified.books.reader.ReaderBookLocation;
+import org.nypl.simplified.books.api.BookLocation;
 
 /**
  * A listener for receiving the current book location.
@@ -24,5 +24,5 @@ public interface ReaderCurrentPageListenerType
    */
 
   void onCurrentPageReceived(
-    ReaderBookLocation l);
+    BookLocation l);
 }

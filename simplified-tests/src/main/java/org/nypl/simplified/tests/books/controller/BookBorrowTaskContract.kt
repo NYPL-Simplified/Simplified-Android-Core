@@ -12,31 +12,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.mockito.Mockito
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.accounts.AccountLoginState
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.Book
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
-import org.nypl.simplified.books.book_database.BookDatabaseEntryType
-import org.nypl.simplified.books.book_database.BookDatabaseType
-import org.nypl.simplified.books.book_database.BookEvent
-import org.nypl.simplified.books.book_database.BookFormats
-import org.nypl.simplified.books.book_database.BookID
+import org.nypl.simplified.books.api.BookEvent
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
+import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.books.bundled_content.BundledContentResolverType
-import org.nypl.simplified.books.controller.BookBorrowTask
-import org.nypl.simplified.books.exceptions.BookBorrowExceptionBadBorrowFeed
-import org.nypl.simplified.books.exceptions.BookBorrowExceptionNoCredentials
-import org.nypl.simplified.books.exceptions.BookUnexpectedTypeException
-import org.nypl.simplified.books.feeds.FeedHTTPTransport
-import org.nypl.simplified.books.feeds.FeedHTTPTransportException
-import org.nypl.simplified.books.feeds.FeedLoader
-import org.nypl.simplified.books.feeds.FeedLoaderType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.files.DirectoryUtilities
@@ -56,7 +40,6 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
-import java.lang.IllegalStateException
 import java.net.URI
 import java.util.ArrayList
 import java.util.Calendar
@@ -73,7 +56,7 @@ open class BookBorrowTaskContract {
   val expected = ExpectedException.none()
 
   val accountID =
-    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+    org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
   
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorDownloads: ListeningExecutorService
@@ -85,8 +68,8 @@ open class BookBorrowTaskContract {
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var executorTimer: ListeningExecutorService
-  private lateinit var bundledContent: BundledContentResolverType
-  private lateinit var feedLoader: FeedLoaderType
+  private lateinit var bundledContent: org.nypl.simplified.books.bundled.api.BundledContentResolverType
+  private lateinit var feedLoader: org.nypl.simplified.feeds.api.FeedLoaderType
 
   @Before
   @Throws(Exception::class)
@@ -100,7 +83,7 @@ open class BookBorrowTaskContract {
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
-    this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.bundledContent = org.nypl.simplified.books.bundled.api.BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = createFeedLoader(this.executorFeeds)
   }
@@ -114,7 +97,7 @@ open class BookBorrowTaskContract {
     this.executorTimer.shutdown()
   }
 
-  private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
+  private fun createFeedLoader(executorFeeds: ListeningExecutorService): org.nypl.simplified.feeds.api.FeedLoaderType {
     val entryParser =
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
     val parser =
@@ -122,9 +105,9 @@ open class BookBorrowTaskContract {
     val searchParser =
       OPDSSearchParser.newParser()
     val transport =
-      FeedHTTPTransport.newTransport(this.http)
+      org.nypl.simplified.feeds.api.FeedHTTPTransport.newTransport(this.http)
 
-    return FeedLoader.create(
+    return org.nypl.simplified.feeds.api.FeedLoader.create(
       exec = executorFeeds,
       parser = parser,
       searchParser = searchParser,
@@ -141,13 +124,13 @@ open class BookBorrowTaskContract {
   fun testBorrowOpenAccessEPUB() {
 
     val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+      Mockito.mock(org.nypl.simplified.feeds.api.FeedLoaderType::class.java)
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -180,10 +163,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -201,7 +184,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -233,13 +216,13 @@ open class BookBorrowTaskContract {
   fun testBorrowOpenAccessPDF() {
 
     val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+      Mockito.mock(org.nypl.simplified.feeds.api.FeedLoaderType::class.java)
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandlePDF::class.java)
 
@@ -272,10 +255,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -293,7 +276,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -323,13 +306,13 @@ open class BookBorrowTaskContract {
   fun testBorrowOpenAccessAudioBook() {
 
     val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+      Mockito.mock(org.nypl.simplified.feeds.api.FeedLoaderType::class.java)
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
@@ -362,10 +345,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -383,7 +366,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -417,15 +400,15 @@ open class BookBorrowTaskContract {
     val tempFile =
       File.createTempFile("nypl-test", "epub")
     val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+      Mockito.mock(org.nypl.simplified.feeds.api.FeedLoaderType::class.java)
     val bundledContent =
-      Mockito.mock(BundledContentResolverType::class.java)
+      Mockito.mock(org.nypl.simplified.books.bundled.api.BundledContentResolverType::class.java)
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -448,10 +431,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -473,7 +456,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -507,15 +490,15 @@ open class BookBorrowTaskContract {
     val tempFile =
       File.createTempFile("nypl-test", "epub")
     val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+      Mockito.mock(org.nypl.simplified.feeds.api.FeedLoaderType::class.java)
     val bundledContent =
-      Mockito.mock(BundledContentResolverType::class.java)
+      Mockito.mock(org.nypl.simplified.books.bundled.api.BundledContentResolverType::class.java)
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -538,10 +521,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -563,7 +546,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -593,11 +576,11 @@ open class BookBorrowTaskContract {
   fun testBorrowFeedEPUB() {
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -640,10 +623,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -661,7 +644,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -693,11 +676,11 @@ open class BookBorrowTaskContract {
   fun testBorrowFeedEPUBContentTypeExact() {
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -743,10 +726,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -764,7 +747,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -796,11 +779,11 @@ open class BookBorrowTaskContract {
   fun testBorrowFeedEPUBGarbageFails() {
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -833,10 +816,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -854,7 +837,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -884,11 +867,11 @@ open class BookBorrowTaskContract {
   fun testBorrowFeedEPUB404Fails() {
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -921,10 +904,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -942,7 +925,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -972,11 +955,11 @@ open class BookBorrowTaskContract {
   fun testBorrowFeedEPUB401Fails() {
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -1023,10 +1006,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -1044,7 +1027,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1065,7 +1048,7 @@ open class BookBorrowTaskContract {
     val bookWithStatus = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
     Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
     val exception =
-      optionUnsafe((bookWithStatus.status() as BookStatusDownloadFailed).error) as FeedHTTPTransportException
+      optionUnsafe((bookWithStatus.status() as BookStatusDownloadFailed).error) as org.nypl.simplified.feeds.api.FeedHTTPTransportException
     Assert.assertEquals(401, exception.code)
   }
 
@@ -1077,11 +1060,11 @@ open class BookBorrowTaskContract {
   fun testBorrowFeedEPUBCredentialsNeededButMissing() {
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -1124,10 +1107,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -1138,7 +1121,7 @@ open class BookBorrowTaskContract {
     Mockito.`when`(account.requiresCredentials())
       .thenReturn(true)
     Mockito.`when`(account.loginState())
-      .thenReturn(AccountLoginState.AccountNotLoggedIn)
+      .thenReturn(org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn)
     Mockito.`when`(account.bookDatabase())
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
@@ -1149,7 +1132,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1171,7 +1154,7 @@ open class BookBorrowTaskContract {
     Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
     val exception =
       optionUnsafe((bookWithStatus.status() as BookStatusDownloadFailed).error)
-        as BookBorrowExceptionNoCredentials
+        as org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
   }
 
   /**
@@ -1182,11 +1165,11 @@ open class BookBorrowTaskContract {
   fun testBorrowFeedEPUBContentTypeNonsense() {
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -1232,10 +1215,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -1253,7 +1236,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1275,7 +1258,7 @@ open class BookBorrowTaskContract {
     Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
     val exception =
       optionUnsafe((bookWithStatus.status() as BookStatusDownloadFailed).error)
-        as BookUnexpectedTypeException
+        as org.nypl.simplified.books.controller.api.BookUnexpectedTypeException
   }
 
   /**
@@ -1286,11 +1269,11 @@ open class BookBorrowTaskContract {
   fun testBorrowFeedEPUBNoUsableAcquisition() {
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -1333,10 +1316,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -1354,7 +1337,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1376,7 +1359,7 @@ open class BookBorrowTaskContract {
     Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
     val exception =
       optionUnsafe((bookWithStatus.status() as BookStatusDownloadFailed).error)
-        as BookBorrowExceptionBadBorrowFeed
+        as org.nypl.simplified.books.controller.api.BookBorrowExceptionBadBorrowFeed
   }
 
   /**
@@ -1387,13 +1370,13 @@ open class BookBorrowTaskContract {
   fun testBorrowBearerToken() {
 
     val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+      Mockito.mock(org.nypl.simplified.feeds.api.FeedLoaderType::class.java)
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -1438,10 +1421,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -1459,7 +1442,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1491,13 +1474,13 @@ open class BookBorrowTaskContract {
   fun testBorrowBearerTokenUnparseable() {
 
     val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+      Mockito.mock(org.nypl.simplified.feeds.api.FeedLoaderType::class.java)
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
     val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
@@ -1542,10 +1525,10 @@ open class BookBorrowTaskContract {
       opdsEntryBuilder.build()
 
     val bookId =
-      BookID.create("a")
+      org.nypl.simplified.books.api.BookID.create("a")
 
     val book =
-      Book(
+      org.nypl.simplified.books.api.Book(
         id = bookId,
         account = accountID,
         cover = null,
@@ -1563,7 +1546,7 @@ open class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     val task =
-      BookBorrowTask(
+      org.nypl.simplified.books.controller.BookBorrowTask(
         adobeDRM = null,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),

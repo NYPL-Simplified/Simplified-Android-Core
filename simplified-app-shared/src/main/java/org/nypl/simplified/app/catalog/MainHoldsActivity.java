@@ -3,7 +3,7 @@ package org.nypl.simplified.app.catalog;
 import android.content.res.Resources;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.feeds.FeedBooksSelection;
+import org.nypl.simplified.feeds.api.FeedBooksSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

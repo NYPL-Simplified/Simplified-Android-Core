@@ -26,15 +26,16 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.login.LoginDialog
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
+import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookStatusDownloadInProgress
@@ -58,14 +59,13 @@ import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
 import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
 import org.nypl.simplified.books.book_registry.BookStatusRevoked
 import org.nypl.simplified.books.book_registry.BookStatusType
-import org.nypl.simplified.books.controller.BooksControllerType
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.core.BookAcquisitionSelection
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.stack.ImmutableStack
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -210,7 +210,7 @@ class CatalogBookDetailView(
 
     val coverHeight = this.bookHeaderCover.layoutParams.height
     val coverWidth = (coverHeight.toDouble() / 4.0 * 3.0).toInt()
-    this.bookHeaderLeft.layoutParams = LinearLayout.LayoutParams(coverWidth, LayoutParams.WRAP_CONTENT)
+    this.bookHeaderLeft.layoutParams = LinearLayout.LayoutParams(coverWidth, WRAP_CONTENT)
 
     /* Configure detail texts. */
     val entryNow = this.entry.get()
@@ -855,7 +855,7 @@ class CatalogBookDetailView(
 
     private fun configureSummaryWebViewHeight(summaryText: WebView) {
       summaryText.layoutParams =
-        LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, WRAP_CONTENT)
     }
 
     private fun configureViewTextAuthor(

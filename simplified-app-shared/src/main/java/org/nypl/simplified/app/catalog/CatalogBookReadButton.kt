@@ -4,10 +4,10 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import android.text.TextUtils
 import android.util.TypedValue
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 
 /**
  * A button that opens a given book for reading.

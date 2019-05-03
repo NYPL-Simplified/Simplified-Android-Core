@@ -1,6 +1,5 @@
 package org.nypl.simplified.tests.sandbox
 
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle

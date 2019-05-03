@@ -17,10 +17,10 @@ import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.reader.ReaderColorSchemes
 import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.ReaderSelectedTOCElement
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfilePreferencesChanged
-import org.nypl.simplified.books.reader.ReaderColorScheme
 import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.reader.api.ReaderColorScheme
 import org.slf4j.LoggerFactory
 
 /**
@@ -168,8 +168,8 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
     val layoutParams =
       RelativeLayout.LayoutParams(
-      android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-      android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
+      ViewGroup.LayoutParams.WRAP_CONTENT,
+      ViewGroup.LayoutParams.WRAP_CONTENT)
 
     // Set the left margin based on the desired indentation level.
     val leftIndent = if (element != null) {

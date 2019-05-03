@@ -13,48 +13,29 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
-import org.nypl.simplified.books.accounts.AccountBarcode
-import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountEventCreation.AccountCreationSucceeded
-import org.nypl.simplified.books.accounts.AccountEventLoginStateChanged
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggedIn
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggingIn
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_CREDENTIALS_INCORRECT
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginFailed
-import org.nypl.simplified.books.accounts.AccountPIN
-import org.nypl.simplified.books.accounts.AccountProvider
-import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription
-import org.nypl.simplified.books.accounts.AccountProviderCollection
-import org.nypl.simplified.books.accounts.AccountsDatabases
-import org.nypl.simplified.books.book_database.BookFormats
-import org.nypl.simplified.books.book_database.BookID
+import org.nypl.simplified.accounts.api.AccountBarcode
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountCreationSucceeded
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode.ERROR_CREDENTIALS_INCORRECT
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
+import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderCollectionType
+import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
+import org.nypl.simplified.accounts.database.AccountProviderCollection
+import org.nypl.simplified.accounts.database.AccountsDatabases
+import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.bundled_content.BundledContentResolverType
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
-import org.nypl.simplified.books.controller.ProfileFeedRequest
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.feeds.FeedHTTPTransport
-import org.nypl.simplified.books.feeds.FeedLoader
-import org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationFailed
-import org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_DISPLAY_NAME_ALREADY_USED
-import org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationSucceeded
-import org.nypl.simplified.books.profiles.ProfileDatabaseException
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
-import org.nypl.simplified.books.profiles.ProfilePreferencesChanged
-import org.nypl.simplified.books.profiles.ProfileSelected
-import org.nypl.simplified.books.profiles.ProfilesDatabase
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType
-import org.nypl.simplified.books.reader.ReaderBookLocation
-import org.nypl.simplified.books.reader.ReaderColorScheme
-import org.nypl.simplified.books.reader.ReaderFontSelection
-import org.nypl.simplified.books.reader.ReaderPreferences
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.feeds.api.FeedHTTPTransport
+import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
@@ -65,6 +46,18 @@ import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.profiles.ProfilesDatabase
+import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed
+import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_DISPLAY_NAME_ALREADY_USED
+import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationSucceeded
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.reader.api.ReaderColorScheme
+import org.nypl.simplified.reader.api.ReaderFontSelection
+import org.nypl.simplified.reader.api.ReaderPreferences
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
@@ -125,7 +118,7 @@ abstract class ProfilesControllerContract {
     books: BookRegistryType,
     profiles: ProfilesDatabaseType,
     downloader: DownloaderType,
-    accountProviders: FunctionType<Unit, AccountProviderCollection>,
+    accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
     timerExecutor: ExecutorService): ProfilesControllerType {
 
     val parser =
@@ -221,7 +214,7 @@ abstract class ProfilesControllerContract {
         accountProviders = FunctionType { this.accountProviders(it) },
         timerExecutor = this.executorTimer)
 
-    this.expected.expect(ProfileNoneCurrentException::class.java)
+    this.expected.expect(org.nypl.simplified.profiles.api.ProfileNoneCurrentException::class.java)
     controller.profileCurrent()
   }
 
@@ -333,7 +326,7 @@ abstract class ProfilesControllerContract {
         Option.none<HTTPProblemReport>()))
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
+      org.nypl.simplified.accounts.api.AccountAuthenticationCredentials.builder(
         AccountPIN.create("abcd"), AccountBarcode.create("1234"))
         .build()
 
@@ -343,19 +336,19 @@ abstract class ProfilesControllerContract {
     controller.profileAccountLogin(accountID, credentials).get()
 
     EventAssertions.isType(ProfileCreationSucceeded::class.java, this.profileEventsReceived, 0)
-    EventAssertions.isType(ProfileSelected::class.java, this.profileEventsReceived, 1)
+    EventAssertions.isType(org.nypl.simplified.profiles.api.ProfileSelected::class.java, this.profileEventsReceived, 1)
 
     EventAssertions.isType(
       AccountCreationSucceeded::class.java, this.accountEventsReceived, 0)
 
     EventAssertions.isTypeAndMatches(
-      AccountEventLoginStateChanged::class.java,
+      org.nypl.simplified.accounts.api.AccountEventLoginStateChanged::class.java,
       this.accountEventsReceived,
       1,
       { event -> Assert.assertEquals(event.state, AccountLoggingIn) })
 
     EventAssertions.isTypeAndMatches(
-      AccountEventLoginStateChanged::class.java,
+      org.nypl.simplified.accounts.api.AccountEventLoginStateChanged::class.java,
       this.accountEventsReceived,
       2,
       { event -> Assert.assertEquals(event.state, AccountLoginFailed(ERROR_CREDENTIALS_INCORRECT, null)) })
@@ -405,7 +398,7 @@ abstract class ProfilesControllerContract {
         0L))
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
+      org.nypl.simplified.accounts.api.AccountAuthenticationCredentials.builder(
         AccountPIN.create("abcd"), AccountBarcode.create("1234"))
         .build()
 
@@ -413,80 +406,23 @@ abstract class ProfilesControllerContract {
       profiles.currentProfileUnsafe().accounts().firstKey(), credentials).get()
 
     EventAssertions.isType(ProfileCreationSucceeded::class.java, this.profileEventsReceived, 0)
-    EventAssertions.isType(ProfileSelected::class.java, this.profileEventsReceived, 1)
+    EventAssertions.isType(org.nypl.simplified.profiles.api.ProfileSelected::class.java, this.profileEventsReceived, 1)
 
     EventAssertions.isType(AccountCreationSucceeded::class.java, this.accountEventsReceived, 0)
 
     EventAssertions.isTypeAndMatches(
-      AccountEventLoginStateChanged::class.java,
+      org.nypl.simplified.accounts.api.AccountEventLoginStateChanged::class.java,
       this.accountEventsReceived,
       1,
       { event -> Assert.assertEquals(event.state, AccountLoggingIn) })
 
     EventAssertions.isTypeAndMatches(
-      AccountEventLoginStateChanged::class.java,
+      org.nypl.simplified.accounts.api.AccountEventLoginStateChanged::class.java,
       this.accountEventsReceived,
       2,
       { event -> Assert.assertEquals(event.state, AccountLoggedIn(credentials)) })
 
     Assert.assertEquals(3, this.accountEventsReceived.size)
-  }
-
-  /**
-   * Setting and getting bookmarks works.
-   *
-   * @throws Exception On errors
-   */
-
-  @Test(timeout = 3_000L)
-  @Throws(Exception::class)
-  fun testProfilesBookmarks() {
-
-    val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller =
-      this.controller(
-        taskExecutor = this.executorBooks,
-        feedsExecutor = this.executorFeeds,
-        http = this.http,
-        books = this.bookRegistry,
-        profiles = profiles,
-        downloader = this.downloader,
-        accountProviders = FunctionType { this.accountProviders(it) },
-        timerExecutor = this.executorTimer)
-
-    val provider = this.fakeProvider("urn:fake:0")
-    controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
-    controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id()).get()
-    controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
-
-    controller.profileBookmarkSet(
-      BookID.create("aaaa"),
-      ReaderBookLocation.create(Option.none(), "1")).get()
-
-    Assert.assertEquals(
-      "Bookmark must have been saved",
-      Option.some(ReaderBookLocation.create(Option.none(), "1")),
-      controller.profileBookmarkGet(BookID.create("aaaa")))
-
-    controller.profileBookmarkSet(
-      BookID.create("aaaa"),
-      ReaderBookLocation.create(Option.none(), "2")).get()
-
-    Assert.assertEquals(
-      "Bookmark must have been saved",
-      Option.some(ReaderBookLocation.create(Option.none(), "2")),
-      controller.profileBookmarkGet(BookID.create("aaaa")))
-
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
-      Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences())
-      Assert.assertTrue("Bookmarks must have changed", e.changedReaderBookmarks())
-    }
-
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 1) { e ->
-      Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences())
-      Assert.assertTrue("Bookmarks must have changed", e.changedReaderBookmarks())
-    }
   }
 
   /**
@@ -516,12 +452,10 @@ abstract class ProfilesControllerContract {
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(provider.id()).get()
     controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
-
     controller.profilePreferencesUpdate(profiles.currentProfileUnsafe().preferences()).get()
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
+    EventAssertions.isTypeAndMatches(org.nypl.simplified.profiles.api.ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
       Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences())
-      Assert.assertTrue("Bookmarks must not have changed", !e.changedReaderBookmarks())
     }
 
     this.profileEventsReceived.clear()
@@ -539,9 +473,8 @@ abstract class ProfilesControllerContract {
         .build())
       .get()
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
+    EventAssertions.isTypeAndMatches(org.nypl.simplified.profiles.api.ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
       Assert.assertTrue("Preferences must have changed", e.changedReaderPreferences())
-      Assert.assertTrue("Bookmarks must not have changed", !e.changedReaderBookmarks())
     }
   }
 
@@ -583,7 +516,7 @@ abstract class ProfilesControllerContract {
     Assert.assertEquals(0L, feed.size.toLong())
   }
 
-  @Throws(ProfileDatabaseException::class)
+  @Throws(org.nypl.simplified.profiles.api.ProfileDatabaseException::class)
   private fun profilesDatabaseWithoutAnonymous(dir_profiles: File): ProfilesDatabaseType {
     return ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),

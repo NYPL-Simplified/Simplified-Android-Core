@@ -1,0 +1,30 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 27
+  buildToolsVersion "28.0.2"
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  useLibrary 'org.apache.http.legacy'
+}
+
+description = 'simplified-books-database-api'
+
+dependencies {
+  api project(":simplified-accounts-api")
+  api project(":simplified-books-api")
+  api project(":simplified-opds-core")
+
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation "org.nypl.audiobook:org.nypl.audiobook.android.api:${nypl_audiobook_api_version}"
+}
+
+repositories {
+  mavenCentral()
+  jcenter()
+}

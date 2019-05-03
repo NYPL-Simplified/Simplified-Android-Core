@@ -12,12 +12,12 @@ import com.io7m.jfunctional.Some
 import org.nypl.audiobook.android.api.PlayerManifest
 import org.nypl.audiobook.android.api.PlayerManifests
 import org.nypl.audiobook.android.api.PlayerResult
+import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.accounts.AccountAuthenticatedHTTP
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.files.FileUtilities
@@ -78,7 +78,7 @@ class AudioBookLoadingFragment : Fragment() {
     super.onCreate(state)
 
     this.loadingParameters =
-      this.arguments!!.getSerializable(AudioBookLoadingFragment.parametersKey)
+      this.arguments!!.getSerializable(parametersKey)
         as AudioBookLoadingFragmentParameters
   }
 

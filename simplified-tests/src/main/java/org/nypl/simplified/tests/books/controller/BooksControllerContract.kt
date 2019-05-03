@@ -13,38 +13,33 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
-import org.nypl.simplified.books.accounts.AccountBarcode
-import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggedIn
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountNotLoggedIn
-import org.nypl.simplified.books.accounts.AccountPIN
-import org.nypl.simplified.books.accounts.AccountProvider
-import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription
-import org.nypl.simplified.books.accounts.AccountProviderCollection
-import org.nypl.simplified.books.accounts.AccountsDatabases
-import org.nypl.simplified.books.book_database.BookEvent
-import org.nypl.simplified.books.book_database.BookFormats
-import org.nypl.simplified.books.book_database.BookID
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountBarcode
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
+import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderCollectionType
+import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
+import org.nypl.simplified.accounts.database.AccountProviderCollection
+import org.nypl.simplified.accounts.database.AccountsDatabases
+import org.nypl.simplified.books.api.BookEvent
+import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookStatusLoaned
 import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
 import org.nypl.simplified.books.book_registry.BookStatusRevoked
-import org.nypl.simplified.books.bundled_content.BundledContentResolverType
-import org.nypl.simplified.books.controller.BooksControllerType
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
-import org.nypl.simplified.books.exceptions.BookRevokeExceptionNoCredentials
-import org.nypl.simplified.books.feeds.FeedHTTPTransport
-import org.nypl.simplified.books.feeds.FeedLoader
-import org.nypl.simplified.books.profiles.ProfileDatabaseException
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfilesDatabase
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.feeds.api.FeedHTTPTransport
+import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
@@ -56,9 +51,11 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.profiles.ProfilesDatabase
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.MockAnalytics
-import org.nypl.simplified.tests.books.BooksContract
 import org.nypl.simplified.tests.books.MappedHTTP
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
@@ -162,7 +159,7 @@ abstract class BooksControllerContract {
     books: BookRegistryType,
     profiles: ProfilesDatabaseType,
     downloader: DownloaderType,
-    accountProviders: FunctionType<Unit, AccountProviderCollection>,
+    accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
     timerExec: ExecutorService): BooksControllerType {
 
     val parser = OPDSFeedParser.newParser(
@@ -479,11 +476,11 @@ abstract class BooksControllerContract {
     Assert.assertEquals(3L, this.bookRegistry.books().size.toLong())
 
     this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
     this.bookRegistry.bookOrException(
-      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
+      org.nypl.simplified.books.api.BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
     this.bookRegistry.bookOrException(
-      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
+      org.nypl.simplified.books.api.BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
 
     EventAssertions.isTypeAndMatches(
       BookStatusEvent::class.java,
@@ -548,11 +545,11 @@ abstract class BooksControllerContract {
     controller.booksSync(account).get()
 
     this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
     this.bookRegistry.bookOrException(
-      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
+      org.nypl.simplified.books.api.BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
     this.bookRegistry.bookOrException(
-      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
+      org.nypl.simplified.books.api.BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
 
     this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
 
@@ -590,7 +587,7 @@ abstract class BooksControllerContract {
     ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_REMOVED) }
 
     this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
 
     checkBookIsNotInRegistry("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
     checkBookIsNotInRegistry("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
@@ -598,7 +595,7 @@ abstract class BooksControllerContract {
 
   private fun checkBookIsNotInRegistry(id: String) {
     try {
-      this.bookRegistry.bookOrException(BookID.create(id))
+      this.bookRegistry.bookOrException(org.nypl.simplified.books.api.BookID.create(id))
       Assert.fail("Book should not exist!")
     } catch (e: NoSuchElementException) {
       // Correctly raised
@@ -658,7 +655,7 @@ abstract class BooksControllerContract {
     controller.booksSync(account).get()
 
     this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
-    controller.bookRevoke(account, BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")).get()
+    controller.bookRevoke(account, org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")).get()
 
     EventAssertions.isTypeAndMatches(
       BookStatusEvent::class.java,
@@ -726,13 +723,13 @@ abstract class BooksControllerContract {
     controller.booksSync(account).get()
     account.setLoginState(AccountNotLoggedIn)
 
-    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val bookId = org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     try {
       controller.bookRevoke(account, bookId).get()
       Assert.fail("Exception must be raised")
     } catch (e: ExecutionException) {
-      Assert.assertThat<Throwable>(e.cause, IsInstanceOf.instanceOf(BookRevokeExceptionNoCredentials::class.java))
+      Assert.assertThat<Throwable>(e.cause, IsInstanceOf.instanceOf(org.nypl.simplified.books.controller.api.BookRevokeExceptionNoCredentials::class.java))
     }
 
     Assert.assertThat(
@@ -782,7 +779,7 @@ abstract class BooksControllerContract {
     controller.booksSync(account).get()
 
     val bookId =
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+      org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     controller.bookRevoke(account, bookId).get()
 
@@ -842,7 +839,7 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account).get()
 
-    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val bookId = org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     try {
       controller.bookRevoke(account, bookId).get()
@@ -907,7 +904,7 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account).get()
 
-    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val bookId = org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     try {
       controller.bookRevoke(account, bookId).get()
@@ -962,7 +959,7 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account).get()
 
-    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val bookId = org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     Assert.assertFalse(
       "Book must not have a saved EPUB file",
@@ -1053,7 +1050,7 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account).get()
 
-    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val bookId = org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     try {
       controller.bookRevoke(account, bookId).get()
@@ -1119,7 +1116,7 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account).get()
 
-    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val bookId = org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     val statusBefore = this.bookRegistry.bookOrException(bookId).status()
     Assert.assertThat(statusBefore, IsInstanceOf.instanceOf(BookStatusLoaned::class.java))
@@ -1150,7 +1147,7 @@ abstract class BooksControllerContract {
     return total
   }
 
-  @Throws(ProfileDatabaseException::class)
+  @Throws(org.nypl.simplified.profiles.api.ProfileDatabaseException::class)
   private fun profilesDatabaseWithoutAnonymous(
     accountEvents: ObservableType<AccountEvent>,
     dirProfiles: File?): ProfilesDatabaseType {
@@ -1166,12 +1163,12 @@ abstract class BooksControllerContract {
 
 
   companion object {
-    private val LOG = LoggerFactory.getLogger(BooksContract::class.java)
+    private val LOG = LoggerFactory.getLogger(BooksControllerContract::class.java)
     private val LOANS_URI = URI.create("http://example.com/loans/")
     private val ROOT_URI = URI.create("http://example.com/")
 
     private fun httpResource(name: String): MappedHTTP.MappedResource {
-      val stream = BooksContract.javaClass.getResourceAsStream(name)
+      val stream = BooksControllerContract.javaClass.getResourceAsStream(name)
       ByteArrayOutputStream().use { outStream ->
         val size = stream.copyTo(outStream, 1024)
         val copyStream = ByteArrayInputStream(outStream.toByteArray())

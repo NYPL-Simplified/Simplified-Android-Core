@@ -25,6 +25,17 @@ import com.squareup.picasso.Picasso;
 
 import org.joda.time.LocalDateTime;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType;
+import org.nypl.simplified.accounts.api.AccountBundledCredentialsType;
+import org.nypl.simplified.accounts.api.AccountEvent;
+import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore;
+import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty;
+import org.nypl.simplified.accounts.database.AccountBundledCredentialsJSON;
+import org.nypl.simplified.accounts.database.AccountProviderCollection;
+import org.nypl.simplified.accounts.database.AccountProvidersJSON;
+import org.nypl.simplified.accounts.database.AccountsDatabases;
+import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.analytics.api.Analytics;
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration;
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
@@ -39,54 +50,32 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentialsStore;
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentialsStoreType;
-import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty;
-import org.nypl.simplified.books.accounts.AccountBundledCredentialsJSON;
-import org.nypl.simplified.books.accounts.AccountBundledCredentialsType;
-import org.nypl.simplified.books.accounts.AccountEvent;
-import org.nypl.simplified.books.accounts.AccountProvider;
-import org.nypl.simplified.books.accounts.AccountProviderCollection;
-import org.nypl.simplified.books.accounts.AccountProvidersJSON;
-import org.nypl.simplified.books.accounts.AccountType;
-import org.nypl.simplified.books.accounts.AccountsDatabases;
-import org.nypl.simplified.books.authentication_document.AuthenticationDocumentValuesType;
-import org.nypl.simplified.books.book_database.BookFormats;
+import org.nypl.simplified.books.book_database.api.BookFormats;
 import org.nypl.simplified.books.book_registry.BookRegistry;
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
 import org.nypl.simplified.books.book_registry.BookRegistryType;
-import org.nypl.simplified.books.bundled_content.BundledContentResolverType;
-import org.nypl.simplified.books.clock.Clock;
-import org.nypl.simplified.books.clock.ClockType;
-import org.nypl.simplified.books.controller.BooksControllerType;
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType;
 import org.nypl.simplified.books.controller.Controller;
-import org.nypl.simplified.books.controller.ProfilesControllerType;
+import org.nypl.simplified.books.controller.api.BooksControllerType;
 import org.nypl.simplified.books.covers.BookCoverBadgeLookupType;
 import org.nypl.simplified.books.covers.BookCoverGenerator;
 import org.nypl.simplified.books.covers.BookCoverProvider;
 import org.nypl.simplified.books.covers.BookCoverProviderType;
-import org.nypl.simplified.books.document_store.DocumentStore;
-import org.nypl.simplified.books.document_store.DocumentStoreBuilderType;
-import org.nypl.simplified.books.document_store.DocumentStoreType;
-import org.nypl.simplified.books.feeds.FeedHTTPTransport;
-import org.nypl.simplified.books.feeds.FeedLoader;
-import org.nypl.simplified.books.feeds.FeedLoaderType;
-import org.nypl.simplified.books.profiles.ProfileDatabaseException;
-import org.nypl.simplified.books.profiles.ProfileEvent;
-import org.nypl.simplified.books.profiles.ProfileType;
-import org.nypl.simplified.books.profiles.ProfilesDatabase;
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType;
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService;
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceProviderType;
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType;
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceUsableType;
 import org.nypl.simplified.branding.BrandingThemeOverrideServiceType;
 import org.nypl.simplified.bugsnag.IfBugsnag;
-import org.nypl.simplified.cardcreator.CardCreator;
+import org.nypl.simplified.documents.authentication.AuthenticationDocumentValuesType;
+import org.nypl.simplified.documents.clock.Clock;
+import org.nypl.simplified.documents.clock.ClockType;
+import org.nypl.simplified.documents.store.DocumentStore;
+import org.nypl.simplified.documents.store.DocumentStoreBuilderType;
+import org.nypl.simplified.documents.store.DocumentStoreType;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.feeds.api.FeedHTTPTransport;
+import org.nypl.simplified.feeds.api.FeedLoader;
+import org.nypl.simplified.feeds.api.FeedLoaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -101,6 +90,16 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
+import org.nypl.simplified.profiles.ProfilesDatabase;
+import org.nypl.simplified.profiles.api.ProfileDatabaseException;
+import org.nypl.simplified.profiles.api.ProfileEvent;
+import org.nypl.simplified.profiles.api.ProfileType;
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent;
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType;
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType;
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType;
 import org.nypl.simplified.tenprint.TenPrintGenerator;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
 import org.nypl.simplified.theme.ThemeControl;
@@ -131,7 +130,6 @@ public final class Simplified extends MultiDexApplication {
   private static final Logger LOG = LoggerFactory.getLogger(Simplified.class);
   private static volatile Simplified INSTANCE;
 
-  private CardCreator cardcreator;
   private ListeningScheduledExecutorService exec_catalog_feeds;
   private ListeningScheduledExecutorService exec_covers;
   private ListeningScheduledExecutorService exec_downloader;
@@ -224,15 +222,6 @@ public final class Simplified extends MultiDexApplication {
   public static HTTPType getHTTP() {
     final Simplified i = Simplified.checkInitialized();
     return i.http;
-  }
-
-  /**
-   * @return The Card Creator
-   */
-
-  public static CardCreator getCardCreator() {
-    final Simplified i = Simplified.checkInitialized();
-    return i.cardcreator;
   }
 
   /**
@@ -864,13 +853,6 @@ public final class Simplified extends MultiDexApplication {
 
     LOG.debug("initializing network connectivity checker");
     this.network_connectivity = new NetworkConnectivity(this);
-
-    LOG.debug("initializing CardCreator");
-    this.cardcreator =
-      new CardCreator(
-        asset_manager,
-        resources.getString(R.string.feature_environment),
-        resources);
 
     LOG.debug("initializing HelpStack");
     this.helpstack = Helpstack.get(this, asset_manager);

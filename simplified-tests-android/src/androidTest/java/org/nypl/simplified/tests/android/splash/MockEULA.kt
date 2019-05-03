@@ -1,9 +1,8 @@
 package org.nypl.simplified.tests.android.splash
 
-import org.nypl.simplified.books.eula.EULAType
 import java.net.URL
 
-class MockEULA : EULAType {
+class MockEULA : org.nypl.simplified.documents.eula.EULAType {
   var agreed = false
   var url : URL? = URL("http://example.com")
 

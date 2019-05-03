@@ -1,0 +1,30 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 27
+  buildToolsVersion "28.0.2"
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  useLibrary 'org.apache.http.legacy'
+}
+
+description = 'simplified-books-registry-api'
+
+dependencies {
+  api project(":simplified-books-api")
+  api project(":simplified-observable")
+  api project(":simplified-rfc3339-core")
+
+  compileOnly 'com.google.auto.value:auto-value:1.5'
+  annotationProcessor 'com.google.auto.value:auto-value:1.5'
+}
+
+repositories {
+  mavenCentral()
+  jcenter()
+}

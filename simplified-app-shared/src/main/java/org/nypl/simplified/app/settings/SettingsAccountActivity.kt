@@ -24,9 +24,22 @@ import android.widget.TextView
 import android.widget.Toast
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
+import com.io7m.junreachable.UnimplementedCodeException
 import com.tenmiles.helpstack.HSHelpStack
 import com.tenmiles.helpstack.gears.HSDeskGear
-import org.nypl.simplified.app.CardCreatorActivity
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountBarcode
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
+import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ReportIssueActivity
@@ -35,23 +48,10 @@ import org.nypl.simplified.app.WebViewActivity
 import org.nypl.simplified.app.login.LoginErrorCodeStrings
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
-import org.nypl.simplified.books.accounts.AccountBarcode
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountEventLoginStateChanged
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggedIn
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggingIn
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggingOut
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginFailed
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountLogoutFailed
-import org.nypl.simplified.books.accounts.AccountLoginState.AccountNotLoggedIn
-import org.nypl.simplified.books.accounts.AccountPIN
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.eula.EULAType
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
+import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
 import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -261,8 +261,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     if (accountProvider.supportsCardCreator()) {
       this.tableSignup.visibility = View.VISIBLE
       this.signup.setOnClickListener {
-        val cardcreator = Intent(this, CardCreatorActivity::class.java)
-        this.startActivity(cardcreator)
+        throw UnimplementedCodeException()
       }
       this.signup.setText(R.string.need_card_button)
     } else {
@@ -563,7 +562,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private fun tryLogout(): Unit {
     Simplified.getProfilesController()
       .profileAccountLogout(this.account.id())
-      .onException(Exception::class.java) { exception ->
+      .onException(Exception::class.java) { exception : Exception ->
         this.logger.error("error during logout: ", exception)
         Unit.unit()
       }

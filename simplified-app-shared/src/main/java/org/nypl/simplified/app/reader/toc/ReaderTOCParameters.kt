@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.reader.toc
 
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarks
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 import java.io.Serializable
 
 data class ReaderTOCParameters(

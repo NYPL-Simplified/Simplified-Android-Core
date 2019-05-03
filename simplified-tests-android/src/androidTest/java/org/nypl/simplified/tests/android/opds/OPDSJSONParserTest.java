@@ -5,7 +5,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
 import org.nypl.simplified.tests.opds.OPDSJSONParserContract;
-import org.nypl.simplified.tests.opds.OPDSJSONSerializerContract;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

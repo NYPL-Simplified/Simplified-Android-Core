@@ -4,10 +4,10 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import android.text.TextUtils
 import android.util.TypedValue
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.controller.BooksControllerType
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import java.util.Objects
 
 /**

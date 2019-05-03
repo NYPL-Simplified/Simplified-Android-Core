@@ -10,13 +10,12 @@ import org.nypl.simplified.app.player.AudioBookPlayerActivity
 import org.nypl.simplified.app.player.AudioBookPlayerParameters
 import org.nypl.simplified.app.reader.ReaderActivity
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.Book
-import org.nypl.simplified.books.book_database.BookFormat.BookFormatAudioBook
-import org.nypl.simplified.books.book_database.BookFormat.BookFormatEPUB
-import org.nypl.simplified.books.book_database.BookFormat.BookFormatPDF
-import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
+import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
+import org.nypl.simplified.books.api.BookFormat.BookFormatPDF
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.slf4j.LoggerFactory
 
 /**
@@ -25,7 +24,7 @@ import org.slf4j.LoggerFactory
 
 class CatalogBookReadController(
   val activity: AppCompatActivity,
-  val account: AccountType,
+  val account: org.nypl.simplified.accounts.database.api.AccountType,
   val id: BookID,
   val entry: FeedEntryOPDS) : OnClickListener {
 

@@ -6,10 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Test;
-import org.nypl.simplified.books.profiles.ProfileDescription;
-import org.nypl.simplified.books.profiles.ProfileDescriptionJSON;
-import org.nypl.simplified.books.profiles.ProfilePreferences;
-import org.nypl.simplified.books.reader.ReaderPreferences;
+import org.nypl.simplified.profiles.ProfileDescriptionJSON;
+import org.nypl.simplified.profiles.api.ProfileDescription;
+import org.nypl.simplified.profiles.api.ProfilePreferences;
+import org.nypl.simplified.reader.api.ReaderPreferences;
 
 public abstract class ProfileDescriptionJSONContract {
 

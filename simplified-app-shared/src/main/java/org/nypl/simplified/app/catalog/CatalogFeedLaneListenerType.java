@@ -1,8 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.books.feeds.FeedGroup;
-
-import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
+import org.nypl.simplified.feeds.api.FeedEntry;
+import org.nypl.simplified.feeds.api.FeedGroup;
 
 /**
  * A listener that receives lane events.
@@ -16,7 +15,7 @@ public interface CatalogFeedLaneListenerType {
    */
 
   void onSelectBook(
-    FeedEntryOPDS e);
+    FeedEntry.FeedEntryOPDS e);
 
   /**
    * A feed group was selected.

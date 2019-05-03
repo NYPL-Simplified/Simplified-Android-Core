@@ -7,7 +7,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.nypl.simplified.books.reader.ReaderBookLocation;
+import org.nypl.simplified.books.api.BookLocation;
 
 /**
  * A request for a specific page in a book. This request is serialized to JSON
@@ -30,7 +30,7 @@ import org.nypl.simplified.books.reader.ReaderBookLocation;
    */
 
   public static ReaderOpenPageRequestType fromBookLocation(
-    final ReaderBookLocation location)
+    final BookLocation location)
   {
     NullCheck.notNull(location);
     return new FromElementCFIAndIDRef(location.idRef(), location.contentCFI());

@@ -5,7 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import com.squareup.picasso.Transformation
-import org.nypl.simplified.books.feeds.FeedEntry
+import org.nypl.simplified.feeds.api.FeedEntry
 
 /**
  * An image transformer that optionally adds a badge image to the loaded book cover.

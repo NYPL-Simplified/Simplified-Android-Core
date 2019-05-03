@@ -5,12 +5,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
 import org.nypl.simplified.books.covers.BookCoverBadge
 import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 
 /**
  * The images used to add badges to book covers.
