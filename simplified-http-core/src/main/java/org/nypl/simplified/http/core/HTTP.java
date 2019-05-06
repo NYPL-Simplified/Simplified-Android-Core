@@ -44,10 +44,10 @@ public final class HTTP implements HTTPType
     if (p != null) {
       final String v = p.getImplementationVersion();
       if (v != null) {
-        return NullCheck.notNull(String.format("simplified-http %s", v));
+        return NullCheck.notNull(String.format("simplified-http Android %s", v));
       }
     }
-    return "simplified-http";
+    return "simplified-http Android";
   }
 
   private static void checkURI(
