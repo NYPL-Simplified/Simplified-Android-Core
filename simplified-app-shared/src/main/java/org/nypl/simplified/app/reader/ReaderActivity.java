@@ -35,6 +35,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
 import org.nypl.simplified.accounts.api.AccountLoginState;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
+import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.app.Simplified;
@@ -560,6 +561,24 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     this.readium_js_api.getCurrentPage(this);
     this.readium_js_api.mediaOverlayIsAvailable(this);
 
+    /*
+     * Publish an analytics event.
+     */
+
+    try {
+      Simplified.getAnalytics()
+        .publishEvent(new AnalyticsEvent.BookClosed(
+          LocalDateTime.now(),
+          this.current_account.loginState().getCredentials(),
+          Simplified.getProfilesController().profileCurrent().id().getUuid(),
+          this.current_account.provider().id(),
+          this.current_account.id().getUuid(),
+          this.feed_entry.getID(),
+          this.feed_entry.getTitle()));
+    } catch (ProfileNoneCurrentException ex) {
+      LOG.error("profile is not current: ", ex);
+    }
+
     final ObservableSubscriptionType<ProfileEvent> sub = this.profile_subscription;
     if (sub != null) {
       sub.unsubscribe();
@@ -830,6 +849,27 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
               page.getSpineItemPageIndex() + 1,
               page.getSpineItemPageCount(),
               default_package.getSpineItem(page.getIDRef()).getTitle())));
+
+        /*
+         * Publish an analytics event.
+         */
+
+        try {
+          Simplified.getAnalytics()
+            .publishEvent(new AnalyticsEvent.BookPageTurned(
+              LocalDateTime.now(),
+              this.current_account.loginState().getCredentials(),
+              Simplified.getProfilesController().profileCurrent().id().getUuid(),
+              this.current_account.provider().id(),
+              this.current_account.id().getUuid(),
+              this.feed_entry.getID(),
+              this.feed_entry.getTitle(),
+              this.current_page_index,
+              this.current_page_count,
+              this.current_chapter_title));
+        } catch (ProfileNoneCurrentException ex) {
+          LOG.error("profile is not current: ", ex);
+        }
       }
 
       /*

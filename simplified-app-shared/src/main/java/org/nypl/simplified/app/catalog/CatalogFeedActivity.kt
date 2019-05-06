@@ -679,6 +679,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     try {
       without = CatalogFeedWithoutGroups(
         activity = this,
+        analytics = Simplified.getAnalytics(),
         account = Simplified.getProfilesController().profileAccountCurrent(),
         bookCoverProvider = Simplified.getCoverProvider(),
         bookSelectionListener = bookSelectListener,
@@ -1154,6 +1155,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         .publishEvent(AnalyticsEvent.CatalogSearched(
           profileUUID = profile.id().uuid,
           timestamp = LocalDateTime.now(),
+          credentials = account.loginState().credentials,
           accountProvider = account.provider().id(),
           accountUUID = account.id().uuid,
           searchQuery = query))

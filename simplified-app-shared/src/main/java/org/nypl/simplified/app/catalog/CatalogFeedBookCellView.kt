@@ -20,6 +20,7 @@ import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
@@ -66,6 +67,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 class CatalogFeedBookCellView(
   private val activity: AppCompatActivity,
+  private val analytics: AnalyticsType,
   private val coverProvider: BookCoverProviderType,
   private val booksController: BooksControllerType,
   private val profilesController: ProfilesControllerType,
@@ -242,6 +244,8 @@ class CatalogFeedBookCellView(
     this.cellButtons.addView(
       CatalogBookReadButton(
         this.activity,
+        this.analytics,
+        this.profilesController.profileCurrent(),
         this.account(feedEntry.bookID),
         bookId,
         feedEntry),

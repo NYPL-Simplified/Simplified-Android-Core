@@ -22,6 +22,7 @@ import com.io7m.jnull.NullCheck;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.nypl.simplified.analytics.api.Analytics;
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
@@ -31,6 +32,7 @@ import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.profiles.api.ProfileEvent;
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileReadableType;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
@@ -83,6 +85,26 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
     profiles.profileIdleTimer().stop();
 
     this.profile_event_subscription = profiles.profileEvents().subscribe(event -> reloadProfiles());
+
+    /*
+     * If the profile selection screen has been reached and a profile is active, then
+     * assume that we've gotten here because a profile has been logged out.
+     */
+
+    if (profiles.profileAnyIsCurrent()) {
+      try {
+        final ProfileReadableType profile = profiles.profileCurrent();
+        Simplified.getAnalytics().publishEvent(
+          new AnalyticsEvent.ProfileLoggedOut(
+            LocalDateTime.now(),
+            null,
+            profile.id().getUuid(),
+            profile.displayName()
+          ));
+      } catch (ProfileNoneCurrentException e) {
+        LOG.error("profile is not current: ", e);
+      }
+    }
   }
 
   @Override
@@ -110,8 +132,9 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
 
     Simplified.getAnalytics()
       .publishEvent(new AnalyticsEvent.ProfileLoggedIn(
-        profile.id().getUuid(),
         LocalDateTime.now(),
+        null,
+        profile.id().getUuid(),
         profile.displayName(),
         gender,
         birthday

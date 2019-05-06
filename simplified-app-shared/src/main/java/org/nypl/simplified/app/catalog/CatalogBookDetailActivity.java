@@ -133,6 +133,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
         account,
         Simplified.getCoverProvider(),
         bookRegistry,
+        Simplified.getAnalytics(),
         profiles,
         Simplified.getBooksController(),
         Simplified.getScreenSizeInformation(),

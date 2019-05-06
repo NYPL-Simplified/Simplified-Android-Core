@@ -864,6 +864,7 @@ public final class Simplified extends MultiDexApplication {
       this.analytics.publishEvent(
         new AnalyticsEvent.ApplicationOpened(
           LocalDateTime.now(),
+          null,
           packageInfo.packageName,
           packageInfo.versionName,
           packageInfo.versionCode

@@ -18,6 +18,8 @@ import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.UIThread
@@ -48,7 +50,8 @@ import java.util.concurrent.atomic.AtomicReference
 
 class CatalogFeedWithoutGroups(
   private val activity: AppCompatActivity,
-  private val account: org.nypl.simplified.accounts.database.api.AccountType,
+  private val analytics: AnalyticsType,
+  private val account: AccountType,
   private val bookCoverProvider: BookCoverProviderType,
   private val bookSelectionListener: CatalogBookSelectionListenerType,
   private val bookRegistry: BookRegistryReadableType,
@@ -123,6 +126,7 @@ class CatalogFeedWithoutGroups(
     } else {
       cv = CatalogFeedBookCellView(
         activity = this.activity,
+        analytics = this.analytics,
         coverProvider = this.bookCoverProvider,
         booksController = this.bookController,
         profilesController = this.profilesController,
