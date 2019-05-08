@@ -9,7 +9,7 @@ import com.io7m.jnull.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
+import static org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 
 /**
  * A controller that opens a report activity for a given book.

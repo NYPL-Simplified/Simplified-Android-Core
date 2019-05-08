@@ -18,14 +18,16 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.login.LoginDialog
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException
-import org.nypl.simplified.books.book_database.BookID
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookStatusDownloadInProgress
@@ -46,16 +48,15 @@ import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
 import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
 import org.nypl.simplified.books.book_registry.BookStatusRevoked
 import org.nypl.simplified.books.book_registry.BookStatusType
-import org.nypl.simplified.books.controller.BooksControllerType
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.core.BookAcquisitionSelection
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.feeds.FeedEntry
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryCorrupt
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
+import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 import java.util.Calendar
 import java.util.concurrent.atomic.AtomicReference
@@ -66,6 +67,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 class CatalogFeedBookCellView(
   private val activity: AppCompatActivity,
+  private val analytics: AnalyticsType,
   private val coverProvider: BookCoverProviderType,
   private val booksController: BooksControllerType,
   private val profilesController: ProfilesControllerType,
@@ -187,7 +189,7 @@ class CatalogFeedBookCellView(
     this.cellDownloadingFailed.visibility = View.INVISIBLE
   }
 
-  private fun loadImageAndSetVisibility(inE: FeedEntry.FeedEntryOPDS) {
+  private fun loadImageAndSetVisibility(inE: FeedEntryOPDS) {
     val inImageHeight = this.cellCoverLayout.layoutParams.height
 
     val coverImage = this.cellCoverImage
@@ -242,6 +244,8 @@ class CatalogFeedBookCellView(
     this.cellButtons.addView(
       CatalogBookReadButton(
         this.activity,
+        this.analytics,
+        this.profilesController.profileCurrent(),
         this.account(feedEntry.bookID),
         bookId,
         feedEntry),

@@ -11,22 +11,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
-import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountProvider
-import org.nypl.simplified.books.accounts.AccountProviderCollection
-import org.nypl.simplified.books.accounts.AccountProviderCollectionType
-import org.nypl.simplified.books.accounts.AccountsDatabaseFactoryType
-import org.nypl.simplified.books.accounts.AccountsDatabaseLastAccountException
-import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException
-import org.nypl.simplified.books.accounts.AccountsDatabases
-import org.nypl.simplified.books.profiles.ProfileAnonymousDisabledException
-import org.nypl.simplified.books.profiles.ProfileAnonymousEnabledException
-import org.nypl.simplified.books.profiles.ProfileDatabaseException
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfileID
-import org.nypl.simplified.books.profiles.ProfileNonexistentException
-import org.nypl.simplified.books.profiles.ProfilesDatabase
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.observable.Observable
@@ -37,12 +21,13 @@ import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.util.TreeMap
+import java.util.UUID
 
 abstract class ProfilesDatabaseContract {
 
   private lateinit var credentialStore: FakeAccountCredentialStorage
-  private lateinit var accountEvents: ObservableType<AccountEvent>
-  private lateinit var profileEvents: ObservableType<ProfileEvent>
+  private lateinit var accountEvents: ObservableType<org.nypl.simplified.accounts.api.AccountEvent>
+  private lateinit var profileEvents: ObservableType<org.nypl.simplified.profiles.api.ProfileEvent>
 
   @JvmField
   @Rule
@@ -66,10 +51,10 @@ abstract class ProfilesDatabaseContract {
 
   private class CausesContains<T : Exception> internal constructor(
     private val exception_type: Class<T>,
-    private val message: String) : BaseMatcher<ProfileDatabaseException>() {
+    private val message: String) : BaseMatcher<org.nypl.simplified.profiles.api.ProfileDatabaseException>() {
 
     override fun matches(item: Any): Boolean {
-      if (item is ProfileDatabaseException) {
+      if (item is org.nypl.simplified.profiles.api.ProfileDatabaseException) {
         for (c in item.causes()) {
           LOG.error("Cause: ", c)
           if (this.exception_type.isAssignableFrom(c.javaClass) && c.message!!.contains(this.message)) {
@@ -94,17 +79,21 @@ abstract class ProfilesDatabaseContract {
     val f_pro = File(f_tmp, "profiles")
     FileUtilities.fileWriteUTF8(f_pro, "Hello!")
 
-    this.expected.expect(ProfileDatabaseException::class.java)
+    this.expected.expect(org.nypl.simplified.profiles.api.ProfileDatabaseException::class.java)
     this.expected.expect(CausesContains(IOException::class.java, "Not a directory"))
-    ProfilesDatabase.openWithAnonymousProfileDisabled(
+    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
   }
+
+  /**
+   * A subdirectory that can't be parsed as a UUID will be migrated.
+   */
 
   @Test
   @Throws(Exception::class)
@@ -116,21 +105,18 @@ abstract class ProfilesDatabaseContract {
     val f_bad = File(f_pro, "not-a-number")
     f_bad.mkdirs()
 
-    this.expected.expect(ProfileDatabaseException::class.java)
-    this.expected.expect(CausesContains(
-      IOException::class.java, "Could not parse directory name as profile ID"))
-    ProfilesDatabase.openWithAnonymousProfileDisabled(
+    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
   }
 
-  private fun accountsDatabases(): AccountsDatabaseFactoryType {
-    return AccountsDatabases
+  private fun accountsDatabases(): org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType {
+    return org.nypl.simplified.accounts.database.AccountsDatabases
   }
 
   @Test
@@ -143,11 +129,11 @@ abstract class ProfilesDatabaseContract {
     val f_0 = File(f_pro, "0")
     f_0.mkdirs()
 
-    ProfilesDatabase.openWithAnonymousProfileDisabled(
+    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -165,13 +151,13 @@ abstract class ProfilesDatabaseContract {
     val f_p = File(f_0, "profile.json")
     FileUtilities.fileWriteUTF8(f_p, "} { this is not JSON { } { }")
 
-    this.expected.expect(ProfileDatabaseException::class.java)
+    this.expected.expect(org.nypl.simplified.profiles.api.ProfileDatabaseException::class.java)
     this.expected.expect(CausesContains(IOException::class.java, "Could not parse profile: "))
-    ProfilesDatabase.openWithAnonymousProfileDisabled(
+    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -183,11 +169,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -205,11 +191,11 @@ abstract class ProfilesDatabaseContract {
 
     val account_providers = this.accountProviders()
 
-    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       account_providers,
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -281,11 +267,11 @@ abstract class ProfilesDatabaseContract {
 
     val account_providers = this.accountProviders()
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       account_providers,
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -296,11 +282,11 @@ abstract class ProfilesDatabaseContract {
     val p1 = db0.createProfile(acc, "Gonzo")
     val p2 = db0.createProfile(acc, "Beaker")
 
-    val db1 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db1 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       account_providers,
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -328,11 +314,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -357,11 +343,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -370,7 +356,7 @@ abstract class ProfilesDatabaseContract {
 
     val p0 = db.createProfile(acc, "Kermit")
 
-    this.expected.expect(ProfileDatabaseException::class.java)
+    this.expected.expect(org.nypl.simplified.profiles.api.ProfileDatabaseException::class.java)
     this.expected.expectMessage(StringContains.containsString("Display name is already used"))
     db.createProfile(acc, "Kermit")
   }
@@ -381,18 +367,18 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
     val acc = fakeProvider("http://www.example.com/accounts0/")
 
-    this.expected.expect(ProfileDatabaseException::class.java)
+    this.expected.expect(org.nypl.simplified.profiles.api.ProfileDatabaseException::class.java)
     this.expected.expectMessage(StringContains.containsString("Display name cannot be empty"))
     db.createProfile(acc, "")
   }
@@ -403,11 +389,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -428,11 +414,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -441,9 +427,9 @@ abstract class ProfilesDatabaseContract {
 
     val p0 = db0.createProfile(acc, "Kermit")
 
-    this.expected.expect(ProfileNonexistentException::class.java)
+    this.expected.expect(org.nypl.simplified.profiles.api.ProfileNonexistentException::class.java)
     this.expected.expectMessage(StringContains.containsString("Profile does not exist"))
-    db0.setProfileCurrent(ProfileID.create(23))
+    db0.setProfileCurrent(org.nypl.simplified.profiles.api.ProfileID(UUID.fromString("135dec78-b89b-4a6c-bf6a-294c1694d40b")))
   }
 
   @Test
@@ -452,11 +438,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileEnabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileEnabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       exampleAccountProvider(),
@@ -475,18 +461,18 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileEnabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileEnabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       exampleAccountProvider(),
       f_pro)
 
-    this.expected.expect(ProfileAnonymousEnabledException::class.java)
-    db0.setProfileCurrent(ProfileID.create(23))
+    this.expected.expect(org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException::class.java)
+    db0.setProfileCurrent(org.nypl.simplified.profiles.api.ProfileID.generate())
   }
 
   @Test
@@ -495,11 +481,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -522,11 +508,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -537,7 +523,7 @@ abstract class ProfilesDatabaseContract {
     val p0 = db0.createProfile(acc0, "Kermit")
     db0.setProfileCurrent(p0.id())
 
-    this.expected.expect(AccountsDatabaseNonexistentException::class.java)
+    this.expected.expect(org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException::class.java)
     p0.deleteAccountByProvider(acc1)
   }
 
@@ -547,11 +533,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -561,7 +547,7 @@ abstract class ProfilesDatabaseContract {
     val p0 = db0.createProfile(acc0, "Kermit")
     db0.setProfileCurrent(p0.id())
 
-    this.expected.expect(AccountsDatabaseLastAccountException::class.java)
+    this.expected.expect(org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException::class.java)
     p0.deleteAccountByProvider(acc0)
   }
 
@@ -571,11 +557,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -598,11 +584,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
@@ -613,7 +599,7 @@ abstract class ProfilesDatabaseContract {
     val p0 = db0.createProfile(acc0, "Kermit")
     db0.setProfileCurrent(p0.id())
 
-    this.expected.expect(AccountsDatabaseNonexistentException::class.java)
+    this.expected.expect(org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException::class.java)
     p0.selectAccount(acc1)
   }
 
@@ -623,16 +609,16 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
-    this.expected.expect(ProfileAnonymousDisabledException::class.java)
+    this.expected.expect(org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException::class.java)
     this.expected.expectMessage(StringContains.containsString("The anonymous profile is not enabled"))
     db0.anonymousProfile()
   }
@@ -652,11 +638,11 @@ abstract class ProfilesDatabaseContract {
 
     val account_providers = accountProviders()
 
-    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       account_providers,
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       accountsDatabases(),
       f_pro)
@@ -666,11 +652,11 @@ abstract class ProfilesDatabaseContract {
     val p0 = db0.createProfile(acc, "Kermit")
     p0.createAccount(account_providers.provider(URI.create("http://www.example.com/accounts1/")))
 
-    ProfilesDatabase.openWithAnonymousProfileDisabled(
+    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       accountProvidersMissingOne(),
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       accountsDatabases(),
       f_pro)
@@ -692,11 +678,11 @@ abstract class ProfilesDatabaseContract {
     val account_providers_no_zero = accountProvidersMissingZero()
 
     val db0 =
-      ProfilesDatabase.openWithAnonymousProfileDisabled(
+      org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
         this.context(),
         this.accountEvents,
         account_providers_no_zero,
-        AccountBundledCredentialsEmpty.getInstance(),
+        org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         accountsDatabases(),
         f_pro)
@@ -705,11 +691,11 @@ abstract class ProfilesDatabaseContract {
 
     val account_providers_no_one = accountProvidersMissingOne()
 
-    ProfilesDatabase.openWithAnonymousProfileDisabled(
+    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       account_providers_no_one,
-      AccountBundledCredentialsEmpty.getInstance(),
+      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       accountsDatabases(),
       f_pro)
@@ -730,11 +716,11 @@ abstract class ProfilesDatabaseContract {
     val account_providers = accountProviders()
 
     val db0 =
-      ProfilesDatabase.openWithAnonymousProfileDisabled(
+      org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
         this.context(),
         this.accountEvents,
         account_providers,
-        AccountBundledCredentialsEmpty.getInstance(),
+        org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         accountsDatabases(),
         f_pro)
@@ -745,11 +731,11 @@ abstract class ProfilesDatabaseContract {
       p0.createAccount(account_providers.provider(URI.create("http://www.example.com/accounts1/")))
 
     val db1 =
-      ProfilesDatabase.openWithAnonymousProfileEnabled(
+      org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileEnabled(
         this.context(),
         this.accountEvents,
         account_providers,
-        AccountBundledCredentialsEmpty.getInstance(),
+        org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         accountsDatabases(),
         acc,
@@ -762,35 +748,35 @@ abstract class ProfilesDatabaseContract {
   }
 
 
-  private fun accountProvidersMissingZero(): AccountProviderCollectionType {
+  private fun accountProvidersMissingZero(): org.nypl.simplified.accounts.api.AccountProviderCollectionType {
     val p1 = fakeProvider("http://www.example.com/accounts1/")
-    val providers = TreeMap<URI, AccountProvider>()
+    val providers = TreeMap<URI, org.nypl.simplified.accounts.api.AccountProvider>()
     providers[p1.id()] = p1
-    return AccountProviderCollection.create(p1, providers)
+    return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p1, providers)
   }
 
-  private fun accountProvidersMissingOne(): AccountProviderCollectionType {
+  private fun accountProvidersMissingOne(): org.nypl.simplified.accounts.api.AccountProviderCollectionType {
     val p0 = fakeProvider("http://www.example.com/accounts0/")
-    val providers = TreeMap<URI, AccountProvider>()
+    val providers = TreeMap<URI, org.nypl.simplified.accounts.api.AccountProvider>()
     providers[p0.id()] = p0
-    return AccountProviderCollection.create(p0, providers)
+    return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p0, providers)
   }
 
-  private fun accountProviders(): AccountProviderCollectionType {
+  private fun accountProviders(): org.nypl.simplified.accounts.api.AccountProviderCollectionType {
     val p0 = fakeProvider("http://www.example.com/accounts0/")
     val p1 = fakeProvider("http://www.example.com/accounts1/")
-    val providers = TreeMap<URI, AccountProvider>()
+    val providers = TreeMap<URI, org.nypl.simplified.accounts.api.AccountProvider>()
     providers[p0.id()] = p0
     providers[p1.id()] = p1
-    return AccountProviderCollection.create(p0, providers)
+    return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p0, providers)
   }
 
   companion object {
 
     private val LOG = LoggerFactory.getLogger(ProfilesDatabaseContract::class.java)
 
-    private fun exampleAccountProvider(): AccountProvider {
-      return AccountProvider.builder()
+    private fun exampleAccountProvider(): org.nypl.simplified.accounts.api.AccountProvider {
+      return org.nypl.simplified.accounts.api.AccountProvider.builder()
         .setCatalogURI(URI.create("http://www.example.com"))
         .setSupportEmail("postmaster@example.com")
         .setId(URI.create("urn:com.example"))
@@ -803,8 +789,8 @@ abstract class ProfilesDatabaseContract {
         .build()
     }
 
-    private fun fakeProvider(provider_id: String): AccountProvider {
-      return AccountProvider.builder()
+    private fun fakeProvider(provider_id: String): org.nypl.simplified.accounts.api.AccountProvider {
+      return org.nypl.simplified.accounts.api.AccountProvider.builder()
         .setId(URI.create(provider_id))
         .setDisplayName("Fake Library")
         .setSubtitle(Option.some("Imaginary books"))

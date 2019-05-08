@@ -8,10 +8,11 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 
+import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.books.accounts.AccountType;
-import org.nypl.simplified.books.book_database.BookID;
+import org.nypl.simplified.books.api.BookID;
+import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection;
 import org.nypl.simplified.books.book_registry.BookStatusDownloaded;
 import org.nypl.simplified.books.book_registry.BookStatusDownloadingType;
 import org.nypl.simplified.books.book_registry.BookStatusHeld;
@@ -29,11 +30,10 @@ import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed;
 import org.nypl.simplified.books.book_registry.BookStatusRevoked;
 import org.nypl.simplified.books.book_registry.BookStatusType;
 import org.nypl.simplified.books.book_registry.BookWithStatus;
-import org.nypl.simplified.books.core.BookAcquisitionSelection;
-import org.nypl.simplified.books.feeds.FeedBooksSelection;
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
+import org.nypl.simplified.feeds.api.FeedBooksSelection;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

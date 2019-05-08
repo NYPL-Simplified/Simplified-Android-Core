@@ -1,12 +1,12 @@
 package org.nypl.simplified.tests.local.books.reader.bookmarks
 
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCallsType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceProviderType
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.tests.books.reader.bookmarks.ReaderBookmarkServiceContract
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

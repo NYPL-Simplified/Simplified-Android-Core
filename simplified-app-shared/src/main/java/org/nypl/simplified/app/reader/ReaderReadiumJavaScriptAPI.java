@@ -14,10 +14,10 @@ import org.json.JSONObject;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
 import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.reader.ReaderBookLocation;
-import org.nypl.simplified.books.reader.ReaderBookLocationJSON;
-import org.nypl.simplified.books.reader.ReaderColorScheme;
-import org.nypl.simplified.books.reader.ReaderPreferences;
+import org.nypl.simplified.books.api.BookLocation;
+import org.nypl.simplified.books.api.BookLocationJSON;
+import org.nypl.simplified.reader.api.ReaderColorScheme;
+import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,8 +78,8 @@ public final class ReaderReadiumJavaScriptAPI implements ReaderReadiumJavaScript
            * parsed.
            */
 
-          final ReaderBookLocation location =
-            ReaderBookLocationJSON.deserializeFromString(
+          final BookLocation location =
+            BookLocationJSON.deserializeFromString(
               this.json_objects, TextUtilities.unquote(value));
 
           listener.onCurrentPageReceived(location);

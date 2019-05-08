@@ -3,8 +3,8 @@ package org.nypl.simplified.splash
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.splash.SplashEvent.SplashEULAEvent.SplashEULAAgreed
 import org.nypl.simplified.splash.SplashEvent.SplashEULAEvent.SplashEULADisagreed

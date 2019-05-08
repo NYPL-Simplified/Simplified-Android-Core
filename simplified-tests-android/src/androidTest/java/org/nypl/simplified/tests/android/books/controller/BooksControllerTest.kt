@@ -4,8 +4,6 @@ import android.content.Context
 import android.support.test.InstrumentationRegistry
 import android.support.test.filters.MediumTest
 import android.support.test.runner.AndroidJUnit4
-
-import org.junit.Before
 import org.junit.runner.RunWith
 import org.nypl.simplified.tests.books.controller.BooksControllerContract
 

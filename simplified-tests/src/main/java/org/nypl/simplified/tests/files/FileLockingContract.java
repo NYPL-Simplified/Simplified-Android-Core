@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public abstract class FileLockingContract {
+
   private static final Logger LOG;
 
   static {

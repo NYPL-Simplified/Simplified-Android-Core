@@ -21,22 +21,21 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.joda.time.LocalDate;
+import org.nypl.simplified.accounts.database.AccountProviderCollection;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.accounts.AccountProviderCollection;
-import org.nypl.simplified.books.controller.ProfilesControllerType;
-import org.nypl.simplified.books.profiles.ProfileCreationEvent;
-import org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationFailed;
-import org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationSucceeded;
-import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.datepicker.DatePicker;
+import org.nypl.simplified.profiles.api.ProfileCreationEvent;
+import org.nypl.simplified.profiles.api.ProfileEvent;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_GENERAL;
+import static org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed;
+import static org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationSucceeded;
 
 /**
  * An activity that allows for the creation of profiles.
@@ -173,7 +172,7 @@ public final class ProfileCreationActivity extends SimplifiedActivity implements
         date_value);
 
     FluentFuture.from(task)
-      .catching(Exception.class, e -> ProfileCreationFailed.of(name_text, ERROR_GENERAL, Option.some(e)), exec)
+      .catching(Exception.class, e -> ProfileCreationFailed.of(name_text, ProfileCreationFailed.ErrorCode.ERROR_GENERAL, Option.some(e)), exec)
       .transform(this::onProfileEvent, exec);
   }
 

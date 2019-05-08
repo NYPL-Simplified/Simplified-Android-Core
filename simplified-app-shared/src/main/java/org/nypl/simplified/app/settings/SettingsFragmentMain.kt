@@ -10,7 +10,7 @@ import com.tenmiles.helpstack.gears.HSDeskGear
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.WebViewActivity
 import org.nypl.simplified.app.helpstack.HelpstackType
-import org.nypl.simplified.books.synced_document.SyncedDocumentType
+import org.nypl.simplified.documents.synced.SyncedDocumentType
 
 /**
  * The main settings fragment.
@@ -69,7 +69,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private fun configureLicenses(licenses: Preference) {
     val docLicensesOpt = this.listener.documents().licenses
-    if (docLicensesOpt is Some<SyncedDocumentType>) {
+    if (docLicensesOpt is Some<org.nypl.simplified.documents.synced.SyncedDocumentType>) {
       val docLicenses = docLicensesOpt.get()
       licenses.intent = this.showLicense(docLicenses)
     } else {
@@ -110,7 +110,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       title = this.resources.getString(R.string.settings_about))
   }
 
-  private fun showLicense(docLicenses: SyncedDocumentType): Intent {
+  private fun showLicense(docLicenses: org.nypl.simplified.documents.synced.SyncedDocumentType): Intent {
     return this.webViewIntent(
       uri = docLicenses.documentGetReadableURL().toString(),
       title = this.resources.getString(R.string.settings_licence_software))

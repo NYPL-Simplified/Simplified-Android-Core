@@ -21,32 +21,32 @@ import com.google.common.util.concurrent.FluentFuture
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.squareup.picasso.Picasso
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventCreation
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountCreationFailed
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountCreationSucceeded
+import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountDeletionFailed
+import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountDeletionSucceeded
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.images.ImageAccountIcons
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountEventCreation
-import org.nypl.simplified.books.accounts.AccountEventCreation.AccountCreationFailed
-import org.nypl.simplified.books.accounts.AccountEventCreation.AccountCreationSucceeded
-import org.nypl.simplified.books.accounts.AccountEventDeletion
-import org.nypl.simplified.books.accounts.AccountEventDeletion.AccountDeletionFailed
-import org.nypl.simplified.books.accounts.AccountEventDeletion.AccountDeletionSucceeded
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.accounts.AccountProvider
-import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.profiles.ProfileAccountSelectEvent
-import org.nypl.simplified.books.profiles.ProfileAccountSelectEvent.ProfileAccountSelectFailed
-import org.nypl.simplified.books.profiles.ProfileAccountSelectEvent.ProfileAccountSelectSucceeded
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
-import org.nypl.simplified.books.profiles.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
 import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
+import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectFailed
+import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectSucceeded
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
+import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
 
@@ -284,7 +284,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun openAccountSettings(account: AccountID) {
     val parameterBundle = Bundle()
-    NavigationDrawerActivity.setActivityArguments(parameterBundle, false)
+    setActivityArguments(parameterBundle, false)
     parameterBundle.putSerializable(SettingsAccountActivity.ACCOUNT_ID, account)
 
     val intent = Intent()

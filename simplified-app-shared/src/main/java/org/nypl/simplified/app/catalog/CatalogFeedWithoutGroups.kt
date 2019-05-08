@@ -18,27 +18,26 @@ import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.accounts.AccountAuthenticatedHTTP
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
-import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusEvent
-import org.nypl.simplified.books.controller.BooksControllerType
-import org.nypl.simplified.books.controller.ProfilesControllerType
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.feeds.Feed
-import org.nypl.simplified.books.feeds.Feed.FeedWithGroups
-import org.nypl.simplified.books.feeds.Feed.FeedWithoutGroups
-import org.nypl.simplified.books.feeds.FeedEntry
-import org.nypl.simplified.books.feeds.FeedLoaderResult
-import org.nypl.simplified.books.feeds.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
-import org.nypl.simplified.books.feeds.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
-import org.nypl.simplified.books.feeds.FeedLoaderResult.FeedLoaderSuccess
-import org.nypl.simplified.books.feeds.FeedLoaderType
+import org.nypl.simplified.feeds.api.Feed
+import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
+import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
+import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.feeds.api.FeedLoaderResult
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
+import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.http.core.HTTPAuthType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.CancellationException
@@ -51,6 +50,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 class CatalogFeedWithoutGroups(
   private val activity: AppCompatActivity,
+  private val analytics: AnalyticsType,
   private val account: AccountType,
   private val bookCoverProvider: BookCoverProviderType,
   private val bookSelectionListener: CatalogBookSelectionListenerType,
@@ -73,9 +73,9 @@ class CatalogFeedWithoutGroups(
     createHttpAuth(this.account.loginState().credentials)
 
   private fun createHttpAuth(
-    credentials: AccountAuthenticationCredentials?): OptionType<HTTPAuthType> {
+    credentials: org.nypl.simplified.accounts.api.AccountAuthenticationCredentials?): OptionType<HTTPAuthType> {
     return if (credentials != null) {
-      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials))
+      Option.some(org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials))
     } else {
       Option.none<HTTPAuthType>()
     }
@@ -126,6 +126,7 @@ class CatalogFeedWithoutGroups(
     } else {
       cv = CatalogFeedBookCellView(
         activity = this.activity,
+        analytics = this.analytics,
         coverProvider = this.bookCoverProvider,
         booksController = this.bookController,
         profilesController = this.profilesController,

@@ -20,11 +20,11 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
 
-import org.nypl.simplified.books.accounts.AccountID;
-import org.nypl.simplified.books.accounts.AccountType;
-import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
-import org.nypl.simplified.books.profiles.ProfileReadableType;
+import org.nypl.simplified.accounts.api.AccountID;
+import org.nypl.simplified.accounts.database.api.AccountType;
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
+import org.nypl.simplified.profiles.api.ProfileReadableType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,7 @@ public class ReportIssueActivity extends AppCompatActivity {
       this.mail_client_opened = false;
 
       final ActionBar bar = this.getActionBar();
-      if (android.os.Build.VERSION.SDK_INT < 21) {
+      if (Build.VERSION.SDK_INT < 21) {
         bar.setDisplayHomeAsUpEnabled(false);
         bar.setHomeButtonEnabled(true);
         bar.setIcon(R.drawable.ic_arrow_back);
@@ -174,11 +174,11 @@ public class ReportIssueActivity extends AppCompatActivity {
     final String subject,
     final String message) {
 
-    final Intent email_intent = new Intent(android.content.Intent.ACTION_SEND);
+    final Intent email_intent = new Intent(Intent.ACTION_SEND);
     email_intent.setType("plain/text");
-    email_intent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{email});
-    email_intent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
-    email_intent.putExtra(android.content.Intent.EXTRA_TEXT, getDeviceInformation(this, message));
+    email_intent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+    email_intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+    email_intent.putExtra(Intent.EXTRA_TEXT, getDeviceInformation(this, message));
 
     activity.startActivityForResult(Intent.createChooser(email_intent, "Email"), 1);
   }

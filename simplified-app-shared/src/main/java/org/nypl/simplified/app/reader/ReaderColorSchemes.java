@@ -5,7 +5,7 @@ import android.graphics.Color;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
-import org.nypl.simplified.books.reader.ReaderColorScheme;
+import org.nypl.simplified.reader.api.ReaderColorScheme;
 
 /**
  * Color schemes.

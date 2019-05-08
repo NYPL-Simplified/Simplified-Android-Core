@@ -2,10 +2,10 @@ package org.nypl.simplified.app.catalog
 
 import android.content.res.Resources
 import org.nypl.simplified.app.R
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 
 /**
  * Functions over book formats.

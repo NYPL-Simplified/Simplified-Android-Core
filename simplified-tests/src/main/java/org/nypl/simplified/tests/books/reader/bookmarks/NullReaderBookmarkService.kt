@@ -2,15 +2,15 @@ package org.nypl.simplified.tests.books.reader.bookmarks
 
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.reader.ReaderBookmark
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceProviderType
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarks
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 
 class NullReaderBookmarkService(
   val events: ObservableType<ReaderBookmarkEvent>) : ReaderBookmarkServiceType {
@@ -22,11 +22,11 @@ class NullReaderBookmarkService(
   override val bookmarkEvents: ObservableReadableType<ReaderBookmarkEvent>
     get() = this.events
 
-  override fun bookmarkCreate(accountID: AccountID, bookmark: ReaderBookmark): FluentFuture<Unit> {
+  override fun bookmarkCreate(accountID: AccountID, bookmark: Bookmark): FluentFuture<Unit> {
     return FluentFuture.from(Futures.immediateFuture(Unit))
   }
 
-  override fun bookmarkDelete(accountID: AccountID, bookmark: ReaderBookmark): FluentFuture<Unit> {
+  override fun bookmarkDelete(accountID: AccountID, bookmark: Bookmark): FluentFuture<Unit> {
     return FluentFuture.from(Futures.immediateFuture(Unit))
   }
 

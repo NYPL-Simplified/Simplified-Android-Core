@@ -2,7 +2,7 @@ package org.nypl.simplified.app.settings
 
 import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.app.helpstack.HelpstackType
-import org.nypl.simplified.books.document_store.DocumentStoreType
+import org.nypl.simplified.documents.store.DocumentStoreType
 
 /**
  * The listener interface that must be implemented by activities hosting [SettingsFragmentListenerType].

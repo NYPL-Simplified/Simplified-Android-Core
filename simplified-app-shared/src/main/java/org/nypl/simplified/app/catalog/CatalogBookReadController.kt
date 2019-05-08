@@ -3,23 +3,25 @@ package org.nypl.simplified.app.catalog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.View.OnClickListener
+import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.player.AudioBookPlayerActivity
 import org.nypl.simplified.app.player.AudioBookPlayerParameters
 import org.nypl.simplified.app.reader.ReaderActivity
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.Book
-import org.nypl.simplified.books.book_database.BookFormat.BookFormatAudioBook
-import org.nypl.simplified.books.book_database.BookFormat.BookFormatEPUB
-import org.nypl.simplified.books.book_database.BookFormat.BookFormatPDF
-import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
-import org.nypl.simplified.circanalytics.CirculationAnalytics
+import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
+import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
+import org.nypl.simplified.books.api.BookFormat.BookFormatPDF
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.slf4j.LoggerFactory
 
 /**
@@ -28,6 +30,8 @@ import org.slf4j.LoggerFactory
 
 class CatalogBookReadController(
   val activity: AppCompatActivity,
+  val analytics: AnalyticsType,
+  val profile: ProfileReadableType,
   val account: AccountType,
   val id: BookID,
   val entry: FeedEntryOPDS) : OnClickListener {
@@ -37,11 +41,6 @@ class CatalogBookReadController(
   }
 
   override fun onClick(@Nullable v: View) {
-    val credentials = this.account.loginState().credentials
-    if (credentials != null) {
-      CirculationAnalytics.postEvent(credentials, this.activity, this.entry, "open_book")
-    }
-
     val database = this.account.bookDatabase()
     val entry = database.entry(this.id)
     val format = entry.book.findPreferredFormat()
@@ -52,11 +51,11 @@ class CatalogBookReadController(
 
     return when (format) {
       is BookFormatEPUB ->
-        launchEPUBReader(entry.book, format)
+        this.launchEPUBReader(entry.book, format)
       is BookFormatAudioBook ->
-        launchAudioBookPlayer(entry.book, format)
+        this.launchAudioBookPlayer(entry.book, format)
       is BookFormatPDF ->
-        launchPDFReader(entry.book, format)
+        this.launchPDFReader(entry.book, format)
     }
   }
 
@@ -68,8 +67,17 @@ class CatalogBookReadController(
       null)
   }
 
+  private fun <T> orElseNull(x: OptionType<T>): T? {
+    return if (x is Some<T>) {
+      x.get()
+    } else {
+      null
+    }
+  }
+
   private fun launchEPUBReader(book: Book, format: BookFormatEPUB) {
     if (format.isDownloaded) {
+      this.sendAnalytics(book)
       ReaderActivity.startActivity(this.activity, this.id, format.file, FeedEntryOPDS(book.entry))
     } else {
       ErrorDialogUtilities.showError(
@@ -83,6 +91,7 @@ class CatalogBookReadController(
   private fun launchAudioBookPlayer(book: Book, format: BookFormatAudioBook) {
     val manifest = format.manifest
     if (manifest != null) {
+      this.sendAnalytics(book)
       AudioBookPlayerActivity.startActivity(
         from = this.activity,
         parameters = AudioBookPlayerParameters(
@@ -98,5 +107,18 @@ class CatalogBookReadController(
         "Bug: book claimed to be downloaded but no book file exists in storage",
         null)
     }
+  }
+
+  private fun sendAnalytics(book: Book) {
+    this.analytics.publishEvent(
+      AnalyticsEvent.BookOpened(
+        credentials = this.account.loginState().credentials,
+        profileUUID = this.profile.id().uuid,
+        profileDisplayName = this.profile.displayName(),
+        accountProvider = this.account.provider().id(),
+        accountUUID = this.account.id().uuid,
+        bookOPDSId = book.entry.id,
+        bookTitle = book.entry.title,
+        targetURI = this.orElseNull(book.entry.analytics)))
   }
 }

@@ -11,8 +11,9 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
-import org.nypl.simplified.books.eula.EULAType
-import org.nypl.simplified.splash.SplashEvent.SplashEULAEvent.*
+import org.nypl.simplified.documents.eula.EULAType
+import org.nypl.simplified.splash.SplashEvent.SplashEULAEvent.SplashEULAAgreed
+import org.nypl.simplified.splash.SplashEvent.SplashEULAEvent.SplashEULADisagreed
 import org.slf4j.LoggerFactory
 
 class SplashEULAFragment : Fragment() {

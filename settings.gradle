@@ -1,30 +1,43 @@
 rootProject.name = 'simplified'
 
-// FIXME: These should be re-enabled once they are working.
-// include ':simplified-app-openebooks'
 include ':simplified-accessibility'
+include ':simplified-accounts-api'
+include ':simplified-accounts-database'
+include ':simplified-accounts-database-api'
+include ':simplified-analytics-api'
+include ':simplified-analytics-circulation'
+include ':simplified-analytics-lfa'
 include ':simplified-app-shared'
 include ':simplified-app-simplye'
 include ':simplified-app-vanilla'
 include ':simplified-app-vanilla-with-profiles'
-include ':simplified-books-core'
-include ':simplified-books-core-ng'
+include ':simplified-books-api'
+include ':simplified-books-bundled-api'
+include ':simplified-books-controller'
+include ':simplified-books-controller-api'
 include ':simplified-books-covers'
+include ':simplified-books-database'
+include ':simplified-books-database-api'
+include ':simplified-books-registry-api'
 include ':simplified-branding'
 include ':simplified-bugsnag'
-include ':simplified-cardcreator'
-include ':simplified-circ-analytics'
 include ':simplified-datepicker'
 include ':simplified-datepicker-demo'
+include ':simplified-documents'
 include ':simplified-downloader-core'
+include ':simplified-feeds-api'
 include ':simplified-files'
 include ':simplified-futures'
 include ':simplified-http-core'
 include ':simplified-json-core'
-include ':simplified-multilibrary'
 include ':simplified-observable'
 include ':simplified-opds-core'
-include ':simplified-prefs'
+include ':simplified-profiles'
+include ':simplified-profiles-api'
+include ':simplified-profiles-controller-api'
+include ':simplified-reader-api'
+include ':simplified-reader-bookmarks'
+include ':simplified-reader-bookmarks-api'
 include ':simplified-rfc3339-core'
 include ':simplified-splash'
 include ':simplified-stack'
@@ -33,38 +46,5 @@ include ':simplified-tests'
 include ':simplified-tests-android'
 include ':simplified-tests-sandbox'
 include ':simplified-theme'
-include ':simplified-volley'
+include ':simplified-threads'
 
-// FIXME: These should be re-enabled once they are working
-// project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
-// project(':simplified-app-openebooks').projectDir = "$rootDir/simplified-app-openebooks" as File
-project(':simplified-accessibility').projectDir = "$rootDir/simplified-accessibility" as File
-project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" as File
-project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
-project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
-project(':simplified-app-vanilla-with-profiles').projectDir = "$rootDir/simplified-app-vanilla-with-profiles" as File
-project(':simplified-books-core').projectDir = "$rootDir/simplified-books-core" as File
-project(':simplified-books-core-ng').projectDir = "$rootDir/simplified-books-core-ng" as File
-project(':simplified-books-covers').projectDir = "$rootDir/simplified-books-covers" as File
-project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as File
-project(':simplified-branding').projectDir = "$rootDir/simplified-branding" as File
-project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
-project(':simplified-circ-analytics').projectDir = "$rootDir/simplified-circ-analytics" as File
-project(':simplified-datepicker').projectDir = "$rootDir/simplified-datepicker" as File
-project(':simplified-datepicker-demo').projectDir = "$rootDir/simplified-datepicker-demo" as File
-project(':simplified-downloader-core').projectDir = "$rootDir/simplified-downloader-core" as File
-project(':simplified-files').projectDir = "$rootDir/simplified-files" as File
-project(':simplified-http-core').projectDir = "$rootDir/simplified-http-core" as File
-project(':simplified-json-core').projectDir = "$rootDir/simplified-json-core" as File
-project(':simplified-multilibrary').projectDir = "$rootDir/simplified-multilibrary" as File
-project(':simplified-observable').projectDir = "$rootDir/simplified-observable" as File
-project(':simplified-opds-core').projectDir = "$rootDir/simplified-opds-core" as File
-project(':simplified-prefs').projectDir = "$rootDir/simplified-prefs" as File
-project(':simplified-rfc3339-core').projectDir = "$rootDir/simplified-rfc3339-core" as File
-project(':simplified-splash').projectDir = "$rootDir/simplified-splash" as File
-project(':simplified-stack').projectDir = "$rootDir/simplified-stack" as File
-project(':simplified-tenprint').projectDir = "$rootDir/simplified-tenprint" as File
-project(':simplified-tests').projectDir = "$rootDir/simplified-tests" as File
-project(':simplified-tests-android').projectDir = "$rootDir/simplified-tests-android" as File
-project(':simplified-tests-sandbox').projectDir = "$rootDir/simplified-tests-sandbox" as File
-project(':simplified-volley').projectDir = "$rootDir/simplified-volley" as File

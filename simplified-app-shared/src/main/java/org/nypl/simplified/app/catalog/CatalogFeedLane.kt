@@ -19,8 +19,6 @@ import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.FadeUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.feeds.FeedEntry
-import org.nypl.simplified.books.feeds.FeedGroup
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger
@@ -66,11 +64,11 @@ class CatalogFeedLane(
    * @param group The group
    */
 
-  fun configureForGroup(group: FeedGroup) {
+  fun configureForGroup(group: org.nypl.simplified.feeds.api.FeedGroup) {
     this.configureView(group)
   }
 
-  private fun configureView(feedGroup: FeedGroup) {
+  private fun configureView(feedGroup: org.nypl.simplified.feeds.api.FeedGroup) {
 
     this.scroller.visibility = View.INVISIBLE
     this.scroller.post { this.scroller.scrollTo(0, 0) }
@@ -90,9 +88,9 @@ class CatalogFeedLane(
     for (index in entries.indices) {
       val entry = entries[index]
       when (entry) {
-        is FeedEntry.FeedEntryCorrupt ->
+        is org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt ->
           this.addViewForFeedEntryCorrupt(coverViews)
-        is FeedEntry.FeedEntryOPDS ->
+        is org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS ->
           this.addViewForFeedEntryOPDS(entry, coverViews)
       }
     }
@@ -130,7 +128,7 @@ class CatalogFeedLane(
 
       val future =
         this.covers.loadThumbnailInto(
-        feedEntry as FeedEntry.FeedEntryOPDS,
+        feedEntry as org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS,
         imageView,
         imageWidth,
         this.imageHeight)
@@ -140,7 +138,7 @@ class CatalogFeedLane(
   }
 
   private fun addViewForFeedEntryOPDS(
-    entry: FeedEntry.FeedEntryOPDS,
+    entry: org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS,
     coverViews: ArrayList<ImageView?>): Unit {
 
     /*

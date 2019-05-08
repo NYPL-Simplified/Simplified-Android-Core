@@ -1,6 +1,6 @@
 package org.nypl.simplified.books.covers
 
-import org.nypl.simplified.books.feeds.FeedEntry
+import org.nypl.simplified.feeds.api.FeedEntry
 
 /**
  * A function to look up badge images for cover.

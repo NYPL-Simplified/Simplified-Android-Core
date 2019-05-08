@@ -23,15 +23,19 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
+import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials;
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
+import org.nypl.simplified.accounts.api.AccountLoginState;
+import org.nypl.simplified.accounts.database.api.AccountType;
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
+import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.app.Simplified;
@@ -45,28 +49,23 @@ import org.nypl.simplified.app.reader.toc.ReaderTOCSelection;
 import org.nypl.simplified.app.reader.toc.ReaderTOCSelectionListenerType;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.accounts.AccountAuthenticationAdobePostActivationCredentials;
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
-import org.nypl.simplified.books.accounts.AccountLoginState;
-import org.nypl.simplified.books.accounts.AccountType;
-import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
-import org.nypl.simplified.books.book_database.BookDatabaseException;
-import org.nypl.simplified.books.book_database.BookFormat;
-import org.nypl.simplified.books.book_database.BookID;
-import org.nypl.simplified.books.controller.ProfilesControllerType;
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
-import org.nypl.simplified.books.profiles.ProfileEvent;
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
-import org.nypl.simplified.books.profiles.ProfilePreferencesChanged;
-import org.nypl.simplified.books.reader.ReaderBookLocation;
-import org.nypl.simplified.books.reader.ReaderBookmark;
-import org.nypl.simplified.books.reader.ReaderColorScheme;
-import org.nypl.simplified.books.reader.ReaderPreferences;
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind;
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarks;
+import org.nypl.simplified.books.api.BookFormat;
+import org.nypl.simplified.books.api.BookID;
+import org.nypl.simplified.books.api.BookLocation;
+import org.nypl.simplified.books.api.Bookmark;
+import org.nypl.simplified.books.api.BookmarkKind;
+import org.nypl.simplified.books.book_database.api.BookDatabaseException;
+import org.nypl.simplified.feeds.api.FeedEntry;
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.profiles.api.ProfileEvent;
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
+import org.nypl.simplified.profiles.api.ProfilePreferencesChanged;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
+import org.nypl.simplified.reader.api.ReaderColorScheme;
+import org.nypl.simplified.reader.api.ReaderPreferences;
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks;
 import org.nypl.simplified.theme.ThemeControl;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
@@ -88,6 +87,7 @@ import static org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.Synthet
 import static org.nypl.simplified.app.utilities.FadeUtilities.DEFAULT_FADE_DURATION;
 import static org.nypl.simplified.app.utilities.FadeUtilities.fadeIn;
 import static org.nypl.simplified.app.utilities.FadeUtilities.fadeOut;
+import static org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 
 /**
  * The main reader activity for reading an EPUB.
@@ -133,7 +133,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   private WebView view_web_view;
   private ReaderReadiumViewerSettings viewer_settings;
   private boolean web_view_resized;
-  private ReaderBookmark current_location;
+  private Bookmark current_location;
   private AccountType current_account;
   private int current_page_index = 0;
   private int current_page_count = 1;
@@ -162,7 +162,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     final Activity from,
     final BookID book_id,
     final File file,
-    final FeedEntryOPDS entry) {
+    final FeedEntry.FeedEntryOPDS entry) {
     Objects.requireNonNull(file);
     final Bundle b = new Bundle();
     b.putSerializable(ReaderActivity.BOOK_ID, book_id);
@@ -525,15 +525,15 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onCurrentPageReceived(final ReaderBookLocation location) {
+  public void onCurrentPageReceived(final BookLocation location) {
     Objects.requireNonNull(location);
     LOG.debug("onCurrentPageReceived: {}", location);
 
-    final ReaderBookmark bookmark =
-      new ReaderBookmark(
+    final Bookmark bookmark =
+      new Bookmark(
         this.feed_entry.getID(),
         location,
-        ReaderBookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
+        BookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
         LocalDateTime.now(),
         this.current_chapter_title,
         currentChapterProgress(),
@@ -560,6 +560,24 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     this.readium_js_api.getCurrentPage(this);
     this.readium_js_api.mediaOverlayIsAvailable(this);
+
+    /*
+     * Publish an analytics event.
+     */
+
+    try {
+      Simplified.getAnalytics()
+        .publishEvent(new AnalyticsEvent.BookClosed(
+          LocalDateTime.now(),
+          this.current_account.loginState().getCredentials(),
+          Simplified.getProfilesController().profileCurrent().id().getUuid(),
+          this.current_account.provider().id(),
+          this.current_account.id().getUuid(),
+          this.feed_entry.getID(),
+          this.feed_entry.getTitle()));
+    } catch (ProfileNoneCurrentException ex) {
+      LOG.error("profile is not current: ", ex);
+    }
 
     final ObservableSubscriptionType<ProfileEvent> sub = this.profile_subscription;
     if (sub != null) {
@@ -831,6 +849,27 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
               page.getSpineItemPageIndex() + 1,
               page.getSpineItemPageCount(),
               default_package.getSpineItem(page.getIDRef()).getTitle())));
+
+        /*
+         * Publish an analytics event.
+         */
+
+        try {
+          Simplified.getAnalytics()
+            .publishEvent(new AnalyticsEvent.BookPageTurned(
+              LocalDateTime.now(),
+              this.current_account.loginState().getCredentials(),
+              Simplified.getProfilesController().profileCurrent().id().getUuid(),
+              this.current_account.provider().id(),
+              this.current_account.id().getUuid(),
+              this.feed_entry.getID(),
+              this.feed_entry.getTitle(),
+              this.current_page_index,
+              this.current_page_count,
+              this.current_chapter_title));
+        } catch (ProfileNoneCurrentException ex) {
+          LOG.error("profile is not current: ", ex);
+        }
       }
 
       /*
@@ -989,12 +1028,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     this.readium_js_api.openContentURL(e.getContentRef(), e.getSourceHref());
   }
 
-  private void onBookmarkSelectionReceived(final ReaderBookmark bookmark) {
+  private void onBookmarkSelectionReceived(final Bookmark bookmark) {
     LOG.debug("onTOCBookmarkSelectionReceived: received bookmark selection: {}", bookmark);
     this.navigateTo(Option.some(bookmark));
   }
 
-  private void navigateTo(final OptionType<ReaderBookmark> location) {
+  private void navigateTo(final OptionType<Bookmark> location) {
     LOG.debug("navigateTo: {}", location);
 
     OptionType<ReaderOpenPageRequestType> page_request = location.map((actual) -> {

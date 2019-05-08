@@ -12,12 +12,12 @@ import android.widget.ListAdapter;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.app.ScreenSizeInformationType;
-import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.covers.BookCoverProviderType;
-import org.nypl.simplified.books.feeds.FeedGroup;
+import org.nypl.simplified.feeds.api.Feed.FeedWithGroups;
+import org.nypl.simplified.feeds.api.FeedGroup;
 
-import static org.nypl.simplified.books.feeds.Feed.FeedWithGroups;
 
 /**
  * A view that displays a catalog feed that contains groups.

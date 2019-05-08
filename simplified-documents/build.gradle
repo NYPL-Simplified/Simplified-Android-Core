@@ -1,0 +1,32 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 27
+  buildToolsVersion "28.0.2"
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+
+description = 'simplified-documents'
+
+dependencies {
+  api project(":simplified-opds-core")
+
+  implementation project(":simplified-json-core")
+  implementation project(":simplified-http-core")
+  implementation project(":simplified-files")
+
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation "com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)"
+  implementation "com.fasterxml.jackson.core:jackson-databind:2.9.5"
+  implementation "org.slf4j:slf4j-api:1.7.25"
+}
+
+repositories {
+  mavenCentral()
+  jcenter()
+}

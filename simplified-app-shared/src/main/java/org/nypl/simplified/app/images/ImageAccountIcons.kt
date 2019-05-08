@@ -9,7 +9,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
 
 import org.nypl.simplified.app.R
-import org.nypl.simplified.books.accounts.AccountProvider
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.slf4j.LoggerFactory
 
 import java.net.URI
@@ -31,7 +31,7 @@ object ImageAccountIcons {
   @JvmStatic
   fun loadAccountLogoIntoView(
     loader: Picasso,
-    account: AccountProvider,
+    account: org.nypl.simplified.accounts.api.AccountProvider,
     iconView: ImageView) {
 
     val request: RequestCreator

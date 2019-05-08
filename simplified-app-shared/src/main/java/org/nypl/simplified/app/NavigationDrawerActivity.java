@@ -32,6 +32,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
@@ -45,13 +46,14 @@ import org.nypl.simplified.app.profiles.ProfileSwitchDialog;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
 import org.nypl.simplified.app.settings.SettingsActivity;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.accounts.AccountProvider;
-import org.nypl.simplified.books.controller.ProfilesControllerType;
-import org.nypl.simplified.books.profiles.ProfileAccountSelectEvent;
-import org.nypl.simplified.books.profiles.ProfileEvent;
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
-import org.nypl.simplified.books.profiles.ProfileNonexistentAccountProviderException;
+import org.nypl.simplified.feeds.api.FeedBooksSelection;
+import org.nypl.simplified.feeds.api.FeedFacetPseudo;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
+import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent;
+import org.nypl.simplified.profiles.api.ProfileEvent;
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
+import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +61,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.nypl.simplified.books.feeds.FeedBooksSelection.BOOKS_FEED_HOLDS;
-import static org.nypl.simplified.books.feeds.FeedBooksSelection.BOOKS_FEED_LOANED;
-import static org.nypl.simplified.books.feeds.FeedFacetPseudo.FacetType.SORT_BY_TITLE;
-import static org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED;
+import static org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled;
 
 /**
  * The type of activities that have a navigation drawer.
@@ -116,7 +115,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
     drawer_items.add(new NavigationDrawerItemSettings(activity));
 
     final ProfilesControllerType profiles = Simplified.getProfilesController();
-    if (profiles.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED) {
+    if (profiles.profileAnonymousEnabled() == AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED) {
       drawer_items.add(new NavigationDrawerItemSwitchProfile(activity));
     }
     return drawer_items.build();
@@ -660,9 +659,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
           new CatalogFeedArgumentsLocalBooks(
             empty_stack,
             this.activity.getResources().getString(R.string.books),
-            SORT_BY_TITLE,
+            FeedFacetPseudo.FacetType.SORT_BY_TITLE,
             no_search,
-            BOOKS_FEED_LOANED);
+            FeedBooksSelection.BOOKS_FEED_LOANED);
         CatalogFeedActivity.Companion.setActivityArguments(bundle, local);
         startActivityWithoutHistory(this.activity, bundle, MainBooksActivity.class);
       }, 500L);
@@ -711,9 +710,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
           new CatalogFeedArgumentsLocalBooks(
             empty_stack,
             this.activity.getResources().getString(R.string.holds),
-            SORT_BY_TITLE,
+            FeedFacetPseudo.FacetType.SORT_BY_TITLE,
             no_search,
-            BOOKS_FEED_HOLDS);
+            FeedBooksSelection.BOOKS_FEED_HOLDS);
         CatalogFeedActivity.Companion.setActivityArguments(bundle, local);
         startActivityWithoutHistory(this.activity, bundle, MainHoldsActivity.class);
       }, 500L);

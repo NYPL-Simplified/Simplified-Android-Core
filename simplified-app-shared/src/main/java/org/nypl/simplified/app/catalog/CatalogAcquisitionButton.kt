@@ -8,17 +8,16 @@ import android.util.TypedValue
 import android.view.ViewGroup
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Some
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountEventLoginStateChanged
-import org.nypl.simplified.books.accounts.AccountLoginState
-import org.nypl.simplified.books.accounts.AccountType
+import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.controller.BooksControllerType
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.core.BookAcquisitionSelection
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
@@ -28,6 +27,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_A
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
 /**

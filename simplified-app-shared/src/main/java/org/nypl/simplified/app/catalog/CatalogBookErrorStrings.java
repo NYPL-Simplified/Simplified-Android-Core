@@ -9,11 +9,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed;
-import org.nypl.simplified.books.exceptions.AccountNotReadyException;
-import org.nypl.simplified.books.exceptions.AccountTooManyActivationsException;
-import org.nypl.simplified.books.exceptions.BookUnsupportedPasshashException;
-import org.nypl.simplified.books.exceptions.BookUnsupportedTypeException;
-import org.nypl.simplified.books.feeds.FeedHTTPTransportException;
+import org.nypl.simplified.books.controller.api.AccountNotReadyException;
+import org.nypl.simplified.books.controller.api.AccountTooManyActivationsException;
+import org.nypl.simplified.books.controller.api.BookUnsupportedPasshashException;
+import org.nypl.simplified.books.controller.api.BookUnsupportedTypeException;
+import org.nypl.simplified.feeds.api.FeedHTTPTransportException;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 
 final class CatalogBookErrorStrings

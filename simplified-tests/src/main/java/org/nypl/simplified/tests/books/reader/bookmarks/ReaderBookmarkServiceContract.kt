@@ -7,34 +7,29 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
-import org.nypl.simplified.books.accounts.AccountBarcode
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.accounts.AccountLoginState
-import org.nypl.simplified.books.accounts.AccountPIN
-import org.nypl.simplified.books.accounts.AccountPreferences
-import org.nypl.simplified.books.accounts.AccountProvider
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.book_database.BookDatabaseEntryType
-import org.nypl.simplified.books.book_database.BookDatabaseType
-import org.nypl.simplified.books.book_database.BookFormat
-import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.profiles.ProfileEvent
-import org.nypl.simplified.books.profiles.ProfileID
-import org.nypl.simplified.books.profiles.ProfileType
-import org.nypl.simplified.books.reader.ReaderBookLocation
-import org.nypl.simplified.books.reader.ReaderBookmark
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountBarcode
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPreferences
+import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.books.api.BookLocation
+import org.nypl.simplified.books.api.Bookmark
+import org.nypl.simplified.books.api.BookmarkKind
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCallsType
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPResultType
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
 import org.nypl.simplified.tests.http.MockingHTTP
@@ -133,7 +128,7 @@ abstract class ReaderBookmarkServiceContract {
       EventLogging.create<AccountEvent>(this.logger, 1)
 
     val books =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
 
     Mockito.`when`(books.books())
       .thenReturn(sortedSetOf())
@@ -152,7 +147,7 @@ abstract class ReaderBookmarkServiceContract {
       AccountPreferences(bookmarkSyncingPermitted = true)
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
 
     Mockito.`when`(account.loginState())
       .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
@@ -173,7 +168,7 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(profile.accounts())
       .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
-      .thenReturn(ProfileID.create(23))
+      .thenReturn(ProfileID.generate())
 
     val profiles =
       Mockito.mock(ProfilesControllerType::class.java)
@@ -270,13 +265,13 @@ abstract class ReaderBookmarkServiceContract {
       EventLogging.create<AccountEvent>(this.logger, 1)
 
     val bookID =
-      BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
+      org.nypl.simplified.books.api.BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
 
     val receivedBookmarks =
-      mutableListOf<ReaderBookmark>()
+      mutableListOf<Bookmark>()
 
     val format =
-      BookFormat.BookFormatEPUB(
+      org.nypl.simplified.books.api.BookFormat.BookFormatEPUB(
         adobeRightsFile = null,
         adobeRights = null,
         file = null,
@@ -291,19 +286,19 @@ abstract class ReaderBookmarkServiceContract {
 
     Mockito.`when`(formatHandle.setBookmarks(Mockito.anyList()))
       .then { input ->
-        val bookmarks: List<ReaderBookmark> = input.arguments[0] as List<ReaderBookmark>
+        val bookmarks: List<Bookmark> = input.arguments[0] as List<Bookmark>
         receivedBookmarks.addAll(bookmarks)
         Unit
       }
 
     val bookEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
 
     Mockito.`when`(bookEntry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java))
       .thenReturn(formatHandle)
 
     val books =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
 
     Mockito.`when`(books.books())
       .thenReturn(sortedSetOf())
@@ -324,7 +319,7 @@ abstract class ReaderBookmarkServiceContract {
       AccountPreferences(bookmarkSyncingPermitted = true)
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
 
     Mockito.`when`(account.loginState())
       .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
@@ -343,7 +338,7 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(profile.accounts())
       .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
-      .thenReturn(ProfileID.create(23))
+      .thenReturn(ProfileID.generate())
     Mockito.`when`(profile.account(fakeAccountID))
       .thenReturn(account)
 
@@ -453,16 +448,16 @@ abstract class ReaderBookmarkServiceContract {
       EventLogging.create<AccountEvent>(this.logger, 1)
 
     val bookID =
-      BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
+      org.nypl.simplified.books.api.BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
 
     val receivedBookmarks =
-      mutableListOf<ReaderBookmark>()
+      mutableListOf<Bookmark>()
 
     val startingBookmarks =
-      listOf(ReaderBookmark(
+      listOf(Bookmark(
         opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-        location = ReaderBookLocation.create(Option.none(), "x"),
-        kind = ReaderBookmarkKind.ReaderBookmarkLastReadLocation,
+        location = BookLocation.create(Option.none(), "x"),
+        kind = BookmarkKind.ReaderBookmarkLastReadLocation,
         time = LocalDateTime.now(),
         chapterTitle = "A Title",
         chapterProgress = 0.5,
@@ -471,7 +466,7 @@ abstract class ReaderBookmarkServiceContract {
         uri = null))
 
     val format =
-      BookFormat.BookFormatEPUB(
+      org.nypl.simplified.books.api.BookFormat.BookFormatEPUB(
         adobeRightsFile = null,
         adobeRights = null,
         file = null,
@@ -486,19 +481,19 @@ abstract class ReaderBookmarkServiceContract {
 
     Mockito.`when`(formatHandle.setBookmarks(Mockito.anyList()))
       .then { input ->
-        val bookmarks: List<ReaderBookmark> = input.arguments[0] as List<ReaderBookmark>
+        val bookmarks: List<Bookmark> = input.arguments[0] as List<Bookmark>
         receivedBookmarks.addAll(bookmarks)
         Unit
       }
 
     val bookEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
 
     Mockito.`when`(bookEntry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java))
       .thenReturn(formatHandle)
 
     val books =
-      Mockito.mock(BookDatabaseType::class.java)
+      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
 
     Mockito.`when`(books.books())
       .thenReturn(sortedSetOf())
@@ -519,7 +514,7 @@ abstract class ReaderBookmarkServiceContract {
       AccountPreferences(bookmarkSyncingPermitted = true)
 
     val account =
-      Mockito.mock(AccountType::class.java)
+      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
 
     Mockito.`when`(account.loginState())
       .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
@@ -538,7 +533,7 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(profile.accounts())
       .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
-      .thenReturn(ProfileID.create(23))
+      .thenReturn(ProfileID.generate())
     Mockito.`when`(profile.account(fakeAccountID))
       .thenReturn(account)
 

@@ -1,6 +1,5 @@
 package org.nypl.simplified.tests.books.accounts;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.io7m.jfunctional.Option;
 
 import org.hamcrest.core.StringContains;
@@ -8,18 +7,16 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.nypl.simplified.books.accounts.AccountProvider;
-import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription;
-import org.nypl.simplified.books.accounts.AccountProviderCollection;
-import org.nypl.simplified.books.accounts.AccountProvidersJSON;
+import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription;
+import org.nypl.simplified.accounts.database.AccountProviderCollection;
+import org.nypl.simplified.accounts.database.AccountProvidersJSON;
 import org.nypl.simplified.json.core.JSONParseException;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.Optional;
 
 public abstract class AccountProvidersJSONContract {
 

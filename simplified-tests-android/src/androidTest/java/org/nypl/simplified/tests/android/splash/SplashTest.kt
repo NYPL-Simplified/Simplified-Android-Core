@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.android.splash
 
+
 import android.app.KeyguardManager
 import android.content.Context
 import android.graphics.Color
@@ -23,13 +24,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.eula.EULAType
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.splash.R
 import org.nypl.simplified.splash.SplashEULAFragment
 import org.nypl.simplified.splash.SplashEvent
@@ -114,9 +115,9 @@ class SplashTest {
       Mockito.mock(ProfilesControllerType::class.java)
 
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(23))
+      .thenReturn(AccountID.generate())
     Mockito.`when`(profiles.profileAnonymousEnabled())
-      .thenReturn(ANONYMOUS_PROFILE_ENABLED)
+      .thenReturn(ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED)
     Mockito.`when`(profiles.profileAccountCurrent())
       .thenReturn(account)
 
@@ -155,9 +156,9 @@ class SplashTest {
       Mockito.mock(ProfilesControllerType::class.java)
 
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(23))
+      .thenReturn(AccountID.generate())
     Mockito.`when`(profiles.profileAnonymousEnabled())
-      .thenReturn(ANONYMOUS_PROFILE_ENABLED)
+      .thenReturn(ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED)
     Mockito.`when`(profiles.profileAccountCurrent())
       .thenReturn(account)
 
@@ -193,9 +194,9 @@ class SplashTest {
       Mockito.mock(ProfilesControllerType::class.java)
 
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(23))
+      .thenReturn(AccountID.generate())
     Mockito.`when`(profiles.profileAnonymousEnabled())
-      .thenReturn(ANONYMOUS_PROFILE_ENABLED)
+      .thenReturn(ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED)
     Mockito.`when`(profiles.profileAccountCurrent())
       .thenReturn(account)
 
@@ -226,9 +227,9 @@ class SplashTest {
       Mockito.mock(ProfilesControllerType::class.java)
 
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(23))
+      .thenReturn(AccountID.generate())
     Mockito.`when`(profiles.profileAnonymousEnabled())
-      .thenReturn(ANONYMOUS_PROFILE_ENABLED)
+      .thenReturn(ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED)
     Mockito.`when`(profiles.profileAccountCurrent())
       .thenReturn(account)
 
@@ -242,7 +243,7 @@ class SplashTest {
       when (event) {
         is SplashEvent.SplashImageEvent.SplashImageTimedOut -> Unit
         is SplashEvent.SplashEULAEvent.SplashEULAAgreed -> Unit
-        is SplashEvent.SplashEULAEvent.SplashEULADisagreed -> {
+        is SplashEULADisagreed -> {
           testFinishLatch.countDown()
           testEvent = event
         }

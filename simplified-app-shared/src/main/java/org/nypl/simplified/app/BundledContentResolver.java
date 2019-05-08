@@ -4,8 +4,8 @@ import android.content.res.AssetManager;
 
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.books.bundled_content.BundledContentResolverType;
-import org.nypl.simplified.books.bundled_content.BundledURIs;
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType;
+import org.nypl.simplified.books.bundled.api.BundledURIs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,11 +9,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.controller.ProfilesControllerType;
-import org.nypl.simplified.books.idle_timer.ProfileIdleTimeOutSoon;
-import org.nypl.simplified.books.idle_timer.ProfileIdleTimedOut;
-import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
+import org.nypl.simplified.profiles.api.ProfileEvent;
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon;
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

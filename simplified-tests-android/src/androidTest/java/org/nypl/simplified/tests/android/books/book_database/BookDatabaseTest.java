@@ -5,10 +5,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.nypl.simplified.tests.books.book_database.BookDatabaseContract;
 
 @RunWith(AndroidJUnit4.class)

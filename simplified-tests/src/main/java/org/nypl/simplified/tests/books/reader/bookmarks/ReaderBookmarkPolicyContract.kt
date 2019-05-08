@@ -4,17 +4,14 @@ import com.io7m.jfunctional.Option
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.reader.ReaderBookLocation
-import org.nypl.simplified.books.reader.ReaderBookmark
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
+import org.nypl.simplified.books.api.BookLocation
+import org.nypl.simplified.books.api.Bookmark
+import org.nypl.simplified.books.api.BookmarkKind
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicy
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyAccountState
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.BookmarkCreated
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Remote.BookmarkReceived
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Remote.SyncingEnabled
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Command
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Event
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyState
 import java.util.Random
 import java.util.UUID
@@ -22,14 +19,14 @@ import java.util.UUID
 open class ReaderBookmarkPolicyContract {
 
   val accountID =
-    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+    org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
   
   val bookmark0 =
-    ReaderBookmark(
+    Bookmark(
       opdsId = "opdsid",
-      location = ReaderBookLocation.create(Option.none(), "id"),
+      location = BookLocation.create(Option.none(), "id"),
       time = LocalDateTime.now(),
-      kind = ReaderBookmarkKind.ReaderBookmarkExplicit,
+      kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
       chapterProgress = 0.5,
       bookProgress = 0.25,
@@ -37,11 +34,11 @@ open class ReaderBookmarkPolicyContract {
       deviceID = "urn:uuid:28cad755-2a0e-48bc-b5c8-1d43d57ac3e9")
 
   val bookmark0Idle =
-    ReaderBookmark(
+    Bookmark(
       opdsId = "opdsid",
-      location = ReaderBookLocation.create(Option.none(), "id"),
+      location = BookLocation.create(Option.none(), "id"),
       time = LocalDateTime.now(),
-      kind = ReaderBookmarkKind.ReaderBookmarkLastReadLocation,
+      kind = BookmarkKind.ReaderBookmarkLastReadLocation,
       chapterTitle = "A Title",
       chapterProgress = 0.5,
       bookProgress = 0.25,
@@ -49,11 +46,11 @@ open class ReaderBookmarkPolicyContract {
       deviceID = "urn:uuid:28cad755-2a0e-48bc-b5c8-1d43d57ac3e9")
 
   val bookmark1 =
-    ReaderBookmark(
+    Bookmark(
       opdsId = "opdsid-x",
-      location = ReaderBookLocation.create(Option.none(), "id"),
+      location = BookLocation.create(Option.none(), "id"),
       time = LocalDateTime.now(),
-      kind = ReaderBookmarkKind.ReaderBookmarkExplicit,
+      kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
       chapterProgress = 0.5,
       bookProgress = 0.25,
@@ -80,7 +77,7 @@ open class ReaderBookmarkPolicyContract {
 
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
-        ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0)),
+        ReaderBookmarkPolicy.evaluateInput(Event.Local.BookmarkCreated(accountID, bookmark0)),
         state)
 
     Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
@@ -108,7 +105,7 @@ open class ReaderBookmarkPolicyContract {
 
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
-        ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0)),
+        ReaderBookmarkPolicy.evaluateInput(Event.Local.BookmarkCreated(accountID, bookmark0)),
         state)
 
     Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
@@ -136,7 +133,7 @@ open class ReaderBookmarkPolicyContract {
 
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
-        ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0)),
+        ReaderBookmarkPolicy.evaluateInput(Event.Local.BookmarkCreated(accountID, bookmark0)),
         state)
 
     Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
@@ -164,7 +161,7 @@ open class ReaderBookmarkPolicyContract {
 
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
-        ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0)),
+        ReaderBookmarkPolicy.evaluateInput(Event.Local.BookmarkCreated(accountID, bookmark0)),
         state)
 
     Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
@@ -194,7 +191,7 @@ open class ReaderBookmarkPolicyContract {
 
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
-        ReaderBookmarkPolicy.evaluateInput(BookmarkReceived(accountID, bookmark0)),
+        ReaderBookmarkPolicy.evaluateInput(Event.Remote.BookmarkReceived(accountID, bookmark0)),
         state)
 
     Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
@@ -218,13 +215,13 @@ open class ReaderBookmarkPolicyContract {
 
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
-        ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0))
-          .flatMap { ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0)) },
+        ReaderBookmarkPolicy.evaluateInput(Event.Local.BookmarkCreated(accountID, bookmark0))
+          .flatMap { ReaderBookmarkPolicy.evaluateInput(Event.Local.BookmarkCreated(accountID, bookmark0)) },
         state)
 
     Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
     Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
-    Assert.assertEquals(Event.LocalBookmarkAlreadyExists(accountID, bookmark0), result.outputs[1])
+    Assert.assertEquals(ReaderBookmarkPolicyOutput.Event.LocalBookmarkAlreadyExists(accountID, bookmark0), result.outputs[1])
   }
 
   /**
@@ -242,8 +239,8 @@ open class ReaderBookmarkPolicyContract {
 
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
-        ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0))
-          .flatMap { ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0Idle)) },
+        ReaderBookmarkPolicy.evaluateInput(Event.Local.BookmarkCreated(accountID, bookmark0))
+          .flatMap { ReaderBookmarkPolicy.evaluateInput(Event.Local.BookmarkCreated(accountID, bookmark0Idle)) },
         state)
 
     Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
@@ -271,7 +268,7 @@ open class ReaderBookmarkPolicyContract {
 
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
-        ReaderBookmarkPolicy.evaluateInput(SyncingEnabled(accountID, true)),
+        ReaderBookmarkPolicy.evaluateInput(Event.Remote.SyncingEnabled(accountID, true)),
         state)
 
     Assert.assertEquals(Command.RemotelyFetchBookmarks(accountID), result.outputs[0])

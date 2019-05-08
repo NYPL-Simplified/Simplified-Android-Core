@@ -5,15 +5,11 @@ import com.io7m.jfunctional.Option
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
-import org.nypl.simplified.books.accounts.AccountID
-import org.nypl.simplified.books.book_database.BookDatabase
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.book_database.BookIDs
-import org.nypl.simplified.books.reader.ReaderBookLocation
-import org.nypl.simplified.books.reader.ReaderBookmark
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind.*
+import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.api.BookLocation
+import org.nypl.simplified.books.api.Bookmark
+import org.nypl.simplified.books.api.BookmarkKind
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -31,7 +27,7 @@ abstract class BookDatabaseEPUBContract {
     LoggerFactory.getLogger(BookDatabaseEPUBContract::class.java)
 
   private val accountID =
-    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+    org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
   
   protected abstract fun context(): Context
 
@@ -48,7 +44,7 @@ abstract class BookDatabaseEPUBContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, accountID, directory)
+      org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookIDs.newFromText("abcd")
@@ -65,12 +61,12 @@ abstract class BookDatabaseEPUBContract {
       Assert.assertEquals(null, formatHandle.format.lastReadLocation)
 
       val bookmark =
-        ReaderBookmark(
+        Bookmark(
           opdsId = "abcd",
-          location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
+          location = BookLocation.create(Option.some("xyz"), "abc"),
           time = LocalDateTime.now(),
           chapterTitle = "A title",
-          kind = ReaderBookmarkLastReadLocation,
+          kind = BookmarkKind.ReaderBookmarkLastReadLocation,
           chapterProgress = 0.5,
           bookProgress = 0.25,
           uri = null,
@@ -96,18 +92,18 @@ abstract class BookDatabaseEPUBContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, accountID, directory)
+      org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookIDs.newFromText("abcd")
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val bookmark0 =
-      ReaderBookmark(
+      Bookmark(
         opdsId = "abcd",
-        location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
+        location = BookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
-        kind = ReaderBookmarkExplicit,
+        kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.5,
         bookProgress = 0.25,
@@ -115,11 +111,11 @@ abstract class BookDatabaseEPUBContract {
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
     val bookmark1 =
-      ReaderBookmark(
+      Bookmark(
         opdsId = "abcd",
-        location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
+        location = BookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
-        kind = ReaderBookmarkExplicit,
+        kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.6,
         bookProgress = 0.25,
@@ -127,11 +123,11 @@ abstract class BookDatabaseEPUBContract {
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
     val bookmark2 =
-      ReaderBookmark(
+      Bookmark(
         opdsId = "abcd",
-        location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
+        location = BookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
-        kind = ReaderBookmarkExplicit,
+        kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.7,
         bookProgress = 0.25,
@@ -149,7 +145,7 @@ abstract class BookDatabaseEPUBContract {
         "Format is present", formatHandle != null)
 
       formatHandle!!
-      Assert.assertEquals(listOf<ReaderBookmark>(), formatHandle.format.bookmarks)
+      Assert.assertEquals(listOf<Bookmark>(), formatHandle.format.bookmarks)
 
       formatHandle.setBookmarks(bookmarks0)
       Assert.assertEquals(bookmarks0, formatHandle.format.bookmarks)
@@ -159,7 +155,7 @@ abstract class BookDatabaseEPUBContract {
     }
 
     val database1 =
-      BookDatabase.open(context(), parser, serializer, accountID, directory)
+      org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
     val databaseEntry1 =
       database1.createOrUpdate(bookID, feedEntry)
 

@@ -8,7 +8,7 @@ import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.helpstack.HelpstackType
-import org.nypl.simplified.books.document_store.DocumentStoreType
+import org.nypl.simplified.documents.store.DocumentStoreType
 
 /**
  * The main activity used to display the settings section.
@@ -25,7 +25,7 @@ class SettingsActivity : NavigationDrawerActivity(), SettingsFragmentListenerTyp
   override fun helpstack(): OptionType<HelpstackType> =
     Simplified.getHelpStack()
 
-  override fun documents(): DocumentStoreType =
+  override fun documents(): org.nypl.simplified.documents.store.DocumentStoreType =
     Simplified.getDocumentStore()
 
   override fun navigationDrawerShouldShowIndicator(): Boolean =

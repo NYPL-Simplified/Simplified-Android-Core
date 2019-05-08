@@ -1,7 +1,7 @@
 package org.nypl.simplified.app.reader
 
 import org.nypl.simplified.app.ScreenSizeInformationType
-import org.nypl.simplified.books.controller.ProfilesControllerType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 
 /**
  * The listener interface that activities hosting [ReaderSettingsDialog] must implement.

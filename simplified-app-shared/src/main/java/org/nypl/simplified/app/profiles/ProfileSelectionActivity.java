@@ -3,7 +3,6 @@ package org.nypl.simplified.app.profiles;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,16 +20,22 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.nypl.simplified.analytics.api.Analytics;
+import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.controller.ProfilesControllerType;
-import org.nypl.simplified.books.profiles.ProfileEvent;
-import org.nypl.simplified.books.profiles.ProfileReadableType;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
+import org.nypl.simplified.profiles.api.ProfileEvent;
+import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
+import org.nypl.simplified.profiles.api.ProfilePreferences;
+import org.nypl.simplified.profiles.api.ProfileReadableType;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +85,26 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
     profiles.profileIdleTimer().stop();
 
     this.profile_event_subscription = profiles.profileEvents().subscribe(event -> reloadProfiles());
+
+    /*
+     * If the profile selection screen has been reached and a profile is active, then
+     * assume that we've gotten here because a profile has been logged out.
+     */
+
+    if (profiles.profileAnyIsCurrent()) {
+      try {
+        final ProfileReadableType profile = profiles.profileCurrent();
+        Simplified.getAnalytics().publishEvent(
+          new AnalyticsEvent.ProfileLoggedOut(
+            LocalDateTime.now(),
+            null,
+            profile.id().getUuid(),
+            profile.displayName()
+          ));
+      } catch (ProfileNoneCurrentException e) {
+        LOG.error("profile is not current: ", e);
+      }
+    }
   }
 
   @Override
@@ -98,21 +123,22 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
     LOG.debug("selected profile: {} ({})", profile.id(), profile.displayName());
     final ProfilesControllerType profiles = Simplified.getProfilesController();
 
-    final String gender = getWithDefault(profile.preferences().gender(), "");
-    final String birthday = getWithDefault(
-      profile.preferences().dateOfBirth().map((d) -> d.toString()),
-      "");
+    final ProfilePreferences preferences =
+      profile.preferences();
+    final String gender =
+      getWithDefault(preferences.gender(), null);
+    final String birthday =
+      getWithDefault(preferences.dateOfBirth().map(LocalDate::toString), null);
 
-    final String message = "profile_selected," + profile.id().id()
-      + "," + profile.displayName()
-      + "," + gender
-      + "," + birthday;
-    Simplified.getAnalyticsController().logToAnalytics(message);
-
-    if (Simplified.getNetworkConnectivity().isNetworkAvailable()) {
-      String deviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-      Simplified.getAnalyticsController().attemptToPushAnalytics(deviceId);
-    }
+    Simplified.getAnalytics()
+      .publishEvent(new AnalyticsEvent.ProfileLoggedIn(
+        LocalDateTime.now(),
+        null,
+        profile.id().getUuid(),
+        profile.displayName(),
+        gender,
+        birthday
+      ));
 
     FluentFuture.from(
       profiles.profileSelect(profile.id()))

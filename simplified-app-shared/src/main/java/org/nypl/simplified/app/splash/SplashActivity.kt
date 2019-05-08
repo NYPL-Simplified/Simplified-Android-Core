@@ -10,9 +10,9 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.catalog.MainCatalogActivity
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity
-import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.controller.ProfilesControllerType
-import org.nypl.simplified.books.eula.EULAType
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.branding.BrandingSplashServiceType
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableSubscriptionType
