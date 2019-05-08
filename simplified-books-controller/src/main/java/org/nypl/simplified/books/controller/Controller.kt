@@ -45,6 +45,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
@@ -152,7 +153,12 @@ class Controller private constructor(
     gender: String,
     date: LocalDate): FluentFuture<ProfileCreationEvent> {
     return FluentFuture.from(this.taskExecutor.submit(ProfileCreationTask(
-      this.profiles, this.profileEvents, accountProvider, displayName, gender, date)))
+      this.profiles,
+      this.profileEvents,
+      accountProvider,
+      displayName,
+      gender,
+      ProfileDateOfBirth(date = date, isSynthesized = false))))
   }
 
   override fun profileSelect(id: ProfileID): FluentFuture<Unit> {
@@ -243,25 +249,6 @@ class Controller private constructor(
         ProfileAccountLogoutTask(this.bookRegistry, profile, account).call()
         Unit.unit()
       }))
-  }
-
-  @Throws(ProfileNoneCurrentException::class)
-  override fun profileAccountCurrentCatalogRootURI(): URI {
-    val profile = this.profiles.currentProfileUnsafe()
-    val account = profile.accountCurrent()
-
-    return profile.preferences().dateOfBirth().accept(object : OptionVisitorType<LocalDate, URI> {
-      override fun none(none: None<LocalDate>): URI {
-        return account.provider().catalogURI()
-      }
-
-      override fun some(some: Some<LocalDate>): URI {
-        val now = LocalDate.now()
-        val then = some.get()
-        val age = now.year - then.year
-        return account.provider().catalogURIForAge(age)
-      }
-    })
   }
 
   @Throws(ProfileNoneCurrentException::class)

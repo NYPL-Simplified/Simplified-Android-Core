@@ -4,8 +4,14 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jnull.NullCheck
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.feeds.api.FeedSearch.FeedSearchOpen1_1
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.*
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_GENERIC
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import java.net.URI
@@ -33,7 +39,7 @@ sealed class Feed {
    * @return The search URI for the feed
    */
 
-  abstract val feedSearch: FeedSearchType?
+  abstract val feedSearch: FeedSearch?
 
   /**
    * @return The title of the feed
@@ -61,7 +67,7 @@ sealed class Feed {
 
   data class FeedWithoutGroups internal constructor(
     override val feedID: String,
-    override val feedSearch: FeedSearchType?,
+    override val feedSearch: FeedSearch?,
     override val feedTitle: String,
     override val feedUpdated: Calendar,
     override val feedURI: URI,
@@ -97,16 +103,16 @@ sealed class Feed {
 
     val feedNext: URI?,
 
-    private val facetsByGroupData: MutableMap<String, MutableList<FeedFacetType>>,
-    private val facetsOrderData: MutableList<FeedFacetType>)
+    private val facetsByGroupData: MutableMap<String, MutableList<FeedFacet>>,
+    private val facetsOrderData: MutableList<FeedFacet>)
     : Feed() {
 
     private val entriesData: MutableMap<BookID, FeedEntry> = mutableMapOf()
     private val entriesOrderData: MutableList<BookID> = mutableListOf()
 
-    val facetsByGroup: Map<String, List<FeedFacetType>> =
+    val facetsByGroup: Map<String, List<FeedFacet>> =
       Collections.unmodifiableMap(this.facetsByGroupData)
-    val facetsOrder: List<FeedFacetType> =
+    val facetsOrder: List<FeedFacet> =
       Collections.unmodifiableList(this.facetsOrderData)
     val entriesByID: Map<BookID, FeedEntry> =
       Collections.unmodifiableMap(this.entriesData)
@@ -150,7 +156,7 @@ sealed class Feed {
 
   data class FeedWithGroups internal constructor(
     override val feedID: String,
-    override val feedSearch: FeedSearchType?,
+    override val feedSearch: FeedSearch?,
     override val feedTitle: String,
     override val feedUpdated: Calendar,
     override val feedURI: URI,
@@ -185,15 +191,15 @@ sealed class Feed {
 
     val feedNext: URI?,
 
-    private val facetsByGroupData: MutableMap<String, MutableList<FeedFacetType>>,
-    private val facetsOrderData: MutableList<FeedFacetType>,
+    private val facetsByGroupData: MutableMap<String, MutableList<FeedFacet>>,
+    private val facetsOrderData: MutableList<FeedFacet>,
     private val feedGroupsData: MutableMap<String, FeedGroup>,
     private val feedGroupsOrderData: MutableList<String>)
     : Feed() {
 
-    val facetsByGroup: Map<String, List<FeedFacetType>> =
+    val facetsByGroup: Map<String, List<FeedFacet>> =
       Collections.unmodifiableMap(this.facetsByGroupData)
-    val facetsOrder: List<FeedFacetType> =
+    val facetsOrder: List<FeedFacet> =
       Collections.unmodifiableList(this.facetsOrderData)
     val feedGroupsByID: Map<String, FeedGroup> =
       Collections.unmodifiableMap(this.feedGroupsData)
@@ -239,7 +245,7 @@ sealed class Feed {
 
     fun empty(
       feedID: String,
-      feedSearch: FeedSearchType?,
+      feedSearch: FeedSearch?,
       feedTitle: String,
       feedURI: URI): FeedWithoutGroups {
 
@@ -367,22 +373,22 @@ sealed class Feed {
         feedGroupsOrderData = feed.feedGroupsOrder)
     }
 
-    private fun constructFacetsOrdered(f: OPDSAcquisitionFeed): MutableList<FeedFacetType> {
-      val facetsOrder = ArrayList<FeedFacetType>(4)
+    private fun constructFacetsOrdered(f: OPDSAcquisitionFeed): MutableList<FeedFacet> {
+      val facetsOrder = ArrayList<FeedFacet>(4)
       for (ff in f.feedFacetsOrder) {
-        facetsOrder.add(FeedFacetOPDS(NullCheck.notNull(ff)))
+        facetsOrder.add(FeedFacet.FeedFacetOPDS(NullCheck.notNull(ff)))
       }
       return facetsOrder
     }
 
-    private fun constructFacetGroups(feed: OPDSAcquisitionFeed): MutableMap<String, MutableList<FeedFacetType>> {
-      val facetsByGroup = HashMap<String, MutableList<FeedFacetType>>(4)
+    private fun constructFacetGroups(feed: OPDSAcquisitionFeed): MutableMap<String, MutableList<FeedFacet>> {
+      val facetsByGroup = HashMap<String, MutableList<FeedFacet>>(4)
       val fMap = feed.feedFacetsByGroup
       for (k in fMap.keys) {
         val fs = fMap[k]!!
-        val rs = ArrayList<FeedFacetType>(4)
+        val rs = ArrayList<FeedFacet>(4)
         for (ff in fs) {
-          rs.add(FeedFacetOPDS(NullCheck.notNull(ff)))
+          rs.add(FeedFacet.FeedFacetOPDS(NullCheck.notNull(ff)))
         }
         facetsByGroup[k] = rs
       }

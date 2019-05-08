@@ -28,7 +28,7 @@ public abstract class ProfilePreferences {
    * @return The date of birth of the reader (if one has been explicitly specified)
    */
 
-  public abstract OptionType<LocalDate> dateOfBirth();
+  public abstract OptionType<ProfileDateOfBirth> dateOfBirth();
 
   /**
    * @return The current value as a mutable builder
@@ -88,7 +88,7 @@ public abstract class ProfilePreferences {
      */
 
     public abstract Builder setDateOfBirth(
-      OptionType<LocalDate> date);
+      OptionType<ProfileDateOfBirth> date);
 
     /**
      * @param date The date
@@ -96,7 +96,7 @@ public abstract class ProfilePreferences {
      * @see #dateOfBirth()
      */
 
-    public final Builder setDateOfBirth(final LocalDate date) {
+    public final Builder setDateOfBirth(final ProfileDateOfBirth date) {
       return setDateOfBirth(Option.some(date));
     }
 

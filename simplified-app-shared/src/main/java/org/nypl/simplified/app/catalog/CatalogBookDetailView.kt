@@ -31,6 +31,7 @@ import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
+import org.nypl.simplified.app.catalog.CatalogFeedArguments.*
 import org.nypl.simplified.app.login.LoginDialog
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
@@ -746,15 +747,15 @@ class CatalogBookDetailView(
     val relatedBookListener = OnClickListener {
       if (relatedBookLink is Some<URI>) {
         val empty =
-          ImmutableStack.empty<CatalogFeedArgumentsType>()
+          ImmutableStack.empty<CatalogFeedArguments>()
 
         val remoteArgs =
           CatalogFeedArgumentsRemote(
-            false,
-            empty,
-            "Related Books",
-            relatedBookLink.get(),
-            false)
+            title = "Related Books",
+            upStack = empty,
+            drawerShouldOpen = false,
+            feedURI = relatedBookLink.get(),
+            isSearchResults = false)
 
         val b = Bundle()
         CatalogFeedActivity.setActivityArguments(b, remoteArgs)

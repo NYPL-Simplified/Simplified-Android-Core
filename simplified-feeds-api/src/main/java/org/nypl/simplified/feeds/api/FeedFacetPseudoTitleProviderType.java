@@ -17,5 +17,5 @@ public interface FeedFacetPseudoTitleProviderType
    */
 
   String getTitle(
-    FeedFacetPseudo.FacetType t);
+    FeedFacet.FeedFacetPseudo.FacetType t);
 }

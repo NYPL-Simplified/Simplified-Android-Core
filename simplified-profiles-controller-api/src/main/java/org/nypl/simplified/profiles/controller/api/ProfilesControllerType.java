@@ -192,19 +192,6 @@ public interface ProfilesControllerType {
   FluentFuture<Unit> profileAccountLogout(AccountID account);
 
   /**
-   * Determine the root URI of the catalog based on the current account of the current profile,
-   * and any age-related settings in the current profile. For example, some accounts require different
-   * root catalog URIs based on whether or not the reader is over 13.
-   *
-   * @return The calculated catalog root URI
-   * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
-   * @see #profileSelect(ProfileID)
-   * @see #profileAnonymousEnabled()
-   */
-
-  URI profileAccountCurrentCatalogRootURI() throws ProfileNoneCurrentException;
-
-  /**
    * Update preferences for the current profile.
    *
    * @param preferences The new preferences

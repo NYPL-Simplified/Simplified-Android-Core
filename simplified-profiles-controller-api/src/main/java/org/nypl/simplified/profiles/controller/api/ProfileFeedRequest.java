@@ -6,10 +6,11 @@ import com.io7m.jfunctional.OptionType;
 
 import org.joda.time.DateTime;
 import org.nypl.simplified.feeds.api.FeedBooksSelection;
-import org.nypl.simplified.feeds.api.FeedFacetPseudo;
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType;
 
 import java.net.URI;
+
+import static org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType;
 
 /**
  * The type of feed requests.
@@ -26,7 +27,7 @@ public abstract class ProfileFeedRequest {
 
   public abstract String title();
 
-  public abstract FeedFacetPseudo.FacetType facetActive();
+  public abstract FacetType facetActive();
 
   public abstract String facetGroup();
 
@@ -47,7 +48,7 @@ public abstract class ProfileFeedRequest {
 
     public abstract Builder setTitle(String x);
 
-    public abstract Builder setFacetActive(FeedFacetPseudo.FacetType x);
+    public abstract Builder setFacetActive(FacetType x);
 
     public abstract Builder setFacetGroup(String x);
 
@@ -72,7 +73,7 @@ public abstract class ProfileFeedRequest {
     b.setId(uri.toString());
     b.setUpdated(DateTime.now());
     b.setTitle(title);
-    b.setFacetActive(FeedFacetPseudo.FacetType.SORT_BY_TITLE);
+    b.setFacetActive(FacetType.SORT_BY_TITLE);
     b.setFacetGroup(facet_group);
     b.setFacetTitleProvider(title_provider);
     b.setSearch(Option.none());

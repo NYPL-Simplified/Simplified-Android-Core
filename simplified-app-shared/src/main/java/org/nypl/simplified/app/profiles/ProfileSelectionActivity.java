@@ -128,7 +128,8 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
     final String gender =
       getWithDefault(preferences.gender(), null);
     final String birthday =
-      getWithDefault(preferences.dateOfBirth().map(LocalDate::toString), null);
+      getWithDefault(preferences.dateOfBirth()
+        .map(date -> date.component1().toString()), null);
 
     Simplified.getAnalytics()
       .publishEvent(new AnalyticsEvent.ProfileLoggedIn(

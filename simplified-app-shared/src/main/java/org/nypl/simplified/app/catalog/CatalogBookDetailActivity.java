@@ -61,11 +61,11 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
   public static void setActivityArguments(
     final Bundle b,
     final boolean drawer_open,
-    final ImmutableStack<CatalogFeedArgumentsType> up_stack,
+    final ImmutableStack<CatalogFeedArguments> up_stack,
     final FeedEntryOPDS e) {
     NullCheck.notNull(b);
     NavigationDrawerActivity.setActivityArguments(b, drawer_open);
-    CatalogActivity.setActivityArguments(b, up_stack);
+    CatalogActivity.setActivityArguments(b, drawer_open);
     b.putSerializable(CATALOG_BOOK_DETAIL_FEED_ENTRY_ID, NullCheck.notNull(e));
   }
 
@@ -79,7 +79,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
 
   public static void startNewActivity(
     final Activity from,
-    final ImmutableStack<CatalogFeedArgumentsType> up_stack,
+    final ImmutableStack<CatalogFeedArguments> up_stack,
     final FeedEntryOPDS e) {
     final Bundle b = new Bundle();
     setActivityArguments(b, false, up_stack, e);

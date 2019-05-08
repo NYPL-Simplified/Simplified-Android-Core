@@ -6,8 +6,9 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.feeds.api.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType;
+
+import static org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType;
 
 
 /**

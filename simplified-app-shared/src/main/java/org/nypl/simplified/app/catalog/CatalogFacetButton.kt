@@ -3,7 +3,7 @@ package org.nypl.simplified.app.catalog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import com.google.common.base.Preconditions
-import org.nypl.simplified.feeds.api.FeedFacetType
+import org.nypl.simplified.feeds.api.FeedFacet
 import java.util.ArrayList
 import java.util.Objects
 
@@ -14,7 +14,7 @@ import java.util.Objects
 class CatalogFacetButton(
   val activity: AppCompatActivity,
   private val groupName: String,
-  val group: ArrayList<FeedFacetType>,
+  val group: ArrayList<FeedFacet>,
   val listener: CatalogFacetSelectionListenerType) 
   : AppCompatButton(activity) {
 
@@ -24,14 +24,14 @@ class CatalogFacetButton(
 
     var active_maybe = Objects.requireNonNull(group[0])
     for (f in group) {
-      if (f.facetIsActive()) {
+      if (f.isActive) {
         active_maybe = Objects.requireNonNull(f)
         break
       }
     }
 
     val active = Objects.requireNonNull(active_maybe)
-    this.text = active.facetGetTitle()
+    this.text = active.title
     this.setOnClickListener { view ->
       val fm = activity.fragmentManager
       val d = CatalogFacetDialog.newDialog(groupName, group)
