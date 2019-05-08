@@ -699,14 +699,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private fun ageGateIsPresent(): Boolean =
     this.account.provider().hasAgeGate()
 
-  private fun ageGateIsSatisfied(): Boolean {
-    val dateOfBirthOpt = this.profile.preferences().dateOfBirth()
-    return if (dateOfBirthOpt is Some<ProfileDateOfBirth>) {
-      dateOfBirthOpt.get().yearsOld(LocalDate.now()) >= 13
-    } else {
-      false
-    }
-  }
+  private fun ageGateIsSatisfied(): Boolean =
+    this.profile.preferences().dateOfBirth() is Some<ProfileDateOfBirth>
 
   /**
    * Remove any current views and show the age gate.
