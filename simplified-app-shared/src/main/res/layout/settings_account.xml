@@ -156,14 +156,16 @@
           </TableRow>
         </TableLayout>
 
-        <CheckBox android:id="@+id/age13_checkbox"
+        <CheckBox
+          android:id="@+id/age13_checkbox"
           android:layout_width="wrap_content"
           android:layout_height="0dp"
           android:layout_gravity="center_vertical"
           android:layout_weight="1"
           android:checked="false"
           android:text="@string/age_verification_13_checkbox"
-          android:textAppearance="?android:attr/textAppearanceListItem" />
+          android:textAppearance="?android:attr/textAppearanceListItem"
+          tools:visibility="gone" />
 
         <LinearLayout
           android:id="@+id/settings_action_layout"

@@ -61,9 +61,9 @@ import java.net.URI
 
 class SettingsAccountActivity : NavigationDrawerActivity() {
 
-
   private val logger = LoggerFactory.getLogger(SettingsAccountActivity::class.java)
 
+  private lateinit var ageCheckbox: CheckBox
   private lateinit var accountNameText: TextView
   private lateinit var accountSubtitleText: TextView
   private lateinit var accountIcon: ImageView
@@ -189,6 +189,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.findViewById(R.id.support_center)
     this.eulaCheckbox =
       this.findViewById(R.id.eula_checkbox)
+    this.ageCheckbox =
+      this.findViewById(R.id.age13_checkbox)
     this.signup =
       this.findViewById(R.id.settings_signup)
     this.privacy =
@@ -353,6 +355,13 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     } else {
       this.logger.debug("EULA: unavailable")
     }
+
+    /*
+     * Don't show the Age 13 checkbox. We're not prepared to deal with
+     * age gating here yet.
+     */
+
+    this.ageCheckbox.visibility = View.GONE
 
     /*
      * Configure the syncing switch.
