@@ -68,8 +68,8 @@ class CirculationAnalyticsSystem(
         Option.none()
       }
 
-    val result = this.configuration.http.post(
-      httpAuth, targetURI, ByteArray(0), "application/octet-stream")
+    val result =
+      this.configuration.http.get(httpAuth, targetURI, 0L)
 
     return result.match<Unit, Exception>({ error ->
       HTTPProblemReportLogging.logError(
