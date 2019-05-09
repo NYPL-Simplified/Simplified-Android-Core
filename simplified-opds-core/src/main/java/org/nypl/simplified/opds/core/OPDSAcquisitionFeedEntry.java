@@ -20,7 +20,6 @@ import java.util.Set;
  * The type of entries in acquisition feeds.
  */
 
-@SuppressWarnings("synthetic-access")
 public final class OPDSAcquisitionFeedEntry implements Serializable
 {
   private static final long serialVersionUID = 1L;
@@ -44,6 +43,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   private final OptionType<URI>        alternate;
   private final OptionType<URI>        analytics;
   private final OptionType<DRMLicensor> licensor;
+  private final List<OPDSAcquisitionPath> linearized;
 
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
@@ -68,8 +68,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     final OptionType<DRMLicensor> in_licensor)
   {
     this.authors = NullCheck.notNull(Collections.unmodifiableList(in_authors));
-    this.acquisitions =
-      NullCheck.notNull(Collections.unmodifiableList(in_acquisitions));
+    this.acquisitions = NullCheck.notNull(Collections.unmodifiableList(in_acquisitions));
     this.availability = NullCheck.notNull(in_availability);
     this.groups = NullCheck.notNull(in_groups);
     this.cover = NullCheck.notNull(in_cover);
@@ -88,6 +87,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     this.alternate = NullCheck.notNull(in_alternate);
     this.analytics = NullCheck.notNull(in_analytics);
     this.licensor = NullCheck.notNull(in_licensor);
+    this.linearized = OPDSAcquisitionPath.Companion.linearizeAcquisitions(acquisitions);
   }
 
   /**
@@ -396,6 +396,15 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       }
     }
     return sb.toString();
+  }
+
+  /**
+   * @return The linearized acquisition paths
+   */
+
+  public List<OPDSAcquisitionPath> getAcquisitionPaths()
+  {
+    return this.linearized;
   }
 
   @Override public int hashCode()

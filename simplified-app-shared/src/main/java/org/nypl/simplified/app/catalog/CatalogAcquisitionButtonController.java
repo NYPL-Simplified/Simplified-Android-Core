@@ -9,7 +9,6 @@ import android.view.View.OnClickListener;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.nypl.simplified.app.LoginActivity;
@@ -26,7 +25,8 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath;
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation;
 import org.slf4j.Logger;
 
 /**
@@ -45,7 +45,7 @@ public final class CatalogAcquisitionButtonController
     LOG = LogUtilities.getLog(CatalogAcquisitionButtonController.class);
   }
 
-  private final OPDSAcquisition acquisition;
+  private final OPDSAcquisitionPath acquisition;
   private final Activity        activity;
   private final BooksType       books;
   private final FeedEntryOPDS   entry;
@@ -65,7 +65,7 @@ public final class CatalogAcquisitionButtonController
     final Activity in_activity,
     final BooksType in_books,
     final BookID in_id,
-    final OPDSAcquisition in_acq,
+    final OPDSAcquisitionPath in_acq,
     final FeedEntryOPDS in_entry)
   {
     this.activity = NullCheck.notNull(in_activity);
@@ -80,7 +80,7 @@ public final class CatalogAcquisitionButtonController
   {
     if (this.books.accountIsLoggedIn()
       && Simplified.getCurrentAccount().needsAuth()
-      && this.acquisition.getRelation() != OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS) {
+      && this.acquisition.getNext().getRelation() != OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS) {
       this.books.accountGetCachedLoginDetails(
         new AccountGetCachedCredentialsListenerType()
         {
@@ -96,7 +96,7 @@ public final class CatalogAcquisitionButtonController
           }
         });
     } else if (!Simplified.getCurrentAccount().needsAuth()
-      || this.acquisition.getRelation() == OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS) {
+      || this.acquisition.getNext().getRelation() == OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS) {
       this.getBook();
     }
     else {
@@ -144,9 +144,9 @@ public final class CatalogAcquisitionButtonController
   }
 
   private void getBook() {
-    LOG.debug("attempting borrow of {} acquisition", this.acquisition.getRelation());
+    LOG.debug("attempting borrow of {} acquisition", this.acquisition.getNext().getRelation());
 
-    switch (this.acquisition.getRelation()) {
+    switch (this.acquisition.getNext().getRelation()) {
       case ACQUISITION_BORROW:
       case ACQUISITION_GENERIC:
       case ACQUISITION_OPEN_ACCESS: {

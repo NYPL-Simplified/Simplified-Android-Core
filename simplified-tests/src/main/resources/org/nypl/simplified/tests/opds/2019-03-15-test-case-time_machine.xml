@@ -1,0 +1,45 @@
+<entry xmlns:dcterms="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog"
+    xmlns="http://www.w3.org/2005/Atom" xml:base="https://bookserver.archive.org/simple/">
+  <title>The time machine</title>
+  <id>urn:x-internet-archive:bookserver:item:timemachinebanta00hgwe</id>
+  <updated>2011-06-22T22:04:28Z</updated>
+  <link href="https://bookserver.archive.org/borrow/webview/timemachinebanta00hgwe"
+      rel="http://opds-spec.org/acquisition/borrow" type="text/html">
+    <opds:availability status="available" />
+    <opds:holds total="0" />
+    <opds:copies available="1" total="1" />
+    <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+      <opds:indirectAcquisition type="application/epub+zip" />
+    </opds:indirectAcquisition>
+  </link>
+  <link href="https://bookserver.archive.org/borrow/timemachinebanta00hgwe"
+      rel="http://opds-spec.org/acquisition/borrow"
+      type="application/atom+xml;type=entry;profile=opds-catalog">
+    <opds:availability status="available" />
+    <opds:holds total="0" />
+    <opds:copies available="1" total="1" />
+    <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+      <opds:indirectAcquisition type="application/epub+zip" />
+    </opds:indirectAcquisition>
+  </link>
+  <link href="http://archive.org/download/timemachinebanta00hgwe/page/cover_medium.jpg"
+      rel="http://opds-spec.org/image" type="image/jpeg" />
+  <link href="http://archive.org/download/timemachinebanta00hgwe/page/cover_medium.jpg"
+      rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" />
+  <link href="https://bookserver.archive.org/group/staffpicks/" rel="collection"
+      title="Books We Love" type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  <dcterms:issued>1991</dcterms:issued>
+  <published>1991-01-01T00:00:00Z</published>
+  <author>
+    <name>Wells, H. G. (Herbert George), 1866-1946</name>
+  </author>
+  <category label="Science fiction" term="Science fiction" />
+  <category label="Time travel" term="Time travel" />
+  <category label="Science fiction" term="Science fiction" />
+  <category label="Science fiction" term="Science fiction" />
+  <dcterms:publisher>New York, NY : Bantam Books</dcterms:publisher>
+  <dcterms:language>en</dcterms:language>
+  <summary type="html">Relates the adventures of a scientist who invents a machine that transports
+    him into the future
+  </summary>
+</entry>

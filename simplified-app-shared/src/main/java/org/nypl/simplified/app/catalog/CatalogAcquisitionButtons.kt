@@ -10,6 +10,7 @@ import org.nypl.simplified.books.core.BookAcquisitionSelection
 import org.nypl.simplified.books.core.BooksType
 import org.nypl.simplified.books.core.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.slf4j.LoggerFactory
 
 /**
@@ -48,8 +49,9 @@ class CatalogAcquisitionButtons private constructor() {
       val bookID = entry.bookID
       val opdsEntry = entry.feedEntry
 
-      val acquisitionOpt = BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitions)
-      if (acquisitionOpt is Some<OPDSAcquisition>) {
+      val acquisitionOpt =
+        BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitionPaths)
+      if (acquisitionOpt is Some<OPDSAcquisitionPath>) {
         val acquisition = acquisitionOpt.get()
         viewGroup.addView(CatalogAcquisitionButton(activity, books, bookID, acquisition, entry))
       } else {

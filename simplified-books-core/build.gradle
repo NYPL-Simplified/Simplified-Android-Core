@@ -21,7 +21,7 @@ dependencies {
   implementation project(':simplified-http-core')
   implementation project(':simplified-downloader-core')
   implementation project(':simplified-opds-core')
-
+  implementation project(':simplified-mime')
   implementation project(':simplified-json-core')
 
   api "com.google.guava:guava:23.6.1-android"

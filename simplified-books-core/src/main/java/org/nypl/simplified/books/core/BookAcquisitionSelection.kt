@@ -3,12 +3,13 @@ package org.nypl.simplified.books.core
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_GENERIC
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BUY
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_GENERIC
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_SAMPLE
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_SUBSCRIBE
 
 /**
  * Functions to pick an acquisition based on the supported formats.
@@ -17,25 +18,37 @@ import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCR
 object BookAcquisitionSelection {
 
   /**
-   * Pick the preferred acquisition from the list of acquisitions. The selection is made
+   * Pick the preferred acquisition path from the list of acquisition paths. The selection is made
    * based on the supported relations of the acquisitions, and the available final content
    * types.
    *
    * @return A preferred acquisition, or nothing if none of the acquisitions were suitable
    */
 
-  fun preferredAcquisition(acquisitions: List<OPDSAcquisition>): OptionType<OPDSAcquisition> {
+  fun preferredAcquisition(acquisitions: List<OPDSAcquisitionPath>): OptionType<OPDSAcquisitionPath> {
 
-    val onlySupportedRelations: List<OPDSAcquisition> =
-      acquisitions.filter { acquisition -> relationIsSupported(acquisition) }
+    val onlySupportedRelations: List<OPDSAcquisitionPath> =
+      acquisitions.filter { acquisition -> relationIsSupported(acquisition.next) }
 
-    for (acquisition in onlySupportedRelations) {
-      val supportedContentTypes = BookFormats.supportedBookMimeTypes()
-      val availableContentTypes = acquisition.availableFinalContentTypes()
-      for (contentType in supportedContentTypes) {
-        if (availableContentTypes.contains(contentType)) {
-          return Option.some(acquisition)
+    for (acquisitionPath in onlySupportedRelations) {
+
+      /*
+       * Check that all types in the sequence except the last are borrowable, and that
+       * the last type in the sequence is usable as a book.
+       */
+
+      val typeSequence = acquisitionPath.sequence
+      if (typeSequence.size == 1) {
+        if (BookFormats.isSupportedBookMimeType(typeSequence.first())) {
+          return Option.some(acquisitionPath)
         }
+      }
+
+      val head = typeSequence.dropLast(1)
+      val tail = typeSequence.last()
+      if (head.all(BookFormats.Companion::isSupportedBorrowMimeType)
+        && BookFormats.isSupportedBookMimeType(tail)) {
+        return Option.some(acquisitionPath)
       }
     }
 

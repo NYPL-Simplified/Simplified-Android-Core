@@ -2,6 +2,7 @@ package org.nypl.simplified.opds.core;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
@@ -54,18 +55,27 @@ final class OPDSAtom implements Serializable
 
   static String findTitle(
     final Element e)
-    throws OPDSParseException
   {
-    return OPDSXML.getFirstChildElementTextWithName(
-      e, OPDSFeedConstants.ATOM_URI, "title");
+    final OptionType<String> opt =
+      OPDSXML.getFirstChildElementTextWithNameOptional(e, OPDSFeedConstants.ATOM_URI, "title");
+    if (opt.isSome()) {
+      return ((Some<String>)opt).get();
+    } else {
+      return "";
+    }
   }
 
   static Calendar findUpdated(
     final Element e)
-    throws OPDSParseException, ParseException
+    throws ParseException
   {
-    final String e_updated_raw = OPDSXML.getFirstChildElementTextWithName(
-      e, OPDSFeedConstants.ATOM_URI, "updated");
-    return RFC3339Formatter.parseRFC3339Date(e_updated_raw);
+    final OptionType<String> opt =
+      OPDSXML.getFirstChildElementTextWithNameOptional(e, OPDSFeedConstants.ATOM_URI, "updated");
+
+    if (opt.isSome()) {
+      return RFC3339Formatter.parseRFC3339Date(((Some<String>)opt).get());
+    } else {
+      return Calendar.getInstance();
+    }
   }
 }

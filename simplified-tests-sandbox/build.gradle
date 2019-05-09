@@ -55,4 +55,5 @@ dependencies {
     // https://github.com/tony19/logback-android/issues/73
     exclude group: 'com.google.android', module: 'android'
   }
+  compile project(path: ':simplified-mime')
 }

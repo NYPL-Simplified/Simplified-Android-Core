@@ -123,16 +123,20 @@ public final class HTTPRedirectFollower
     throws Exception
   {
     final int code = e.getStatus();
-    this.logger.debug("received {} for {}", code, this.current_uri);
+    this.logger.debug("(http-redirect) onHTTPError: received {} for {}", code, this.current_uri);
 
     HTTPProblemReportLogging.INSTANCE.logError(
-      this.logger, this.current_uri, e.getMessage(), e.getStatus(), e.getProblemReport());
+      this.logger,
+      this.current_uri,
+      e.getMessage(),
+      e.getStatus(),
+      e.getProblemReport());
 
     switch (code) {
       case HttpURLConnection.HTTP_UNAUTHORIZED: {
         if (this.tried_auth.contains(this.current_uri)) {
           this.logger.error(
-            "already tried authenticating for {}", this.current_uri);
+            "(http-redirect) onHTTPError: already tried authenticating for {}", this.current_uri);
           return e;
         }
 
@@ -161,7 +165,7 @@ public final class HTTPRedirectFollower
     throws Exception
   {
     final int code = e.getStatus();
-    this.logger.debug("received {} for {}", code, this.current_uri);
+    this.logger.debug("(http-redirect) onHTTPOK: received {} for {}", code, this.current_uri);
 
     if (code >= 200 && code < 300) {
       return e;
@@ -192,18 +196,22 @@ public final class HTTPRedirectFollower
         this.current_uri = NullCheck.notNull(previous_uri.resolve(location));
 
         final boolean isSameHost =
-            previous_uri.getHost() == this.current_uri.getHost();
+          Objects.equals(previous_uri.getHost(), this.current_uri.getHost());
 
         final boolean droppedHTTPS =
-            previous_uri.getHost() == "https" && this.current_uri.getScheme() != "https";
+          Objects.equals(previous_uri.getHost(), "https")
+            && !Objects.equals(this.current_uri.getScheme(), "https");
 
         // Protect against passing authentication information in an unsafe manner.
         if (!isSameHost || droppedHTTPS) {
+          this.logger.debug("(http-redirect) onHTTPOK: dropping credentials due to redirect (same host: {}, dropped https: {})",
+            isSameHost,
+            droppedHTTPS);
           this.current_auth = Option.none();
         }
 
         this.logger.debug(
-          "following redirect {} to {}", this.cur_redirects, this.current_uri);
+          "(http-redirect) onHTTPOK: following redirect {} to {}", this.cur_redirects, this.current_uri);
 
         return this.processURI();
       }
@@ -217,7 +225,9 @@ public final class HTTPRedirectFollower
   private HTTPResultType<InputStream> processURI()
     throws IOException, Exception
   {
-    this.logger.debug("processing {}", this.current_uri);
+    this.logger.debug("(http-redirect) processing {} (with auth: {})",
+      this.current_uri,
+      this.current_auth.isSome());
 
     if (this.cur_redirects >= this.max_redirects) {
       throw new IOException("Reached redirect limit");
