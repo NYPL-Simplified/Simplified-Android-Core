@@ -2038,7 +2038,6 @@
         "supportsSimplyESync": true
     },
     {
-    {
 	"authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
         "catalogUrl": "http://circ.mls.minitex.net/NML/",
@@ -2057,7 +2056,6 @@
         "supportsCardCreator": false,
         "supportsReservations": true,
         "supportsSimplyESync": true
-        "supportsCardCreator": false
     },
     {
         "authPasscodeAllowsLetters": true,
