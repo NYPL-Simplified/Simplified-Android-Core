@@ -32,7 +32,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ACQUISITION_URI_PREFIX_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ALTERNATE_REL_TEXT;
-import static org.nypl.simplified.opds.core.OPDSFeedConstants.ANALYTICS_REL_TEXT;
+import static org.nypl.simplified.opds.core.OPDSFeedConstants.CIRCULATION_ANALYTICS_OPEN_BOOK_REL_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ANNOTATION_URI_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ATOM_URI;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.BIBFRAME_URI;
@@ -425,7 +425,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     final String rel_text)
     throws URISyntaxException {
 
-    if (rel_text.equals(ANALYTICS_REL_TEXT)) {
+    if (rel_text.equals(CIRCULATION_ANALYTICS_OPEN_BOOK_REL_TEXT)) {
       final String uri_text = NullCheck.notNull(e_link.getAttribute("href"));
       final URI uri = new URI(uri_text);
       entry_builder.setAnalyticsOption(Option.some(uri));
