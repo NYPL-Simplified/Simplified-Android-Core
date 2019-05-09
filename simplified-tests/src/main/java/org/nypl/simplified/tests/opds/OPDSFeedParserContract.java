@@ -22,6 +22,8 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSGroup;
 import org.nypl.simplified.opds.core.OPDSParseException;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 
 import java.io.FileNotFoundException;
@@ -36,6 +38,8 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class OPDSFeedParserContract {
+
+  private final Logger logger = LoggerFactory.getLogger(OPDSFeedParserContract.class);
 
   @Rule
   public ExpectedException expected = ExpectedException.none();
@@ -411,6 +415,31 @@ public abstract class OPDSFeedParserContract {
         URI.create(
           "http://circulation.alpha.librarysimplified"
             + ".org/feed/Picture%20Books?order=author"), fi.getUri());
+    }
+  }
+
+  @Test
+  public void testAnalytics20190509()
+    throws Exception {
+    final URI uri = URI.create("urn:example");
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
+        BookFormats.Companion.supportedBookMimeTypes()));
+    final InputStream d =
+      OPDSFeedParserContract.getResource("analytics-20190509.xml");
+    final OPDSAcquisitionFeed f = p.parse(uri, d);
+    d.close();
+
+    for (final OPDSAcquisitionFeedEntry e : f.getFeedEntries()) {
+      final OptionType<URI> analytics = e.getAnalytics();
+      this.logger.debug("analytics: {}", e.getAnalytics());
+      Assert.assertTrue(
+        "Analytics link must exist",
+        analytics.isSome());
+      final URI analyticsURI = ((Some<URI>) analytics).get();
+      Assert.assertTrue(
+        "URI must contain 'open_book'",
+        analyticsURI.toString().contains("open_book"));
     }
   }
 }

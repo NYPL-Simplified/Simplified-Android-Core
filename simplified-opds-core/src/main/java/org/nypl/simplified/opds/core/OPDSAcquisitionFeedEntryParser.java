@@ -32,6 +32,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ACQUISITION_URI_PREFIX_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ALTERNATE_REL_TEXT;
+import static org.nypl.simplified.opds.core.OPDSFeedConstants.ANALYTICS_REL_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ANNOTATION_URI_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ATOM_URI;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.BIBFRAME_URI;
@@ -134,6 +135,10 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
         }
 
         if (tryConsumeLinkAlternate(entry_builder, e_link, rel_text)) {
+          continue;
+        }
+
+        if (tryConsumeLinkAnalytics(entry_builder, e_link, rel_text)) {
           continue;
         }
 
@@ -404,12 +409,26 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
       final String uri_text = NullCheck.notNull(e_link.getAttribute("href"));
       final URI uri = new URI(uri_text);
       entry_builder.setAlternateOption(Option.some(uri));
+      return true;
+    }
+    return false;
+  }
 
-      final String uri_text_analytics =
-        uri_text.replace("/works/", "/analytics/");
+  /**
+   * Check if the given link refers to analytics. If it does, add it to the builder and
+   * return {@code true}.
+   */
 
-      final URI uri_analytics = new URI(uri_text_analytics);
-      entry_builder.setAnalyticsOption(Option.some(uri_analytics));
+  private boolean tryConsumeLinkAnalytics(
+    final OPDSAcquisitionFeedEntryBuilderType entry_builder,
+    final Element e_link,
+    final String rel_text)
+    throws URISyntaxException {
+
+    if (rel_text.equals(ANALYTICS_REL_TEXT)) {
+      final String uri_text = NullCheck.notNull(e_link.getAttribute("href"));
+      final URI uri = new URI(uri_text);
+      entry_builder.setAnalyticsOption(Option.some(uri));
       return true;
     }
     return false;
