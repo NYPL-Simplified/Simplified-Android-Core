@@ -6,13 +6,14 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountCreationSucceeded
 import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountDeletionSucceeded
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.Bookmark
@@ -21,6 +22,7 @@ import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkLastReadLocation
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.AccountCreated
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.AccountDeleted
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.AccountLoggedIn
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.AccountUpdated
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.BookmarkCreated
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.BookmarkDeleteRequested
@@ -44,6 +46,7 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent.ReaderBookma
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType.Requirements
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -64,7 +67,7 @@ class ReaderBookmarkService private constructor(
   private val httpCalls: ReaderBookmarkHTTPCallsType,
   private val bookmarkEventsOut: ObservableType<ReaderBookmarkEvent>,
   private val profilesController: ProfilesControllerType)
-  : org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType {
+  : ReaderBookmarkServiceType {
 
   /**
    * A trivial Thread subclass for efficient checks to determine whether or not the current
@@ -388,7 +391,9 @@ class ReaderBookmarkService private constructor(
         val account = this.profile.account(this.accountID)
         val books = account.bookDatabase()
         val entry = books.entry(this.bookmark.book)
-        val handle = entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
+        val handle =
+          entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
+
         if (handle != null) {
           when (this.bookmark.kind) {
             ReaderBookmarkLastReadLocation ->
@@ -510,6 +515,44 @@ class ReaderBookmarkService private constructor(
         this.onEventAccountDeleted(profile, event)
       } else if (event is AccountEventUpdated) {
         this.onEventAccountUpdated(profile, event)
+      } else if (event is AccountEventLoginStateChanged) {
+        this.onEventAccountEventLoginStateChanged(profile, event)
+      }
+    }
+  }
+
+  private fun onEventAccountEventLoginStateChanged(
+    profile: ProfileReadableType,
+    event: AccountEventLoginStateChanged) {
+
+    return when (event.state) {
+      AccountLoginState.AccountNotLoggedIn,
+      AccountLoginState.AccountLoggingIn,
+      is AccountLoginState.AccountLoginFailed,
+      AccountLoginState.AccountLoggingOut,
+      is AccountLoginState.AccountLogoutFailed -> {
+        // We don't care about these
+      }
+
+      is AccountLoginState.AccountLoggedIn -> {
+        this.logger.debug("[{}]: account {} logged in", profile.id().uuid, event.accountID.uuid)
+
+        val account =
+          profile.account(event.accountID)
+
+        val accountStateCurrent =
+          ReaderBookmarkPolicy.evaluatePolicy(ReaderBookmarkPolicy.getAccountState(event.accountID),
+            this.policyState)
+            .result
+
+        val accountState =
+          ReaderBookmarkPolicyAccountState(
+            accountID = account.id(),
+            syncSupportedByAccount = account.provider().supportsSimplyESynchronization(),
+            syncEnabledOnServer = if (accountStateCurrent != null) accountStateCurrent.syncEnabledOnServer else false,
+            syncPermittedByUser = account.preferences().bookmarkSyncingPermitted)
+
+        this.evaluatePolicyInput(profile, AccountLoggedIn(accountState))
       }
     }
   }

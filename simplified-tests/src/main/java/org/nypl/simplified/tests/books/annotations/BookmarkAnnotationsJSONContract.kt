@@ -39,6 +39,14 @@ abstract class BookmarkAnnotationsJSONContract {
       chapterTitle = "A Title",
       bookProgress = 50.0f)
 
+  private val bookmarkBodyBadDate =
+    BookmarkAnnotationBodyNode(
+      timestamp = "2019-01-25T20:00:37Z",
+      device = "cca80416-3168-4e58-b621-7964b9265ac9",
+      chapterProgress = 25.0f,
+      chapterTitle = "A Title",
+      bookProgress = 50.0f)
+
   private val bookmark0 =
     BookmarkAnnotation(
       context = "http://www.w3.org/ns/anno.jsonld",
@@ -178,5 +186,25 @@ abstract class BookmarkAnnotationsJSONContract {
     Assert.assertEquals(
       bookmarkAnnotationResponse,
       BookmarkAnnotationsJSON.deserializeBookmarkAnnotationResponseFromJSON(node))
+  }
+
+  @Test
+  fun testBookmarkBadDateSIMPLY_1938() {
+    val target =
+      BookmarkAnnotationTargetNode("z", BookmarkAnnotationSelectorNode("x", "y"))
+
+    val input =
+      BookmarkAnnotation(
+        context = "http://www.w3.org/ns/anno.jsonld",
+        body = bookmarkBodyBadDate,
+        id = "x",
+        type = "Annotation",
+        motivation = "http://www.w3.org/ns/oa#bookmarking",
+        target = target)
+
+    val node =
+      BookmarkAnnotationsJSON.serializeBookmarkAnnotationToJSON(mapper, input)
+
+    Assert.assertEquals(input, BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(node))
   }
 }

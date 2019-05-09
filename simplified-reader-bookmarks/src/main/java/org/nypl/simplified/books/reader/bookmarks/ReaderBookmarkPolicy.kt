@@ -276,6 +276,8 @@ data class ReaderBookmarkPolicy<T>(
           onEventSyncingEnabled(input)
         is Event.Local.AccountUpdated ->
           onEventAccountUpdated(input)
+        is Event.Local.AccountLoggedIn ->
+          onEventAccountLoggedIn(input)
       }
     }
 
@@ -486,6 +488,11 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun onEventAccountUpdated(event: Event.Local.AccountUpdated): ReaderBookmarkPolicy<Unit> {
+      return updateAccount(event.account)
+        .andThen { remoteSyncAllIfPossible(event.account.accountID) }
+    }
+
+    private fun onEventAccountLoggedIn(event: Event.Local.AccountLoggedIn): ReaderBookmarkPolicy<Unit> {
       return updateAccount(event.account)
         .andThen { remoteSyncAllIfPossible(event.account.accountID) }
     }
