@@ -627,7 +627,7 @@ class ReaderBookmarkService private constructor(
           .call()
 
       is ReaderBookmarkPolicyOutput.Event.LocalBookmarkAlreadyExists ->
-        throw UnimplementedCodeException()
+        this.logger.warn("local bookmark already exists: {}", output.bookmark.bookmarkId)
     }
   }
 
