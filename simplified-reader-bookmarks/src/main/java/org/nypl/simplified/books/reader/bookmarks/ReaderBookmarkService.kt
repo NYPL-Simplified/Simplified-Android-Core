@@ -450,7 +450,7 @@ class ReaderBookmarkService private constructor(
     private val book: BookID)
     : ReaderBookmarkControllerOp<ReaderBookmarks>(logger) {
 
-    override fun runActual(): org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks {
+    override fun runActual(): ReaderBookmarks {
       try {
         this.logger.debug("[{}]: loading bookmarks", this.profile.id().uuid)
 
@@ -459,7 +459,7 @@ class ReaderBookmarkService private constructor(
         val entry = books.entry(this.book)
         val handle = entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
         if (handle != null) {
-          return org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks(
+          return ReaderBookmarks(
             handle.format.lastReadLocation,
             handle.format.bookmarks)
         }
@@ -468,7 +468,7 @@ class ReaderBookmarkService private constructor(
       }
 
       this.logger.debug("[{}]: returning empty bookmarks", this.profile.id().uuid)
-      return org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks(null, listOf())
+      return ReaderBookmarks(null, listOf())
     }
   }
 
@@ -669,7 +669,7 @@ class ReaderBookmarkService private constructor(
 
   override fun bookmarkLoad(
     accountID: AccountID,
-    book: BookID): FluentFuture<org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks> {
+    book: BookID): FluentFuture<ReaderBookmarks> {
 
     return try {
       val profile = this.profilesController.profileCurrent()
