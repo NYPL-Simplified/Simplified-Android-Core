@@ -2635,7 +2635,7 @@
         "mainColor": "blue",
         "name": "San Francisco Public Library",
         "needsAuth": true,
-        "pinKeyboard": "Number pad",
+        "pinKeyboard": "Default",
         "privacyUrl": "http://califa.org/privacy-policy",
         "subtitle": "Dedicated to free, equal access to information, knowledge, independent learning and joys of reading for our diverse community",
         "supportEmail": "info@sfpl.org",
