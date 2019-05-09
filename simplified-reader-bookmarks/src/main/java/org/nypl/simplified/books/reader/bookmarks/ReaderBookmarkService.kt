@@ -243,8 +243,8 @@ class ReaderBookmarkService private constructor(
 
     override fun runActual() {
       this.logger.debug("[{}]: syncing account {}",
-        profile.id().uuid,
-        accountID)
+        this.profile.id().uuid,
+        this.accountID)
 
       val syncable =
         accountSupportsSyncing(this.profile.account(this.accountID))
@@ -269,7 +269,7 @@ class ReaderBookmarkService private constructor(
           listOf()
         }
 
-      this.logger.debug("[{}]: received {} bookmarks", profile.id().uuid, bookmarks.size)
+      this.logger.debug("[{}]: received {} bookmarks", this.profile.id().uuid, bookmarks.size)
       for (bookmark in bookmarks) {
         this.evaluatePolicyInput(BookmarkReceived(syncable.account.id(), bookmark))
       }
@@ -390,9 +390,9 @@ class ReaderBookmarkService private constructor(
         val entry = books.entry(this.bookmark.book)
         val handle = entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
         if (handle != null) {
-          when (bookmark.kind) {
+          when (this.bookmark.kind) {
             ReaderBookmarkLastReadLocation ->
-              handle.setLastReadLocation(bookmark)
+              handle.setLastReadLocation(this.bookmark)
             ReaderBookmarkExplicit ->
               handle.setBookmarks(handle.format.bookmarks.plus(this.bookmark))
           }
@@ -692,14 +692,14 @@ class ReaderBookmarkService private constructor(
       profile: ProfileReadableType): ReaderBookmarkPolicyState {
       logger.debug("[{}]: configuring bookmark policy state", profile.id().uuid)
       return ReaderBookmarkPolicyState.create(
-        initialAccounts = accountStatesForProfile(profile),
-        locallySaved = bookmarksForProfile(logger, profile))
+        initialAccounts = this.accountStatesForProfile(profile),
+        locallySaved = this.bookmarksForProfile(logger, profile))
     }
 
     private fun accountStatesForProfile(
       profile: ProfileReadableType): Set<ReaderBookmarkPolicyAccountState> {
       return profile.accounts()
-        .map { pair -> accountStateForAccount(pair.value) }
+        .map { pair -> this.accountStateForAccount(pair.value) }
         .toSet()
     }
 
@@ -717,7 +717,7 @@ class ReaderBookmarkService private constructor(
       val books = mutableMapOf<AccountID, Set<Bookmark>>()
       val accounts = profile.accounts().values
       for (account in accounts) {
-        books.put(account.id(), bookmarksForAccount(account))
+        books.put(account.id(), this.bookmarksForAccount(account))
       }
       logger.debug("[{}]: collected {} bookmarks for profile", profile.id().uuid, books.size)
       return books
