@@ -965,14 +965,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    * Otherwise, disable and hide it.
    */
 
-  private fun onCreateOptionsMenuSearchItem(menuNn: Menu) {
-    val searchItem = menuNn.findItem(R.id.catalog_action_search)
+  private fun onCreateOptionsMenuSearchItem(menuItem: Menu) {
+    val searchItem = menuItem.findItem(R.id.catalog_action_search)
     val feedActual = this.feed!!
     val search = feedActual.feedSearch
     var searchOk = false
 
-    // XXX: Update to support library search item
-    if (search != null && false) {
+    if (search != null) {
       this.searchView = searchItem.actionView as SearchView
       searchOk = when (search) {
         FeedSearch.FeedSearchLocal -> {
@@ -1097,7 +1096,6 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    */
 
   private fun retryFeed() {
-    this@CatalogFeedActivity.swipeRefreshLayout.isRefreshing = false
     this.loading?.cancel(true)
     this.loading = null
 
