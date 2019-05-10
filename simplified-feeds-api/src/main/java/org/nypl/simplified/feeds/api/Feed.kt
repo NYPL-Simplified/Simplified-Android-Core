@@ -3,6 +3,7 @@ package org.nypl.simplified.feeds.api
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jnull.NullCheck
+import org.joda.time.DateTime
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.FeedSearch.FeedSearchOpen1_1
 import org.nypl.simplified.opds.core.OPDSAcquisition
@@ -51,7 +52,7 @@ sealed class Feed {
    * @return The last time the feed was updated
    */
 
-  abstract val feedUpdated: Calendar
+  abstract val feedUpdated: DateTime
 
   /**
    * @return The URI of the feed
@@ -69,7 +70,7 @@ sealed class Feed {
     override val feedID: String,
     override val feedSearch: FeedSearch?,
     override val feedTitle: String,
-    override val feedUpdated: Calendar,
+    override val feedUpdated: DateTime,
     override val feedURI: URI,
 
     /**
@@ -158,7 +159,7 @@ sealed class Feed {
     override val feedID: String,
     override val feedSearch: FeedSearch?,
     override val feedTitle: String,
-    override val feedUpdated: Calendar,
+    override val feedUpdated: DateTime,
     override val feedURI: URI,
 
     /**
@@ -253,7 +254,7 @@ sealed class Feed {
         feedID = feedID,
         feedSearch = feedSearch,
         feedTitle = feedTitle,
-        feedUpdated = Calendar.getInstance(),
+        feedUpdated = DateTime.now(),
         feedAbout = null,
         feedURI = feedURI,
         feedTermsOfService = null,

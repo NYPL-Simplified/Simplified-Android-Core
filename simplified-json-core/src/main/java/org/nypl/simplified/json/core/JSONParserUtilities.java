@@ -12,13 +12,12 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Objects;
 
 /**
@@ -613,13 +612,13 @@ public final class JSONParserUtilities {
   }
 
   /**
-   * @param key A key assumed to be holding a value
    * @param s   A node
+   * @param key A key assumed to be holding a value
    * @return A timestamp value from key {@code key}
    * @throws JSONParseException On type errors
    */
 
-  public static Calendar getTimestamp(
+  public static DateTime getTimestamp(
     final ObjectNode s,
     final String key)
     throws JSONParseException {
@@ -628,12 +627,11 @@ public final class JSONParserUtilities {
     NullCheck.notNull(key);
 
     try {
-      return RFC3339Formatter.parseRFC3339Date(
-        JSONParserUtilities.getString(s, key));
-    } catch (final ParseException e) {
-      final String m = NullCheck.notNull(
-        String.format("Could not parse RFC3999 date for key '%s'", key));
-      throw new JSONParseException(m, e);
+      return ISODateTimeFormat.dateTimeParser()
+        .parseDateTime(JSONParserUtilities.getString(s, key));
+    } catch (final IllegalArgumentException e) {
+      throw new JSONParseException(
+        String.format("Could not parse RFC3999 date for key '%s'", key), e);
     }
   }
 
@@ -644,7 +642,7 @@ public final class JSONParserUtilities {
    * @throws JSONParseException On type errors
    */
 
-  public static OptionType<Calendar> getTimestampOptional(
+  public static OptionType<DateTime> getTimestampOptional(
     final ObjectNode n,
     final String key)
     throws JSONParseException {

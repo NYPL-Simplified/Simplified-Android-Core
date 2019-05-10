@@ -6,6 +6,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.DateTime;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.simplified.books.api.Book;
 import org.nypl.simplified.books.api.BookFormat;
@@ -20,8 +21,6 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
-import java.util.Calendar;
-
 public final class BookStatus {
   private BookStatus() {
     throw new UnreachableCodeException();
@@ -30,7 +29,7 @@ public final class BookStatus {
   public static BookStatusType fromBook(final Book book) {
     NullCheck.notNull(book, "Book");
 
-    final OptionType<Calendar> no_expiry = Option.none();
+    final OptionType<DateTime> no_expiry = Option.none();
     final OPDSAcquisitionFeedEntry e = book.getEntry();
     final boolean downloaded = book.isDownloaded();
     final boolean adobe_returnable = BookStatus.isAdobeReturnable(book);
@@ -87,7 +86,7 @@ public final class BookStatus {
     final OPDSAvailabilityOpenAccess a,
     final boolean downloaded,
     final Book book,
-    final OptionType<Calendar> no_expiry) {
+    final OptionType<DateTime> no_expiry) {
     final boolean returnable = a.getRevoke().isSome();
     if (downloaded) {
       return new BookStatusDownloaded(book.getId(), no_expiry, returnable);

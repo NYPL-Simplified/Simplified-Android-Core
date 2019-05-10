@@ -1,14 +1,12 @@
 package org.nypl.simplified.books.book_registry;
 
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.nypl.simplified.books.api.BookID;
-import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 /**
  * The given book is currently placed on hold.
@@ -18,8 +16,8 @@ public final class BookStatusHeld implements BookStatusType {
 
   private final BookID id;
   private final OptionType<Integer> queue_position;
-  private final OptionType<Calendar> start_date;
-  private final OptionType<Calendar> end_date;
+  private final OptionType<DateTime> start_date;
+  private final OptionType<DateTime> end_date;
   private final boolean revocable;
 
   /**
@@ -36,8 +34,8 @@ public final class BookStatusHeld implements BookStatusType {
   public BookStatusHeld(
       final BookID in_id,
       final OptionType<Integer> in_queue_position,
-      final OptionType<Calendar> in_start_date,
-      final OptionType<Calendar> in_end_date,
+      final OptionType<DateTime> in_start_date,
+      final OptionType<DateTime> in_end_date,
       final boolean in_revocable) {
 
     this.id = NullCheck.notNull(in_id);
@@ -51,7 +49,7 @@ public final class BookStatusHeld implements BookStatusType {
    * @return The approximate date that the book will become available
    */
 
-  public OptionType<Calendar> getEndDate() {
+  public OptionType<DateTime> getEndDate() {
     return this.end_date;
   }
 
@@ -117,30 +115,16 @@ public final class BookStatusHeld implements BookStatusType {
 
   @Override
   public String toString() {
-    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
+    final DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
     final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusHeld ");
     b.append(this.id);
     b.append(" ");
     b.append(this.queue_position);
     b.append(" ");
-    b.append(
-        this.start_date.map(
-            new FunctionType<Calendar, String>() {
-              @Override
-              public String call(final Calendar et) {
-                return fmt.format(et.getTime());
-              }
-            }));
+    b.append(this.start_date.map(fmt::print));
     b.append(" ");
-    b.append(
-        this.end_date.map(
-            new FunctionType<Calendar, String>() {
-              @Override
-              public String call(final Calendar et) {
-                return fmt.format(et.getTime());
-              }
-            }));
+    b.append(this.end_date.map(fmt::print));
     b.append(" revocable=");
     b.append(this.revocable);
     b.append("]");

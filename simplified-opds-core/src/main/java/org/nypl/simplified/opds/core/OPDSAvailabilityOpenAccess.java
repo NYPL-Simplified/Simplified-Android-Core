@@ -4,8 +4,9 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
+
 import java.net.URI;
-import java.util.Calendar;
 
 /**
  * The book is public domain.
@@ -25,7 +26,7 @@ public final class OPDSAvailabilityOpenAccess implements OPDSAvailabilityType
    * Get availability end date (always none for OpenAccess)
    * @return end_date
    */
-  public OptionType<Calendar> getEndDate()
+  public OptionType<DateTime> getEndDate()
   {
     return Option.none();
   }

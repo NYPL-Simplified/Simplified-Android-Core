@@ -26,12 +26,14 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormatterBuilder
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
-import org.nypl.simplified.app.catalog.CatalogFeedArguments.*
+import org.nypl.simplified.app.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
 import org.nypl.simplified.app.login.LoginDialog
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
@@ -72,8 +74,6 @@ import org.nypl.simplified.stack.ImmutableStack
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -933,12 +933,19 @@ class CatalogBookDetailView(
       }
 
       val publishedOpt = entry.published
-      if (publishedOpt is Some<Calendar>) {
+      if (publishedOpt is Some<DateTime>) {
         val published = publishedOpt.get()
-        val fmt = SimpleDateFormat("yyyy-MM-dd")
+        val fmt =
+          DateTimeFormatterBuilder()
+            .appendYear(4, 5)
+            .appendLiteral('-')
+            .appendMonthOfYear(2)
+            .appendLiteral('-')
+            .appendDayOfMonth(2)
+            .toFormatter()
         buffer.append(resources.getString(R.string.catalog_publication_date))
         buffer.append(": ")
-        buffer.append(fmt.format(published.time))
+        buffer.append(fmt.print(published))
         return buffer.toString()
       }
 

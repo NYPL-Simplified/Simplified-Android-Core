@@ -18,6 +18,7 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.DateTime
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.analytics.api.AnalyticsType
@@ -274,7 +275,7 @@ class CatalogFeedBookCellView(
      */
 
     if (!this.networkConnectivity.isWifiAvailable) {
-      this.onBookStatusLoaned(BookStatusLoaned(status.id, None.none<Calendar>(), false))
+      this.onBookStatusLoaned(BookStatusLoaned(status.id, None.none<DateTime>(), false))
       return Unit.unit()
     }
 

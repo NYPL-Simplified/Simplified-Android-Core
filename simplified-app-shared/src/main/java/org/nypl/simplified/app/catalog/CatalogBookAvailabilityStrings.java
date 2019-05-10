@@ -7,6 +7,8 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
+import org.joda.time.DateTime;
+import org.joda.time.Hours;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.book_registry.BookStatusHeld;
 import org.nypl.simplified.books.book_registry.BookStatusHeldReady;
@@ -29,7 +31,6 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
-import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -147,7 +148,7 @@ public final class CatalogBookAvailabilityStrings
         public String onBookStatusHeld(
           final BookStatusHeld s)
         {
-          final OptionType<Calendar> end_date_opt = s.getEndDate();
+          final OptionType<DateTime> end_date_opt = s.getEndDate();
           final OptionType<Integer> queue_opt = s.getQueuePosition();
           return CatalogBookAvailabilityStrings.onHeld(
             end_date_opt, queue_opt, r);
@@ -216,7 +217,7 @@ public final class CatalogBookAvailabilityStrings
   }
 
   private static String onLoaned(
-    final OptionType<Calendar> expiry_opt,
+    final OptionType<DateTime> expiry_opt,
     final Resources r)
   {
     /**
@@ -224,9 +225,9 @@ public final class CatalogBookAvailabilityStrings
      */
 
     if (expiry_opt.isSome()) {
-      final Some<Calendar> expiry_some = (Some<Calendar>) expiry_opt;
-      final Calendar expiry = expiry_some.get();
-      final Calendar now = Calendar.getInstance();
+      final Some<DateTime> expiry_some = (Some<DateTime>) expiry_opt;
+      final DateTime expiry = expiry_some.get();
+      final DateTime now = DateTime.now();
       final String format =
         r.getString(R.string.catalog_book_availability_loaned_timed);
 
@@ -244,7 +245,7 @@ public final class CatalogBookAvailabilityStrings
   }
 
   private static String onReserved(
-    final OptionType<Calendar> expiry_opt,
+    final OptionType<DateTime> expiry_opt,
     final Resources r)
   {
     /**
@@ -252,9 +253,9 @@ public final class CatalogBookAvailabilityStrings
      */
 
     if (expiry_opt.isSome()) {
-      final Some<Calendar> expiry_some = (Some<Calendar>) expiry_opt;
-      final Calendar expiry = expiry_some.get();
-      final Calendar now = Calendar.getInstance();
+      final Some<DateTime> expiry_some = (Some<DateTime>) expiry_opt;
+      final DateTime expiry = expiry_some.get();
+      final DateTime now = DateTime.now();
       final String format =
         r.getString(R.string.catalog_book_availability_reserved_timed);
 
@@ -272,7 +273,7 @@ public final class CatalogBookAvailabilityStrings
   }
 
   private static String onHeld(
-    final OptionType<Calendar> end_date_opt,
+    final OptionType<DateTime> end_date_opt,
     final OptionType<Integer> queue_opt,
     final Resources r)
   {
@@ -282,9 +283,9 @@ public final class CatalogBookAvailabilityStrings
      */
 
     if (end_date_opt.isSome()) {
-      final Some<Calendar> end_date_some = (Some<Calendar>) end_date_opt;
-      final Calendar end_date = end_date_some.get();
-      final Calendar now = Calendar.getInstance();
+      final Some<DateTime> end_date_some = (Some<DateTime>) end_date_opt;
+      final DateTime end_date = end_date_some.get();
+      final DateTime now = DateTime.now();
       final String format =
         r.getString(R.string.catalog_book_availability_held_timed);
       return String.format(
@@ -334,8 +335,8 @@ public final class CatalogBookAvailabilityStrings
   //@formatter:on
   public static String getIntervalString(
     final Resources r,
-    final Calendar lower,
-    final Calendar upper)
+    final DateTime lower,
+    final DateTime upper)
   {
     NullCheck.notNull(r);
     NullCheck.notNull(lower);
@@ -367,8 +368,8 @@ public final class CatalogBookAvailabilityStrings
    */
   public static String getIntervalStringShort(
     final Resources r,
-    final Calendar lower,
-    final Calendar upper)
+    final DateTime lower,
+    final DateTime upper)
   {
     NullCheck.notNull(r);
     NullCheck.notNull(lower);
@@ -405,10 +406,9 @@ public final class CatalogBookAvailabilityStrings
   }
 
   private static long calendarHoursBetween(
-    final Calendar in_start,
-    final Calendar in_end)
+    final DateTime in_start,
+    final DateTime in_end)
   {
-    return TimeUnit.MILLISECONDS.toHours(
-      Math.abs(in_end.getTimeInMillis() - in_start.getTimeInMillis()));
+    return Hours.hoursBetween(in_start, in_end).getHours();
   }
 }

@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
+import org.joda.time.DateTime
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -155,7 +156,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -247,7 +248,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -337,7 +338,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -423,7 +424,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -513,7 +514,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -615,7 +616,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -718,7 +719,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -808,7 +809,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -896,7 +897,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -998,7 +999,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1099,7 +1100,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1207,7 +1208,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1308,7 +1309,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1413,7 +1414,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1517,7 +1518,7 @@ open class BookBorrowTaskContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none()))
     opdsEntryBuilder.addAcquisition(acquisition)
 

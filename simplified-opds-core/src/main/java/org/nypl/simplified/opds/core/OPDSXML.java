@@ -4,11 +4,18 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -18,12 +25,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.OutputStream;
-import java.net.URI;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 /**
  * Convenient XML handling functions.
@@ -408,7 +409,7 @@ public final class OPDSXML
    * @throws OPDSParseException On parse errors
    */
 
-  public static OptionType<Calendar> getAttributeRFC3339Optional(
+  public static OptionType<DateTime> getAttributeRFC3339Optional(
     final Element e,
     final String name)
     throws OPDSParseException
@@ -417,14 +418,13 @@ public final class OPDSXML
     NullCheck.notNull(name);
 
     try {
-      final OptionType<Calendar> end_date;
+      final OptionType<DateTime> end_date;
       if (e.hasAttribute(name)) {
-        return Option.some(
-          RFC3339Formatter.parseRFC3339Date(e.getAttribute(name)));
+        return Option.some(ISODateTimeFormat.dateTimeParser().parseDateTime(e.getAttribute(name)));
       }
 
       return Option.none();
-    } catch (final ParseException x) {
+    } catch (final IllegalArgumentException x) {
       throw new OPDSParseException(x);
     }
   }
@@ -441,7 +441,7 @@ public final class OPDSXML
    * @throws OPDSParseException On parse errors
    */
 
-  public static Calendar getAttributeRFC3339(
+  public static DateTime getAttributeRFC3339(
     final Element e,
     final String name)
     throws OPDSParseException
@@ -449,11 +449,11 @@ public final class OPDSXML
     NullCheck.notNull(e);
     NullCheck.notNull(name);
 
-    final OptionType<Calendar> end_date;
+    final OptionType<DateTime> end_date;
     if (e.hasAttribute(name)) {
       try {
-        return RFC3339Formatter.parseRFC3339Date(e.getAttribute(name));
-      } catch (final ParseException x) {
+        return ISODateTimeFormat.dateTimeParser().parseDateTime(e.getAttribute(name));
+      } catch (final IllegalArgumentException x) {
         throw new OPDSParseException(x);
       }
     }

@@ -3,25 +3,20 @@ package org.nypl.simplified.opds.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.io7m.jfunctional.FunctionType;
-import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Pair;
-import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.nypl.simplified.json.core.JSONSerializerUtilities;
-import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
@@ -53,12 +48,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
     node.put("type", a.getRelation().toString());
     node.put("uri", a.getUri().toString());
 
-    a.getType().map_(new ProcedureType<String>() {
-      @Override
-      public void call(final String type) {
-        node.put("content_type", type);
-      }
-    });
+    a.getType().map_(type -> node.put("content_type", type));
 
     node.set("indirect_acquisitions", serializeIndirectAcquisitions(a.getIndirectAcquisitions()));
     return node;
@@ -99,7 +89,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
     final OPDSAvailabilityType av) {
     NullCheck.notNull(av);
 
-    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
+    final DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
     final ObjectMapper jom = new ObjectMapper();
     return av.matchAvailability(
       new OPDSAvailabilityMatcherType<ObjectNode, UnreachableCodeException>() {
@@ -107,23 +97,14 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
         public ObjectNode onHeldReady(final OPDSAvailabilityHeldReady a) {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
-          a.getEndDate().map(
-            new FunctionType<Calendar, Unit>() {
-              @Override
-              public Unit call(
-                final Calendar t) {
-                oh.put("end_date", fmt.format(t.getTime()));
-                return Unit.unit();
-              }
-            });
-          a.getRevoke().map(
-            new FunctionType<URI, Unit>() {
-              @Override
-              public Unit call(final URI uri) {
-                oh.put("revoke", uri.toString());
-                return Unit.unit();
-              }
-            });
+          a.getEndDate().map(t -> {
+            oh.put("end_date", fmt.print(t));
+            return Unit.unit();
+          });
+          a.getRevoke().map(uri -> {
+            oh.put("revoke", uri.toString());
+            return Unit.unit();
+          });
           o.set("held_ready", oh);
           return o;
         }
@@ -132,31 +113,18 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
         public ObjectNode onHeld(final OPDSAvailabilityHeld a) {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
-          a.getStartDate().map(
-            new FunctionType<Calendar, Unit>() {
-              @Override
-              public Unit call(
-                final Calendar t) {
-                oh.put("start_date", fmt.format(t.getTime()));
-                return Unit.unit();
-              }
-            });
-          a.getPosition().map(
-            new FunctionType<Integer, Unit>() {
-              @Override
-              public Unit call(final Integer x) {
-                oh.put("position", x);
-                return Unit.unit();
-              }
-            });
-          a.getRevoke().map(
-            new FunctionType<URI, Unit>() {
-              @Override
-              public Unit call(final URI uri) {
-                oh.put("revoke", uri.toString());
-                return Unit.unit();
-              }
-            });
+          a.getStartDate().map(t -> {
+            oh.put("start_date", fmt.print(t));
+            return Unit.unit();
+          });
+          a.getPosition().map(x -> {
+            oh.put("position", x);
+            return Unit.unit();
+          });
+          a.getRevoke().map(uri -> {
+            oh.put("revoke", uri.toString());
+            return Unit.unit();
+          });
 
           o.set("held", oh);
           return o;
@@ -182,32 +150,18 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
         public ObjectNode onLoaned(final OPDSAvailabilityLoaned a) {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
-          a.getStartDate().map(
-            new FunctionType<Calendar, Unit>() {
-              @Override
-              public Unit call(
-                final Calendar t) {
-                oh.put("start_date", fmt.format(t.getTime()));
-                return Unit.unit();
-              }
-            });
-          a.getEndDate().map(
-            new FunctionType<Calendar, Unit>() {
-              @Override
-              public Unit call(
-                final Calendar t) {
-                oh.put("end_date", fmt.format(t.getTime()));
-                return Unit.unit();
-              }
-            });
-          a.getRevoke().map(
-            new FunctionType<URI, Unit>() {
-              @Override
-              public Unit call(final URI uri) {
-                oh.put("revoke", uri.toString());
-                return Unit.unit();
-              }
-            });
+          a.getStartDate().map(t -> {
+            oh.put("start_date", fmt.print(t));
+            return Unit.unit();
+          });
+          a.getEndDate().map(t -> {
+            oh.put("end_date", fmt.print(t));
+            return Unit.unit();
+          });
+          a.getRevoke().map(uri -> {
+            oh.put("revoke", uri.toString());
+            return Unit.unit();
+          });
 
           o.set("loaned", oh);
           return o;
@@ -218,12 +172,9 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
           a.getRevoke().map(
-            new FunctionType<URI, Unit>() {
-              @Override
-              public Unit call(final URI uri) {
-                oh.put("revoke", uri.toString());
-                return Unit.unit();
-              }
+            uri -> {
+              oh.put("revoke", uri.toString());
+              return Unit.unit();
             });
           o.set("open_access", oh);
           return o;
@@ -281,7 +232,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
     throws OPDSSerializationException {
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode je = jom.createObjectNode();
-    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
+    final DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 
     {
       final ArrayNode ja = jom.createArrayNode();
@@ -317,15 +268,10 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
       je.set("categories", ja);
     }
 
-    e.getCover().map(
-      new FunctionType<URI, Unit>() {
-        @Override
-        public Unit call(
-          final URI u) {
-          je.put("cover", u.toString());
-          return Unit.unit();
-        }
-      });
+    e.getCover().map(u -> {
+      je.put("cover", u.toString());
+      return Unit.unit();
+    });
 
     {
       final Set<Pair<String, URI>> eg = e.getGroups();
@@ -341,63 +287,39 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
 
     je.put("id", e.getID());
 
-    e.getPublished().map(
-      new FunctionType<Calendar, Unit>() {
-        @Override
-        public Unit call(
-          final Calendar c) {
-          je.put("published", fmt.format(c.getTime()));
-          return Unit.unit();
-        }
-      });
+    e.getPublished().map(c -> {
+      je.put("published", fmt.print(c));
+      return Unit.unit();
+    });
 
-    e.getPublisher().map(
-      new FunctionType<String, Unit>() {
-        @Override
-        public Unit call(
-          final String s) {
-          je.put("publisher", s);
-          return Unit.unit();
-        }
-      });
+    e.getPublisher().map(s -> {
+      je.put("publisher", s);
+      return Unit.unit();
+    });
 
     je.put("distribution", e.getDistribution());
     je.put("summary", e.getSummary());
     je.put("title", e.getTitle());
 
-    e.getThumbnail().map(
-      new FunctionType<URI, Unit>() {
-        @Override
-        public Unit call(
-          final URI u) {
-          je.put("thumbnail", u.toString());
-          return Unit.unit();
-        }
-      });
+    e.getThumbnail().map(u -> {
+      je.put("thumbnail", u.toString());
+      return Unit.unit();
+    });
 
 
-    e.getAlternate().map(
-      new FunctionType<URI, Unit>() {
-        @Override
-        public Unit call(
-          final URI u) {
-          je.put("alternate", u.toString());
-          je.put("analytics", u.toString().replace("/works/", "/analytics/"));
-          return Unit.unit();
-        }
-      });
+    e.getAlternate().map(u -> {
+      je.put("alternate", u.toString());
+      je.put("analytics", u.toString().replace("/works/", "/analytics/"));
+      return Unit.unit();
+    });
 
     e.getAnnotations().map(
-      new FunctionType<URI, Unit>() {
-        @Override
-        public Unit call(
-          final URI u) {
-          je.put("annotations", u.toString());
-          return Unit.unit();
-        }
+      u -> {
+        je.put("annotations", u.toString());
+        return Unit.unit();
       });
 
-    je.put("updated", fmt.format(e.getUpdated().getTime()));
+    je.put("updated", fmt.print(e.getUpdated()));
     return NullCheck.notNull(je);
   }
 
@@ -409,20 +331,15 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
 
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode je = jom.createObjectNode();
-    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
+    final DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 
     je.put("id", e.getFeedID());
     je.put("title", e.getFeedTitle());
 
-    e.getFeedNext().map(
-      new FunctionType<URI, Unit>() {
-        @Override
-        public Unit call(
-          final URI next) {
-          je.put("next", next.toString());
-          return Unit.unit();
-        }
-      });
+    e.getFeedNext().map(next -> {
+      je.put("next", next.toString());
+      return Unit.unit();
+    });
 
     {
       final ArrayNode a = jom.createArrayNode();
@@ -447,19 +364,15 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
     }
 
     e.getFeedSearchURI().map(
-      new FunctionType<OPDSSearchLink, Unit>() {
-        @Override
-        public Unit call(
-          final OPDSSearchLink s) {
-          final ObjectNode os = jom.createObjectNode();
-          os.put("type", s.getType());
-          os.put("uri", s.getURI().toString());
-          je.set("search", os);
-          return Unit.unit();
-        }
+      s -> {
+        final ObjectNode os = jom.createObjectNode();
+        os.put("type", s.getType());
+        os.put("uri", s.getURI().toString());
+        je.set("search", os);
+        return Unit.unit();
       });
 
-    je.put("updated", fmt.format(e.getFeedUpdated().getTime()));
+    je.put("updated", fmt.print(e.getFeedUpdated()));
     je.put("uri", e.getFeedURI().toString());
     return NullCheck.notNull(je);
   }

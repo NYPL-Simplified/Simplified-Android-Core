@@ -4,6 +4,7 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,7 +16,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 
 import java.net.URI;
-import java.util.Calendar;
 
 public abstract class BookIDContract
 {
@@ -33,7 +33,7 @@ public abstract class BookIDContract
         + ".org%2Fterms%2Fid%2FOverdrive%2520ID%2F2b3729cd-27ec-42e1-bc51"
         + "-298aaee0af7d",
         "1Q84",
-        NullCheck.notNull(Calendar.getInstance()),
+        NullCheck.notNull(DateTime.now()),
         OPDSAvailabilityOpenAccess.get(revoke));
     final OPDSAcquisitionFeedEntry e = eb.build();
     final BookID b = BookIDs.newFromOPDSEntry(e);

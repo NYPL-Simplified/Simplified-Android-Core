@@ -1,14 +1,12 @@
 package org.nypl.simplified.books.book_registry;
 
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.nypl.simplified.books.api.BookID;
-import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 /**
  * The given book is currently reserved for the user. This is equivalent to a
@@ -18,7 +16,7 @@ import java.util.Calendar;
 public final class BookStatusHeldReady implements BookStatusType
 {
   private final BookID id;
-  private final OptionType<Calendar> end_date;
+  private final OptionType<DateTime> end_date;
   private final boolean              revocable;
 
   /**
@@ -31,7 +29,7 @@ public final class BookStatusHeldReady implements BookStatusType
 
   public BookStatusHeldReady(
     final BookID in_id,
-    final OptionType<Calendar> in_end_date,
+    final OptionType<DateTime> in_end_date,
     final boolean in_revocable)
   {
     this.id = NullCheck.notNull(in_id);
@@ -43,7 +41,7 @@ public final class BookStatusHeldReady implements BookStatusType
    * @return The expiry date of the reservation, if any
    */
 
-  public OptionType<Calendar> getExpiryDate()
+  public OptionType<DateTime> getExpiryDate()
   {
     return this.end_date;
   }
@@ -67,20 +65,12 @@ public final class BookStatusHeldReady implements BookStatusType
 
   @Override public String toString()
   {
-    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
+    final DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
     final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusHeldReady ");
     b.append(this.id);
     b.append(" ");
-    b.append(
-      this.end_date.map(
-        new FunctionType<Calendar, String>()
-        {
-          @Override public String call(final Calendar et)
-          {
-            return fmt.format(et.getTime());
-          }
-        }));
+    b.append(this.end_date.map(fmt::print));
     b.append(" revocable=");
     b.append(this.revocable);
     b.append("]");

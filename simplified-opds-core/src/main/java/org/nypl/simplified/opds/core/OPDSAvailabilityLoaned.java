@@ -1,14 +1,14 @@
 package org.nypl.simplified.opds.core;
 
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 /**
  * The book is loaned out to the user.
@@ -17,13 +17,13 @@ import java.util.Calendar;
 public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
 {
   private static final long serialVersionUID = 1L;
-  private final OptionType<Calendar> end_date;
-  private final OptionType<Calendar> start_date;
+  private final OptionType<DateTime> end_date;
+  private final OptionType<DateTime> start_date;
   private final OptionType<URI>      revoke;
 
   private OPDSAvailabilityLoaned(
-    final OptionType<Calendar> in_start_date,
-    final OptionType<Calendar> in_end_date,
+    final OptionType<DateTime> in_start_date,
+    final OptionType<DateTime> in_end_date,
     final OptionType<URI> in_revoke)
   {
     this.start_date = NullCheck.notNull(in_start_date);
@@ -40,8 +40,8 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
    */
 
   public static OPDSAvailabilityLoaned get(
-    final OptionType<Calendar> in_start_date,
-    final OptionType<Calendar> in_end_date,
+    final OptionType<DateTime> in_start_date,
+    final OptionType<DateTime> in_end_date,
     final OptionType<URI> in_revoke)
   {
     return new OPDSAvailabilityLoaned(in_start_date, in_end_date, in_revoke);
@@ -69,7 +69,7 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
    * @return The end date for the loan, if any
    */
 
-  public OptionType<Calendar> getEndDate()
+  public OptionType<DateTime> getEndDate()
   {
     return this.end_date;
   }
@@ -87,7 +87,7 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
    * @return The start date for the loan, if any
    */
 
-  public OptionType<Calendar> getStartDate()
+  public OptionType<DateTime> getStartDate()
   {
     return this.start_date;
   }
@@ -111,31 +111,12 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
 
   @Override public String toString()
   {
-    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
+    final DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
     final StringBuilder b = new StringBuilder(128);
     b.append("[OPDSAvailabilityLoaned end_date=");
-    b.append(
-      this.end_date.map(
-        new FunctionType<Calendar, String>()
-        {
-          @Override public String call(
-            final Calendar c)
-          {
-            return NullCheck.notNull(fmt.format(c.getTime()));
-          }
-        }));
+    b.append(this.end_date.map(c -> NullCheck.notNull(fmt.print(c))));
     b.append(" start_date=");
-    b.append(
-      this.start_date.map(
-        new FunctionType<Calendar, String>()
-        {
-          @Override
-          public String call(
-            final Calendar c)
-          {
-            return NullCheck.notNull(fmt.format(c.getTime()));
-          }
-        }));
+    b.append(this.start_date.map(c -> NullCheck.notNull(fmt.print(c))));
     b.append(" revoke=");
     b.append(this.revoke);
     b.append("]");

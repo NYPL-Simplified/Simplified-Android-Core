@@ -2,8 +2,9 @@ package org.nypl.simplified.opds.core;
 
 import com.io7m.jfunctional.OptionType;
 
+import org.joda.time.DateTime;
+
 import java.net.URI;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -124,7 +125,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    */
 
   void setPublishedOption(
-    OptionType<Calendar> pub);
+    OptionType<DateTime> pub);
 
   /**
    * Set the publisher.

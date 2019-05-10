@@ -2,6 +2,7 @@ package org.nypl.simplified.tests.books.book_database
 
 import android.content.Context
 import com.io7m.jfunctional.Option
+import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
@@ -176,7 +177,7 @@ abstract class BookDatabaseEPUBContract {
     val eb = OPDSAcquisitionFeedEntry.newBuilder(
       "abcd",
       "Title",
-      Calendar.getInstance(),
+      DateTime.now(),
       OPDSAvailabilityOpenAccess.get(revoke))
 
     eb.addAcquisition(

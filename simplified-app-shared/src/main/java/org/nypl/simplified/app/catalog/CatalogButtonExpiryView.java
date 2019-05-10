@@ -5,9 +5,8 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.joda.time.DateTime;
 import org.nypl.simplified.app.R;
-
-import java.util.Calendar;
 
 /**
  * View that displays a clock icon with short time string below,
@@ -15,7 +14,7 @@ import java.util.Calendar;
  */
 public class CatalogButtonExpiryView extends LinearLayout
 {
-  private Calendar date;
+  private DateTime date;
 
   /**
    * Construct a new expiry view
@@ -35,7 +34,7 @@ public class CatalogButtonExpiryView extends LinearLayout
    *
    * @return date
    */
-  public Calendar getDate()
+  public DateTime getDate()
   {
     return this.date;
   }
@@ -46,14 +45,14 @@ public class CatalogButtonExpiryView extends LinearLayout
    * @param in_date The date that the view should display.
    */
   public void setDate(
-    final Calendar in_date)
+    final DateTime in_date)
   {
     this.date = in_date;
     final TextView text_view = (TextView) this.findViewById(R.id.catalog_button_expiry_date);
     if (in_date != null) {
       text_view.setText(CatalogBookAvailabilityStrings.getIntervalStringShort(
         this.getContext().getResources(),
-        Calendar.getInstance(),
+        DateTime.now(),
         in_date
       ));
     }

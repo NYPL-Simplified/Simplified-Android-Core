@@ -7,10 +7,11 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+import org.joda.time.DateTime;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -21,28 +22,27 @@ import java.util.Set;
  */
 
 @SuppressWarnings("synthetic-access")
-public final class OPDSAcquisitionFeedEntry implements Serializable
-{
+public final class OPDSAcquisitionFeedEntry implements Serializable {
   private static final long serialVersionUID = 1L;
-  private final List<OPDSAcquisition>  acquisitions;
-  private final List<String>           authors;
-  private final OPDSAvailabilityType   availability;
-  private final List<OPDSCategory>     categories;
-  private final OptionType<URI>        cover;
-  private final OptionType<URI>        annotations;
+  private final List<OPDSAcquisition> acquisitions;
+  private final List<String> authors;
+  private final OPDSAvailabilityType availability;
+  private final List<OPDSCategory> categories;
+  private final OptionType<URI> cover;
+  private final OptionType<URI> annotations;
   private final Set<Pair<String, URI>> groups;
-  private final String                 id;
-  private final OptionType<URI>        issues;
-  private final OptionType<URI>        related;
-  private final OptionType<Calendar>   published;
-  private final OptionType<String>     publisher;
-  private final String                 distribution;
-  private final String                 summary;
-  private final OptionType<URI>        thumbnail;
-  private final String                 title;
-  private final Calendar               updated;
-  private final OptionType<URI>        alternate;
-  private final OptionType<URI>        analytics;
+  private final String id;
+  private final OptionType<URI> issues;
+  private final OptionType<URI> related;
+  private final OptionType<DateTime> published;
+  private final OptionType<String> publisher;
+  private final String distribution;
+  private final String summary;
+  private final OptionType<URI> thumbnail;
+  private final String title;
+  private final DateTime updated;
+  private final OptionType<URI> alternate;
+  private final OptionType<URI> analytics;
   private final OptionType<DRMLicensor> licensor;
 
   private OPDSAcquisitionFeedEntry(
@@ -57,16 +57,15 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     final OptionType<URI> in_related,
     final String in_title,
     final OptionType<URI> in_thumbnail,
-    final Calendar in_updated,
+    final DateTime in_updated,
     final String in_summary,
-    final OptionType<Calendar> in_published,
+    final OptionType<DateTime> in_published,
     final OptionType<String> in_publisher,
     final String in_distribution,
     final List<OPDSCategory> in_categories,
     final OptionType<URI> in_alternate,
     final OptionType<URI> in_analytics,
-    final OptionType<DRMLicensor> in_licensor)
-  {
+    final OptionType<DRMLicensor> in_licensor) {
     this.authors = NullCheck.notNull(Collections.unmodifiableList(in_authors));
     this.acquisitions =
       NullCheck.notNull(Collections.unmodifiableList(in_acquisitions));
@@ -97,16 +96,14 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @param in_title        The feed title
    * @param in_updated      The feed updated time
    * @param in_availability The availability
-   *
    * @return A new builder
    */
 
   public static OPDSAcquisitionFeedEntryBuilderType newBuilder(
     final String in_id,
     final String in_title,
-    final Calendar in_updated,
-    final OPDSAvailabilityType in_availability)
-  {
+    final DateTime in_updated,
+    final OPDSAvailabilityType in_availability) {
     return new Builder(in_id, in_title, in_updated, in_availability);
   }
 
@@ -115,13 +112,11 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * initialized with the values of the existing entry {@code e}.
    *
    * @param e An existing entry
-   *
    * @return A new builder
    */
 
   public static OPDSAcquisitionFeedEntryBuilderType newBuilderFrom(
-    final OPDSAcquisitionFeedEntry e)
-  {
+    final OPDSAcquisitionFeedEntry e) {
     final Builder b = new Builder(
       e.getID(), e.getTitle(), e.getUpdated(), e.getAvailability());
 
@@ -166,9 +161,9 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     return b;
   }
 
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
+  @Override
+  public boolean equals(
+    final @Nullable Object obj) {
     if (this == obj) {
       return true;
     }
@@ -180,33 +175,32 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     }
     final OPDSAcquisitionFeedEntry other = (OPDSAcquisitionFeedEntry) obj;
     return this.acquisitions.equals(other.acquisitions)
-           && this.availability.equals(other.availability)
-           && this.authors.equals(other.authors)
-           && this.groups.equals(other.groups)
-           && this.categories.equals(other.categories)
-           && this.cover.equals(other.cover)
-           && this.alternate.equals(other.alternate)
-           && this.analytics.equals(other.analytics)
-           && this.annotations.equals(other.annotations)
-           && this.id.equals(other.id)
-           && this.issues.equals(other.issues)
-           && this.related.equals(other.related)
-           && this.summary.equals(other.summary)
-           && this.thumbnail.equals(other.thumbnail)
-           && this.title.equals(other.title)
-           && this.updated.equals(other.updated)
-           && this.published.equals(other.published)
-           && this.publisher.equals(other.publisher)
-           && this.licensor.equals(other.licensor)
-           && this.distribution.equals(other.distribution);
+      && this.availability.equals(other.availability)
+      && this.authors.equals(other.authors)
+      && this.groups.equals(other.groups)
+      && this.categories.equals(other.categories)
+      && this.cover.equals(other.cover)
+      && this.alternate.equals(other.alternate)
+      && this.analytics.equals(other.analytics)
+      && this.annotations.equals(other.annotations)
+      && this.id.equals(other.id)
+      && this.issues.equals(other.issues)
+      && this.related.equals(other.related)
+      && this.summary.equals(other.summary)
+      && this.thumbnail.equals(other.thumbnail)
+      && this.title.equals(other.title)
+      && this.updated.equals(other.updated)
+      && this.published.equals(other.published)
+      && this.publisher.equals(other.publisher)
+      && this.licensor.equals(other.licensor)
+      && this.distribution.equals(other.distribution);
   }
 
   /**
    * @return The list of acquisitions
    */
 
-  public List<OPDSAcquisition> getAcquisitions()
-  {
+  public List<OPDSAcquisition> getAcquisitions() {
     return this.acquisitions;
   }
 
@@ -214,8 +208,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The list of authors
    */
 
-  public List<String> getAuthors()
-  {
+  public List<String> getAuthors() {
     return this.authors;
   }
 
@@ -223,8 +216,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The entry availability
    */
 
-  public OPDSAvailabilityType getAvailability()
-  {
+  public OPDSAvailabilityType getAvailability() {
     return this.availability;
   }
 
@@ -232,8 +224,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The list of categories
    */
 
-  public List<OPDSCategory> getCategories()
-  {
+  public List<OPDSCategory> getCategories() {
     return this.categories;
   }
 
@@ -241,8 +232,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The cover image
    */
 
-  public OptionType<URI> getCover()
-  {
+  public OptionType<URI> getCover() {
     return this.cover;
   }
 
@@ -251,24 +241,21 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return the annotations url
    */
 
-  public OptionType<URI> getAnnotations()
-  {
+  public OptionType<URI> getAnnotations() {
     return this.annotations;
   }
 
   /**
    * @return alternate url
    */
-  public OptionType<URI> getAlternate()
-  {
+  public OptionType<URI> getAlternate() {
     return this.alternate;
   }
 
   /**
    * @return analytics url
    */
-  public OptionType<URI> getAnalytics()
-  {
+  public OptionType<URI> getAnalytics() {
     return this.analytics;
   }
 
@@ -276,8 +263,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The report issues URI
    */
 
-  public OptionType<URI> getIssues()
-  {
+  public OptionType<URI> getIssues() {
     return this.issues;
   }
 
@@ -285,8 +271,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The related feed url
    */
 
-  public OptionType<URI> getRelated()
-  {
+  public OptionType<URI> getRelated() {
     return this.related;
   }
 
@@ -294,8 +279,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The groups
    */
 
-  public Set<Pair<String, URI>> getGroups()
-  {
+  public Set<Pair<String, URI>> getGroups() {
     return this.groups;
   }
 
@@ -303,8 +287,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The entry ID
    */
 
-  public String getID()
-  {
+  public String getID() {
     return this.id;
   }
 
@@ -312,8 +295,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The entry publication date, if any
    */
 
-  public OptionType<Calendar> getPublished()
-  {
+  public OptionType<DateTime> getPublished() {
     return this.published;
   }
 
@@ -321,8 +303,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The publisher, if any
    */
 
-  public OptionType<String> getPublisher()
-  {
+  public OptionType<String> getPublisher() {
     return this.publisher;
   }
 
@@ -330,8 +311,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The distribution, if any
    */
 
-  public String getDistribution()
-  {
+  public String getDistribution() {
     return this.distribution;
   }
 
@@ -339,8 +319,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The summary
    */
 
-  public String getSummary()
-  {
+  public String getSummary() {
     return this.summary;
   }
 
@@ -348,16 +327,14 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The thumbnail, if any
    */
 
-  public OptionType<URI> getThumbnail()
-  {
+  public OptionType<URI> getThumbnail() {
     return this.thumbnail;
   }
 
   /**
    * @return The licensor
    */
-  public OptionType<DRMLicensor> getLicensor()
-  {
+  public OptionType<DRMLicensor> getLicensor() {
     return this.licensor;
   }
 
@@ -365,8 +342,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The title
    */
 
-  public String getTitle()
-  {
+  public String getTitle() {
     return this.title;
   }
 
@@ -374,8 +350,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The time of the last update
    */
 
-  public Calendar getUpdated()
-  {
+  public DateTime getUpdated() {
     return this.updated;
   }
 
@@ -383,8 +358,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
    * @return The authors as a comma separated string
    */
 
-  public String getAuthorsCommaSeparated()
-  {
+  public String getAuthorsCommaSeparated() {
     final StringBuilder sb = new StringBuilder();
     final List<String> author_list = this.getAuthors();
     final int max = author_list.size();
@@ -398,8 +372,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     return sb.toString();
   }
 
-  @Override public int hashCode()
-  {
+  @Override
+  public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.acquisitions.hashCode();
@@ -425,8 +399,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     return result;
   }
 
-  @Override public String toString()
-  {
+  @Override
+  public String toString() {
     final StringBuilder b = new StringBuilder(128);
     b.append("[OPDSAcquisitionFeedEntry acquisitions=");
     b.append(this.acquisitions);
@@ -473,35 +447,33 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   }
 
   private static final class Builder
-    implements OPDSAcquisitionFeedEntryBuilderType
-  {
-    private final List<OPDSAcquisition>  acquisitions;
-    private final List<String>           authors;
-    private final List<OPDSCategory>     categories;
+    implements OPDSAcquisitionFeedEntryBuilderType {
+    private final List<OPDSAcquisition> acquisitions;
+    private final List<String> authors;
+    private final List<OPDSCategory> categories;
     private final Set<Pair<String, URI>> groups;
-    private final String                 id;
-    private final String                 title;
-    private final Calendar               updated;
-    private       OPDSAvailabilityType   availability;
-    private       OptionType<URI>        cover;
-    private       OptionType<URI>        alternate;
-    private       OptionType<URI>        analytics;
-    private       OptionType<URI>        annotations;
-    private       OptionType<URI>        issues;
-    private       OptionType<URI>        related;
-    private       OptionType<Calendar>   published;
-    private       OptionType<String>     publisher;
-    private       String                 distribution;
-    private       String                 summary;
-    private       OptionType<URI>        thumbnail;
-    private       OptionType<DRMLicensor>        licensor;
+    private final String id;
+    private final String title;
+    private final DateTime updated;
+    private OPDSAvailabilityType availability;
+    private OptionType<URI> cover;
+    private OptionType<URI> alternate;
+    private OptionType<URI> analytics;
+    private OptionType<URI> annotations;
+    private OptionType<URI> issues;
+    private OptionType<URI> related;
+    private OptionType<DateTime> published;
+    private OptionType<String> publisher;
+    private String distribution;
+    private String summary;
+    private OptionType<URI> thumbnail;
+    private OptionType<DRMLicensor> licensor;
 
     private Builder(
       final String in_id,
       final String in_title,
-      final Calendar in_updated,
-      final OPDSAvailabilityType in_availability)
-    {
+      final DateTime in_updated,
+      final OPDSAvailabilityType in_availability) {
       this.id = NullCheck.notNull(in_id);
       this.issues = Option.none();
       this.related = Option.none();
@@ -524,35 +496,35 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       this.licensor = Option.none();
     }
 
-    @Override public void addAcquisition(
-      final OPDSAcquisition a)
-    {
+    @Override
+    public void addAcquisition(
+      final OPDSAcquisition a) {
       this.acquisitions.add(NullCheck.notNull(a));
     }
 
-    @Override public void addAuthor(
-      final String name)
-    {
+    @Override
+    public void addAuthor(
+      final String name) {
       this.authors.add(NullCheck.notNull(name));
     }
 
-    @Override public void addCategory(
-      final OPDSCategory c)
-    {
+    @Override
+    public void addCategory(
+      final OPDSCategory c) {
       this.categories.add(NullCheck.notNull(c));
     }
 
-    @Override public void addGroup(
+    @Override
+    public void addGroup(
       final URI uri,
-      final String b)
-    {
+      final String b) {
       NullCheck.notNull(uri);
       NullCheck.notNull(b);
       this.groups.add(Pair.pair(b, uri));
     }
 
-    @Override public OPDSAcquisitionFeedEntry build()
-    {
+    @Override
+    public OPDSAcquisitionFeedEntry build() {
       return new OPDSAcquisitionFeedEntry(
         this.authors,
         this.acquisitions,
@@ -576,75 +548,75 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
         this.licensor);
     }
 
-    @Override public List<OPDSAcquisition> getAcquisitions()
-    {
+    @Override
+    public List<OPDSAcquisition> getAcquisitions() {
       return this.acquisitions;
     }
 
-    @Override public void setAvailability(
-      final OPDSAvailabilityType a)
-    {
+    @Override
+    public void setAvailability(
+      final OPDSAvailabilityType a) {
       this.availability = NullCheck.notNull(a);
     }
 
-    @Override public void setCoverOption(
-      final OptionType<URI> uri)
-    {
+    @Override
+    public void setCoverOption(
+      final OptionType<URI> uri) {
       this.cover = NullCheck.notNull(uri);
     }
 
 
-    @Override public void setAlternateOption(
-      final OptionType<URI> uri)
-    {
+    @Override
+    public void setAlternateOption(
+      final OptionType<URI> uri) {
       this.alternate = NullCheck.notNull(uri);
     }
 
-    @Override public void setAnalyticsOption(
-      final OptionType<URI> uri)
-    {
+    @Override
+    public void setAnalyticsOption(
+      final OptionType<URI> uri) {
       this.analytics = NullCheck.notNull(uri);
     }
 
-    @Override public void setAnnotationsOption(
-      final OptionType<URI> uri)
-    {
+    @Override
+    public void setAnnotationsOption(
+      final OptionType<URI> uri) {
       this.annotations = NullCheck.notNull(uri);
     }
 
-    @Override public void setIssuesOption(
-      final OptionType<URI> uri)
-    {
+    @Override
+    public void setIssuesOption(
+      final OptionType<URI> uri) {
       this.issues = NullCheck.notNull(uri);
     }
 
-    @Override public void setRelatedOption(
-      final OptionType<URI> uri)
-    {
+    @Override
+    public void setRelatedOption(
+      final OptionType<URI> uri) {
       this.related = NullCheck.notNull(uri);
     }
 
-    @Override public void setPublishedOption(
-      final OptionType<Calendar> pub)
-    {
+    @Override
+    public void setPublishedOption(
+      final OptionType<DateTime> pub) {
       this.published = NullCheck.notNull(pub);
     }
 
-    @Override public void setPublisherOption(
-      final OptionType<String> pub)
-    {
+    @Override
+    public void setPublisherOption(
+      final OptionType<String> pub) {
       this.publisher = NullCheck.notNull(pub);
     }
 
-    @Override public void setDistribution(
-      final String dist)
-    {
+    @Override
+    public void setDistribution(
+      final String dist) {
       this.distribution = NullCheck.notNull(dist);
     }
 
-    @Override public void setSummaryOption(
-      final OptionType<String> text)
-    {
+    @Override
+    public void setSummaryOption(
+      final OptionType<String> text) {
       if (text.isNone()) {
         this.summary = "";
       } else {
@@ -652,15 +624,15 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       }
     }
 
-    @Override public void setThumbnailOption(
-      final OptionType<URI> uri)
-    {
+    @Override
+    public void setThumbnailOption(
+      final OptionType<URI> uri) {
       this.thumbnail = NullCheck.notNull(uri);
     }
 
-    @Override public void setLicensorOption(
-      final OptionType<DRMLicensor> lic)
-    {
+    @Override
+    public void setLicensorOption(
+      final OptionType<DRMLicensor> lic) {
       this.licensor = NullCheck.notNull(lic);
     }
   }

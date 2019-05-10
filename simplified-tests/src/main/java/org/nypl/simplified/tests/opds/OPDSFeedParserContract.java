@@ -5,6 +5,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -86,14 +86,14 @@ public abstract class OPDSFeedParserContract {
         "application/opensearchdescription+xml",
         search.getType());
 
-    final Calendar u = f.getFeedUpdated();
+    final DateTime u = f.getFeedUpdated();
     final Set<String> ids = new HashSet<String>();
     final Set<String> titles = new HashSet<String>();
 
     for (final OPDSAcquisitionFeedEntry e : f.getFeedEntries()) {
       final String e_id = e.getID();
       final String e_title = e.getTitle();
-      final Calendar e_u = e.getUpdated();
+      final DateTime e_u = e.getUpdated();
       final List<OPDSAcquisition> e_acq = e.getAcquisitions();
       final List<String> e_authors = e.getAuthors();
       final OptionType<URI> e_thumb = e.getThumbnail();

@@ -2,8 +2,9 @@ package org.nypl.simplified.opds.core;
 
 import com.io7m.jfunctional.OptionType;
 
+import org.joda.time.DateTime;
+
 import java.io.Serializable;
-import java.util.Calendar;
 
 /**
  * <p> The type of book availability. </p> <p> OPDS does not have a standard way
@@ -19,7 +20,7 @@ public interface OPDSAvailabilityType extends Serializable
    *
    * @return end_date
    */
-  OptionType<Calendar> getEndDate();
+  OptionType<DateTime> getEndDate();
 
   /**
    * Match the type of availability.
