@@ -710,7 +710,7 @@ public final class Simplified extends MultiDexApplication {
         this.cover_generator,
         this.cover_badges,
         this.exec_covers,
-        true,
+        false,
         false);
 
     LOG.debug("initializing local image loader");
