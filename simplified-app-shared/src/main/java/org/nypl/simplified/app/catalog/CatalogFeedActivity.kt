@@ -6,6 +6,7 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -166,6 +167,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
       button.layoutParams = buttonLayout
       button.gravity = Gravity.CENTER
+      button.maxLines = 1
+      button.ellipsize = TextUtils.TruncateAt.END
 
       /*
        * The buttons need unique IDs so that they can be addressed within the parent
