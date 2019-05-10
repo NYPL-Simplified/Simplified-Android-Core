@@ -492,6 +492,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     return when (state) {
       AccountNotLoggedIn -> {
         this.actionLayout.visibility = View.INVISIBLE
+        this.pinText.setText("")
+        this.barcodeText.setText("")
         this.configureEnableLoginForm()
       }
 
