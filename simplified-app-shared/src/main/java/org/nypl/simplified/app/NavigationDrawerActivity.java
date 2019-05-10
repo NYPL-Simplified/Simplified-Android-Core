@@ -148,6 +148,20 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
   protected abstract boolean navigationDrawerShouldShowIndicator();
 
   /**
+   * Replace the navigation drawer icon with an "up" indicator.
+   */
+
+  protected final void navigationDrawerShowUpIndicatorUnconditionally()
+  {
+    final ActionBar bar = this.getSupportActionBar();
+    if (bar != null) {
+      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+      bar.setDisplayHomeAsUpEnabled(true);
+      bar.setHomeButtonEnabled(false);
+    }
+  }
+
+  /**
    * @return The title string for this activity
    */
 

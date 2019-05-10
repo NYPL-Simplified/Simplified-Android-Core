@@ -206,13 +206,6 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     this.actionProgress =
       this.actionLayout.findViewById(R.id.settings_action_progress)
 
-    val bar = this.supportActionBar
-    if (bar != null) {
-      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp)
-      bar.setDisplayHomeAsUpEnabled(true)
-      bar.setHomeButtonEnabled(false)
-    }
-
     val accountProvider = this.account.provider()
     this.accountNameText.text = accountProvider.displayName()
 
@@ -393,6 +386,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   override fun onStart() {
     super.onStart()
+
+    this.navigationDrawerShowUpIndicatorUnconditionally()
 
     this.accountEventSubscription =
       Simplified.getProfilesController()

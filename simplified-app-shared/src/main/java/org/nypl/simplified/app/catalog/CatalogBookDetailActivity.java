@@ -65,7 +65,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
     final FeedEntryOPDS e) {
     NullCheck.notNull(b);
     NavigationDrawerActivity.setActivityArguments(b, drawer_open);
-    CatalogActivity.setActivityArguments(b, drawer_open);
+    CatalogActivity.Companion.setActivityArguments(b, up_stack);
     b.putSerializable(CATALOG_BOOK_DETAIL_FEED_ENTRY_ID, NullCheck.notNull(e));
   }
 
@@ -103,7 +103,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
 
   @Override
   protected boolean navigationDrawerShouldShowIndicator() {
-    return false;
+    return this.upStack.isEmpty();
   }
 
   @Override
@@ -146,14 +146,21 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
     content_area.removeAllViews();
     content_area.addView(detailView.getScrollView());
     content_area.requestLayout();
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+    this.navigationDrawerShowUpIndicatorUnconditionally();
 
     /*
      * Subscribe the detail view to book events.
      */
 
     this.bookSubscription =
-      bookRegistry.bookEvents()
-        .subscribe(detailView::onBookEvent);
+      Simplified.getBooksRegistry()
+        .bookEvents()
+        .subscribe(this.view::onBookEvent);
   }
 
   @Override

@@ -293,6 +293,11 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     this.startActivity(intent)
   }
 
+  override fun onStart() {
+    super.onStart()
+    this.navigationDrawerShowUpIndicatorUnconditionally()
+  }
+
   override fun onDestroy() {
     super.onDestroy()
     this.profilesSubscription?.unsubscribe()
