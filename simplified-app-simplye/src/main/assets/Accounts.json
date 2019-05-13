@@ -2242,6 +2242,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "catalogUrl": "http://open.minitex.org/textbooks/",
         "id_numeric": 1263,
         "id_uuid": "urn:uuid:5278562c-d642-4fda-ad7e-1613077cfb8d",
         "inProduction": false,
