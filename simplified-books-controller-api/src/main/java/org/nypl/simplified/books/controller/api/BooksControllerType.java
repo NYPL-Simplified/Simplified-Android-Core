@@ -55,11 +55,13 @@ public interface BooksControllerType {
   /**
    * Submit a problem report for a book
    *
+   * @param account The account that owns the book
    * @param feed_entry  Feed entry, used to get the URI to submit to
    * @param report_type Type of report to submit
    */
 
   ListenableFuture<Unit> bookReport(
+    final AccountType account,
     final FeedEntry.FeedEntryOPDS feed_entry,
     final String report_type);
 

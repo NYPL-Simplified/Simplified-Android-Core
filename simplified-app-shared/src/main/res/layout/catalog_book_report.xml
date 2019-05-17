@@ -1,160 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent" android:layout_height="match_parent"
-    >
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:orientation="vertical">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
+      android:id="@+id/options_container"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+      <CheckBox
+        android:id="@+id/report_genre"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/wrong-genre"
+        android:text="@string/catalog_book_report_wrong_genre"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/options_container">
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_wrong_genre"
-                android:id="@+id/report_genre"
-                android:tag="http://librarysimplified.org/terms/problem/wrong-genre"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
+      <CheckBox
+        android:id="@+id/report_audience"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/wrong-audience"
+        android:text="@string/catalog_book_report_wrong_audience"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_wrong_audience"
-                android:id="@+id/report_audience"
-                android:tag="http://librarysimplified.org/terms/problem/wrong-audience"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
+      <CheckBox
+        android:id="@+id/report_age_range"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/wrong-age-range"
+        android:text="@string/catalog_book_report_wrong_age_range"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_wrong_age_range"
-                android:id="@+id/report_age_range"
-                android:tag="http://librarysimplified.org/terms/problem/wrong-age-range"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
+      <CheckBox
+        android:id="@+id/report_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/wrong-title"
+        android:text="@string/catalog_book_report_wrong_title"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_wrong_title"
-                android:id="@+id/report_title"
-                android:tag="http://librarysimplified.org/terms/problem/wrong-title"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
+      <CheckBox
+        android:id="@+id/report_medium"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/wrong-medium"
+        android:text="@string/catalog_book_report_wrong_medium"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_wrong_medium"
-                android:id="@+id/report_medium"
-                android:tag="http://librarysimplified.org/terms/problem/wrong-medium"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
+      <CheckBox
+        android:id="@+id/report_author"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/wrong-author"
+        android:text="@string/catalog_book_report_wrong_author"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_wrong_author"
-                android:id="@+id/report_author"
-                android:tag="http://librarysimplified.org/terms/problem/wrong-author"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"
-                />
+      <CheckBox
+        android:id="@+id/report_cover_image"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/bad-cover-image"
+        android:text="@string/catalog_book_report_wrong_cover_image"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_wrong_cover_image"
-                android:id="@+id/report_cover_image"
-                android:tag="http://librarysimplified.org/terms/problem/bad-cover-image"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
+      <CheckBox
+        android:id="@+id/report_description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/bad-description"
+        android:text="@string/catalog_book_report_wrong_description"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_wrong_description"
-                android:id="@+id/report_description"
-                android:tag="http://librarysimplified.org/terms/problem/bad-description"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
+      <CheckBox
+        android:id="@+id/report_download"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/cannot-fulfill-loan"
+        android:text="@string/catalog_book_report_cant_download"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_cant_download"
-                android:id="@+id/report_download"
-                android:tag="http://librarysimplified.org/terms/problem/cannot-fulfill-loan"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
+      <CheckBox
+        android:id="@+id/report_borrow"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/cannot-issue-loan"
+        android:text="@string/catalog_book_report_cant_borrow"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_cant_borrow"
-                android:id="@+id/report_borrow"
-                android:tag="http://librarysimplified.org/terms/problem/cannot-issue-loan"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
-
-            <CheckBox
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/catalog_book_report_incorrect_contents"
-                android:id="@+id/report_contents"
-                android:tag="http://librarysimplified.org/terms/problem/cannot-render"
-                android:checked="false"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="8dp"
-                android:singleLine="false"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center_horizontal"
-            >
-
-            <Button
-                android:id="@+id/report_submit"
-                android:background="@drawable/simplified_button"
-                android:layout_gravity="start"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@drawable/simplified_button_text"
-                android:textSize="12sp"
-                android:text="@string/catalog_book_report_submit"/>
-        </LinearLayout>
-
+      <CheckBox
+        android:id="@+id/report_contents"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="false"
+        android:singleLine="false"
+        android:tag="http://librarysimplified.org/terms/problem/cannot-render"
+        android:text="@string/catalog_book_report_incorrect_contents"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal"
+      android:layout_marginTop="32dp"
+      android:layout_marginBottom="32dp"
+      android:gravity="center_horizontal"
+      android:orientation="horizontal">
+
+      <Button
+        android:id="@+id/report_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:background="@drawable/simplified_button"
+        android:text="@string/catalog_book_report_submit"
+        android:textColor="@drawable/simplified_button_text"
+        android:textSize="12sp" />
+    </LinearLayout>
+  </LinearLayout>
+
 </ScrollView>

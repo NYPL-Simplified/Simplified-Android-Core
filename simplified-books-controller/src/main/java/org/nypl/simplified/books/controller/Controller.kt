@@ -6,14 +6,9 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.FunctionType
-import com.io7m.jfunctional.None
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.OptionVisitorType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
-import com.io7m.junreachable.UnimplementedCodeException
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -26,7 +21,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -341,9 +335,14 @@ class Controller private constructor(
   }
 
   override fun bookReport(
+    account: AccountType,
     feedEntry: FeedEntry.FeedEntryOPDS,
     reportType: String): ListenableFuture<Unit> {
-    throw UnimplementedCodeException()
+    return this.taskExecutor.submit(BookReportTask(
+      http = this.http,
+      account = account,
+      feedEntry = feedEntry,
+      reportType = reportType))
   }
 
   override fun booksSync(account: AccountType): ListenableFuture<Unit> {
