@@ -12,7 +12,7 @@
 
   <!-- Age Verification strings -->
   <string name="age_verification_title">Age Verification</string>
-  <string name="age_verification_question">You must be 13 years of age or older to download a book from the collection.\nHow old are you?</string>
+  <string name="age_verification_question">You must be 13 years of age or older to download some of the books from this collection.\nHow old are you?</string>
   <string name="age_verification_changed">If you are under 13, all content downloaded to My Books will be removed.\nHow old are you?</string>
   <string name="age_verification_13_older">13 or Older</string>
   <string name="age_verification_13_younger">Under 13</string>
