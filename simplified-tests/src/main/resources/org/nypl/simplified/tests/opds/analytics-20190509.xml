@@ -1,0 +1,316 @@
+<feed xmlns:app="http://www.w3.org/2007/app" xmlns:bib="http://bib.schema.org/" xmlns:bibframe="http://bibframe.org/vocab/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:drm="http://librarysimplified.org/terms/drm" xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:opf="http://www.idpf.org/2007/opf" xmlns:schema="http://schema.org/" xmlns:simplified="http://librarysimplified.org/terms/" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://circulation.librarysimplified.org/CLASSICS/search/1831?q=corner&amp;entrypoint=Book</id>
+  <title>Search</title>
+  <updated>2019-05-09T17:14:04Z</updated>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/search/1831?q=corner&amp;entrypoint=Book" rel="self"/>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>https://www.feedbooks.com/book/485</id>
+    <title>The Jolly Corner</title>
+    <author>
+      <name>Henry James</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Henry%20James/eng/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Henry James"/>
+    </author>
+    <summary type="html">No Description Available</summary>
+    <simplified:pwid>08fd1f2a-00a0-dd48-4904-7d3d86ea4dba</simplified:pwid>
+    <link href="https://covers.nypl.org/FeedBooks/URI/https%3A//www.feedbooks.com/book/485/485.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://covers.nypl.org/scaled/300/FeedBooks/URI/https%3A//www.feedbooks.com/book/485/485.png" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Short%20Stories" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Short Stories"/>
+    <dcterms:language>en</dcterms:language>
+    <published>2018-04-09T15:11:25Z</published>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/https://www.feedbooks.com/book/485/report" rel="issues"/>
+    <id>https://www.feedbooks.com/book/485</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/https://www.feedbooks.com/book/485" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="FeedBooks"/>
+    <published>2018-04-09T00:00:00Z</published>
+    <updated>2018-06-04T20:29:04Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/309501/fulfill/1" rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip" dcterms:rights="https://creativecommons.org/licenses/by-nc/4.0">
+      <opds:availability status="available"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/https://www.feedbooks.com/book/485/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/https://www.feedbooks.com/book/485/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>http://www.feedbooks.com/book/5544</id>
+    <title>The Old Man in the Corner</title>
+    <author>
+      <name>Emma Orczy</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Emma%20Orczy/eng/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Emma Orczy"/>
+    </author>
+    <summary type="html">&lt;p&gt;Created by Baroness Orczy, author of the famous Scarlet Pimpernel series, The Old Man In the Corner was one of the earliest armchair detectives, popping up with so many others in the wake of the huge popularity of the Sherlock Holmes stories.&lt;/p&gt;
+
+&lt;p&gt;The Old Man relies mostly upon sensationalistic "penny dreadful" newspaper accounts, with the occasional courtroom visit. He narrates all this information, while tying complicated knots in a piece of string, to a female Journalist who frequents the same tea-shop (the ABC Teashop on the corner of Norfolk Street and the Strand). They enjoy an antagonistic relationship, as the Journalist attempts to cut the Old Man's ego down to size and the Old Man trumps her every time.&lt;/p&gt;
+
+&lt;p&gt;--Wikipedia&lt;/p&gt;</summary>
+    <simplified:pwid>fb1452dc-4154-19c6-8529-8ec9386f1615</simplified:pwid>
+    <link href="https://d3pqhns20516vc.cloudfront.net/FeedBooks/URI/http%3A//www.feedbooks.com/book/5544/5544.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://d3pqhns20516vc.cloudfront.net/scaled/300/FeedBooks/URI/http%3A//www.feedbooks.com/book/5544/5544.png" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Short%20Stories" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Short Stories"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Mystery" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Mystery"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <published>2018-04-11T19:16:10Z</published>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/5544/report" rel="issues"/>
+    <id>http://www.feedbooks.com/book/5544</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/5544" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="FeedBooks"/>
+    <published>2018-04-11T00:00:00Z</published>
+    <updated>2018-05-03T14:07:47Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/312473/fulfill/1" rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip" dcterms:rights="https://creativecommons.org/licenses/by-nc/4.0">
+      <opds:availability status="available"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/5544/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/http://www.feedbooks.com/book/5544/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>http://www.feedbooks.com/book/616</id>
+    <title>The Cone</title>
+    <author>
+      <name>H. G. Wells</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/H.%20G.%20Wells/eng/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="H. G. Wells"/>
+    </author>
+    <summary type="html">No Description Available</summary>
+    <simplified:pwid>eca13b88-1553-d66c-f9ad-3d1d34962bb0</simplified:pwid>
+    <link href="https://d3pqhns20516vc.cloudfront.net/FeedBooks/URI/http%3A//www.feedbooks.com/book/616/616.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://d3pqhns20516vc.cloudfront.net/scaled/300/FeedBooks/URI/http%3A//www.feedbooks.com/book/616/616.png" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Short%20Stories" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Short Stories"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <published>2018-04-09T15:11:25Z</published>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/616/report" rel="issues"/>
+    <id>http://www.feedbooks.com/book/616</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/616" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="FeedBooks"/>
+    <published>2018-04-09T00:00:00Z</published>
+    <updated>2018-04-09T15:13:31Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/309492/fulfill/1" rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip" dcterms:rights="https://creativecommons.org/licenses/by-nc/4.0">
+      <opds:availability status="available"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/616/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/http://www.feedbooks.com/book/616/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>http://www.feedbooks.com/book/6132</id>
+    <title>&#161;Adi&#243;s, Cordera!</title>
+    <author>
+      <name>Leopoldo Alas</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Leopoldo%20Alas/spa/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Leopoldo Alas"/>
+    </author>
+    <summary type="html">&lt;p&gt;La historia trata de dos ni&#241;os gemelos: Pin&#237;n y Rosa, que junto con la Cordera y su padre: Ant&#243;n de Chinta, viven en el prado Somonte y van descubriendo de modos diferentes el progreso a su alrededor representado por el tren y por el poste de tel&#233;grafo. &lt;/p&gt;</summary>
+    <simplified:pwid>8d064e57-6cea-942b-cd96-bb3cc40bbcb2</simplified:pwid>
+    <link href="https://d3pqhns20516vc.cloudfront.net/FeedBooks/URI/http%3A//www.feedbooks.com/book/6132/6132.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://d3pqhns20516vc.cloudfront.net/scaled/300/FeedBooks/URI/http%3A//www.feedbooks.com/book/6132/6132.png" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Short%20Stories" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Short Stories"/>
+    <dcterms:language>es</dcterms:language>
+    <published>2018-03-27T16:00:10Z</published>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/6132/report" rel="issues"/>
+    <id>http://www.feedbooks.com/book/6132</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/6132" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="FeedBooks"/>
+    <published>2018-03-27T00:00:00Z</published>
+    <updated>2018-03-27T16:10:32Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/307692/fulfill/1" rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip" dcterms:rights="https://creativecommons.org/licenses/by-nc/4.0">
+      <opds:availability status="available"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/6132/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/http://www.feedbooks.com/book/6132/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>urn:isbn:9781683604334</id>
+    <title>The Long Walk North</title>
+    <author>
+      <name>Bill Cotter</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Bill%20Cotter/eng/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Bill Cotter"/>
+    </author>
+    <summary type="html">There is no rescue in &#8220;The Long Walk North.&#8221; Because unlike the evening newscasters, Bill Cotter knows which part of the story to tell: the setting out, the part you can never quite get a handle on, the part with all the questions, the lead up, the messy bits, the posturing and the promises and the too-little-to-lates. - Halimah Marcus, Editor-in-Chief, Electric Literature's Recommended Reading.</summary>
+    <simplified:pwid>398c33a3-eb40-93c7-3960-88b67bdfc377</simplified:pwid>
+    <link href="https://covers.nypl.org/Plympton/ISBN/9781683604334/9781683604334_The-Long-Walk-North.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://d14p0gig7ihu1b.cloudfront.net/covers/9781683604334_The-Long-Walk-North.thumbnail.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Short%20Stories" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Short Stories"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Electric Literature</dcterms:publisher>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/ISBN/9781683604334/report" rel="issues"/>
+    <id>urn:isbn:9781683604334</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/ISBN/9781683604334" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="Plympton"/>
+    <published>2018-04-25T00:00:00Z</published>
+    <updated>2018-04-25T12:31:13Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/313459/fulfill/17" rel="http://opds-spec.org/acquisition/open-access" type="application/vnd.librarysimplified.bearer-token+json" dcterms:rights="http://librarysimplified.org/terms/rights-status/in-copyright">
+      <opds:indirectAcquisition type="application/epub+zip"/>
+      <opds:availability status="available"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/ISBN/9781683604334/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/ISBN/9781683604334/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>http://www.feedbooks.com/book/517</id>
+    <title>Carnet d'un inconnu (St&#233;pantchikovo)</title>
+    <author>
+      <name>Fyodor Dostoyevsky</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Fyodor%20Dostoyevsky/fre/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Fyodor Dostoyevsky"/>
+    </author>
+    <summary type="html">No Description Available</summary>
+    <simplified:pwid>a849264d-629f-da94-16a7-726a300af946</simplified:pwid>
+    <link href="https://d3pqhns20516vc.cloudfront.net/FeedBooks/URI/http%3A//www.feedbooks.com/book/517/517.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://d3pqhns20516vc.cloudfront.net/scaled/300/FeedBooks/URI/http%3A//www.feedbooks.com/book/517/517.png" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <dcterms:language>fr</dcterms:language>
+    <published>2018-03-28T14:03:25Z</published>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/517/report" rel="issues"/>
+    <id>http://www.feedbooks.com/book/517</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/517" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="FeedBooks"/>
+    <published>2018-03-28T00:00:00Z</published>
+    <updated>2018-03-28T14:11:55Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/308023/fulfill/1" rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip" dcterms:rights="https://creativecommons.org/licenses/by-nc/4.0">
+      <opds:availability status="available"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/517/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/http://www.feedbooks.com/book/517/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>http://www.feedbooks.com/book/7280</id>
+    <title>Il corriere scomparso</title>
+    <author>
+      <name>E. Phillips Oppenheim</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/E.%20Phillips%20Oppenheim/ita/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="E. Phillips Oppenheim"/>
+    </author>
+    <summary type="html">&lt;p&gt;Un bizzarro, ricco e apparentemente innocuo invalido vive in un castello tenendo in pratica segregati i due nipoti e in soggezione quasi tutta la popolazione del circondario.&lt;/p&gt;</summary>
+    <simplified:pwid>b7396bb4-d9b3-d910-6d20-0453f0334b35</simplified:pwid>
+    <link href="http://covers.feedbooks.net/book/7280.jpg?size=large&amp;t=1502435747" type="image/png" rel="http://opds-spec.org/image"/>
+    <link href="http://covers.feedbooks.net/book/7280.jpg?t=1502435747" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Mystery" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Mystery"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <dcterms:language>it</dcterms:language>
+    <published>2018-03-27T14:56:30Z</published>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/7280/report" rel="issues"/>
+    <id>http://www.feedbooks.com/book/7280</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/7280" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="FeedBooks"/>
+    <published>2018-03-27T00:00:00Z</published>
+    <updated>2018-03-27T14:57:40Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/307451/fulfill/1" rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip" dcterms:rights="https://creativecommons.org/licenses/by-nc-nd/4.0">
+      <opds:availability status="available"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/7280/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/http://www.feedbooks.com/book/7280/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>http://www.feedbooks.com/book/2934</id>
+    <title>Doctor Who: Human Nature</title>
+    <author>
+      <name>Paul Cornell</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Paul%20Cornell/eng/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Paul Cornell"/>
+    </author>
+    <summary type="html">&lt;p&gt;"On the eve of the First World War, John Smith teaches at an English public school. But is he all that he seems?"&lt;/p&gt;</summary>
+    <simplified:pwid>3f77f640-83d1-45eb-dd2e-aa253b3c7839</simplified:pwid>
+    <link href="https://covers.nypl.org/FeedBooks/URI/http%3A//www.feedbooks.com/book/2934/2934.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://covers.nypl.org/scaled/300/FeedBooks/URI/http%3A//www.feedbooks.com/book/2934/2934.png" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Science%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Science Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <published>2018-04-11T15:04:07Z</published>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/2934/report" rel="issues"/>
+    <id>http://www.feedbooks.com/book/2934</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/2934" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="FeedBooks"/>
+    <published>2018-04-11T00:00:00Z</published>
+    <updated>2018-06-04T17:22:28Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/311239/fulfill/1" rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip" dcterms:rights="http://librarysimplified.org/terms/rights-status/generic-open-access">
+      <opds:availability status="available"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/2934/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/http://www.feedbooks.com/book/2934/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <title>The End of Coney Island Avenue</title>
+    <author>
+      <name>Roohi Choudhry</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Roohi%20Choudhry/eng/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Roohi Choudhry"/>
+    </author>
+    <summary type="html">Ayesha, a recent immigrant from Pakistan, remembers her husband, Ahmad, achingly absent from their little sphere of life on Coney Island Avenue in Brooklyn. New York has changed since the towers fell, and she faces disapproving neighbors, wary strangers, and close-lipped bureaucracy in her desperate search for answers as she adapts to life alone.</summary>
+    <simplified:pwid>8447e6db-ba59-74fa-7889-05b3fc6dce6a</simplified:pwid>
+    <link href="https://covers.nypl.org/Plympton/ISBN/9781683601111/9781683601111_The-End-of-Coney-Island-Avenue.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://covers.nypl.org/scaled/300/Plympton/ISBN/9781683601111/9781683601111_The-End-of-Coney-Island-Avenue.png" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Short%20Stories" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Short Stories"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Plympton</dcterms:publisher>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/ISBN/9781683601111/report" rel="issues"/>
+    <id>urn:isbn:9781683601111</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/ISBN/9781683601111" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="Plympton"/>
+    <published>2018-05-31T00:00:00Z</published>
+    <updated>2018-05-31T12:18:09Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/315213/fulfill/17" rel="http://opds-spec.org/acquisition/open-access" type="application/vnd.librarysimplified.bearer-token+json" dcterms:rights="http://librarysimplified.org/terms/rights-status/in-copyright">
+      <opds:indirectAcquisition type="application/epub+zip"/>
+      <opds:availability status="available"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/ISBN/9781683601111/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/ISBN/9781683601111/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <id>http://www.feedbooks.com/book/478</id>
+    <title>Michael Strogoff, or The Courier of the Czar</title>
+    <author>
+      <name>Jules Verne</name>
+      <link href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Jules%20Verne/eng/Adult%2CAdults+Only%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Jules Verne"/>
+    </author>
+    <summary type="html">No Description Available</summary>
+    <simplified:pwid>42299615-9532-589c-8880-c09eb5fff77f</simplified:pwid>
+    <link href="https://d3pqhns20516vc.cloudfront.net/FeedBooks/URI/http%3A//www.feedbooks.com/book/478/478.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="https://d3pqhns20516vc.cloudfront.net/scaled/300/FeedBooks/URI/http%3A//www.feedbooks.com/book/478/478.png" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Science%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Science Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Historical%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Historical Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <published>2018-04-09T14:58:21Z</published>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/478/report" rel="issues"/>
+    <id>http://www.feedbooks.com/book/478</id>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/478" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="FeedBooks"/>
+    <published>2018-04-09T00:00:00Z</published>
+    <updated>2018-04-09T15:09:59Z</updated>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/309481/fulfill/1" rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip" dcterms:rights="https://creativecommons.org/licenses/by-nc/4.0">
+      <opds:availability status="available"/>
+    </link>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/works/URI/http://www.feedbooks.com/book/478/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/http://www.feedbooks.com/book/478/open_book" rel="http://librarysimplified.org/terms/rel/analytics/open-book"/>
+  </entry>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/groups/" rel="start" title="All Books"/>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/search/1831?q=corner&amp;after=10&amp;entrypoint=Book&amp;size=10" rel="next"/>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/groups/1831" rel="up" title="The SimplyE Collection"/>
+  <simplified:breadcrumbs>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/groups/" title="All Books"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/groups/1831" title="The SimplyE Collection"/>
+  </simplified:breadcrumbs>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/authentication_document" rel="http://opds-spec.org/auth/document"/>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/search/1831?entrypoint=Book" type="application/opensearchdescription+xml" rel="search"/>
+  <link href="http://www.librarysimplified.org/iclicenses.html" type="text/html" rel="license"/>
+  <link href="mailto:adrianaalter+abc@nypl.org" rel="help"/>
+</feed>

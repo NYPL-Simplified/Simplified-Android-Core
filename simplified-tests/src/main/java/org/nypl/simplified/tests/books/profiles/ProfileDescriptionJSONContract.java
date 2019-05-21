@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.profiles.ProfileDescriptionJSON;
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth;
 import org.nypl.simplified.profiles.api.ProfileDescription;
 import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.reader.api.ReaderPreferences;
@@ -23,7 +24,7 @@ public abstract class ProfileDescriptionJSONContract {
         ProfileDescription.builder(
             "Kermit",
             ProfilePreferences.builder()
-                .setDateOfBirth(new LocalDate(1985, 1, 1))
+                .setDateOfBirth(new ProfileDateOfBirth(new LocalDate(1985, 1, 1), true))
                 .setReaderPreferences(ReaderPreferences.builder().build())
                 .build()).build();
 

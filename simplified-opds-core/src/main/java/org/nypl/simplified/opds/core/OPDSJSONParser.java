@@ -11,6 +11,7 @@ import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
@@ -20,7 +21,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -136,9 +136,9 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
 
       if (node.has("loaned")) {
         final ObjectNode n = JSONParserUtilities.getObject(node, "loaned");
-        final OptionType<Calendar> in_start_date =
+        final OptionType<DateTime> in_start_date =
           JSONParserUtilities.getTimestampOptional(n, "start_date");
-        final OptionType<Calendar> in_end_date =
+        final OptionType<DateTime> in_end_date =
           JSONParserUtilities.getTimestampOptional(n, "end_date");
         final OptionType<URI> in_revoke =
           JSONParserUtilities.getURIOptional(n, "revoke");
@@ -147,11 +147,11 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
 
       if (node.has("held")) {
         final ObjectNode n = JSONParserUtilities.getObject(node, "held");
-        final OptionType<Calendar> in_start_date =
+        final OptionType<DateTime> in_start_date =
           JSONParserUtilities.getTimestampOptional(n, "start_date");
         final OptionType<Integer> in_position =
           JSONParserUtilities.getIntegerOptional(n, "position");
-        final OptionType<Calendar> in_end_date =
+        final OptionType<DateTime> in_end_date =
           JSONParserUtilities.getTimestampOptional(n, "end_date");
         final OptionType<URI> in_revoke =
           JSONParserUtilities.getURIOptional(n, "revoke");
@@ -160,7 +160,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
 
       if (node.has("held_ready")) {
         final ObjectNode n = JSONParserUtilities.getObject(node, "held_ready");
-        final OptionType<Calendar> in_end_date =
+        final OptionType<DateTime> in_end_date =
           JSONParserUtilities.getTimestampOptional(n, "end_date");
         final OptionType<URI> in_revoke =
           JSONParserUtilities.getURIOptional(n, "revoke");
@@ -231,7 +231,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
     try {
       final URI in_uri = new URI(JSONParserUtilities.getString(s, "uri"));
       final String in_id = JSONParserUtilities.getString(s, "id");
-      final Calendar in_updated = JSONParserUtilities.getTimestamp(
+      final DateTime in_updated = JSONParserUtilities.getTimestamp(
         s, "updated");
       final String in_title = JSONParserUtilities.getString(s, "title");
 
@@ -313,8 +313,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
     try {
       final String in_id = JSONParserUtilities.getString(s, "id");
       final String in_title = JSONParserUtilities.getString(s, "title");
-      final Calendar in_updated = JSONParserUtilities.getTimestamp(
-        s, "updated");
+      final DateTime in_updated = JSONParserUtilities.getTimestamp(s, "updated");
 
       final OPDSAvailabilityType in_availability =
         OPDSJSONParser.parseAvailability(

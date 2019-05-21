@@ -21,9 +21,9 @@ import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.feeds.api.FeedFacetPseudo
-import org.nypl.simplified.feeds.api.FeedFacetType
-import org.nypl.simplified.feeds.api.FeedSearchLocal
+import org.nypl.simplified.feeds.api.FeedFacet
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
+import org.nypl.simplified.feeds.api.FeedSearch
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
@@ -43,8 +43,8 @@ internal class ProfileFeedTask(
      * Generate facets.
      */
 
-    val facet_groups = HashMap<String, List<FeedFacetType>>(32)
-    val facets = ArrayList<FeedFacetType>(32)
+    val facet_groups = HashMap<String, List<FeedFacet>>(32)
+    val facets = ArrayList<FeedFacet>(32)
 
     facets(this.request, facet_groups, facets)
 
@@ -52,7 +52,7 @@ internal class ProfileFeedTask(
       Feed.empty(
         feedURI = this.request.uri(),
         feedID = this.request.id(),
-        feedSearch = FeedSearchLocal(),
+        feedSearch = FeedSearch.FeedSearchLocal,
         feedTitle = this.request.title())
 
     try {
@@ -123,12 +123,12 @@ internal class ProfileFeedTask(
    */
 
   private fun sortBooks(
-    facet: FeedFacetPseudo.FacetType,
+    facet: FacetType,
     books: ArrayList<BookWithStatus>) {
 
     when (facet) {
-      FeedFacetPseudo.FacetType.SORT_BY_AUTHOR -> sortBooksByAuthor(books)
-      FeedFacetPseudo.FacetType.SORT_BY_TITLE -> sortBooksByTitle(books)
+      FacetType.SORT_BY_AUTHOR -> sortBooksByAuthor(books)
+      FacetType.SORT_BY_TITLE -> sortBooksByTitle(books)
     }
   }
 
@@ -275,12 +275,12 @@ internal class ProfileFeedTask(
 
     private fun facets(
       request: ProfileFeedRequest,
-      facet_groups: HashMap<String, List<FeedFacetType>>,
-      facets: ArrayList<FeedFacetType>) {
-      val values = FeedFacetPseudo.FacetType.values()
+      facet_groups: HashMap<String, List<FeedFacet>>,
+      facets: ArrayList<FeedFacet>) {
+      val values = FacetType.values()
       for (v in values) {
         val active = v == request.facetActive()
-        val f = FeedFacetPseudo(request.facetTitleProvider().getTitle(v), active, v)
+        val f = FeedFacet.FeedFacetPseudo(request.facetTitleProvider().getTitle(v), active, v)
         facets.add(f)
       }
       facet_groups[request.facetGroup()] = facets

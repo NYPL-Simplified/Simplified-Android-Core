@@ -6,6 +6,7 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -26,19 +27,22 @@ import android.widget.TextView
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.FutureCallback
+import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.ProcedureType
 import com.io7m.jfunctional.Some
-import com.io7m.jfunctional.Unit
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
+import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
-import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
+import org.nypl.simplified.app.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
 import org.nypl.simplified.app.login.LoginDialogListenerType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_registry.BookStatusEvent
@@ -47,11 +51,8 @@ import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
 import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
-import org.nypl.simplified.feeds.api.FeedFacetMatcherType
-import org.nypl.simplified.feeds.api.FeedFacetOPDS
-import org.nypl.simplified.feeds.api.FeedFacetPseudo
-import org.nypl.simplified.feeds.api.FeedFacetPseudo.FacetType
-import org.nypl.simplified.feeds.api.FeedFacetType
+import org.nypl.simplified.feeds.api.FeedFacet
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
 import org.nypl.simplified.feeds.api.FeedFacets
 import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
@@ -59,14 +60,15 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.feeds.api.FeedLoaderType
-import org.nypl.simplified.feeds.api.FeedSearchLocal
-import org.nypl.simplified.feeds.api.FeedSearchOpen1_1
-import org.nypl.simplified.http.core.HTTPAuthType
+import org.nypl.simplified.feeds.api.FeedSearch
+import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
+import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.stack.ImmutableStack
@@ -89,11 +91,17 @@ import java.util.Objects
 
 abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType {
 
+  private val logger = LoggerFactory.getLogger(CatalogFeedActivity::class.java)
+
+  private lateinit var feedArguments: CatalogFeedArguments
+  private lateinit var profile: ProfileReadableType
+  private lateinit var account: AccountType
+  private var initialized = false
+
   private var feed: Feed? = null
   private var listView: AbsListView? = null
   private lateinit var swipeRefreshLayout: SwipeRefreshLayout
   private var loading: FluentFuture<FeedLoaderResult>? = null
-  private lateinit var progressLayout: ViewGroup
   private var savedScrollPosition: Int = 0
   private var previouslyPaused: Boolean = false
   private var searchView: SearchView? = null
@@ -114,43 +122,6 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     super.onBackPressed()
   }
 
-  override fun onResume() {
-    super.onResume()
-
-    /*
-     * If the activity was previously paused, this means that the user
-     * navigated away from the activity and is now coming back to it. If the
-     * user went into a book detail view and revoked a book, then the feed
-     * should be completely reloaded when the user comes back, to ensure that
-     * the book no longer shows up in the list.
-     *
-     * This obviously only applies to local feeds.
-     */
-
-    if (this.searchView != null) {
-      this.searchView!!.setQuery("", false)
-      this.searchView!!.clearFocus()
-    }
-
-    var didRetry = false
-    val extras = this.intent.extras
-    if (extras != null) {
-      val reload = extras.getBoolean("reload")
-      if (reload) {
-        didRetry = true
-        this@CatalogFeedActivity.retryFeed()
-        extras.putBoolean("reload", false)
-      }
-    }
-
-    if (this.previouslyPaused && !didRetry) {
-      val args = this.retrieveArguments()
-      if (!args.requiresNetworkConnectivity()) {
-        this.retryFeed()
-      }
-    }
-  }
-
   /**
    * Configure the "entry point" facet layout. This causes the "entry point" buttons to appear
    * (or not) at the top of the screen based on the available facets.
@@ -162,8 +133,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun configureFacetEntryPointButtons(
     feed: Feed?,
-    layout: ViewGroup,
-    resources: Resources) {
+    layout: ViewGroup) {
 
     UIThread.checkIsUIThread()
 
@@ -186,7 +156,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      * Add a set of radio buttons to the view.
      */
 
-    val facetGroup = (facetGroupOpt as Some<List<FeedFacetType>>).get()
+    val facetGroup = (facetGroupOpt as Some<List<FeedFacet>>).get()
 
     val size = facetGroup.size
     for (index in 0 until size) {
@@ -197,6 +167,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
       button.layoutParams = buttonLayout
       button.gravity = Gravity.CENTER
+      button.maxLines = 1
+      button.ellipsize = TextUtils.TruncateAt.END
 
       /*
        * The buttons need unique IDs so that they can be addressed within the parent
@@ -216,15 +188,16 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         button.setButtonDrawable(R.drawable.catalog_facet_tab_button_background_middle)
       }
 
-      button.text = facet.facetGetTitle()
-      button.setTextColor(colorStateListForFacetTabs())
-
-      val launcher =
-        CatalogFeedFacetLauncher(this, feed, resources, this.retrieveLocalSearchTerms())
-
+      button.text = facet.title
+      button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener { ignored ->
-        LOG.debug("selected entry point facet: {}", facet.facetGetTitle())
-        facet.matchFeedFacet(launcher)
+        this.logger.debug("selected entry point facet: {}", facet.title)
+        this.openActivityForFeedFacet(
+          facet = facet,
+          feed = feed,
+          feedSelection = FeedBooksSelection.BOOKS_FEED_LOANED,
+          upStack = this.upStack,
+          searchTerms = this.retrieveLocalSearchTerms())
       }
       facetsView.addView(button)
     }
@@ -240,8 +213,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
       val facet = facetGroup[index]
       val button = facetsView.getChildAt(index) as RadioButton
 
-      if (facet.facetIsActive()) {
-        LOG.debug("active entry point facet: {}", facet.facetGetTitle())
+      if (facet.isActive) {
+        this.logger.debug("active entry point facet: {}", facet.title)
         facetsView.check(button.id)
       }
     }
@@ -275,8 +248,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private fun configureFacets(
     screen: ScreenSizeInformationType,
     feed: FeedWithoutGroups,
-    layout: ViewGroup,
-    resources: Resources) {
+    layout: ViewGroup) {
 
     UIThread.checkIsUIThread()
 
@@ -316,11 +288,17 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
       val searchTerms =
         this.retrieveLocalSearchTerms()
-      val facetFeedListener =
-        CatalogFeedFacetLauncher(this, feed, resources, searchTerms)
 
       val facetListener =
-        CatalogFacetSelectionListenerType { selected -> selected.matchFeedFacet(facetFeedListener) }
+        CatalogFacetSelectionListenerType { selected ->
+          this.openActivityForFeedFacet(
+            facet = selected,
+            feed = feed,
+            feedSelection = FeedBooksSelection.BOOKS_FEED_LOANED,
+            upStack = this.upStack,
+            searchTerms = searchTerms)
+        }
+
       val facetButton =
         CatalogFacetButton(this, groupName, groupCopy, facetListener)
 
@@ -331,9 +309,9 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun retrieveLocalSearchTerms(): OptionType<String> {
     val searchTerms: OptionType<String>
-    val currentArgs = this.retrieveArguments()
-    if (currentArgs is CatalogFeedArgumentsLocalBooks) {
-      searchTerms = currentArgs.searchTerms
+    val args = this.feedArguments
+    if (args is CatalogFeedArgumentsLocalBooks) {
+      searchTerms = args.searchTerms
     } else {
       searchTerms = Option.none()
     }
@@ -350,7 +328,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   protected abstract fun localFeedTypeSelection(): FeedBooksSelection
 
   private fun configureUpButton(
-    upStack: ImmutableStack<CatalogFeedArgumentsType>,
+    upStack: ImmutableStack<CatalogFeedArguments>,
     title: String) {
     val bar = this.supportActionBar
     if (!upStack.isEmpty) {
@@ -358,97 +336,32 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     }
   }
 
-  /**
-   * FIXME: When real navigation support comes into the app to support age-gated
-   * collections, like the SimplyE Collection, remove this hack.
-   */
-
-  private fun retrieveArguments(): CatalogFeedArgumentsType {
-//    val libTitle = this.resources.getString(R.string.feature_app_name)
-//    val libraryID = Simplified.getCurrentAccount().getId()
-//    val upStack = this.upStack
-//
-//    if (upStack.isEmpty && libraryID == 2 && this.javaClass == MainCatalogActivity::class.java) {
-//      if (Simplified.getSharedPrefs().contains("age13") === false) {
-//        //Show Age Verification and load <13 to be safe
-//        this.showAgeCheckAlert()
-//      }
-//      val over13 = Simplified.getSharedPrefs().getBoolean("age13")
-//      val ageURI: URI
-//      try {
-//        if (over13) {
-//          ageURI = URI(Simplified.getCurrentAccount().getCatalogUrl13AndOver())
-//        } else {
-//          ageURI = URI(Simplified.getCurrentAccount().getCatalogUrlUnder13())
-//        }
-//        LOG.debug("Hardcoding SimplyE Collection URI: {}", ageURI)
-//        return CatalogFeedArgumentsRemote(
-//          false,
-//          ImmutableStack.empty(),
-//          libTitle,
-//          ageURI,
-//          false
-//        )
-//      } catch (e: Exception) {
-//        LOG.error(
-//          "error constructing SimplyE collection uri: {}", e.message, e)
-//      }
-//    }
-
-    /*
-     * Attempt to fetch arguments.
-     */
-
-    val a = this.intent.extras
-    if (a != null) {
-      val args =
-        a.getSerializable(CATALOG_ARGS) as CatalogFeedArgumentsType?
-      if (args != null) {
-        return args
-      }
-    }
-
-    /*
-     * If there were no arguments (because, for example, this activity is the
-     * initial one started for the app), synthesize some.
-     */
-
-    val inDrawerOpen = true
-    val empty = ImmutableStack.empty<CatalogFeedArgumentsType>()
-    val feedTitle = this.resources.getString(R.string.feature_app_name)
-    val account =
-      Simplified.getProfilesController()
-        .profileAccountCurrent()
-
-    val feedURI = account.provider().catalogURIForAge(100)
-    return CatalogFeedArgumentsRemote(inDrawerOpen, empty, feedTitle, feedURI, false)
-  }
-
   private fun loadFeed(
     feedLoader: FeedLoaderType,
     feedURI: URI) {
-    LOG.debug("loading feed: {}", feedURI)
+    this.logger.debug("loading feed: {}", feedURI)
 
-    // XXX: Why no credentials here? Use the correct credentials!
-    val none =
-      Option.none<HTTPAuthType>()
-
-    val executor =
-      Simplified.getBackgroundTaskExecutor()
+    val loginState = this.account.loginState()
+    val authentication =
+      if (loginState.credentials != null) {
+        Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(loginState.credentials))
+      } else {
+        Option.none()
+      }
 
     val future =
-      feedLoader.fetchURIWithBookRegistryEntries(feedURI, none)
+      feedLoader.fetchURIWithBookRegistryEntries(feedURI, authentication)
 
     future.addCallback(object : FutureCallback<FeedLoaderResult> {
       override fun onSuccess(result: FeedLoaderResult?) {
-        onFeedResult(feedURI, result!!)
+        this@CatalogFeedActivity.onFeedResult(feedURI, result!!)
       }
 
       override fun onFailure(ex: Throwable) {
-        LOG.error("error in feed result handler: ", ex)
-        onFeedResultFailedException(feedURI, ex)
+        this@CatalogFeedActivity.logger.error("error in feed result handler: ", ex)
+        this@CatalogFeedActivity.onFeedResultFailedException(feedURI, ex)
       }
-    }, executor)
+    }, MoreExecutors.directExecutor())
 
     this.loading = future
   }
@@ -460,10 +373,9 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private fun onFeedResultFailedExceptionUI(feedURI: URI, e: Throwable) {
     UIThread.checkIsUIThread()
 
-    LOG.info("Failed to get feed: ", e)
+    this.logger.info("Failed to get feed: ", e)
     this.invalidateOptionsMenu()
 
-    this.progressLayout.visibility = View.GONE
     this.contentFrame.removeAllViews()
 
     val error =
@@ -480,9 +392,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun onFeedResult(feedURI: URI, result: FeedLoaderResult) {
     return when (result) {
-      is FeedLoaderSuccess -> {
+      is FeedLoaderSuccess ->
         this.onFeedResultSuccess(feedURI, result.feed)
-      }
       is FeedLoaderFailedGeneral ->
         this.onFeedResultFailedException(feedURI, result.exception)
       is FeedLoaderFailedAuthentication ->
@@ -498,35 +409,32 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   }
 
   private fun onFeedResultSuccess(uri: URI, feed: Feed) {
-    LOG.debug("received feed for {}", uri)
+    this.logger.debug("received feed for {}", uri)
     this.feed = feed
 
     UIThread.runOnUIThread { this.configureUpButton(this.upStack, feed.feedTitle) }
     return when (feed) {
-      is FeedWithoutGroups -> {
+      is FeedWithoutGroups ->
         this.onFeedResultSuccessWithoutGroups(feed)
-      }
-      is FeedWithGroups -> {
+      is FeedWithGroups ->
         this.onFeedResultSuccessWithGroups(feed)
-      }
     }
   }
 
   private fun onFeedResultSuccessWithGroups(feed: FeedWithGroups) {
-    LOG.debug("received feed with groups: {}", feed.feedURI)
+    this.logger.debug("received feed with groups: {}", feed.feedURI)
 
     UIThread.runOnUIThread { this.onFeedResultSuccessWithGroupsUI(feed) }
     onPossiblyReceivedEULALink(feed.feedTermsOfService)
   }
 
   private fun onFeedResultSuccessWithGroupsUI(feed: FeedWithGroups) {
-    LOG.debug("received feed with groups: {}", feed.feedURI)
+    this.logger.debug("received feed with groups: {}", feed.feedURI)
 
     UIThread.checkIsUIThread()
 
     this.invalidateOptionsMenu()
 
-    this.progressLayout.visibility = View.GONE
     this.contentFrame.removeAllViews()
 
     val layout =
@@ -538,13 +446,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     this.contentFrame.addView(layout)
     this.contentFrame.requestLayout()
 
-    LOG.debug("restoring scroll position: {}", this.savedScrollPosition)
+    this.logger.debug("restoring scroll position: {}", this.savedScrollPosition)
 
     val list =
       layout.findViewById<ListView>(R.id.catalog_feed_groups_list)
 
     this.swipeRefreshLayout = layout.findViewById(R.id.swipe_refresh_layout)
-    this.swipeRefreshLayout.setOnRefreshListener({ this.retryFeed() })
+    this.swipeRefreshLayout.setOnRefreshListener { this.retryFeed() }
 
     list.post { list.setSelection(this.savedScrollPosition) }
     list.dividerHeight = 0
@@ -552,11 +460,10 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     this.configureFacetEntryPointButtons(
       this.feed,
-      layout,
-      this.resources)
+      layout)
 
-    val args = this.retrieveArguments()
-    val newUpStack = this.newUpStack(args)
+    val newUpStack =
+      this.newUpStack(this.feedArguments)
 
     val laneListener = object : CatalogFeedLaneListenerType {
       override fun onSelectFeed(inGroup: FeedGroup) {
@@ -587,7 +494,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   }
 
   private fun onFeedResultSuccessWithoutGroups(feed: FeedWithoutGroups) {
-    LOG.debug("received feed without blocks: {}", feed.feedURI)
+    this.logger.debug("received feed without blocks: {}", feed.feedURI)
 
     UIThread.runOnUIThread { this.onFeedResultSuccessWithoutGroupsUI(feed) }
     onPossiblyReceivedEULALink(feed.feedTermsOfService)
@@ -605,14 +512,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   }
 
   private fun onFeedResultSuccessWithoutGroupsEmptyUI(feed: FeedWithoutGroups) {
-    LOG.debug("received feed without blocks (empty): {}", feed.feedURI)
+    this.logger.debug("received feed without blocks (empty): {}", feed.feedURI)
 
     UIThread.checkIsUIThread()
     Preconditions.checkArgument(feed.entriesInOrder.isEmpty(), "Feed is empty")
 
     this.invalidateOptionsMenu()
 
-    this.progressLayout.visibility = View.GONE
     this.contentFrame.removeAllViews()
 
     val layout =
@@ -623,9 +529,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     val emptyText =
       layout.findViewById<TextView>(R.id.catalog_feed_nogroups_empty_text)
 
-    if (this.retrieveArguments().isSearching) {
-      val resources = this.resources
-      emptyText.text = resources.getText(R.string.catalog_empty_feed)
+    if (this.feedArguments.isSearchResults) {
+      emptyText.text = this.resources.getText(R.string.catalog_empty_feed)
     } else {
       emptyText.text = this.catalogFeedGetEmptyText()
     }
@@ -635,15 +540,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   }
 
   private fun onFeedResultSuccessWithoutGroupsNonEmptyUI(feedWithoutGroups: FeedWithoutGroups) {
-    LOG.debug("received feed without blocks (non-empty): {}", feedWithoutGroups.feedURI)
+    this.logger.debug("received feed without blocks (non-empty): {}", feedWithoutGroups.feedURI)
 
     UIThread.checkIsUIThread()
     Preconditions.checkArgument(
       !feedWithoutGroups.entriesInOrder.isEmpty(), "Feed is non-empty")
 
     this.invalidateOptionsMenu()
-
-    this.progressLayout.visibility = View.GONE
     this.contentFrame.removeAllViews()
 
     val layout =
@@ -655,22 +558,22 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     this.contentFrame.addView(layout)
     this.contentFrame.requestLayout()
 
-    LOG.debug("restoring scroll position: {}", this.savedScrollPosition)
+    this.logger.debug("restoring scroll position: {}", this.savedScrollPosition)
 
     val gridView = layout.findViewById<GridView>(R.id.catalog_feed_nogroups_grid)
     this.swipeRefreshLayout = layout.findViewById(R.id.swipe_refresh_layout)
     this.swipeRefreshLayout.setOnRefreshListener({ this.retryFeed() })
 
     this.configureFacetEntryPointButtons(
-      feedWithoutGroups, layout, this.resources)
+      feedWithoutGroups, layout)
     this.configureFacets(
-      Simplified.getScreenSizeInformation(), feedWithoutGroups, layout, this.resources)
+      Simplified.getScreenSizeInformation(), feedWithoutGroups, layout)
 
     gridView.post { gridView.setSelection(this.savedScrollPosition) }
     this.listView = gridView
 
-    val args = this.retrieveArguments()
-    val newUpStack = this.newUpStack(args)
+    val newUpStack =
+      this.newUpStack(this.feedArguments)
 
     val bookSelectListener =
       CatalogBookSelectionListenerType { v, e -> this.onSelectedBook(newUpStack, e) }
@@ -705,18 +608,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     this.bookEventSubscription = Simplified.getBooksRegistry()
       .bookEvents()
-      .subscribe({ event -> without.onBookEvent(event) })
+      .subscribe { event -> without.onBookEvent(event) }
   }
 
-  override fun navigationDrawerShouldShowIndicator(): Boolean {
-    return this.upStack.isEmpty
-  }
+  override fun navigationDrawerShouldShowIndicator(): Boolean = this.upStack.isEmpty
 
-  private fun newUpStack(
-    args: CatalogFeedArgumentsType): ImmutableStack<CatalogFeedArgumentsType> {
-    val upStack = this.upStack
-    return upStack.push(args)
-  }
+  private fun newUpStack(args: CatalogFeedArguments): ImmutableStack<CatalogFeedArguments> =
+    this.upStack.push(args)
 
   private fun onProfileEvent(event: ProfileEvent) {
 
@@ -729,7 +627,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
       UIThread.runOnUIThread {
         val i = Intent(this@CatalogFeedActivity, MainCatalogActivity::class.java)
         val b = Bundle()
-        NavigationDrawerActivity.setActivityArguments(b, false)
+        setActivityArguments(b, false)
         i.putExtras(b)
         this.startActivity(i)
         this.finish()
@@ -737,40 +635,231 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     }
   }
 
+  /*
+   * Attempt to fetch arguments explicitly passed to the activity.
+   */
+
+  private fun getExplicitActivityArguments(): CatalogFeedArguments? =
+    this.intent.extras?.getSerializable(CATALOG_ARGS) as CatalogFeedArguments?
+
+  /*
+   * Attempt to fetch arguments explicitly passed to the activity.
+   */
+
+  private fun getOrSynthesizeActivityArguments(): CatalogFeedArguments {
+    return this.getExplicitActivityArguments() ?: this.run {
+      this.logger.debug("synthesizing remote feed arguments")
+
+      /*
+       * If there were no arguments (because, for example, this activity is the
+       * initial one started for the app), synthesize some.
+       */
+
+      CatalogFeedArgumentsRemote(
+        title = this.resources.getString(R.string.catalog),
+        upStack = ImmutableStack.empty(),
+        drawerShouldOpen = false,
+        feedURI = this.account.provider().catalogURI(),
+        isSearchResults = false)
+    }
+  }
+
   override fun onCreate(@Nullable state: Bundle?) {
     super.onCreate(state)
-
-    val args = this.retrieveArguments()
-    val stack = this.upStack
-    this.configureUpButton(stack, args.title)
-
-    this.title =
-      if (args.title == this.resources.getString(R.string.feature_app_name))
-        this.resources.getString(R.string.catalog)
-      else
-        args.title
 
     /*
      * Attempt to restore the saved scroll position, if there is one.
      */
 
     if (state != null) {
-      LOG.debug("received state")
+      this.logger.debug("received state")
       this.savedScrollPosition = state.getInt(LIST_STATE_ID)
     } else {
       this.savedScrollPosition = 0
     }
 
+    try {
+      this.profile = Simplified.getProfilesController().profileCurrent()
+      this.account = this.profile.accountCurrent()
+      this.initialized = true
+    } catch (e: ProfileNoneCurrentException) {
+      this.logger.error("no profile is current: ", e)
+      // We expect a superclass to handle this problem
+      return
+    }
+
+    this.feedArguments = this.getOrSynthesizeActivityArguments()
+  }
+
+  private fun isRootOfCollection(): Boolean =
+    when (val arguments = this.feedArguments) {
+      is CatalogFeedArgumentsRemote ->
+        arguments.feedURI == account.provider().catalogURI()
+      is CatalogFeedArgumentsLocalBooks ->
+        false
+    }
+
+  private fun ageGateIsPresent(): Boolean =
+    this.account.provider().hasAgeGate()
+
+  private fun ageGateIsSatisfied(): Boolean =
+    this.profile.preferences().dateOfBirth() is Some<ProfileDateOfBirth>
+
+  /**
+   * Remove any current views and show the age gate.
+   */
+
+  private fun showAgeGate() {
+    val newLayout =
+      this.layoutInflater.inflate(
+        R.layout.catalog_feed_age_gate,
+        this.contentFrame,
+        false) as ViewGroup
+
+    val buttonUnder13 =
+      newLayout.findViewById<Button>(R.id.catalog_age_gate_younger)
+    val buttonOver13 =
+      newLayout.findViewById<Button>(R.id.catalog_age_gate_older)
+
     /*
-     * Display a progress bar until the feed is either loaded or fails.
+     * A button that synthesizes a fake age that happens to be under 13 and then loads
+     * the correct feed.
      */
 
-    val newProgressLayout =
-      this.layoutInflater.inflate(R.layout.catalog_loading, this.contentFrame, false) as ViewGroup
+    buttonUnder13.setOnClickListener {
+      Simplified.getProfilesController()
+        .profilePreferencesUpdate(
+          this.profile.preferences()
+            .toBuilder()
+            .setDateOfBirth(this.synthesizeDateOfBirth(0))
+            .build())
+        .map {
+          UIThread.runOnUIThread {
+            this.startDisplayingFeed()
+          }
+        }
+    }
 
-    this.contentFrame.addView(newProgressLayout)
+    /*
+     * A button that synthesizes a fake age that happens to be over 13 and then loads
+     * the correct feed.
+     */
+
+    buttonOver13.setOnClickListener {
+      Simplified.getProfilesController()
+        .profilePreferencesUpdate(
+          this.profile.preferences()
+            .toBuilder()
+            .setDateOfBirth(this.synthesizeDateOfBirth(14))
+            .build())
+        .map {
+          UIThread.runOnUIThread {
+            this.startDisplayingFeed()
+          }
+        }
+    }
+
+    this.contentFrame.removeAllViews()
+    this.contentFrame.addView(newLayout)
     this.contentFrame.requestLayout()
-    this.progressLayout = newProgressLayout
+  }
+
+  /**
+   * Synthesize a fake date of birth based on the current date and given age in years.
+   */
+
+  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth =
+    ProfileDateOfBirth(
+      date = LocalDate.now().minusYears(years),
+      isSynthesized = true)
+
+  override fun onStart() {
+    super.onStart()
+
+    /*
+     * If the activity was not correctly initialized, it almost certainly means that no
+     * profile was active and this activity is scheduled for destruction at the earliest
+     * opportunity. There's no point trying to do any useful work.
+     */
+
+    if (!this.initialized) {
+      return
+    }
+
+    /*
+     * Subscribe to profile change events.
+     */
+
+    this.profileEventSubscription =
+      Simplified.getProfilesController()
+        .profileEvents()
+        .subscribe { event -> this.onProfileEvent(event) }
+
+    this.startForCurrentFeedArguments()
+  }
+
+  private fun startForCurrentFeedArguments() {
+
+    /*
+     * Decide whether or not it's necessary to show an age gate.
+     */
+
+    if (this.ageGateIsPresent()) {
+      if (this.ageGateIsSatisfied()) {
+        this.startDisplayingFeed()
+        return
+      }
+
+      if (this.isRootOfCollection()) {
+        this.showAgeGate()
+        return
+      }
+    }
+
+    /*
+     * Otherwise, we're going to be displaying a feed.
+     */
+
+    this.startDisplayingFeed()
+  }
+
+  /**
+   * Select the correct feed based on the profile age gate.
+   */
+
+  private fun ageGateSelectCorrectFeed() {
+    val ageOpt = this.profile.preferences().dateOfBirth()
+    if (!(ageOpt is Some<ProfileDateOfBirth>)) {
+      throw UnreachableCodeException()
+    }
+
+    val age = ageOpt.get()
+    val yearsOld = age.yearsOld(LocalDate.now())
+    this.logger.debug("updating feed arguments for age gate ({} years)", yearsOld)
+    this.feedArguments =
+      CatalogFeedArgumentsRemote(
+        title = this.resources.getString(R.string.catalog),
+        upStack = ImmutableStack.empty(),
+        drawerShouldOpen = false,
+        feedURI = this.account.provider().catalogURIForAge(yearsOld),
+        isSearchResults = false)
+  }
+
+  /*
+   * The main function that starts the actual loading and displaying of a feed.
+   */
+
+  private fun startDisplayingFeed() {
+
+    if (this.ageGateIsPresent()) {
+      Preconditions.checkArgument(
+        this.ageGateIsSatisfied(),
+        "Age gate must have been satisfied")
+    }
+
+    if (this.isRootOfCollection() && this.ageGateIsPresent()) {
+      this.ageGateSelectCorrectFeed()
+    }
 
     /*
      * If the feed requires network connectivity, and the network is not
@@ -778,7 +867,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      */
 
     val net = Simplified.getNetworkConnectivity()
-    if (args.requiresNetworkConnectivity()) {
+    if (this.feedArguments.requiresNetworkConnectivity) {
       if (!net.isNetworkAvailable) {
         this.onNetworkUnavailable()
         return
@@ -786,42 +875,90 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     }
 
     /*
-     * Create a dispatching function that will load a feed based on the given
-     * arguments, and execute it.
+     * Display a progress bar until the feed is either loaded or fails.
      */
 
-    args.matchArguments(
-      object : CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException> {
-        override fun onFeedArgumentsLocalBooks(c: CatalogFeedArgumentsLocalBooks): Unit {
-          this@CatalogFeedActivity.doLoadLocalFeed(c)
-          return Unit.unit()
-        }
-
-        override fun onFeedArgumentsRemote(c: CatalogFeedArgumentsRemote): Unit {
-          this@CatalogFeedActivity.doLoadRemoteFeed(c)
-          return Unit.unit()
-        }
-      })
+    this.showProgressView()
 
     /*
-     * Subscribe to profile change events.
+     * Load a feed based on the given arguments.
      */
 
-    this.profileEventSubscription = Simplified.getProfilesController()
-      .profileEvents()
-      .subscribe(ProcedureType<ProfileEvent> { this.onProfileEvent(it) })
+    return when (val arguments = this.feedArguments) {
+      is CatalogFeedArgumentsRemote ->
+        this.doLoadRemoteFeed(arguments)
+      is CatalogFeedArgumentsLocalBooks ->
+        this.doLoadLocalFeed(arguments)
+    }
+  }
+
+  /**
+   * Remove any current views and show a progress indicator.
+   */
+
+  private fun showProgressView() {
+    val newProgressLayout =
+      this.layoutInflater.inflate(R.layout.catalog_loading, this.contentFrame, false)
+        as ViewGroup
+
+    this.contentFrame.removeAllViews()
+    this.contentFrame.addView(newProgressLayout)
+    this.contentFrame.requestLayout()
+  }
+
+  override fun onStop() {
+    super.onStop()
+
+    this.profileEventSubscription?.unsubscribe()
+    this.bookEventSubscription?.unsubscribe()
+  }
+
+  override fun onResume() {
+    super.onResume()
+
+    /*
+     * If the activity was previously paused, this means that the user
+     * navigated away from the activity and is now coming back to it. If the
+     * user went into a book detail view and revoked a book, then the feed
+     * should be completely reloaded when the user comes back, to ensure that
+     * the book no longer shows up in the list.
+     *
+     * This obviously only applies to local feeds.
+     */
+
+    if (this.searchView != null) {
+      this.searchView!!.setQuery("", false)
+      this.searchView!!.clearFocus()
+    }
+
+    var didRetry = false
+    val extras = this.intent.extras
+    if (extras != null) {
+      val reload = extras.getBoolean("reload")
+      if (reload) {
+        didRetry = true
+        this.retryFeed()
+        extras.putBoolean("reload", false)
+      }
+    }
+
+    if (this.previouslyPaused && !didRetry) {
+      if (!this.feedArguments.requiresNetworkConnectivity) {
+        this.retryFeed()
+      }
+    }
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
-    LOG.debug("inflating menu")
+    this.logger.debug("inflating menu")
     this.menuInflater.inflate(R.menu.catalog, menu)
 
     if (this.feed == null) {
-      LOG.debug("menu creation requested but feed is not yet present")
+      this.logger.debug("menu creation requested but feed is not yet present")
       return true
     }
 
-    LOG.debug("menu creation requested and feed is present")
+    this.logger.debug("menu creation requested and feed is present")
     this.onCreateOptionsMenuSearchItem(menu)
     return true
   }
@@ -831,38 +968,28 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    * Otherwise, disable and hide it.
    */
 
-  private fun onCreateOptionsMenuSearchItem(menuNn: Menu) {
-    val searchItem = menuNn.findItem(R.id.catalog_action_search)
+  private fun onCreateOptionsMenuSearchItem(menuItem: Menu) {
+    val searchItem = menuItem.findItem(R.id.catalog_action_search)
     val feedActual = this.feed!!
     val search = feedActual.feedSearch
-    val args = this.retrieveArguments()
     var searchOk = false
 
-    // XXX: Update to support library search item
-    if (search != null && false) {
+    if (search != null) {
       this.searchView = searchItem.actionView as SearchView
-
-      // Check that the search URI is of an understood type.
-      searchOk = search.matchSearch(
-        object : org.nypl.simplified.feeds.api.FeedSearchMatcherType<Boolean, UnreachableCodeException> {
-          override fun onFeedSearchOpen1_1(
-            fs: FeedSearchOpen1_1): Boolean? {
-            this@CatalogFeedActivity.searchView!!.setOnQueryTextListener(
-              this@CatalogFeedActivity.OpenSearchQueryHandler(
-                this@CatalogFeedActivity.resources, args, fs.search))
-            return java.lang.Boolean.TRUE
-          }
-
-          override fun onFeedSearchLocal(
-            f: FeedSearchLocal): Boolean? {
-            this@CatalogFeedActivity.searchView!!.setOnQueryTextListener(
-              this@CatalogFeedActivity.BooksLocalSearchQueryHandler(
-                this@CatalogFeedActivity.resources, args, FacetType.SORT_BY_TITLE))
-            return java.lang.Boolean.TRUE
-          }
-        })
+      searchOk = when (search) {
+        FeedSearch.FeedSearchLocal -> {
+          this.searchView!!.setOnQueryTextListener(
+            this.BooksLocalSearchQueryHandler(this.resources, this.feedArguments, FacetType.SORT_BY_TITLE))
+          true
+        }
+        is FeedSearch.FeedSearchOpen1_1 -> {
+          this.searchView!!.setOnQueryTextListener(
+            this.OpenSearchQueryHandler(this.resources, this.feedArguments, search.search))
+          true
+        }
+      }
     } else {
-      LOG.debug("Feed has no search opts.")
+      this.logger.debug("Feed has no search opts.")
     }
 
     if (searchOk) {
@@ -876,8 +1003,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         String.format(this.getString(R.string.search_hint_format),
           Objects.toString(this.feed!!.feedTitle,
             this.getString(R.string.search_hint_feed_title_default)))
-      if (args.title.startsWith(this.getString(R.string.search_hint_prefix))) {
-        this.searchView!!.queryHint = args.title
+      if (this.feedArguments.title.startsWith(this.getString(R.string.search_hint_prefix))) {
+        this.searchView!!.queryHint = this.feedArguments.title
       }
 
       searchItem.isEnabled = true
@@ -891,7 +1018,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   override fun onDestroy() {
     super.onDestroy()
-    LOG.debug("onDestroy")
+    this.logger.debug("onDestroy")
 
     val future = this.loading
     future?.cancel(true)
@@ -903,47 +1030,6 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     bookSub?.unsubscribe()
   }
 
-  fun showAgeCheckAlert() {
-//    val builder = AlertDialog.Builder(this@CatalogFeedActivity)
-//
-//    builder.setTitle(R.string.age_verification_title)
-//    builder.setMessage(R.string.age_verification_question)
-//
-//    // Under 13
-//    builder.setNeutralButton(R.string.age_verification_13_younger) { dialog, which ->
-//      Simplified.getSharedPrefs().putBoolean("age13", false)
-//      this@CatalogFeedActivity.reloadCatalogActivity(true)
-//    }
-//
-//    // 13 or Over
-//    builder.setPositiveButton(R.string.age_verification_13_older) { dialog, which ->
-//      Simplified.getSharedPrefs().putBoolean("age13", true)
-//      this@CatalogFeedActivity.reloadCatalogActivity(false)
-//    }
-//
-//    if (!this.isFinishing) {
-//      val alert = builder.show()
-//      val resID = ThemeMatcher.color(Simplified.getCurrentAccount().getMainColor())
-//      val mainTextColor = ContextCompat.getColor(this, resID)
-//      alert.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(mainTextColor)
-//      alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor)
-//    }
-  }
-
-  private fun reloadCatalogActivity(deleteBooks: Boolean) {
-//    Simplified.getCatalogAppServices().reloadCatalog(deleteBooks, Simplified.getCurrentAccount())
-//    val i = Intent(this@CatalogFeedActivity, MainCatalogActivity::class.java)
-//    i.flags = Intent.FLAG_ACTIVITY_NO_ANIMATION
-//    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-//    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//    val b = Bundle()
-//    SimplifiedActivity.setActivityArguments(b, false)
-//    i.putExtras(b)
-//    this.startActivity(i)
-//    this.overridePendingTransition(0, 0)
-  }
-
   /**
    * The network is unavailable. Simply display a message and a button to allow
    * the user to retry loading when they have fixed their connection.
@@ -952,9 +1038,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private fun onNetworkUnavailable() {
     UIThread.checkIsUIThread()
 
-    LOG.debug("network is unavailable")
+    this.logger.debug("network is unavailable")
 
-    this.progressLayout.visibility = View.GONE
     this.contentFrame.removeAllViews()
 
     val error =
@@ -975,7 +1060,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   override fun onSaveInstanceState(state: Bundle) {
     super.onSaveInstanceState(state)
 
-    LOG.debug("saving state")
+    this.logger.debug("saving state")
 
     /*
      * Save the scroll position in the hope that it can be restored later.
@@ -984,57 +1069,49 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     val lv = this.listView
     if (lv != null) {
       val position = lv.firstVisiblePosition
-      LOG.debug("saving list view position: {}", Integer.valueOf(position))
+      this.logger.debug("saving list view position: {}", Integer.valueOf(position))
       state.putInt(LIST_STATE_ID, position)
     }
   }
 
   private fun onSelectedBook(
-    newUpStack: ImmutableStack<CatalogFeedArgumentsType>,
+    newUpStack: ImmutableStack<CatalogFeedArguments>,
     e: FeedEntryOPDS) {
-    LOG.debug("onSelectedBook: {}", this)
+    this.logger.debug("onSelectedBook: {}", this)
     CatalogBookDetailActivity.startNewActivity(this, newUpStack, e)
   }
 
   private fun onSelectedFeedGroup(
-    newUpStack: ImmutableStack<CatalogFeedArgumentsType>,
+    newUpStack: ImmutableStack<CatalogFeedArguments>,
     f: FeedGroup) {
-    LOG.debug("onSelectFeed: {}", this)
+    this.logger.debug("onSelectFeed: {}", this)
 
-    val remote = CatalogFeedArgumentsRemote(
-      false, newUpStack, f.groupTitle, f.groupURI, false)
-    this.catalogActivityForkNew(remote)
+    this.catalogActivityForkNew(CatalogFeedArgumentsRemote(
+      title = f.groupTitle,
+      upStack = newUpStack,
+      drawerShouldOpen = false,
+      feedURI = f.groupURI,
+      isSearchResults = false))
   }
 
   /**
    * Retry the current feed.
    */
 
-  protected fun retryFeed() {
-    val args = this.retrieveArguments()
-    LOG.debug("retrying feed {}", args)
+  private fun retryFeed() {
+    this.loading?.cancel(true)
+    this.loading = null
 
-    val loader = Simplified.getFeedLoader()
-
-    args.matchArguments(
-      object : CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException> {
-        override fun onFeedArgumentsLocalBooks(c: CatalogFeedArgumentsLocalBooks): Unit {
-          this@CatalogFeedActivity.catalogActivityForkNewReplacing(args)
-          if (this@CatalogFeedActivity.swipeRefreshLayout != null) {
-            this@CatalogFeedActivity.swipeRefreshLayout!!.isRefreshing = false
-          }
-          return Unit.unit()
-        }
-
-        override fun onFeedArgumentsRemote(c: CatalogFeedArgumentsRemote): Unit {
-          loader.invalidate(c.uri)
-          this@CatalogFeedActivity.catalogActivityForkNewReplacing(args)
-          if (this@CatalogFeedActivity.swipeRefreshLayout != null) {
-            this@CatalogFeedActivity.swipeRefreshLayout!!.isRefreshing = false
-          }
-          return Unit.unit()
-        }
-      })
+    return when (val arguments = this.feedArguments) {
+      is CatalogFeedArgumentsRemote -> {
+        this.logger.debug("invalidating {} in feed cache", arguments.feedURI)
+        Simplified.getFeedLoader().invalidate(arguments.feedURI)
+        this.startDisplayingFeed()
+      }
+      is CatalogFeedArgumentsLocalBooks -> {
+        this.startDisplayingFeed()
+      }
+    }
   }
 
   /**
@@ -1050,37 +1127,33 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    */
 
   private fun doLoadLocalFeed(c: CatalogFeedArgumentsLocalBooks) {
-    val resources = this.resources
-
     val booksUri = URI.create("Books")
 
     val request =
       ProfileFeedRequest.builder(
         booksUri,
-        resources.getString(R.string.books),
-        resources.getString(R.string.books_sort_by),
-        CatalogFacetPseudoTitleProvider(resources))
+        this.resources.getString(R.string.books),
+        this.resources.getString(R.string.books_sort_by),
+        CatalogFacetPseudoTitleProvider(this.resources))
         .setFeedSelection(c.selection)
         .setSearch(c.searchTerms)
         .setFacetActive(c.facetType)
         .build()
 
     try {
-      val exec =
-        Simplified.getBackgroundTaskExecutor()
       val future =
         Simplified.getProfilesController().profileFeed(request)
 
       future.addCallback(object : FutureCallback<FeedWithoutGroups> {
         override fun onSuccess(result: FeedWithoutGroups?) {
-          onFeedResult(booksUri, FeedLoaderSuccess(result!!))
+          this@CatalogFeedActivity.onFeedResult(booksUri, FeedLoaderSuccess(result!!))
         }
 
         override fun onFailure(ex: Throwable) {
-          LOG.error("error in feed result handler: ", ex)
-          onFeedResultFailedException(booksUri, ex)
+          this@CatalogFeedActivity.logger.error("error in feed result handler: ", ex)
+          this@CatalogFeedActivity.onFeedResultFailedException(booksUri, ex)
         }
-      }, exec)
+      }, MoreExecutors.directExecutor())
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }
@@ -1093,9 +1166,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    * @param c The feed arguments
    */
 
-  private fun doLoadRemoteFeed(c: CatalogFeedArgumentsRemote) {
-    this.loadFeed(Simplified.getFeedLoader(), c.uri)
-  }
+  private fun doLoadRemoteFeed(c: CatalogFeedArgumentsRemote) =
+    this.loadFeed(Simplified.getFeedLoader(), c.feedURI)
 
   /**
    * A handler for local book searches.
@@ -1103,29 +1175,24 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private inner class BooksLocalSearchQueryHandler internal constructor(
     private val resources: Resources,
-    private val args: CatalogFeedArgumentsType,
+    private val feedArguments: CatalogFeedArguments,
     private val facetActive: FacetType) : OnQueryTextListener {
 
-    override fun onQueryTextChange(
-      @Nullable s: String): Boolean {
-      return true
-    }
+    override fun onQueryTextChange(@Nullable s: String): Boolean = true
 
     override fun onQueryTextSubmit(query: String): Boolean {
-      val cfa = this@CatalogFeedActivity
-      val us = ImmutableStack.empty<CatalogFeedArgumentsType>()
-      val title = this.resources.getString(R.string.catalog_search) + ": " + query
+      val newArgs =
+        CatalogFeedArgumentsLocalBooks(
+          title = this.resources.getString(R.string.catalog_search) + ": " + query,
+          upStack = ImmutableStack.empty(),
+          facetType = this.facetActive,
+          searchTerms = Option.some(query),
+          selection = this@CatalogFeedActivity.localFeedTypeSelection())
 
-      val newArgs = CatalogFeedArgumentsLocalBooks(
-        us,
-        title,
-        this.facetActive,
-        Option.some(query),
-        cfa.localFeedTypeSelection())
-      if ("Search" == this@CatalogFeedActivity.feed!!.feedTitle) {
-        cfa.catalogActivityForkNewReplacing(newArgs)
+      if (this.feedArguments.isSearchResults) {
+        this@CatalogFeedActivity.catalogActivityForkNewReplacing(newArgs)
       } else {
-        cfa.catalogActivityForkNew(newArgs)
+        this@CatalogFeedActivity.catalogActivityForkNew(newArgs)
       }
 
       return true
@@ -1138,12 +1205,10 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private inner class OpenSearchQueryHandler internal constructor(
     private val resources: Resources,
-    private val args: CatalogFeedArgumentsType,
+    private val feedArguments: CatalogFeedArguments,
     private val search: OPDSOpenSearch1_1) : OnQueryTextListener {
 
-    override fun onQueryTextChange(text: String): Boolean {
-      return true
-    }
+    override fun onQueryTextChange(text: String): Boolean = true
 
     override fun onQueryTextSubmit(query: String): Boolean {
       val profile =
@@ -1161,69 +1226,71 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
           searchQuery = query))
 
       val target = this.search.getQueryURIForTerms(query)
-      val cfa = this@CatalogFeedActivity
-      val us = cfa.newUpStack(this.args)
+      val us =
+        this@CatalogFeedActivity.newUpStack(this.feedArguments)
       val title = this.resources.getString(R.string.catalog_search) + ": " + query
-      val newArgs = CatalogFeedArgumentsRemote(false, us, title, target, true)
+      val newArgs =
+        CatalogFeedArgumentsRemote(
+          title = title,
+          upStack = us,
+          drawerShouldOpen = false,
+          feedURI = target,
+          isSearchResults = true)
 
-      if ("Search" == this@CatalogFeedActivity.feed!!.feedTitle) {
-        cfa.catalogActivityForkNewReplacing(newArgs)
+      if (this@CatalogFeedActivity.feedArguments.isSearchResults) {
+        this@CatalogFeedActivity.catalogActivityForkNewReplacing(newArgs)
       } else {
-        cfa.catalogActivityForkNew(newArgs)
+        this@CatalogFeedActivity.catalogActivityForkNew(newArgs)
       }
       return true
     }
   }
 
-  /**
-   * A launcher that can create a new catalog activity for the given facet.
-   */
-
-  private class CatalogFeedFacetLauncher internal constructor(
-    private val parent: CatalogFeedActivity,
-    private val feed: Feed,
-    private val resources: Resources,
-    private val searchTerms: OptionType<String>) : FeedFacetMatcherType<Unit, UnreachableCodeException> {
-
-    override fun onFeedFacetOPDS(feedOpds: FeedFacetOPDS): Unit {
-
-      val (_, uri) = feedOpds.opdsFacet
-      val args = CatalogFeedArgumentsRemote(
-        false,
-        this.parent.upStack,
-        this.feed.feedTitle,
-        uri,
-        false)
-
-      this.parent.catalogActivityForkNewReplacing(args)
-      return Unit.unit()
+  private fun openActivityForFeedFacet(
+    facet: FeedFacet,
+    feed: Feed,
+    feedSelection: FeedBooksSelection,
+    upStack: ImmutableStack<CatalogFeedArguments>,
+    searchTerms: OptionType<String>) =
+    when (facet) {
+      is FeedFacet.FeedFacetOPDS ->
+        this.openActivityForFeedFacetOPDS(feed, upStack, facet)
+      is FeedFacet.FeedFacetPseudo ->
+        this.openActivityForFeedFacetPseudo(feed, upStack, facet, searchTerms, feedSelection)
     }
 
-    override fun onFeedFacetPseudo(fp: FeedFacetPseudo): Unit {
-      val facetTitle = this.resources.getString(R.string.books_sort_by)
+  private fun openActivityForFeedFacetPseudo(
+    feed: Feed,
+    upStack: ImmutableStack<CatalogFeedArguments>,
+    facet: FeedFacet.FeedFacetPseudo,
+    searchTerms: OptionType<String>,
+    feedSelection: FeedBooksSelection) =
+    this.catalogActivityForkNewReplacing(
+      CatalogFeedArgumentsLocalBooks(
+        title = feed.feedTitle,
+        upStack = upStack,
+        facetType = facet.type,
+        searchTerms = searchTerms,
+        selection = feedSelection))
 
-      val args = CatalogFeedArgumentsLocalBooks(
-        this.parent.upStack,
-        facetTitle,
-        fp.type,
-        this.searchTerms,
-        this.parent.localFeedTypeSelection())
-
-      this.parent.catalogActivityForkNewReplacing(args)
-      return Unit.unit()
-    }
-  }
+  private fun openActivityForFeedFacetOPDS(
+    feed: Feed,
+    upStack: ImmutableStack<CatalogFeedArguments>,
+    facet: FeedFacet.FeedFacetOPDS) =
+    this.catalogActivityForkNewReplacing(
+      CatalogFeedArgumentsRemote(
+        title = feed.feedTitle,
+        drawerShouldOpen = false,
+        upStack = upStack,
+        feedURI = facet.opdsFacet.uri,
+        isSearchResults = false))
 
   companion object {
 
-    private val CATALOG_ARGS: String
-    private val LIST_STATE_ID: String
-    private val LOG = LoggerFactory.getLogger(CatalogFeedActivity::class.java)
-
-    init {
-      this.CATALOG_ARGS = "org.nypl.simplified.app.CatalogFeedActivity.arguments"
-      this.LIST_STATE_ID = "org.nypl.simplified.app.CatalogFeedActivity.list_view_state"
-    }
+    private const val CATALOG_ARGS: String =
+      "org.nypl.simplified.app.CatalogFeedActivity.arguments"
+    private const val LIST_STATE_ID: String =
+      "org.nypl.simplified.app.CatalogFeedActivity.list_view_state"
 
     /**
      * Set the arguments of the activity to be created.
@@ -1236,23 +1303,20 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     fun setActivityArguments(
       b: Bundle,
-      args: CatalogFeedArgumentsType) {
+      args: CatalogFeedArguments) {
 
       b.putSerializable(this.CATALOG_ARGS, args)
-      args.matchArguments(
-        object : CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException> {
-          override fun onFeedArgumentsLocalBooks(c: CatalogFeedArgumentsLocalBooks): Unit {
-            NavigationDrawerActivity.setActivityArguments(b, false)
-            setActivityArguments(b, c.upStack)
-            return Unit.unit()
-          }
 
-          override fun onFeedArgumentsRemote(c: CatalogFeedArgumentsRemote): Unit {
-            NavigationDrawerActivity.setActivityArguments(b, c.isDrawerOpen)
-            setActivityArguments(b, c.upStack)
-            return Unit.unit()
-          }
-        })
+      when (args) {
+        is CatalogFeedArgumentsRemote -> {
+          setActivityArguments(b, args.drawerShouldOpen)
+          setActivityArguments(b, args.upStack)
+        }
+        is CatalogFeedArgumentsLocalBooks -> {
+          setActivityArguments(b, false)
+          setActivityArguments(b, args.upStack)
+        }
+      }
     }
 
     /**
@@ -1270,7 +1334,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
           try {
             eula.documentSetLatestURL(latest.toURL())
           } catch (e: MalformedURLException) {
-            this.LOG.error("could not use latest EULA link: ", e)
+            // We don't care about this. Eventually the right URL will be given to us.
           }
         }
       }

@@ -19,7 +19,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.feeds.api.FeedFacetType;
+import org.nypl.simplified.feeds.api.FeedFacet;
 
 import java.util.ArrayList;
 
@@ -39,7 +39,7 @@ public final class CatalogFacetDialog extends DialogFragment
       "org.nypl.simplified.app.catalog.CatalogFacetDialog.facets_name";
   }
 
-  private @Nullable ArrayList<FeedFacetType>          group;
+  private @Nullable ArrayList<FeedFacet>          group;
   private @Nullable ArrayAdapter<String>              group_adapter;
   private @Nullable String                            group_name;
   private @Nullable CatalogFacetSelectionListenerType listener;
@@ -64,7 +64,7 @@ public final class CatalogFacetDialog extends DialogFragment
 
   public static CatalogFacetDialog newDialog(
     final String in_facet_group_name,
-    final ArrayList<FeedFacetType> in_facet_group)
+    final ArrayList<FeedFacet> in_facet_group)
   {
     NullCheck.notNull(in_facet_group);
     final CatalogFacetDialog c = new CatalogFacetDialog();
@@ -82,9 +82,9 @@ public final class CatalogFacetDialog extends DialogFragment
 
     final Bundle b = NullCheck.notNull(this.getArguments());
 
-    @SuppressWarnings("unchecked") final ArrayList<FeedFacetType> in_group =
+    @SuppressWarnings("unchecked") final ArrayList<FeedFacet> in_group =
       NullCheck.notNull(
-        (ArrayList<FeedFacetType>) b.getSerializable(
+        (ArrayList<FeedFacet>) b.getSerializable(
           CatalogFacetDialog.GROUP_ID));
 
     this.group = in_group;
@@ -92,8 +92,8 @@ public final class CatalogFacetDialog extends DialogFragment
       NullCheck.notNull(b.getString(CatalogFacetDialog.GROUP_NAME_ID));
 
     final ArrayList<String> in_strings = new ArrayList<String>(in_group.size());
-    for (final FeedFacetType f : in_group) {
-      in_strings.add(f.facetGetTitle());
+    for (final FeedFacet f : in_group) {
+      in_strings.add(f.getTitle());
     }
 
     this.group_adapter = new ArrayAdapter<String>(
@@ -150,7 +150,7 @@ public final class CatalogFacetDialog extends DialogFragment
     final int position,
     final long id)
   {
-    final FeedFacetType f =
+    final FeedFacet f =
       NullCheck.notNull(NullCheck.notNull(this.group).get(position));
     NullCheck.notNull(this.listener).onFacetSelected(f);
   }

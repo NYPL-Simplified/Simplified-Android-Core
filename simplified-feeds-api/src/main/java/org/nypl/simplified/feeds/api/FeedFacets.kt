@@ -2,8 +2,7 @@ package org.nypl.simplified.feeds.api
 
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
-import com.io7m.junreachable.UnreachableCodeException
-import org.nypl.simplified.feeds.api.FeedFacetOPDS.ENTRYPOINT_FACET_GROUP_TYPE
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetOPDS.Companion.ENTRYPOINT_FACET_GROUP_TYPE
 
 /**
  * Functions to process facets.
@@ -19,7 +18,7 @@ object FeedFacets {
    */
 
   @JvmStatic
-  fun findEntryPointFacetGroupForFeed(feed: Feed): OptionType<List<FeedFacetType>> {
+  fun findEntryPointFacetGroupForFeed(feed: Feed): OptionType<List<FeedFacet>> {
     return when (feed) {
       is Feed.FeedWithoutGroups ->
         findEntryPointFacetGroup(feed.facetsByGroup)
@@ -37,7 +36,7 @@ object FeedFacets {
 
   @JvmStatic
   private fun findEntryPointFacetGroup(
-    groups: Map<String, List<FeedFacetType>>): OptionType<List<FeedFacetType>> {
+    groups: Map<String, List<FeedFacet>>): OptionType<List<FeedFacet>> {
 
     for (groupName in groups.keys) {
       val facets = groups[groupName]!!
@@ -57,7 +56,7 @@ object FeedFacets {
    */
 
   @JvmStatic
-  fun facetGroupsAreAllEntryPoints(facetGroups: Map<String, List<FeedFacetType>>): Boolean {
+  fun facetGroupsAreAllEntryPoints(facetGroups: Map<String, List<FeedFacet>>): Boolean {
     return facetGroups.all { entry -> facetGroupIsEntryPointTyped(entry.value) }
   }
 
@@ -66,7 +65,7 @@ object FeedFacets {
    */
 
   @JvmStatic
-  fun facetGroupIsEntryPointTyped(facets: List<FeedFacetType>): Boolean {
+  fun facetGroupIsEntryPointTyped(facets: List<FeedFacet>): Boolean {
     return facets.all { facet -> facetIsEntryPointTyped(facet) }
   }
 
@@ -75,15 +74,12 @@ object FeedFacets {
    */
 
   @JvmStatic
-  fun facetIsEntryPointTyped(facet: FeedFacetType): Boolean {
-    return facet.matchFeedFacet(object : FeedFacetMatcherType<Boolean, UnreachableCodeException> {
-      override fun onFeedFacetOPDS(facet: FeedFacetOPDS): Boolean {
-        return facet.opdsFacet.groupType == Option.some(ENTRYPOINT_FACET_GROUP_TYPE)
-      }
-
-      override fun onFeedFacetPseudo(facet: FeedFacetPseudo): Boolean {
-        return false
-      }
-    })
+  fun facetIsEntryPointTyped(facet: FeedFacet): Boolean {
+    return when (facet) {
+      is FeedFacet.FeedFacetOPDS ->
+        facet.opdsFacet.groupType == Option.some(ENTRYPOINT_FACET_GROUP_TYPE)
+      is FeedFacet.FeedFacetPseudo ->
+        false
+    }
   }
 }

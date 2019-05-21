@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.view.Menu
@@ -27,6 +28,7 @@ import com.io7m.jfunctional.Unit
 import com.io7m.junreachable.UnimplementedCodeException
 import com.tenmiles.helpstack.HSHelpStack
 import com.tenmiles.helpstack.gears.HSDeskGear
+import org.joda.time.LocalDate
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -51,7 +53,9 @@ import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
 import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
+import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -61,9 +65,9 @@ import java.net.URI
 
 class SettingsAccountActivity : NavigationDrawerActivity() {
 
-
   private val logger = LoggerFactory.getLogger(SettingsAccountActivity::class.java)
 
+  private lateinit var ageCheckbox: CheckBox
   private lateinit var accountNameText: TextView
   private lateinit var accountSubtitleText: TextView
   private lateinit var accountIcon: ImageView
@@ -82,6 +86,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private lateinit var privacy: TableRow
   private lateinit var license: TableRow
   private lateinit var account: AccountType
+  private lateinit var profile: ProfileReadableType
   private lateinit var syncSwitch: Switch
   private lateinit var actionLayout: ViewGroup
   private lateinit var actionText: TextView
@@ -159,7 +164,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     contentArea.requestLayout()
 
     val extras = this.intent.extras
-    this.account = getAccount(extras)
+    this.profile = Simplified.getProfilesController().profileCurrent()
+    this.account = org.nypl.simplified.app.settings.SettingsAccountActivity.Companion.getAccount(extras)
 
     this.accountNameText =
       this.findViewById(android.R.id.text1)
@@ -189,6 +195,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.findViewById(R.id.support_center)
     this.eulaCheckbox =
       this.findViewById(R.id.eula_checkbox)
+    this.ageCheckbox =
+      this.findViewById(R.id.age13_checkbox)
     this.signup =
       this.findViewById(R.id.settings_signup)
     this.privacy =
@@ -203,13 +211,6 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.actionLayout.findViewById(R.id.settings_action_text)
     this.actionProgress =
       this.actionLayout.findViewById(R.id.settings_action_progress)
-
-    val bar = this.supportActionBar
-    if (bar != null) {
-      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp)
-      bar.setDisplayHomeAsUpEnabled(true)
-      bar.setHomeButtonEnabled(false)
-    }
 
     val accountProvider = this.account.provider()
     this.accountNameText.text = accountProvider.displayName()
@@ -355,6 +356,13 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     }
 
     /*
+     * The age-gate checkbox will be conditonally configured based on
+     * the account state.
+     */
+
+    this.ageCheckbox.visibility = View.INVISIBLE
+
+    /*
      * Configure the syncing switch.
      */
 
@@ -384,6 +392,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   override fun onStart() {
     super.onStart()
+
+    this.navigationDrawerShowUpIndicatorUnconditionally()
 
     this.accountEventSubscription =
       Simplified.getProfilesController()
@@ -478,11 +488,37 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     return Unit.unit()
   }
 
+  /**
+   * Synthesize a fake date of birth based on the current date and given age in years.
+   */
+
+  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth =
+    ProfileDateOfBirth(
+      date = LocalDate.now().minusYears(years),
+      isSynthesized = true)
+
   private fun configureLoginFieldVisibilityAndContents() {
     val state = this.account.loginState()
+
+    val ageGateRequired =
+      this.account.provider().hasAgeGate()
+
+    this.ageCheckbox.visibility =
+      if (ageGateRequired) {
+        View.VISIBLE
+      } else {
+        View.INVISIBLE
+      }
+
     return when (state) {
       AccountNotLoggedIn -> {
         this.actionLayout.visibility = View.INVISIBLE
+        this.pinText.setText("")
+        this.barcodeText.setText("")
+        this.ageCheckbox.isChecked = this.isOver13()
+        this.ageCheckbox.isEnabled = true
+        this.ageCheckbox.setOnClickListener(onAgeCheckboxClicked())
+
         this.configureEnableLoginForm()
       }
 
@@ -490,6 +526,9 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         val credentials = state.credentials
 
         this.actionLayout.visibility = View.INVISIBLE
+        this.ageCheckbox.isChecked = this.isOver13()
+        this.ageCheckbox.isEnabled = true
+        this.ageCheckbox.setOnClickListener(onAgeCheckboxClicked())
 
         this.pinText.setText(credentials.pin().value())
         this.pinText.isEnabled = false
@@ -509,6 +548,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.VISIBLE
         this.actionText.setText(R.string.settings_logout_in_progress)
+        this.ageCheckbox.isChecked = this.isOver13()
+        this.ageCheckbox.isEnabled = false
         this.configureDisableLoginForm()
       }
 
@@ -516,6 +557,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.VISIBLE
         this.actionText.setText(R.string.settings_login_in_progress)
+        this.ageCheckbox.isChecked = this.isOver13()
+        this.ageCheckbox.isEnabled = false
         this.configureDisableLoginForm()
       }
 
@@ -523,6 +566,9 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.INVISIBLE
         this.actionText.setText(R.string.settings_login_failed)
+        this.ageCheckbox.isChecked = this.isOver13()
+        this.ageCheckbox.isEnabled = true
+        this.ageCheckbox.setOnClickListener {}
         this.configureEnableLoginForm()
       }
 
@@ -531,6 +577,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         this.actionProgress.visibility = View.INVISIBLE
         this.actionText.setText(R.string.settings_logout_failed)
 
+        this.ageCheckbox.isChecked = this.isOver13()
+        this.ageCheckbox.isEnabled = true
+        this.ageCheckbox.setOnClickListener {}
+
         this.login.isEnabled = true
         this.login.setText(R.string.settings_log_out)
         this.login.setOnClickListener {
@@ -538,6 +588,62 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
           this.tryLogout()
         }
       }
+    }
+  }
+
+  /**
+   * A click listener for the age checkbox. If the user wants to change their age, then
+   * this must trigger an account logout. If the user cancels the dialog, the checkbox must
+   * be set to the opposite of what it was previously set to. This looks strange but it's actually
+   * because the checkbox will be checked/unchecked when the user initially clicks it, and then
+   * when the dialog is cancelled, the checkbox must be unchecked/checked again to return it to
+   * the original state it was in.
+   */
+
+  private fun onAgeCheckboxClicked(): (View) -> kotlin.Unit = {
+    AlertDialog.Builder(this)
+      .setTitle(R.string.age_verification_confirm_title)
+      .setMessage(R.string.age_verification_confirm_under13_check)
+      .setNegativeButton(R.string.age_verification_cancel_delete, { _, _ ->
+        this.ageCheckbox.isChecked = !this.ageCheckbox.isChecked
+      })
+      .setPositiveButton(R.string.age_verification_confirm_delete, { _, _ ->
+        this.configureDisableLoginForm()
+        if (this.ageCheckbox.isChecked) {
+          this.setOver13()
+        } else {
+          this.setUnder13()
+        }
+        this.tryLogout()
+      })
+      .create()
+      .show()
+  }
+
+  private fun setUnder13() {
+    Simplified.getProfilesController()
+      .profilePreferencesUpdate(
+        this.profile.preferences()
+          .toBuilder()
+          .setDateOfBirth(this.synthesizeDateOfBirth(0))
+          .build())
+  }
+
+  private fun setOver13() {
+    Simplified.getProfilesController()
+      .profilePreferencesUpdate(
+        this.profile.preferences()
+          .toBuilder()
+          .setDateOfBirth(this.synthesizeDateOfBirth(14))
+          .build())
+  }
+
+  private fun isOver13(): Boolean {
+    val age = this.profile.preferences().dateOfBirth()
+    return if (age is Some<ProfileDateOfBirth>) {
+      age.get().yearsOld(LocalDate.now()) >= 13
+    } else {
+      false
     }
   }
 

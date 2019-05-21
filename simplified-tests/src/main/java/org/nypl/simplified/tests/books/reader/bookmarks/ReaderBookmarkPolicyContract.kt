@@ -20,7 +20,7 @@ open class ReaderBookmarkPolicyContract {
 
   val accountID =
     org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
-  
+
   val bookmark0 =
     Bookmark(
       opdsId = "opdsid",
@@ -269,6 +269,32 @@ open class ReaderBookmarkPolicyContract {
     val result =
       ReaderBookmarkPolicy.evaluatePolicy(
         ReaderBookmarkPolicy.evaluateInput(Event.Remote.SyncingEnabled(accountID, true)),
+        state)
+
+    Assert.assertEquals(Command.RemotelyFetchBookmarks(accountID), result.outputs[0])
+  }
+
+  /**
+   * If an account logs in, syncing happens.
+   */
+
+  @Test
+  fun testBookmarkSyncingAccountLoggedIn()
+  {
+    val state =
+      ReaderBookmarkPolicyState.create(
+        locallySaved = mapOf(),
+        initialAccounts = setOf(
+          ReaderBookmarkPolicyAccountState(
+            accountID = accountID,
+            syncSupportedByAccount = true,
+            syncEnabledOnServer = true,
+            syncPermittedByUser = true)))
+
+    val result =
+      ReaderBookmarkPolicy.evaluatePolicy(
+        ReaderBookmarkPolicy.getAccountState(accountID)
+          .andThen { s -> ReaderBookmarkPolicy.evaluateInput(Event.Local.AccountLoggedIn(s!!)) },
         state)
 
     Assert.assertEquals(Command.RemotelyFetchBookmarks(accountID), result.outputs[0])

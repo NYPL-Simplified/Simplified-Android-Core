@@ -22,4 +22,5 @@ dependencies {
   implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
   implementation group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
+  implementation 'joda-time:joda-time:2.9.9'
 }

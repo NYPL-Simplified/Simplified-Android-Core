@@ -34,6 +34,14 @@ sealed class ReaderBookmarkPolicyInput {
         : Local()
 
       /**
+       * An account logged in.
+       */
+
+      data class AccountLoggedIn(
+        val account: ReaderBookmarkPolicyAccountState)
+        : Local()
+
+      /**
        * An account was updated.
        */
 

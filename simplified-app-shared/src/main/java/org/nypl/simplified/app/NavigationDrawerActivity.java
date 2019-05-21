@@ -34,9 +34,7 @@ import com.io7m.jnull.Nullable;
 
 import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
-import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
-import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
-import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
+import org.nypl.simplified.app.catalog.CatalogFeedArguments;
 import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
@@ -47,7 +45,6 @@ import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
 import org.nypl.simplified.app.settings.SettingsActivity;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.feeds.api.FeedBooksSelection;
-import org.nypl.simplified.feeds.api.FeedFacetPseudo;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent;
 import org.nypl.simplified.profiles.api.ProfileEvent;
@@ -61,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE;
 import static org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled;
 
 /**
@@ -148,6 +146,20 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
    */
 
   protected abstract boolean navigationDrawerShouldShowIndicator();
+
+  /**
+   * Replace the navigation drawer icon with an "up" indicator.
+   */
+
+  protected final void navigationDrawerShowUpIndicatorUnconditionally()
+  {
+    final ActionBar bar = this.getSupportActionBar();
+    if (bar != null) {
+      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+      bar.setDisplayHomeAsUpEnabled(true);
+      bar.setHomeButtonEnabled(false);
+    }
+  }
 
   /**
    * @return The title string for this activity
@@ -654,12 +666,12 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       UIThread.runOnUIThreadDelayed(() -> {
         final Bundle bundle = new Bundle();
         final OptionType<String> no_search = Option.none();
-        final ImmutableStack<CatalogFeedArgumentsType> empty_stack = ImmutableStack.empty();
-        final CatalogFeedArgumentsLocalBooks local =
-          new CatalogFeedArgumentsLocalBooks(
-            empty_stack,
+        final ImmutableStack<CatalogFeedArguments> empty_stack = ImmutableStack.empty();
+        final CatalogFeedArguments.CatalogFeedArgumentsLocalBooks local =
+          new CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
             this.activity.getResources().getString(R.string.books),
-            FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+            empty_stack,
+            SORT_BY_TITLE,
             no_search,
             FeedBooksSelection.BOOKS_FEED_LOANED);
         CatalogFeedActivity.Companion.setActivityArguments(bundle, local);
@@ -704,13 +716,12 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
         final Bundle bundle = new Bundle();
         final OptionType<String> no_search = Option.none();
-        final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
-          ImmutableStack.empty();
-        final CatalogFeedArgumentsLocalBooks local =
-          new CatalogFeedArgumentsLocalBooks(
-            empty_stack,
+        final ImmutableStack<CatalogFeedArguments> empty_stack = ImmutableStack.empty();
+        final CatalogFeedArguments.CatalogFeedArgumentsLocalBooks local =
+          new CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
             this.activity.getResources().getString(R.string.holds),
-            FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+            empty_stack,
+            SORT_BY_TITLE,
             no_search,
             FeedBooksSelection.BOOKS_FEED_HOLDS);
         CatalogFeedActivity.Companion.setActivityArguments(bundle, local);
@@ -765,24 +776,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       drawer.closeDrawer(GravityCompat.START);
 
       UIThread.runOnUIThreadDelayed(() -> {
-        try {
-          final Bundle bundle = new Bundle();
-          final ProfilesControllerType profiles = Simplified.getProfilesController();
-          final ImmutableStack<CatalogFeedArgumentsType> empty =
-            ImmutableStack.empty();
-          final CatalogFeedArgumentsRemote remote =
-            new CatalogFeedArgumentsRemote(
-              false,
-              NullCheck.notNull(empty),
-              NullCheck.notNull(this.activity.getResources().getString(R.string.feature_app_name)),
-              profiles.profileAccountCurrentCatalogRootURI(),
-              false);
-          CatalogFeedActivity.Companion.setActivityArguments(bundle, remote);
-          startActivityWithoutHistory(this.activity, bundle, MainCatalogActivity.class);
-        } catch (final ProfileNoneCurrentException e) {
-          throw new IllegalStateException(e);
-        }
-
+        final Bundle bundle = new Bundle();
+        MainCatalogActivity.setActivityArguments(bundle, false);
+        startActivityWithoutHistory(this.activity, bundle, MainCatalogActivity.class);
       }, 500L);
     }
   }

@@ -38,6 +38,6 @@ public final class CatalogBookReport implements View.OnClickListener {
 
   @Override
   public void onClick(final @Nullable View v) {
-    CatalogBookReportActivity.startActivity(this.activity, this.feed_entry);
+    CatalogBookReportActivity.Companion.startActivity(this.activity, this.feed_entry);
   }
 }

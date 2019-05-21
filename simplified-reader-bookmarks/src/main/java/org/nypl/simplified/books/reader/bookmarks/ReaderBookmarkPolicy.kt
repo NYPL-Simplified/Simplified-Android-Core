@@ -115,13 +115,13 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     fun getBookmarksState(
-      account: org.nypl.simplified.accounts.api.AccountID): ReaderBookmarkPolicy<Map<BookmarkID, ReaderBookmarkState>> {
+      account: AccountID): ReaderBookmarkPolicy<Map<BookmarkID, ReaderBookmarkState>> {
       return getState().map { state -> state.bookmarksByAccount[account] ?: mapOf() }
     }
 
     fun getBookmarkState(
-      account: org.nypl.simplified.accounts.api.AccountID,
-      id: org.nypl.simplified.books.api.BookmarkID): ReaderBookmarkPolicy<ReaderBookmarkState?> {
+      account: AccountID,
+      id: BookmarkID): ReaderBookmarkPolicy<ReaderBookmarkState?> {
       return getBookmarksState(account).map { bookmarks -> bookmarks[id] }
     }
 
@@ -129,7 +129,7 @@ data class ReaderBookmarkPolicy<T>(
       return getState().map { state -> state.accountState }
     }
 
-    fun getAccountState(id: org.nypl.simplified.accounts.api.AccountID): ReaderBookmarkPolicy<ReaderBookmarkPolicyAccountState?> {
+    fun getAccountState(id: AccountID): ReaderBookmarkPolicy<ReaderBookmarkPolicyAccountState?> {
       return getAccountsState().map { accounts -> accounts[id] }
     }
 
@@ -149,7 +149,7 @@ data class ReaderBookmarkPolicy<T>(
       }
     }
 
-    fun removeAccount(account: org.nypl.simplified.accounts.api.AccountID): ReaderBookmarkPolicy<Unit> {
+    fun removeAccount(account: AccountID): ReaderBookmarkPolicy<Unit> {
       return updateState { state -> state.copy(accountState = state.accountState.minus(account)) }
     }
 
@@ -172,13 +172,13 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun remoteDeleteBookmark(
-      accountID: org.nypl.simplified.accounts.api.AccountID,
+      accountID: AccountID,
       bookmark: ReaderBookmarkState): ReaderBookmarkPolicy<Unit> {
       return emitOutput(RemotelyDeleteBookmark(accountID, bookmark.bookmark))
     }
 
     private fun remoteDeleteBookmarkIfPossible(
-      accountID: org.nypl.simplified.accounts.api.AccountID,
+      accountID: AccountID,
       bookmark: ReaderBookmarkState): ReaderBookmarkPolicy<Unit> {
       return getAccountState(accountID)
         .andThen { account ->
@@ -191,7 +191,7 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun remoteSendAllUnsentBookmarksIfPossible(
-      account: org.nypl.simplified.accounts.api.AccountID): ReaderBookmarkPolicy<Unit> {
+      account: AccountID): ReaderBookmarkPolicy<Unit> {
       return getAccountState(account)
         .andThen { accountState ->
           if (accountState != null && accountState.canSync) {
@@ -204,17 +204,17 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun remoteSendAllUnsentBookmarks(
-      accountID: org.nypl.simplified.accounts.api.AccountID,
-      bookmarksState: Map<org.nypl.simplified.books.api.BookmarkID, ReaderBookmarkState>): ReaderBookmarkPolicy<Unit> {
+      accountID: AccountID,
+      bookmarksState: Map<BookmarkID, ReaderBookmarkState>): ReaderBookmarkPolicy<Unit> {
       return sequenceDiscarding(bookmarksThatRequireSyncingInAccount(accountID, bookmarksState)
         .map { bookmark -> emitOutput(RemotelySendBookmark(accountID, bookmark.bookmark)) })
     }
 
-    private fun remoteFetchAllBookmarks(account: org.nypl.simplified.accounts.api.AccountID): ReaderBookmarkPolicy<Unit> {
+    private fun remoteFetchAllBookmarks(account: AccountID): ReaderBookmarkPolicy<Unit> {
       return emitOutput(RemotelyFetchBookmarks(account))
     }
 
-    private fun remoteSyncAllIfPossible(account: org.nypl.simplified.accounts.api.AccountID): ReaderBookmarkPolicy<Unit> {
+    private fun remoteSyncAllIfPossible(account: AccountID): ReaderBookmarkPolicy<Unit> {
       return getAccountState(account)
         .andThen { accountState ->
           if (accountState != null && accountState.canSync) {
@@ -227,22 +227,22 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun remoteSyncAll(
-      account: org.nypl.simplified.accounts.api.AccountID,
-      bookmarks: Map<org.nypl.simplified.books.api.BookmarkID, ReaderBookmarkState>): ReaderBookmarkPolicy<Unit> {
+      account: AccountID,
+      bookmarks: Map<BookmarkID, ReaderBookmarkState>): ReaderBookmarkPolicy<Unit> {
       return remoteSendAllUnsentBookmarks(account, bookmarks)
         .andThen { remoteFetchAllBookmarks(account) }
     }
 
     private fun bookmarksThatRequireSyncingInAccount(
-      account: org.nypl.simplified.accounts.api.AccountID,
-      bookmarks: Map<org.nypl.simplified.books.api.BookmarkID, ReaderBookmarkState>): List<ReaderBookmarkState> {
+      account: AccountID,
+      bookmarks: Map<BookmarkID, ReaderBookmarkState>): List<ReaderBookmarkState> {
       return bookmarks.filterValues { bookmark -> bookmarkRequiresSyncing(account, bookmark) }
         .values
         .toList()
     }
 
     private fun bookmarkRequiresSyncing(
-      account: org.nypl.simplified.accounts.api.AccountID,
+      account: AccountID,
       bookmark: ReaderBookmarkState): Boolean {
 
       return if (bookmark.account == account) {
@@ -276,6 +276,8 @@ data class ReaderBookmarkPolicy<T>(
           onEventSyncingEnabled(input)
         is Event.Local.AccountUpdated ->
           onEventAccountUpdated(input)
+        is Event.Local.AccountLoggedIn ->
+          onEventAccountLoggedIn(input)
       }
     }
 
@@ -486,6 +488,11 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun onEventAccountUpdated(event: Event.Local.AccountUpdated): ReaderBookmarkPolicy<Unit> {
+      return updateAccount(event.account)
+        .andThen { remoteSyncAllIfPossible(event.account.accountID) }
+    }
+
+    private fun onEventAccountLoggedIn(event: Event.Local.AccountLoggedIn): ReaderBookmarkPolicy<Unit> {
       return updateAccount(event.account)
         .andThen { remoteSyncAllIfPossible(event.account.accountID) }
     }

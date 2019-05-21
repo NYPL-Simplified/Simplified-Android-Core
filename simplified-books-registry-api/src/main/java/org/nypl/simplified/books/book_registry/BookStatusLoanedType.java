@@ -2,7 +2,7 @@ package org.nypl.simplified.books.book_registry;
 
 import com.io7m.jfunctional.OptionType;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  * The given book is owned/loaned.
@@ -14,7 +14,7 @@ public interface BookStatusLoanedType extends BookStatusType
    * @return The expiry date of the loan, if any.
    */
 
-  OptionType<Calendar> getLoanExpiryDate();
+  OptionType<DateTime> getLoanExpiryDate();
 
   /**
    * Match on the type of status.

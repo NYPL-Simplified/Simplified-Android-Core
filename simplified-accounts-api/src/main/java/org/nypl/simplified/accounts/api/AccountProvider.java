@@ -221,6 +221,15 @@ public abstract class AccountProvider implements Comparable<AccountProvider> {
   }
 
   /**
+   * @return {@code true} if the account has an age gate
+   */
+
+  public final boolean hasAgeGate()
+  {
+    return this.catalogURIForOver13s().isSome() || this.catalogURIForUnder13s().isSome();
+  }
+
+  /**
    * The type of mutable builders for account providers.
    */
 

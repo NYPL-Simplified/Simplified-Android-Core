@@ -19,6 +19,7 @@ final class OPDSFeedConstants
   public static final String THUMBNAIL_URI_TEXT;
   public static final String ISSUES_REL_TEXT;
   public static final String ALTERNATE_REL_TEXT;
+  public static final String CIRCULATION_ANALYTICS_OPEN_BOOK_REL_TEXT;
   public static final String RELATED_REL_TEXT;
   public static final URI    SCHEMA_URI;
   public static final URI    SIMPLIFIED_URI;
@@ -75,6 +76,8 @@ final class OPDSFeedConstants
 
     ISSUES_REL_TEXT = "issues";
 
+    CIRCULATION_ANALYTICS_OPEN_BOOK_REL_TEXT =
+      "http://librarysimplified.org/terms/rel/analytics/open-book";
 
     ALTERNATE_REL_TEXT = "alternate";
     RELATED_REL_TEXT = "related";

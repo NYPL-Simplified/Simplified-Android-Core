@@ -15,6 +15,7 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -329,11 +330,11 @@ abstract class ProfilesDatabaseContract {
     p0.preferencesUpdate(
       p0.preferences()
         .toBuilder()
-        .setDateOfBirth(LocalDate(2010, 10, 30))
+        .setDateOfBirth(ProfileDateOfBirth(LocalDate(2010, 10, 30), true))
         .build())
 
     Assert.assertEquals(
-      Option.some(LocalDate(2010, 10, 30)),
+      Option.some(ProfileDateOfBirth(LocalDate(2010, 10, 30), true)),
       p0.preferences().dateOfBirth())
   }
 

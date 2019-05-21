@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.observable.ObservableType;
 import org.nypl.simplified.profiles.api.ProfileCreationEvent;
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileType;
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType;
@@ -24,7 +25,7 @@ final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
   private final ObservableType<ProfileEvent> profile_events;
   private final String display_name;
   private final String gender;
-  private final LocalDate date;
+  private final ProfileDateOfBirth date;
   private final AccountProvider account_provider;
 
   ProfileCreationTask(
@@ -33,7 +34,7 @@ final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
       final AccountProvider in_account_provider,
       final String in_display_name,
       final String in_gender,
-      final LocalDate in_date) {
+      final ProfileDateOfBirth in_date) {
 
     this.profiles =
         NullCheck.notNull(in_profiles, "Profiles");

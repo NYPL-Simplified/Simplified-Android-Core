@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.feeds.api.FeedFacetType;
+import org.nypl.simplified.feeds.api.FeedFacet;
 
 /**
  * The type of facet selection listeners.
@@ -15,5 +15,5 @@ public interface CatalogFacetSelectionListenerType
    */
 
   void onFacetSelected(
-    final FeedFacetType f);
+    final FeedFacet f);
 }

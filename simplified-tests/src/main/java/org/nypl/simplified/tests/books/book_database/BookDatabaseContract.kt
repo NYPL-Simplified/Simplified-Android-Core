@@ -2,6 +2,7 @@ package org.nypl.simplified.tests.books.book_database
 
 import android.content.Context
 import com.io7m.jfunctional.Option
+import org.joda.time.DateTime
 import org.junit.Assert
 import org.junit.Test
 import org.nypl.audiobook.android.api.PlayerPosition
@@ -22,7 +23,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
-import java.util.Calendar
 import java.util.UUID
 
 abstract class BookDatabaseContract {
@@ -65,7 +65,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
         .build()
 
@@ -73,7 +73,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "b",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
         .build()
 
@@ -81,7 +81,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "c",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
         .build()
 
@@ -122,7 +122,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
-        Calendar.getInstance(),
+        DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
         .build()
 
@@ -661,7 +661,7 @@ abstract class BookDatabaseContract {
     val eb = OPDSAcquisitionFeedEntry.newBuilder(
       "abcd",
       "Title",
-      Calendar.getInstance(),
+      DateTime.now(),
       OPDSAvailabilityOpenAccess.get(revoke))
     eb.addAcquisition(
       OPDSAcquisition(
@@ -677,7 +677,7 @@ abstract class BookDatabaseContract {
     val eb = OPDSAcquisitionFeedEntry.newBuilder(
       "abcd",
       "Title",
-      Calendar.getInstance(),
+      DateTime.now(),
       OPDSAvailabilityOpenAccess.get(revoke))
     eb.addAcquisition(
       OPDSAcquisition(
@@ -693,7 +693,7 @@ abstract class BookDatabaseContract {
     val eb = OPDSAcquisitionFeedEntry.newBuilder(
       "abcd",
       "Title",
-      Calendar.getInstance(),
+      DateTime.now(),
       OPDSAvailabilityOpenAccess.get(revoke))
 
     eb.addAcquisition(

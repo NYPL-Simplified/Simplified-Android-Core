@@ -6,14 +6,9 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.FunctionType
-import com.io7m.jfunctional.None
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.OptionVisitorType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
-import com.io7m.junreachable.UnimplementedCodeException
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -26,7 +21,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -45,6 +39,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
@@ -152,7 +147,12 @@ class Controller private constructor(
     gender: String,
     date: LocalDate): FluentFuture<ProfileCreationEvent> {
     return FluentFuture.from(this.taskExecutor.submit(ProfileCreationTask(
-      this.profiles, this.profileEvents, accountProvider, displayName, gender, date)))
+      this.profiles,
+      this.profileEvents,
+      accountProvider,
+      displayName,
+      gender,
+      ProfileDateOfBirth(date = date, isSynthesized = false))))
   }
 
   override fun profileSelect(id: ProfileID): FluentFuture<Unit> {
@@ -246,25 +246,6 @@ class Controller private constructor(
   }
 
   @Throws(ProfileNoneCurrentException::class)
-  override fun profileAccountCurrentCatalogRootURI(): URI {
-    val profile = this.profiles.currentProfileUnsafe()
-    val account = profile.accountCurrent()
-
-    return profile.preferences().dateOfBirth().accept(object : OptionVisitorType<LocalDate, URI> {
-      override fun none(none: None<LocalDate>): URI {
-        return account.provider().catalogURI()
-      }
-
-      override fun some(some: Some<LocalDate>): URI {
-        val now = LocalDate.now()
-        val then = some.get()
-        val age = now.year - then.year
-        return account.provider().catalogURIForAge(age)
-      }
-    })
-  }
-
-  @Throws(ProfileNoneCurrentException::class)
   override fun profilePreferencesUpdate(preferences: ProfilePreferences): FluentFuture<Unit> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfilePreferencesUpdateTask(
@@ -354,9 +335,14 @@ class Controller private constructor(
   }
 
   override fun bookReport(
+    account: AccountType,
     feedEntry: FeedEntry.FeedEntryOPDS,
     reportType: String): ListenableFuture<Unit> {
-    throw UnimplementedCodeException()
+    return this.taskExecutor.submit(BookReportTask(
+      http = this.http,
+      account = account,
+      feedEntry = feedEntry,
+      reportType = reportType))
   }
 
   override fun booksSync(account: AccountType): ListenableFuture<Unit> {

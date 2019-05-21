@@ -6,10 +6,11 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+import org.joda.time.DateTime;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +34,7 @@ public final class OPDSAcquisitionFeed implements Serializable
   private final OptionType<URI>                next;
   private final OptionType<OPDSSearchLink>     search;
   private final String                         title;
-  private final Calendar                       updated;
+  private final DateTime                       updated;
   private final URI                            uri;
   private final OptionType<URI>                terms_of_service;
   private final OptionType<URI>                about;
@@ -47,7 +48,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     final Map<String, OPDSGroup> in_groups,
     final List<String> in_groups_order,
     final String in_id,
-    final Calendar in_updated,
+    final DateTime in_updated,
     final String in_title,
     final OptionType<URI> in_next,
     final OptionType<OPDSSearchLink> in_search,
@@ -94,7 +95,7 @@ public final class OPDSAcquisitionFeed implements Serializable
   public static OPDSAcquisitionFeedBuilderType newBuilder(
     final URI in_uri,
     final String in_id,
-    final Calendar in_updated,
+    final DateTime in_updated,
     final String in_title)
   {
     return new Builder(in_uri, in_title, in_id, in_updated);
@@ -214,7 +215,7 @@ public final class OPDSAcquisitionFeed implements Serializable
    * @return The feed update time
    */
 
-  public Calendar getFeedUpdated()
+  public DateTime getFeedUpdated()
   {
     return this.updated;
   }
@@ -304,7 +305,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     private final List<String>                                groups_order;
     private final String                                      id;
     private final String                                      title;
-    private final Calendar                                    updated;
+    private final DateTime                                    updated;
     private final URI                                         uri;
     private       OptionType<URI>                             next;
     private       OptionType<OPDSSearchLink>                  search;
@@ -318,7 +319,7 @@ public final class OPDSAcquisitionFeed implements Serializable
       final URI in_uri,
       final String in_title,
       final String in_id,
-      final Calendar in_updated)
+      final DateTime in_updated)
     {
       this.uri = NullCheck.notNull(in_uri);
       this.title = NullCheck.notNull(in_title);

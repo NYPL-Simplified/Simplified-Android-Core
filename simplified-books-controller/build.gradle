@@ -17,6 +17,7 @@ description = 'simplified-books-controller'
 
 dependencies {
   api project(":simplified-books-controller-api")
+  api project(":simplified-profiles-controller-api")
 
   implementation project(":simplified-accounts-api")
   implementation project(":simplified-accounts-database-api")
@@ -30,7 +31,6 @@ dependencies {
   implementation project(":simplified-observable")
   implementation project(":simplified-opds-core")
   implementation project(":simplified-profiles-api")
-  implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-reader-bookmarks-api")
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

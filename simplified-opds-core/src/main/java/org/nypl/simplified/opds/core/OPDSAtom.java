@@ -2,15 +2,15 @@ package org.nypl.simplified.opds.core;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
-import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.Calendar;
 
 final class OPDSAtom implements Serializable
 {
@@ -29,7 +29,7 @@ final class OPDSAtom implements Serializable
       ee, OPDSFeedConstants.ATOM_URI, "id");
   }
 
-  static OptionType<Calendar> findPublished(
+  static OptionType<DateTime> findPublished(
     final Element e)
     throws DOMException, ParseException
   {
@@ -38,17 +38,10 @@ final class OPDSAtom implements Serializable
         e, OPDSFeedConstants.ATOM_URI, "published");
 
     return e_opt.mapPartial(
-      new PartialFunctionType<Element, Calendar, ParseException>()
-      {
-        @Override public Calendar call(
-          final Element er)
-          throws ParseException
-        {
-          final String text = er.getTextContent();
-          final String trimmed = text.trim();
-          return RFC3339Formatter.parseRFC3339Date(
-            NullCheck.notNull(trimmed));
-        }
+      (PartialFunctionType<Element, DateTime, ParseException>) er -> {
+        final String text = er.getTextContent();
+        final String trimmed = text.trim();
+        return ISODateTimeFormat.dateTimeParser().parseDateTime(trimmed);
       });
   }
 
@@ -60,12 +53,11 @@ final class OPDSAtom implements Serializable
       e, OPDSFeedConstants.ATOM_URI, "title");
   }
 
-  static Calendar findUpdated(
+  static DateTime findUpdated(
     final Element e)
-    throws OPDSParseException, ParseException
-  {
-    final String e_updated_raw = OPDSXML.getFirstChildElementTextWithName(
-      e, OPDSFeedConstants.ATOM_URI, "updated");
-    return RFC3339Formatter.parseRFC3339Date(e_updated_raw);
+    throws OPDSParseException {
+    final String e_updated_raw =
+      OPDSXML.getFirstChildElementTextWithName(e, OPDSFeedConstants.ATOM_URI, "updated");
+    return ISODateTimeFormat.dateTimeParser().parseDateTime(e_updated_raw);
   }
 }

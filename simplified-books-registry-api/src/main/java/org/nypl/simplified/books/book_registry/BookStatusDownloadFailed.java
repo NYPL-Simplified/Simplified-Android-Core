@@ -3,9 +3,8 @@ package org.nypl.simplified.books.book_registry;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
 import org.nypl.simplified.books.api.BookID;
-
-import java.util.Calendar;
 
 /**
  * The given book failed to download properly.
@@ -15,7 +14,7 @@ public final class BookStatusDownloadFailed implements BookStatusDownloadingType
 
   private final OptionType<Throwable> error;
   private final BookID id;
-  private final OptionType<Calendar> loan_end_date;
+  private final OptionType<DateTime> loan_end_date;
 
   /**
    * Construct a status value.
@@ -28,7 +27,7 @@ public final class BookStatusDownloadFailed implements BookStatusDownloadingType
   public BookStatusDownloadFailed(
       final BookID in_id,
       final OptionType<Throwable> x,
-      final OptionType<Calendar> in_loan_end_date) {
+      final OptionType<DateTime> in_loan_end_date) {
 
     this.id = NullCheck.notNull(in_id);
     this.error = NullCheck.notNull(x);
@@ -41,7 +40,7 @@ public final class BookStatusDownloadFailed implements BookStatusDownloadingType
   }
 
   @Override
-  public OptionType<Calendar> getLoanExpiryDate() {
+  public OptionType<DateTime> getLoanExpiryDate() {
     return this.loan_end_date;
   }
 

@@ -3,9 +3,8 @@ package org.nypl.simplified.books.book_registry;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
 import org.nypl.simplified.books.api.BookID;
-
-import java.util.Calendar;
 
 /**
  * The given book is owned/loaned but is not downloaded and is therefore not
@@ -14,7 +13,7 @@ import java.util.Calendar;
 
 public final class BookStatusLoaned implements BookStatusLoanedType {
 
-  private final OptionType<Calendar> end_date;
+  private final OptionType<DateTime> end_date;
   private final BookID id;
   private final boolean returnable;
 
@@ -28,7 +27,7 @@ public final class BookStatusLoaned implements BookStatusLoanedType {
 
   public BookStatusLoaned(
       final BookID in_id,
-      final OptionType<Calendar> in_end_date,
+      final OptionType<DateTime> in_end_date,
       final boolean in_returnable) {
     this.id = NullCheck.notNull(in_id);
     this.end_date = NullCheck.notNull(in_end_date);
@@ -41,7 +40,7 @@ public final class BookStatusLoaned implements BookStatusLoanedType {
   }
 
   @Override
-  public OptionType<Calendar> getLoanExpiryDate() {
+  public OptionType<DateTime> getLoanExpiryDate() {
     return this.end_date;
   }
 

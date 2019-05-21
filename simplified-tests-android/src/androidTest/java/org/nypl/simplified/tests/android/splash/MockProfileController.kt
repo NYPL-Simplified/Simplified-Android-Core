@@ -95,10 +95,6 @@ class MockProfileController : ProfilesControllerType {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun profileAccountCurrentCatalogRootURI(): URI {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
   override fun profilePreferencesUpdate(preferences: ProfilePreferences?): FluentFuture<Unit> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }

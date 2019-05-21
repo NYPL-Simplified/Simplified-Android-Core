@@ -13,6 +13,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth;
 import org.nypl.simplified.reader.api.ReaderPreferencesJSON;
 import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.nypl.simplified.files.FileUtilities;
@@ -97,7 +98,7 @@ public final class ProfilePreferencesJSON {
     final OptionType<String> gender=
         JSONParserUtilities.getStringOptional(obj, "gender");
 
-    final OptionType<LocalDate> date_of_birth =
+    final OptionType<LocalDate> date_of_birth_date =
         JSONParserUtilities.getStringOptional(obj, "date-of-birth")
             .mapPartial(text -> {
               try {
@@ -106,6 +107,13 @@ public final class ProfilePreferencesJSON {
                 throw new JSONParseException(e);
               }
             });
+
+    final boolean date_of_birth_synthesized =
+      JSONParserUtilities.getBooleanDefault(obj, "date-of-birth-synthesized", false);
+
+    final OptionType<ProfileDateOfBirth> date_of_birth =
+      date_of_birth_date.map(
+        date_value -> new ProfileDateOfBirth(date_value, date_of_birth_synthesized));
 
     final ReaderPreferences reader_prefs =
         JSONParserUtilities.getObjectOptional(obj, "reader-preferences")
@@ -160,7 +168,10 @@ public final class ProfilePreferencesJSON {
         gender -> jo.put("gender", gender));
 
     description.dateOfBirth().map_(
-        date -> jo.put("date-of-birth", date_formatter.print(date)));
+        date -> {
+          jo.put("date-of-birth", date_formatter.print(date.getDate()));
+          jo.put("date-of-birth-synthesized", date.isSynthesized());
+        });
 
     jo.set("reader-preferences", ReaderPreferencesJSON.serializeToJSON(jom, description.readerPreferences()));
     return jo;

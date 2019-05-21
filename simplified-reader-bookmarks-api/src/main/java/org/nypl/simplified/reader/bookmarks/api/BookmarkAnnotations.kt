@@ -2,10 +2,12 @@ package org.nypl.simplified.reader.bookmarks.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.joda.time.LocalDateTime
+import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.books.api.BookLocationJSON
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
 import java.net.URI
+import java.time.format.DateTimeFormatter
 
 data class BookmarkAnnotationSelectorNode(
   val type: String,
@@ -65,7 +67,7 @@ object BookmarkAnnotations {
       opdsId = annotation.target.source,
       location = locationJSON,
       kind = BookmarkKind.ofMotivation(annotation.motivation),
-      time = LocalDateTime.parse(annotation.body.timestamp),
+      time = ISODateTimeFormat.dateTimeParser().parseLocalDateTime(annotation.body.timestamp),
       chapterTitle = annotation.body.chapterTitle ?: "",
       chapterProgress = annotation.body.chapterProgress?.toDouble() ?: 0.0,
       bookProgress = annotation.body.bookProgress?.toDouble() ?: 0.0,

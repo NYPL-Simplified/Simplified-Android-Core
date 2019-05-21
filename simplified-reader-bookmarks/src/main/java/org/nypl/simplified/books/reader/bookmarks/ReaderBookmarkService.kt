@@ -6,13 +6,14 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountCreationSucceeded
 import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountDeletionSucceeded
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.Bookmark
@@ -21,6 +22,7 @@ import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkLastReadLocation
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.AccountCreated
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.AccountDeleted
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.AccountLoggedIn
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.AccountUpdated
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.BookmarkCreated
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Local.BookmarkDeleteRequested
@@ -44,6 +46,7 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent.ReaderBookma
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType.Requirements
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -64,7 +67,7 @@ class ReaderBookmarkService private constructor(
   private val httpCalls: ReaderBookmarkHTTPCallsType,
   private val bookmarkEventsOut: ObservableType<ReaderBookmarkEvent>,
   private val profilesController: ProfilesControllerType)
-  : org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType {
+  : ReaderBookmarkServiceType {
 
   /**
    * A trivial Thread subclass for efficient checks to determine whether or not the current
@@ -243,8 +246,8 @@ class ReaderBookmarkService private constructor(
 
     override fun runActual() {
       this.logger.debug("[{}]: syncing account {}",
-        profile.id().uuid,
-        accountID)
+        this.profile.id().uuid,
+        this.accountID)
 
       val syncable =
         accountSupportsSyncing(this.profile.account(this.accountID))
@@ -269,7 +272,7 @@ class ReaderBookmarkService private constructor(
           listOf()
         }
 
-      this.logger.debug("[{}]: received {} bookmarks", profile.id().uuid, bookmarks.size)
+      this.logger.debug("[{}]: received {} bookmarks", this.profile.id().uuid, bookmarks.size)
       for (bookmark in bookmarks) {
         this.evaluatePolicyInput(BookmarkReceived(syncable.account.id(), bookmark))
       }
@@ -388,11 +391,13 @@ class ReaderBookmarkService private constructor(
         val account = this.profile.account(this.accountID)
         val books = account.bookDatabase()
         val entry = books.entry(this.bookmark.book)
-        val handle = entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
+        val handle =
+          entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
+
         if (handle != null) {
-          when (bookmark.kind) {
+          when (this.bookmark.kind) {
             ReaderBookmarkLastReadLocation ->
-              handle.setLastReadLocation(bookmark)
+              handle.setLastReadLocation(this.bookmark)
             ReaderBookmarkExplicit ->
               handle.setBookmarks(handle.format.bookmarks.plus(this.bookmark))
           }
@@ -450,7 +455,7 @@ class ReaderBookmarkService private constructor(
     private val book: BookID)
     : ReaderBookmarkControllerOp<ReaderBookmarks>(logger) {
 
-    override fun runActual(): org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks {
+    override fun runActual(): ReaderBookmarks {
       try {
         this.logger.debug("[{}]: loading bookmarks", this.profile.id().uuid)
 
@@ -459,7 +464,7 @@ class ReaderBookmarkService private constructor(
         val entry = books.entry(this.book)
         val handle = entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
         if (handle != null) {
-          return org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks(
+          return ReaderBookmarks(
             handle.format.lastReadLocation,
             handle.format.bookmarks)
         }
@@ -468,7 +473,7 @@ class ReaderBookmarkService private constructor(
       }
 
       this.logger.debug("[{}]: returning empty bookmarks", this.profile.id().uuid)
-      return org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks(null, listOf())
+      return ReaderBookmarks(null, listOf())
     }
   }
 
@@ -510,6 +515,44 @@ class ReaderBookmarkService private constructor(
         this.onEventAccountDeleted(profile, event)
       } else if (event is AccountEventUpdated) {
         this.onEventAccountUpdated(profile, event)
+      } else if (event is AccountEventLoginStateChanged) {
+        this.onEventAccountEventLoginStateChanged(profile, event)
+      }
+    }
+  }
+
+  private fun onEventAccountEventLoginStateChanged(
+    profile: ProfileReadableType,
+    event: AccountEventLoginStateChanged) {
+
+    return when (event.state) {
+      AccountLoginState.AccountNotLoggedIn,
+      AccountLoginState.AccountLoggingIn,
+      is AccountLoginState.AccountLoginFailed,
+      AccountLoginState.AccountLoggingOut,
+      is AccountLoginState.AccountLogoutFailed -> {
+        // We don't care about these
+      }
+
+      is AccountLoginState.AccountLoggedIn -> {
+        this.logger.debug("[{}]: account {} logged in", profile.id().uuid, event.accountID.uuid)
+
+        val account =
+          profile.account(event.accountID)
+
+        val accountStateCurrent =
+          ReaderBookmarkPolicy.evaluatePolicy(ReaderBookmarkPolicy.getAccountState(event.accountID),
+            this.policyState)
+            .result
+
+        val accountState =
+          ReaderBookmarkPolicyAccountState(
+            accountID = account.id(),
+            syncSupportedByAccount = account.provider().supportsSimplyESynchronization(),
+            syncEnabledOnServer = if (accountStateCurrent != null) accountStateCurrent.syncEnabledOnServer else false,
+            syncPermittedByUser = account.preferences().bookmarkSyncingPermitted)
+
+        this.evaluatePolicyInput(profile, AccountLoggedIn(accountState))
       }
     }
   }
@@ -627,7 +670,7 @@ class ReaderBookmarkService private constructor(
           .call()
 
       is ReaderBookmarkPolicyOutput.Event.LocalBookmarkAlreadyExists ->
-        throw UnimplementedCodeException()
+        this.logger.warn("local bookmark already exists: {}", output.bookmark.bookmarkId)
     }
   }
 
@@ -669,7 +712,7 @@ class ReaderBookmarkService private constructor(
 
   override fun bookmarkLoad(
     accountID: AccountID,
-    book: BookID): FluentFuture<org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks> {
+    book: BookID): FluentFuture<ReaderBookmarks> {
 
     return try {
       val profile = this.profilesController.profileCurrent()
@@ -692,14 +735,14 @@ class ReaderBookmarkService private constructor(
       profile: ProfileReadableType): ReaderBookmarkPolicyState {
       logger.debug("[{}]: configuring bookmark policy state", profile.id().uuid)
       return ReaderBookmarkPolicyState.create(
-        initialAccounts = accountStatesForProfile(profile),
-        locallySaved = bookmarksForProfile(logger, profile))
+        initialAccounts = this.accountStatesForProfile(profile),
+        locallySaved = this.bookmarksForProfile(logger, profile))
     }
 
     private fun accountStatesForProfile(
       profile: ProfileReadableType): Set<ReaderBookmarkPolicyAccountState> {
       return profile.accounts()
-        .map { pair -> accountStateForAccount(pair.value) }
+        .map { pair -> this.accountStateForAccount(pair.value) }
         .toSet()
     }
 
@@ -717,7 +760,7 @@ class ReaderBookmarkService private constructor(
       val books = mutableMapOf<AccountID, Set<Bookmark>>()
       val accounts = profile.accounts().values
       for (account in accounts) {
-        books.put(account.id(), bookmarksForAccount(account))
+        books.put(account.id(), this.bookmarksForAccount(account))
       }
       logger.debug("[{}]: collected {} bookmarks for profile", profile.id().uuid, books.size)
       return books

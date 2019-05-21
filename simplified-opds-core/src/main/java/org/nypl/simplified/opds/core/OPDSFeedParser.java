@@ -6,6 +6,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -21,7 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -315,7 +316,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     OPDSFeedParser.LOG.debug("parsing feed as single entry: {}", uri);
 
     final String id = "urn:simplified-entry";
-    final Calendar updated = Calendar.getInstance();
+    final DateTime updated = DateTime.now();
     final String title = "Entry";
     final OPDSAcquisitionFeedBuilderType b =
       OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
@@ -334,7 +335,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
 
     final String id = OPDSAtom.findID(e_feed);
     final String title = OPDSAtom.findTitle(e_feed);
-    final Calendar updated = OPDSAtom.findUpdated(e_feed);
+    final DateTime updated = OPDSAtom.findUpdated(e_feed);
 
     final OPDSAcquisitionFeedBuilderType b =
       OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);

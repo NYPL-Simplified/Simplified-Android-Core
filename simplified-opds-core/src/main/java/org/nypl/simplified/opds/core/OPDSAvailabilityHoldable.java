@@ -3,7 +3,7 @@ package org.nypl.simplified.opds.core;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  * The book is not available for borrowing but is available to place on hold.
@@ -27,7 +27,7 @@ public final class OPDSAvailabilityHoldable implements OPDSAvailabilityType
    * Get availability end date (always none for Holdable)
    * @return end_date
    */
-  public OptionType<Calendar> getEndDate()
+  public OptionType<DateTime> getEndDate()
   {
     return Option.none();
   }

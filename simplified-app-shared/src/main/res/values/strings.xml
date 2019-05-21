@@ -12,14 +12,16 @@
 
   <!-- Age Verification strings -->
   <string name="age_verification_title">Age Verification</string>
-  <string name="age_verification_question">You must be 13 years of age or older to download a book from the collection.\nHow old are you?</string>
+  <string name="age_verification_question">You must be 13 years of age or older to download some of the books from this collection.\nHow old are you?</string>
   <string name="age_verification_changed">If you are under 13, all content downloaded to My Books will be removed.\nHow old are you?</string>
   <string name="age_verification_13_older">13 or Older</string>
   <string name="age_verification_13_younger">Under 13</string>
   <string name="age_verification_13_checkbox">I am 13 years of age or older.</string>
   <string name="age_verification_too_young">You are not old enough to sign up for a library card.</string>
-  <string name="age_verification_confirm_under13_check">Changing your age to under 13 will remove all books downloaded from the SimplyE Collection.</string>
+  <string name="age_verification_confirm_under13_check">Changing your age will remove all books downloaded from the current account.</string>
   <string name="age_verification_confirm_title">Delete Books?</string>
+  <string name="age_verification_confirm_delete">Delete</string>
+  <string name="age_verification_cancel_delete">Cancel</string>
 
   <!-- Books strings -->
   <string name="books">My Books</string>
