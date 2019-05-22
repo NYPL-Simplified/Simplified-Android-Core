@@ -37,25 +37,29 @@ yes | sdkmanager tools \
 
 info "avdmanager: $(which avdmanager)"
 
-info "downloading emulator"
+COMPONENTS="
+android-21
+android-28
+build-tools-28.0.3
+emulator
+platform-tools
+platforms:android-24
+platforms;android-28
+sys-img-armeabi-v7a-android-24
+system-images;android-24;default;armeabi-v7a
+tools
+"
 
-yes | sdkmanager emulator \
-  >> .travis/device-pre.txt 2>&1 \
-  || fatal "could not download emulator"
+for COMPONENT in ${COMPONENTS}
+do
+  info "downloading ${COMPONENT}"
 
-info "installing platforms"
+  yes | sdkmanager "${COMPONENT}" \
+    >> .travis/device-pre.txt 2>&1 \
+    || fatal "could not download emulator"
+done
 
-yes | sdkmanager "platforms;android-28" \
-  >> .travis/device-pre.txt 2>&1 \
-  || fatal "could not install platform"
-
-info "installing system image"
-
-yes | sdkmanager "system-images;android-24;default;armeabi-v7a" \
-  >> .travis/device-pre.txt 2>&1 \
-  || fatal "could not install system image"
-
-info "updating platforms"
+info "updating all"
 
 yes | sdkmanager --update \
   >> .travis/device-pre.txt 2>&1 \
