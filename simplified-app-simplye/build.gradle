@@ -1,12 +1,36 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
+def versionValues() {
+  def propsFile = file('version.properties')
+  def Properties props = new Properties()
+  def name
+  def code
+  if (propsFile.canRead()) {
+    props.load(new FileInputStream(propsFile))
+    name = props['versionName']
+    code = props['versionCode'].toInteger()
+  } else {
+    throw new FileNotFoundException("Could not read version.properties!")
+  }
+
+  props['versionCode'] = (code + 1).toString()
+  props.save(new FileOutputStream(propsFile), "")
+
+  logger.info("incrementing build version ${code} -> ${code + 1}")
+  return new Tuple(name, code)
+}
+
 android {
   compileSdkVersion 27
   buildToolsVersion "28.0.2"
+
+  def version = versionValues()
+
   packagingOptions {
     exclude 'META-INF/LICENSE'
   }
+
   signingConfigs {
     release {
       keyAlias findProperty("org.librarysimplified.simplye.keyAlias")
@@ -15,17 +39,24 @@ android {
       storePassword findProperty("org.librarysimplified.simplye.storePassword")
     }
   }
+
   buildTypes {
     release {
       signingConfig signingConfigs.release
     }
   }
+
   defaultConfig {
     multiDexEnabled true
+    versionName = version.get(0)
+    versionCode = version.get(1)
+    setProperty("archivesBaseName", "simplye-${versionName}-${versionCode}")
   }
+
   lintOptions {
     checkReleaseBuilds false
   }
+
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
