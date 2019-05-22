@@ -30,6 +30,8 @@ yes | sdkmanager tools \
   >> .travis/device-pre.txt 2>&1 \
   || fatal "could not download avdmanager"
 
+info "avdmanager: $(which avdmanager)"
+
 info "downloading emulator"
 
 yes | sdkmanager emulator \
