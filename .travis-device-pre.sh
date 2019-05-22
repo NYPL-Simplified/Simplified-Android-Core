@@ -4,10 +4,7 @@ fatal()
 {
   echo "fatal: $1" 1>&2
   echo
-  find "${ANDROID_HOME}/system-images"
-  echo
   echo "dumping log: " 1>&2
-  echo
   echo
   cat .travis/device-pre.txt
   exit 1
@@ -39,11 +36,8 @@ info "avdmanager: $(which avdmanager)"
 
 COMPONENTS="
 build-tools;28.0.3
-emulator
 platform-tools
-platforms;android-24
 platforms;android-28
-system-images;android-24;default;armeabi-v7a
 tools
 "
 
@@ -67,61 +61,4 @@ info "agreeing to licenses"
 yes | sdkmanager --licenses \
   >> .travis/device-pre.txt 2>&1 \
   || fatal "could not agree to licenses"
-
-#------------------------------------------------------------------------
-# Create the emulator and start it
-
-# XXX: As of 2019-05-22, the emulator is broken with an apparently
-# endless series of errors. It will probably never be fixed as Google
-# don't want people using ARM emulators. Unfortunately, the app doesn't
-# work on anything other than ARM...
-
-info "aborting early due to broken emulators"
-exit 0
-
-info "creating an AVD"
-
-echo no | avdmanager create avd \
-  --name test \
-  --force \
-  --package 'system-images;android-24;default;armeabi-v7a' \
-  >> .travis/device-pre.txt 2>&1 \
-  || fatal "could not create AVD"
-
-info "starting an emulator"
-
-$ANDROID_HOME/emulator/emulator \
-  -avd test \
-  -verbose \
-  -no-audio \
-  -no-window & \
-  >> .travis/device-pre.txt 2>&1 \
-  || fatal "could not start AVD"
-
-EMULATOR_PID=$!
-
-info "waiting a few seconds for emulator startup"
-
-EMULATOR_WAITED=0
-EMULATOR_WAIT_MAX=20
-
-while [ 1 ]
-do
-  sleep 2
-
-  kill -0 "${EMULATOR_PID}"
-  if [ $? -ne 0 ]
-  then
-    fatal "emulator failed to run"
-  else
-    if [ ${EMULATOR_WAITED} -gt ${EMULATOR_WAIT_MAX} ]
-    then
-      info "finished waiting for emulator"
-      break
-    else
-      info "waiting for emulator"
-      EMULATOR_WAITED=$(expr ${EMULATOR_WAITED} + 2)
-    fi
-  fi
-done
 
