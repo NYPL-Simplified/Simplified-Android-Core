@@ -48,7 +48,7 @@ yes | sdkmanager "platforms;android-28" \
 
 info "installing system image"
 
-yes | sdkmanager "system-images;android-24;default;armeabi-v7a" \
+yes | sdkmanager "system-images;android-21;default;armeabi-v7a" \
   >> .travis/device-pre.txt 2>&1 \
   || fatal "could not install system image"
 
