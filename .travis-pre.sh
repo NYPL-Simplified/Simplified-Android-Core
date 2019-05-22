@@ -6,7 +6,7 @@ fatal()
   echo
   echo "dumping log: " 1>&2
   echo
-  cat .travis/device-pre.txt
+  cat .travis/pre.txt
   exit 1
 }
 
@@ -29,7 +29,7 @@ env | sort -u
 info "downloading avdmanager"
 
 yes | sdkmanager tools \
-  >> .travis/device-pre.txt 2>&1 \
+  >> .travis/pre.txt 2>&1 \
   || fatal "could not download avdmanager"
 
 info "avdmanager: $(which avdmanager)"
@@ -46,19 +46,19 @@ do
   info "downloading ${COMPONENT}"
 
   yes | sdkmanager "${COMPONENT}" \
-    >> .travis/device-pre.txt 2>&1 \
+    >> .travis/pre.txt 2>&1 \
     || fatal "could not download emulator"
 done
 
 info "updating all"
 
 yes | sdkmanager --update \
-  >> .travis/device-pre.txt 2>&1 \
+  >> .travis/pre.txt 2>&1 \
   || fatal "could not update platform"
 
 info "agreeing to licenses"
 
 yes | sdkmanager --licenses \
-  >> .travis/device-pre.txt 2>&1 \
+  >> .travis/pre.txt 2>&1 \
   || fatal "could not agree to licenses"
 
