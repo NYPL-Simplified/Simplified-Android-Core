@@ -65,3 +65,29 @@ $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window & \
   >> .travis/device-pre.txt 2>&1 \
   || fatal "could not start AVD"
 
+EMULATOR_PID=$!
+
+info "waiting a few seconds for emulator startup"
+
+EMULATOR_WAITED=0
+EMULATOR_WAIT_MAX=20
+
+while [ 1 ]
+do
+  kill -0 "${EMULATOR_PID}"
+  if [ $? -ne 0 ]
+  then
+    fatal "emulator failed to run"
+  else
+    if [ ${EMULATOR_WAITED} -gt ${EMULATOR_WAIT_MAX} ]
+    then
+      info "finished waiting for emulator"
+      break
+    else
+      info "waiting for emulator"
+      sleep 2
+      EMULATOR_WAITED=$(expr ${EMULATOR_WAITED + 2})
+    fi
+  fi
+done
+
