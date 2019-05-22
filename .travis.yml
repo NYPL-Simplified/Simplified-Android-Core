@@ -14,19 +14,19 @@ android:
   - google-gdk-license-.+
 
 before_script:
-- android list target
-- echo no | android create avd --force --name test --package system-images;android-21;default;armeabi-v7a
-- emulator -avd test -no-audio -no-window &
+- chmod +x .travis-device-post.sh
+- chmod +x .travis-device-pre.sh
+- chmod +x .travis.sh
 
 before_install:
+- ./.travis-device-pre.sh
 - yes | sdkmanager "platforms;android-28"
 - yes | sdkmanager --update
 - yes | sdkmanager --licenses
-- chmod +x gradlew
 
 script:
-- chmod 755 ./.travis.sh
 - ./.travis.sh
+- ./.travis-device-post.sh
 
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
