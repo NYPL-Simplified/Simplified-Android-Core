@@ -71,6 +71,14 @@ yes | sdkmanager --licenses \
 #------------------------------------------------------------------------
 # Create the emulator and start it
 
+# XXX: As of 2019-05-22, the emulator is broken with an apparently
+# endless series of errors. It will probably never be fixed as Google
+# don't want people using ARM emulators. Unfortunately, the app doesn't
+# work on anything other than ARM...
+
+info "aborting early due to broken emulators"
+exit 0
+
 info "creating an AVD"
 
 echo no | avdmanager create avd \

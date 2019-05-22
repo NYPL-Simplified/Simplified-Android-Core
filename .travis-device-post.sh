@@ -13,6 +13,9 @@ dumpLogAndExit()
 
 mkdir -p .travis || fatal "could not create .travis"
 
+info "not running device tests"
+exit 0
+
 #------------------------------------------------------------------------
 # Do all of the nonsense necessary to get on-device tests to be somewhat
 # reliable
