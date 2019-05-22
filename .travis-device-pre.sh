@@ -3,6 +3,7 @@
 fatal()
 {
   echo "fatal: $1" 1>&2
+  echo "dumping log: " 1>&2
   cat .travis/device-pre.txt
   exit 1
 }
@@ -13,6 +14,10 @@ info()
 }
 
 mkdir -p .travis || fatal "could not create .travis"
+
+info "dumping environment"
+
+env | sort -u
 
 #------------------------------------------------------------------------
 # Download avdmanager
@@ -86,7 +91,7 @@ do
     else
       info "waiting for emulator"
       sleep 2
-      EMULATOR_WAITED=$(expr ${EMULATOR_WAITED + 2})
+      EMULATOR_WAITED=$(expr ${EMULATOR_WAITED} + 2)
     fi
   fi
 done
