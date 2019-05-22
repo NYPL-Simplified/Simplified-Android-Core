@@ -3,8 +3,9 @@
 fatal()
 {
   echo "fatal: $1" 1>&2
-  find "${ANDROID_HOME}" | sort -u
   echo "dumping log: " 1>&2
+  echo
+  echo
   cat .travis/device-pre.txt
   exit 1
 }
@@ -44,6 +45,12 @@ info "installing platforms"
 yes | sdkmanager "platforms;android-28" \
   >> .travis/device-pre.txt 2>&1 \
   || fatal "could not install platform"
+
+info "installing system image"
+
+yes | sdkmanager "system-images;android-24;default;armeabi-v7a" \
+  >> .travis/device-pre.txt 2>&1 \
+  || fatal "could not install system image"
 
 info "updating platforms"
 
