@@ -19,7 +19,7 @@ org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 org.gradle.parallel=true
 org.gradle.jvmargs=-Xms1024m -Xmx2048m
 
-org.librarysimplified.with_drm_adobe=true
+org.librarysimplified.with_drm_adobe=false
 org.librarysimplified.with_findaway=true
 EOF
 ) > gradle.properties.tmp || exit 1
