@@ -3,6 +3,7 @@
 fatal()
 {
   echo "fatal: $1" 1>&2
+  find "${ANDROID_HOME}" | sort -u
   echo "dumping log: " 1>&2
   cat .travis/device-pre.txt
   exit 1
