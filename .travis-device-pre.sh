@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 fatal()
 {
@@ -24,6 +24,15 @@ yes | sdkmanager tools \
   || fatal "could not download avdmanager"
 
 #------------------------------------------------------------------------
+# Download Emulator
+
+info "downloading emulator"
+
+yes | sdkmanager emulator \
+  >> .travis/device-pre.txt 2>&1 \
+  || fatal "could not download emulator"
+
+#------------------------------------------------------------------------
 # Create the emulator and start it
 
 info "creating an AVD"
@@ -37,7 +46,7 @@ echo no | avdmanager create avd \
 
 info "starting an emulator"
 
-emulator -avd test -no-audio -no-window & \
+$ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window & \
   >> .travis/device-pre.txt 2>&1 \
   || fatal "could not start AVD"
 

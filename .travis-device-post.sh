@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 info()
 {
@@ -19,9 +19,11 @@ mkdir -p .travis || fatal "could not create .travis"
 #------------------------------------------------------------------------
 
 info "waiting for emulator"
-while [ 1 ]; do
+while [ 1 ]
+do
   BOOT_ANIM=$(adb -e shell getprop init.svc.bootanim 2>&1)
-  if [ ${BOOT_ANIM} =~ "stopped" ]
+  echo "${BOOT_ANIM}" | grep "stopped"
+  if [ $? -eq 0 ]
   then
     info "device booted"
     break
