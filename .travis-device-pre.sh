@@ -38,14 +38,11 @@ yes | sdkmanager tools \
 info "avdmanager: $(which avdmanager)"
 
 COMPONENTS="
-android-21
-android-28
-build-tools-28.0.3
+build-tools;28.0.3
 emulator
 platform-tools
-platforms:android-24
+platforms;android-24
 platforms;android-28
-sys-img-armeabi-v7a-android-24
 system-images;android-24;default;armeabi-v7a
 tools
 "
