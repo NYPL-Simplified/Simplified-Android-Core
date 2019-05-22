@@ -3,6 +3,9 @@
 fatal()
 {
   echo "fatal: $1" 1>&2
+  echo
+  find "${ANDROID_HOME}/system-images"
+  echo
   echo "dumping log: " 1>&2
   echo
   echo
