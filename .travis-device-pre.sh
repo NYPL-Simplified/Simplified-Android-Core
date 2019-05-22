@@ -81,6 +81,8 @@ EMULATOR_WAIT_MAX=20
 
 while [ 1 ]
 do
+  sleep 2
+
   kill -0 "${EMULATOR_PID}"
   if [ $? -ne 0 ]
   then
@@ -92,7 +94,6 @@ do
       break
     else
       info "waiting for emulator"
-      sleep 2
       EMULATOR_WAITED=$(expr ${EMULATOR_WAITED} + 2)
     fi
   fi
