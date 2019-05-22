@@ -15,7 +15,7 @@ android:
 
 before_script:
 - android list target
-- echo no | android create avd --force --name test --tag android-21 --abi armeabi-v7a
+- echo no | android create avd --force --name test --package system-images;android-21;default;armeabi-v7a
 - emulator -avd test -no-audio -no-window &
 
 before_install:
