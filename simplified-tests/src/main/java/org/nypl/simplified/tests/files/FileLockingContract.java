@@ -24,11 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class FileLockingContract {
 
-  private static final Logger LOG;
-
-  static {
-    LOG = NullCheck.notNull(LoggerFactory.getLogger(FileLockingContract.class));
-  }
+  protected abstract Logger logger();
 
   /**
    * Construct a new contract.
@@ -40,8 +36,6 @@ public abstract class FileLockingContract {
 
   /**
    * Test that a lock can be obtained.
-   *
-   * @throws Exception On errors
    */
 
   @Test
@@ -53,14 +47,9 @@ public abstract class FileLockingContract {
     final AtomicBoolean locked = new AtomicBoolean(false);
 
     FileLocking.withFileThreadLocked(
-        lock, 1000L, new PartialFunctionType<Unit, Unit, IOException>() {
-          @Override
-          public Unit call(
-              final Unit x)
-              throws IOException {
-            locked.set(true);
-            return Unit.unit();
-          }
+        lock, 1000L, (PartialFunctionType<Unit, Unit, IOException>) x -> {
+          locked.set(true);
+          return Unit.unit();
         });
 
     Assert.assertTrue(locked.get());
@@ -70,8 +59,6 @@ public abstract class FileLockingContract {
    * Test that a lock on a file can be obtained by a given thread, and that if
    * the same thread cannot obtain another lock until it has released the
    * first.
-   *
-   * @throws Exception On errors
    */
 
   @Test
@@ -83,39 +70,30 @@ public abstract class FileLockingContract {
     final AtomicBoolean failed = new AtomicBoolean(false);
     final AtomicInteger count = new AtomicInteger(0);
 
-    FileLockingContract.LOG.debug("attempting outer lock");
+    final Logger logger = this.logger();
+    logger.debug("attempting outer lock");
     FileLocking.withFileThreadLocked(
-        lock, 1000L, new PartialFunctionType<Unit, Unit, IOException>() {
-          @Override
-          public Unit call(
-              final Unit u0)
-              throws IOException {
-            count.set(1);
+        lock, 1000L, (PartialFunctionType<Unit, Unit, IOException>) u0 -> {
+          count.set(1);
 
-            try {
-              FileLockingContract.LOG.debug("attempting inner lock");
-              FileLocking.withFileThreadLocked(
-                  lock, 1000L, new PartialFunctionType<Unit, Unit, IOException>() {
-                    @Override
-                    public Unit call(
-                        final Unit u1)
-                        throws IOException {
-                      FileLockingContract.LOG.debug("called inner lock");
-                      count.set(3);
-                      return Unit.unit();
-                    }
-                  });
-            } catch (final IOException e) {
-              FileLockingContract.LOG.error("io error: ", e);
-              failed.set(true);
-            }
-
-            FileLockingContract.LOG.debug("finished inner lock");
-            count.set(2);
-            return Unit.unit();
+          try {
+            logger.debug("attempting inner lock");
+            FileLocking.withFileThreadLocked(
+                lock, 1000L, (PartialFunctionType<Unit, Unit, IOException>) u1 -> {
+                logger.debug("called inner lock");
+                count.set(3);
+                return Unit.unit();
+              });
+          } catch (final IOException e) {
+            logger.error("io error: ", e);
+            failed.set(true);
           }
+
+          logger.debug("finished inner lock");
+          count.set(2);
+          return Unit.unit();
         });
-    FileLockingContract.LOG.debug("finished outer lock");
+    logger.debug("finished outer lock");
 
     Assert.assertEquals(Integer.valueOf(count.get()), Integer.valueOf(2));
     Assert.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
@@ -123,8 +101,6 @@ public abstract class FileLockingContract {
 
   /**
    * Test that two threads cannot obtain a lock on the same file.
-   *
-   * @throws Exception On errors
    */
 
   @Test
@@ -134,30 +110,26 @@ public abstract class FileLockingContract {
     final File lock = new File(tmp, "lock.txt");
     final CountDownLatch latch = new CountDownLatch(1);
     final AtomicInteger count = new AtomicInteger(0);
+    final Logger logger = this.logger();
 
     final Thread t1 = new Thread() {
       @Override
       public void run() {
         try {
           FileLocking.withFileThreadLocked(
-              lock, 1000L, new PartialFunctionType<Unit, Unit, IOException>() {
-                @Override
-                public Unit call(
-                    final Unit x)
-                    throws IOException {
-                  count.incrementAndGet();
-                  latch.countDown();
+              lock, 1000L, (PartialFunctionType<Unit, Unit, IOException>) x -> {
+                count.incrementAndGet();
+                latch.countDown();
 
-                  try {
-                    Thread.sleep(1000L);
-                  } catch (InterruptedException e) {
-                    e.printStackTrace();
-                  }
-                  return Unit.unit();
+                try {
+                  Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                  e.printStackTrace();
                 }
+                return Unit.unit();
               });
         } catch (final Exception e) {
-          FileLockingContract.LOG.error("error: ", e);
+          logger.error("error: ", e);
         }
       }
     };
@@ -170,17 +142,12 @@ public abstract class FileLockingContract {
       public void run() {
         try {
           FileLocking.withFileThreadLocked(
-              lock, 500L, new PartialFunctionType<Unit, Unit, IOException>() {
-                @Override
-                public Unit call(
-                    final Unit x)
-                    throws IOException {
-                  count.incrementAndGet();
-                  return Unit.unit();
-                }
+              lock, 500L, (PartialFunctionType<Unit, Unit, IOException>) x -> {
+                count.incrementAndGet();
+                return Unit.unit();
               });
         } catch (Exception e) {
-          FileLockingContract.LOG.error("error: ", e);
+          logger.error("error: ", e);
         }
       }
     };
