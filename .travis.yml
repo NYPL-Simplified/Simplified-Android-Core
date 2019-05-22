@@ -20,9 +20,6 @@ before_script:
 
 before_install:
 - ./.travis-device-pre.sh
-- yes | sdkmanager "platforms;android-28"
-- yes | sdkmanager --update
-- yes | sdkmanager --licenses
 
 script:
 - ./.travis.sh
