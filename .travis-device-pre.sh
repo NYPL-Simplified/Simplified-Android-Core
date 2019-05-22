@@ -80,12 +80,6 @@ echo no | avdmanager create avd \
   >> .travis/device-pre.txt 2>&1 \
   || fatal "could not create AVD"
 
-# XXX: https://stackoverflow.com/a/43734601
-info "applying system image hack"
-
-cp -v "${ANDROID_HOME}/system-images/android-24/default/armeabi-v7a/kernel-qemu" \
-      "${ANDROID_HOME}/system-images/android-24/default/armeabi-v7a/kernel-ranchu"
-
 info "starting an emulator"
 
 $ANDROID_HOME/emulator/emulator \
