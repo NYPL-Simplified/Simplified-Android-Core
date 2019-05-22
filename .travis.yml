@@ -20,7 +20,8 @@ before_install:
 - chmod +x gradlew
 
 script:
-- ./gradlew clean assembleDebug test
+- chmod 755 ./.travis.sh
+- ./.travis.sh
 
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
