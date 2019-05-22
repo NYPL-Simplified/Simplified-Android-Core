@@ -7,6 +7,8 @@ fatal()
   exit 1
 }
 
+mkdir -p .travis || fatal "could not create .travis"
+
 #------------------------------------------------------------------------
 # Download avdmanager
 
