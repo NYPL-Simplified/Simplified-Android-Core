@@ -11,7 +11,7 @@ yes | sdkmanager tools || exit 1
 # Create the emulator and start it
 
 avdmanager list target || exit 1
-avdmanager create avd --name test --force --package 'system-images;android-21;default;armeabi-v7a' || exit 1
+echo no | avdmanager create avd --name test --force --package 'system-images;android-21;default;armeabi-v7a' || exit 1
 emulator -avd test -no-audio -no-window &
 
 #------------------------------------------------------------------------
