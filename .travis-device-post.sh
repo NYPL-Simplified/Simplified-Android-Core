@@ -19,7 +19,17 @@ mkdir -p .travis || fatal "could not create .travis"
 #------------------------------------------------------------------------
 
 info "waiting for emulator"
-android-wait-for-emulator
+while [ 1 ]; do
+  BOOT_ANIM=$(adb -e shell getprop init.svc.bootanim 2>&1)
+  if [ ${BOOT_ANIM} =~ "stopped" ]
+  then
+    info "device booted"
+    break
+  else
+    info "waiting for device (currently: ${BOOT_ANIM})"
+    sleep 5
+  fi
+done
 
 info "configuring emulator for unit tests"
 adb shell input keyevent 82 &
