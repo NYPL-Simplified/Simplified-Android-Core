@@ -14,6 +14,7 @@ android:
   - google-gdk-license-.+
 
 before_script:
+- mkdir .travis
 - chmod +x .travis-device-post.sh
 - chmod +x .travis-device-pre.sh
 - chmod +x .travis.sh

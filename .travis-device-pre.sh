@@ -1,24 +1,45 @@
 #!/bin/sh -x
 
-echo "info: starting up emulator" 1>&2
+fatal()
+{
+  echo "fatal: $1" 1>&2
+  cat .travis/device-pre.txt
+  exit 1
+}
 
 #------------------------------------------------------------------------
 # Download avdmanager
 
-yes | sdkmanager tools || exit 1
+yes | sdkmanager tools \
+  >> .travis/device-pre.txt 2>&1 \
+  || fatal "could not download avdmanager"
 
 #------------------------------------------------------------------------
 # Create the emulator and start it
 
-avdmanager list target || exit 1
-echo no | avdmanager create avd --name test --force --package 'system-images;android-21;default;armeabi-v7a' || exit 1
-emulator -avd test -no-audio -no-window &
+echo no | avdmanager create avd \
+  --name test \
+  --force \
+  --package 'system-images;android-21;default;armeabi-v7a' \
+  >> .travis/device-pre.txt 2>&1 \
+  || fatal "could not create AVD"
+
+emulator -avd test -no-audio -no-window & \
+  >> .travis/device-pre.txt 2>&1 \
+  || fatal "could not start AVD"
 
 #------------------------------------------------------------------------
 # Install SDKs
 
-echo "info: installing Android SDKs" 1>&2
+yes | sdkmanager "platforms;android-28" \
+  >> .travis/device-pre.txt 2>&1 \
+  || fatal "could not install platform"
 
-yes | sdkmanager "platforms;android-28"
-yes | sdkmanager --update
-yes | sdkmanager --licenses
+yes | sdkmanager --update \
+  >> .travis/device-pre.txt 2>&1 \
+  || fatal "could not update platform"
+
+yes | sdkmanager --licenses \
+  >> .travis/device-pre.txt 2>&1 \
+  || fatal "could not agree to licenses"
+
