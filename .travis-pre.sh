@@ -47,6 +47,11 @@ git clone \
   >> .travis/pre.txt 2>&1 \
   || fatal "could not clone credentials"
 
+info "installing certificate"
+
+cp -v .travis/credentials/SimplyE/Android/ReaderClientCert.sig \
+  simplified-app-simplye/src/main/assets/ReaderClientCert.sig
+
 #------------------------------------------------------------------------
 # Download avdmanager
 

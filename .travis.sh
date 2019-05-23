@@ -22,7 +22,10 @@ org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
 org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 
 org.gradle.parallel=false
-org.nypl.simplified.with_findaway=true
+
+org.librarysimplified.with_drm_adobe=true
+org.librarysimplified.with_findaway=true
+
 EOF
 ) > gradle.properties.tmp || exit 1
 
