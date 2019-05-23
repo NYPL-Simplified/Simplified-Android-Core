@@ -54,7 +54,7 @@ cp -v .travis/credentials/SimplyE/Android/ReaderClientCert.sig \
 
 info "installing keystore"
 
-cp -v ".travis/credentials/SimplyE/APK Signing/nypl-keystore.jks" \
+cp -v ".travis/credentials/APK Signing/nypl-keystore.jks" \
   simplified-app-simplye/keystore.jks
 
 #------------------------------------------------------------------------
