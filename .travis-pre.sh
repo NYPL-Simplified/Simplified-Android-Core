@@ -42,7 +42,7 @@ env | sort -u
 info "cloning credentials"
 
 git clone \
-  "https://${NYPL_GITHUB_ACCESS_TOKEN}@www.github.com/NYPL-Simplified/Certificates" \
+  "https://${NYPL_GITHUB_ACCESS_TOKEN}@github.com/NYPL-Simplified/Certificates" \
   ".travis/credentials" \
   >> .travis/pre.txt 2>&1 \
   || fatal "could not clone credentials"
