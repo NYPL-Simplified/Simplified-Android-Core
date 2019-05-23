@@ -24,6 +24,13 @@ export ANDROID_SDK_ROOT="${ANDROID_HOME}"
 env | sort -u
 
 #------------------------------------------------------------------------
+# Clone credentials repos
+
+git clone https://www.github.com/NYPL-Simplified/credentials .travis/credentials \
+  >> .travis/pre.txt 2>&1 \
+  || fatal "could not retrieve credentials"
+
+#------------------------------------------------------------------------
 # Download avdmanager
 
 info "downloading avdmanager"
