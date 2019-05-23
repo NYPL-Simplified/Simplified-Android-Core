@@ -15,20 +15,37 @@ info()
   echo "info: $1" 1>&2
 }
 
+if [ -z "${NYPL_NEXUS_USER}" ]
+then
+  fatal "NYPL_NEXUS_USER is not defined"
+fi
+
+if [ -z "${NYPL_NEXUS_PASSWORD}" ]
+then
+  fatal "NYPL_NEXUS_PASSWORD is not defined"
+fi
+
+if [ -z "${NYPL_GITHUB_ACCESS_TOKEN}" ]
+then
+  fatal "NYPL_GITHUB_ACCESS_TOKEN is not defined"
+fi
+
 mkdir -p .travis || fatal "could not create .travis"
 
 info "dumping environment"
-
 export ANDROID_SDK_ROOT="${ANDROID_HOME}"
-
 env | sort -u
 
 #------------------------------------------------------------------------
-# Clone credentials repos
+# Clone repos
 
-git clone https://www.github.com/NYPL-Simplified/credentials .travis/credentials \
+info "cloning credentials"
+
+git clone \
+  "https://${NYPL_GITHUB_ACCESS_TOKEN}@www.github.com/NYPL-Simplified/Certificates" \
+  ".travis/credentials" \
   >> .travis/pre.txt 2>&1 \
-  || fatal "could not retrieve credentials"
+  || fatal "could not clone credentials"
 
 #------------------------------------------------------------------------
 # Download avdmanager
