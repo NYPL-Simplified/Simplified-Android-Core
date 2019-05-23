@@ -1,11 +1,9 @@
 language: android
 
 before_install:
-- chmod +x .travis-pre.sh
 - ./.travis-pre.sh
 
 script:
-- chmod +x .travis.sh
 - ./.travis.sh
 
 before_cache:
