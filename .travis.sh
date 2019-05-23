@@ -12,6 +12,18 @@ then
   exit 1
 fi
 
+if [ -z "${NYPL_SIGNING_KEY_PASSWORD}" ]
+then
+  echo "error: NYPL_SIGNING_KEY_PASSWORD is not defined" 1>&2
+  exit 1
+fi
+
+if [ -z "${NYPL_SIGNING_STORE_PASSWORD}" ]
+then
+  echo "error: NYPL_SIGNING_STORE_PASSWORD is not defined" 1>&2
+  exit 1
+fi
+
 #------------------------------------------------------------------------
 # Clone GitHub repos
 
@@ -21,11 +33,14 @@ mkdir -p .travis || exit 1
 org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
 org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 
-org.gradle.parallel=false
-
 org.librarysimplified.with_drm_adobe=true
 org.librarysimplified.with_findaway=true
 
+org.librarysimplified.simplye.keyAlias=nypl
+org.librarysimplified.simplye.keyPassword=${NYPL_SIGNING_KEY_PASSWORD}
+org.librarysimplified.simplye.storePassword=${NYPL_SIGNING_STORE_PASSWORD}
+
+org.gradle.parallel=false
 EOF
 ) > gradle.properties.tmp || exit 1
 
