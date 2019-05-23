@@ -52,6 +52,11 @@ info "installing certificate"
 cp -v .travis/credentials/SimplyE/Android/ReaderClientCert.sig \
   simplified-app-simplye/src/main/assets/ReaderClientCert.sig
 
+info "installing keystore"
+
+cp -v ".travis/credentials/SimplyE/APK Signing/nypl-keystore.jks" \
+  simplified-app-simplye/keystore.jks
+
 #------------------------------------------------------------------------
 # Download avdmanager
 
