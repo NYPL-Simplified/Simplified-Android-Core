@@ -1,6 +1,7 @@
 language: android
 
-before_install:
+before_script:
+- ls -alF
 - ./.travis-pre.sh
 
 script:
