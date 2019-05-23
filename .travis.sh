@@ -46,4 +46,4 @@ EOF
 
 mv gradle.properties.tmp gradle.properties || exit 1
 
-exec ./gradlew clean assemble test
+exec ./gradlew clean assembleDebug test
