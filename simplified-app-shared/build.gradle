@@ -123,8 +123,8 @@ dependencies {
   implementation "org.nypl.audiobook:org.nypl.audiobook.android.views:${nypl_audiobook_api_version}"
   implementation "org.nypl.audiobook:org.nypl.audiobook.android.downloads:${nypl_audiobook_api_version}"
 
-  if (project.hasProperty("org.nypl.simplified.with_findaway")) {
-    if (project.property("org.nypl.simplified.with_findaway") == "true") {
+  if (project.hasProperty("org.librarysimplified.with_findaway")) {
+    if (project.property("org.librarysimplified.with_findaway") == "true") {
       implementation "org.nypl.audiobook:org.nypl.audiobook.android.audioengine.core:${nypl_audiobook_findaway_version}"
     }
   }

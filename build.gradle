@@ -56,8 +56,8 @@ subprojects {
 
     jcenter()
 
-    if (project.hasProperty("org.nypl.simplified.with_findaway")) {
-      if (project.property("org.nypl.simplified.with_findaway") == "true") {
+    if (project.hasProperty("org.librarysimplified.with_findaway")) {
+      if (project.property("org.librarysimplified.with_findaway") == "true") {
         maven {
           url "http://maven.findawayworld.com/artifactory/libs-release/"
         }
