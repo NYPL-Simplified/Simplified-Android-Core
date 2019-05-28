@@ -3,10 +3,6 @@
 fatal()
 {
   echo "fatal: $1" 1>&2
-  echo
-  echo "dumping log: " 1>&2
-  echo
-  cat .travis/post.txt
   exit 1
 }
 
@@ -18,8 +14,7 @@ info()
 WORKING_DIRECTORY=$(pwd) ||
   fatal "could not save working directory"
 
-BINARIES_DIRECTORY=$(realpath .travis/binaries) ||
-  fatal "could not resolve binaries directory"
+BINARIES_DIRECTORY="${WORKING_DIRECTORU}/.travis/binaries"
 
 cd "${BINARIES_DIRECTORY}" ||
   fatal "could not switch to binaries directory"
