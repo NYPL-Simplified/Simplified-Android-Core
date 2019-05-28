@@ -25,8 +25,8 @@ git rm -f build.properties
 cd "${WORKING_DIRECTORY}" ||
   fatal "could not restore working directory"
 
-cp -v ./simplified-app-simplye/build/outputs/apk/debug/*   "${BINARIES_DIRECTORY}"
-cp -v ./simplified-app-simplye/build/outputs/apk/release/* "${BINARIES_DIRECTORY}"
+cp -v ./simplified-app-simplye/build/outputs/apk/debug/*.apk   "${BINARIES_DIRECTORY}"
+cp -v ./simplified-app-simplye/build/outputs/apk/release/*.apk "${BINARIES_DIRECTORY}"
 
 ./.travis-git-props.sh > "${BINARIES_DIRECTORY}/build.properties" ||
   fatal "could not save build properties"
