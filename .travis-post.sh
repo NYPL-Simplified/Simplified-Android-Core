@@ -14,7 +14,7 @@ info()
 WORKING_DIRECTORY=$(pwd) ||
   fatal "could not save working directory"
 
-BINARIES_DIRECTORY="${WORKING_DIRECTORU}/.travis/binaries"
+BINARIES_DIRECTORY="${WORKING_DIRECTORY}/.travis/binaries"
 
 cd "${BINARIES_DIRECTORY}" ||
   fatal "could not switch to binaries directory"
