@@ -9,7 +9,7 @@ Build of ${GP_GIT_COMMIT}
 
 Git commit: ${GP_GIT_COMMIT}
 Git branch: ${GP_GIT_BRANCH}
-Build number: ${SIMPLYE_VERSION}
+Version code: ${SIMPLYE_VERSION}
 
 Commit link: https://www.github.com/NYPL-Simplified/android/commit/${GP_GIT_COMMIT}
 EOF
