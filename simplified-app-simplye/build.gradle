@@ -1,6 +1,28 @@
 apply plugin: 'com.android.application'
 
+def versionValues() {
+  def propsFile = file('version.properties')
+  def Properties props = new Properties()
+  def name
+  def code
+  if (propsFile.canRead()) {
+    props.load(new FileInputStream(propsFile))
+    name = props['versionName']
+    code = props['versionCode'].toInteger()
+  } else {
+    throw new FileNotFoundException("Could not read version.properties!")
+  }
+
+  props['versionCode'] = (code + 1).toString()
+  props.save(new FileOutputStream(propsFile), "")
+
+  logger.info("incrementing build version ${code} -> ${code + 1}")
+  return new Tuple(name, code)
+}
+
 android {
+  def version = versionValues()
+
   compileSdkVersion 27
   packagingOptions {
     exclude 'META-INF/LICENSE'
@@ -22,6 +44,9 @@ android {
     multiDexEnabled true
     minSdkVersion 21
     targetSdkVersion 28
+    versionName = version.get(0)
+    versionCode = version.get(1)
+    setProperty("archivesBaseName", "simplye-master-${versionName}-${versionCode}")
   }
   lintOptions {
     checkReleaseBuilds false

@@ -6,6 +6,7 @@ before_script:
 
 script:
 - ./.travis.sh
+- ./.travis-post.sh
 
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

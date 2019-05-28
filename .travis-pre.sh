@@ -37,11 +37,12 @@ export ANDROID_SDK_ROOT="${ANDROID_HOME}"
 env | sort -u
 
 #------------------------------------------------------------------------
-# Clone repos
+# Clone credentials repos
 
 info "cloning credentials"
 
 git clone \
+  --depth 1 \
   "https://${NYPL_GITHUB_ACCESS_TOKEN}@github.com/NYPL-Simplified/Certificates" \
   ".travis/credentials" \
   >> .travis/pre.txt 2>&1 \
@@ -56,6 +57,18 @@ info "installing keystore"
 
 cp -v ".travis/credentials/APK Signing/nypl-keystore.jks" \
   simplified-app-simplye/keystore.jks
+
+#------------------------------------------------------------------------
+# Clone binaries repos
+
+info "cloning binaries"
+
+git clone \
+  --depth 1 \
+  "https://${NYPL_GITHUB_ACCESS_TOKEN}@github.com/NYPL-Simplified/android-binaries" \
+  ".travis/binaries" \
+  >> .travis/pre.txt 2>&1 \
+  || fatal "could not clone binaries"
 
 #------------------------------------------------------------------------
 # Download avdmanager
