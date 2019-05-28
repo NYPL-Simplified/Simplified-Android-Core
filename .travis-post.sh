@@ -19,10 +19,8 @@ BINARIES_DIRECTORY="${WORKING_DIRECTORY}/.travis/binaries"
 cd "${BINARIES_DIRECTORY}" ||
   fatal "could not switch to binaries directory"
 
-git rm -f *.apk ||
-  fatal "could not delete APKs"
-git rm -f build.properties ||
-  fatal "could not delete build properties"
+git rm -f *.apk
+git rm -f build.properties
 
 cd "${WORKING_DIRECTORY}" ||
   fatal "could not restore working directory"
