@@ -27,11 +27,8 @@ cd "${WORKING_DIRECTORY}" ||
 
 cp -v ./simplified-app-simplye/build/outputs/apk/debug/*.apk   "${BINARIES_DIRECTORY}"
 cp -v ./simplified-app-simplye/build/outputs/apk/release/*.apk "${BINARIES_DIRECTORY}"
-
-./.travis-git-props.sh > "${BINARIES_DIRECTORY}/build.properties" ||
-  fatal "could not save build properties"
-./.travis-git-message.sh > "${WORKING_DIRECTORY}/commit-message.txt" ||
-  fatal "could not save commit message"
+cp -v "${WORKING_DIRECTORY}/.travis/build.properties" "${BINARIES_DIRECTORY}"/build.properties ||
+  fatal "could not copy build properties"
 
 cd "${BINARIES_DIRECTORY}" ||
   fatal "could not switch to binaries directory"
@@ -40,7 +37,7 @@ git add *.apk ||
   fatal "could not add APKs to index"
 git add build.properties ||
   fatal "could not add build properties to index"
-git commit --file="${WORKING_DIRECTORY}/commit-message.txt" ||
+git commit --file="${WORKING_DIRECTORY}/.travis/commit-message.txt" ||
   fatal "could not commit"
 git push ||
   fatal "could not push"

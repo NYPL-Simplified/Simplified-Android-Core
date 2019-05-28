@@ -32,6 +32,8 @@ fi
 
 mkdir -p .travis || fatal "could not create .travis"
 
+WORKING_DIRECTORY=$(pwd) || fatal "could not save working directory"
+
 info "dumping environment"
 export ANDROID_SDK_ROOT="${ANDROID_HOME}"
 env | sort -u
@@ -69,6 +71,11 @@ git clone \
   ".travis/binaries" \
   >> .travis/pre.txt 2>&1 \
   || fatal "could not clone binaries"
+
+./.travis-git-props.sh > "${WORKING_DIRECTORY}/.travis/build.properties" ||
+  fatal "could not save build properties"
+./.travis-git-message.sh > "${WORKING_DIRECTORY}/.travis/commit-message.txt" ||
+  fatal "could not save commit message"
 
 #------------------------------------------------------------------------
 # Download avdmanager
