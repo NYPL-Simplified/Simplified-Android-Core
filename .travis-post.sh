@@ -39,6 +39,7 @@ git add build.properties ||
   fatal "could not add build properties to index"
 git commit --file="${WORKING_DIRECTORY}/.travis/commit-message.txt" ||
   fatal "could not commit"
-git push ||
-  fatal "could not push"
+
+git pull || fatal "could not pull"
+git push || fatal "could not push"
 
