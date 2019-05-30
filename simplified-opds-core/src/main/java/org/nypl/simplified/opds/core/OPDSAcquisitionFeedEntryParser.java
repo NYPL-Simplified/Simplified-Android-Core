@@ -7,8 +7,6 @@ import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.mime.MIMEParser;
 import org.nypl.simplified.mime.MIMEType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,10 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,6 +30,7 @@ import static org.nypl.simplified.opds.core.OPDSFeedConstants.ALTERNATE_REL_TEXT
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ANNOTATION_URI_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ATOM_URI;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.BIBFRAME_URI;
+import static org.nypl.simplified.opds.core.OPDSFeedConstants.CIRCULATION_ANALYTICS_OPEN_BOOK_REL_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.DUBLIN_CORE_TERMS_URI;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.GROUP_REL_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.IMAGE_URI_TEXT;
@@ -125,6 +121,10 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
         }
 
         if (tryConsumeLinkAlternate(entry_builder, e_link, rel_text)) {
+          continue;
+        }
+
+        if (tryConsumeLinkAnalytics(entry_builder, e_link, rel_text)) {
           continue;
         }
 
@@ -385,12 +385,26 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
       final String uri_text = NullCheck.notNull(e_link.getAttribute("href"));
       final URI uri = new URI(uri_text);
       entry_builder.setAlternateOption(Option.some(uri));
+      return true;
+    }
+    return false;
+  }
 
-      final String uri_text_analytics =
-        uri_text.replace("/works/", "/analytics/");
+  /**
+   * Check if the given link refers to analytics. If it does, add it to the builder and
+   * return {@code true}.
+   */
 
-      final URI uri_analytics = new URI(uri_text_analytics);
-      entry_builder.setAnalyticsOption(Option.some(uri_analytics));
+  private boolean tryConsumeLinkAnalytics(
+    final OPDSAcquisitionFeedEntryBuilderType entry_builder,
+    final Element e_link,
+    final String rel_text)
+    throws URISyntaxException {
+
+    if (rel_text.equals(CIRCULATION_ANALYTICS_OPEN_BOOK_REL_TEXT)) {
+      final String uri_text = NullCheck.notNull(e_link.getAttribute("href"));
+      final URI uri = new URI(uri_text);
+      entry_builder.setAnalyticsOption(Option.some(uri));
       return true;
     }
     return false;
