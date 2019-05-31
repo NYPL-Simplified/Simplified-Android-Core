@@ -1,6 +1,8 @@
 [
     {
         "authPasscodeLength": 4,
+        "authenticationDocument": "https://circulation.librarysimplified.org/NYNYPL/authentication_document",
+        "cardCreatorUrl": "https://patrons.librarysimplified.org/",
         "catalogUrl": "https://circulation.librarysimplified.org/NYNYPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 0,
@@ -24,6 +26,7 @@
     },
     {
         "authPasscodeLength": 4,
+        "authenticationDocument": "https://bplsimplye.bklynlibrary.org/NYBKLYN/authentication_document",
         "cardCreatorUrl": "https://go.bklynlibrary.org/ecard",
         "catalogUrl": "https://bplsimplye.bklynlibrary.org/NYBKLYN/",
         "eulaUrl": "http://www.bklynlibrary.org/policy/terms-conditions",
@@ -48,6 +51,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/acton/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/acton/",
         "id_numeric": 128,
         "id_uuid": "urn:uuid:1a110ef6-3018-4359-84f9-e24abee9aeb3",
@@ -68,6 +72,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://acl.simplye-ca.org/CALMDA/authentication_document",
         "catalogUrl": "http://acl.simplye-ca.org/CALMDA/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 7,
@@ -90,6 +95,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://allegany.simplye-md.org/MDALLEGANY/authentication_document",
         "catalogUrl": "https://allegany.simplye-md.org/MDALLEGANY/",
         "id_numeric": 21,
         "id_uuid": "urn:uuid:1d80d5e5-d304-4be0-9110-49582a12162d",
@@ -111,6 +117,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://anne-arundel.simplye-md.org/ANNEARUNDEL/authentication_document",
         "catalogUrl": "https://anne-arundel.simplye-md.org/ANNEARUNDEL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 11,
@@ -135,6 +142,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/ansonia/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/ansonia/",
         "id_numeric": 30,
         "id_uuid": "urn:uuid:1ef19c4c-7380-4ab7-b85b-8487376e8e88",
@@ -156,6 +164,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/avon/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/avon/",
         "id_numeric": 29,
         "id_uuid": "urn:uuid:301d32db-ac98-43d0-a207-7112fd1d62f8",
@@ -175,6 +184,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/babcock/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/babcock/",
         "id_numeric": 1231,
         "id_uuid": "urn:uuid:f1b7a6c6-1c80-4422-8942-1df0b01236ab",
@@ -196,6 +206,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/beacon/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/beacon/",
         "id_numeric": 31,
         "id_uuid": "urn:uuid:2183a032-a4e6-4405-a4d3-7447d3c6886e",
@@ -217,6 +228,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/bentley/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/bentley/",
         "id_numeric": 32,
         "id_uuid": "urn:uuid:cb1d94fc-5c5c-4e38-9469-6182a6537881",
@@ -238,6 +250,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/berlinpeck/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/berlinpeck/",
         "id_numeric": 60,
         "id_uuid": "urn:uuid:d16d6a75-f4e5-40ff-a942-21b5ffb876c6",
@@ -258,6 +271,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/bethel/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/bethel/",
         "id_numeric": 1232,
         "id_uuid": "urn:uuid:0f5b790f-112e-4a24-8dc7-071f86892e24",
@@ -278,6 +292,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://bgc.simplye-ca.org/CABGLD/authentication_document",
         "catalogUrl": "http://bgc.simplye-ca.org/CABGLD/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 12,
@@ -302,6 +317,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/bloomfield/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/bloomfield/",
         "id_numeric": 61,
         "id_uuid": "urn:uuid:5e1c8e01-2bb3-49d0-9b4e-7764f6da8811",
@@ -323,6 +339,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/brainerd/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/brainerd/",
         "id_numeric": 66,
         "id_uuid": "urn:uuid:725aed61-b893-4327-a768-ce54af0aee36",
@@ -343,6 +360,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "https://simplye.amigos.org/txbrazoria/authentication_document",
         "catalogUrl": "https://simplye.amigos.org/txbrazoria/",
         "id_numeric": 70,
         "id_uuid": "urn:uuid:705afc58-a1ab-40f9-9a80-030be5c12d1e",
@@ -363,6 +381,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/bridgeport/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/bridgeport/",
         "id_numeric": 1233,
         "id_uuid": "urn:uuid:ec19e1c2-5fb5-47aa-b1ce-9d712507e34e",
@@ -384,6 +403,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/bristol/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/bristol/",
         "id_numeric": 62,
         "id_uuid": "urn:uuid:f4760d4d-bb1b-4ecc-a47a-f8c039c78158",
@@ -404,6 +424,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/brookfield/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/brookfield/",
         "id_numeric": 1235,
         "id_uuid": "urn:uuid:4759fc7d-0cb8-43af-a895-34449ba78257",
@@ -425,6 +446,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/burlington/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/burlington/",
         "id_numeric": 63,
         "id_uuid": "urn:uuid:9d26dbea-fcd1-4e4c-b00e-febab8931211",
@@ -445,6 +467,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/burnham/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/burnham/",
         "id_numeric": 1234,
         "id_uuid": "urn:uuid:8e5bda1a-c7d7-47b5-a783-2e8f4fdb54c3",
@@ -465,6 +488,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://bcl.simplye-ca.org/CABTTE/authentication_document",
         "catalogUrl": "http://bcl.simplye-ca.org/CABTTE/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 17,
@@ -488,6 +512,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://smrla.simplye-md.org/MDCALV/authentication_document",
         "catalogUrl": "https://smrla.simplye-md.org/MDCALV/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 14,
@@ -512,6 +537,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/canton/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/canton/",
         "id_numeric": 64,
         "id_uuid": "urn:uuid:3f4783f5-a1c1-4f2f-8156-01af60d47742",
@@ -532,6 +558,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "https://clp.lyrasistechnology.org/clp/authentication_document",
         "catalogUrl": "https://clp.lyrasistechnology.org/clp/",
         "id_numeric": 36,
         "id_uuid": "urn:uuid:a53993ce-91ca-4070-b965-b236e2ea146b",
@@ -551,6 +578,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://carroll.simplye-md.org/CARROLL/authentication_document",
         "catalogUrl": "https://carroll.simplye-md.org/CARROLL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 16,
@@ -573,6 +601,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/casememorial/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/casememorial/",
         "id_numeric": 129,
         "id_uuid": "urn:uuid:750106ef-eceb-43b9-9a85-a8e505ac80ad",
@@ -593,6 +622,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://smrla.simplye-md.org/MDCHAR/authentication_document",
         "catalogUrl": "https://smrla.simplye-md.org/MDCHAR/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 15,
@@ -617,6 +647,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/cheshire/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/cheshire/",
         "id_numeric": 76,
         "id_uuid": "urn:uuid:37fbb5a4-617b-46ac-9fd1-4ac447d7697e",
@@ -638,6 +669,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/clark/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/clark/",
         "id_numeric": 46,
         "id_uuid": "urn:uuid:b4590bdb-160c-4025-9d73-af2382e7c898",
@@ -657,6 +689,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://demo.lyrasistechnology.org/columbia/authentication_document",
         "catalogUrl": "https://demo.lyrasistechnology.org/columbia/",
         "id_numeric": 87,
         "id_uuid": "urn:uuid:e689ff0b-ba28-4e43-a598-2fe56964272b",
@@ -675,6 +708,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa104.simplye-ca.org/CACCCL/authentication_document",
         "cardCreatorUrl": "https://ccclib.org/ecard/ecard_en.html",
         "catalogUrl": "http://califa104.simplye-ca.org/CACCCL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -699,6 +733,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/belden/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/belden/",
         "id_numeric": 117,
         "id_uuid": "urn:uuid:d2213bb8-544f-4912-832d-dc5a564fef85",
@@ -720,6 +755,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/cornwall/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/cornwall/",
         "id_numeric": 33,
         "id_uuid": "urn:uuid:f78e7d78-5342-4aa1-b954-7422998e914c",
@@ -739,8 +775,32 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa107.simplye-ca.org/CACORO/authentication_document",
+        "cardCreatorUrl": "https://corona.bywatersolutions.com/cgi-bin/koha/opac-memberentry.pl",
+        "catalogUrl": "http://califa107.simplye-ca.org/CACORO/",
+        "eulaUrl": "http://www.librarysimplified.org/EULA.html",
+        "id_numeric": 1264,
+        "id_uuid": "urn:uuid:0f9295ed-c74c-4cd2-b38b-c193c0ed15ba",
+        "inProduction": true,
+        "licenseUrl": "http://califa.org/third-party-content",
+        "loginKeyboard": "Number pad",
+        "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIcAAACHCAYAAAA850oKAABQa0lEQVR4nO1dd5xU1fX/nnvfm7qVpSqKCgo7uxS3gEYj9m5iA3uMAnZjrwjDUOzGGCsCJsYYo8RojFFjLNFogrKLCOwuKOpPRUCEZeu0d+89vz/ezDC7O7ssNjTx+/nsR3nv3HbmvFvOOfccYmb0BCLq8f33DaG97ugjnLZKBu0LQaPBXMbAEALZAAMgMEwzmN4n8DIS9mIDs6h+8Q1Lt3ffv25s9bf/bxeOUOXNOwthfgzW+zOjkol3IaCYSAIAmA1coegIIgGAADCYOQnwBoAaBMQiI/Aq+5OL61+LtH2rg/ma8T8pHKP3mr2jUvgpiI4DzN5S+oIAgVmBje5WILoDkQBIQJAFIgnDDoxWawB+iUk+3i+QeOm11yLqmxvRN4P/KeEorbhxnBB8HoiPk9JXCDYwJpkShlyg1PgISI8zww9OMS8XfwgkJITwgFmDtapj0G9lMvG7ZcsiG772gX1D+J8QjtKKyDgh7WuJcKwQHhidALPuSETkfvnCAkBwBccBs04CiDE4SYACwwMiL4CAELbIQd+lfSE8EMKG0rEviMS9ilvuWbn45k3fwtC/Ev6rhaOsaupOoECEQGcJ6YHWsawvH+5SIGx3KdBxMPP7AC8F412QWGmMXuOxPZ9zLB4lQjIeDGhpojY0PMKgiIGBRHI3hihj8J4EjBTC05eEBBsHxjgd+kPCgpReKJX4DNBz6hZPu/9bZsk24b9WOMorI+eBrNnS8pVoHeuwdJCwIIQXRkeZmf5FRM9o1q8EeMCK2tpznR6q7RGhve7oQyZRBaOPIqKjhPAMBVFa8DJ0Qtggdwb7l+boJQ01s9/5aqP9ZvBfJxyh6vBAAfteIX3Hd/56SViQwgulop8D9HsI+Ujd29e9+030Y6+9LvO3meLDwPIsgH8ipK/LzCUtP4x24szq2rqa6Xd9E/34KvivEo7SisiPpbQfkZZ3iHLaM8+JBKT0Q+v4WgB3K9C8lYuv3+qa/8FL5QOSCac/E/UhyAKGtghSgdBKTI1ev9mwy/71nxP1fLQpr55dBcblEOIUQbYrJJm+SUhXcP7otDSfs2rVba1fgQVfK/5rhKOsMvwzIX3zQMJjdByuDgKQ0gdjHM3Edznauem92sjGXOWZIVb+o7zCS/iR0mZvBkYyYzARCj22gJSAIAIR4ChGImnAjGYAa4XAcimwSGm8udbbb8kBB7yW89gaqpy1LwmaLaVvvDFJsHFS/SRYdhBKxWqNip7Q8M6cj78hNm0T/iuEI1QZuVxa/jvAKrWMkDtbWH5oFV+ktbq0YUn4rVxlV/99RDmROMmAjhWE8mBAwBjAcRjaMIQgeCyClASlGe1Rg4BfwOshKLWFRgpCW1SDDTeQoGeU4T8OP6x+aa42yytnXQwhbxTSztNqyywirQCMTnzi6NjRq5bMXv6NMGsb8L0XjlBl5FrLDt605XjKIGFDkAVjkrevCPzjOrzW9Ut+78Xy8RJ8mQEfXRC0ZDxpwAawLMCSBGOA1qgGgDUA6kjwEqPpHbBYBdK7SkEHGGBfNjyyIGh5hHBnFCLAtgSa2zQLwnNE5ldDD2l4qXP7pdUzyyTkAmn5xiknCldfwpAyAMPOemUSh6ysiaz4pvnXE77XwlFWEb5UevLvdE8DrlZTSC/YmJjRanL9kul/6Fym7vnSMq+kiGWJE7w2obXdQBuGlAQ2vBbAKkG0lAXXCMjlQaYPBx22rL1r6y7ee65sKBOPJUn7gHlfNhwCyAYB+UEJpRiO5r+oGMLDj6nrsPkdNuxir7eo/wOWFfj5lhMVQ0o/jFHrtKPGNyyd/v7Xzrhe4nsrHCOqwifbMvgYZxRPDCH9MMbZABM/vq521puditD7L5RdLy1MDfiEv7lNQxt3xc8PCrS2mb+hUJ9Suu+qr7QhXPNC2U5tzIs8ttghkTQQBBTkS8TiJuEo3PpuS11k4kR00JSVVc2aKS3/tGwhl1YAWiXe1yT27s3m+ZvA91I4RlRMq7Sk/00QvGwUtnxtzlqdjB3a8O7sumz6Fc+Edvb76Tf5efLAllaNpMPI7nafQolNTXp26Kj6aV+mPx+9OsSnnYLdlVal0BLSw/OZka+1yztmwGMTCvMlmlv1G7E2/Hzk8XUfZNdRWhG50rYDtxmTyAiIZeVBOdGX62rVoUCkOx3/N4bvnXCMHh0uUh6rVgjvbiZ1JBTCC4bepExy/87rdP2zI47yeuW8oF8M2tzSVbUNAHkBgWjM1Ca0PGTU0cs3b60Pn7w0escEOyPZoJoZ1QBGWpJ2YQYch/8WCIij2qMGuVhTVCARi5sNyYQ5d/iRDX/JPgaXVkWut63gHHeT6j627Dw4ydbb6mvDV/eaSV8Ttvbbi2+pH72GY9H9lhVMCQaBhA0D4xidPDbXBk6QOH5gX7tbwSACYnGjhKTl7S1tnu7abXg+9JOPXi6fv/L50JJoMrnK7xHP9+tjz9yhv+eYASX2Lh4PwXF4DQPPx+NG2Xbuj2Zzs0b/Ers/CzqpSxs14RtVsu3Xlh3MPFMqCmn5riqrCB+6de58u/hOCUdpRXiiZeed7Cq4XP2AIBusEufU10beyFVmeHvZOZ+uS/yub5GV80u2LYLW+MhxzB47DAo8tPIfoX1z1cMGvxo80J40sJ+9Z98+djDpMD7f6Hy27gvnmU2b9ZVOXO+1vL1+l9BR9fc6GpcTwCJHe/36WFizPvEn3YozcynP6pfMuMRx2v4hrQAABlJqfyI5f+zYcEHvufXN4zsjHKNHh4uEtH6V3mMAgGUFoJzo/fVLIr/Nph1w51O7pP+fJi7UI45sOHNTs/pdSQ4BYQYYsAGgb7F9pF+Kf61+seyJ954r3TObjoA1679wPln/hbNwY6O+UIHLRhxRP3iPw+p+OvTQFXco7SwdkzeieuXzpRMlsUPU1Zjft9hCY5P+02OLGk4qn1ifTD/fcO5uu2fTeVTsNK3ia4XwAgCMjkN68nZq03TTl+HdN4XvzJ6jrGLGHZa34HLltAIgCOmF1smV7UG158evReJpuh3nvTSK/fn/5GjL3evOOSScXceqF0K/61NonbGpSXUwzloWaWP4ZTawvV46oH8fG2u/cAyBf9PmmFvHHLXyvZpnKgNVP6mNpsu8/3xpmWKMI2AsA3sSaI/CfFm0uVV9RsDywQM8h6/5fItdxxUM9eQfFtVPjESQ2VxuvmBoJOCXl7XE1YH97v2wJv28tCpyhCV9zxmTBJjTnmdskKyoXxxZ+vVyNze+FxvSkVU37cak6wHyMuuM74VSyf0aloT/labbbe4/CmNS1ohA/jAww7S2TF133sE3Zte16oXQ7/oUWGdsbFIgAoJ+Aa9HQBtGW5t+UTH+LAmnFRdaP/bYhMZmFY3GzAxJVOv10U8TDlcTYw/LopK8gIBtEUgQ2DCSitHYpD5gQdcFbHGC0nySNow+RRY2N+k//WFR3UnZgtF44dCpxX5rNgC0JfXHRluVhfeuzBxbQ5UzFlie/LN1yk4krQC00/Z8Xe2MI79xpuN7siHVnJgqLb837UgjZQBGJx/OFgwAiLK5X+QVDjOtTTCxdoiCwjmDHnjp+mya4YfX/2xTs/pd/z4WwOxE4+bvzW36htYW3p/IOqP0iPq5exxev19jkzrvi0b1yU4DPQESdIQh3NK/j/2LkkJr75JiqyQvKNEeM/iiUX2+odH5x6YmPbOtTR1pNB1YdkT9wl0PXnGy0ubTHfrb2NzcVTCaLt59arHfmt2eNGiKaeT55BCGmp/dVwW+RjvRRtehCNAqBiF9R4Qqwzn3Rd82tvvMMXxceBfb2KsA8jBruI6/3EbklC5/O7ImTTfwgRePl/mFT5po2xazuJQQvmDOGeS9F0KPg+hY6Zcjh+637L1cbS97dmRxQZDDsagZwMDQ/KCsbo+Z1YBZCqZ/S0FvWV6rftcD3m3KVb7hudL1Hkss2e3NuqMpWzAuGnp9oc+a0540UIbhkQRJgMcW2Nymz+hz/+rfp2lDFTOusD35tyuVPXu0P1NXG/7pl2ZqL/GdX1bKKiM3Wp6869ImeGkHYZLtt6+onX5VmqbfPa/mSY+uFz7/ThyPdaxASIhAEKYll4CU/cG2cELC4UUEXkNEq0CoVzAro4ngh+k9xqvh8daO4zaMzCsW8UHxvu9TN1bXbNQ/P6KCjLhqeTvOnJi1+Wy6aOj1hX5rTnvCwDGMoC3Q7pjNYG4v8svBrQnzuW5xRhQ//HETAFRWzg3E6fP3hLB3NMYBSAAMLWDKltdMX/XlObt1fKeXlSHjwz4GzjDa5S2RhFaxaFzqDo4x0nYukQV9ugoGABidWmIK5gya+4/rsl/tfljdafG4+V3AJ4YR0d5MmMKMOyWLJ/Pt2Isrnyt99L0XQtMHjtt4REKIjTvsXdfQG8Goe7Z0Ilgc1679kzoIxoVDr3MFQ8MxjDyPQEyZxxJClxY50eGb4+bC/DxrAAetTD9ra8+NAriLREoFwwaW5ZeaedK28PKbwHadOcqqIscI6X/G9c9wp1TltP2+vnbGGWmawfNe6KNgvycsu4SdZLd1QUoIfxCmtfn6dece0uFIuOqF0C2WpAuMQYIZ7QDHQWBmeMHwMMAEtAO8weMVa52knr/H4Sv/0bmJN5/crf+gAv+98aTJV2ydkq1tTW8+25PujCEAFHgFmmI4uPi+915O022+cOgGjyXy25zkrgPu+3g9AAwbM6efV+oPSMh8Zg0hbBiT/CTRtHGP1avvTnx5DveM7/TMAcZE9wiX+icrCKKOmzZjny3zi3oWDADQqRkkv+jGzjPI2v/0m8rM5xBhngHeBKENoEIiFJIgIQXiRNAA9ZWCjlRGTO5c/aq/h87cpV/gfQP0iw4IHJMtGE0XDb2+2G/NjiYNPAIo8kkU+CXgl4DQYzoMmejTQJ7l8wp7SvrZ6qVTv2DgaSFTeg+jIKR3Z09Bn316wcVvDNtNOCorwwEQDmLj/uhC2NA68UFJ0GSsrROeYAnoyZyIgywbJC30eBlJa5hoG0R+4Y2D5r58bfrxAZHX1LBD6x+LOurJgIdqBcRsMnSJMZgNNn9hxmcMCjIw0GNRXvZcufSvI8pXv1T27K47en8bT/Abj7xRd2BVVW1GwdGYWkpAgC2AhEJ9c0zPa47p21VUP8iGM05In18QyoPhISauYZjPfu/iYd70O2L6/ZZrDwxBNkDiJ1+ew18d1vZqOMqi0pKeQca4SzwJD6Cdv2bfHPtX4yv7CH9gOIjATvILJgSFxxfgRBw5deWAuweJtkPk5980aO7LWHfuQTenXwkpP4w5JlwYlLdvblX1YKploneZ+RWCUcyiLxGPIPDfPnp1iM9JBK+Rkq7ZeaDH/8GniaemPVQ/YeHCLD3GBUOvLy7wzHHiGgnFT4LxQN7nY16lhQtzGnq85Jxa6JMlrQmDIp/cRSbUgQCeB4BmT+BfhaptHQl7EJuUxxvhAKTvZG4HbL9lReDH7iYsbfZWIMEvdKQxx8uivuBk/BUp9AhoqmatPyOvD6lCII8PIpDXse70JjU//6YBc/+RmUHKD69vHH5Y/TFNbeqxHft7QgV58oyCPHm7bYnHAXG3IBy7oVG3aMbu8VhgUVGBNaOkyPJ/8GniqWWt9RMWLtzip9F04dDrios9cxIx9VGro/bNv/v9E/Pvef+l7gQj1eG2pOZmIVKKNaYT0m/WLLoixozXhbAz/ACodPi4m4Z8Kf5+DdhuwiFAY4GM0QlaxVs07Ix6GeGwgOGjdfOmuHTMz9ZMObxx/fkH10OpiyBdBpIvAJOMrTTRtr+R7UXa6RhAZg9i5RXeNChLQABgxOENp67bkHzUYxOaWzQcxZCSdvD7xBF9i61wn0Lr/oBPjgYB6zc5Ty1rLZuQ7cDTeOHQ6wrz7Rtj7aq9Ne4cUXLPh2+2XbL7mOYLh53V+Ivddu5uzEX3rv5Du+LrgzbBUQYGOJDPqbSzuPJqegzMBpb02bZyxnx5Ln81bBfhmDDhCQnmUs4sKRaIqD7bI6rf4L13k/lFQ017y2Nrzj/4s/Tzdece/LRpb1km8grBTvILQ7T/unMOPtqo5B9FsNMMojVMvB0iv6uADD+i4fTGJufRkmILYNc/tD1m0NSi0dSiEfALNDWrPy9rqZ8wceLCDoJRHLBuhAFiCTOp3wP/t2rzRcPmBn3yHQC/FI7q0dPMMN6HICQ1wxZi10a7cUT6nWSuMTqBjJCThAaP2Vb+fl3YLsKx/IP3+jPRYN5irgaDO/hqSLbGkMcLKT2/71oD/UnkF4GMc++GKQd/DgBS6ekmEXMg3CGR1+duYJVyl5i8wpsGPPDiNdm1ZAtI9hamb7GFzc3qqaUt9ROzZ4ymi4ZdW+y3bgQBm9udx0ru/+Dx5ouGRooC8hwAMMyzi+7/pEdnIkk8SmluMQzkeQUsFmPS74TWH7BRjVtOcAYCKN0aP78pbBfhkEIPFiQDHW6/G17ZiaxCN2/SMX+iptNzsMS/dOMGKIM/p599dv6h77OTrCGPD2R7wfF4A2vVAst2BSTeDqug6OZuZ5CUub9vsYVNrmB0XUp88iYwoyWqF/e594NT37t4mNcwrmPFaGlXjbDVglzj/ejMIb5N5w/9EQAY8KJ1bO2qDTfAFmDBo9J0774baQLwCYms2CFE/3N7joGusSm1CXeZ8EkHCkaItfqg8YwjW7qUZvOxibWvkBTv4KdJTG+KYD6MSr5XXNw4BsDPyfYAQqSOue4SM+DBrjPI5mb92C47eNDY7DyzrJNgbL5w2DXFfutGV8EFGIA2X7THrv2YjvJIQSQJmvnp4rtclXhnFObbJ8qUZ1jJPR++6U9qny2pAIYBiKEdhkZYQ5AZvjCjX2XlXLtLpd8Cto9wMPenTNMEZg1B6BjXgmgnIvFhruKCPa0QtGjduT+JdnrxHlkekNb310+cmFx3zsFPmWj7SvKk1AmpU4wVLLp5wNyXOvhs7n5Y3elrN6hL1q6LntRBMC4edk2RX97cnnRV4u2OgVdSFVi/J4mfNGBLawYEPd3DeK8HuAwANp8/9IA8y9TaQuxoHAMGBnai/jy9xjEzCChSKhrsXOW3ge2i52CIguxFno0GC2rqSGT6ALQ6V3lPFCoewGednxPQbKItAMTrmWcCr5HtGcGJlL9QapNq5RfcMmjuS1h37sG3AgARDLDi19n1NV007NpCr7wpPWOke5zUDFsKy/3xCG0JnYDknBe2my/a/agCL5U2J/TuTRcNfQ1MP7IEWW2OQZ4tQEA+u1obTo0hiw8MBnvjoimADs+/HWyXmYNJ+ynFaiICwzAIHfXjBC8y82tHyIBiwdz5i4MxsoRjUdiw122pBh90OOICW1TteQW3DHrgpZl44okO7fAEyM0XDp1V6EsLBneuAcowdFo1RcSGRc6rBQb8M9d5iawCj9zPkq5gEADDDGb245zKLR8pc9YFKwYR2R7p8+Wq+5vGd8LZJzfIgTHDc71pYRWAbf9kwK//smuHEgLHAEDCxDPLAoNFTm2q1iDbAxCqKzfv1pEPofFEQAgWQeUQjA7VGEaBV/psYw7KScAYzIZhGGhJ+Xd0qq/DP90ZLLs4k9bx7fI7bZdGialzTCZorWVHGm4SeQVlg+5+vqJzeQlrglUycJDI7/PCwLkvjt/5vn8VD3rotYdEIHgEbBtCiGMBYMhvXvUx5DG5jHaioBimufHpHVD0k9pzqzoEdKHIa6qw7wcTWtrVHwsDslvhYACCAPIQSIjrTZatBABStpMC3Y3yO2XxTmJQ7RZhdkNOZfgChoLAVqyO3wy2k3DIFs6ozRlEksiITpsuaiSPl+D3Ldxh/ss/wRMsB819te+g375xvfR679KbPv+YpFgnQGVxERsMEpUm1r6BLBuy38C5g+a9fGo8qR6ReQX7cLzjVVhRUAzd3vz02jU0IVsw+jxw1rhM6xGYwrtXn9IS048VdCMgFgHKcLK5RT3tkbR7M/NF2e8HGD2ECGVxlfsymyQAoNZsLzI2VNiBCyDHoz05HFm+eWyfZUXoRnQI0yQBopJsEiZ8zskkyLZ3E/nFfxmw8cVSkDmOpLUvMR9knOSJnIw/ypa9l7Ts30Al8wF8rltbnjaxthuZxHsCrjaJ/Fs0p6KgD7it5S/r8zeeiMgBGSNfn3lTrpMl+YtKFpzTQQ9SePfqU1u7EZA8nwQR/bro3tXHJYweDsg/Z783ZDvM0N35xAgCCJ1OaeC+Gb6QAIjbpEx2e9H7m8R2Oa1o0HpijbTBkUiCCIM7kX0EQYARMNE2I4T0rDvnoHn973hqkVVccgnZnhOFz19IHh/YScC0t9+ntPnlF+cdlNF9VM6tOfmz9s0HkbDDIq9gL0gLpq3pmXWf0omITMxM5SXzJl1N+d4bTdwBBT03lcyfrDdNnn9b+n3B3atPbbl4GBUE5MktUQ0GYAmgLa4VNN0PAIW//rDLbfmYY/z5HlebkRNEIOCjTs923KIcJDCwqbY28r8zc5CitUYnO35RTMM6ELGpF4F8QDn/x8m28evOO3jJDg/84yqrpKSWfP5JYC5kpaDbmjeZ9pZD10054MJswQCA2nOrnPVTDnlh3Sev7qPbWxeY1qYX1n1CJ2TPGCXzJl1NBf5bOO4ACQWOO6A8360l8ydflV1Xwd2rT22J6j+mZ5CALZE0/HjR/e9/uOn8oTslr9zjt62/2COj7dx4/u4H9w2I56Ugj+5ePKAJDen/H3b4XV4w74yUXweRADGtwXYy2W+XmcM2/rXaim4AiUFg43qTkynLpjFMq1XTxqWitf2YtZccuWbQA3+fLYpLppr2FpjWJpDHCxgVNfHYkZ+ff/jbPTYYiZj1QBfvrpJ5k64WffJuYZ3uAwBtsgRkCm+aPO/2FDkX3rP6lJaLhqEgIE8GAAF6GQCkpJeZ0WzghvHZfMmQIov5YVuKHdpTx9bOEAQkHANmzkQa9HzeuBMJa1DG6YcEwJxT1/NtYLvMHMuWXdUO4AMiVzaZFcAYOWzYxZmduqTid6ObVx/w2SVHrtlh7ksni4I+U3VrM1gpQAiQ7QHHYlO2KhjdoGT+5KtEn/xbTHOszrTG/gYgSXleVx2l0gLiva3LDHLP6lNaY/qPkAIW4fz2Xwx7A4xnvHe8V51eWoS25uV55A5xx6DIJ1HoFSj0dmS1RxCiijckfcFl6WfGEiOl5bU62Jwot3Lt28B203Mwi9q09dEYBSHkYG+ffhnz9bpzq6LNl53VNGjuq32NoLs5mQBMKohLMB+mreXJdRcc3iWyT29QMn/yVZTvv5UdBdYm1jhp/tEARnPcmU9eyz1GpAUk339ryfwpV2aXL7h79aktLc7jef191crgs6J7V18JuDNG+y92/32BzzrR0QzFvLYloS9rTuiTmxPmqaCrEQUAeG0BQfzmoDu2RBWSLPYBpU/0BKMT0CyWfpkxfh3Yjkow8+aWpZQhpI9YmwO7kJH+hcwv6suJ1J5MWjCxaEJBXtOFthcoeWjKlZTnu5VjSXB7AiLgqSqaO2X8prMeXLnpzLlTOOFcRR7L5Yw24FgSlOe9rXjBpCuyquGCvqtPjW5KzDKtzrkA0Hj+sPE+eN4OeMVp0aSBo7k54dDBhXev/lXRPR88XnTP6uOjjn40P2sGIVCH0w3YHMjsnqzdKMlqbZEnWP9lxvl1YLsJh2PLf2snFkuntgAbEOjoTmQE8AmcTGR8RoU/D1DJP3befPYGJfMnX0VB320cdwCdmrqFgLRxa5pm09nzbudY8t+U53NlN7UHkUH/7dkzCEVggne9P7344Y+bmi4adm3ASy97JO3eFNMI2AIJbf7R9/73G7LbV4T7lGb4LEJzTDex7Xku/a68cs4IkByVDrorhA0G/WfRoiu2y0kF2I7C8f6iGz4DUJP2mTQmCZDYp3TPWdn+C8zAK2SnfE2JwMk4CPLBbW2veP6UKynfnTEAgAJeUJ7PVaN7PWNL5k/5c99Hpgwa9tzFXhDaOKli5LNAlgR5bUAZdwaZf3aHJYbPqbTB/COvX8rWpElnaAEBXSypbChIRPB6BBh4vOjO+sbMO+gTpO2XW8IDEAjm+W0d59eJ7WpbYeCp7KQ40gp4SepTs2m0Eb8y7a1JSAtke2ES8ffXFm/KGXO0O5TMn3KlzPPeBsMgnw0Ys9nEk8+gPXGFiTp7J9d/XgLJL8KIRxvXx1cYRREdS+7Fyqwzjn6F48mHOOlsIilg9S28rSRLQOjBWqdwwwfHtbapx9Oq9vakgc+ig5ovHnZMmu7zC0J5XoEbpCBEE0ZLgS0W4HBYMPHprFNLCkloFY0pw/+7wgHoJ7WKJtIbUzYOYGjS+PHhzBH7i/MO+oBV8mERLHANZcDrmDixBw/vjiiZf/aVosh/G1kSnFANnEieL32mtPGsB3+68ewHfymARnvHgfuxg2epVf4EmmvIMgc1TVmwDFHnAIA9bPgxj0M7c1tismmJLZMDi28reShriVkInX/36lNaY/rxgoCEZoBBHmI83XzR0N83XjD0Tq9I1vhtsR8JIOGYhQV3r87sJUr/Jg6T0j/CpO/wSA+YzUur3oms/eo8/vLYrsJRXxv5hMEvCOlapI1JwvIEh37RKidm0wnNs0xba7trRaUuboPdoWTu2VeKksLbTMzRpjV23aaPBpZvOvPBBzacuuBzAOizYMrB1D9/lSwMPCUKfJ8aX3zHRiN+RqAj+syfcsmmCx5aJQwmAXx/QvK+G8+au2DTG4ur1Ka2W0RRsMMSQwAX3L36lJaofqIwYCGpGUQQBT7rtOKAdWnAouEJxYgmTUJqnp7dT2Jc3lnFTkTztp2jXy+2u8negO7JTnDjhmHAVCCc6dvaCw//FCo5C7YN0UulUMn8s68U/Qtv4/Z4E+LJgzed9eDNA/I+8Pd78rLRBfMm9QEA25bL9Ob22/UXzc8impzB3uA6nPug440mjgHxaSULJl+48Zz57wmSR4L418W/OedwPFjrNJ4591rT2PaS3b/4tpJ5UzqeYu5ZfXJrzF1iNAPNcY3muEZUMQI+gXjS3Fo4d4uq3Q327z1YK9cZSUgPtBN938efdbzDsx2w3UMwAKBQ5YzFlhWo1FkXqrXTNrmudsYWh90nnpCDmvr8hwVduX7yQa93VxkAlMybdIUoCt7OCaXRFj9w43kPvV784OQyYYu3RJ4vaOLJOCcT+zdO+k23e5fB8yb1iQrxIsM8tnnSgjuK559XLkg9zaDT7MbYCtU3sIh8djmIoNviV2yePP+X6bIMUNvFwx7P88sJLVENw0CRT6AlYZYXlHiqKLLlZn6oasYblgzuk860YFlBOKr1ovqaGfd+aY72Et/ti9QuGCRmdnQbdEBkzR49OlyUeThxona0OU0I56McdWRQMv/sKynffzuIoOPJX28876HXAUAaagTwqkk478Hw6xZ8X/RUz5opCxqdaPwwAXFCyUOTI5snP7ACbE4mYL4akLeMLFnO7Qn3mJvnu6N4/uTL02UJ4NvvXn1ya1Q/UeCX8NmEuOK4Bp2RLRile4ZPt6y8jGAI4YHjtH/qZ/7NNnHwG8J3YeYAAIQqI29aduBH6SwD0g5COW0L6mvCXWwi3cEVjMBtnFCANoqVHtU4ZUHD1kt2j8F3nOiPFRc9w4ZWNU6ed1GfByfvRT75JgkhOK5ce4wU7imoLX7FxqwZBAC1Xrz7wrw8ecLGZudn/e774JH0izFj5vRzLFMnhNUvrduwrCCU09pxxvwG8Z2P7JNGaUVknGV5FjGnU3u6EQWVih3bUBv+y9bKl8ybdAXl+2/nuAMSBJNQaxuja3ZDY0z32Wn3a8nvPQTgjSKZnPXFWfOXblPnwmFRsvNnT4BJb5o876S+D5y9H4Lel8Bsc1J3EJAuS8yZQ3xNefZRxfeufjK7ylDljD9bdv5xWrUBIDeZkGp/p66Wq76tUNffG+EAgFDFjPttb8F5mXCTwgYbvUlrrmx4Z1q3CWyK50++XOb57khrPsmSMEn1RaPl7Dw40Idira3vy4FFOzIz9IaWyxsnzbvzy/Svz4Ip9xPzsE2T5x/S94Gzj0K+71lWGkh7enUjIJ1RVhW+VFoFd+pUHDAi4d764+SPViwO/+fL9O3L4Puw58ggafE1ymn/JPtoKyxvibDoySHjwzk9sPvMmzLdKgzcka0SZ20gfHa/fsZbteakO2PKb4/U7fGD+PPNFV9WMACgcdK885n49T4LJr9NyveaiSZ+Tn7PlnAQaVV7gf+OPg9NviFXHaVV4YNJ+O5IRzMCUhtwnbj92xSM3mC7xefIhdVvR1qGV4bP9LD1KpEAs4FWMUg7WJnXzo8BOK5zGRKUZEeDLAFWqcslzIAloBPO1QDeaD7t/s0AXgEAPBH2lLSvOxJ+zwARi7+1rUtM46QFs/osmLzW+J2XdYs6iSg2k/L907kt7h5TpAAMA5q6fHjle4ZHMXmeIJAwqTQhbqir9iWI8dQvwbJvFN+pmQMAVtVG/qlV4no3NrgL7bTDsoPHllXPeqQz/aZJD96sY8kj2fB6UeDPOPpzNAkR9B3TZ96Uy7LpS1rWTpaDS56y+uY9YAy903/epAHZ7/v9dsrQfg9M6XBFsTMaJ81fwMyvWIPyVxCowbTHXyevBSrwgRkbuS16XOOUeTOzy5TteUMpW57nhbCKjXHDfLkJkpOtmtQp9fWR7eJh3hO+c8IBAPVLZtyknLbHLHuLY7By2mBZwdPLqmb/HpjQ4RrD5knznjet8bE6lniGgj7XUMYAJxyIoOeXJQ+dk2Xe10/rzxpnqc+b5wHmjA1rBmfCPpQsmLyAA77V3Me3umT+5G41lCXzJ59GHus80ibIhMcICJHXBked52RbfNymyQ89nU0fqg6PISvwDynsHdLJC4kkQAKGk6evXBzJGSd1e+M7tSHNRigU9iAo/25bwf2V4+7oAfe4p1XsRWM5p9QvijR2Llfy23NOB4kZIuAZynEHrAwoYINjzrNkTHjj2fOWdNdmnwWTLxU+z3kAYOLJBxonzf9V9vvi304uk2RdB0uexkqDCKCgF7otsRbK3NA46cEu+onSqsgRkuxHScjiLYIh3JOYE724vjZ8z1fj1JfH9+q00hm7Vd5c6Cf9kmX7qrLzyKayLDaQ1mcsXzK9tnO5klvOzscg6wIYOp/8niEwDJICJho3AD0Jw4+w7X2t8Yy7u97g74QBvzs9mOTgeGH4dAATRJ7PYm1c94F48lNm3K85fn/zWQ83dS5bXjnrckh5O0GQu5RsyWqpkm3T6mrDs78ah74avtfCAQAjqq8tkZz3V8sO7O3OIMCWtF4qzszX1tVMvStX2X73XJCHAn0iG5zBxuwnCvwWeW1wwoFpiW0Eowagd5h5NbNZDyFbQGyIeQBBDAe4moEfyQL/QPLZ4ISCaYlpWPQGGfN7I31P5BKwsqqpOxEF7pTSe4LOZLV0TfFCeqGd6A11tdPnfHNc6x2+98IBAKFQOI+C9uOWFTjSnUHcNJxElstsFX9ZG1y9cskN3S4ZfR+evAeTdRCUOQjgKkgxRBQEQJ6UP4k2SN8wISkAQWBHg1tiYKU/YWAJLPEyWLzceOb93Wpdy6pnTwbEbCk9A7RKR4hgCOEeebVKbNelJBv/FcLhIizKqu1fS+m7sGO2ZzdnvDZJh5gflMK5/d23Iv/XU03DnrvY2/RFbIhh2gUGg6ExgATnM0ikONYqBG3Q4E+l9H4U3Lntk48PeDjeU51l1bMPI9ANQnr2dUNFJjv0zxinSWvn573R9n5b+C8SDhful0m/ktITzM72nMlnr2KtTPQwCcxb8dbUZT1U9ZVRWTnXTogvjmbGhUJaBxEEdJZyy91fBKBUfBFU9Oy6d2Z/JTvP143/OuEAgOEVN4y0ZeBeaXl/rHUC6aiEQNa6ruOGGC9B4HGC9eLyt69d00OV2wCmkeNuroA2PzXEE6TwjAAArRPIvpgmpR+GHWbDt/r442m1tQ863dW4vfBfKRwp0Mixcy5lYKqUvhKt4sh2GiISWet8vA2gt5jwGsCLtbBWytb42t4onkaPDhcpkkNg0SgQ7wPGj4lkSEofjEkibVFNQwiPm9FSJ95g41xbVxvunBz5O4P/ZuEAAIwcGx4M9lzDjMnS8vm07igkQGo2ETbcLYWG0ck4s1lHRJ8xeCMYjWBqI8EaTB6ACwEqATCICTsQqL+0fAAImdDTna6vCumFIAmtEu9B8C0r3r7hoW+NCV8S//XCkcbIqpnDmcTFDJxqSX+x4dSmMMf40lZQkEgn3utEwQAzmA0YxhW2nPW4SxizARvnXQbmNsuNv12z6M7tdtdkW/A/IxxpjKiYPUgKmgjiUwgYJ6XfnS2Mk0kT/qWRSkxIwgbA0DrRRKC/g/iRFW87z2+PlONfBf9zwpGNUPXsMYLFEQb6EAGMJmH1odQlKjfGpzszuPKSxQciECgzsxAIDIZRcTDoIxDeJPALStMrK5fcsC5X298H/E8LRzYqK8N9k8IXYpjRzCbE4N0ADASjDxF8YHgACCYoYsQZHCWiDcy0FsSrCbQCgpe1+fWq7Dy332f8IBxbwZDxYV+B9vmdqPYxO+T1QSUoEMtLfBD/Lh4/v078IBw/oFt8r9wEf8B3Cz8Ixw/oFj8Ixw/oFj8Ixw/oFj8Ixw/oFj8Ixw/oFr26txLaMzyMiA5hsiTgvF1fG1mMLJXibpXXFAZQMGhF7dQOqbhKKyLjbI9/uNJxYZFfJ03bOytrIplcbqG9wn3IEaVpy2WoOjwQBjvX10Z6HT5yZMXMSk1ib5BiCe/zy2uu65LAp6xi1lDh8e3LKqkZDlkO/zWVMqtXKK+ceSRJe1dtElGPsp9dunRql0vYZXvOLGVJB4INGTL/zB5nZrzV4YGA9zAhLG1MYmP94mk5wyyUVs8sI8MHgAST5lfq3pnexQ+krGLWUJaUX7/4hqUAUDZuZmkiEdu4eulNXfrm+uIm9qurCf+1t2MGejFzlFZEfkxS/AJEy5jMm0TiRyNHXluUTSMtewcmdXiXwizWG8Ufk+GDSOhVMPam7NctaImBcMLIinAFABDLq4QQOXOs5MLI6vB+RtBpEHiDIN9hcq4I7XnjsM50DHUQGyefjH6XtP1uUxF6reEMVUYuYuIQS/tlsGh1LLVfF5rq8BhIXCCI3pJM/5GQ54ysmFnZmU5ouxJQAwm6AZqrQ5XhE7uMqSJcIRjnCWEWCaK3IHFBqDo8pkvHhAnBmEfKx80ZAABG81E+29dl7ADgQ/IQBmaFKsPdpjXNha3OHIKwQDnm0FXvZlzv3ulMI43UxF0Z7t5vDX9aVmXt8+6ia7vMBmsW3RkL/ih8u5W0flFWMWMcAXXbciXQGHG48npuX/Xva9YCQFllhFg6xwK4vSMlJWBUVJNuJkE8tn+Z0+3F2yyMHBserLXYua5mWjrlV+ckhS5Y/ERCzl22eOoKACivnNPOQp8EoINnvJGsieid5W9dV1taFelPLLpkfjQkfgKJ+1a8FWkAgBFV4bjQ8jgASzsSoo2IH2GtLgNwLRhtDKjO9Y0fH7Y2tnE5jLmapDgWyIpFthX0Zs9RsupdfLJ1stwYNSrPT+BuE9it+ndkLYP/zUQHr6iZvk0+EARi2RTdmP63pcxnBOoSxY8EDEjsBZKHw/Bhyz5bHOhMkwsmKUvA/HkvemIniTIGuFaVXM+GusyADOOAxQllY2+6S4D2E5b1aNeqyMutekub5F2Xm38UBOFVw7SotHLGJEHUxGy6qLM3tln7AiLqox1eZaahw8aGC7Y+HhdbFQ4G/lleLX6a/veYMXP6db7UzKzJEHe7HBC6MiobJqlXGjb/6k2HO1XcZvxifPqfyqKDBNAlPqnRbJNOPF5fM/3BuiXT56/69209JgbO1Bdo/RCE3UZU35hJ9zGiYvagHB1Zb0FlMjXl2fJAA7OxC5khr2F+WrB6kglNK96a2kXwmPkzCsj9twxRHcRCdBVQZjJM/Rpqpz9NJPqD+UxoT1sXMvBRZHlK4rT+QkAO8hp5cG/GDvRiWfHDnBFjcX1Z1ewhRCKeZDXAjuFOYMsyYhmvIqGjucrbdgHHOd6l0x1oWJKG2WYjlyH9G8HyipHjbtrVaMdvmIujQX1zZzohZdSw1eu9TBqr/n1ba1lV+FFheFr52FuWsU4MIaGXAngqm87Pbb+PcfDqsqob+4KYYdROluO5rUuFghNCs1y+ZNrrZVWRsWWV4f3raiP/zCaR/tijJh64uqxq9kABIm30Dn603dqlLjIJkGXc9vVdccgDydsxJ1RZ1aydwKZ9xVvXzACA4Xve8oQl1XlA+Ole+Z6wm4Su279MQ2Nnji6vnl01YcKErkye8ITsLkQCAKqsDPc4jU+Y8ITca687/FvtbO4RUHn17KqysTNHd0cx7PC7vKFQ2PPl6nf9SEeNu23cyKqbduuJrrTqpj1HVszuknYsjVAo7NnSD6aRI68t7o52ZMXsit7X5fKwc/7ZwXtd5u/8uwz/0S35ABOw9d/+B6vs/zC29ttvdVkZPz5srW/CYI8NQcJi1aY+y+W1PWzYXV5/UeOOgA+a46q+FmuAiCkfN2cAOyZPWsg5jdlafV5bG8ksSRMmTJArVo8abEklSViZ3rNRJKTPtG9au2716rsT3fU3ND6cR63BAdJKGK28wtLtm3LpNIbvGd7BI30+EqoDh9hY5GHaVFt7bXP62aixs3bVCkIIi5O6Mb7qndu6BI8dPjq8i8eGUDIgTTLa3psAs8N/dEs+2qMlWSfBDhgyPuzzNWFgd+8BV1cEDU/94sh6wJ1RyGftxJbwMmti1kRSJgJqwP/V1p67TUv3VjekTXHfYGmLJSy8DdpgpRXAHrnoPIWNo5k8DSx4JSDeGDYWeQBglLpP2N4GbXhl1z+sTEpvQ6giMh0pL99Va0IlJM1iJk+HMgayQWlnpa/PoLpQ9exp2XFKO6BNzBc2N2jDK8k2DY6VO1O0lPIJltSlTwaqIU5qVfnYGx8cUX1tCQBobSYI27tak1ppWUUrQmPCoey6yqpmnOTx+lca2A2S9SohRbdLXIc+JGIPe/35H5VWzyzL9b6gVZZ5fcFVpZXh87qtRInLwVYmwJzxoRyClpPRfxEGf5YQfyaN5xNiY/3I6hsfGDbmun696RvQC+EwOi4ICBAJD5HwGJ27jGEIIuERJG0CMnsMIvIKkjaR8Ajp8VhW0GNZQY+0Ah4hLA9AO3t8xZFQ5cxLs6rLtCctf4o+6BHS6yXQUI9dMDNUKe/u3IfhP7plByI6FmxsIuGBMbaQnvHle84Z1ZmWQL4t/fJu6Zf0ekiIAZYVnCI58NyQ8WFfornoLqPj9Zb025blK4akTLwvdz8lbgWR17KDHmOcPzXUhLcas7x03MzdAdrXmMR7wvAluWiYBTFrj5Te+8v3DHcZQ2okNoEz+wpBCIBN1MeBvX3Qe/rYjEFUjzXanMskd/bbBctHVIXLt9Y/oBfCQcJiBhSnHHKJZM6FiiCYM067WcoYZp2ODqh14gPHaXvWUe1/0077C0Y7jczavULIfBYAxJMwABSnrgZoFfuX47Q9q1Xbc1rFP2VmKKcFQsgLyivDI7L7YCXjEy0r6DXGSd1RURDCC1j6jK493tIvo+J1jtP2rOO0PatU7F0ww0k2w7Lzx+a1yYmrV1+S0Jons3GgVRyWFTystDLyUwCIw7rasoI7gw20094opHVxbxhPCpeCaIlS8VNBdEpl5c2FnWlYskeb5Epo9QhL+cKQIV03/ZQKMpX9OwBwmpvt1traSLS2NhKtr4801i+Z9sqKt685kqEek5CvuBvTnvGtGd6E9IFAc+trw8fU10w/uq42fATYzBTSDzeYFjwAIITXzelOBIAgoH9eXxs+pq4mfJQR9p7M+nPADX7CkGOz22DQ6YaVKxjGWcQMxSYJY/jkYYff5e3aK/cyEhH9sr42fEzqb4xh/c/0fRSA9wGAle+E/6NM8m5p+cDQIMKsERWzK5j4Sq0TIGFDw7kql+6iM4aMD/tAfJowPHflklm1DP4iTsmfdyFkQwT4TUxPBrA5r5/VJexVdwgEkjn3kysWT7sMQEwmY5fnep+Nb0042Dhg8MGhyshFocrIRWVVkUtZiDOMSUJKL0D4EwB4EokOR2WdtYwJJGy3z10nrxEVsyuEsCrZKMCYGJM5nwhrGQzL8g/2bmo+pNu+iWzNIhN1wxeKmuuVE/3ElWUxUgjzsiARFNKGdtpfaaiJ9ErDG2ylk4ihvDTw2VSTcwFc1A25p74+kmTWR5CQJ5ZVzpjUmzZ6AjPfD4jjt0b3rQmHMQlI4TnUsoN3W3bwbmkF75TCrgSYk8nm+fU1YTc0Y0r57R6zGCTk70JVM18IVc18kVgsIZL9AMDoBAg6Y68RZM4Qwpu+cLS4fnFkKTO/7t6XFQDzmTn7pRNgQ1em2nihrGrWCiK5n9GJdNLfN9K09fWRNsBclE4BIkgWAQSjkwlFdEFveUEkLmXgofTpQUEvYPCQ0orIj3NQcygUzquvjXzCJvkzIX3zh1fNHN7btnK2z2IJmL87ywrgZjBC9h8JgA0Jsiu6KrHc2UHa/r0tK3CYJX2HkLAHMStIKwBmdeeK2shKANhrrzv8BJ7IJpm+3rgAAAxhPrNmoxNg0BFpC2aHVlhBCu8I2woeZknfYULYIWYNy86Dk2x5PdG3+Ils+rqa8F+Viv5RSi+YNYSwoY0za1XN9FW94UH5uPAoBsql9GYMYO/VRjaC8Vch6IqeytbVzHjEmORjFsQLyKWM7CWEyK1W6EL3ZRvYVgjhBYzzrHZiZyodO0up9rO1ij8OCEjLV8GafweERVJ5O9yCVk40ppyocgO2aBBJrZyWy+pqwpk1synZdri0AjswK2gVNyx4h1D1jNMkUGZUIgEwLCsYNEpN6NozgjHJpOO0xYxxYIwDITxQTnSe5bQcufqFS7roVCSL293NrgWtY81W0ntfb/nASlxKhFc7h4QgMncw86GjRoX791Q+0fTFWQT2lX1UPt+tkLb5fqeBKScgp7kjG9scpNYIasr1nNHVIpgNkjZYJf9Zt2T679LPyvacuYgknaRVDEQ0avieGCgCiRa0u9cQ3QvK+nCL5GbDvIhIBkhIYZTTYdMnBH4GSi9FRkjhvYkgwTDussHGzV0L/hmADiGXpOWHcqJhIvGoMfo5aXnLCQKG407dsjty5pAnBWOkQSoFmYMu54zcGDXqiqAiOp5IOKHKmcsppcZ2+Qdje/L9WrSejB7M6qtX350oG3vD4YIKlpZXRv5gYDa6KeV6D2ZxHsBbdfzpvXCk9gDM5q5Q1cxGABAQYBinLagvo3ZfAj3MVkYnYIjPCFXNzPgwMHifdIJdBhyyvIlkLCGyjSC2hfXLFk9/r6wqskDIwMXGJIhI3llZefNztbXXNo8ePXtHBXOY0W60PmkF3HuucM86ZEkYHYfRSQhhV42smDly+ZLpy7e0QIDgTXWLp31aWj1zFpF8XOsYLOm9IFQ5++H62hu6+KGwlTXjMshJcK9mYGUXnQ5mYubjBLEkEpmvXpFhraLHMeNybMXnou7t2e+WVc24FBB/EgLPM6OLEAcaRc4fI1Q1azox72xr2dWY1wm9Ew5GKlsuwbKDx6U3ZEQCRiVhx3zXSN2mYbnHT2QtVwyIdFwLKb2jhbQzewujHTArWJ4CJBOb/7Zy8fWbxoy5rl9S+oRbD0E7OmWQE7dpFZ1MQvotO29AzGm9HsA1SVuf4rHz/W5wNsPaaZ/J4IzqGxAeEKYLkgFp+Ulx61kALmdGpo3UPVk0HKn/FPpb+3JL+keCBGAStwPo4vnlwi3L27A0E/GVAC+oq5n+Rq73I0ZcW2/lBy8rq559WN3iG/7OMEQsc9ZfVzPjrlBlZD+vb8BJidiGx7bw2xAgBQYDSC1clZXn2HE5OCRgX8XAcRrJw5bWTv0CuL7H/m5VONgoIpIykz1abzGrEAkY7WjpBXNSkCBK30qXW2ggtmQF0NAqe0tBACjmOK0vJJV1LgAoLwQ0SUrdcE/9bqirmfZpqGLGPMsO/sLoBIjp8tLqmb8jg4nMBkL6oFX74rra8IzOYwhVRfaSlv9YNzwUnTxq1BXTNEGn23BPrwAiEYPKyCyQeMLoJGy74MdlVTNPrquZ/scOPGFBtOUGfq82hmWV4f2J5DDWptsMTCtX3rwpVDnjr4C4DsDfUyzqtv6kNGfJ+OZ92CDjwEMkEkSyf6uKvlVWGdEAIU4cJLa8TKgxTnx0wzuRXqVC26pwxPr2+cy/oflHmrUEOtttbAghzKgdd41++GHd+zFtjwMAJjh7DilrX/02YCRdCiQj6cyH2WWJiD222fDOf7aky/CqTY3tPHg/xUkJAH6pM/nQ/MTXKU4+qnUMRJYFRW2S6DzlxC3L8hKzyRkOQcj4eWwCNyvVzkIIGQjsYNqclp8TVAGbJFkek8n+VF8bXli+Z7jaCFsIQySApi716c0NShSPAzQMazUgoJtz+w9mgawPlE5WrlwS6TFZshGes0g7ri9oDEs5KA6tL1seQ4681KvfjrSUVU2tFhTIeL/52NQ5hvZSFoLMIIuJlOFWlli98u3rNnWtpYcu/2Cy/9/FDxepf8CXRq82pGVVM+8A5ABmnbUDZgKIBYl1LPjlurenvZh+E6qePUaSdaXWydzHF8FEEFBJNS3bV2H8+PHWpuihx4NxBIj3MGzyBMR6SPGGUYmH62sjGUfnssqZU4X0lHZtg0kIa6MhvFn/9tQ/pZ+OHHvzYK2TN5IgYpP7kxGWLTUnH2h4O9zBn7W0MvJTafkmGpXQREIAarOP116ejt9RXhk5BJbv50Yluk2GTIIIzLrZ2nx+kSoaC+k7h7ViQK0P7Vp6zcKFHRMpl4+dcyyYjgbMCGN0Hgn5BUEsAczCFYtv6JBbNzQmHCLLcz2zYin9pEzrow01szpYhssqZk8m2z6AmFmbZF19zfSbuutrGr0SDmY+y+PNK86OypsZNBGY+eqyqsgffPzZz2trH3SIzW6WJ+80Eum4aZ2WplRYJTbNdwP4PwAoGzOtelPU/4CQHtc1jg0IDIIYRUIeCiEuK60In9ewJJLWWJ5o2Xlj3DY69cndxV1aXj37n0Y6J9QvijQacIll+89Ib4y7BolLRRpONr4O4F8d68NM2wqM0qngckJYaE/QMwD+AQCaMNpnF5yqKX2i5I6lkdq8GwWPM+AS5kSZx5d/KksHTqJp04cfbr4OKcvq8KobhtsUmC+EZ980H0RqfichDzY6eXWoetZ9/QLqktdeiyj3udnJ9uSdZowCkYRk39Gle84a3SH1GfEhtp0/EWygE421ALYqHL1dVpq0ikKrqBtmkY37B4ZWcWgVhe0pOjWOwVen+JF06WPQKpaKxme6/Clyg42PqAhXkO1/RUi7QqtYKpKfdkNYE+AqybjYsv2Ph6rCP0n1qSXTJ53o0CdjklCqHZadvz8peQ8AGHaU2x+3X2xUzj6h06wyoiJcIYQ9KployozVGAUJZGw1ZJiRNUajE0i31aFvbABsBgmKp/vOtGXDO3xceBeb/K9K6d1Xq2gqbplGejNvdBLMCh47/4Iv2sTj6XIM4aTrU04zhPQWkuRHOzpEcXuaBsBWs0UA26ghFdIHo+LzDON5AGCBQUTyWiK5k1YxMHA2gDkMciWaCMYYbZzYxSRpPaePjGACJPyOeD8UCntA4mEh7TytYqnow7FHBei30KpJG30gCWsaCTtPSA+0Sk4G8AyTqz0T0gejEy8bR90LCRhQIRlcQtIeo5w2MPjE0aPDFzhKJyDdUyGRhDaJsGBaxtThAyHWHdOhC5JnuMH32wEigAkphdsxI6pvLFm5+PpNBPm0cqKfGBMzAMBMtwpp7UYkoXX8WTjqIUMkiZh3yvO1b2zVHfwyancrNqgFpKIHpMc/SDltqcyY8SeJeZ6G+UKyKgPktUJ6Qk6yBban4PhQ1cxz6mumP9jxVyL3Y7Xz9imtbJ3dULsVZUYP2CbhILJAzK+tWDIj45pfXhkxws673+g4iDBgwoQnZMOHDSlDOwFEZqd+RQ+9kMNGAQBlVZFjpBUo1yoGafmgnPjt9bXTr8oiqSmvjrzP8F6jEq33IKafBgBiV/FCZMEg0dCwJJzpU1ll5H0i+QazhiDbVj4xCArtQDI1Dgk4+NOKpVNzHBC3YK+97vC3OO0nsklCSC+MTswDcAiAXaQdKGAdOx7AvLol0z5A1n2Z0qrI1URiN5dfWL4iq28AUFoR7nhPYuFEXb5neBRJ72HKaXcD/avYw/W103+eRbVkRPWNz8Ek3xbC3s2dTfhSAA9KaXW56aZVFJblva6sIvzPuiWRF5Glqu8tttG2YmAI/dO3pvxAgWY6klilvirEFi6caMoqZmVc3wlsfbKx+flQ1cxoxpZAEmxMItlceApMy3hAgIQFpeIb/NDhzq2uWBx+Cp3uimT3iUAF6T4FJHzawUlb1n0DaN1mSVjp7TSzAlnmoVBl5AvKzBwCRJJYqSvSF5dbVfsRlu0f7NpnNFuWiDiO9kvLs4u7BOmfA+iS7osyfGWA0NV7i7oay4yQB1nCA2INrRPRhNBdskuuXHz9ptKKGbdLj/8+o+Mg0IjycXMGKEclrMwvyUzCJjYaxAAJ++FQKLw7iHq8O5QL23SU1SoOIjHTa+QHXiM/0EaslGQfY3QcbjBYvAZ34k0H+wRAZEnfAZblP0pagSOlFTjSsgJHCmkdZwpjPiYzADAgsgCYumxP9F73iXlipk+OeE8Iz8VGJyCkD2z0irqaaWu0s8XP0tWoesdZduDodJ+k5T/SsoNHCIsyDrgm5QNCwgaMXvruohs+A8RzriU3ASHsvbpzDt5WEPFO7n8twJj/W/12JGcgfyKuTe9BhPCQMTzIylrGAbQwO78XwkqlXvUNhF/eB7AN3rYYutuo5zAgYeUJ6e1LwuoryAoak0yprqOfSNJXAwDLjpozwwpsuv7ZXjKU8TdlgEV3F6O20ifpE9LbVwi7L5FV6JrdbRiTbBdGXAiAtZQdZnJ3w9u5Tw60ca2Ho/eavaMgcajRSXcZYjEPAOprpz2mVHQDICGlTwjDp217n7uCQU76/xjs6867nqXwbtkmMQw7WUsKgRl5RokbtE7+UVoBaBWFEOIMMJ3qZnboPbZROATYqDaj4pvSO2l3LXb+FXfaqpbXRDrExkgdczUpdZrR6gCjkgcalTxQceIgAu+/6t/RdkB8TBBg44CEHL3H2Km7dm03LEZV35jzSoTbJx03Kr4pHcKahAXD+kMy0crl70x7vXMJIgtGq8uNjmf6ZFTiQDaxg/ywlwOA46iJ0gr43ED6cYDMmLLKyA2hqpnXEXM7yE2KzMDJX+U23RaYlQBgjIKQ9i6hSlTloiLFR5Ow4M5eToI9gY9ZcqZ9IpK2hkhKc67RiXVCeFI8Efm53Ct7wjbtOdwNY/t0P3wPxUziIcsOHm9MEgSzQ8D0ybEcuBtSDwYs7O5CDYnws8Ykw+ymugp4tH/ByH1vOmH5G9dtTtOUVdlzIKzLyqpnL4TRD7jBXtx12+1TbKEf3osTnLxa2IHrtY4BoBJjvF02aoCrcyCDF+reiXSXHIfAdLrrA5JahizfOSn/DRgdT/nEEqTl31UH2w8EkDMQS29hjPWCVtFk6kqGILLvKx8356hsh+XSqlkHC5IXGR13Z2sn+saqf1/TWlY5y5tt/mOL81a/HfmorGLaWWQHX0j7xmwrtnFDSgCjrXbJtc0j95o5w+jkscxaWHZwqMOtswF0SPDrbkgh4/T546GqSGvG+ikAApFRuGHF4mk1ocoZf7Q9RScrpxlS+g/Q8fg7ocqZCwFsJOBgIayDjXHg9fU9PR7bUAzgaM58BQQC4q5vR/g2TdHzSMg+QtiF2kTvAXBE51EwK7DEXaGqyLpMnwBIyyeUjt8hWcYgqSJtgZaWH9lKM5HKtcLGca26RpyJryAc48eHrddeu2FdqHLGr21P/pVOsgVSeiu1Tiwpq4o8DsZ6EMYAmAiCBJOr/2COpMYjsn9KEu71kbols/5eWjHjZo+34NotyRN7j94KB2X9jwUAyxdNX15WEfmz9OSdqFUcQtgXlI6beV/DW9PfB6ePTQwAQkr/ccjehqQ0pI6rIf3YD995cadtiGUX7O2ukfYQEvaV7sBdJZBlBZGIbfxICn1eqh9bfEZSi/C770aaQlUzfm3L4AzltENY/sPLqiOH1S0O/52NzizVzAZSeg+hTtZ2ywrA6PifDalyW+RDmXYABOXEfgUyGzquwnyGFN5S1xGZjhozZk6/TDgo3oZjI4Pa2nZw6WM8NUktpbZdcJRW7SBh7SCE57I0oduWBAkBJ9l2VcOSyFbDVjQs4amhqrbxluXfOzvtWW/Quz0HUZ6UPkjpA4At66tFs9k4ENID21PoIY17AZBhiDS9W4Z71JDW1l7b7GPnYONEfwmiJteDPDXJkAVBNrSKP8/s7L88s4unQLp+AmVu6Euf99eO095k2UH3ygPTA0PGh33SaJ3dJwJ16U8qP8swAk0CAbYnHwzzQX3t9Mvqa2bcVF8zPfNHhn5p2UGQsOHx9sl3LJXl3U7BdDuMrkdZMDwZ3hBl0m7X10eS9TXLf+o4bbNB2CSy+EAQIGGDjVmhVfTEhiWRTPQiAqzssWmhs6Q+YiT06UYnmy07LzV2dAlwkwu9s62Af6Z1ex60B0JwJpRR3dvT3y2tCh9iwVeccBrZVbSESVrxRUq1T9Ta6XEH5Fci46uROsJeMXzPW+6wZPLHBDMCQMAwrbcs+vfyt69/K7sskblCqfb+gIQwnNkIL3/jus1lVZFDjVa7aN3MEOT1OQHbL6P/F1PxHA7GWVBxSJYfGjKrnWSbkNJHUlKXAHQAoHzexzm+uSnFICJC5ujJAhdo1dYH8EBIq6tXOvNflBP9BEgCRK21NWuzjG4LdX3Nwmnl4+bcw0btx8aUgk0eAxtZWjX1i+OvA5EOeympsFRb7RO1dj+2PKk/yn6/vCbyYag6vD9pe3eDBAxRL6IV/eDP8T+NrxyCIRuhUDjPDvqHMIxTHEh8mLYK9gYTJjwh33lnXYf2HKeRgkGY3iTiyy7v7NhIH/evd7BwYbcm8ixQKBS2e9PGsGF3eVevzq3mT9eVUuxt25lwwgQ54v/2HOqFsC2DNdnhHbZeNDffbLuRewpF0RllFbOGSuHzs099ln0S7Am9nDmYyqtvupmBn4B1G8AeEpZk5j/JhOe2ZcuuyunCn0aocuaJ0vLN0Cre4bgrpQ1tEmvLdg2d0NmfIRvllTOPJcs3e0t5giDygKhe6fYrVi65sYdsSWERqhLPM+jxhh4C0oWqIk+B6fX62ul3dkdTVjFzMgTtU1cz7azu29uCYcMu9nqLBs0A4UhmzQQ4RCJIJJbEE/qa99+94bOeypeOiRxheX23aZXowDchJVjrjT4MOLG29tweNcrlFZGjIO2ZYCMZ7IAojyBWaaip9W9Pq+upbK82pKHqWfcAfJxhdWrdrsv28rHem8EXE9Hx2o5etdUKhBlqTCJpSTop+4+gTiLIixcunNjjIdywGWq046TLKYmTlHHOBsgryfdmzxHyIoaYFxFjancUI6rC5QQ6VhOe63EcRAOZuBtlXEeMGhXu7ysesIQIYw3xRQVWYO+6XZftRayPA5D02Kh1wzD0AIkhWidFZ74JmJMY+rza2rU9Z8mujOzDQvyJgF+LpHefupple7FyjiGidYJ5/tbG0ItlJSxg+BRN+qCGmunvoAaodW9LvYrx4yv2aNu/aGs1EJMGm03LasMfbY02Z3lBGqwbl709Pbv8RwBOCFVGPvEYeTKAB7spDpGM/0p7/FeVVof3a1gc6aIxlSwvZ8KLW7vSyGAnV7zVXFC2fJqY36uruf64zMNFwHIsXAXg7JFVs49go3uMakhEBuDO4+49iC5kNguX10x7OP2o/h2sBnB+rquhndGLmWMGg0gTUVd17muvqfdqI11DKubs6LabjLPRye8i6wUaAAztqezy5TdvJsJTxKLLLBcKhfMAnMC09Us+vUV5ZeQQEI+SyabTu+1TzQ3Pp0M19Yht0Zl0Lgo0EXUNhAsAvQkV0YuZgxiYOVUKz73lY2860BjnMdvRr29L7HAiZmZhh/YK98l+Lq0BHEt+rle/HenRM8l1EuIum99hY8MF0PgxoLu9C5Kpg8xtZOR/QtXhgR1+lIB1JrPZ2LB46su9Hc/WYAQdC2NeXNbNdcpegwyDZRe+AUDciesPa2/pcWPLmm4RtvVaefWNy4h5rtbJv9f38s4K0MvTSn3N9AdHVISXWdJ3qSB5t/JY3rLqG2vYJG6ur43kvL2VDcOiVUpvlXHiryFL28rcQl4j3wVwak/liTgBkoNDlTNOceujFkliIMG62sB5ob5mxl+BSM9jWBxZGqqK1IPFRQC2+EqwuRige7ov+SVgsBMzvfc11NMmhV1uHPOayzZ3FiHpgZ+s9wEc11PxhnemfTxy5LV7sj//CmacLyzPjJHVN37G4AUrFk/tEjarM3p9lF25JLIIwMmVlXPtGDaME8L6uZD+V8sqZ06qq91yOToXBHGeNoml2pgJPq+dEQ5jYmQpz9aPY4aSJGV/kDmOGUIKnACilWA1s752+qPA9N4NgugOMrhj/PjwjNdei6jSisiPCdghIfWCrRfuPYi4FURFX7keIYKakw3amGM68i1OwsZWj+aAu6TC/RhuKKuYNRRS/hRkTSurmnEQgGN7KrvNt+xT1tU3ALxRXhFZxoRbQ6HwH3vSIzBDEHG0N+EXc5Yn5LNJLqmvDU8EgLKqmcez0b+q223FH7G49/X4zYCFMfr8zo3t4qcAnhSEKwE8ubVlbZv7y+J1kNn6KW6r9UAAiH1ZvnVGyp3xl8PGXPeI1/J1SXDQGb3158i5KTJsniOQnZeXw37QGfzlL1ARMadcxQAAdTXT/0xEb4Q+GvmPbamntvZch4x5iEEXusdf2t8Iun2rBbcRfth/JKZ+oepZU7qjGTbsYu/48eGtf5xfgW+dIxqnsXrpTV8w0KOOA+iFcJRVRarLqma/Wzbupv07vyNpRUCoe3trXx5DuL77Xw7MTNmmdQBotjZPAri8rCpy6bbUpZjvJvBuXnh+y4S3GhZP3yqTsnpCjK3bE2prr20G4zSCuK987JxzO78vHzfnEF/xwLrGVnQTPjLVGrNg/rJ8Y4rR+j+XV994a2chLK+ccwhAY7ZWw1Ylty1olgej4g+C8UB59ZwVYL3cAJaArAJRH0ckTtpqNwVvFsI3rKwy0mFtF8IizfqLCUfp6yKRHgK1k0wScwd785pFd8bKKiPHAfjLyIqZL3eMudE9Vr0TWRuqmvm8Lf3nJbm11xkEUj1OEtAru3fdkunPllbNOkKSdUt59ZzjmXkJk4kSi3JAhgycW+qXdMqh0glM1GRLe+fOfIOwCKya2oLm+u5TpxOzidwKS9y2Kep9paxq5mKANoHEUIB+DDbXbm0M/w+aqO4V9PHrFgAAAABJRU5ErkJggg==",
+        "mainColor": "blue",
+        "name": "Corona Public Library",
+        "needsAuth": true,
+        "pinKeyboard": "Number pad",
+        "privacyUrl": "http://califa.org/privacy-policy",
+        "supportEmail": "aska.lib@coronaca.gov ",
+        "supportsBarcodeDisplay": true,
+        "supportsBarcodeScanner": true,
+        "supportsCardCreator": false,
+        "supportsReservations": true,
+        "supportsSimplyESync": true
+    },
+    {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/cragin/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/cragin/",
         "id_numeric": 77,
         "id_uuid": "urn:uuid:68a96afb-5f38-4ec6-bdb3-8ad706e5db42",
@@ -762,6 +822,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/cromwell/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/cromwell/",
         "id_numeric": 78,
         "id_uuid": "urn:uuid:6f6c6d79-b8fb-43ba-ae45-b9342954affa",
@@ -782,6 +843,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/cyreniushbooth/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/cyreniushbooth/",
         "id_numeric": 1236,
         "id_uuid": "urn:uuid:06f4e89b-7a64-4bd1-9787-c58361eab651",
@@ -802,6 +864,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/davidmhunt/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/davidmhunt/",
         "id_numeric": 1205,
         "id_uuid": "urn:uuid:4be05696-f269-4409-9754-7b9dce4e3dc5",
@@ -823,6 +886,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/derbyneck/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/derbyneck/",
         "id_numeric": 34,
         "id_uuid": "urn:uuid:0226f878-134d-42e0-bcb2-2b3ad3f13380",
@@ -844,6 +908,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/derby/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/derby/",
         "id_numeric": 35,
         "id_uuid": "urn:uuid:489402d9-97f1-419c-a267-f4cce4b6dd54",
@@ -864,6 +929,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "http://openbookshelf.dp.la/OB/authentication_document",
         "catalogUrl": "http://openbookshelf.dp.la/OB/groups/3",
         "id_numeric": 86,
         "id_uuid": "urn:uuid:6b849570-070f-43b4-9dcc-7ebb4bca292e",
@@ -885,6 +951,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/douglashebron/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/douglashebron/",
         "id_numeric": 55,
         "id_uuid": "urn:uuid:10b84c15-8097-4f01-9da6-57c8b32b247c",
@@ -906,6 +973,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/douglascanaan/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/douglascanaan/",
         "id_numeric": 56,
         "id_uuid": "urn:uuid:33a32e9e-ea4b-404f-b4ab-0de7d9f6c4e4",
@@ -927,6 +995,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/durham/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/durham/",
         "id_numeric": 48,
         "id_uuid": "urn:uuid:2d1c8df1-fbfe-41e8-aa64-e0285ecd8599",
@@ -947,6 +1016,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/ecscranton/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/ecscranton/",
         "id_numeric": 81,
         "id_uuid": "urn:uuid:f86aa852-ff5f-4970-88b4-d54ce97ef9a8",
@@ -967,6 +1037,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/easthaddam/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/easthaddam/",
         "id_numeric": 135,
         "id_uuid": "urn:uuid:816199c6-1446-42a4-9a8f-8254fbc1017c",
@@ -988,6 +1059,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/easthampton/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/easthampton/",
         "id_numeric": 49,
         "id_uuid": "urn:uuid:8bb90cee-5c31-4ebf-8c82-a541269d1dce",
@@ -1008,6 +1080,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/easthartford/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/easthartford/",
         "id_numeric": 79,
         "id_uuid": "urn:uuid:f74ff17c-d7a1-4657-9c4a-d6d09b9a69b8",
@@ -1029,6 +1102,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/eastlyme/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/eastlyme/",
         "id_numeric": 50,
         "id_uuid": "urn:uuid:3c9cbc42-db02-4119-9f11-31796aa84bcd",
@@ -1048,6 +1122,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/easton/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/easton/",
         "id_numeric": 90,
         "id_uuid": "urn:uuid:e0f433c7-5372-467a-bf5a-42ce614112e0",
@@ -1068,6 +1143,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/ewml/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/ewml/",
         "id_numeric": 94,
         "id_uuid": "urn:uuid:f7bc9a4d-aa0e-4d5a-bfb2-ccdfeecba207",
@@ -1088,6 +1164,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/enfield/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/enfield/",
         "id_numeric": 110,
         "id_uuid": "urn:uuid:0e4d8366-d7f6-48eb-b276-7574cd623344",
@@ -1109,6 +1186,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/essex/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/essex/",
         "id_numeric": 51,
         "id_uuid": "urn:uuid:2e1af0df-ee4d-4216-bcc7-266e521f1ec3",
@@ -1127,6 +1205,8 @@
         "supportsSimplyESync": true
     },
     {
+        "authPasscodeLength": 0,
+        "authenticationDocument": "https://ct-verso.lyrasistechnology.org/ferguson/authentication_document",
         "catalogUrl": "https://ct-verso.lyrasistechnology.org/ferguson/",
         "id_numeric": 1259,
         "id_uuid": "urn:uuid:fddd8eaa-c2ce-4eb3-a8b8-fcf100b47f05",
@@ -1136,7 +1216,7 @@
         "mainColor": "blue",
         "name": "The Ferguson Library",
         "needsAuth": true,
-        "pinKeyboard": "Default",
+        "pinKeyboard": "No input",
         "subtitle": "serving Stamford, CT",
         "supportEmail": "carissa.egan@lyrasis.org",
         "supportsBarcodeDisplay": true,
@@ -1146,6 +1226,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circ-pinnacle.minitex.net/FOUNT/authentication_document",
         "catalogUrl": "https://circ-pinnacle.minitex.net/FOUNT/",
         "id_numeric": 1247,
         "id_uuid": "urn:uuid:f1954241-99df-433d-badd-71c06c2f833d",
@@ -1166,6 +1247,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "https://frederick.simplye-md.org/MDFREDCT/authentication_document",
         "catalogUrl": "https://frederick.simplye-md.org/MDFREDCT/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 10,
@@ -1188,6 +1270,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa108.simplye-ca.org/CAGLEN/authentication_document",
         "cardCreatorUrl": "https://catalog.ci.glendora.ca.us/polaris/patronaccount/selfregister.aspx?ctx=3.1033.0.0.1",
         "catalogUrl": "http://califa108.simplye-ca.org/CAGLEN/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -1212,6 +1295,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/granby/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/granby/",
         "id_numeric": 111,
         "id_uuid": "urn:uuid:df2a9cd2-889a-440b-9ecc-cf60b92b6277",
@@ -1231,6 +1315,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circ.minitex.net/GRRL/authentication_document",
         "catalogUrl": "https://circ.minitex.net/GRRL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 28,
@@ -1255,6 +1340,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/guilford/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/guilford/",
         "id_numeric": 65,
         "id_uuid": "urn:uuid:4ece1d0a-68ce-4637-ba47-6f7ed29548d1",
@@ -1275,6 +1361,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/guilfordsmith/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/guilfordsmith/",
         "id_numeric": 1228,
         "id_uuid": "urn:uuid:19b3fe47-4ac4-4a15-a1ac-eb52327c393f",
@@ -1296,6 +1383,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/gunn/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/gunn/",
         "id_numeric": 57,
         "id_uuid": "urn:uuid:02b1ff6c-55ce-40d6-af09-2d19a054514a",
@@ -1317,6 +1405,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/hagaman/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/hagaman/",
         "id_numeric": 58,
         "id_uuid": "urn:uuid:73d3f233-f332-4cb6-b319-738239f4f7fb",
@@ -1337,6 +1426,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/hall/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/hall/",
         "id_numeric": 91,
         "id_uuid": "urn:uuid:c728624e-bada-4953-b645-ece46c958157",
@@ -1358,6 +1448,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/hamden/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/hamden/",
         "id_numeric": 67,
         "id_uuid": "urn:uuid:45f7ea1a-2262-4af6-95ce-4cee2adb421f",
@@ -1377,6 +1468,8 @@
         "supportsSimplyESync": true
     },
     {
+        "authPasscodeLength": 0,
+        "authenticationDocument": "https://ct-verso.lyrasistechnology.org/hartford/authentication_document",
         "catalogUrl": "https://ct-verso.lyrasistechnology.org/hartford/",
         "id_numeric": 1257,
         "id_uuid": "urn:uuid:8bb7b978-4b62-41af-87e3-379df87f788b",
@@ -1386,7 +1479,7 @@
         "mainColor": "blue",
         "name": "Hartford Public Library",
         "needsAuth": true,
-        "pinKeyboard": "Default",
+        "pinKeyboard": "No input",
         "subtitle": "serving Hartford, CT",
         "supportEmail": "carissa.egan@lyrasis.org",
         "supportsBarcodeDisplay": true,
@@ -1396,6 +1489,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circ-hco.minitex.net/HCO/authentication_document",
         "catalogUrl": "https://circ-hco.minitex.net/HCO/",
         "id_numeric": 1245,
         "id_uuid": "urn:uuid:ead249d3-12c0-42d5-a0de-eefc0529606e",
@@ -1416,6 +1510,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/hotchkiss/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/hotchkiss/",
         "id_numeric": 1206,
         "id_uuid": "urn:uuid:654fd577-b1dc-4db2-9de3-75fcb908474d",
@@ -1435,6 +1530,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://simplye.amigos.org/txhouston/authentication_document",
         "catalogUrl": "https://simplye.amigos.org/txhouston/",
         "id_numeric": 1221,
         "id_uuid": "urn:uuid:1d6b2000-fca2-4391-9eb7-ec4e43a28703",
@@ -1455,6 +1551,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "https://howard.simplye-md.org/MDHOWRDCTLIB/authentication_document",
         "catalogUrl": "https://howard.simplye-md.org/MDHOWRDCTLIB/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 8,
@@ -1479,6 +1576,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/whittemore/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/whittemore/",
         "id_numeric": 59,
         "id_uuid": "urn:uuid:63bfea56-0d89-4d5d-80af-e6fc7044b8e5",
@@ -1498,6 +1596,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://bookserver.archive.org/catalog/authentication_document",
         "cardCreatorUrl": "https://archive.org/account/login.createaccount.php",
         "catalogUrl": "https://bookserver.archive.org/simple",
         "id_numeric": 5,
@@ -1521,6 +1620,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/ivoryton/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/ivoryton/",
         "id_numeric": 68,
         "id_uuid": "urn:uuid:a3f7a338-7266-4f0b-8433-d976a2f384cf",
@@ -1542,6 +1642,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/blackstone/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/blackstone/",
         "id_numeric": 47,
         "id_uuid": "urn:uuid:36b5a718-0b90-4921-841b-87992355e814",
@@ -1563,6 +1664,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/calvert/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/calvert/",
         "id_numeric": 71,
         "id_uuid": "urn:uuid:37957a24-0f6e-4740-a560-6599e8314caf",
@@ -1582,6 +1684,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circ-pinnacle.minitex.net/JOLIET/authentication_document",
         "catalogUrl": "https://circ-pinnacle.minitex.net/JOLIET/",
         "id_numeric": 1248,
         "id_uuid": "urn:uuid:964392a7-8f23-47f3-bafc-5b67996b4bdb",
@@ -1603,6 +1706,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/trumbull/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/trumbull/",
         "id_numeric": 72,
         "id_uuid": "urn:uuid:0c9c1c7f-13fc-4f5a-ac58-3bd155e86e25",
@@ -1622,6 +1726,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa103.simplye-ca.org/CAKASL/authentication_document",
         "catalogUrl": "http://califa103.simplye-ca.org/CAKASL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 1253,
@@ -1646,6 +1751,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/kent/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/kent/",
         "id_numeric": 73,
         "id_uuid": "urn:uuid:9e881a55-45e3-427d-aa8e-22c4cf4c5996",
@@ -1665,6 +1771,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://simplye.amigos.org/nekilgore/authentication_document",
         "catalogUrl": "https://simplye.amigos.org/nekilgore/",
         "id_numeric": 1244,
         "id_uuid": "urn:uuid:89d41123-c7f6-48cf-ab1c-735df71f44e4",
@@ -1686,6 +1793,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/killingly/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/killingly/",
         "id_numeric": 74,
         "id_uuid": "urn:uuid:2443ac65-55f4-43cb-a07d-60682f82bab1",
@@ -1707,6 +1815,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/ledyard/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/ledyard/",
         "id_numeric": 69,
         "id_uuid": "urn:uuid:b1a7b2ae-98d5-45d7-a531-82938c9fe694",
@@ -1726,6 +1835,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circ-pinnacle.minitex.net/LEM/authentication_document",
         "catalogUrl": "https://circ-pinnacle.minitex.net/LEM/",
         "id_numeric": 1249,
         "id_uuid": "urn:uuid:cc0eba87-1487-495f-94f1-2c363b9e28f8",
@@ -1747,6 +1857,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/leviecoe/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/leviecoe/",
         "id_numeric": 83,
         "id_uuid": "urn:uuid:122d9720-640d-4cf3-9931-819ea091a158",
@@ -1768,6 +1879,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/warehouse/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/warehouse/",
         "id_numeric": 80,
         "id_uuid": "urn:uuid:f8aaaa27-e4d5-4604-9404-697cfc79ba70",
@@ -1788,6 +1900,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://lapl.simplye-ca.org/CALAPL/authentication_document",
         "cardCreatorUrl": "https://www.lapl.org/about-lapl/contact-us/adult-library-card-pre-registration",
         "catalogUrl": "http://lapl.simplye-ca.org/CALAPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -1812,6 +1925,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/welles/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/welles/",
         "id_numeric": 114,
         "id_uuid": "urn:uuid:43044b1e-5b1b-4d6d-b2af-75542c272b01",
@@ -1832,6 +1946,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/manchester/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/manchester/",
         "id_numeric": 112,
         "id_uuid": "urn:uuid:471ef85e-b35c-4880-932b-ba91b785740c",
@@ -1851,6 +1966,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://simplye.amigos.org/azmaricopa/authentication_document",
         "catalogUrl": "https://simplye.amigos.org/azmaricopa/",
         "id_numeric": 1243,
         "id_uuid": "urn:uuid:d2d8bfbd-7144-4dc7-b44c-3684151afa33",
@@ -1871,6 +1987,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/marktwain/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/marktwain/",
         "id_numeric": 100,
         "id_uuid": "urn:uuid:7e6c7eb6-b915-45cf-a19a-a6d339da8fc2",
@@ -1892,6 +2009,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/meriden/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/meriden/",
         "id_numeric": 82,
         "id_uuid": "urn:uuid:2922723f-5c4c-4e25-81b8-81fad628b528",
@@ -1912,6 +2030,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/milford/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/milford/",
         "id_numeric": 93,
         "id_uuid": "urn:uuid:bb86001e-c810-4c48-98cd-f4ae84e85db4",
@@ -1933,6 +2052,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/minor/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/minor/",
         "id_numeric": 75,
         "id_uuid": "urn:uuid:a5748a8b-ffa5-46e4-908e-3278f691b856",
@@ -1953,6 +2073,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://montgomery.simplye-md.org/MDMONTG/authentication_document",
         "catalogUrl": "https://montgomery.simplye-md.org/MDMONTG/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 9,
@@ -1976,6 +2097,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/morris/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/morris/",
         "id_numeric": 95,
         "id_uuid": "urn:uuid:77320694-95ff-467f-8abb-a8a7c606d44f",
@@ -1995,6 +2117,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa102.simplye-ca.org/CAMVPL/authentication_document",
         "cardCreatorUrl": "https://library.mountainview.gov/selfreg",
         "catalogUrl": "http://califa102.simplye-ca.org/CAMVPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -2020,6 +2143,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/newbritain/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/newbritain/",
         "id_numeric": 44,
         "id_uuid": "urn:uuid:7d6f67d1-d4a3-4ff1-a6d2-db6d7af585a9",
@@ -2039,6 +2163,8 @@
         "supportsSimplyESync": true
     },
     {
+        "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/newfairfield/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/newfairfield/",
         "id_numeric": 1255,
         "id_uuid": "urn:uuid:389bf866-2dae-4b46-a320-789a48772990",
@@ -2048,7 +2174,7 @@
         "mainColor": "blue",
         "name": "New Fairfield Free Public Library",
         "needsAuth": true,
-        "pinKeyboard": "Default",
+        "pinKeyboard": "No input",
         "subtitle": "serving New Fairfield, CT",
         "supportEmail": "carissa.egan@lyrasis.org",
         "supportsBarcodeDisplay": false,
@@ -2058,6 +2184,8 @@
         "supportsSimplyESync": false
     },
     {
+        "authPasscodeLength": 0,
+        "authenticationDocument": "https://ct-verso.lyrasistechnology.org/newhavenfree/authentication_document",
         "catalogUrl": "https://ct-verso.lyrasistechnology.org/newhavenfree/",
         "id_numeric": 1258,
         "id_uuid": "urn:uuid:9d365be3-abac-40e5-bb5f-1df66e5109f2",
@@ -2067,7 +2195,7 @@
         "mainColor": "blue",
         "name": "New Haven Free Public Library",
         "needsAuth": true,
-        "pinKeyboard": "Default",
+        "pinKeyboard": "No input",
         "subtitle": "serving New Haven, CT",
         "supportEmail": "carissa.egan@lyrasis.org",
         "supportsBarcodeDisplay": true,
@@ -2078,6 +2206,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/newmilford/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/newmilford/",
         "id_numeric": 1199,
         "id_uuid": "urn:uuid:acdcf485-a920-4210-8354-c0504d96532a",
@@ -2097,6 +2226,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://qa.circulation.librarysimplified.org/QANYPL/authentication_document",
         "catalogUrl": "http://qa.circulation.librarysimplified.org/QANYPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 1254,
@@ -2119,6 +2249,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/norfolk/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/norfolk/",
         "id_numeric": 96,
         "id_uuid": "urn:uuid:cccc6e9a-e938-40f7-aeff-2cfd2dd5bff2",
@@ -2139,6 +2270,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/nbranford/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/nbranford/",
         "id_numeric": 124,
         "id_uuid": "urn:uuid:ddb50957-6453-4bd3-a3ce-bd5b7333930c",
@@ -2159,6 +2291,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/northhaven/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/northhaven/",
         "id_numeric": 125,
         "id_uuid": "urn:uuid:f3ded2c4-b182-42e1-a486-c9e6f1de61ff",
@@ -2178,6 +2311,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa106.simplye-ca.org/CAOAKL/authentication_document",
         "cardCreatorUrl": "http://oaklandlibrary.org/usinglibrary/ library-cards",
         "catalogUrl": "http://califa106.simplye-ca.org/CAOAKL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -2202,6 +2336,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/oldlyme/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/oldlyme/",
         "id_numeric": 127,
         "id_uuid": "urn:uuid:c62ecb1d-99e8-438d-9bca-13536ef216ac",
@@ -2222,6 +2357,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/wolcott/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/wolcott/",
         "id_numeric": 97,
         "id_uuid": "urn:uuid:400f87c9-1ac6-40e3-adf9-fe5321d6ca8b",
@@ -2242,6 +2378,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "http://open.minitex.org/textbooks/authentication_document",
         "catalogUrl": "http://open.minitex.org/textbooks/",
         "id_numeric": 1263,
         "id_uuid": "urn:uuid:5278562c-d642-4fda-ad7e-1613077cfb8d",
@@ -2263,6 +2400,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/otis/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/otis/",
         "id_numeric": 126,
         "id_uuid": "urn:uuid:724811c4-7af7-47e7-aace-bf6a35ba25f7",
@@ -2282,6 +2420,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://simplye.biblioottawalibrary.ca/opl/authentication_document",
         "cardCreatorUrl": "https://biblioottawalibrary.ca/en/getacard",
         "catalogUrl": "https://simplye.biblioottawalibrary.ca/opl/",
         "id_numeric": 137,
@@ -2302,6 +2441,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/oxford/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/oxford/",
         "id_numeric": 98,
         "id_uuid": "urn:uuid:339aa64f-7d2b-4f64-a4bc-bb4320419681",
@@ -2321,6 +2461,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circ-pinnacle.minitex.net/PLAIN/authentication_document",
         "catalogUrl": "https://circ-pinnacle.minitex.net/PLAIN/",
         "id_numeric": 1250,
         "id_uuid": "urn:uuid:2fc0dc8d-e697-41c7-b925-588a7b00b0a5",
@@ -2341,6 +2482,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/plainville/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/plainville/",
         "id_numeric": 115,
         "id_uuid": "urn:uuid:b0065fa8-6719-4f7c-9022-b8ed77e5cbca",
@@ -2361,6 +2503,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://pcl.simplye-ca.org/CAPORT/authentication_document",
         "catalogUrl": "http://pcl.simplye-ca.org/CAPORT/",
         "id_numeric": 19,
         "id_uuid": "urn:uuid:84106637-891f-4544-b638-dfa8bd0be92b",
@@ -2383,6 +2526,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/portland/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/portland/",
         "id_numeric": 116,
         "id_uuid": "urn:uuid:643be35c-27be-4c98-acb3-e01031a10655",
@@ -2403,6 +2547,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/plnl/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/plnl/",
         "id_numeric": 123,
         "id_uuid": "urn:uuid:4711ac2e-49d9-47e5-9aef-6896166c291d",
@@ -2423,6 +2568,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/putnam/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/putnam/",
         "id_numeric": 99,
         "id_uuid": "urn:uuid:ef52fc30-ca51-4c1f-9b7d-cf525a29ac04",
@@ -2443,6 +2589,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/richmond/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/richmond/",
         "id_numeric": 113,
         "id_uuid": "urn:uuid:0a09f0b4-e978-49ee-b6b4-efc42b4cc755",
@@ -2463,6 +2610,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/ridgefield/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/ridgefield/",
         "id_numeric": 101,
         "id_uuid": "urn:uuid:f8272064-bc72-429d-8b22-758c5999caf3",
@@ -2483,6 +2631,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/rockville/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/rockville/",
         "id_numeric": 102,
         "id_uuid": "urn:uuid:378d0def-bea5-4845-9f65-4864344f15ed",
@@ -2502,6 +2651,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://simplye.amigos.org/txroundrock/authentication_document",
         "catalogUrl": "https://simplye.amigos.org/txroundrock/",
         "id_numeric": 1256,
         "id_uuid": "urn:uuid:b9a27dd4-a4f4-4ebe-826c-cf4b63d32745",
@@ -2522,6 +2672,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/rowayton/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/rowayton/",
         "id_numeric": 103,
         "id_uuid": "urn:uuid:81a20070-869c-4810-b883-bab77bbf3403",
@@ -2543,6 +2694,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/russell/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/russell/",
         "id_numeric": 84,
         "id_uuid": "urn:uuid:130f48a8-4b71-413f-a71e-9b8f58138ced",
@@ -2563,6 +2715,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "https://wmrl.simplye-md.org/MDRUTH/authentication_document",
         "catalogUrl": "https://wmrl.simplye-md.org/MDRUTH/",
         "id_numeric": 22,
         "id_uuid": "urn:uuid:dbb59ed3-a9b4-45e9-be00-934c02b21f3f",
@@ -2585,6 +2738,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/salem/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/salem/",
         "id_numeric": 104,
         "id_uuid": "urn:uuid:88ecde03-b1a6-4ed7-be62-6bc22776f748",
@@ -2604,6 +2758,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa101.simplye-ca.org/CASFPL/authentication_document",
         "cardCreatorUrl": "https://sflib1.sfpl.org/selfreg",
         "catalogUrl": "http://califa101.simplye-ca.org/CASFPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -2627,6 +2782,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa102.simplye-ca.org/CASJPL/authentication_document",
         "cardCreatorUrl": "http://catalog.sjlibrary.org/search/$",
         "catalogUrl": "http://califa102.simplye-ca.org/CASJPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -2649,6 +2805,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa105.simplye-ca.org/CASMCL/authentication_document",
         "cardCreatorUrl": "https://smcl.org/card-services/get-a-card/",
         "catalogUrl": "http://califa105.simplye-ca.org/CASMCL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -2673,6 +2830,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://sccl.simplye-ca.org/CASCCL/authentication_document",
         "catalogUrl": "http://sccl.simplye-ca.org/CASCCL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 20,
@@ -2696,6 +2854,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/scoville/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/scoville/",
         "id_numeric": 105,
         "id_uuid": "urn:uuid:2c48ad29-6eb8-4ba1-a058-a3491a28d522",
@@ -2716,6 +2875,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/seymour/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/seymour/",
         "id_numeric": 106,
         "id_uuid": "urn:uuid:9626096b-3604-4f76-8885-84a655204f5f",
@@ -2736,6 +2896,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/shelton/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/shelton/",
         "id_numeric": 107,
         "id_uuid": "urn:uuid:2003c69e-3b79-42d2-818c-5ec1f0e72ad0",
@@ -2756,6 +2917,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/sherman/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/sherman/",
         "id_numeric": 108,
         "id_uuid": "urn:uuid:972888b7-7abe-407d-835d-9610c43580f3",
@@ -2775,6 +2937,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circ-pinnacle.minitex.net/STROY/authentication_document",
         "catalogUrl": "https://circ-pinnacle.minitex.net/STROY/",
         "id_numeric": 1251,
         "id_uuid": "urn:uuid:639a814f-18a4-4d1a-9c18-6284448ae9e6",
@@ -2794,6 +2957,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/bronson/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/bronson/",
         "id_numeric": 109,
         "id_uuid": "urn:uuid:1fb8d6ea-9072-4686-abed-fa0f9479e635",
@@ -2813,6 +2977,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circulation.librarysimplified.org/CLASSICS/authentication_document",
         "catalogUrl": "https://circulation.librarysimplified.org/CLASSICS/",
         "catalogUrl13": "http://simplye-collection-redirects.librarysimplified.org/all-books.xml",
         "catalogUrlUnder13": "http://simplye-collection-redirects.librarysimplified.org/childrens-books.xml",
@@ -2835,6 +3000,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/simsbury/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/simsbury/",
         "id_numeric": 45,
         "id_uuid": "urn:uuid:306436c4-f024-41aa-bc28-9c58f877ee24",
@@ -2855,6 +3021,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/slater/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/slater/",
         "id_numeric": 92,
         "id_uuid": "urn:uuid:944a14a1-3d07-4ddf-a9c1-94435ec16315",
@@ -2875,6 +3042,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/somers/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/somers/",
         "id_numeric": 1198,
         "id_uuid": "urn:uuid:6c92feac-a2a5-4b53-82f5-265f40c9187d",
@@ -2895,6 +3063,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/southwindsor/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/southwindsor/",
         "id_numeric": 118,
         "id_uuid": "urn:uuid:f6eb4e88-c9ed-442f-ae17-988c25b6c23d",
@@ -2915,6 +3084,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/southbury/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/southbury/",
         "id_numeric": 1222,
         "id_uuid": "urn:uuid:3a2e8b39-ef65-4acf-a17c-d662b2888cf1",
@@ -2935,6 +3105,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/southington/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/southington/",
         "id_numeric": 119,
         "id_uuid": "urn:uuid:414b7738-2abd-493a-874f-ad4191b04a61",
@@ -2955,6 +3126,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/sprague/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/sprague/",
         "id_numeric": 1201,
         "id_uuid": "urn:uuid:625a725d-2324-4407-9407-20d230e2648a",
@@ -2975,6 +3147,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://smrla.simplye-md.org/MDMARY/authentication_document",
         "catalogUrl": "https://smrla.simplye-md.org/MDMARY/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 13,
@@ -2998,6 +3171,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/stafford/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/stafford/",
         "id_numeric": 1202,
         "id_uuid": "urn:uuid:4c0fcc4b-777b-42f3-a3d0-2577b6a23ba7",
@@ -3018,6 +3192,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/suffieldkent/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/suffieldkent/",
         "id_numeric": 1203,
         "id_uuid": "urn:uuid:dea97614-8838-4339-a4a3-2340af1ad582",
@@ -3037,6 +3212,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "http://califa104.simplye-ca.org/CASVPL/authentication_document",
         "cardCreatorUrl": "https://sunnyvale.ca.gov/community/library/account/card.htm",
         "catalogUrl": "http://califa104.simplye-ca.org/CASVPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
@@ -3060,6 +3236,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/terryville/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/terryville/",
         "id_numeric": 1223,
         "id_uuid": "urn:uuid:d3fdbdc9-d129-46fc-bb4e-f7422b3f3725",
@@ -3080,6 +3257,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/thomaston/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/thomaston/",
         "id_numeric": 1207,
         "id_uuid": "urn:uuid:6f0e930f-25c2-41de-b6c4-feb66ab2df34",
@@ -3100,6 +3278,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/thompson/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/thompson/",
         "id_numeric": 1208,
         "id_uuid": "urn:uuid:6e206037-215e-4d1a-b89f-0f69af6f5ec3",
@@ -3120,6 +3299,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/tolland/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/tolland/",
         "id_numeric": 1224,
         "id_uuid": "urn:uuid:3a2f7d77-fc34-4ba4-a046-73e80b4f8bee",
@@ -3140,6 +3320,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/unionfree/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/unionfree/",
         "id_numeric": 1225,
         "id_uuid": "urn:uuid:733f5c08-0d60-4e18-a80d-db15bb1e35e1",
@@ -3160,6 +3341,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/wallingford/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/wallingford/",
         "id_numeric": 131,
         "id_uuid": "urn:uuid:c6a50365-e90e-4b8a-8f36-a1eaf26e751d",
@@ -3180,6 +3362,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/warren/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/warren/",
         "id_numeric": 1226,
         "id_uuid": "urn:uuid:015a8c7c-d188-4773-b839-1ceaedb67a70",
@@ -3200,6 +3383,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
+        "authenticationDocument": "http://wmrl.simplye-md.org/MDWASH/authentication_document",
         "catalogUrl": "https://wmrl.simplye-md.org/MDWASH/",
         "id_numeric": 23,
         "id_uuid": "urn:uuid:6263da4e-723f-417a-9d87-9ca4cbc2da6d",
@@ -3223,6 +3407,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/wellesturner/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/wellesturner/",
         "id_numeric": 41,
         "id_uuid": "urn:uuid:f160318e-2d32-4821-97ed-e8bf03828b51",
@@ -3244,6 +3429,7 @@
     {
         "authPasscodeAllowsLetters": true,
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/westhartford/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/westhartford/",
         "id_numeric": 42,
         "id_uuid": "urn:uuid:bdbd1482-1336-4684-8267-9d48f80f00f9",
@@ -3264,6 +3450,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/westhaven/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/westhaven/",
         "id_numeric": 132,
         "id_uuid": "urn:uuid:ba6e4b4b-0c34-47c2-ab83-df1a820eba54",
@@ -3284,6 +3471,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/westbrook/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/westbrook/",
         "id_numeric": 133,
         "id_uuid": "urn:uuid:74a72251-75ca-4813-b982-ce28ad8036b5",
@@ -3304,6 +3492,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/weston/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/weston/",
         "id_numeric": 1219,
         "id_uuid": "urn:uuid:8c5a57c2-6c98-4b57-a7d9-1cced4afdab2",
@@ -3324,6 +3513,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/wethersfield/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/wethersfield/",
         "id_numeric": 120,
         "id_uuid": "urn:uuid:825b934f-5cf9-4bd8-91ef-dbc80b84d78b",
@@ -3343,6 +3533,7 @@
         "supportsSimplyESync": true
     },
     {
+        "authenticationDocument": "https://circ-pinnacle.minitex.net/WHOAK/authentication_document",
         "catalogUrl": "https://circ-pinnacle.minitex.net/WHOAK/",
         "id_numeric": 1252,
         "id_uuid": "urn:uuid:ea7e5398-7091-420d-9560-378d479847c0",
@@ -3362,6 +3553,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/willimantic/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/willimantic/",
         "id_numeric": 1218,
         "id_uuid": "urn:uuid:0557a7e4-58c3-41ef-9d8f-fcb81affa262",
@@ -3382,6 +3574,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/willoughby/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/willoughby/",
         "id_numeric": 130,
         "id_uuid": "urn:uuid:8a773572-178a-4fae-920a-26af646dbbb6",
@@ -3402,6 +3595,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/windham/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/windham/",
         "id_numeric": 1227,
         "id_uuid": "urn:uuid:8a9b61df-36f3-41de-bcbb-e821cf6559c2",
@@ -3422,6 +3616,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/windsorlocks/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/windsorlocks/",
         "id_numeric": 121,
         "id_uuid": "urn:uuid:d74acd09-e42d-44da-a468-e2d98509642c",
@@ -3442,6 +3637,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lci.lyrasistechnology.org/windsor/authentication_document",
         "catalogUrl": "https://lci.lyrasistechnology.org/windsor/",
         "id_numeric": 122,
         "id_uuid": "urn:uuid:88fbd66a-4a91-4a90-949b-75a4d2b46c53",
@@ -3462,6 +3658,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/wolcottlibrary/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/wolcottlibrary/",
         "id_numeric": 1229,
         "id_uuid": "urn:uuid:1374649b-86ee-4779-a0b2-0142598ce418",
@@ -3482,6 +3679,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://lion.lyrasistechnology.org/woodbridge/authentication_document",
         "catalogUrl": "https://lion.lyrasistechnology.org/woodbridge/",
         "id_numeric": 134,
         "id_uuid": "urn:uuid:f09d725a-1e1d-42ba-8f95-8fd3eedd4d5f",
@@ -3502,6 +3700,7 @@
     },
     {
         "authPasscodeLength": 0,
+        "authenticationDocument": "https://bibliomation.lyrasistechnology.org/woodbury/authentication_document",
         "catalogUrl": "https://bibliomation.lyrasistechnology.org/woodbury/",
         "id_numeric": 1230,
         "id_uuid": "urn:uuid:fb5e191b-2779-4b66-8e54-91abf7fa535f",
