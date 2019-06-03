@@ -1,0 +1,27 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 27
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+  defaultConfig {
+    minSdkVersion 21
+    targetSdkVersion 28
+  }
+}
+
+description = 'simplified-mime'
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  api "com.google.guava:guava:23.6.1-android"
+}

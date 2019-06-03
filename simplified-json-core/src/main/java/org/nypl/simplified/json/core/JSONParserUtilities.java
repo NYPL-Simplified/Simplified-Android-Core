@@ -217,6 +217,27 @@ public final class JSONParserUtilities {
 
   /**
    * @param key A key assumed to be holding a value
+   * @param s   A node
+   * @return An array from key {@code key}, or null if the key is not present
+   * @throws JSONParseException On type errors
+   */
+
+  public static ArrayNode getArrayOrNull(
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(s);
+    NullCheck.notNull(key);
+
+    if (s.has(key)) {
+      return getArray(s, key);
+    }
+    return null;
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
    * @param o   A node
    * @return A boolean value from key {@code key}
    * @throws JSONParseException On type errors
@@ -415,6 +436,27 @@ public final class JSONParserUtilities {
   /**
    * @param key A key assumed to be holding a value
    * @param s   A node
+   * @return An object value from key {@code key}, if the key exists
+   * @throws JSONParseException On type errors
+   */
+
+  public static ObjectNode getObjectOrNull(
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(s);
+    NullCheck.notNull(key);
+
+    if (s.has(key)) {
+      return JSONParserUtilities.getObject(s, key);
+    }
+    return null;
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param s   A node
    * @return A string value from key {@code key}
    * @throws JSONParseException On type errors
    */
@@ -579,6 +621,30 @@ public final class JSONParserUtilities {
       return Option.some(JSONParserUtilities.getString(n, key));
     }
     return Option.none();
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param n   A node
+   * @return A string value from key {@code key}, if the key exists
+   * @throws JSONParseException On type errors
+   */
+
+  public static String getStringOrNull(
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+    NullCheck.notNull(key);
+
+    if (n.has(key)) {
+      if (n.get(key).isNull()) {
+        return null;
+      }
+      return JSONParserUtilities.getString(n, key);
+    }
+    return null;
   }
 
   /**

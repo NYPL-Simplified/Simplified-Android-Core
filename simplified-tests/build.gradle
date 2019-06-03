@@ -50,6 +50,8 @@ dependencies {
   api project(":simplified-http-core")
   api project(":simplified-json-core")
   api project(":simplified-observable")
+  api project(":simplified-opds-auth-document-api")
+  api project(":simplified-opds-auth-document")
   api project(":simplified-opds-core")
   api project(":simplified-profiles")
   api project(":simplified-profiles-api")

@@ -5,5 +5,4 @@
     <uses-sdk
       android:minSdkVersion="21"
       android:targetSdkVersion="28"/>
-
 </manifest>
