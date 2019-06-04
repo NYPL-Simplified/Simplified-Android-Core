@@ -3,6 +3,7 @@ package org.nypl.simplified.books.controller
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
+import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
@@ -44,16 +45,14 @@ internal class ProfileAccountLoginTask(
   private fun run() {
     this.account.setLoginState(AccountLoggingIn)
 
-    val authenticationOpt =
-      this.account.provider().authentication()
-
-    if (authenticationOpt.isNone) {
+    val authenticationOpt = this.account.provider().authentication
+    if (authenticationOpt == null) {
       this.debug("account does not require authentication")
       this.account.setLoginState(AccountLoggedIn(this.credentials))
+      return
     }
 
-    return this.runHTTPRequest(
-      (authenticationOpt as Some<AccountProviderAuthenticationDescription>).get())
+    return this.runHTTPRequest(authenticationOpt)
   }
 
   /**
@@ -61,11 +60,10 @@ internal class ProfileAccountLoginTask(
    */
 
   private fun runHTTPRequest(auth: AccountProviderAuthenticationDescription) {
-
     this.debug("hitting login URI: {}", auth.loginURI())
 
     val httpAuthentication =
-      org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP(this.credentials)
+      createAuthenticatedHTTP(this.credentials)
     val result =
       this.http.head(Option.some(httpAuthentication), auth.loginURI())
 

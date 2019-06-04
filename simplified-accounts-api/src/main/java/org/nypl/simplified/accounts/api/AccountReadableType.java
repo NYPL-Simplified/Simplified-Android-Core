@@ -30,7 +30,7 @@ public interface AccountReadableType {
    * @return The account provider associated with this account
    */
 
-  AccountProvider provider();
+  AccountProviderType provider();
 
   /**
    * @return The current state of the account with respect to logging in/out
@@ -49,6 +49,6 @@ public interface AccountReadableType {
    */
 
   default boolean requiresCredentials() {
-    return this.provider().authentication().isSome();
+    return this.provider().getAuthentication() != null;
   }
 }

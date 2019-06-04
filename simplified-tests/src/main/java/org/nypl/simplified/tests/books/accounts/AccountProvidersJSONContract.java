@@ -1,14 +1,12 @@
 package org.nypl.simplified.tests.books.accounts;
 
-import com.io7m.jfunctional.Option;
-
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.AccountProviderCollection;
 import org.nypl.simplified.accounts.database.AccountProvidersJSON;
 import org.nypl.simplified.json.core.JSONParseException;
@@ -92,27 +90,27 @@ public abstract class AccountProvidersJSONContract {
         .setRequiresPin(true)
         .build();
 
-    final AccountProvider p = c.providerDefault();
-    Assert.assertTrue(c.providers().containsKey(p.id()));
+    final AccountProviderType p = c.providerDefault();
+    Assert.assertTrue(c.providers().containsKey(p.getId()));
     Assert.assertTrue(c.providers().containsValue(p));
-    Assert.assertEquals(Option.some(auth), p.authentication());
-    Assert.assertEquals("http://www.librarysimplified.org", p.id().toString());
-    Assert.assertEquals("The New York Public Library", p.displayName());
-    Assert.assertEquals(Option.some("Inspiring lifelong learning, advancing knowledge, and strengthening our communities."), p.subtitle());
-    Assert.assertEquals(false, p.supportsSimplyESynchronization());
-    Assert.assertEquals(false, p.supportsBarcodeDisplay());
-    Assert.assertEquals(false, p.supportsBarcodeScanner());
-    Assert.assertEquals(true, p.supportsCardCreator());
-    Assert.assertEquals(true, p.supportsHelpCenter());
-    Assert.assertEquals(true, p.supportsReservations());
-    Assert.assertEquals("https://circulation.librarysimplified.org/", p.catalogURI().toString());
-    Assert.assertEquals(Option.some("simplyehelp@nypl.org"), p.supportEmail());
-    Assert.assertEquals(Option.some(URI.create("http://www.librarysimplified.org/EULA.html")), p.eula());
-    Assert.assertEquals(Option.some(URI.create("http://www.librarysimplified.org/license.html")), p.license());
-    Assert.assertEquals(Option.some(URI.create("http://www.librarysimplified.org/privacypolicy.html")), p.privacyPolicy());
-    Assert.assertEquals("#da2527", p.mainColor());
-    Assert.assertEquals(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")), p.logo());
-    Assert.assertEquals(Option.some("SimplifiedThemeNoActionBar_NYPL"), p.styleNameOverride());
+    Assert.assertEquals(auth, p.getAuthentication());
+    Assert.assertEquals("http://www.librarysimplified.org", p.getId().toString());
+    Assert.assertEquals("The New York Public Library", p.getDisplayName());
+    Assert.assertEquals("Inspiring lifelong learning, advancing knowledge, and strengthening our communities.", p.getSubtitle());
+    Assert.assertEquals(false, p.getSupportsSimplyESynchronization());
+    Assert.assertEquals(false, p.getSupportsBarcodeDisplay());
+    Assert.assertEquals(false, p.getSupportsBarcodeScanner());
+    Assert.assertEquals(true, p.getSupportsCardCreator());
+    Assert.assertEquals(true, p.getSupportsHelpCenter());
+    Assert.assertEquals(true, p.getSupportsReservations());
+    Assert.assertEquals("https://circulation.librarysimplified.org/", p.getCatalogURI().toString());
+    Assert.assertEquals("simplyehelp@nypl.org", p.getSupportEmail());
+    Assert.assertEquals(URI.create("http://www.librarysimplified.org/EULA.html"), p.getEula());
+    Assert.assertEquals(URI.create("http://www.librarysimplified.org/license.html"), p.getLicense());
+    Assert.assertEquals(URI.create("http://www.librarysimplified.org/privacypolicy.html"), p.getPrivacyPolicy());
+    Assert.assertEquals("#da2527", p.getMainColor());
+    Assert.assertEquals(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo="), p.getLogo());
+    Assert.assertEquals("SimplifiedThemeNoActionBar_NYPL", p.getStyleNameOverride());
   }
 
   @Test
@@ -124,27 +122,27 @@ public abstract class AccountProvidersJSONContract {
 
     Assert.assertEquals(1L, c.providers().size());
 
-    final AccountProvider p = c.providerDefault();
-    Assert.assertTrue(c.providers().containsKey(p.id()));
+    final AccountProviderType p = c.providerDefault();
+    Assert.assertTrue(c.providers().containsKey(p.getId()));
     Assert.assertTrue(c.providers().containsValue(p));
-    Assert.assertEquals("https://instantclassics.librarysimplified.org", p.id().toString());
-    Assert.assertEquals("SimplyE Collection", p.displayName());
-    Assert.assertEquals(Option.some("E-books free to download and read without a library card"), p.subtitle());
-    Assert.assertEquals(false, p.supportsSimplyESynchronization());
-    Assert.assertEquals(false, p.supportsBarcodeDisplay());
-    Assert.assertEquals(false, p.supportsBarcodeScanner());
-    Assert.assertEquals(false, p.supportsCardCreator());
-    Assert.assertEquals(false, p.supportsHelpCenter());
-    Assert.assertEquals(false, p.supportsReservations());
-    Assert.assertEquals("https://instantclassics.librarysimplified.org/index.xml", p.catalogURI().toString());
-    Assert.assertEquals(Option.some(URI.create("https://instantclassics.librarysimplified.org/childrens-books.xml")), p.catalogURIForUnder13s());
-    Assert.assertEquals(Option.some(URI.create("https://instantclassics.librarysimplified.org/all-books.xml")), p.catalogURIForOver13s());
-    Assert.assertEquals(Option.none(), p.supportEmail());
-    Assert.assertEquals(Option.none(), p.eula());
-    Assert.assertEquals(Option.some(URI.create("http://www.librarysimplified.org/iclicenses.html")), p.license());
-    Assert.assertEquals(Option.none(), p.privacyPolicy());
-    Assert.assertEquals("#497049", p.mainColor());
-    Assert.assertEquals(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")), p.logo());
+    Assert.assertEquals("https://instantclassics.librarysimplified.org", p.getId().toString());
+    Assert.assertEquals("SimplyE Collection", p.getDisplayName());
+    Assert.assertEquals("E-books free to download and read without a library card", p.getSubtitle());
+    Assert.assertEquals(false, p.getSupportsSimplyESynchronization());
+    Assert.assertEquals(false, p.getSupportsBarcodeDisplay());
+    Assert.assertEquals(false, p.getSupportsBarcodeScanner());
+    Assert.assertEquals(false, p.getSupportsCardCreator());
+    Assert.assertEquals(false, p.getSupportsHelpCenter());
+    Assert.assertEquals(false, p.getSupportsReservations());
+    Assert.assertEquals("https://instantclassics.librarysimplified.org/index.xml", p.getCatalogURI().toString());
+    Assert.assertEquals(URI.create("https://instantclassics.librarysimplified.org/childrens-books.xml"), p.getCatalogURIForUnder13s());
+    Assert.assertEquals(URI.create("https://instantclassics.librarysimplified.org/all-books.xml"), p.getCatalogURIForOver13s());
+    Assert.assertEquals(null, p.getSupportEmail());
+    Assert.assertEquals(null, p.getEula());
+    Assert.assertEquals(URI.create("http://www.librarysimplified.org/iclicenses.html"), p.getLicense());
+    Assert.assertEquals(null, p.getPrivacyPolicy());
+    Assert.assertEquals("#497049", p.getMainColor());
+    Assert.assertEquals(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo="), p.getLogo());
   }
 
   @Test
@@ -155,8 +153,8 @@ public abstract class AccountProvidersJSONContract {
             readAllFromResource("providers-all.json"));
 
     Assert.assertEquals(165L, c.providers().size());
-    final AccountProvider p = c.providerDefault();
-    Assert.assertTrue(c.providers().containsKey(p.id()));
+    final AccountProviderType p = c.providerDefault();
+    Assert.assertTrue(c.providers().containsKey(p.getId()));
     Assert.assertTrue(c.providers().containsValue(p));
   }
 }

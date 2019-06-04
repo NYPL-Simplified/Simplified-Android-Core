@@ -6,8 +6,8 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.accounts.api.AccountID;
-import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.observable.ObservableType;
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent;
@@ -49,7 +49,7 @@ final class ProfileAccountSelectionTask implements Callable<ProfileAccountSelect
       final ProfileType profile = this.profiles.currentProfileUnsafe();
       final AccountID id_then = profile.accountCurrent().id();
       final AccountProviderCollectionType providers = this.account_providers.call(Unit.unit());
-      final AccountProvider provider = providers.providers().get(provider_id);
+      final AccountProviderType provider = providers.providers().get(provider_id);
       if (provider != null) {
         profile.selectAccount(provider);
         return ProfileAccountSelectEvent.ProfileAccountSelectSucceeded.of(id_then, profile.accountCurrent().id());

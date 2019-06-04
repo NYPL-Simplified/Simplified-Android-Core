@@ -57,7 +57,6 @@ import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.slf4j.LoggerFactory
-import java.net.URI
 
 /**
  * An activity displaying settings for a specific account.
@@ -129,11 +128,11 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     if (item.itemId == R.id.show_eula) {
       val eulaIntent = Intent(this, WebViewActivity::class.java)
-      this.account.provider().eula().map_ { eula_uri ->
+      this.account.provider().eula?.let { eula ->
         val argumentBundle = Bundle()
         WebViewActivity.setActivityArguments(
           arguments = argumentBundle,
-          uri = eula_uri.toString(),
+          uri = eula.toString(),
           title = this.resources.getString(R.string.settings_eula))
         eulaIntent.putExtras(argumentBundle)
         this.startActivity(eulaIntent)
@@ -213,11 +212,11 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.actionLayout.findViewById(R.id.settings_action_progress)
 
     val accountProvider = this.account.provider()
-    this.accountNameText.text = accountProvider.displayName()
+    this.accountNameText.text = accountProvider.displayName
 
-    val subtitleOpt = accountProvider.subtitle()
-    if (subtitleOpt is Some<String>) {
-      this.accountSubtitleText.text = subtitleOpt.get()
+    val subtitle = accountProvider.subtitle
+    if (subtitle != null) {
+      this.accountSubtitleText.text = subtitle
     } else {
       this.accountSubtitleText.text = ""
     }
@@ -226,7 +225,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Show the "Support Center" section if the provider offers one.
      */
 
-    if (accountProvider.supportEmail().isSome) {
+    if (accountProvider.supportEmail != null) {
       this.reportIssue.visibility = View.VISIBLE
       this.reportIssue.setOnClickListener {
         val intent = Intent(this, ReportIssueActivity::class.java)
@@ -243,7 +242,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Show the "Help Center" section if the provider offers one.
      */
 
-    if (accountProvider.supportsHelpCenter()) {
+    if (accountProvider.supportsHelpCenter) {
       this.supportCenter.visibility = View.VISIBLE
       this.supportCenter.setOnClickListener {
         val stack = HSHelpStack.getInstance(this)
@@ -259,7 +258,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Show the "Card Creator" section if the provider supports it.
      */
 
-    if (accountProvider.supportsCardCreator()) {
+    if (accountProvider.supportsCardCreator) {
       this.tableSignup.visibility = View.VISIBLE
       this.signup.setOnClickListener {
         throw UnimplementedCodeException()
@@ -280,7 +279,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     this.pinText.transformationMethod = PasswordTransformationMethod.getInstance()
     this.handlePinReveal(this.pinText, this.pinReveal)
 
-    if (accountProvider.authentication().isSome) {
+    if (accountProvider.authentication != null) {
       this.tableWithCode.visibility = View.VISIBLE
       this.login.visibility = View.VISIBLE
       this.configureLoginFieldVisibilityAndContents()
@@ -293,15 +292,15 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Show the "Privacy Policy" section if the provider has one.
      */
 
-    val privacyPolicy = accountProvider.privacyPolicy()
-    if (privacyPolicy is Some<URI>) {
+    val privacyPolicy = accountProvider.privacyPolicy
+    if (privacyPolicy != null) {
       this.privacy.visibility = View.VISIBLE
       this.privacy.setOnClickListener {
         val intent = Intent(this, WebViewActivity::class.java)
         val intentBundle = Bundle()
         WebViewActivity.setActivityArguments(
           intentBundle,
-          privacyPolicy.get().toString(),
+          privacyPolicy.toString(),
           "Privacy Policy")
         intent.putExtras(intentBundle)
         this.startActivity(intent)
@@ -314,15 +313,15 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Show the "Content License" section if the provider has one.
      */
 
-    val license = accountProvider.license()
-    if (license is Some<URI>) {
+    val license = accountProvider.license
+    if (license != null) {
       this.license.visibility = View.VISIBLE
       this.license.setOnClickListener {
         val intent = Intent(this, WebViewActivity::class.java)
         val intentBundle = Bundle()
         WebViewActivity.setActivityArguments(
           intentBundle,
-          license.get().toString(),
+          license.toString(),
           "Content Licenses")
         intent.putExtras(intentBundle)
         this.startActivity(intent)
@@ -362,7 +361,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Configure the syncing switch.
      */
 
-    if (accountProvider.supportsSimplyESynchronization()) {
+    if (accountProvider.supportsSimplyESynchronization) {
       this.syncSwitch.isEnabled = true
       this.syncSwitch.isChecked = this.account.preferences().bookmarkSyncingPermitted
       this.syncSwitch.setOnCheckedChangeListener { _, isEnabled ->
@@ -378,10 +377,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Configure the logo.
      */
 
-    val logo = accountProvider.logo()
-    if (logo is Some<URI>) {
+    val logo = accountProvider.logo
+    if (logo != null) {
       Simplified.getLocalImageLoader()
-        .load(logo.get().toString())
+        .load(logo.toString())
         .into(this.accountIcon)
     }
   }
@@ -664,7 +663,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private fun tryLogout(): Unit {
     Simplified.getProfilesController()
       .profileAccountLogout(this.account.id())
-      .onException(Exception::class.java) { exception : Exception ->
+      .onException(Exception::class.java) { exception: Exception ->
         this.logger.error("error during logout: ", exception)
         Unit.unit()
       }

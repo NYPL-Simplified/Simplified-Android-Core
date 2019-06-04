@@ -115,7 +115,7 @@ class CatalogBookReadController(
         credentials = this.account.loginState().credentials,
         profileUUID = this.profile.id().uuid,
         profileDisplayName = this.profile.displayName(),
-        accountProvider = this.account.provider().id(),
+        accountProvider = this.account.provider().id,
         accountUUID = this.account.id().uuid,
         bookOPDSId = book.entry.id,
         bookTitle = book.entry.title,

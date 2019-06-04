@@ -15,8 +15,8 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.analytics.api.AnalyticsType
@@ -142,7 +142,7 @@ class Controller private constructor(
   }
 
   override fun profileCreate(
-    accountProvider: AccountProvider,
+    accountProvider: AccountProviderType,
     displayName: String,
     gender: String,
     date: LocalDate): FluentFuture<ProfileCreationEvent> {
@@ -219,15 +219,15 @@ class Controller private constructor(
   }
 
   @Throws(ProfileNoneCurrentException::class, ProfileNonexistentAccountProviderException::class)
-  override fun profileCurrentlyUsedAccountProviders(): ImmutableList<AccountProvider> {
-    val accounts = ArrayList<AccountProvider>()
+  override fun profileCurrentlyUsedAccountProviders(): ImmutableList<AccountProviderType> {
+    val accounts = ArrayList<AccountProviderType>()
     val accountProviders = this.accountProviders.call(Unit.unit())
     val profile = this.profileCurrent()
 
     for (account in profile.accounts().values) {
       val provider = account.provider()
-      if (accountProviders.providers().containsKey(provider.id())) {
-        val accountProvider = accountProviders.providers()[provider.id()]!!
+      if (accountProviders.providers().containsKey(provider.id)) {
+        val accountProvider = accountProviders.providers()[provider.id]!!
         accounts.add(accountProvider)
       }
     }

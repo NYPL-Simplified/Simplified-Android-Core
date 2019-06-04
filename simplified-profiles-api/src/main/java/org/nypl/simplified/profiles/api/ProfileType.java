@@ -1,7 +1,7 @@
 package org.nypl.simplified.profiles.api;
 
 import org.nypl.simplified.accounts.api.AccountID;
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
@@ -36,7 +36,7 @@ public interface ProfileType extends ProfileReadableType {
    */
 
   void preferencesUpdate(
-      ProfilePreferences preferences) throws IOException;
+    ProfilePreferences preferences) throws IOException;
 
   /**
    * Create an account using the given provider.
@@ -45,8 +45,8 @@ public interface ProfileType extends ProfileReadableType {
    */
 
   AccountType createAccount(
-      AccountProvider account_provider)
-      throws AccountsDatabaseException;
+    AccountProviderType account_provider)
+    throws AccountsDatabaseException;
 
   /**
    * Delete the account using the given provider.
@@ -54,12 +54,12 @@ public interface ProfileType extends ProfileReadableType {
    * @param account_provider The account provider
    * @return The ID of the deleted account
    * @throws AccountsDatabaseException On accounts database problems
-   * @see AccountsDatabaseType#deleteAccountByProvider(AccountProvider)
+   * @see AccountsDatabaseType#deleteAccountByProvider(AccountProviderType)
    */
 
   AccountID deleteAccountByProvider(
-      AccountProvider account_provider)
-      throws AccountsDatabaseException;
+    AccountProviderType account_provider)
+    throws AccountsDatabaseException;
 
   /**
    * Set the account created by the given provider to be the current account in the profile.
@@ -68,6 +68,6 @@ public interface ProfileType extends ProfileReadableType {
    */
 
   AccountType selectAccount(
-      AccountProvider account_provider)
-      throws AccountsDatabaseNonexistentException;
+    AccountProviderType account_provider)
+    throws AccountsDatabaseNonexistentException;
 }

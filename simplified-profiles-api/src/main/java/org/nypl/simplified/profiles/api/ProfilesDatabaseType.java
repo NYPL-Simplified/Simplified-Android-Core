@@ -2,7 +2,7 @@ package org.nypl.simplified.profiles.api;
 
 import com.io7m.jfunctional.OptionType;
 
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 
 import java.io.File;
 import java.util.SortedMap;
@@ -85,7 +85,7 @@ public interface ProfilesDatabaseType {
    */
 
   ProfileType createProfile(
-      AccountProvider account_provider,
+      AccountProviderType account_provider,
       String display_name)
       throws ProfileDatabaseException;
 

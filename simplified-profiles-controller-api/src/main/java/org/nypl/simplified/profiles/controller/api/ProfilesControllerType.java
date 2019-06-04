@@ -10,7 +10,7 @@ import org.nypl.simplified.accounts.api.AccountEvent;
 import org.nypl.simplified.accounts.api.AccountEventCreation;
 import org.nypl.simplified.accounts.api.AccountEventDeletion;
 import org.nypl.simplified.accounts.api.AccountID;
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.api.BookID;
@@ -81,7 +81,7 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<ProfileCreationEvent> profileCreate(
-    AccountProvider account_provider,
+    AccountProviderType account_provider,
     String display_name,
     String gender,
     LocalDate date);
@@ -180,7 +180,7 @@ public interface ProfilesControllerType {
    * @see #profileAnonymousEnabled()
    */
 
-  ImmutableList<AccountProvider> profileCurrentlyUsedAccountProviders()
+  ImmutableList<AccountProviderType> profileCurrentlyUsedAccountProviders()
     throws ProfileNoneCurrentException, ProfileNonexistentAccountProviderException;
 
   /**

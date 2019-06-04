@@ -9,7 +9,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.Feed
@@ -51,7 +51,7 @@ class MockProfileController : ProfilesControllerType {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun profileCreate(account_provider: AccountProvider?, display_name: String?, gender: String?, date: LocalDate?): FluentFuture<ProfileCreationEvent> {
+  override fun profileCreate(account_provider: AccountProviderType?, display_name: String?, gender: String?, date: LocalDate?): FluentFuture<ProfileCreationEvent> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
@@ -87,7 +87,7 @@ class MockProfileController : ProfilesControllerType {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun profileCurrentlyUsedAccountProviders(): ImmutableList<AccountProvider> {
+  override fun profileCurrentlyUsedAccountProviders(): ImmutableList<AccountProviderType> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 

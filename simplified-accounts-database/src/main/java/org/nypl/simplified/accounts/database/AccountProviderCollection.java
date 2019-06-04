@@ -3,8 +3,8 @@ package org.nypl.simplified.accounts.database;
 import com.google.auto.value.AutoValue;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 
 import java.net.URI;
 import java.util.Collections;
@@ -30,8 +30,8 @@ public abstract class AccountProviderCollection implements AccountProviderCollec
    */
 
   public static AccountProviderCollection create(
-    final AccountProvider in_default_provider,
-    final SortedMap<URI, AccountProvider> in_providers)
+    final AccountProviderType in_default_provider,
+    final SortedMap<URI, AccountProviderType> in_providers)
     throws IllegalArgumentException {
 
     return new AutoValue_AccountProviderCollection(
@@ -39,10 +39,10 @@ public abstract class AccountProviderCollection implements AccountProviderCollec
   }
 
   @Override
-  public final AccountProvider provider(final URI provider_id)
+  public final AccountProviderType provider(final URI provider_id)
     throws IllegalArgumentException {
 
-    final AccountProvider provider =
+    final AccountProviderType provider =
       this.providers().get(NullCheck.notNull(provider_id, "Provider"));
     if (provider == null) {
       throw new IllegalArgumentException(

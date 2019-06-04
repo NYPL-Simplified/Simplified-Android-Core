@@ -17,8 +17,8 @@ import org.nypl.simplified.accounts.api.AccountBundledCredentialsType;
 import org.nypl.simplified.accounts.api.AccountEvent;
 import org.nypl.simplified.accounts.api.AccountID;
 import org.nypl.simplified.accounts.api.AccountLoginState;
-import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType;
@@ -261,7 +261,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     final AccountBundledCredentialsType account_bundled_credentials,
     final AccountAuthenticationCredentialsStoreType account_credentials_store,
     final AccountsDatabaseFactoryType accounts_databases,
-    final AccountProvider account_provider,
+    final AccountProviderType account_provider,
     final File directory)
     throws ProfileDatabaseException {
 
@@ -497,7 +497,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   @Override
   public ProfileType createProfile(
-    final AccountProvider account_provider,
+    final AccountProviderType account_provider,
     final String display_name)
     throws ProfileDatabaseException {
 
@@ -555,7 +555,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     final AccountProviderCollectionType account_providers,
     final AccountsDatabaseFactoryType accounts_databases,
     final AccountAuthenticationCredentialsStoreType account_credentials_store,
-    final AccountProvider account_provider,
+    final AccountProviderType account_provider,
     final File directory,
     final String display_name,
     final ProfileID id)
@@ -612,9 +612,9 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     LOG.debug("[{}]: creating automatic accounts", profile.getUuid());
 
-    for (final AccountProvider auto_provider : account_providers.providers().values()) {
-      if (auto_provider.addAutomatically()) {
-        final URI auto_provider_id = auto_provider.id();
+    for (final AccountProviderType auto_provider : account_providers.providers().values()) {
+      if (auto_provider.getAddAutomatically()) {
+        final URI auto_provider_id = auto_provider.getId();
         LOG.debug(
           "[{}]: account provider {} should be added automatically",
           profile.getUuid(),
@@ -631,7 +631,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
         }
 
         final OptionType<AccountAuthenticationCredentials> credentials_opt =
-          account_bundled_credentials.bundledCredentialsFor(auto_provider.id());
+          account_bundled_credentials.bundledCredentialsFor(auto_provider.getId());
         if (credentials_opt.isSome()) {
           LOG.debug("[{}]: credentials for automatic account {} were provided",
             profile.getUuid(), auto_provider_id);
@@ -859,7 +859,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     }
 
     @Override
-    public AccountType createAccount(final AccountProvider account_provider)
+    public AccountType createAccount(final AccountProviderType account_provider)
       throws AccountsDatabaseException {
 
       Objects.requireNonNull(account_provider, "Account provider");
@@ -867,7 +867,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     }
 
     @Override
-    public AccountID deleteAccountByProvider(final AccountProvider account_provider)
+    public AccountID deleteAccountByProvider(final AccountProviderType account_provider)
       throws AccountsDatabaseException {
 
       Objects.requireNonNull(account_provider, "Account provider");
@@ -882,18 +882,18 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     }
 
     @Override
-    public AccountType selectAccount(final AccountProvider account_provider)
+    public AccountType selectAccount(final AccountProviderType account_provider)
       throws AccountsDatabaseNonexistentException {
 
       Objects.requireNonNull(account_provider, "Account provider");
-      final AccountType account = this.accounts.accountsByProvider().get(account_provider.id());
+      final AccountType account = this.accounts.accountsByProvider().get(account_provider.getId());
       if (account != null) {
         setAccountCurrent(account.id());
         return account;
       }
 
       throw new AccountsDatabaseNonexistentException(
-        "No account with provider: " + account_provider.id());
+        "No account with provider: " + account_provider.getId());
     }
 
     @Override

@@ -2,8 +2,6 @@ package org.nypl.simplified.tests.books.accounts;
 
 import android.content.Context;
 
-import com.io7m.jfunctional.Option;
-
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Assert;
@@ -16,8 +14,10 @@ import org.nypl.simplified.accounts.api.AccountBarcode;
 import org.nypl.simplified.accounts.api.AccountEvent;
 import org.nypl.simplified.accounts.api.AccountLoginState;
 import org.nypl.simplified.accounts.api.AccountPIN;
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderBuilderType;
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType;
+import org.nypl.simplified.accounts.api.AccountProviderType;
+import org.nypl.simplified.accounts.api.AccountProviders;
 import org.nypl.simplified.accounts.database.AccountProviderCollection;
 import org.nypl.simplified.accounts.database.AccountsDatabase;
 import org.nypl.simplified.accounts.database.api.AccountType;
@@ -52,8 +52,7 @@ public abstract class AccountsDatabaseContract {
   public ExpectedException expected = ExpectedException.none();
 
   @Before
-  public void setup()
-  {
+  public void setup() {
     this.credentialStore = new FakeAccountCredentialStorage();
     this.accountEvents = Observable.create();
     this.profileEvents = Observable.create();
@@ -150,12 +149,12 @@ public abstract class AccountsDatabaseContract {
     expected.expect(new CausesContains<>(IOException.class, "Could not parse account: "));
     AccountsDatabaseType database =
       AccountsDatabase.open(
-      context(),
-      this.accountEvents,
-      bookDatabases(),
-      accountProviders(),
-      this.credentialStore,
-      f_acc);
+        context(),
+        this.accountEvents,
+        bookDatabases(),
+        accountProviders(),
+        this.credentialStore,
+        f_acc);
   }
 
   @Test
@@ -257,9 +256,9 @@ public abstract class AccountsDatabaseContract {
         this.credentialStore,
         f_acc);
 
-    final AccountProvider provider0 =
+    final AccountProviderType provider0 =
       fakeProvider("http://www.example.com/accounts0/");
-    final AccountProvider provider1 =
+    final AccountProviderType provider1 =
       fakeProvider("http://www.example.com/accounts1/");
 
     final AccountType acc0 = db.createAccount(provider0);
@@ -309,9 +308,9 @@ public abstract class AccountsDatabaseContract {
         this.credentialStore,
         f_acc);
 
-    final AccountProvider provider0 =
+    final AccountProviderType provider0 =
       fakeProvider("http://www.example.com/accounts0/");
-    final AccountProvider provider1 =
+    final AccountProviderType provider1 =
       fakeProvider("http://www.example.com/accounts1/");
 
     final AccountType acc0 = db0.createAccount(provider0);
@@ -357,7 +356,7 @@ public abstract class AccountsDatabaseContract {
         this.credentialStore,
         f_acc);
 
-    final AccountProvider provider0 = fakeProvider("http://www.example.com/accounts0/");
+    final AccountProviderType provider0 = fakeProvider("http://www.example.com/accounts0/");
     final AccountType acc0 = db0.createAccount(provider0);
 
     final AccountAuthenticationCredentials creds =
@@ -371,24 +370,25 @@ public abstract class AccountsDatabaseContract {
   }
 
   private AccountProviderCollectionType accountProviders() {
-    final AccountProvider p0 = fakeProvider("http://www.example.com/accounts0/");
-    final AccountProvider p1 = fakeProvider("http://www.example.com/accounts1/");
-    final SortedMap<URI, AccountProvider> providers = new TreeMap<>();
-    providers.put(p0.id(), p0);
-    providers.put(p1.id(), p1);
+    final AccountProviderType p0 = fakeProvider("http://www.example.com/accounts0/");
+    final AccountProviderType p1 = fakeProvider("http://www.example.com/accounts1/");
+    final SortedMap<URI, AccountProviderType> providers = new TreeMap<>();
+    providers.put(p0.getId(), p0);
+    providers.put(p1.getId(), p1);
     return AccountProviderCollection.create(p0, providers);
   }
 
-  private static AccountProvider fakeProvider(final String provider_id) {
-    return AccountProvider.builder()
-      .setId(URI.create(provider_id))
-      .setDisplayName("Fake Library")
-      .setSubtitle(Option.some("Imaginary books"))
-      .setLogo(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")))
-      .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
-      .setSupportEmail("postmaster@example.com")
-      .setAnnotationsURI(Option.some(URI.create("http://example.com/accounts0/annotations")))
-      .setPatronSettingsURI(Option.some(URI.create("http://example.com/accounts0/patrons/me")))
-      .build();
+  private static AccountProviderType fakeProvider(final String provider_id) {
+    AccountProviderBuilderType builder = AccountProviders.builder();
+    builder.setId(URI.create(provider_id));
+    builder.setDisplayName("Fake Library");
+    builder.setSubtitle("Imaginary books");
+    builder.setLogo(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo="));
+    builder.setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"));
+    builder.setSupportEmail("postmaster@example.com");
+    builder.setAnnotationsURI(URI.create("http://example.com/accounts0/annotations"));
+    builder.setPatronSettingsURI(URI.create("http://example.com/accounts0/patrons/me"));
+    builder.setMainColor("#ff0000");
+    return builder.build();
   }
 }

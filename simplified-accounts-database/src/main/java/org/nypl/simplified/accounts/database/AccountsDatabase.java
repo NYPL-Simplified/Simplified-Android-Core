@@ -20,9 +20,9 @@ import org.nypl.simplified.accounts.api.AccountEventUpdated;
 import org.nypl.simplified.accounts.api.AccountID;
 import org.nypl.simplified.accounts.api.AccountLoginState;
 import org.nypl.simplified.accounts.api.AccountPreferences;
-import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription;
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseBooksException;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException;
@@ -220,14 +220,14 @@ public final class AccountsDatabase implements AccountsDatabaseType {
             account_id_name);
 
         if (account != null) {
-          final Account existing_account = accounts_by_provider.get(account.provider.id());
+          final Account existing_account = accounts_by_provider.get(account.provider.getId());
           if (existing_account != null) {
             final String message =
               new StringBuilder(128)
                 .append("Multiple accounts using the same provider.")
                 .append("\n")
                 .append("  Provider: ")
-                .append(account.provider.id())
+                .append(account.provider.getId())
                 .append("\n")
                 .append("  Existing Account: ")
                 .append(existing_account.id.getUuid())
@@ -248,7 +248,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
           }
 
           accounts.put(account.id, account);
-          accounts_by_provider.put(account.provider().id(), account);
+          accounts_by_provider.put(account.provider().getId(), account);
         }
       }
     }
@@ -346,16 +346,16 @@ public final class AccountsDatabase implements AccountsDatabaseType {
         book_databases.openDatabase(context, account_id, books_dir);
       final AccountDescription desc =
         AccountDescriptionJSON.deserializeFromFile(jom, account_file);
-      final AccountProvider provider =
+      final AccountProviderType provider =
         account_providers.provider(desc.provider());
 
-      final OptionType<AccountProviderAuthenticationDescription> authentication =
-        provider.authentication();
+      final AccountProviderAuthenticationDescription authentication =
+        provider.getAuthentication();
       final AccountAuthenticationCredentials credentials =
         credentials_store.get(account_id);
 
       final AccountLoginState login_state;
-      if (authentication.isSome() && credentials != null) {
+      if (authentication != null && credentials != null) {
         login_state = new AccountLoginState.AccountLoggedIn(credentials);
       } else {
         login_state = AccountLoginState.AccountNotLoggedIn.INSTANCE;
@@ -412,7 +412,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
   }
 
   @Override
-  public AccountType createAccount(final AccountProvider account_provider)
+  public AccountType createAccount(final AccountProviderType account_provider)
     throws AccountsDatabaseException {
 
     Objects.requireNonNull(account_provider, "Account provider");
@@ -422,7 +422,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
     synchronized (this.accounts_lock) {
       account_id = freshAccountID(this.accounts);
 
-      LOG.debug("creating account {} (provider {})", account_id, account_provider.id());
+      LOG.debug("creating account {} (provider {})", account_id, account_provider.getId());
 
       Preconditions.checkArgument(
         !this.accounts.containsKey(account_id),
@@ -450,7 +450,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
         new AccountPreferences(false);
 
       final AccountDescription desc =
-        AccountDescription.builder(account_provider.id(), preferences)
+        AccountDescription.builder(account_provider.getId(), preferences)
           .build();
 
       writeDescription(account_lock, account_file, account_file_tmp, desc);
@@ -467,7 +467,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
           this.credentials_store,
           book_database);
         this.accounts.put(account_id, account);
-        this.accounts_by_provider.put(account_provider.id(), account);
+        this.accounts_by_provider.put(account_provider.getId(), account);
       }
       return account;
     } catch (final IOException e) {
@@ -478,15 +478,15 @@ public final class AccountsDatabase implements AccountsDatabaseType {
   }
 
   @Override
-  public AccountID deleteAccountByProvider(final AccountProvider account_provider)
+  public AccountID deleteAccountByProvider(final AccountProviderType account_provider)
     throws AccountsDatabaseException {
 
     Objects.requireNonNull(account_provider, "Account provider");
 
-    LOG.debug("delete account by provider: {}", account_provider.id());
+    LOG.debug("delete account by provider: {}", account_provider.getId());
 
     synchronized (this.accounts_lock) {
-      if (!this.accounts_by_provider.containsKey(account_provider.id())) {
+      if (!this.accounts_by_provider.containsKey(account_provider.getId())) {
         throw new AccountsDatabaseNonexistentException(
           "No account with the given provider");
       }
@@ -495,9 +495,9 @@ public final class AccountsDatabase implements AccountsDatabaseType {
           "At most one account must exist at any given time");
       }
 
-      final Account account = this.accounts_by_provider.get(account_provider.id());
+      final Account account = this.accounts_by_provider.get(account_provider.getId());
       this.accounts.remove(account.id());
-      this.accounts_by_provider.remove(account_provider.id());
+      this.accounts_by_provider.remove(account_provider.getId());
 
       try {
         account.delete();
@@ -538,14 +538,14 @@ public final class AccountsDatabase implements AccountsDatabaseType {
     private @GuardedBy("description_lock")
     AccountLoginState login_state;
     private final BookDatabaseType book_database;
-    private final AccountProvider provider;
+    private final AccountProviderType provider;
 
     Account(
       final AccountID id,
       final File directory,
       final ObservableType<AccountEvent> account_events,
       final AccountDescription description,
-      final AccountProvider provider,
+      final AccountProviderType provider,
       final AccountLoginState login_state,
       final AccountAuthenticationCredentialsStoreType credentials,
       final BookDatabaseType book_database) {
@@ -581,7 +581,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
     }
 
     @Override
-    public AccountProvider provider() {
+    public AccountProviderType provider() {
       synchronized (this.description_lock) {
         return this.provider;
       }

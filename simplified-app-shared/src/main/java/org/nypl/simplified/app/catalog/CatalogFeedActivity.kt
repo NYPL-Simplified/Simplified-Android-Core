@@ -659,7 +659,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         title = this.resources.getString(R.string.catalog),
         upStack = ImmutableStack.empty(),
         drawerShouldOpen = false,
-        feedURI = this.account.provider().catalogURI(),
+        feedURI = this.account.provider().catalogURI,
         isSearchResults = false)
     }
   }
@@ -694,7 +694,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private fun isRootOfCollection(): Boolean =
     when (val arguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote ->
-        arguments.feedURI == account.provider().catalogURI()
+        arguments.feedURI == account.provider().catalogURI
       is CatalogFeedArgumentsLocalBooks ->
         false
     }
@@ -1221,7 +1221,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
           profileUUID = profile.id().uuid,
           timestamp = LocalDateTime.now(),
           credentials = account.loginState().credentials,
-          accountProvider = account.provider().id(),
+          accountProvider = account.provider().id,
           accountUUID = account.id().uuid,
           searchQuery = query))
 

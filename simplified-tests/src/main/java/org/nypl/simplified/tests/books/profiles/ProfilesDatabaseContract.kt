@@ -11,6 +11,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.nypl.simplified.accounts.api.AccountProviderCollectionType
+import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountProviders
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.observable.Observable
@@ -749,26 +752,26 @@ abstract class ProfilesDatabaseContract {
   }
 
 
-  private fun accountProvidersMissingZero(): org.nypl.simplified.accounts.api.AccountProviderCollectionType {
+  private fun accountProvidersMissingZero(): AccountProviderCollectionType {
     val p1 = fakeProvider("http://www.example.com/accounts1/")
-    val providers = TreeMap<URI, org.nypl.simplified.accounts.api.AccountProvider>()
-    providers[p1.id()] = p1
+    val providers = TreeMap<URI, AccountProviderType>()
+    providers[p1.id] = p1
     return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p1, providers)
   }
 
-  private fun accountProvidersMissingOne(): org.nypl.simplified.accounts.api.AccountProviderCollectionType {
+  private fun accountProvidersMissingOne(): AccountProviderCollectionType {
     val p0 = fakeProvider("http://www.example.com/accounts0/")
-    val providers = TreeMap<URI, org.nypl.simplified.accounts.api.AccountProvider>()
-    providers[p0.id()] = p0
+    val providers = TreeMap<URI, AccountProviderType>()
+    providers[p0.id] = p0
     return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p0, providers)
   }
 
-  private fun accountProviders(): org.nypl.simplified.accounts.api.AccountProviderCollectionType {
+  private fun accountProviders(): AccountProviderCollectionType {
     val p0 = fakeProvider("http://www.example.com/accounts0/")
     val p1 = fakeProvider("http://www.example.com/accounts1/")
-    val providers = TreeMap<URI, org.nypl.simplified.accounts.api.AccountProvider>()
-    providers[p0.id()] = p0
-    providers[p1.id()] = p1
+    val providers = TreeMap<URI, AccountProviderType>()
+    providers[p0.id] = p0
+    providers[p1.id] = p1
     return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p0, providers)
   }
 
@@ -776,31 +779,34 @@ abstract class ProfilesDatabaseContract {
 
     private val LOG = LoggerFactory.getLogger(ProfilesDatabaseContract::class.java)
 
-    private fun exampleAccountProvider(): org.nypl.simplified.accounts.api.AccountProvider {
-      return org.nypl.simplified.accounts.api.AccountProvider.builder()
-        .setCatalogURI(URI.create("http://www.example.com"))
-        .setSupportEmail("postmaster@example.com")
-        .setId(URI.create("urn:com.example"))
-        .setMainColor("#eeeeee")
-        .setLogo(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")))
-        .setSubtitle(Option.some("Example Subtitle"))
-        .setDisplayName("Example Provider")
-        .setAnnotationsURI(Option.some(URI.create("http://example.com/accounts0/annotations")))
-        .setPatronSettingsURI(Option.some(URI.create("http://example.com/accounts0/patrons/me")))
-        .build()
+    private fun exampleAccountProvider(): AccountProviderType {
+      return AccountProviders.builder()
+        .apply {
+          this.catalogURI = URI.create("http://www.example.com")
+          this.supportEmail = "postmaster@example.com"
+          this.id = URI.create("urn:com.example")
+          this.mainColor = "#eeeeee"
+          this.logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")
+          this.subtitle = "Example Subtitle"
+          this.displayName = "Example Provider"
+          this.annotationsURI = URI.create("http://example.com/accounts0/annotations")
+          this.patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me")
+        }.build()
     }
 
-    private fun fakeProvider(provider_id: String): org.nypl.simplified.accounts.api.AccountProvider {
-      return org.nypl.simplified.accounts.api.AccountProvider.builder()
-        .setId(URI.create(provider_id))
-        .setDisplayName("Fake Library")
-        .setSubtitle(Option.some("Imaginary books"))
-        .setLogo(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")))
-        .setCatalogURI(URI.create("http://www.example.com/accounts0/feed.xml"))
-        .setSupportEmail("postmaster@example.com")
-        .setAnnotationsURI(Option.some(URI.create("http://example.com/accounts0/annotations")))
-        .setPatronSettingsURI(Option.some(URI.create("http://example.com/accounts0/patrons/me")))
-        .build()
+    private fun fakeProvider(provider_id: String): AccountProviderType {
+      return AccountProviders.builder()
+        .apply {
+          this.id = URI.create(provider_id)
+          this.mainColor = "#ff0000"
+          this.displayName = "Fake Library"
+          this.subtitle = "Imaginary books"
+          this.logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")
+          this.catalogURI = URI.create("http://www.example.com/accounts0/feed.xml")
+          this.supportEmail = "postmaster@example.com"
+          this.annotationsURI = URI.create("http://example.com/accounts0/annotations")
+          this.patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me")
+        }.build()
     }
   }
 }

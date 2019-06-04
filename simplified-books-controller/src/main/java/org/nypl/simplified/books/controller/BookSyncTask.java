@@ -85,16 +85,13 @@ final class BookSyncTask implements Callable<Unit> {
   }
 
   private Unit execute() throws Exception {
-    final OptionType<AccountProviderAuthenticationDescription> provider_auth_opt =
-        this.account.provider().authentication();
+    final AccountProviderAuthenticationDescription provider_auth =
+        this.account.provider().getAuthentication();
 
-    if (!provider_auth_opt.isSome()) {
+    if (provider_auth == null) {
       LOG.debug("account does not support syncing");
       return Unit.unit();
     }
-
-    final AccountProviderAuthenticationDescription provider_auth =
-        ((Some<AccountProviderAuthenticationDescription>) provider_auth_opt).get();
 
     final AccountAuthenticationCredentials credentials =
       this.account.loginState().getCredentials();

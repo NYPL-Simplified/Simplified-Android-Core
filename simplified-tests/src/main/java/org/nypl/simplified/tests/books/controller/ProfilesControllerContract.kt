@@ -21,9 +21,10 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorCode.ERROR_CREDENTIALS_INCORRECT
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountPIN
-import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType
+import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountProviders
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountProviderCollection
 import org.nypl.simplified.accounts.database.AccountsDatabases
@@ -98,17 +99,18 @@ abstract class ProfilesControllerContract {
 
   protected abstract fun context(): Context
 
-  private fun fakeProvider(provider_id: String): AccountProvider {
-    return AccountProvider.builder()
-      .setId(URI.create(provider_id))
-      .setDisplayName("Fake Library")
-      .setSubtitle(Option.some("Imaginary books"))
-      .setLogo(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")))
-      .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
-      .setSupportEmail("postmaster@example.com")
-      .setAnnotationsURI(Option.some(URI.create("http://example.com/accounts0/annotations")))
-      .setPatronSettingsURI(Option.some(URI.create("http://example.com/accounts0/patrons/me")))
-      .build()
+  private fun fakeProvider(provider_id: String): AccountProviderType {
+    return AccountProviders.builder().apply {
+      this.id = URI.create(provider_id)
+      this.mainColor = "#ff0000"
+      this.displayName = "Fake Library"
+      this.subtitle = "Imaginary books"
+      this.logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")
+      this.catalogURI = URI.create("http://example.com/accounts0/feed.xml")
+      this.supportEmail = "postmaster@example.com"
+      this.annotationsURI = URI.create("http://example.com/accounts0/annotations")
+      this.patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me")
+    }.build()
   }
 
   private fun controller(
@@ -312,7 +314,7 @@ abstract class ProfilesControllerContract {
     val provider = this.fakeAuthProvider("urn:fake-auth:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id()).get()
+    controller.profileAccountCreate(provider.id).get()
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -385,7 +387,7 @@ abstract class ProfilesControllerContract {
     val provider = this.fakeAuthProvider("urn:fake-auth:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id()).get()
+    controller.profileAccountCreate(provider.id).get()
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -450,7 +452,7 @@ abstract class ProfilesControllerContract {
     val provider = this.fakeProvider("urn:fake:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id()).get()
+    controller.profileAccountCreate(provider.id).get()
     controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
     controller.profilePreferencesUpdate(profiles.currentProfileUnsafe().preferences()).get()
 
@@ -504,7 +506,7 @@ abstract class ProfilesControllerContract {
     val provider = this.fakeProvider("urn:fake:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id()).get()
+    controller.profileAccountCreate(provider.id).get()
     controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
 
     val feed = controller.profileFeed(
@@ -538,23 +540,25 @@ abstract class ProfilesControllerContract {
     val fake2 = this.fakeProvider("urn:fake:2")
     val fake3 = this.fakeAuthProvider("urn:fake-auth:0")
 
-    val providers = TreeMap<URI, AccountProvider>()
-    providers[fake0.id()] = fake0
-    providers[fake1.id()] = fake1
-    providers[fake2.id()] = fake2
-    providers[fake3.id()] = fake3
+    val providers = TreeMap<URI, AccountProviderType>()
+    providers[fake0.id] = fake0
+    providers[fake1.id] = fake1
+    providers[fake2.id] = fake2
+    providers[fake3.id] = fake3
     return AccountProviderCollection.create(fake0, providers)
   }
 
-  private fun fakeAuthProvider(uri: String): AccountProvider {
+  private fun fakeAuthProvider(uri: String): AccountProviderType {
     return this.fakeProvider(uri)
       .toBuilder()
-      .setAuthentication(Option.some(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create(uri))
-        .setPassCodeLength(4)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build()))
-      .build()
+      .apply {
+        this.authentication =
+          AccountProviderAuthenticationDescription.builder()
+            .setLoginURI(URI.create(uri))
+            .setPassCodeLength(4)
+            .setPassCodeMayContainLetters(true)
+            .setRequiresPin(true)
+            .build()
+      }.build()
   }
 }

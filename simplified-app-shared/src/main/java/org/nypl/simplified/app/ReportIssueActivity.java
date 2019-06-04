@@ -134,9 +134,8 @@ public class ReportIssueActivity extends AppCompatActivity {
         b.setCancelable(true);
         b.create().show();
       } else {
-        final OptionType<String> emailOpt = this.account.provider().supportEmail();
-        if (emailOpt.isSome()) {
-          final String email = ((Some<String>) emailOpt).get();
+        final String email = this.account.provider().getSupportEmail();
+        if (email != null) {
           this.launchEmailAppWithEmailAddress(this,
             email,
             this.subject_field.getText().toString(),

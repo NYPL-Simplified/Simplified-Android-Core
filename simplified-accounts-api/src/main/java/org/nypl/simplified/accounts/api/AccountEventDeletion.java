@@ -46,7 +46,7 @@ public abstract class AccountEventDeletion extends AccountEvent {
 
     public static AccountDeletionSucceeded of(
       final AccountID id,
-      final AccountProvider provider) {
+      final AccountProviderType provider) {
       return new AutoValue_AccountEventDeletion_AccountDeletionSucceeded(id, provider);
     }
 
@@ -54,7 +54,7 @@ public abstract class AccountEventDeletion extends AccountEvent {
      * @return The account provider
      */
 
-    public abstract AccountProvider provider();
+    public abstract AccountProviderType provider();
 
     @Override
     public final <A, E extends Exception> A matchDeletion(

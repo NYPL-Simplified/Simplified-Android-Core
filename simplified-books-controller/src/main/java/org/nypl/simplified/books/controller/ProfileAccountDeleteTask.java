@@ -8,8 +8,8 @@ import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.accounts.api.AccountEvent;
 import org.nypl.simplified.accounts.api.AccountEventDeletion;
 import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountDeletionFailed;
-import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException;
 import org.nypl.simplified.observable.ObservableType;
@@ -56,7 +56,7 @@ final class ProfileAccountDeleteTask implements Callable<AccountEventDeletion> {
 
     try {
       final AccountProviderCollectionType providers_now = this.account_providers.call(Unit.unit());
-      final AccountProvider provider = providers_now.providers().get(this.provider_id);
+      final AccountProviderType provider = providers_now.providers().get(this.provider_id);
 
       if (provider != null) {
         final ProfileType profile = this.profiles.currentProfileUnsafe();

@@ -43,7 +43,7 @@ public abstract class AccountEventCreation extends AccountEvent {
      * @return The account provider
      */
 
-    public abstract AccountProvider provider();
+    public abstract AccountProviderType provider();
 
     @Override
     public final <A, E extends Exception> A matchCreation(
@@ -59,7 +59,7 @@ public abstract class AccountEventCreation extends AccountEvent {
 
     public static AccountCreationSucceeded of(
       final AccountID id,
-      final AccountProvider provider) {
+      final AccountProviderType provider) {
       return new AutoValue_AccountEventCreation_AccountCreationSucceeded(id, provider);
     }
   }

@@ -5,11 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.io7m.jfunctional.Option;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription;
+import org.nypl.simplified.accounts.api.AccountProviderBuilderType;
+import org.nypl.simplified.accounts.api.AccountProviderType;
+import org.nypl.simplified.accounts.api.AccountProviders;
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 
@@ -33,7 +34,7 @@ public final class AccountProvidersJSON {
    * @throws JSONParseException On parse errors
    */
 
-  public static AccountProvider deserializeFromJSON(
+  public static AccountProviderType deserializeFromJSON(
     final ObjectMapper jom,
     final JsonNode node)
     throws JSONParseException {
@@ -42,7 +43,7 @@ public final class AccountProvidersJSON {
     NullCheck.notNull(node, "JSON");
 
     final ObjectNode obj = JSONParserUtilities.checkObject(null, node);
-    final AccountProvider.Builder b = AccountProvider.builder();
+    final AccountProviderBuilderType b = AccountProviders.builder();
 
     final URI id_uuid = JSONParserUtilities.getURI(obj, "id_uuid");
 
@@ -51,19 +52,19 @@ public final class AccountProvidersJSON {
 
       final URI catalogUrl = JSONParserUtilities.getURI(obj, "catalogUrl");
       b.setCatalogURI(catalogUrl);
-      b.setPatronSettingsURI(Option.some(applyPatronSettingHack(catalogUrl)));
-      b.setAnnotationsURI(Option.some(applyAnnotationsHack(catalogUrl)));
+      b.setPatronSettingsURI(applyPatronSettingHack(catalogUrl));
+      b.setAnnotationsURI(applyAnnotationsHack(catalogUrl));
 
       b.setCatalogURIForUnder13s(
-        JSONParserUtilities.getURIOptional(obj, "catalogUrlUnder13"));
+        JSONParserUtilities.getURIOrNull(obj, "catalogUrlUnder13"));
       b.setCatalogURIForOver13s(
-        JSONParserUtilities.getURIOptional(obj, "catalogUrl13"));
+        JSONParserUtilities.getURIOrNull(obj, "catalogUrl13"));
       b.setDisplayName(
         JSONParserUtilities.getString(obj, "name"));
       b.setSubtitle(
-        JSONParserUtilities.getStringOptional(obj, "subtitle"));
+        JSONParserUtilities.getStringOrNull(obj, "subtitle"));
       b.setLogo(
-        JSONParserUtilities.getURIOptional(obj, "logo"));
+        JSONParserUtilities.getURIOrNull(obj, "logo"));
 
       if (JSONParserUtilities.getBooleanDefault(obj, "needsAuth", false)) {
         final AccountProviderAuthenticationDescription.Builder authentication_builder =
@@ -78,9 +79,9 @@ public final class AccountProvidersJSON {
         authentication_builder.setLoginURI(
           JSONParserUtilities.getURIDefault(obj, "loginUrl", applyLoansHack(catalogUrl)));
 
-        b.setAuthentication(Option.some(authentication_builder.build()));
+        b.setAuthentication(authentication_builder.build());
       } else {
-        b.setAuthentication(Option.none());
+        b.setAuthentication(null);
       }
 
       b.setSupportsSimplyESynchronization(
@@ -97,17 +98,17 @@ public final class AccountProvidersJSON {
         JSONParserUtilities.getBooleanDefault(obj, "supportsHelpCenter", false));
 
       b.setSupportEmail(
-        JSONParserUtilities.getStringOptional(obj, "supportEmail"));
+        JSONParserUtilities.getStringOrNull(obj, "supportEmail"));
       b.setEula(
-        JSONParserUtilities.getURIOptional(obj, "eulaUrl"));
+        JSONParserUtilities.getURIOrNull(obj, "eulaUrl"));
       b.setLicense(
-        JSONParserUtilities.getURIOptional(obj, "licenseUrl"));
+        JSONParserUtilities.getURIOrNull(obj, "licenseUrl"));
       b.setPrivacyPolicy(
-        JSONParserUtilities.getURIOptional(obj, "privacyUrl"));
+        JSONParserUtilities.getURIOrNull(obj, "privacyUrl"));
       b.setMainColor(
         JSONParserUtilities.getString(obj, "mainColor"));
       b.setStyleNameOverride(
-        JSONParserUtilities.getStringOptional(obj, "styleNameOverride"));
+        JSONParserUtilities.getStringOrNull(obj, "styleNameOverride"));
 
       return b.build();
     } catch (JSONParseException e) {
@@ -144,20 +145,20 @@ public final class AccountProvidersJSON {
     final ArrayNode node)
     throws JSONParseException {
 
-    final TreeMap<URI, AccountProvider> providers = new TreeMap<>();
-    AccountProvider default_provider = null;
+    final TreeMap<URI, AccountProviderType> providers = new TreeMap<>();
+    AccountProviderType default_provider = null;
 
     JSONParseException ex = null;
     for (int index = 0; index < node.size(); ++index) {
       try {
-        final AccountProvider provider = deserializeFromJSON(jom, node.get(index));
+        final AccountProviderType provider = deserializeFromJSON(jom, node.get(index));
         if (default_provider == null) {
           default_provider = provider;
         }
-        if (providers.containsKey(provider.id())) {
-          throw new JSONParseException("Duplicate provider ID: " + provider.id());
+        if (providers.containsKey(provider.getId())) {
+          throw new JSONParseException("Duplicate provider ID: " + provider.getId());
         }
-        providers.put(provider.id(), provider);
+        providers.put(provider.getId(), provider);
       } catch (final JSONParseException e) {
         if (ex == null) {
           ex = e;

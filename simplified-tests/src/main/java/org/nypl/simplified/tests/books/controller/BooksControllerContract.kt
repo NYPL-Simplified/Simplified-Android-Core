@@ -19,9 +19,10 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountPIN
-import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType
+import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountProviders
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountProviderCollection
 import org.nypl.simplified.accounts.database.AccountsDatabases
@@ -101,17 +102,18 @@ abstract class BooksControllerContract {
 
   protected abstract fun context(): Context
 
-  private fun fakeProvider(providerId: String): AccountProvider {
-    return AccountProvider.builder()
-      .setId(URI.create(providerId))
-      .setDisplayName("Fake Library")
-      .setSubtitle(Option.some("Imaginary books"))
-      .setLogo(Option.some(URI.create("http://example.com/logo.png")))
-      .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
-      .setSupportEmail("postmaster@example.com")
-      .setAnnotationsURI(Option.some(URI.create("http://example.com/accounts0/annotations")))
-      .setPatronSettingsURI(Option.some(URI.create("http://example.com/accounts0/patrons/me")))
-      .build()
+  private fun fakeProvider(providerId: String): AccountProviderType {
+    return AccountProviders.builder().apply {
+      this.id = URI.create(providerId)
+      this.mainColor = "#ff0000"
+      this.displayName = "Fake Library"
+      this.subtitle = "Imaginary books"
+      this.logo = URI.create("http://example.com/logo.png")
+      this.catalogURI = URI.create("http://example.com/accounts0/feed.xml")
+      this.supportEmail = "postmaster@example.com"
+      this.annotationsURI = URI.create("http://example.com/accounts0/annotations")
+      this.patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me")
+    }.build()
   }
 
   private fun accountProviders(unit: Unit): AccountProviderCollection {
@@ -124,24 +126,26 @@ abstract class BooksControllerContract {
     val fake2 = fakeProvider("urn:fake:2")
     val fake3 = fakeAuthProvider("urn:fake-auth:0")
 
-    val providers = TreeMap<URI, AccountProvider>()
-    providers[fake0.id()] = fake0
-    providers[fake1.id()] = fake1
-    providers[fake2.id()] = fake2
-    providers[fake3.id()] = fake3
+    val providers = TreeMap<URI, AccountProviderType>()
+    providers[fake0.id] = fake0
+    providers[fake1.id] = fake1
+    providers[fake2.id] = fake2
+    providers[fake3.id] = fake3
     return AccountProviderCollection.create(fake0, providers)
   }
 
-  private fun fakeAuthProvider(uri: String): AccountProvider {
+  private fun fakeAuthProvider(uri: String): AccountProviderType {
     return fakeProvider(uri)
       .toBuilder()
-      .setAuthentication(Option.some(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create(uri))
-        .setPassCodeLength(4)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build()))
-      .build()
+      .apply {
+        this.authentication =
+          AccountProviderAuthenticationDescription.builder()
+            .setLoginURI(URI.create(uri))
+            .setPassCodeLength(4)
+            .setPassCodeMayContainLetters(true)
+            .setRequiresPin(true)
+            .build()
+      }.build()
   }
 
   private fun correctCredentials(): AccountAuthenticationCredentials {

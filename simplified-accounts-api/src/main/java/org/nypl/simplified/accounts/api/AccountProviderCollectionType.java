@@ -13,13 +13,13 @@ public interface AccountProviderCollectionType {
    * @return The default account provider
    */
 
-  AccountProvider providerDefault();
+  AccountProviderType providerDefault();
 
   /**
    * @return The account providers
    */
 
-  SortedMap<URI, AccountProvider> providers();
+  SortedMap<URI, AccountProviderType> providers();
 
   /**
    * @param provider_id The provider ID
@@ -27,6 +27,6 @@ public interface AccountProviderCollectionType {
    * @throws IllegalArgumentException If no provider exists with the given ID
    */
 
-  AccountProvider provider(URI provider_id)
+  AccountProviderType provider(URI provider_id)
     throws IllegalArgumentException;
 }

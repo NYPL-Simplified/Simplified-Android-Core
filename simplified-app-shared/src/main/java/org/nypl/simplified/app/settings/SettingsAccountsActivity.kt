@@ -18,7 +18,6 @@ import android.widget.ListView
 import android.widget.TextView
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
-import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.squareup.picasso.Picasso
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -29,7 +28,7 @@ import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountDeletionFailed
 import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountDeletionSucceeded
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
@@ -58,8 +57,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private val logger = LoggerFactory.getLogger(SettingsAccountsActivity::class.java)
 
-  private lateinit var adapterAccounts: ArrayAdapter<AccountProvider>
-  private lateinit var adapterAccountsArray: ArrayList<AccountProvider>
+  private lateinit var adapterAccounts: ArrayAdapter<AccountProviderType>
+  private lateinit var adapterAccountsArray: ArrayList<AccountProviderType>
   private lateinit var accountListView: ListView
   private lateinit var accountCurrentView: LinearLayout
 
@@ -70,17 +69,17 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
     private fun configureAccountListCellViews(
       picasso: Picasso,
-      accountProvider: AccountProvider,
+      accountProvider: AccountProviderType,
       itemTitleView: TextView,
       itemSubtitleView: TextView,
       iconView: ImageView): Unit {
 
-      itemTitleView.text = accountProvider.displayName()
+      itemTitleView.text = accountProvider.displayName
 
-      val subtitle = accountProvider.subtitle()
-      if (subtitle is Some<String>) {
+      val subtitle = accountProvider.subtitle
+      if (subtitle != null) {
         itemSubtitleView.visibility = View.VISIBLE
-        itemSubtitleView.text = subtitle.get()
+        itemSubtitleView.text = subtitle
       } else {
         itemSubtitleView.visibility = View.INVISIBLE
       }
@@ -165,7 +164,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     profiles: ProfilesControllerType) {
     try {
       val selectedProvider = this.adapterAccounts.getItem(position)
-      this.openAccountSettings(profiles.profileAccountFindByProvider(selectedProvider.id()).id())
+      this.openAccountSettings(profiles.profileAccountFindByProvider(selectedProvider.id).id())
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     } catch (e: AccountsDatabaseNonexistentException) {
@@ -185,17 +184,17 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
    */
 
   private fun showAccountDeletionDialog(
-    accountProvider: AccountProvider,
+    accountProvider: AccountProviderType,
     profiles: ProfilesControllerType) {
     val builder =
       AlertDialog.Builder(this)
 
     builder.setMessage(
       this.resources.getString(R.string.settings_account_delete,
-        accountProvider.displayName()))
+        accountProvider.displayName))
 
     builder.setPositiveButton(R.string.settings_account_delete_button) { _, _ ->
-      val providerId = accountProvider.id()
+      val providerId = accountProvider.id
       FluentFuture.from(profiles.profileAccountDeleteByProvider(providerId))
         .onException(java.lang.Exception::class.java) { exception -> AccountDeletionFailed.ofException(exception) }
         .map { event -> this.onAccountDeletionEvent(event) }
@@ -208,9 +207,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   private class AccountsArrayAdapter(
     targetContext: Context,
     private val picasso: Picasso,
-    private val adapterAccountsArray: ArrayList<AccountProvider>,
+    private val adapterAccountsArray: ArrayList<AccountProviderType>,
     private val inflater: LayoutInflater)
-    : ArrayAdapter<AccountProvider>(targetContext, R.layout.account_list_item, adapterAccountsArray) {
+    : ArrayAdapter<AccountProviderType>(targetContext, R.layout.account_list_item, adapterAccountsArray) {
 
     override fun getView(
       position: Int,
@@ -465,7 +464,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
    * if no account already exists for it in the current profile.
    */
 
-  private fun determineAvailableAccountProviders(): ArrayList<AccountProvider> {
+  private fun determineAvailableAccountProviders(): ArrayList<AccountProviderType> {
     val usedAccountProviders =
       Simplified.getProfilesController()
         .profileCurrentlyUsedAccountProviders()
@@ -475,8 +474,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
     availableAccountProviders.removeAll(usedAccountProviders)
     availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
-      val name0 = provider0.displayName().removePrefix("The ")
-      val name1 = provider1.displayName().removePrefix("The ")
+      val name0 = provider0.displayName.removePrefix("The ")
+      val name1 = provider1.displayName.removePrefix("The ")
       name0.toUpperCase().compareTo(name1.toUpperCase())
     })
 
@@ -504,9 +503,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     }
   }
 
-  private fun tryCreateAccount(accountProvider: AccountProvider): Unit {
+  private fun tryCreateAccount(accountProvider: AccountProviderType): Unit {
     FluentFuture
-      .from(Simplified.getProfilesController().profileAccountCreate(accountProvider.id()))
+      .from(Simplified.getProfilesController().profileAccountCreate(accountProvider.id))
       .onException(Exception::class.java) { event -> AccountCreationFailed.of(event) }
       .map { event -> this.onAccountCreationEvent(event) }
     return Unit.unit()

@@ -771,6 +771,29 @@ public final class JSONParserUtilities {
   /**
    * @param key A key assumed to be holding a value
    * @param n   A node
+   * @return A URI value from key {@code key}, if the key exists
+   * @throws JSONParseException On type errors
+   */
+
+  public static URI getURIOrNull(
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+    NullCheck.notNull(key);
+
+    OptionType<URI> opt = getURIOptional(n, key);
+    if (opt.isSome()) {
+      return ((Some<URI>) opt).get();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param n   A node
    * @return A URI value from key {@code key}
    * @throws JSONParseException On type errors
    */

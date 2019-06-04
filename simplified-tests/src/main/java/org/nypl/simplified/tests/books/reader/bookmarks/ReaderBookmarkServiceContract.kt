@@ -14,7 +14,7 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.api.AccountPreferences
-import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
@@ -134,14 +134,14 @@ abstract class ReaderBookmarkServiceContract {
       .thenReturn(sortedSetOf())
 
     val accountProvider =
-      Mockito.mock(AccountProvider::class.java)
+      Mockito.mock(AccountProviderType::class.java)
 
-    Mockito.`when`(accountProvider.supportsSimplyESynchronization())
+    Mockito.`when`(accountProvider.supportsSimplyESynchronization)
       .thenReturn(true)
-    Mockito.`when`(accountProvider.annotationsURI())
-      .thenReturn(Option.some(URI.create("http://www.example.com/annotations")))
-    Mockito.`when`(accountProvider.patronSettingsURI())
-      .thenReturn(Option.some(URI.create("http://www.example.com/patron")))
+    Mockito.`when`(accountProvider.annotationsURI)
+      .thenReturn(URI.create("http://www.example.com/annotations"))
+    Mockito.`when`(accountProvider.patronSettingsURI)
+      .thenReturn(URI.create("http://www.example.com/patron"))
 
     val accountPreferences =
       AccountPreferences(bookmarkSyncingPermitted = true)
@@ -306,14 +306,14 @@ abstract class ReaderBookmarkServiceContract {
       .thenReturn(bookEntry)
 
     val accountProvider =
-      Mockito.mock(AccountProvider::class.java)
+      Mockito.mock(AccountProviderType::class.java)
 
-    Mockito.`when`(accountProvider.supportsSimplyESynchronization())
+    Mockito.`when`(accountProvider.supportsSimplyESynchronization)
       .thenReturn(true)
-    Mockito.`when`(accountProvider.annotationsURI())
-      .thenReturn(Option.some(URI.create("http://www.example.com/annotations")))
-    Mockito.`when`(accountProvider.patronSettingsURI())
-      .thenReturn(Option.some(URI.create("http://www.example.com/patron")))
+    Mockito.`when`(accountProvider.annotationsURI)
+      .thenReturn(URI.create("http://www.example.com/annotations"))
+    Mockito.`when`(accountProvider.patronSettingsURI)
+      .thenReturn(URI.create("http://www.example.com/patron"))
 
     val accountPreferences =
       AccountPreferences(bookmarkSyncingPermitted = true)
@@ -501,14 +501,14 @@ abstract class ReaderBookmarkServiceContract {
       .thenReturn(bookEntry)
 
     val accountProvider =
-      Mockito.mock(AccountProvider::class.java)
+      Mockito.mock(AccountProviderType::class.java)
 
-    Mockito.`when`(accountProvider.supportsSimplyESynchronization())
+    Mockito.`when`(accountProvider.supportsSimplyESynchronization)
       .thenReturn(true)
-    Mockito.`when`(accountProvider.annotationsURI())
-      .thenReturn(Option.some(URI.create("http://www.example.com/annotations")))
-    Mockito.`when`(accountProvider.patronSettingsURI())
-      .thenReturn(Option.some(URI.create("http://www.example.com/patron")))
+    Mockito.`when`(accountProvider.annotationsURI)
+      .thenReturn(URI.create("http://www.example.com/annotations"))
+    Mockito.`when`(accountProvider.patronSettingsURI)
+      .thenReturn(URI.create("http://www.example.com/patron"))
 
     val accountPreferences =
       AccountPreferences(bookmarkSyncingPermitted = true)

@@ -1,7 +1,7 @@
 package org.nypl.simplified.accounts.database.api;
 
 import org.nypl.simplified.accounts.api.AccountID;
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 
 import java.io.File;
 import java.net.URI;
@@ -44,7 +44,7 @@ public interface AccountsDatabaseType {
    */
 
   AccountType createAccount(
-    AccountProvider account_provider)
+    AccountProviderType account_provider)
     throws AccountsDatabaseException;
 
   /**
@@ -58,6 +58,6 @@ public interface AccountsDatabaseType {
    */
 
   AccountID deleteAccountByProvider(
-    AccountProvider account_provider)
+    AccountProviderType account_provider)
     throws AccountsDatabaseException;
 }

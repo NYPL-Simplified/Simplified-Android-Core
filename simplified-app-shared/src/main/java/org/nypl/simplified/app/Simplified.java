@@ -28,7 +28,7 @@ import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType;
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType;
 import org.nypl.simplified.accounts.api.AccountEvent;
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore;
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty;
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsJSON;
@@ -65,7 +65,6 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService;
 import org.nypl.simplified.branding.BrandingThemeOverrideServiceType;
 import org.nypl.simplified.bugsnag.IfBugsnag;
-import org.nypl.simplified.documents.authentication.AuthenticationDocumentValuesType;
 import org.nypl.simplified.documents.clock.Clock;
 import org.nypl.simplified.documents.clock.ClockType;
 import org.nypl.simplified.documents.store.DocumentStore;
@@ -441,7 +440,7 @@ public final class Simplified extends MultiDexApplication {
       final AccountType accountCurrent =
         currentProfile.accountCurrent();
       final ThemeValue theme =
-        ThemeControl.getThemesByName().get(accountCurrent.provider().mainColor());
+        ThemeControl.getThemesByName().get(accountCurrent.provider().getMainColor());
       if (theme != null) {
         return theme;
       }
@@ -482,7 +481,7 @@ public final class Simplified extends MultiDexApplication {
       if (!default_uri_text.isEmpty()) {
         try {
           final URI default_uri = new URI(default_uri_text);
-          final SortedMap<URI, AccountProvider> available = providers.providers();
+          final SortedMap<URI, AccountProviderType> available = providers.providers();
           if (available.containsKey(default_uri)) {
             LOG.debug("using default provider {}", default_uri);
             return AccountProviderCollection.create(available.get(default_uri), available);

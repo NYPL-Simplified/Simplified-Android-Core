@@ -548,7 +548,7 @@ class ReaderBookmarkService private constructor(
         val accountState =
           ReaderBookmarkPolicyAccountState(
             accountID = account.id(),
-            syncSupportedByAccount = account.provider().supportsSimplyESynchronization(),
+            syncSupportedByAccount = account.provider().supportsSimplyESynchronization,
             syncEnabledOnServer = if (accountStateCurrent != null) accountStateCurrent.syncEnabledOnServer else false,
             syncPermittedByUser = account.preferences().bookmarkSyncingPermitted)
 
@@ -573,7 +573,7 @@ class ReaderBookmarkService private constructor(
     val accountState =
       ReaderBookmarkPolicyAccountState(
         accountID = account.id(),
-        syncSupportedByAccount = account.provider().supportsSimplyESynchronization(),
+        syncSupportedByAccount = account.provider().supportsSimplyESynchronization,
         syncEnabledOnServer = if (accountStateCurrent != null) accountStateCurrent.syncEnabledOnServer else false,
         syncPermittedByUser = account.preferences().bookmarkSyncingPermitted)
 
@@ -600,7 +600,7 @@ class ReaderBookmarkService private constructor(
     val accountState =
       ReaderBookmarkPolicyAccountState(
         accountID = account.id(),
-        syncSupportedByAccount = account.provider().supportsSimplyESynchronization(),
+        syncSupportedByAccount = account.provider().supportsSimplyESynchronization,
         syncEnabledOnServer = false,
         syncPermittedByUser = account.preferences().bookmarkSyncingPermitted)
 
@@ -749,7 +749,7 @@ class ReaderBookmarkService private constructor(
     private fun accountStateForAccount(account: AccountType): ReaderBookmarkPolicyAccountState {
       return ReaderBookmarkPolicyAccountState(
         accountID = account.id(),
-        syncSupportedByAccount = account.provider().supportsSimplyESynchronization(),
+        syncSupportedByAccount = account.provider().supportsSimplyESynchronization,
         syncEnabledOnServer = false,
         syncPermittedByUser = account.preferences().bookmarkSyncingPermitted)
     }
@@ -800,15 +800,15 @@ class ReaderBookmarkService private constructor(
     }
 
     private fun accountSupportsSyncing(account: AccountType): SyncableAccount? {
-      return if (account.provider().supportsSimplyESynchronization()) {
-        val settingsOpt = account.provider().patronSettingsURI()
-        val annotationsOpt = account.provider().annotationsURI()
+      return if (account.provider().supportsSimplyESynchronization) {
+        val settingsOpt = account.provider().patronSettingsURI
+        val annotationsOpt = account.provider().annotationsURI
         val credentials = account.loginState().credentials
-        if (credentials != null && settingsOpt is Some<URI> && annotationsOpt is Some<URI>) {
+        if (credentials != null && settingsOpt != null && annotationsOpt != null) {
           return SyncableAccount(
             account = account,
-            settingsURI = settingsOpt.get(),
-            annotationsURI = annotationsOpt.get(),
+            settingsURI = settingsOpt,
+            annotationsURI = annotationsOpt,
             credentials = credentials)
         } else {
           null
@@ -825,7 +825,7 @@ class ReaderBookmarkService private constructor(
     }
 
     override fun createService(
-      requirements: Requirements): org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType {
+      requirements: Requirements): ReaderBookmarkServiceType {
       return ReaderBookmarkService(
         threads = requirements.threads,
         httpCalls = requirements.httpCalls,

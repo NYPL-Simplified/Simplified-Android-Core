@@ -571,7 +571,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
           LocalDateTime.now(),
           this.current_account.loginState().getCredentials(),
           Simplified.getProfilesController().profileCurrent().id().getUuid(),
-          this.current_account.provider().id(),
+          this.current_account.provider().getId(),
           this.current_account.id().getUuid(),
           this.feed_entry.getID(),
           this.feed_entry.getTitle()));
@@ -860,7 +860,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
               LocalDateTime.now(),
               this.current_account.loginState().getCredentials(),
               Simplified.getProfilesController().profileCurrent().id().getUuid(),
-              this.current_account.provider().id(),
+              this.current_account.provider().getId(),
               this.current_account.id().getUuid(),
               this.feed_entry.getID(),
               this.feed_entry.getTitle(),

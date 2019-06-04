@@ -114,10 +114,10 @@ class LoginDialog : AppCompatDialogFragment() {
 
     val accountProvider =
       account.provider()
-    val authenticationOpt =
-      accountProvider.authentication()
+    val authentication =
+      accountProvider.authentication
 
-    if (!(authenticationOpt is Some<AccountProviderAuthenticationDescription>)) {
+    if (authentication == null) {
       this.logger.error("Login dialog created for account that does not require authentication!")
       this.dismissAllowingStateLoss()
       return layout
@@ -127,7 +127,6 @@ class LoginDialog : AppCompatDialogFragment() {
      * If the passcode is not allowed to contain letters, then don't let users enter them.
      */
 
-    val authentication = authenticationOpt.get()
     if (!authentication.passCodeMayContainLetters()) {
       this.pinEdit.inputType =
         InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
@@ -155,7 +154,7 @@ class LoginDialog : AppCompatDialogFragment() {
      * If the account provider supports barcode scanning, show the scan button.
      */
 
-    if (accountProvider.supportsBarcodeScanner()) {
+    if (accountProvider.supportsBarcodeScanner) {
       this.barcodeScanButton.visibility = View.VISIBLE
     }
 
