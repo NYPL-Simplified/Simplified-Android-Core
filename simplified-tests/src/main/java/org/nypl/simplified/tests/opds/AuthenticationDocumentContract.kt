@@ -29,11 +29,73 @@ abstract class AuthenticationDocumentContract {
   }
 
   @Test
+  fun testExampleMissingID() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example_missing_id.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Failure::class.java))
+  }
+
+  @Test
+  fun testExampleBadLink() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example_bad_link.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Failure::class.java))
+  }
+
+  @Test
+  fun testExampleBadLinks() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example_bad_links.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Failure::class.java))
+  }
+
+  @Test
+  fun testExampleBadAuthentications() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example_bad_authentications.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Failure::class.java))
+  }
+
+  @Test
+  fun testExampleBadAuthentication() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example_bad_authentication.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Failure::class.java))
+  }
+
+  @Test
+  fun testExampleBadLabels() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example_bad_labels.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Failure::class.java))
+  }
+
+  @Test
   fun testNYPL20190603() {
     val parser =
       this.parsers.createParser(URI.create("urn:x"), resource("nypl-20190603.json"))
 
-    val result = parser.parse()
+    val result =
+      parser.use { parser.parse() }
+
     this.dump(result)
     Assert.assertThat(result, IsInstanceOf(Success::class.java))
 
@@ -206,6 +268,153 @@ abstract class AuthenticationDocumentContract {
       Assert.assertEquals(null, this.title)
       Assert.assertEquals("image/png", this.type!!.fullType)
       Assert.assertEquals(null, this.width)
+    }
+  }
+
+  @Test
+  fun testMinimal() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("minimal.json"))
+
+    val result =
+      parser.use { parser.parse() }
+
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Success::class.java))
+
+    val success = result as Success
+    val document = success.result
+
+    Assert.assertEquals(
+      "Public Library",
+      document.title)
+    Assert.assertEquals(
+      URI.create("http://example.com/auth.json"),
+      document.id)
+  }
+
+  @Test
+  fun testExample() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example.json"))
+
+    val result =
+      parser.use { parser.parse() }
+
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Success::class.java))
+
+    val success = result as Success
+    val document = success.result
+
+    Assert.assertEquals(
+      "Public Library",
+      document.title)
+    Assert.assertEquals(
+      URI.create("http://example.com/auth.json"),
+      document.id)
+    Assert.assertEquals(
+      "Enter a valid library card number and PIN code to authenticate on our service.",
+      document.description)
+
+    Assert.assertEquals(5, document.links.size)
+
+    document.links[0].apply {
+      Assert.assertEquals(null, this.bitrate)
+      Assert.assertEquals(null, this.duration)
+      Assert.assertEquals(90, this.height)
+      Assert.assertEquals(URI("http://example.com/logo.jpg"), this.href)
+      Assert.assertEquals("logo", this.rel)
+      Assert.assertEquals(false, this.templated)
+      Assert.assertEquals(null, this.title)
+      Assert.assertEquals("image/jpeg", this.type!!.fullType)
+      Assert.assertEquals(90, this.width)
+    }
+
+    document.links[1].apply {
+      Assert.assertEquals(null, this.bitrate)
+      Assert.assertEquals(null, this.duration)
+      Assert.assertEquals(null, this.height)
+      Assert.assertEquals(URI("mailto:support@example.org"), this.href)
+      Assert.assertEquals("help", this.rel)
+      Assert.assertEquals(false, this.templated)
+      Assert.assertEquals(null, this.title)
+      Assert.assertEquals(null, this.type)
+      Assert.assertEquals(null, this.width)
+    }
+
+    document.links[2].apply {
+      Assert.assertEquals(null, this.bitrate)
+      Assert.assertEquals(null, this.duration)
+      Assert.assertEquals(null, this.height)
+      Assert.assertEquals(URI("tel:1800836482"), this.href)
+      Assert.assertEquals("help", this.rel)
+      Assert.assertEquals(false, this.templated)
+      Assert.assertEquals(null, this.title)
+      Assert.assertEquals(null, this.type)
+      Assert.assertEquals(null, this.width)
+    }
+
+    document.links[3].apply {
+      Assert.assertEquals(null, this.bitrate)
+      Assert.assertEquals(null, this.duration)
+      Assert.assertEquals(null, this.height)
+      Assert.assertEquals(URI("http://example.com/support"), this.href)
+      Assert.assertEquals("help", this.rel)
+      Assert.assertEquals(false, this.templated)
+      Assert.assertEquals(null, this.title)
+      Assert.assertEquals("text/html", this.type!!.fullType)
+      Assert.assertEquals(null, this.width)
+    }
+
+    document.links[4].apply {
+      Assert.assertEquals(null, this.bitrate)
+      Assert.assertEquals(null, this.duration)
+      Assert.assertEquals(null, this.height)
+      Assert.assertEquals(URI("http://example.com/registration"), this.href)
+      Assert.assertEquals("register", this.rel)
+      Assert.assertEquals(false, this.templated)
+      Assert.assertEquals(null, this.title)
+      Assert.assertEquals("text/html", this.type!!.fullType)
+      Assert.assertEquals(null, this.width)
+    }
+
+    Assert.assertEquals(2, document.authentication.size)
+
+    document.authentication[0].apply {
+      Assert.assertEquals(URI("http://opds-spec.org/auth/basic"), this.type)
+      Assert.assertEquals(2, this.labels.size)
+      Assert.assertEquals("Library card", this.labels["login"])
+      Assert.assertEquals("PIN", this.labels["password"])
+    }
+    document.authentication[1].apply {
+      Assert.assertEquals(URI("http://opds-spec.org/auth/oauth/implicit"), this.type)
+      Assert.assertEquals(0, this.labels.size)
+      Assert.assertEquals(2, this.links.size)
+
+      this.links[0].apply {
+        Assert.assertEquals(null, this.bitrate)
+        Assert.assertEquals(null, this.duration)
+        Assert.assertEquals(null, this.height)
+        Assert.assertEquals(URI("http://example.com/oauth"), this.href)
+        Assert.assertEquals("authenticate", this.rel)
+        Assert.assertEquals(false, this.templated)
+        Assert.assertEquals(null, this.title)
+        Assert.assertEquals("text/html", this.type!!.fullType)
+        Assert.assertEquals(null, this.width)
+      }
+
+      this.links[1].apply {
+        Assert.assertEquals(null, this.bitrate)
+        Assert.assertEquals(null, this.duration)
+        Assert.assertEquals(null, this.height)
+        Assert.assertEquals(URI("http://example.com/oauth/refresh"), this.href)
+        Assert.assertEquals("refresh", this.rel)
+        Assert.assertEquals(false, this.templated)
+        Assert.assertEquals(null, this.title)
+        Assert.assertEquals("application/json", this.type!!.fullType)
+        Assert.assertEquals(null, this.width)
+      }
     }
   }
 

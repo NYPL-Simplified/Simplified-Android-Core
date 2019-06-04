@@ -521,6 +521,27 @@ public final class JSONParserUtilities {
   /**
    * @param key A key assumed to be holding a value
    * @param n   A node
+   * @return An integer value from key {@code key}, if the key exists
+   * @throws JSONParseException On type errors
+   */
+
+  public static Integer getIntegerOrNull(
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+    NullCheck.notNull(key);
+
+    if (n.has(key)) {
+      return JSONParserUtilities.getInteger(n, key);
+    }
+    return null;
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param n   A node
    * @return A string value from key {@code key}, if the key exists, or {@code default_value} otherwise.
    * @throws JSONParseException On type errors
    */
