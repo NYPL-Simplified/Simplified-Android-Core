@@ -274,13 +274,9 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * provider doesn't support/require authentication.
      */
 
-    // Get labels from the current authentication document.
+    // XXX: Get labels from the current authentication document.
     // XXX: This should be per-account
     val docs = Simplified.getDocumentStore()
-    val auth_doc = docs.authenticationDocument
-    this.barcodeLabel.text = auth_doc.labelLoginUserID
-    this.pinLabel.text = auth_doc.labelLoginPassword
-
     this.pinText.transformationMethod = PasswordTransformationMethod.getInstance()
     this.handlePinReveal(this.pinText, this.pinReveal)
 

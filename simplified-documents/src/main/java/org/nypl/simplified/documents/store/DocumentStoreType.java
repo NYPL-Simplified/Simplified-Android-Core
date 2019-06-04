@@ -31,12 +31,6 @@ public interface DocumentStoreType
   OptionType<SyncedDocumentType> getAcknowledgements();
 
   /**
-   * @return The login document
-   */
-
-  AuthenticationDocumentType getAuthenticationDocument();
-
-  /**
    * @return The EULA, if any
    */
 

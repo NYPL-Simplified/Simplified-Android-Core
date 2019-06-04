@@ -83,8 +83,6 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.observable.Observable;
 import org.nypl.simplified.observable.ObservableType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
-import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParser;
-import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParserType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
@@ -564,33 +562,8 @@ public final class Simplified extends MultiDexApplication {
     final ExecutorService exec,
     final File directory) {
 
-    final OPDSAuthenticationDocumentParserType auth_doc_parser =
-      OPDSAuthenticationDocumentParser.get();
-
-    /*
-     * Default authentication document values.
-     */
-
-    final AuthenticationDocumentValuesType auth_doc_values =
-      new AuthenticationDocumentValuesType() {
-        @Override
-        public String getLabelLoginUserID() {
-          return resources.getString(R.string.settings_barcode);
-        }
-
-        @Override
-        public String getLabelLoginPassword() {
-          return resources.getString(R.string.settings_pin);
-        }
-
-        @Override
-        public String getLabelLoginPatronName() {
-          return resources.getString(R.string.settings_name);
-        }
-      };
-
     final DocumentStoreBuilderType documents_builder =
-      DocumentStore.newBuilder(clock, http, exec, directory, auth_doc_values, auth_doc_parser);
+      DocumentStore.newBuilder(clock, http, exec, directory);
 
     try {
       final InputStream stream = assets.open("eula.html");
