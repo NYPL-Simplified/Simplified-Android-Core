@@ -1,7 +1,5 @@
 package org.nypl.simplified.opds.auth_document.api
 
-interface AuthenticationDocumentSerializerType {
+import org.nypl.simplified.parser.api.SerializerType
 
-  fun serialize()
-
-}
+interface AuthenticationDocumentSerializerType : SerializerType

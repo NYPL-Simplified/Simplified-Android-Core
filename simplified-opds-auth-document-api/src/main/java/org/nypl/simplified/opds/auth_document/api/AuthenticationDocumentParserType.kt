@@ -1,9 +1,5 @@
 package org.nypl.simplified.opds.auth_document.api
 
-import java.io.Closeable
+import org.nypl.simplified.parser.api.ParserType
 
-interface AuthenticationDocumentParserType : Closeable {
-
-  fun parse(): AuthenticationDocumentParseResult<AuthenticationDocument>
-
-}
+interface AuthenticationDocumentParserType : ParserType<AuthenticationDocument>

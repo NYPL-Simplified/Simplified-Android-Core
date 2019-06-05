@@ -56,6 +56,8 @@ dependencies {
   api project(":simplified-opds-auth-document-api")
   api project(":simplified-opds-auth-document")
   api project(":simplified-opds-core")
+  api project(":simplified-patron")
+  api project(":simplified-patron-api")
   api project(":simplified-profiles")
   api project(":simplified-profiles-api")
   api project(":simplified-profiles-controller-api")

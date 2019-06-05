@@ -1,13 +1,5 @@
 package org.nypl.simplified.opds.auth_document.api
 
-import java.io.OutputStream
-import java.net.URI
+import org.nypl.simplified.parser.api.SerializersType
 
-interface AuthenticationDocumentSerializersType {
-
-  fun createSerializer(
-    uri: URI,
-    stream: OutputStream,
-    document: AuthenticationDocument): AuthenticationDocumentSerializerType
-
-}
+interface AuthenticationDocumentSerializersType : SerializersType<AuthenticationDocument>

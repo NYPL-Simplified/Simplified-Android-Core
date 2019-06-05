@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
-import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentError
-import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParseResult
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParserType
-import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentWarning
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObject
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectLink
+import org.nypl.simplified.parser.api.ParseError
+import org.nypl.simplified.parser.api.ParseResult
+import org.nypl.simplified.parser.api.ParseWarning
 import java.io.InputStream
 import java.net.URI
 
@@ -27,20 +27,26 @@ internal class AuthenticationDocumentParser(
   }
 
   private val errors =
-    mutableListOf<AuthenticationDocumentError>()
+    mutableListOf<ParseError>()
   private val warnings =
-    mutableListOf<AuthenticationDocumentWarning>()
+    mutableListOf<ParseWarning>()
 
-  private fun publishWarning(warning: AuthenticationDocumentWarning) {
+  private fun publishWarning(warning: ParseWarning) {
     if (this.warningsAsErrors) {
-      this.errors.add(AuthenticationDocumentError(this.uri, warning.message, warning.exception))
+      this.errors.add(ParseError(
+        source = this.uri,
+        message = warning.message,
+        line = 0,
+        column = 0,
+        exception = warning.exception
+      ))
     } else {
       this.warnings.add(warning)
     }
   }
 
   private fun publishErrorForException(e: Exception) {
-    this.errors.add(AuthenticationDocumentError(
+    this.errors.add(ParseError(
       source = this.uri,
       message = e.message ?: "",
       exception = e
@@ -48,19 +54,19 @@ internal class AuthenticationDocumentParser(
   }
 
   private fun publishErrorForString(message: String) {
-    this.errors.add(AuthenticationDocumentError(
+    this.errors.add(ParseError(
       source = this.uri,
       message = message,
       exception = null
     ))
   }
 
-  override fun parse(): AuthenticationDocumentParseResult<AuthenticationDocument> {
+  override fun parse(): ParseResult<AuthenticationDocument> {
     return try {
       val tree = this.mapper.readTree(this.stream)
       if (tree == null) {
         this.publishErrorForString("Document is empty")
-        return AuthenticationDocumentParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
+        return ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
       }
 
       val root =
@@ -77,7 +83,7 @@ internal class AuthenticationDocumentParser(
         this.parseLinks(root)
 
       if (this.errors.isEmpty()) {
-        return AuthenticationDocumentParseResult.Success(
+        return ParseResult.Success(
           warnings = this.warnings.toList(),
           result = AuthenticationDocument(
             id = id,
@@ -86,11 +92,11 @@ internal class AuthenticationDocumentParser(
             links = links,
             authentication = authentication))
       } else {
-        AuthenticationDocumentParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
+        ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
       }
     } catch (e: Exception) {
       this.publishErrorForException(e)
-      AuthenticationDocumentParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
+      ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
     }
   }
 

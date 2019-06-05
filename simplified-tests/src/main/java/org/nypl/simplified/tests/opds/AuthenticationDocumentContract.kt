@@ -4,10 +4,10 @@ import org.hamcrest.core.IsInstanceOf
 import org.junit.Assert
 import org.junit.Test
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
-import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParseResult
-import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParseResult.Failure
-import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParseResult.Success
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
+import org.nypl.simplified.parser.api.ParseResult
+import org.nypl.simplified.parser.api.ParseResult.Failure
+import org.nypl.simplified.parser.api.ParseResult.Success
 import org.slf4j.Logger
 import java.io.InputStream
 import java.net.URI
@@ -423,7 +423,7 @@ abstract class AuthenticationDocumentContract {
     return AuthenticationDocumentContract::class.java.getResourceAsStream(path)
   }
 
-  private fun dump(result: AuthenticationDocumentParseResult<AuthenticationDocument>) {
+  private fun dump(result: ParseResult<AuthenticationDocument>) {
     return when (result) {
       is Success ->
         this.logger.debug("success: {}", result.result)
