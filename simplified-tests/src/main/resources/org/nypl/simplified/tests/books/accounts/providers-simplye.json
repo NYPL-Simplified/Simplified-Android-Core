@@ -1,5 +1,6 @@
 [
   {
+    "authenticationDocument": "https://circulation.librarysimplified.org/CLASSICS/authentication_document",
     "id_uuid" : "https://instantclassics.librarysimplified.org",
     "name" : "SimplyE Collection",
     "subtitle" : "E-books free to download and read without a library card",

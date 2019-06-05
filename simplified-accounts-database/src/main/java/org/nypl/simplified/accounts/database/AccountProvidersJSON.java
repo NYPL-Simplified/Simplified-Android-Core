@@ -55,6 +55,8 @@ public final class AccountProvidersJSON {
       b.setPatronSettingsURI(applyPatronSettingHack(catalogUrl));
       b.setAnnotationsURI(applyAnnotationsHack(catalogUrl));
 
+      b.setAuthenticationDocumentURI(
+        JSONParserUtilities.getURIOrNull(obj, "authenticationDocument"));
       b.setCatalogURIForUnder13s(
         JSONParserUtilities.getURIOrNull(obj, "catalogUrlUnder13"));
       b.setCatalogURIForOver13s(

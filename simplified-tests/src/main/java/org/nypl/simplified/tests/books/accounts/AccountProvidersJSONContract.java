@@ -125,6 +125,7 @@ public abstract class AccountProvidersJSONContract {
     final AccountProviderType p = c.providerDefault();
     Assert.assertTrue(c.providers().containsKey(p.getId()));
     Assert.assertTrue(c.providers().containsValue(p));
+    Assert.assertEquals("https://circulation.librarysimplified.org/CLASSICS/authentication_document", p.getAuthenticationDocumentURI().toString());
     Assert.assertEquals("https://instantclassics.librarysimplified.org", p.getId().toString());
     Assert.assertEquals("SimplyE Collection", p.getDisplayName());
     Assert.assertEquals("E-books free to download and read without a library card", p.getSubtitle());
@@ -152,7 +153,7 @@ public abstract class AccountProvidersJSONContract {
         AccountProvidersJSON.deserializeFromString(
             readAllFromResource("providers-all.json"));
 
-    Assert.assertEquals(165L, c.providers().size());
+    Assert.assertEquals(172L, c.providers().size());
     final AccountProviderType p = c.providerDefault();
     Assert.assertTrue(c.providers().containsKey(p.getId()));
     Assert.assertTrue(c.providers().containsValue(p));

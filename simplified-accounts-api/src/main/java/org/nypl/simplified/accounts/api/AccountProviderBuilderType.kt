@@ -27,6 +27,12 @@ interface AccountProviderBuilderType {
   var subtitle: String?
 
   /**
+   * @see AccountProviderType.authenticationDocumentURI
+   */
+
+  var authenticationDocumentURI: URI?
+
+  /**
    * @see AccountProviderType.logo
    */
 

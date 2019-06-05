@@ -79,6 +79,12 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val supportsHelpCenter: Boolean
 
   /**
+   * @return The address of the authentication document for the account provider
+   */
+
+  val authenticationDocumentURI: URI?
+
+  /**
    * @return The base URI of the catalog
    */
 

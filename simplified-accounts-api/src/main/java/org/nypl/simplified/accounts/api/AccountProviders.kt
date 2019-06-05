@@ -1,6 +1,5 @@
 package org.nypl.simplified.accounts.api
 
-import java.lang.IllegalStateException
 import java.net.URI
 
 /**
@@ -32,7 +31,8 @@ object AccountProviders {
     override val styleNameOverride: String?,
     override val addAutomatically: Boolean,
     override val patronSettingsURI: URI?,
-    override val annotationsURI: URI?
+    override val annotationsURI: URI?,
+    override val authenticationDocumentURI: URI?
   ) : AccountProviderType {
 
     override fun toBuilder(): AccountProviderBuilderType {
@@ -82,7 +82,8 @@ object AccountProviders {
     override var styleNameOverride: String? = null,
     override var patronSettingsURI: URI? = null,
     override var annotationsURI: URI? = null,
-    override var authentication: AccountProviderAuthenticationDescription? = null)
+    override var authentication: AccountProviderAuthenticationDescription? = null,
+    override var authenticationDocumentURI: URI? = null)
     : AccountProviderBuilderType {
 
     override fun build(): AccountProviderType {
@@ -118,7 +119,8 @@ object AccountProviders {
         styleNameOverride = this.styleNameOverride,
         addAutomatically = this.addAutomatically,
         patronSettingsURI = this.patronSettingsURI,
-        annotationsURI = this.annotationsURI)
+        annotationsURI = this.annotationsURI,
+        authenticationDocumentURI = this.authenticationDocumentURI)
     }
 
     private fun <T> check(value: T?, name: String): T {
