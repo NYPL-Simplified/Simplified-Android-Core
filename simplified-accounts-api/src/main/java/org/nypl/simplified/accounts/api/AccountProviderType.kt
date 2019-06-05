@@ -167,14 +167,12 @@ interface AccountProviderType : Comparable<AccountProviderType> {
 
   fun catalogURIForAge(age: Int): URI {
     return if (age >= 13) {
-      val o13 = this.catalogURIForOver13s
-      when (o13) {
+      when (val o13 = this.catalogURIForOver13s) {
         null -> this.catalogURI
         else -> o13
       }
     } else {
-      val u13 = this.catalogURIForUnder13s
-      when (u13) {
+      when (val u13 = this.catalogURIForUnder13s) {
         null -> this.catalogURI
         else -> u13
       }
