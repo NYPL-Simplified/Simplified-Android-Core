@@ -51,6 +51,7 @@ android {
     versionName = version.get(0)
     versionCode = version.get(1)
     setProperty("archivesBaseName", "simplye-${versionName}-${versionCode}")
+    minSdkVersion androidMinimumSDK
   }
 
   lintOptions {

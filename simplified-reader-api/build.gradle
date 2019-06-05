@@ -11,6 +11,9 @@ android {
   }
 
   useLibrary 'org.apache.http.legacy'
+  defaultConfig {
+    minSdkVersion androidMinimumSDK
+  }
 }
 
 description = 'simplified-reader-api'
