@@ -76,11 +76,11 @@ public abstract class AccountAuthenticationCredentialsJSONContract {
       throws Exception {
 
     AccountAuthenticationAdobePreActivationCredentials adobe =
-        AccountAuthenticationAdobePreActivationCredentials.create(
+        new AccountAuthenticationAdobePreActivationCredentials(
             new AdobeVendorID("vendor"),
             AccountAuthenticationAdobeClientToken.create("NYNYPL|156|5e0cdf28-e3a2-11e7-ab18-0e26ed4612aa|LEcBeSV"),
             URI.create("http://example.com"),
-            Option.<AccountAuthenticationAdobePostActivationCredentials>none());
+            null);
 
     final AccountAuthenticationCredentials creds0 =
         AccountAuthenticationCredentials.builder(
@@ -103,16 +103,16 @@ public abstract class AccountAuthenticationCredentialsJSONContract {
       throws Exception {
 
     AccountAuthenticationAdobePostActivationCredentials adobe_post =
-        AccountAuthenticationAdobePostActivationCredentials.create(
+        new AccountAuthenticationAdobePostActivationCredentials(
             new AdobeDeviceID("device"),
             new AdobeUserID("user"));
 
     AccountAuthenticationAdobePreActivationCredentials adobe =
-        AccountAuthenticationAdobePreActivationCredentials.create(
+      new AccountAuthenticationAdobePreActivationCredentials(
             new AdobeVendorID("vendor"),
             AccountAuthenticationAdobeClientToken.create("NYNYPL|156|5e0cdf28-e3a2-11e7-ab18-0e26ed4612aa|LEcBeSV"),
             URI.create("http://example.com"),
-            Option.some(adobe_post));
+            null);
 
     final AccountAuthenticationCredentials creds0 =
         AccountAuthenticationCredentials.builder(

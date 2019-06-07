@@ -304,7 +304,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   }
 
   private fun onAccountEvent(event: AccountEvent): Unit {
-    this.logger.debug("onAccountEvent: {}", event)
+    this.logger.debug("onAccountEvent: {}", event.javaClass.canonicalName)
 
     return when (event) {
       is AccountEventCreation ->

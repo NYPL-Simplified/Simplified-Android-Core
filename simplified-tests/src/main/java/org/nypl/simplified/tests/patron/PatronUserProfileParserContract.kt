@@ -79,6 +79,37 @@ abstract class PatronUserProfileParserContract {
   }
 
   @Test
+  fun testExampleWithDeviceManagement() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example-with-device.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Success::class.java))
+
+    val success = result as Success
+    val profile = success.result
+
+    Assert.assertEquals(
+      "6120696828384",
+      profile.authorization?.identifier)
+    Assert.assertEquals(
+      "2019-08-02T00:00:00.000Z",
+      profile.authorization?.expires.toString())
+    Assert.assertEquals(
+      true,
+      profile.settings.synchronizeAnnotations)
+
+    Assert.assertEquals(1, profile.drm.size)
+
+    val drmAdobe = profile.drm.map { a -> a as PatronDRMAdobe }.first()
+    Assert.assertEquals("NYPL", drmAdobe.vendor)
+    Assert.assertEquals(URI("http://librarysimplified.org/terms/drm/scheme/ACS"), drmAdobe.scheme)
+    Assert.assertEquals("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K", drmAdobe.clientToken)
+    Assert.assertEquals("https://example.com/devices", drmAdobe.deviceManagerURI?.toString())
+  }
+
+  @Test
   fun testExampleUnknownDRM() {
     val parser =
       this.parsers.createParser(URI.create("urn:x"), resource("example-drm-unknown.json"))

@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.controller.api;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.Unit;
 
@@ -60,7 +61,7 @@ public interface BooksControllerType {
    * @param report_type Type of report to submit
    */
 
-  ListenableFuture<Unit> bookReport(
+  FluentFuture<Unit> bookReport(
     final AccountType account,
     final FeedEntry.FeedEntryOPDS feed_entry,
     final String report_type);
@@ -71,7 +72,7 @@ public interface BooksControllerType {
    * @param account The account
    */
 
-  ListenableFuture<Unit> booksSync(
+  FluentFuture<Unit> booksSync(
     AccountType account);
 
   /**
@@ -81,7 +82,7 @@ public interface BooksControllerType {
    * @param book_id The ID of the book
    */
 
-  ListenableFuture<Unit> bookRevoke(
+  FluentFuture<Unit> bookRevoke(
     AccountType account,
     BookID book_id);
 
@@ -92,7 +93,7 @@ public interface BooksControllerType {
    * @param book_id The ID of the book
    */
 
-  ListenableFuture<Unit> bookDelete(
+  FluentFuture<Unit> bookDelete(
     AccountType account,
     BookID book_id);
 
@@ -103,7 +104,7 @@ public interface BooksControllerType {
    * @param id      The ID of the book
    */
 
-  ListenableFuture<Unit> bookRevokeFailedDismiss(
+  FluentFuture<Unit> bookRevokeFailedDismiss(
     AccountType account,
     BookID id);
 }

@@ -9,6 +9,7 @@ import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeAdeptLoanReturnListenerType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
@@ -310,8 +311,8 @@ internal class BookRevokeTask(
     val listener = AdobeLoanReturnResult(latch)
     adobe.execute { connector ->
       val adobeUserOpt = accountCredentials.adobePostActivationCredentials()
-      val creds = (adobeUserOpt as Some<org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials>).get()
-      connector.loanReturn(listener, adobeLoan.id, creds.userID())
+      val creds = (adobeUserOpt as Some<AccountAuthenticationAdobePostActivationCredentials>).get()
+      connector.loanReturn(listener, adobeLoan.id, creds.userID)
     }
 
     /*

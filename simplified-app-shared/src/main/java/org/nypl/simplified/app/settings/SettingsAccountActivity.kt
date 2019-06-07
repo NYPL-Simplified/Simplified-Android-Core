@@ -47,7 +47,6 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ReportIssueActivity
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.WebViewActivity
-import org.nypl.simplified.app.login.LoginErrorCodeStrings
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.documents.eula.EULAType
@@ -164,7 +163,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
     val extras = this.intent.extras
     this.profile = Simplified.getProfilesController().profileCurrent()
-    this.account = org.nypl.simplified.app.settings.SettingsAccountActivity.Companion.getAccount(extras)
+    this.account = getAccount(extras)
 
     this.accountNameText =
       this.findViewById(android.R.id.text1)
@@ -413,7 +412,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       when (val state = event.state) {
         AccountNotLoggedIn ->
           this.onAccountEventNotLoggedIn()
-        AccountLoggingIn ->
+        is AccountLoggingIn ->
           this.onAccountEventLoggingIn()
         is AccountLoginFailed ->
           this.onAccountEventLoginFailed(state)
@@ -435,7 +434,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      LoginErrorCodeStrings.stringOfLoginError(this.resources, failed.errorCode), null)
+      failed.steps.last().resolution,
+      null)
     { this.login.isEnabled = true }
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
@@ -548,10 +548,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         this.configureDisableLoginForm()
       }
 
-      AccountLoggingIn -> {
+      is AccountLoggingIn -> {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.VISIBLE
-        this.actionText.setText(R.string.settings_login_in_progress)
+        this.actionText.setText(state.status)
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = false
         this.configureDisableLoginForm()
@@ -682,7 +682,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       .profileAccountLogin(this.account.id(), credentials)
       .onException(Exception::class.java) { exception ->
         this.logger.error("error during login: ", exception)
-        Unit.unit()
+        null
       }
     return Unit.unit()
   }

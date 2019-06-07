@@ -14,24 +14,24 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.io7m.jfunctional.Some
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPIN
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
 class LoginDialog : AppCompatDialogFragment() {
 
+  private lateinit var books: BooksControllerType
   private lateinit var profiles: ProfilesControllerType
   private lateinit var loginActionText: TextView
   private lateinit var loginProgress: ProgressBar
@@ -210,7 +210,7 @@ class LoginDialog : AppCompatDialogFragment() {
           this.enableUIElements()
         }
 
-        AccountLoginState.AccountLoggingIn -> {
+        is AccountLoginState.AccountLoggingIn -> {
           this.loginActionLayout.visibility = View.VISIBLE
           this.loginProgress.visibility = View.VISIBLE
           this.loginActionText.setText(R.string.settings_login_in_progress)
@@ -222,8 +222,8 @@ class LoginDialog : AppCompatDialogFragment() {
             ErrorDialogUtilities.showError(
               this.activity,
               this.logger,
-              LoginErrorCodeStrings.stringOfLoginError(this.resources, state.errorCode),
-              state.exception)
+              state.steps.last().resolution,
+              state.steps.last().exception)
             this.shownAlert = true
           }
 
@@ -249,10 +249,11 @@ class LoginDialog : AppCompatDialogFragment() {
 
         is AccountLoginState.AccountLogoutFailed -> {
           if (!this.shownAlert) {
+            // XXX: Adjust logout data class
             ErrorDialogUtilities.showError(
               this.activity,
               this.logger,
-              LoginErrorCodeStrings.stringOfLogoutError(this.resources, state.errorCode),
+              "XXX: Missing string!",
               state.exception)
             this.shownAlert = true
           }

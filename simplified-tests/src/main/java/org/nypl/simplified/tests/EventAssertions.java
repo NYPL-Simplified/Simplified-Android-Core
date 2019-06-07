@@ -47,4 +47,28 @@ public final class EventAssertions {
   {
     isTypeAndMatches(clazz, events, index, e -> {});
   }
+
+  /**
+   * Assert that the elements in the given list have the corresponding types.
+   */
+
+  public static void isListWithTypes(
+    final List<?> events,
+    final List<Class<?>> types)
+  {
+    Assert.assertEquals(
+      "Expected a list of " + types.size() + " events",
+      events.size(),
+      types.size());
+
+    for (int index = 0; index < events.size(); ++index) {
+      Class<?> expectedClass = types.get(index);
+      Object received = events.get(index);
+
+      Assert.assertThat(
+        String.format("Expected [%d] %s == Received [%d] %s\n", index, expectedClass, index, received),
+        received,
+        new IsInstanceOf(expectedClass));
+    }
+  }
 }

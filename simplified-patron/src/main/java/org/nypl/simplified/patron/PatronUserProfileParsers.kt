@@ -6,6 +6,10 @@ import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import java.io.InputStream
 import java.net.URI
 
+/**
+ * The default provider of patron user profile parsers.
+ */
+
 class PatronUserProfileParsers : PatronUserProfileParsersType {
 
   private val mapper = ObjectMapper()

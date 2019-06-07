@@ -53,6 +53,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSFeedTransportType
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.opds.core.OPDSSearchParserType
+import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabase
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
@@ -60,10 +61,12 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.ServiceLoader
 import java.util.concurrent.Executors
 
 class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
 
+  private lateinit var patronParsers: PatronUserProfileParsersType
   private lateinit var profiles: Controller
   private lateinit var timerExecutor: ListeningExecutorService
   private lateinit var analyticsLogger: AnalyticsType
@@ -164,6 +167,11 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
     this.analyticsLogger =
       MockAnalytics()
 
+    this.patronParsers =
+      ServiceLoader.load(PatronUserProfileParsersType::class.java)
+        .iterator()
+        .next()
+
     this.profiles =
       Controller.create(
         exec = this.executor,
@@ -180,7 +188,9 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         bundledContent = this.bundledContent,
         accountProviders = FunctionType { this.getAccountProviders() },
         timerExecutor = this.timerExecutor,
-        adobeDrm = null
+        adobeDrm = null,
+        patronUserProfileParsers = this.patronParsers,
+        accountLoginStringResources = MockAccountLoginStringResources()
       )
 
     val button0 = Button(this)
@@ -331,7 +341,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
           AccountLoginState.AccountNotLoggedIn -> {
             this.clicked = false
           }
-          AccountLoginState.AccountLoggingIn -> {
+          is AccountLoginState.AccountLoggingIn -> {
             this.clicked = false
           }
           is AccountLoginState.AccountLoginFailed -> {

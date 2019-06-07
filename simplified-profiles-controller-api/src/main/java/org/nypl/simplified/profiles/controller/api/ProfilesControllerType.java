@@ -116,7 +116,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a login event
    */
 
-  FluentFuture<Unit> profileAccountLogin(
+  FluentFuture<AccountLoginTaskResult> profileAccountLogin(
     AccountID account,
     AccountAuthenticationCredentials credentials);
 

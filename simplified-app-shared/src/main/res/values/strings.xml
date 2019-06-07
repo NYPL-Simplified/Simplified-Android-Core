@@ -329,4 +329,17 @@
   <string name="versions_revision">Build</string>
   <string name="versions_version">Version</string>
 
+  <!-- Login strings -->
+  <string name="loginDeviceActivated">Device activated</string>
+  <string name="loginDeviceActivating">Attempting to activate device…</string>
+  <string name="loginCheckingAuthenticationRequirement">Checking authentication requirement…</string>
+  <string name="loginPatronSettingsRequesting">Requesting patron settings…</string>
+  <string name="loginPatronSettingsOK">Received patron settings</string>
+  <string name="loginErrorServer">Server returned an error: %1$d %2$s</string>
+  <string name="loginErrorAuthNotRequired">Authentication is not required!</string>
+  <string name="loginErrorNoPatronURI">No patron settings URI is defined!</string>
+  <string name="loginErrorInvalidCredentials">@string/settings_login_failed_credentials</string>
+  <string name="loginErrorConnectionFailed">@string/settings_login_failed_server</string>
+  <string name="loginErrorPatronSettingsParseError">Could not parse patron settings returned by server!</string>
+
 </resources>

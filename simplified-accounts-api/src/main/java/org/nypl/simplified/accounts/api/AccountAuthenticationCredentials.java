@@ -86,21 +86,7 @@ public abstract class AccountAuthenticationCredentials {
    */
 
   public final OptionType<AccountAuthenticationAdobePostActivationCredentials> adobePostActivationCredentials() {
-    return adobeCredentials().accept(
-        new OptionVisitorType<AccountAuthenticationAdobePreActivationCredentials,
-            OptionType<AccountAuthenticationAdobePostActivationCredentials>>() {
-          @Override
-          public OptionType<AccountAuthenticationAdobePostActivationCredentials>
-          none(final None<AccountAuthenticationAdobePreActivationCredentials> none) {
-            return Option.none();
-          }
-
-          @Override
-          public OptionType<AccountAuthenticationAdobePostActivationCredentials>
-          some(final Some<AccountAuthenticationAdobePreActivationCredentials> some) {
-            return some.get().postActivationCredentials();
-          }
-        });
+    return adobeCredentials().map(AccountAuthenticationAdobePreActivationCredentials::getPostActivationCredentials);
   }
 
   /**

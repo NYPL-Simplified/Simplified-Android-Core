@@ -11,5 +11,6 @@ import java.net.URI
 data class PatronDRMAdobe(
   override val vendor: String,
   override val scheme: URI,
-  val clientToken: String)
+  val clientToken: String,
+  val deviceManagerURI: URI?)
   : PatronDRM()

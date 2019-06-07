@@ -44,6 +44,7 @@ import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.helpstack.Helpstack;
 import org.nypl.simplified.app.helpstack.HelpstackType;
 import org.nypl.simplified.app.images.ImageAccountIconRequestHandler;
+import org.nypl.simplified.app.login.LoginStringResources;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
 import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
@@ -87,6 +88,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
+import org.nypl.simplified.patron.api.PatronUserProfileParsersType;
 import org.nypl.simplified.profiles.ProfilesDatabase;
 import org.nypl.simplified.profiles.api.ProfileDatabaseException;
 import org.nypl.simplified.profiles.api.ProfileEvent;
@@ -167,6 +169,7 @@ public final class Simplified extends MultiDexApplication {
   private AccountBundledCredentialsType bundled_credentials;
   private AccountAuthenticationCredentialsStoreType account_credentials_store;
   private AnalyticsType analytics;
+  private PatronUserProfileParsersType patronProfileParsers;
 
   /**
    * A specification of whether or not an action bar is wanted in an activity.
@@ -787,24 +790,32 @@ public final class Simplified extends MultiDexApplication {
     LOG.debug("initializing analytics");
     this.analytics = Analytics.Companion.create(new AnalyticsConfiguration(this, this.http));
 
+    LOG.debug("initializing patron profile parsers");
+    this.patronProfileParsers =
+      ServiceLoader.load(PatronUserProfileParsersType.class)
+        .iterator()
+        .next();
+
     LOG.debug("initializing book controller");
     this.book_controller =
       Controller.Companion.create(
-        this.exec_books,
         account_events,
-        profile_events,
-        reader_bookmark_events,
-        this.http,
-        this.feed_parser,
-        this.feed_loader,
-        this.downloader,
-        this.profiles,
+        new LoginStringResources(this.getResources()),
+        (unused) -> this.account_providers,
+        null,
         this.analytics,
         this.book_registry,
         this.bundled_content_resolver,
-        ignored -> this.account_providers,
-        this.exec_profile_timer,
-        null);
+        this.downloader,
+        this.exec_books,
+        this.feed_loader,
+        this.feed_parser,
+        this.http,
+        this.patronProfileParsers,
+        profile_events,
+        profiles,
+        reader_bookmark_events,
+        exec_profile_timer);
 
     LOG.debug("initializing reader bookmark service");
     this.readerBookmarksService =

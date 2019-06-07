@@ -22,6 +22,7 @@ import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.AccountLoginTaskResult
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import java.net.URI
@@ -63,7 +64,7 @@ class MockProfileController : ProfilesControllerType {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun profileAccountLogin(account: AccountID?, credentials: AccountAuthenticationCredentials?): FluentFuture<Unit> {
+  override fun profileAccountLogin(account: AccountID?, credentials: AccountAuthenticationCredentials?): FluentFuture<AccountLoginTaskResult> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 

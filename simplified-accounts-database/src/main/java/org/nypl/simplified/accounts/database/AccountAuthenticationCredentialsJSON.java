@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
@@ -21,6 +22,8 @@ import org.nypl.simplified.accounts.api.AccountPatron;
 import org.nypl.simplified.http.core.HTTPOAuthToken;
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
+
+import java.net.URI;
 
 /**
  * Functions for serializing/deserializing account credentials.
@@ -53,17 +56,22 @@ public final class AccountAuthenticationCredentialsJSON {
       creds -> {
         final ObjectNode adobe_pre_jo = jom.createObjectNode();
 
-        adobe_pre_jo.put("client_token", creds.clientToken().tokenRaw());
-        adobe_pre_jo.put("device_manager_uri", creds.deviceManagerURI().toString());
-        adobe_pre_jo.put("vendor_id", creds.vendorID().getValue());
+        adobe_pre_jo.put("client_token", creds.getClientToken().tokenRaw());
+        adobe_pre_jo.put("vendor_id", creds.getVendorID().getValue());
 
-        creds.postActivationCredentials().map_(
-          post_creds -> {
-            final ObjectNode adobe_post_jo = jom.createObjectNode();
-            adobe_post_jo.put("device_id", post_creds.deviceID().getValue());
-            adobe_post_jo.put("user_id", post_creds.userID().getValue());
-            adobe_pre_jo.set("activation", adobe_post_jo);
-          });
+        final URI deviceURI = creds.getDeviceManagerURI();
+        if (deviceURI != null) {
+          adobe_pre_jo.put("device_manager_uri", deviceURI.toString());
+        }
+
+        final AccountAuthenticationAdobePostActivationCredentials post =
+          creds.getPostActivationCredentials();
+        if (post != null) {
+          final ObjectNode adobe_post_jo = jom.createObjectNode();
+          adobe_post_jo.put("device_id", post.getDeviceID().getValue());
+          adobe_post_jo.put("user_id", post.getUserID().getValue());
+          adobe_pre_jo.set("activation", adobe_post_jo);
+        }
 
         jo.set("adobe_credentials", adobe_pre_jo);
       });
@@ -112,13 +120,20 @@ public final class AccountAuthenticationCredentialsJSON {
       JSONParserUtilities.getObjectOptional(obj, "adobe_credentials")
         .mapPartial(jo_creds -> {
 
-          final OptionType<AccountAuthenticationAdobePostActivationCredentials> creds_post =
-            JSONParserUtilities.getObjectOptional(jo_creds, "activation")
-              .mapPartial(act -> AccountAuthenticationAdobePostActivationCredentials.create(
-                new AdobeDeviceID(JSONParserUtilities.getString(act, "device_id")),
-                new AdobeUserID(JSONParserUtilities.getString(act, "user_id"))));
+          OptionType<ObjectNode> activation_opt =
+            JSONParserUtilities.getObjectOptional(jo_creds, "activation");
 
-          return AccountAuthenticationAdobePreActivationCredentials.create(
+          final AccountAuthenticationAdobePostActivationCredentials creds_post;
+          if (activation_opt.isSome()) {
+            ObjectNode activation = ((Some<ObjectNode>) activation_opt).get();
+            creds_post = new AccountAuthenticationAdobePostActivationCredentials(
+              new AdobeDeviceID(JSONParserUtilities.getString(activation, "device_id")),
+              new AdobeUserID(JSONParserUtilities.getString(activation, "user_id")));
+          } else {
+            creds_post = null;
+          }
+
+          return new AccountAuthenticationAdobePreActivationCredentials(
             new AdobeVendorID(JSONParserUtilities.getString(jo_creds, "vendor_id")),
             AccountAuthenticationAdobeClientToken.create(JSONParserUtilities.getString(jo_creds, "client_token")),
             JSONParserUtilities.getURI(jo_creds, "device_manager_uri"),

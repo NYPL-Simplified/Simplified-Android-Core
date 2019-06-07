@@ -527,7 +527,7 @@ class ReaderBookmarkService private constructor(
 
     return when (event.state) {
       AccountLoginState.AccountNotLoggedIn,
-      AccountLoginState.AccountLoggingIn,
+      is AccountLoginState.AccountLoggingIn,
       is AccountLoginState.AccountLoginFailed,
       AccountLoginState.AccountLoggingOut,
       is AccountLoginState.AccountLogoutFailed -> {

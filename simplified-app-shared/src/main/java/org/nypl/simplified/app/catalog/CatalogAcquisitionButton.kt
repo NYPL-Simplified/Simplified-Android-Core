@@ -122,7 +122,7 @@ class CatalogAcquisitionButton(
   private fun configureForState(state: AccountLoginState) {
     UIThread.runOnUIThread {
       when (state) {
-        AccountLoginState.AccountLoggingIn,
+        is AccountLoginState.AccountLoggingIn,
         is AccountLoginState.AccountLoginFailed -> {
 
           /*

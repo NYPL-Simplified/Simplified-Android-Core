@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -52,10 +53,12 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabase
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MockAccountLoginStringResources
 import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.books.MappedHTTP
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
@@ -99,8 +102,11 @@ abstract class BooksControllerContract {
   private lateinit var profiles: ProfilesDatabaseType
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var executorTimer: ListeningExecutorService
+  private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
 
   protected abstract fun context(): Context
+
+  private val accountLoginStringResources = MockAccountLoginStringResources()
 
   private fun fakeProvider(providerId: String): AccountProviderType {
     return AccountProviders.builder().apply {
@@ -164,7 +170,9 @@ abstract class BooksControllerContract {
     profiles: ProfilesDatabaseType,
     downloader: DownloaderType,
     accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
-    timerExec: ExecutorService): BooksControllerType {
+    timerExec: ExecutorService,
+    patronUserProfileParsers: PatronUserProfileParsersType
+  ): BooksControllerType {
 
     val parser = OPDSFeedParser.newParser(
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()))
@@ -189,6 +197,7 @@ abstract class BooksControllerContract {
     return Controller.create(
       exec = exec,
       accountEvents = accountEvents,
+      accountLoginStringResources = this.accountLoginStringResources,
       profileEvents = profileEvents,
       http = http,
       feedParser = parser,
@@ -201,7 +210,9 @@ abstract class BooksControllerContract {
       accountProviders = accountProviders,
       timerExecutor = timerExec,
       adobeDrm = null,
-      readerBookmarkEvents = Observable.create())
+      readerBookmarkEvents = Observable.create(),
+      patronUserProfileParsers = patronUserProfileParsers
+    )
   }
 
   @Before
@@ -223,6 +234,7 @@ abstract class BooksControllerContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
+    this.patronUserProfileParsers = Mockito.mock(PatronUserProfileParsersType::class.java)
   }
 
   @After
@@ -243,7 +255,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncRemoteNon401() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -255,7 +266,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -300,7 +312,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -344,7 +357,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeProvider("urn:fake:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -378,7 +392,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -411,7 +426,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -455,7 +471,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -524,7 +541,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -628,7 +646,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -696,7 +715,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -762,7 +782,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -813,7 +834,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -878,7 +900,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -943,7 +966,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -1024,7 +1048,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -1100,7 +1125,8 @@ abstract class BooksControllerContract {
         accountProviders = FunctionType { accountProviders(it) },
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents)
+        profileEvents = this.profileEvents,
+        patronUserProfileParsers = this.patronUserProfileParsers)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")

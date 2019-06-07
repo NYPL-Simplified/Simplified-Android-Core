@@ -676,7 +676,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       if (postActivation.isSome()) {
         return ((Some<AccountAuthenticationAdobePostActivationCredentials>) postActivation)
           .get()
-          .deviceID()
+          .getDeviceID()
           .getValue();
       } else {
         return "null";

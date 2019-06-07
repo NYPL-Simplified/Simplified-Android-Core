@@ -2,6 +2,7 @@ package org.nypl.simplified.patron
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.json.core.JSONParserUtilities
@@ -16,6 +17,10 @@ import org.nypl.simplified.patron.api.PatronUserProfile
 import org.nypl.simplified.patron.api.PatronUserProfileParserType
 import java.io.InputStream
 import java.net.URI
+
+/**
+ * A patron user profile parser.
+ */
 
 internal class PatronUserProfileParser(
   private val mapper: ObjectMapper,
@@ -122,17 +127,15 @@ internal class PatronUserProfileParser(
       val root =
         JSONParserUtilities.checkObject(null, node)
       val vendor =
-        JSONParserUtilities.getString(  root, "drm:vendor")
+        JSONParserUtilities.getString(root, "drm:vendor")
       val scheme =
-        JSONParserUtilities.getURI(  root, "drm:scheme")
+        JSONParserUtilities.getURI(root, "drm:scheme")
+      val links =
+        JSONParserUtilities.getArrayOrNull(root, "links")
 
       return when (scheme.toString()) {
         "http://librarysimplified.org/terms/drm/scheme/ACS" -> {
-          val clientToken = JSONParserUtilities.getString(root, "drm:clientToken")
-          PatronDRMAdobe(
-            vendor = vendor,
-            scheme = scheme,
-            clientToken = clientToken)
+          parseDRMAdobe(root, vendor, scheme, links)
         }
         else -> {
           this.publishWarningMessage("Unrecognized DRM scheme: ${scheme}")
@@ -140,6 +143,46 @@ internal class PatronUserProfileParser(
         }
       }
     } catch (e: Exception) {
+      this.publishErrorForException(e)
+      null
+    }
+  }
+
+  private fun parseDRMAdobe(
+    root: ObjectNode,
+    vendor: String,
+    scheme: URI,
+    linksNode: ArrayNode?
+  ): PatronDRMAdobe {
+    val clientToken =
+      JSONParserUtilities.getString(root, "drm:clientToken")
+    val links =
+      linksNode ?.mapNotNull { node -> parseLink(node) }
+    val deviceManagerURI =
+      links?.find { link -> link.rel == "http://librarysimplified.org/terms/drm/rel/devices" }
+        ?.href
+
+    return PatronDRMAdobe(
+      vendor = vendor,
+      scheme = scheme,
+      clientToken = clientToken,
+      deviceManagerURI = deviceManagerURI)
+  }
+
+  private data class Link(
+    val href: URI,
+    val rel: String?)
+
+  private fun parseLink(node: JsonNode): Link? {
+    return try {
+      val root =
+        JSONParserUtilities.checkObject(null, node)
+      val href =
+        JSONParserUtilities.getURI(root, "href")
+      val rel =
+        JSONParserUtilities.getStringOrNull(root, "rel")
+      return Link(href, rel)
+    }catch (e: Exception) {
       this.publishErrorForException(e)
       null
     }
@@ -162,9 +205,9 @@ internal class PatronUserProfileParser(
 
   private fun parseSettings(root: ObjectNode): PatronSettings {
     return try {
-      val settingsRoot = JSONParserUtilities.getObject(root,"settings")
+      val settingsRoot = JSONParserUtilities.getObject(root, "settings")
       return PatronSettings(synchronizeAnnotations =
-        JSONParserUtilities.getBoolean(settingsRoot, "simplified:synchronize_annotations"))
+      JSONParserUtilities.getBoolean(settingsRoot, "simplified:synchronize_annotations"))
     } catch (e: Exception) {
       this.publishErrorForException(e)
       PatronSettings(synchronizeAnnotations = false)
