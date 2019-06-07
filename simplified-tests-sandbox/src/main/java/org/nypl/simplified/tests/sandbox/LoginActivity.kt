@@ -190,7 +190,8 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         timerExecutor = this.timerExecutor,
         adobeDrm = null,
         patronUserProfileParsers = this.patronParsers,
-        accountLoginStringResources = MockAccountLoginStringResources()
+        accountLoginStringResources = MockAccountLoginStringResources(),
+        accountLogoutStringResources = MockAccountLogoutStringResources()
       )
 
     val button0 = Button(this)
@@ -351,7 +352,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
             this.clicked = false
             this.tryBorrow()
           }
-          AccountLoginState.AccountLoggingOut -> {
+          is AccountLoginState.AccountLoggingOut -> {
             this.clicked = false
           }
           is AccountLoginState.AccountLogoutFailed -> {

@@ -418,7 +418,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
           this.onAccountEventLoginFailed(state)
         is AccountLoggedIn ->
           this.onAccountEventLoginSucceeded()
-        AccountLoggingOut ->
+        is AccountLoggingOut ->
           this.onAccountEventLoggingOut()
         is AccountLogoutFailed ->
           this.onAccountEventLogoutFailed(state)
@@ -539,10 +539,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         }
       }
 
-      AccountLoggingOut -> {
+      is AccountLoggingOut -> {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.VISIBLE
-        this.actionText.setText(R.string.settings_logout_in_progress)
+        this.actionText.text = state.status
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = false
         this.configureDisableLoginForm()
@@ -551,7 +551,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       is AccountLoggingIn -> {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.VISIBLE
-        this.actionText.setText(state.status)
+        this.actionText.text = state.status
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = false
         this.configureDisableLoginForm()
@@ -665,7 +665,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       .profileAccountLogout(this.account.id())
       .onException(Exception::class.java) { exception: Exception ->
         this.logger.error("error during logout: ", exception)
-        Unit.unit()
+        null
       }
 
     return Unit.unit()

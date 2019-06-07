@@ -342,4 +342,15 @@
   <string name="loginErrorConnectionFailed">@string/settings_login_failed_server</string>
   <string name="loginErrorPatronSettingsParseError">Could not parse patron settings returned by server!</string>
 
+  <!-- Logout strings -->
+  <string name="logoutDeactivatingDeviceAdobeDeactivated">Deactivated device</string>
+  <string name="logoutDeactivatingDeviceAdobeNotActive">Device does not appear to be activated</string>
+  <string name="logoutDeactivatingDeviceAdobe">Deactivating device…</string>
+  <string name="logoutClearingBookRegistryFailed">Clearing the book registry failed!</string>
+  <string name="logoutClearingBookRegistry">Clearing the book registry…</string>
+  <string name="logoutClearingBookDatabase">Clearing the book database…</string>
+  <string name="logoutClearingBookDatabaseFailed">Clearing the book database failed!</string>
+  <string name="logoutNotLoggedIn">Account does not appear to be logged in!</string>
+  <string name="logoutStarted">Logging out…</string>
+
 </resources>

@@ -222,8 +222,8 @@ class LoginDialog : AppCompatDialogFragment() {
             ErrorDialogUtilities.showError(
               this.activity,
               this.logger,
-              state.steps.last().resolution,
-              state.steps.last().exception)
+              state.steps.lastOrNull()?.resolution,
+              state.steps.lastOrNull()?.exception)
             this.shownAlert = true
           }
 
@@ -240,21 +240,20 @@ class LoginDialog : AppCompatDialogFragment() {
           this.dismiss()
         }
 
-        AccountLoginState.AccountLoggingOut -> {
+        is AccountLoginState.AccountLoggingOut -> {
           this.loginActionLayout.visibility = View.INVISIBLE
           this.loginProgress.visibility = View.VISIBLE
-          this.loginActionText.setText(R.string.settings_logout_in_progress)
+          this.loginActionText.text = state.status
           this.disableUIElements()
         }
 
         is AccountLoginState.AccountLogoutFailed -> {
           if (!this.shownAlert) {
-            // XXX: Adjust logout data class
             ErrorDialogUtilities.showError(
               this.activity,
               this.logger,
-              "XXX: Missing string!",
-              state.exception)
+              state.steps.lastOrNull()?.resolution,
+              state.steps.lastOrNull()?.exception)
             this.shownAlert = true
           }
 

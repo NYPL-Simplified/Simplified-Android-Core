@@ -113,7 +113,7 @@ public interface ProfilesControllerType {
    *
    * @param account     The account ID
    * @param credentials The credentials
-   * @return A future that returns a login event
+   * @return A future that returns the result of logging in
    */
 
   FluentFuture<AccountLoginTaskResult> profileAccountLogin(
@@ -186,10 +186,10 @@ public interface ProfilesControllerType {
   /**
    * Attempt to log out of the given account of the current profile.
    *
-   * @return A future that returns a logout event
+   * @return A future that returns the result of logging out
    */
 
-  FluentFuture<Unit> profileAccountLogout(AccountID account);
+  FluentFuture<AccountLogoutTaskResult> profileAccountLogout(AccountID account);
 
   /**
    * Update preferences for the current profile.

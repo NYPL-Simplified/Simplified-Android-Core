@@ -16,6 +16,7 @@ import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
+import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderCollectionType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
@@ -58,6 +59,7 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.profiles.controller.api.AccountLoginTaskResult
+import org.nypl.simplified.profiles.controller.api.AccountLogoutTaskResult
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
@@ -76,6 +78,7 @@ import java.util.concurrent.ExecutorService
 class Controller private constructor(
   private val accountEvents: ObservableType<AccountEvent>,
   private val accountLoginStringResources: AccountLoginStringResourcesType,
+  private val accountLogoutStringResources: AccountLogoutStringResourcesType,
   private val accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
   private val adobeDrm: AdobeAdeptExecutorType?,
   private val analytics: AnalyticsType,
@@ -273,13 +276,17 @@ class Controller private constructor(
     return ImmutableList.sortedCopyOf(accounts)
   }
 
-  override fun profileAccountLogout(account: AccountID): FluentFuture<Unit> {
+  override fun profileAccountLogout(account: AccountID): FluentFuture<AccountLogoutTaskResult> {
     return FluentFuture.from(
       this.taskExecutor.submit(Callable {
         val profile = this.profileCurrent()
         val account = profile.account(account)
-        ProfileAccountLogoutTask(this.bookRegistry, profile, account).call()
-        Unit.unit()
+        ProfileAccountLogoutTask(
+          accountLogoutStrings = this.accountLogoutStringResources,
+          bookRegistry = this.bookRegistry,
+          profile = profile,
+          account = account
+        ).call()
       }))
   }
 
@@ -429,6 +436,7 @@ class Controller private constructor(
     fun create(
       accountEvents: ObservableType<AccountEvent>,
       accountLoginStringResources: AccountLoginStringResourcesType,
+      accountLogoutStringResources: AccountLogoutStringResourcesType,
       accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
       adobeDrm: AdobeAdeptExecutorType?,
       analytics: AnalyticsType,
@@ -448,6 +456,7 @@ class Controller private constructor(
       return Controller(
         accountEvents = accountEvents,
         accountLoginStringResources = accountLoginStringResources,
+        accountLogoutStringResources = accountLogoutStringResources,
         accountProviders = accountProviders,
         adobeDrm = adobeDrm,
         analytics = analytics,

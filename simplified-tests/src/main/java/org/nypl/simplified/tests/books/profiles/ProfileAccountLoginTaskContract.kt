@@ -50,6 +50,8 @@ import java.util.UUID
 
 abstract class ProfileAccountLoginTaskContract {
 
+  private lateinit var profileID: ProfileID
+  private lateinit var accountID: AccountID
   private var loginState: AccountLoginState? = null
   private lateinit var patronParsers: PatronUserProfileParsersType
   private lateinit var loginStrings: AccountLoginStringResourcesType
@@ -70,6 +72,11 @@ abstract class ProfileAccountLoginTaskContract {
       MockAccountLoginStringResources()
     this.patronParsers =
       Mockito.mock(PatronUserProfileParsersType::class.java)
+
+    this.accountID =
+      AccountID(UUID.randomUUID())
+    this.profileID =
+      ProfileID(UUID.randomUUID())
   }
 
   @After
@@ -95,12 +102,14 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(null)
     Mockito.`when`(this.profile.id())
-      .thenReturn(ProfileID(UUID.randomUUID()))
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
     Mockito.`when`(this.account.id())
-      .thenReturn(AccountID(UUID.randomUUID()))
+      .thenReturn(this.accountID)
     Mockito.`when`(this.account.provider())
       .thenReturn(provider)
-    Mockito.`when`(this.account.setLoginState(Mockito.argThat { x -> x != null }))
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
         val newState = it.getArgument<AccountLoginState>(0)
         this.logger.debug("new state: {}", newState)
@@ -121,7 +130,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.error("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
       this.account.loginState() as AccountLoginFailed
@@ -156,12 +165,14 @@ abstract class ProfileAccountLoginTaskContract {
         .build())
 
     Mockito.`when`(this.profile.id())
-      .thenReturn(ProfileID(UUID.randomUUID()))
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
     Mockito.`when`(this.account.id())
-      .thenReturn(AccountID(UUID.randomUUID()))
+      .thenReturn(this.accountID)
     Mockito.`when`(this.account.provider())
       .thenReturn(provider)
-    Mockito.`when`(this.account.setLoginState(Mockito.argThat { x -> x != null }))
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
         val newState = it.getArgument<AccountLoginState>(0)
         this.logger.debug("new state: {}", newState)
@@ -194,7 +205,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.error("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
       this.account.loginState() as AccountLoginFailed
@@ -229,12 +240,14 @@ abstract class ProfileAccountLoginTaskContract {
         .build())
 
     Mockito.`when`(this.profile.id())
-      .thenReturn(ProfileID(UUID.randomUUID()))
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
     Mockito.`when`(this.account.id())
-      .thenReturn(AccountID(UUID.randomUUID()))
+      .thenReturn(this.accountID)
     Mockito.`when`(this.account.provider())
       .thenReturn(provider)
-    Mockito.`when`(this.account.setLoginState(Mockito.argThat { x -> x != null }))
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
         val newState = it.getArgument<AccountLoginState>(0)
         this.logger.debug("new state: {}", newState)
@@ -267,7 +280,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.error("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
       this.account.loginState() as AccountLoginFailed
@@ -307,12 +320,14 @@ abstract class ProfileAccountLoginTaskContract {
         .build())
 
     Mockito.`when`(this.profile.id())
-      .thenReturn(ProfileID(UUID.randomUUID()))
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
     Mockito.`when`(this.account.id())
-      .thenReturn(AccountID(UUID.randomUUID()))
+      .thenReturn(this.accountID)
     Mockito.`when`(this.account.provider())
       .thenReturn(provider)
-    Mockito.`when`(this.account.setLoginState(Mockito.argThat { x -> x != null }))
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
         val newState = it.getArgument<AccountLoginState>(0)
         this.logger.debug("new state: {}", newState)
@@ -340,7 +355,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.error("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
       this.account.loginState() as AccountLoginFailed
@@ -375,12 +390,14 @@ abstract class ProfileAccountLoginTaskContract {
         .build())
 
     Mockito.`when`(this.profile.id())
-      .thenReturn(ProfileID(UUID.randomUUID()))
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
     Mockito.`when`(this.account.id())
-      .thenReturn(AccountID(UUID.randomUUID()))
+      .thenReturn(this.accountID)
     Mockito.`when`(this.account.provider())
       .thenReturn(provider)
-    Mockito.`when`(this.account.setLoginState(Mockito.argThat { x -> x != null }))
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
         val newState = it.getArgument<AccountLoginState>(0)
         this.logger.debug("new state: {}", newState)
@@ -408,7 +425,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.error("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
       this.account.loginState() as AccountLoginFailed
@@ -441,9 +458,11 @@ abstract class ProfileAccountLoginTaskContract {
         .build())
 
     Mockito.`when`(this.profile.id())
-      .thenReturn(ProfileID(UUID.randomUUID()))
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
     Mockito.`when`(this.account.id())
-      .thenReturn(AccountID(UUID.randomUUID()))
+      .thenReturn(this.accountID)
     Mockito.`when`(this.account.provider())
       .thenReturn(provider)
     Mockito.`when`(this.account.setLoginState(anyNonNull()))
@@ -494,7 +513,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.error("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
       this.account.loginState() as AccountLoginFailed
@@ -531,9 +550,11 @@ abstract class ProfileAccountLoginTaskContract {
         .build())
 
     Mockito.`when`(this.profile.id())
-      .thenReturn(ProfileID(UUID.randomUUID()))
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
     Mockito.`when`(this.account.id())
-      .thenReturn(AccountID(UUID.randomUUID()))
+      .thenReturn(this.accountID)
     Mockito.`when`(this.account.provider())
       .thenReturn(provider)
     Mockito.`when`(this.account.setLoginState(anyNonNull()))
@@ -585,7 +606,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.error("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
       this.account.loginState() as AccountLoggedIn
@@ -620,9 +641,11 @@ abstract class ProfileAccountLoginTaskContract {
         .build())
 
     Mockito.`when`(this.profile.id())
-      .thenReturn(ProfileID(UUID.randomUUID()))
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
     Mockito.`when`(this.account.id())
-      .thenReturn(AccountID(UUID.randomUUID()))
+      .thenReturn(this.accountID)
     Mockito.`when`(this.account.provider())
       .thenReturn(provider)
     Mockito.`when`(this.account.setLoginState(anyNonNull()))
@@ -679,7 +702,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.error("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
       this.account.loginState() as AccountLoggedIn

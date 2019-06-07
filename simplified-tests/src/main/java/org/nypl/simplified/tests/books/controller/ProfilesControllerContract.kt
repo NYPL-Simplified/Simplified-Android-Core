@@ -70,6 +70,7 @@ import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.MockAccountLoginStringResources
+import org.nypl.simplified.tests.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
@@ -114,6 +115,7 @@ abstract class ProfilesControllerContract {
   protected abstract fun context(): Context
 
   private val accountLoginStringResources = MockAccountLoginStringResources()
+  private val accountLogoutStringResources = MockAccountLogoutStringResources()
 
   private fun fakeProvider(provider_id: String): AccountProviderType {
     return AccountProviders.builder().apply {
@@ -158,6 +160,7 @@ abstract class ProfilesControllerContract {
     return Controller.create(
       exec = this.executorBooks,
       accountLoginStringResources = this.accountLoginStringResources,
+      accountLogoutStringResources = this.accountLogoutStringResources,
       accountEvents = this.accountEvents,
       profileEvents = this.profileEvents,
       readerBookmarkEvents = this.readerBookmarkEvents,

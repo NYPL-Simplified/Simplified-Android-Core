@@ -21,6 +21,9 @@ sealed class AccountLoginState {
   object AccountNotLoggedIn : AccountLoginState() {
     override val credentials: AccountAuthenticationCredentials?
       get() = null
+
+    override fun toString(): String =
+      this.javaClass.simpleName
   }
 
   /**
@@ -121,44 +124,33 @@ sealed class AccountLoginState {
    * The account is currently logging out.
    */
 
-  object AccountLoggingOut : AccountLoginState() {
-    override val credentials: AccountAuthenticationCredentials?
-      get() = null
-  }
+  data class AccountLoggingOut(
+    override val credentials: AccountAuthenticationCredentials,
+
+    /**
+     * A humanly-readable status message.
+     *
+     * @see AccountLogoutStringResourcesType
+     */
+
+    val status: String)
+    : AccountLoginState()
 
   /**
-   * The error codes that can be raised
+   * Data associated with failed logout attempts.
    */
 
-  enum class AccountLogoutErrorCode {
+  sealed class AccountLogoutErrorData {
 
-    /**
-     * A profile or account configuration problem occurred (such as the user not having
-     * selected a profile).
-     */
-
-    ERROR_PROFILE_CONFIGURATION,
-
-    ERROR_ACCOUNTS_DATABASE,
-
-    /**
-     * A general error code that is not specifically actionable (such as an I/O error
-     * or a programming mistake).
-     */
-
-    ERROR_GENERAL
   }
 
   /**
-   * The account is currently logging out.
+   * The account failed to log out
    */
 
   data class AccountLogoutFailed(
-    val errorCode: AccountLogoutErrorCode,
-    val exception: Exception?)
-    : AccountLoginState() {
-    override val credentials: AccountAuthenticationCredentials?
-      get() = null
-  }
+    val steps: List<TaskStep<AccountLogoutErrorData>>,
+    override val credentials: AccountAuthenticationCredentials)
+    : AccountLoginState()
 
 }

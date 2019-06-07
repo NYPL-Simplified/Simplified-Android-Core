@@ -45,6 +45,7 @@ import org.nypl.simplified.app.helpstack.Helpstack;
 import org.nypl.simplified.app.helpstack.HelpstackType;
 import org.nypl.simplified.app.images.ImageAccountIconRequestHandler;
 import org.nypl.simplified.app.login.LoginStringResources;
+import org.nypl.simplified.app.login.LogoutStringResources;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
 import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
@@ -801,6 +802,7 @@ public final class Simplified extends MultiDexApplication {
       Controller.Companion.create(
         account_events,
         new LoginStringResources(this.getResources()),
+        new LogoutStringResources(this.getResources()),
         (unused) -> this.account_providers,
         null,
         this.analytics,

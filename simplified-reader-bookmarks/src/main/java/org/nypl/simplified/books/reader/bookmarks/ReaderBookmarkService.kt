@@ -529,7 +529,7 @@ class ReaderBookmarkService private constructor(
       AccountLoginState.AccountNotLoggedIn,
       is AccountLoginState.AccountLoggingIn,
       is AccountLoginState.AccountLoginFailed,
-      AccountLoginState.AccountLoggingOut,
+      is AccountLoginState.AccountLoggingOut,
       is AccountLoginState.AccountLogoutFailed -> {
         // We don't care about these
       }

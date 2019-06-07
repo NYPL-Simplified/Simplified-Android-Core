@@ -133,7 +133,7 @@ class CatalogAcquisitionButton(
         }
 
         is AccountLoginState.AccountLogoutFailed,
-        AccountLoginState.AccountLoggingOut,
+        is AccountLoginState.AccountLoggingOut,
         AccountLoginState.AccountNotLoggedIn -> {
           LOG.debug("[{}]: user aborted login", this.entry.bookID.brief())
           this.unsubscribe()

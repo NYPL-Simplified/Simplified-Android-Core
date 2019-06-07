@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.controller
 
+import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
@@ -53,6 +54,12 @@ class ProfileAccountLoginTask(
   private val patronParsers: PatronUserProfileParsersType,
   initialCredentials: AccountAuthenticationCredentials) : Callable<AccountLoginTaskResult> {
 
+  init {
+    Preconditions.checkState(
+      this.profile.accounts().containsKey(this.account.id()),
+      "Profile must contain the given account")
+  }
+
   @Volatile
   private var credentials: AccountAuthenticationCredentials =
     initialCredentials
@@ -71,6 +78,12 @@ class ProfileAccountLoginTask(
 
   private fun debug(message: String, vararg arguments: Any?) =
     this.logger.debug("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
+
+  private fun error(message: String, vararg arguments: Any?) =
+    this.logger.error("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
+
+  private fun warn(message: String, vararg arguments: Any?) =
+    this.logger.warn("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
 
   private fun checkAuthenticationRequired(): AccountProviderAuthenticationDescription? {
     val authentication = this.account.provider().authentication
@@ -115,14 +128,14 @@ class ProfileAccountLoginTask(
   }
 
   private fun runDeviceActivation() {
-    this.logger.debug("running device activation")
+    this.debug("running device activation")
 
     val step =
       this.steps.beginNewStep(this.loginStrings.loginDeviceActivation)
 
     val adobeDRMValues = this.adobeDRM
     if (adobeDRMValues != null) {
-      this.logger.debug("constructing new adobe credentials")
+      this.debug("constructing new adobe credentials")
 
       val newCredentials =
         this.credentials.toBuilder()
@@ -166,7 +179,7 @@ class ProfileAccountLoginTask(
    */
 
   private fun runPatronProfileRequest() {
-    this.logger.debug("running patron profile request")
+    this.debug("running patron profile request")
 
     val step = this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest)
     this.account.setLoginState(AccountLoggingIn(step.description))
@@ -202,17 +215,17 @@ class ProfileAccountLoginTask(
   private fun onPatronProfileRequestOK(
     patronSettingsURI: URI,
     result: HTTPResultOKType<InputStream>) {
-    this.logger.debug("requested patron profile successfully")
+    this.debug("requested patron profile successfully")
     return this.patronParsers.createParser(patronSettingsURI, result.value).use { parser ->
       when (val parseResult = parser.parse()) {
         is ParseResult.Success -> {
-          this.logger.debug("parsed patron profile successfully")
+          this.debug("parsed patron profile successfully")
           parseResult.warnings.forEach(this::logParseWarning)
           parseResult.result.drm.forEach(this::onPatronProfileRequestHandleDRM)
           this.steps.currentStepSucceeded(this.loginStrings.loginPatronSettingsRequestOK)
         }
         is ParseResult.Failure -> {
-          this.logger.error("failed to parse patron profile")
+          this.error("failed to parse patron profile")
           this.steps.currentStepFailed(
             message = this.loginStrings.loginPatronSettingsRequestParseFailed(
               parseResult.errors.map(this::showParseError)),
@@ -228,7 +241,7 @@ class ProfileAccountLoginTask(
    */
 
   private fun showParseError(error: ParseError): String {
-    this.logger.error(
+    this.error(
       "{}:{}:{}: {}: ",
       error.source,
       error.line,
@@ -266,7 +279,7 @@ class ProfileAccountLoginTask(
   }
 
   private fun onPatronProfileRequestHandleDRMAdobe(drm: PatronDRMAdobe) {
-    this.logger.debug("received Adobe DRM client token")
+    this.debug("received Adobe DRM client token")
     this.adobeDRM = drm
   }
 
@@ -283,7 +296,7 @@ class ProfileAccountLoginTask(
   private fun onPatronProfileRequestHTTPError(
     patronSettingsURI: URI,
     result: HTTPResultError<InputStream>) {
-    this.debug("received http error: {}: {}: {}", patronSettingsURI, result.message, result.status)
+    this.error("received http error: {}: {}: {}", patronSettingsURI, result.message, result.status)
 
     when (result.status) {
       HttpURLConnection.HTTP_UNAUTHORIZED -> {
@@ -306,7 +319,7 @@ class ProfileAccountLoginTask(
   }
 
   private fun logParseWarning(warning: ParseWarning) {
-    this.logger.warn(
+    this.warn(
       "{}:{}:{}: {}: ",
       warning.source,
       warning.line,
