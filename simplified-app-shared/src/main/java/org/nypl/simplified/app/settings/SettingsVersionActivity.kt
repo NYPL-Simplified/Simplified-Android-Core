@@ -30,7 +30,6 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   private lateinit var buildText: TextView
   private lateinit var developerOptions: ViewGroup
   private lateinit var adobeDRMActivationTable: TableLayout
-  private var adobeDRMActivations = mutableListOf<AdobeDRMExtensions.Activation>()
 
   private val logger = LoggerFactory.getLogger(SettingsVersionActivity::class.java)
 
