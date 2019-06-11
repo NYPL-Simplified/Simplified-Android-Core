@@ -140,19 +140,16 @@ public final class AdobeDRMServices
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-    // XXX: Reimplement using new account/profile system!
-    if (Math.random() > 0.0) {
-      throw new DRMUnsupportedException("Not available!", new UnimplementedCodeException());
-    }
-
+    final File baseDirectory =
+      context.getFilesDir();
     final File app_storage =
-      new File("NOT VALID");
+      new File(baseDirectory, "app");
     final File xml_storage =
-      new File("NOT VALID");
+      new File(baseDirectory,"xml");
     final File book_storage =
-      new File(new File("NOT VALID"), "adobe-books-tmp");
+      new File(baseDirectory, "adobe-books-tmp");
     final File temp_storage =
-      new File(new File("NOT VALID"), "adobe-tmp");
+      new File(baseDirectory, "adobe-tmp");
 
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);
@@ -234,19 +231,16 @@ public final class AdobeDRMServices
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-    // XXX: Reimplement using new account/profile system!
-    if (Math.random() > 0.0) {
-      throw new DRMUnsupportedException("Not available!", new UnimplementedCodeException());
-    }
-
+    final File baseDirectory =
+      context.getFilesDir();
     final File app_storage =
-      new File("NOT VALID");
+      new File(baseDirectory, "app");
     final File xml_storage =
-      new File("NOT VALID");
+      new File(baseDirectory,"xml");
     final File book_storage =
-      new File(new File("NOT VALID"), "adobe-books-tmp");
+      new File(baseDirectory, "adobe-books-tmp");
     final File temp_storage =
-      new File(new File("NOT VALID"), "adobe-tmp");
+      new File(baseDirectory, "adobe-tmp");
 
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);
@@ -326,11 +320,38 @@ public final class AdobeDRMServices
     final OptionType<String> package_name_opt)
   {
     try {
-      return Option.some(
-        AdobeDRMServices.newAdobeDRM(context, package_name_opt));
+      return Option.some(AdobeDRMServices.newAdobeDRM(context, package_name_opt));
     } catch (final DRMException e) {
       AdobeDRMServices.LOG.error("DRM is not supported: ", e);
       return Option.none();
+    }
+  }
+
+  /**
+   * Attempt to load an Adobe DRM implementation.
+   *
+   * The implementation checks the certificate for compatibility with the
+   * package name given in the current Android manifest. However, the package
+   * name can be overridden by passing {@code Some(p)} for {@code
+   * package_name_opt}, if required. This is primarily useful for sharing a
+   * certificate across differently branded versions of the same application
+   * (with different package IDs) during development.
+   *
+   * @param context          Application context
+   * @param package_name_opt An optional package name override
+   *
+   * @return A DRM implementation, if any are available
+   */
+
+  public static AdobeAdeptExecutorType newAdobeDRMOrNull(
+    final Context context,
+    final OptionType<String> package_name_opt)
+  {
+    try {
+      return AdobeDRMServices.newAdobeDRM(context, package_name_opt);
+    } catch (final DRMException e) {
+      AdobeDRMServices.LOG.error("DRM is not supported: ", e);
+      return null;
     }
   }
 

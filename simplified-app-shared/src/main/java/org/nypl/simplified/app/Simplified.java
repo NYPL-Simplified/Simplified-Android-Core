@@ -142,7 +142,7 @@ public final class Simplified extends MultiDexApplication {
   private File directory_documents;
   private File directory_downloads;
   private File directory_profiles;
-  private OptionType<AdobeAdeptExecutorType> adobe_drm;
+  private AdobeAdeptExecutorType adobe_drm;
   private BookCoverGenerator cover_generator;
   private HTTPType http;
   private DownloaderType downloader;
@@ -629,7 +629,8 @@ public final class Simplified extends MultiDexApplication {
 
     LOG.debug("initializing DRM (if required)");
     this.adobe_drm =
-      AdobeDRMServices.newAdobeDRMOptional(this, AdobeDRMServices.getPackageOverride(resources));
+      AdobeDRMServices.newAdobeDRMOrNull(
+        this, AdobeDRMServices.getPackageOverride(resources));
 
     this.screen = new ScreenSizeInformation(LOG, resources);
 
@@ -804,7 +805,7 @@ public final class Simplified extends MultiDexApplication {
         new LoginStringResources(this.getResources()),
         new LogoutStringResources(this.getResources()),
         (unused) -> this.account_providers,
-        null,
+        this.adobe_drm,
         this.analytics,
         this.book_registry,
         this.bundled_content_resolver,
