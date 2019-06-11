@@ -139,7 +139,7 @@ class Controller private constructor(
   }
 
   override fun profiles(): SortedMap<ProfileID, ProfileReadableType> {
-    return org.nypl.simplified.books.controller.Controller.Companion.castMap(this.profiles.profiles())
+    return castMap(this.profiles.profiles())
   }
 
   override fun profileAnonymousEnabled(): AnonymousProfileEnabled {
@@ -196,6 +196,7 @@ class Controller private constructor(
     val profile = this.profileCurrent()
     val account = profile.account(accountID)
     return ProfileAccountLoginTask(
+      adeptExecutor = this.adobeDrm,
       http = this.http,
       profile = profile,
       account = account,
@@ -282,10 +283,12 @@ class Controller private constructor(
         val profile = this.profileCurrent()
         val account = profile.account(account)
         ProfileAccountLogoutTask(
-          accountLogoutStrings = this.accountLogoutStringResources,
+          adeptExecutor = this.adobeDrm,
+          account = account,
           bookRegistry = this.bookRegistry,
-          profile = profile,
-          account = account
+          http = this.http,
+          logoutStrings = this.accountLogoutStringResources,
+          profile = profile
         ).call()
       }))
   }

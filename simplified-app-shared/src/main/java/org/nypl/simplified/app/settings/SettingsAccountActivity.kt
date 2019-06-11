@@ -34,6 +34,7 @@ import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
@@ -55,6 +56,7 @@ import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.slf4j.LoggerFactory
 
 /**
@@ -434,9 +436,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      failed.steps.last().resolution,
-      null)
-    { this.login.isEnabled = true }
+      failed.steps.lastOrNull()?.resolution,
+      failed.steps.lastOrNull()?.exception) {
+      this.login.isEnabled = true
+    }
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
@@ -462,8 +465,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      this.resources.getString(R.string.settings_logout_failed), null
-    ) { this.login.isEnabled = true }
+      failed.steps.lastOrNull()?.resolution,
+      failed.steps.lastOrNull()?.exception) {
+      this.login.isEnabled = true
+    }
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
@@ -559,8 +564,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
       is AccountLoginFailed -> {
         this.actionLayout.visibility = View.VISIBLE
-        this.actionProgress.visibility = View.INVISIBLE
-        this.actionText.setText(R.string.settings_login_failed)
+        this.actionProgress.visibility = View.GONE
+        this.actionText.text = state.steps.last().resolution
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = true
         this.ageCheckbox.setOnClickListener {}
@@ -569,8 +574,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
       is AccountLogoutFailed -> {
         this.actionLayout.visibility = View.VISIBLE
-        this.actionProgress.visibility = View.INVISIBLE
-        this.actionText.setText(R.string.settings_logout_failed)
+        this.actionProgress.visibility = View.GONE
+        this.actionText.text = state.steps.last().resolution
 
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = true

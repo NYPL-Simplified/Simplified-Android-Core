@@ -7,6 +7,30 @@ package org.nypl.simplified.accounts.api
 interface AccountLoginStringResourcesType {
 
   /**
+   * Device activation failed with an exception.
+   */
+
+  fun loginDeviceActivationFailed(e: Throwable): String
+
+  /**
+   * Posting the device ID to the device manager has finished.
+   */
+
+  val loginDeviceActivationPostDeviceManagerDone: String
+
+  /**
+   * Posting the device ID to the device manager.
+   */
+
+  val loginDeviceActivationPostDeviceManager: String
+
+  /**
+   * Account requires DRM that is not supported by the current application.
+   */
+
+  val loginDeviceDRMNotSupported: String
+
+  /**
    * Activated device successfully
    */
 
@@ -16,7 +40,7 @@ interface AccountLoginStringResourcesType {
    * Activating device...
    */
 
-  val loginDeviceActivation: String
+  val loginDeviceActivationAdobe: String
 
   /**
    * "Checking is authentication is required..."

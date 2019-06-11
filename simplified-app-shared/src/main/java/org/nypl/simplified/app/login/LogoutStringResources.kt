@@ -11,6 +11,19 @@ import org.nypl.simplified.app.R
 
 class LogoutStringResources(val resources: Resources) : AccountLogoutStringResourcesType {
 
+  override fun logoutDeactivatingDeviceAdobeFailed(e: Throwable): String {
+    return this.resources.getString(R.string.logoutDeactivatingDeviceAdobeFailed)
+  }
+
+  override val logoutDeviceDeactivationPostDeviceManagerFinished: String
+    get() = this.resources.getString(R.string.logoutDeviceDeactivationPostDeviceManagerFinished)
+
+  override val logoutDeviceDeactivationPostDeviceManager: String
+    get() = this.resources.getString(R.string.logoutDeviceDeactivationPostDeviceManager)
+
+  override val logoutDeactivatingDeviceAdobeUnsupported: String
+    get() = this.resources.getString(R.string.logoutDeactivatingDeviceAdobeUnsupported)
+
   override val logoutDeactivatingDeviceAdobeDeactivated: String
     get() = this.resources.getString(R.string.logoutDeactivatingDeviceAdobeDeactivated)
 

@@ -7,6 +7,30 @@ package org.nypl.simplified.accounts.api
 interface AccountLogoutStringResourcesType {
 
   /**
+   * The device could not be deactivated because the Adobe connector raised an exception.
+   */
+
+  fun logoutDeactivatingDeviceAdobeFailed(e: Throwable): String
+
+  /**
+   * Posting to the device manager URI has completed.
+   */
+
+  val logoutDeviceDeactivationPostDeviceManagerFinished: String
+
+  /**
+   * Posting to the device manager URI has started.
+   */
+
+  val logoutDeviceDeactivationPostDeviceManager: String
+
+  /**
+   * The device could not be deactivated because support for DRM seems to have gone away.
+   */
+
+  val logoutDeactivatingDeviceAdobeUnsupported: String
+
+  /**
    * The device was deactivated successfully.
    */
 

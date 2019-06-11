@@ -10,10 +10,22 @@ import org.nypl.simplified.app.R
 
 class LoginStringResources(val resources: Resources) : AccountLoginStringResourcesType {
 
+  override fun loginDeviceActivationFailed(e: Throwable): String =
+    this.resources.getString(R.string.loginDeviceActivationFailed)
+
+  override val loginDeviceActivationPostDeviceManagerDone: String
+    get() = this.resources.getString(R.string.loginDeviceActivationPostDeviceManagerDone)
+
+  override val loginDeviceActivationPostDeviceManager: String
+    get() = this.resources.getString(R.string.loginDeviceActivationPostDeviceManager)
+
+  override val loginDeviceDRMNotSupported: String
+    get() = this.resources.getString(R.string.loginDeviceDRMNotSupported)
+
   override val loginDeviceActivated: String
     get() = this.resources.getString(R.string.loginDeviceActivated)
 
-  override val loginDeviceActivation: String
+  override val loginDeviceActivationAdobe: String
     get() = this.resources.getString(R.string.loginDeviceActivating)
 
   override val loginCheckAuthRequired: String

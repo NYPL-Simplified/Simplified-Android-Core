@@ -6,19 +6,22 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import org.nypl.drm.core.AdobeAdeptActivationReceiverType
+import org.nypl.drm.core.AdobeAdeptConnectorType
+import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AdobeAdeptProcedureType
+import org.nypl.drm.core.AdobeDeviceID
+import org.nypl.drm.core.AdobeUserID
 import org.nypl.drm.core.AdobeVendorID
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
+import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.*
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountPIN
@@ -50,14 +53,17 @@ import java.util.UUID
 
 abstract class ProfileAccountLoginTaskContract {
 
+  private lateinit var adeptConnector: AdobeAdeptConnectorType
+  private lateinit var adeptExecutor: AdobeAdeptExecutorType
   private lateinit var profileID: ProfileID
   private lateinit var accountID: AccountID
-  private var loginState: AccountLoginState? = null
   private lateinit var patronParsers: PatronUserProfileParsersType
   private lateinit var loginStrings: AccountLoginStringResourcesType
   private lateinit var account: AccountType
   private lateinit var profile: ProfileReadableType
   private lateinit var http: MockingHTTP
+
+  private var loginState: AccountLoginState? = null
 
   abstract val logger: Logger
 
@@ -72,6 +78,10 @@ abstract class ProfileAccountLoginTaskContract {
       MockAccountLoginStringResources()
     this.patronParsers =
       Mockito.mock(PatronUserProfileParsersType::class.java)
+    this.adeptConnector =
+      Mockito.mock(AdobeAdeptConnectorType::class.java)
+    this.adeptExecutor =
+      Mockito.mock(AdobeAdeptExecutorType::class.java)
 
     this.accountID =
       AccountID(UUID.randomUUID())
@@ -121,6 +131,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val task =
       ProfileAccountLoginTask(
+        adeptExecutor = null,
         http = this.http,
         profile = this.profile,
         account = this.account,
@@ -196,6 +207,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val task =
       ProfileAccountLoginTask(
+        adeptExecutor = null,
         http = this.http,
         profile = this.profile,
         account = this.account,
@@ -271,6 +283,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val task =
       ProfileAccountLoginTask(
+        adeptExecutor = null,
         http = this.http,
         profile = this.profile,
         account = this.account,
@@ -346,6 +359,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val task =
       ProfileAccountLoginTask(
+        adeptExecutor = null,
         http = this.http,
         profile = this.profile,
         account = this.account,
@@ -416,6 +430,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val task =
       ProfileAccountLoginTask(
+        adeptExecutor = null,
         http = this.http,
         profile = this.profile,
         account = this.account,
@@ -504,6 +519,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val task =
       ProfileAccountLoginTask(
+        adeptExecutor = null,
         http = this.http,
         profile = this.profile,
         account = this.account,
@@ -597,6 +613,7 @@ abstract class ProfileAccountLoginTaskContract {
 
     val task =
       ProfileAccountLoginTask(
+        adeptExecutor = null,
         http = this.http,
         profile = this.profile,
         account = this.account,
@@ -615,7 +632,8 @@ abstract class ProfileAccountLoginTaskContract {
   }
 
   /**
-   * If a patron user profile can be parsed and it advertises Adobe DRM, then logging in succeeds.
+   * If a patron user profile can be parsed and it advertises Adobe DRM, and Adobe DRM is supported,
+   * then logging in succeeds.
    */
 
   @Test
@@ -691,8 +709,48 @@ abstract class ProfileAccountLoginTaskContract {
         0L
       ) as HTTPResultType<InputStream>)
 
+    this.http.addResponse(
+      URI.create("https://example.com/devices"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>)
+
+    /*
+     * When the code calls activateDevice(), it succeeds if the connector returns a single
+     * activation.
+     */
+
+    Mockito.`when`(this.adeptConnector.activateDevice(
+      anyNonNull(),
+      anyNonNull(),
+      anyNonNull(),
+      anyNonNull()
+    )).then { invocation ->
+      val receiver = invocation.arguments[0] as AdobeAdeptActivationReceiverType
+      receiver.onActivationsCount(1)
+      receiver.onActivation(
+        0,
+        AdobeVendorID("OmniConsumerProducts"),
+        AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
+        "user",
+        AdobeUserID("someone"),
+        null)
+    }
+
+    Mockito.`when`(this.adeptExecutor.execute(anyNonNull()))
+      .then { invocation ->
+        val procedure = invocation.arguments[0] as AdobeAdeptProcedureType
+        procedure.executeWith(this.adeptConnector)
+      }
+
     val task =
       ProfileAccountLoginTask(
+        adeptExecutor = this.adeptExecutor,
         http = this.http,
         profile = this.profile,
         account = this.account,
@@ -714,10 +772,347 @@ abstract class ProfileAccountLoginTaskContract {
             vendorID = AdobeVendorID("OmniConsumerProducts"),
             clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
             deviceManagerURI = URI("https://example.com/devices"),
-            postActivationCredentials = null
+            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+              deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
+              userID = AdobeUserID("someone"))
           )).build()
 
     Assert.assertEquals(newCredentials, state.credentials)
+  }
+
+  /**
+   * If the account shows that DRM is required, but none is supported, then fail.
+   */
+
+  @Test
+  fun testLoginAdobeDRMNotSupported() {
+    val credentials =
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("pin"),
+        AccountBarcode.create("barcode"))
+        .build()
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("urn:patron"))
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.builder()
+        .setLoginURI(URI.create("urn:auth"))
+        .setPassCodeLength(10)
+        .setPassCodeMayContainLetters(true)
+        .setRequiresPin(true)
+        .build())
+
+    Mockito.`when`(this.profile.id())
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id())
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider())
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState())
+      .then { this.loginState }
+
+    val parser =
+      Mockito.mock(PatronUserProfileParserType::class.java)
+
+    val patronStream =
+      Mockito.mock(InputStream::class.java)
+
+    val profile =
+      PatronUserProfile(
+        settings = PatronSettings(false),
+        drm = listOf(PatronDRMAdobe(
+          vendor = "OmniConsumerProducts",
+          scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
+          clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
+          deviceManagerURI = URI("https://example.com/devices")
+        )),
+        authorization = null)
+
+    Mockito.`when`(parser.parse())
+      .thenReturn(ParseResult.Success(listOf(), profile))
+    Mockito.`when`(this.patronParsers.createParser(URI.create("urn:patron"), patronStream, false))
+      .thenReturn(parser)
+
+    this.http.addResponse(
+      URI.create("urn:patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>)
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        initialCredentials = credentials)
+
+    val result = task.call()
+    this.logger.debug("result: {}", result)
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+
+    val state =
+      this.account.loginState() as AccountLoginFailed
+
+    Assert.assertEquals(
+      AccountLoginDRMNotSupported("Adobe ACS"),
+      state.steps.last().errorValue)
+  }
+
+  /**
+   * If no activations are delivered by the Adobe DRM connector, then activation fails.
+   */
+
+  @Test
+  fun testLoginAdobeDRMNoActivations() {
+    val credentials =
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("pin"),
+        AccountBarcode.create("barcode"))
+        .build()
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("urn:patron"))
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.builder()
+        .setLoginURI(URI.create("urn:auth"))
+        .setPassCodeLength(10)
+        .setPassCodeMayContainLetters(true)
+        .setRequiresPin(true)
+        .build())
+
+    Mockito.`when`(this.profile.id())
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id())
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider())
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState())
+      .then { this.loginState }
+
+    val parser =
+      Mockito.mock(PatronUserProfileParserType::class.java)
+
+    val patronStream =
+      Mockito.mock(InputStream::class.java)
+
+    val profile =
+      PatronUserProfile(
+        settings = PatronSettings(false),
+        drm = listOf(PatronDRMAdobe(
+          vendor = "OmniConsumerProducts",
+          scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
+          clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
+          deviceManagerURI = URI("https://example.com/devices")
+        )),
+        authorization = null)
+
+    Mockito.`when`(parser.parse())
+      .thenReturn(ParseResult.Success(listOf(), profile))
+    Mockito.`when`(this.patronParsers.createParser(URI.create("urn:patron"), patronStream, false))
+      .thenReturn(parser)
+
+    this.http.addResponse(
+      URI.create("urn:patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>)
+
+    /*
+     * When the code calls activateDevice(), it succeeds if the connector returns a single
+     * activation.
+     */
+
+    Mockito.`when`(this.adeptConnector.activateDevice(
+      anyNonNull(),
+      anyNonNull(),
+      anyNonNull(),
+      anyNonNull()
+    )).then { invocation ->
+      val receiver =
+        invocation.arguments[0] as AdobeAdeptActivationReceiverType
+      Unit
+    }
+
+    Mockito.`when`(this.adeptExecutor.execute(anyNonNull()))
+      .then { invocation ->
+        val procedure = invocation.arguments[0] as AdobeAdeptProcedureType
+        procedure.executeWith(this.adeptConnector)
+      }
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = this.adeptExecutor,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        initialCredentials = credentials)
+
+    val result = task.call()
+    this.logger.debug("result: {}", result)
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+
+    val state =
+      this.account.loginState() as AccountLoginFailed
+  }
+
+  /**
+   * If the Adobe DRM connector delivers an error, then activation fails.
+   */
+
+  @Test
+  fun testLoginAdobeDRMActivationError() {
+    val credentials =
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("pin"),
+        AccountBarcode.create("barcode"))
+        .build()
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("urn:patron"))
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.builder()
+        .setLoginURI(URI.create("urn:auth"))
+        .setPassCodeLength(10)
+        .setPassCodeMayContainLetters(true)
+        .setRequiresPin(true)
+        .build())
+
+    Mockito.`when`(this.profile.id())
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id())
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider())
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState())
+      .then { this.loginState }
+
+    val parser =
+      Mockito.mock(PatronUserProfileParserType::class.java)
+
+    val patronStream =
+      Mockito.mock(InputStream::class.java)
+
+    val profile =
+      PatronUserProfile(
+        settings = PatronSettings(false),
+        drm = listOf(PatronDRMAdobe(
+          vendor = "OmniConsumerProducts",
+          scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
+          clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
+          deviceManagerURI = URI("https://example.com/devices")
+        )),
+        authorization = null)
+
+    Mockito.`when`(parser.parse())
+      .thenReturn(ParseResult.Success(listOf(), profile))
+    Mockito.`when`(this.patronParsers.createParser(URI.create("urn:patron"), patronStream, false))
+      .thenReturn(parser)
+
+    this.http.addResponse(
+      URI.create("urn:patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>)
+
+    /*
+     * When the code calls activateDevice(), it fails if the connector returns an error.
+     */
+
+    Mockito.`when`(this.adeptConnector.activateDevice(
+      anyNonNull(),
+      anyNonNull(),
+      anyNonNull(),
+      anyNonNull()
+    )).then { invocation ->
+      val receiver = invocation.arguments[0] as AdobeAdeptActivationReceiverType
+      receiver.onActivationError("E_FAIL_OFTEN_AND_LOUDLY")
+    }
+
+    Mockito.`when`(this.adeptExecutor.execute(anyNonNull()))
+      .then { invocation ->
+        val procedure = invocation.arguments[0] as AdobeAdeptProcedureType
+        procedure.executeWith(this.adeptConnector)
+      }
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = this.adeptExecutor,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        initialCredentials = credentials)
+
+    val result = task.call()
+    this.logger.debug("result: {}", result)
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+
+    val state =
+      this.account.loginState() as AccountLoginFailed
+
+    Assert.assertEquals(
+      AccountLoginDRMFailure("E_FAIL_OFTEN_AND_LOUDLY"),
+      state.steps.last().errorValue)
   }
 
   private fun <T> anyNonNull(): T =

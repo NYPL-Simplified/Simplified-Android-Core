@@ -99,6 +99,22 @@ sealed class AccountLoginState {
       val errorMessage: String,
       val errorReport: HTTPProblemReport?)
       : AccountLoginErrorData()
+
+    /**
+     * A required DRM system is not supported by the application.
+     */
+
+    data class AccountLoginDRMNotSupported(
+      val system: String)
+      : AccountLoginErrorData()
+
+    /**
+     * A DRM system failed with an (opaque) error code.
+     */
+
+    data class AccountLoginDRMFailure(
+      val errorCode: String)
+      : AccountLoginErrorData()
   }
 
   /**
@@ -141,6 +157,14 @@ sealed class AccountLoginState {
    */
 
   sealed class AccountLogoutErrorData {
+
+    /**
+     * A DRM system failed with an (opaque) error code.
+     */
+
+    data class AccountLogoutDRMFailure(
+      val errorCode: String)
+      : AccountLogoutErrorData()
 
   }
 

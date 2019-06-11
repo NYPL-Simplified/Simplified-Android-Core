@@ -5,7 +5,9 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
+import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeVendorID
+import org.nypl.drm.core.DRMUnsupportedException
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
@@ -15,6 +17,8 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMNotSupported
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
@@ -40,18 +44,22 @@ import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
+import java.nio.charset.Charset
 import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
 
 /**
  * A task that performs a login for the given account in the given profile.
  */
 
 class ProfileAccountLoginTask(
-  private val http: HTTPType,
-  private val profile: ProfileReadableType,
   private val account: AccountType,
+  private val adeptExecutor: AdobeAdeptExecutorType?,
+  private val http: HTTPType,
   private val loginStrings: AccountLoginStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
+  private val profile: ProfileReadableType,
   initialCredentials: AccountAuthenticationCredentials) : Callable<AccountLoginTaskResult> {
 
   init {
@@ -97,8 +105,8 @@ class ProfileAccountLoginTask(
 
   private fun run(): AccountLoginTaskResult {
     try {
-      val step = this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
-      this.account.setLoginState(AccountLoggingIn(step.description))
+      this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
+      this.updateLoggingInState()
 
       return when (this.checkAuthenticationRequired()) {
         is AccountProviderAuthenticationDescription -> {
@@ -112,7 +120,7 @@ class ProfileAccountLoginTask(
           AccountLoginTaskResult(this.steps.finish())
         }
       }
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       val step = this.steps.currentStep()!!
       if (step.exception == null) {
         this.steps.currentStepFailed(
@@ -130,29 +138,142 @@ class ProfileAccountLoginTask(
   private fun runDeviceActivation() {
     this.debug("running device activation")
 
-    val step =
-      this.steps.beginNewStep(this.loginStrings.loginDeviceActivation)
-
     val adobeDRMValues = this.adobeDRM
     if (adobeDRMValues != null) {
-      this.debug("constructing new adobe credentials")
-
-      val newCredentials =
-        this.credentials.toBuilder()
-          .setAdobeCredentials(AccountAuthenticationAdobePreActivationCredentials(
-            AdobeVendorID(adobeDRMValues.vendor),
-            AccountAuthenticationAdobeClientToken.create(adobeDRMValues.clientToken),
-            adobeDRMValues.deviceManagerURI,
-            null))
-          .build()
-
-      this.credentials = newCredentials
+      this.runDeviceActivationAdobe(adobeDRMValues)
     }
-
-    this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivated)
   }
 
-  private fun pickUsableMessage(message: String, e: Exception): String {
+  private fun runDeviceActivationAdobe(adobeDRM: PatronDRMAdobe) {
+    this.debug("runDeviceActivationAdobe: executing")
+
+    this.steps.beginNewStep(this.loginStrings.loginDeviceActivationAdobe)
+    this.updateLoggingInState()
+
+    val deviceManagerURI = adobeDRM.deviceManagerURI
+    val adobePreCredentials =
+      AccountAuthenticationAdobePreActivationCredentials(
+        AdobeVendorID(adobeDRM.vendor),
+        AccountAuthenticationAdobeClientToken.create(adobeDRM.clientToken),
+        deviceManagerURI,
+        null)
+
+    val newCredentials =
+      this.credentials.toBuilder()
+        .setAdobeCredentials(adobePreCredentials)
+        .build()
+
+    this.credentials = newCredentials
+
+    val adeptExecutor = this.adeptExecutor
+    if (adeptExecutor == null) {
+      this.steps.currentStepFailed(
+        this.loginStrings.loginDeviceDRMNotSupported,
+        AccountLoginDRMNotSupported("Adobe ACS"))
+      throw DRMUnsupportedException("Adobe ACS")
+    }
+
+    val adeptFuture =
+      AdobeDRMExtensions.activateDevice(
+        executor = adeptExecutor,
+        error = { message -> this.error("{}", message) },
+        debug = { message -> this.debug("{}", message) },
+        vendorID = adobePreCredentials.vendorID,
+        clientToken = adobePreCredentials.clientToken)
+
+    try {
+      val postCredentials =
+        adeptFuture.get(1L, TimeUnit.MINUTES)
+
+      Preconditions.checkState(
+        postCredentials.isNotEmpty(),
+        "Must have returned at least one activation")
+
+      val newPostCredentials =
+        this.credentials.toBuilder()
+          .setAdobeCredentials(adobePreCredentials.copy(postActivationCredentials = postCredentials.first()))
+          .build()
+
+      this.credentials = newPostCredentials
+      this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivated)
+    } catch (e: ExecutionException) {
+      val ex = e.cause!!
+      this.logger.error("exception raised waiting for adept future: ", ex)
+      this.handleAdobeDRMConnectorException(ex)
+      throw ex
+    } catch (e: Throwable) {
+      this.logger.error("exception raised waiting for adept future: ", e)
+      this.handleAdobeDRMConnectorException(e)
+      throw e
+    }
+
+    if (deviceManagerURI != null) {
+      this.runDeviceActivationAdobeSendDeviceManagerRequest(deviceManagerURI)
+    }
+  }
+
+  private fun handleAdobeDRMConnectorException(ex: Throwable) =
+    when (ex) {
+      is AdobeDRMExtensions.AdobeDRMLoginNoActivationsException -> {
+        this.steps.currentStepFailed(
+          this.loginStrings.loginDeviceActivationFailed(ex),
+          null,
+          ex)
+      }
+      is AdobeDRMExtensions.AdobeDRMLoginConnectorException -> {
+        this.steps.currentStepFailed(
+          this.loginStrings.loginDeviceActivationFailed(ex),
+          AccountLoginDRMFailure(ex.errorCode),
+          ex)
+      }
+      else -> {
+        this.steps.currentStepFailed(
+          this.loginStrings.loginDeviceActivationFailed(ex),
+          null,
+          ex)
+      }
+    }
+
+  private fun runDeviceActivationAdobeSendDeviceManagerRequest(deviceManagerURI: URI) {
+    this.debug("runDeviceActivationAdobeSendDeviceManagerRequest: posting device ID")
+
+    this.steps.beginNewStep(this.loginStrings.loginDeviceActivationPostDeviceManager)
+    this.updateLoggingInState()
+
+    Preconditions.checkState(
+      this.credentials.adobeCredentials().isSome,
+      "Adobe credentials must be present")
+    Preconditions.checkState(
+      this.credentials.adobePostActivationCredentials().isSome,
+      "Adobe post-activation credentials must be present")
+
+    val adobePreCredentials =
+      (this.credentials.adobeCredentials() as Some<AccountAuthenticationAdobePreActivationCredentials>).get()
+    val adobePostActivationCredentials =
+      adobePreCredentials.postActivationCredentials!!
+
+    val httpAuthentication =
+      createAuthenticatedHTTP(this.credentials)
+
+    val text =
+      adobePostActivationCredentials.deviceID.value + "\n"
+    val textBytes =
+      text.toByteArray(Charset.forName("UTF-8"))
+
+    /*
+     * We don't care if this fails.
+     */
+
+    this.http.post(
+      Option.some(httpAuthentication),
+      deviceManagerURI,
+      textBytes,
+      "vnd.librarysimplified/drm-device-id-list")
+
+    this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivationPostDeviceManagerDone)
+  }
+
+  private fun pickUsableMessage(message: String, e: Throwable): String {
     val exMessage = e.message
     return if (message.isEmpty()) {
       if (exMessage != null) {
@@ -181,8 +302,8 @@ class ProfileAccountLoginTask(
   private fun runPatronProfileRequest() {
     this.debug("running patron profile request")
 
-    val step = this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest)
-    this.account.setLoginState(AccountLoggingIn(step.description))
+    this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest)
+    this.updateLoggingInState()
 
     val patronSettingsURI = this.account.provider().patronSettingsURI
     if (patronSettingsURI == null) {
@@ -316,6 +437,10 @@ class ProfileAccountLoginTask(
         throw Exception()
       }
     }
+  }
+
+  private fun updateLoggingInState() {
+    this.account.setLoginState(AccountLoggingIn(this.steps.currentStep()?.description ?: ""))
   }
 
   private fun logParseWarning(warning: ParseWarning) {

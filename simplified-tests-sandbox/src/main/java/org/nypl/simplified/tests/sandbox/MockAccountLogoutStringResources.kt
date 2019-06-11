@@ -4,6 +4,19 @@ import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 
 class MockAccountLogoutStringResources : AccountLogoutStringResourcesType {
 
+  override val logoutDeviceDeactivationPostDeviceManagerFinished: String
+    get() = "logoutDeviceDeactivationPostDeviceManagerFinished"
+
+  override val logoutDeviceDeactivationPostDeviceManager: String
+    get() = "logoutDeviceDeactivationPostDeviceManager"
+
+  override fun logoutDeactivatingDeviceAdobeFailed(e: Throwable): String {
+    return "logoutDeactivatingDeviceAdobeFailed"
+  }
+
+  override val logoutDeactivatingDeviceAdobeUnsupported: String
+    get() = "logoutDeactivatingDeviceAdobeUnsupported"
+
   override val logoutDeactivatingDeviceAdobeDeactivated: String
     get() = "logoutDeactivatingDeviceAdobeDeactivated"
 

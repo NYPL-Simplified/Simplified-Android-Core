@@ -40,7 +40,7 @@ class TaskRecorder<E> private constructor() : TaskRecorderType<E> {
   override fun currentStepFailed(
     message: String,
     errorValue: E?,
-    exception: Exception?
+    exception: Throwable?
   ) {
     Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
 

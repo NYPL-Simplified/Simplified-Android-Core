@@ -161,8 +161,8 @@
   <string name="settings_logout_in_progress">Logging out…</string>
   <string name="settings_login_failed">Login Failed</string>
   <string name="settings_login_failed_credentials">Your barcode and pin combination was not valid. Please try again.</string>
-  <string name="settings_login_failed_server">An unknown error occurred. Please check your connection or try again later.</string>
-  <string name="settings_logout_failed_server">An unknown error occurred. Please check your connection or try again later.</string>
+  <string name="settings_login_failed_unknown">An unknown error occurred. Please check your connection or try again later.</string>
+  <string name="settings_logout_failed_unknown">An unknown error occurred. Please check your connection or try again later.</string>
   <string name="settings_login_failed_device">An error occurred when activating your device. Please check your connection or try again later.</string>
   <string name="settings_login_failed_adobe_device_limit">Too many devices have been registered on this account. Please contact Adobe support for assistance.</string>
   <string name="settings_login_failed_adobe_device_bad_clock">An error occurred when activating your device. Please check that your device clock is set to the correct time.</string>
@@ -338,13 +338,17 @@
   <string name="loginErrorServer">Server returned an error: %1$d %2$s</string>
   <string name="loginErrorAuthNotRequired">Authentication is not required!</string>
   <string name="loginErrorNoPatronURI">No patron settings URI is defined!</string>
-  <string name="loginErrorInvalidCredentials">@string/settings_login_failed_credentials</string>
-  <string name="loginErrorConnectionFailed">@string/settings_login_failed_server</string>
+  <string name="loginErrorInvalidCredentials">Your barcode and pin combination was not valid. Please try again.</string>
+  <string name="loginErrorConnectionFailed">A network error occurred. Please check your connection or try again later.</string>
   <string name="loginErrorPatronSettingsParseError">Could not parse patron settings returned by server!</string>
+  <string name="loginDeviceDRMNotSupported">This account requires Adobe ACS DRM, but this version of the application does not support it.</string>
+  <string name="loginDeviceActivationPostDeviceManager">Contacting device manager…</string>
+  <string name="loginDeviceActivationPostDeviceManagerDone">Posted to device manager URI.</string>
+  <string name="loginDeviceActivationFailed">Device activation failed: %1$s (%2$s)</string>
 
   <!-- Logout strings -->
-  <string name="logoutDeactivatingDeviceAdobeDeactivated">Deactivated device</string>
-  <string name="logoutDeactivatingDeviceAdobeNotActive">Device does not appear to be activated</string>
+  <string name="logoutDeactivatingDeviceAdobeDeactivated">Deactivated device.</string>
+  <string name="logoutDeactivatingDeviceAdobeNotActive">Device does not appear to be activated.</string>
   <string name="logoutDeactivatingDeviceAdobe">Deactivating device…</string>
   <string name="logoutClearingBookRegistryFailed">Clearing the book registry failed!</string>
   <string name="logoutClearingBookRegistry">Clearing the book registry…</string>
@@ -352,5 +356,9 @@
   <string name="logoutClearingBookDatabaseFailed">Clearing the book database failed!</string>
   <string name="logoutNotLoggedIn">Account does not appear to be logged in!</string>
   <string name="logoutStarted">Logging out…</string>
+  <string name="logoutDeviceDeactivationPostDeviceManagerFinished">Posted to device manager URI.</string>
+  <string name="logoutDeviceDeactivationPostDeviceManager">Contacting device manager…</string>
+  <string name="logoutDeactivatingDeviceAdobeUnsupported">Adobe ACS DRM is not supported in this version of the application.</string>
+  <string name="logoutDeactivatingDeviceAdobeFailed">Deactivating the device failed: %1$s (%2$s)</string>
 
 </resources>

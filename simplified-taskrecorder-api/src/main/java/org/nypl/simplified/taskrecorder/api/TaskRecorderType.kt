@@ -27,7 +27,7 @@ interface TaskRecorderType<E> {
   fun currentStepFailed(
     message: String,
     errorValue: E? = null,
-    exception: Exception? = null
+    exception: Throwable? = null
   )
 
   /**

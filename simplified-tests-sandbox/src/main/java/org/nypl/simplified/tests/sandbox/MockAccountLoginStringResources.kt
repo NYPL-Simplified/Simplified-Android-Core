@@ -4,11 +4,24 @@ import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 
 class MockAccountLoginStringResources : AccountLoginStringResourcesType {
 
+  override val loginDeviceActivationPostDeviceManagerDone: String
+    get() = "loginDeviceActivationPostDeviceManagerDone"
+
+  override val loginDeviceActivationPostDeviceManager: String
+    get() = "loginDeviceActivationPostDeviceManager"
+
+  override fun loginDeviceActivationFailed(e: Throwable): String {
+    return "loginDeviceActivationFailed"
+  }
+
+  override val loginDeviceDRMNotSupported: String
+    get() = "loginDeviceDRMNotSupported"
+
   override val loginDeviceActivated: String
     get() = "loginDeviceActivated"
 
-  override val loginDeviceActivation: String
-    get() = "loginDeviceActivation"
+  override val loginDeviceActivationAdobe: String
+    get() = "loginDeviceActivationAdobe"
 
   override val loginPatronSettingsConnectionFailed: String
     get() = "loginPatronSettingsConnectionFailed"

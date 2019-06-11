@@ -1,7 +1,5 @@
 package org.nypl.simplified.taskrecorder.api
 
-import java.lang.Exception
-
 /**
  * A step in a task.
  *
@@ -23,7 +21,8 @@ data class TaskStep<E>(
   var resolution: String = "",
 
   /**
-   * `true` if the task step failed.
+   * `true` if the task step failed. A failed step is assumed to have failed the task
+   * as a whole.
    */
 
   var failed: Boolean = false,
@@ -38,4 +37,4 @@ data class TaskStep<E>(
    * The exception that failed the task, if any.
    */
 
-  var exception: Exception? = null)
+  var exception: Throwable? = null)
