@@ -4,7 +4,8 @@
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
   android:orientation="vertical"
-  android:padding="16dp">
+  android:padding="16dp"
+  android:scrollbarAlwaysDrawVerticalTrack="true">
 
   <TextView
     android:id="@+id/settings_version_build_title"
@@ -47,8 +48,8 @@
     android:id="@+id/settings_version_dev"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layout_below="@id/settings_version_version">
+    android:layout_below="@id/settings_version_version"
+    android:orientation="vertical">
 
     <TextView
       android:id="@+id/settings_version_dev_title"
@@ -84,10 +85,38 @@
 
     <TableLayout
       android:id="@+id/settings_version_drm_support"
-      android:layout_marginBottom="16dp"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
-    </TableLayout>
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"></TableLayout>
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Adobe DRM Activations"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
+    <HorizontalScrollView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:scrollbars="vertical|horizontal"
+      android:scrollbarAlwaysDrawVerticalTrack="true"
+      android:scrollbarAlwaysDrawHorizontalTrack="true"
+      android:layout_marginBottom="16dp">
+      <TableLayout
+        android:id="@+id/settings_version_drm_adobe_activations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TableRow>
+          <TextView android:text="Placeholder" />
+          <TextView android:text="Placeholder" />
+          <TextView android:text="Placeholder" />
+          <TextView android:text="Placeholder" />
+          <TextView android:text="Placeholder" />
+        </TableRow>
+      </TableLayout>
+    </HorizontalScrollView>
 
     <TextView
       android:layout_width="wrap_content"

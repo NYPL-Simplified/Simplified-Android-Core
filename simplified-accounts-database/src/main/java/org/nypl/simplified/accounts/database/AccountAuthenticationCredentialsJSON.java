@@ -136,7 +136,7 @@ public final class AccountAuthenticationCredentialsJSON {
           return new AccountAuthenticationAdobePreActivationCredentials(
             new AdobeVendorID(JSONParserUtilities.getString(jo_creds, "vendor_id")),
             AccountAuthenticationAdobeClientToken.create(JSONParserUtilities.getString(jo_creds, "client_token")),
-            JSONParserUtilities.getURI(jo_creds, "device_manager_uri"),
+            JSONParserUtilities.getURIOrNull(jo_creds, "device_manager_uri"),
             creds_post);
         }));
 

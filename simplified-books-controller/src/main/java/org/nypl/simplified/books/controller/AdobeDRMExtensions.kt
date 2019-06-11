@@ -145,6 +145,7 @@ object AdobeDRMExtensions {
           }
         }
 
+        debug("deactivating device with token")
         connector.deactivateDevice(
           receiver,
           vendorID,
@@ -172,4 +173,79 @@ object AdobeDRMExtensions {
     val errorCode: String)
     : Exception(errorCode)
 
+  /**
+   * Deactivate a device.
+   *
+   * @param executor The Adept executor to be used
+   * @param error A function to receive error messages
+   * @param debug A function to receive debug messages
+   * @param vendorID The vendor ID
+   * @param clientToken The Adobe short client token
+   */
+
+  fun getDeviceActivations(
+    executor: AdobeAdeptExecutorType,
+    error: (String) -> Unit,
+    debug: (String) -> Unit)
+    : ListenableFuture<List<Activation>> {
+
+    val adeptFuture = SettableFuture.create<List<Activation>>()
+    executor.execute { connector ->
+      try {
+        val results =
+          mutableListOf<Activation>()
+        val rawReceiver =
+          ActivationRawReceiver(error, debug, adeptFuture, results)
+
+        debug("retrieving device activations")
+        connector.getDeviceActivations(rawReceiver)
+
+        if (!rawReceiver.failed) {
+          adeptFuture.set(results.toList())
+        }
+      } catch (e: Throwable) {
+        adeptFuture.setException(e)
+      }
+    }
+    return adeptFuture
+  }
+
+  data class Activation(
+    val index: Int,
+    val vendor: AdobeVendorID,
+    val device: AdobeDeviceID,
+    val userName: String,
+    val userID: AdobeUserID,
+    val expiry: String?)
+
+  private class ActivationRawReceiver(
+    val error: (String) -> Unit,
+    val debug: (String) -> Unit,
+    val future: SettableFuture<List<Activation>>,
+    val results: MutableList<Activation>)
+    : AdobeAdeptActivationReceiverType {
+
+    var failed = false
+
+    override fun onActivationError(error: String) {
+      this.error("onActivationError: $error")
+      this.failed = true
+      this.future.setException(AdobeDRMLoginConnectorException(error))
+    }
+
+    override fun onActivationsCount(count: Int) {
+      this.debug("onActivationsCount: $count")
+    }
+
+    override fun onActivation(
+      index: Int,
+      vendor: AdobeVendorID,
+      device: AdobeDeviceID,
+      userName: String,
+      userId: AdobeUserID,
+      expiry: String?) {
+      this.debug("onActivation: $index")
+      this.results.add(Activation(index, vendor, device, userName, userId, expiry))
+    }
+  }
 }

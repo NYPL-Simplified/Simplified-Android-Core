@@ -10,11 +10,13 @@ import android.widget.Button
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
-import org.nypl.simplified.app.AdobeDRMServices
+import com.google.common.util.concurrent.MoreExecutors
 import org.nypl.simplified.app.BuildConfig
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
+import org.nypl.simplified.app.utilities.UIThread
+import org.nypl.simplified.books.controller.AdobeDRMExtensions
 import org.slf4j.LoggerFactory
 
 class SettingsVersionActivity : ProfileTimeOutActivity() {
@@ -27,6 +29,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   private lateinit var buildTitle: TextView
   private lateinit var buildText: TextView
   private lateinit var developerOptions: ViewGroup
+  private lateinit var adobeDRMActivationTable: TableLayout
+  private var adobeDRMActivations = mutableListOf<AdobeDRMExtensions.Activation>()
 
   private val logger = LoggerFactory.getLogger(SettingsVersionActivity::class.java)
 
@@ -51,6 +55,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       this.findViewById(R.id.settings_version_version)
     this.drmTable =
       this.findViewById(R.id.settings_version_drm_support)
+    this.adobeDRMActivationTable =
+      this.findViewById(R.id.settings_version_drm_adobe_activations)
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -110,15 +116,88 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       row.findViewById<TextView>(R.id.value)
 
     key.text = "Adobe ACS"
-    value.text = try {
-      AdobeDRMServices.newAdobeDRM(this, AdobeDRMServices.getPackageOverride(this.resources))
-      value.setTextColor(ContextCompat.getColor(this, R.color.simplified_material_green_primary))
-      "Supported"
-    } catch (e: Throwable) {
-      this.logger.debug("DRM unsupported: ", e)
+
+    val executor = Simplified.getAdobeDRMExecutor()
+    if (executor == null) {
       value.setTextColor(ContextCompat.getColor(this, R.color.simplified_material_red_primary))
-      "Unsupported"
+      value.text = "Unsupported"
+      return row
     }
+
+    /*
+     * If we managed to get an executor, then fetch the current activations.
+     */
+
+    val adeptFuture =
+      AdobeDRMExtensions.getDeviceActivations(
+        executor,
+        { message -> this.logger.error("DRM: {}", message) },
+        { message -> this.logger.debug("DRM: {}", message) })
+
+    adeptFuture.addListener(
+      Runnable {
+        UIThread.runOnUIThread {
+          try {
+            this.onAdobeDRMReceivedActivations(adeptFuture.get())
+          } catch (e: Exception) {
+            this.onAdobeDRMReceivedActivationsError(e)
+          }
+        }
+      },
+      MoreExecutors.directExecutor())
+
+    value.setTextColor(ContextCompat.getColor(this, R.color.simplified_material_green_primary))
+    value.text = "Supported"
     return row
+  }
+
+  private fun onAdobeDRMReceivedActivationsError(e: Exception) {
+    this.logger.error("could not retrieve activations: ", e)
+  }
+
+  private fun onAdobeDRMReceivedActivations(activations: List<AdobeDRMExtensions.Activation>) {
+    this.adobeDRMActivationTable.removeAllViews()
+
+    run {
+      val row =
+        this.layoutInflater.inflate(
+          R.layout.settings_drm_activation_table_item, this.adobeDRMActivationTable, false) as TableRow
+      val index = row.findViewById<TextView>(R.id.index)
+      val vendor = row.findViewById<TextView>(R.id.vendor)
+      val device = row.findViewById<TextView>(R.id.device)
+      val userName = row.findViewById<TextView>(R.id.userName)
+      val userId = row.findViewById<TextView>(R.id.userId)
+      val expiry = row.findViewById<TextView>(R.id.expiry)
+
+      index.text = "Index"
+      vendor.text = "Vendor"
+      device.text = "Device"
+      userName.text = "UserName"
+      userId.text = "UserID"
+      expiry.text = "Expiry"
+
+      this.adobeDRMActivationTable.addView(row)
+    }
+
+    for (activation in activations) {
+      val row =
+        this.layoutInflater.inflate(
+          R.layout.settings_drm_activation_table_item, this.adobeDRMActivationTable, false) as TableRow
+      val index = row.findViewById<TextView>(R.id.index)
+      val vendor = row.findViewById<TextView>(R.id.vendor)
+      val device = row.findViewById<TextView>(R.id.device)
+      val userName = row.findViewById<TextView>(R.id.userName)
+      val userId = row.findViewById<TextView>(R.id.userId)
+      val expiry = row.findViewById<TextView>(R.id.expiry)
+
+      index.text = activation.index.toString()
+      vendor.text = activation.vendor.value
+      device.text = activation.device.value
+      userName.text = activation.userName
+      userId.text = activation.userID.value
+      expiry.text = activation.expiry ?: "No expiry"
+
+      this.adobeDRMActivationTable.addView(row)
+    }
   }
 }

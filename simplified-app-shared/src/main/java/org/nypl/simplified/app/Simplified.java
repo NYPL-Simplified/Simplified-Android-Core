@@ -23,6 +23,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.squareup.picasso.Picasso;
 
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType;
@@ -205,6 +206,15 @@ public final class Simplified extends MultiDexApplication {
       throw new IllegalStateException("Application is not yet initialized");
     }
     return i;
+  }
+
+  /**
+   * @return The application's Adobe DRM executor (if one is supported)
+   */
+
+  public static AdobeAdeptExecutorType getAdobeDRMExecutor() {
+    final Simplified i = Simplified.checkInitialized();
+    return i.adobe_drm;
   }
 
   /**
