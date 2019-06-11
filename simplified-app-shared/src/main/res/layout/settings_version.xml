@@ -43,10 +43,11 @@
     android:fontFamily="monospace"
     android:text="1.0.0 (2000)" />
 
-  <RelativeLayout
+  <LinearLayout
     android:id="@+id/settings_version_dev"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:layout_below="@id/settings_version_version">
 
     <TextView
@@ -58,13 +59,52 @@
       android:textSize="24sp"
       android:textStyle="bold" />
 
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Crash Application"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
     <Button
       android:id="@+id/settings_version_dev_crash"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_below="@+id/settings_version_dev_title"
+      android:layout_marginBottom="16dp"
       android:text="Crash" />
 
-  </RelativeLayout>
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="DRM Support"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
+    <TableLayout
+      android:id="@+id/settings_version_drm_support"
+      android:layout_marginBottom="16dp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+    </TableLayout>
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Testing Features"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
+    <Switch
+      android:id="@+id/settings_version_dev_production_libraries_switch"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:checked="false"
+      android:enabled="false"
+      android:text="Show non-production libraries" />
+
+  </LinearLayout>
 
 </RelativeLayout>
