@@ -84,7 +84,7 @@ git clone \
 
 info "downloading avdmanager"
 
-SDKMANAGER="${ANDROID_SDK_ROOT}/tools/bin/sdkmanager"
+SDKMANAGER="/usr/local/android-sdk/tools/bin"
 
 yes | "${SDKMANAGER}" tools \
   >> .travis/pre.txt 2>&1 \
