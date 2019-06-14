@@ -8,6 +8,7 @@ import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
+import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -26,6 +27,8 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadResult
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
@@ -83,6 +86,7 @@ class Controller private constructor(
   private val adobeDrm: AdobeAdeptExecutorType?,
   private val analytics: AnalyticsType,
   private val bookRegistry: BookRegistryType,
+  private val borrowStrings: BookBorrowStringResourcesType,
   private val bundledContent: BundledContentResolverType,
   private val downloader: DownloaderType,
   private val feedLoader: FeedLoaderType,
@@ -331,24 +335,21 @@ class Controller private constructor(
     account: AccountType,
     id: BookID,
     acquisition: OPDSAcquisition,
-    entry: OPDSAcquisitionFeedEntry) {
+    entry: OPDSAcquisitionFeedEntry): FluentFuture<BookStatusDownloadResult> {
 
-    NullCheck.notNull(account, "Account")
-    NullCheck.notNull(id, "Book ID")
-    NullCheck.notNull(acquisition, "Acquisition")
-    NullCheck.notNull(entry, "Entry")
-
-    this.taskExecutor.submit(BookBorrowTask(
+    return FluentFuture.from(this.taskExecutor.submit(BookBorrowTask(
+      account = account,
+      acquisition = acquisition,
       adobeDRM = this.adobeDrm,
+      bookId = id,
+      bookRegistry = this.bookRegistry,
+      borrowStrings = this.borrowStrings,
+      bundledContent = this.bundledContent,
+      clock = { Instant.now() },
       downloader = this.downloader,
       downloads = this.downloads,
       feedLoader = this.feedLoader,
-      bundledContent = this.bundledContent,
-      bookRegistry = this.bookRegistry,
-      bookId = id,
-      account = account,
-      acquisition = acquisition,
-      entry = entry))
+      entry = entry)))
   }
 
   override fun bookBorrowFailedDismiss(
@@ -443,6 +444,7 @@ class Controller private constructor(
       accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
       adobeDrm: AdobeAdeptExecutorType?,
       analytics: AnalyticsType,
+      bookBorrowStrings: BookBorrowStringResourcesType,
       bookRegistry: BookRegistryType,
       bundledContent: BundledContentResolverType,
       downloader: DownloaderType,
@@ -463,6 +465,7 @@ class Controller private constructor(
         accountProviders = accountProviders,
         adobeDrm = adobeDrm,
         analytics = analytics,
+        borrowStrings = bookBorrowStrings,
         bookRegistry = bookRegistry,
         bundledContent = bundledContent,
         downloader = downloader,

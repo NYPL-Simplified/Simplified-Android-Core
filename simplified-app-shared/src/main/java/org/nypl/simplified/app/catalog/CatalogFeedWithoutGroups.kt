@@ -192,7 +192,7 @@ class CatalogFeedWithoutGroups(
       this.feedLoader.fetchURIWithBookRegistryEntries(next, this.httpAuth)
         .catching(
           Exception::class.java,
-          Function<Exception, FeedLoaderResult> { ex -> FeedLoaderFailedGeneral(ex!!) },
+          Function<Exception, FeedLoaderResult> { ex -> FeedLoaderFailedGeneral(null, ex!!) },
           this.executor)
         .transform(
           Function<FeedLoaderResult, Unit> { result -> this.onFeedResult(result!!) },

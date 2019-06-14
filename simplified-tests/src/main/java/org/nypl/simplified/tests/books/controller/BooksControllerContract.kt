@@ -7,6 +7,7 @@ import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Unit
 import org.hamcrest.core.IsInstanceOf
+import org.joda.time.Instant
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -61,6 +62,7 @@ import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.MockAccountLoginStringResources
 import org.nypl.simplified.tests.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.MockAnalytics
+import org.nypl.simplified.tests.MockBorrowStringResources
 import org.nypl.simplified.tests.books.MappedHTTP
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
@@ -109,6 +111,7 @@ abstract class BooksControllerContract {
 
   private val accountLoginStringResources = MockAccountLoginStringResources()
   private val accountLogoutStringResources = MockAccountLogoutStringResources()
+  private val bookBorrowStringResources = MockBorrowStringResources()
 
   private fun fakeProvider(providerId: String): AccountProviderType {
     return AccountProviders.builder().apply {
@@ -201,6 +204,7 @@ abstract class BooksControllerContract {
       accountEvents = accountEvents,
       accountLoginStringResources = this.accountLoginStringResources,
       accountLogoutStringResources = this.accountLogoutStringResources,
+      bookBorrowStrings = this.bookBorrowStringResources,
       profileEvents = profileEvents,
       http = http,
       feedParser = parser,

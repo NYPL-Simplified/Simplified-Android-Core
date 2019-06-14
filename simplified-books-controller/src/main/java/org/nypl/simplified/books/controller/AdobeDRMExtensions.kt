@@ -3,13 +3,19 @@ package org.nypl.simplified.books.controller
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import org.nypl.drm.core.AdobeAdeptActivationReceiverType
+import org.nypl.drm.core.AdobeAdeptConnectorType
 import org.nypl.drm.core.AdobeAdeptDeactivationReceiverType
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType
+import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeDeviceID
 import org.nypl.drm.core.AdobeUserID
 import org.nypl.drm.core.AdobeVendorID
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
+import java.io.File
+import java.lang.IllegalStateException
+import java.util.concurrent.CancellationException
 
 /**
  * Extensions to make the ancient Adept interface slightly more pleasant to work with.
@@ -51,6 +57,7 @@ object AdobeDRMExtensions {
           vendorID,
           clientToken.tokenUserName(),
           clientToken.tokenPassword())
+        debug("activation finished")
 
         if (!receiver.failed) {
           if (results.isEmpty()) {
@@ -69,7 +76,7 @@ object AdobeDRMExtensions {
    * The connector raised some sort of error code.
    */
 
-  class AdobeDRMLoginConnectorException(
+  data class AdobeDRMLoginConnectorException(
     val errorCode: String)
     : Exception(errorCode)
 
@@ -152,6 +159,7 @@ object AdobeDRMExtensions {
           userID,
           clientToken.tokenUserName(),
           clientToken.tokenPassword())
+        debug("deactivation finished")
 
         if (errors.isNotEmpty()) {
           adeptFuture.setException(errors[0])
@@ -169,18 +177,16 @@ object AdobeDRMExtensions {
    * The connector raised some sort of error code.
    */
 
-  class AdobeDRMLogoutConnectorException(
+  data class AdobeDRMLogoutConnectorException(
     val errorCode: String)
     : Exception(errorCode)
 
   /**
-   * Deactivate a device.
+   * Retrieve activations for a device.
    *
    * @param executor The Adept executor to be used
    * @param error A function to receive error messages
    * @param debug A function to receive debug messages
-   * @param vendorID The vendor ID
-   * @param clientToken The Adobe short client token
    */
 
   fun getDeviceActivations(
@@ -199,6 +205,7 @@ object AdobeDRMExtensions {
 
         debug("retrieving device activations")
         connector.getDeviceActivations(rawReceiver)
+        debug("retrieving device activations ended")
 
         if (!rawReceiver.failed) {
           adeptFuture.set(results.toList())
@@ -247,5 +254,87 @@ object AdobeDRMExtensions {
       this.debug("onActivation: $index")
       this.results.add(Activation(index, vendor, device, userName, userId, expiry))
     }
+  }
+
+  /**
+   * Retrieve activations for a device.
+   *
+   * @param executor The Adept executor to be used
+   * @param onStart A function evaluated when the download starts
+   * @param error A function to receive error messages
+   * @param debug A function to receive debug messages
+   * @param data The raw bytes of an ACSM file
+   * @param userId The user ID performing the fulfillment
+   */
+
+  fun fulfill(
+    executor: AdobeAdeptExecutorType,
+    error: (String) -> Unit,
+    debug: (String) -> Unit,
+    onStart: (AdobeAdeptConnectorType) -> Unit,
+    progress: (Double) -> Unit,
+    data: ByteArray,
+    userId: AdobeUserID)
+    : ListenableFuture<Fulfillment> {
+
+    val adeptFuture = SettableFuture.create<Fulfillment>()
+    executor.execute { connector ->
+      try {
+        onStart.invoke(connector)
+        val rawReceiver = FulfillmentReceiver(error, debug, progress, adeptFuture)
+        debug("fulfilling ACSM")
+        connector.fulfillACSM(rawReceiver, data, userId)
+        debug("fulfillment ended")
+
+        if (!adeptFuture.isDone) {
+          adeptFuture.setException(IllegalStateException(
+            "Fulfillment receiver failed to report success or failure"))
+        }
+      } catch (e: Throwable) {
+        adeptFuture.setException(e)
+      }
+    }
+    return adeptFuture
+  }
+
+  data class Fulfillment(
+    val file: File,
+    val loan: AdobeAdeptLoan)
+
+  /**
+   * The connector raised some sort of error code.
+   */
+
+  data class AdobeDRMFulfillmentException(
+    val errorCode: String)
+    : Exception(errorCode)
+
+  private class FulfillmentReceiver(
+    private val error: (String) -> Unit,
+    private val debug: (String) -> Unit,
+    private val progress: (Double) -> Unit,
+    private val adeptFuture: SettableFuture<Fulfillment>
+  ) : AdobeAdeptFulfillmentListenerType {
+
+    override fun onFulfillmentCancelled() {
+      this.adeptFuture.setException(CancellationException())
+    }
+
+    override fun onFulfillmentProgress(percent: Double) {
+      try {
+        this.progress.invoke(percent * 100.0)
+      } catch (e: Throwable) {
+        this.error.invoke("suppressed exception: $e")
+      }
+    }
+
+    override fun onFulfillmentFailure(errorCode: String) {
+      this.adeptFuture.setException(AdobeDRMFulfillmentException(errorCode))
+    }
+
+    override fun onFulfillmentSuccess(file: File, loan: AdobeAdeptLoan) {
+      this.adeptFuture.set(Fulfillment(file, loan))
+    }
+
   }
 }

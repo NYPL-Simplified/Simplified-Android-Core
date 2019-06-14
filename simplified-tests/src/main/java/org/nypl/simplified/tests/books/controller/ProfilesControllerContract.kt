@@ -72,6 +72,7 @@ import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.MockAccountLoginStringResources
 import org.nypl.simplified.tests.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.MockAnalytics
+import org.nypl.simplified.tests.MockBorrowStringResources
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
@@ -116,6 +117,7 @@ abstract class ProfilesControllerContract {
 
   private val accountLoginStringResources = MockAccountLoginStringResources()
   private val accountLogoutStringResources = MockAccountLogoutStringResources()
+  private val bookBorrowStringResources = MockBorrowStringResources()
 
   private fun fakeProvider(provider_id: String): AccountProviderType {
     return AccountProviders.builder().apply {
@@ -162,6 +164,7 @@ abstract class ProfilesControllerContract {
       accountLoginStringResources = this.accountLoginStringResources,
       accountLogoutStringResources = this.accountLogoutStringResources,
       accountEvents = this.accountEvents,
+      bookBorrowStrings = this.bookBorrowStringResources,
       profileEvents = this.profileEvents,
       readerBookmarkEvents = this.readerBookmarkEvents,
       http = this.http,

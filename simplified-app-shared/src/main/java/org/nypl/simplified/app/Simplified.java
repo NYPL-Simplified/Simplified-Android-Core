@@ -41,6 +41,7 @@ import org.nypl.simplified.analytics.api.Analytics;
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration;
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
+import org.nypl.simplified.app.catalog.CatalogBookBorrowStrings;
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.helpstack.Helpstack;
 import org.nypl.simplified.app.helpstack.HelpstackType;
@@ -817,6 +818,7 @@ public final class Simplified extends MultiDexApplication {
         (unused) -> this.account_providers,
         this.adobe_drm,
         this.analytics,
+        new CatalogBookBorrowStrings(this.getResources()),
         this.book_registry,
         this.bundled_content_resolver,
         this.downloader,

@@ -132,11 +132,19 @@ class FeedLoader private constructor(
       return FeedLoaderSuccess(feed)
     } catch (e: FeedHTTPTransportException) {
       if (e.code == 401) {
-        return FeedLoaderFailure.FeedLoaderFailedAuthentication(e)
+        return FeedLoaderFailure.FeedLoaderFailedAuthentication(someOrNull(e.problemReport), e)
       }
-      return FeedLoaderFailure.FeedLoaderFailedGeneral(e)
+      return FeedLoaderFailure.FeedLoaderFailedGeneral(someOrNull(e.problemReport), e)
     } catch (e: Exception) {
-      return FeedLoaderFailure.FeedLoaderFailedGeneral(e)
+      return FeedLoaderFailure.FeedLoaderFailedGeneral(null, e)
+    }
+  }
+
+  private fun <T> someOrNull(x: OptionType<T>): T? {
+    return if (x is Some<T>) {
+      x.get()
+    } else {
+      null
     }
   }
 

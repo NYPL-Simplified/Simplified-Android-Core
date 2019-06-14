@@ -184,6 +184,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         downloader = this.downloader,
         profiles = this.profilesDatabase,
         analytics = this.analyticsLogger,
+        bookBorrowStrings = MockBorrowStringResources(),
         bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent,
         accountProviders = FunctionType { this.getAccountProviders() },

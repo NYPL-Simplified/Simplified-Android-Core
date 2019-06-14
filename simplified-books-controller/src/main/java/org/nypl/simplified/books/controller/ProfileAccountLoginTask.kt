@@ -131,7 +131,7 @@ class ProfileAccountLoginTask(
 
       val resultingSteps = this.steps.finish()
       this.account.setLoginState(AccountLoginFailed(resultingSteps))
-      return AccountLoginTaskResult(this.steps.finish())
+      return AccountLoginTaskResult(resultingSteps)
     }
   }
 

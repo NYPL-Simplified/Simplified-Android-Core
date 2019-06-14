@@ -155,7 +155,7 @@ public final class DownloaderHTTP implements DownloaderType
         final HTTPResultType<InputStream> r = rf.runExceptional();
         r.matchResult(this);
       } catch (final Throwable e) {
-        this.listener.onDownloadFailed(this, -1, this.total, Option.some(e));
+        this.listener.onDownloadFailed(this, -1, this.total, Option.none(),  Option.some(e));
         this.failed();
       }
     }
@@ -165,9 +165,8 @@ public final class DownloaderHTTP implements DownloaderType
       throws IOException
     {
       this.log.error("http error: status {}", Integer.valueOf(e.getStatus()));
-
       final OptionType<Throwable> none = Option.none();
-      this.listener.onDownloadFailed(this, e.getStatus(), this.total, none);
+      this.listener.onDownloadFailed(this, e.getStatus(), this.total, e.getProblemReport(),  none);
       this.failed();
       return Unit.unit();
     }
@@ -179,7 +178,7 @@ public final class DownloaderHTTP implements DownloaderType
       this.log.error("http error: ", e.getError());
 
       this.listener.onDownloadFailed(
-        this, -1, this.total, Option.some((Throwable) e.getError()));
+        this, -1, this.total, Option.none(), Option.some((Throwable) e.getError()));
       this.failed();
       return Unit.unit();
     }
@@ -223,7 +222,7 @@ public final class DownloaderHTTP implements DownloaderType
                 Long.valueOf(expected));
               final OptionType<Throwable> none = Option.none();
               this.listener.onDownloadFailed(
-                this, e.getStatus(), this.total, none);
+                this, e.getStatus(), this.total, Option.none(), none);
               this.failed();
             } else {
               this.log.debug("download completed");

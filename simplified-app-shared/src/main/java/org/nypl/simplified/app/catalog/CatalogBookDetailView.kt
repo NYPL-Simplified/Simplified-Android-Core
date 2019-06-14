@@ -318,7 +318,7 @@ class CatalogBookDetailView(
     val currentEntry = this.entry.get()
 
     val failed = this.bookDownloadingFailedText
-    failed.text = CatalogBookErrorStrings.getFailureString(this.activity.resources, status)
+    failed.text = status.detailMessage
 
     /*
      * Manually construct a dismiss button.

@@ -2,6 +2,8 @@ package org.nypl.simplified.downloader.core;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+
+import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -48,11 +50,12 @@ public final class DownloadCatchingListener implements DownloadListenerType
     final DownloadType d,
     final int in_status,
     final long in_running_total,
+    final OptionType<HTTPProblemReport> problemReport,
     final OptionType<Throwable> in_exception)
   {
     try {
       this.listener.onDownloadFailed(
-        d, in_status, in_running_total, in_exception);
+        d, in_status, in_running_total, problemReport, in_exception);
     } catch (final Throwable x) {
       this.log.error(
         "Ignoring exception: onDownloadFailed raised: ", x);

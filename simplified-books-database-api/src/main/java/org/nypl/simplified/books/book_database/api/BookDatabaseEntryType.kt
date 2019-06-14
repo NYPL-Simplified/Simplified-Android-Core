@@ -2,6 +2,7 @@ package org.nypl.simplified.books.book_database.api
 
 import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.drm.core.AdobeAdeptLoan
+import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
@@ -28,7 +29,7 @@ interface BookDatabaseEntryType {
    * @return The most recent book value for the entry
    */
 
-  val book: org.nypl.simplified.books.api.Book
+  val book: Book
 
   /**
    * Copy the cover file into the database.

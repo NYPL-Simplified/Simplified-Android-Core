@@ -1,11 +1,11 @@
 package org.nypl.simplified.books.controller.api;
 
 import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.books.api.BookID;
+import org.nypl.simplified.books.book_registry.BookStatusDownloadResult;
 import org.nypl.simplified.feeds.api.FeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -25,7 +25,7 @@ public interface BooksControllerType {
    * @param entry       The OPDS feed entry for the book
    */
 
-  void bookBorrow(
+  FluentFuture<BookStatusDownloadResult> bookBorrow(
     AccountType account,
     BookID id,
     OPDSAcquisition acquisition,
