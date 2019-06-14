@@ -84,7 +84,9 @@ git clone \
 
 info "downloading avdmanager"
 
-yes | sdkmanager tools \
+SDKMANAGER="${ANDROID_SDK_ROOT}/tools/bin/sdkmanager"
+
+yes | "${SDKMANAGER}" tools \
   >> .travis/pre.txt 2>&1 \
   || fatal "could not download avdmanager"
 
@@ -101,20 +103,20 @@ for COMPONENT in ${COMPONENTS}
 do
   info "downloading ${COMPONENT}"
 
-  yes | sdkmanager "${COMPONENT}" \
+  yes | "${SDKMANAGER}" "${COMPONENT}" \
     >> .travis/pre.txt 2>&1 \
     || fatal "could not download emulator"
 done
 
 info "updating all"
 
-yes | sdkmanager --update \
+yes | "${SDKMANAGER}" --update \
   >> .travis/pre.txt 2>&1 \
   || fatal "could not update platform"
 
 info "agreeing to licenses"
 
-yes | sdkmanager --licenses \
+yes | "${SDKMANAGER}" --licenses \
   >> .travis/pre.txt 2>&1 \
   || fatal "could not agree to licenses"
 
