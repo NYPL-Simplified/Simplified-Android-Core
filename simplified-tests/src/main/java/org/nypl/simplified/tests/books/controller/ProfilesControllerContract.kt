@@ -110,6 +110,7 @@ abstract class ProfilesControllerContract {
   private lateinit var downloader: DownloaderType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
+  private lateinit var cacheDirectory: File
 
   protected abstract val logger: Logger
 
@@ -170,6 +171,7 @@ abstract class ProfilesControllerContract {
       http = this.http,
       feedParser = parser,
       feedLoader = feedLoader,
+      cacheDirectory = this.cacheDirectory,
       downloader = this.downloader,
       profiles = profiles,
       analytics = analyticsLogger,
@@ -197,6 +199,9 @@ abstract class ProfilesControllerContract {
     this.profileEventsReceived = Collections.synchronizedList(ArrayList())
     this.accountEvents = Observable.create<AccountEvent>()
     this.accountEventsReceived = Collections.synchronizedList(ArrayList())
+    this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
+    this.cacheDirectory.delete()
+    this.cacheDirectory.mkdirs()
     this.readerBookmarkEvents = Observable.create()
     this.bookRegistry = BookRegistry.create()
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)

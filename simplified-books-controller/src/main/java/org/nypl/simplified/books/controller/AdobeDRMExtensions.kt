@@ -13,6 +13,7 @@ import org.nypl.drm.core.AdobeUserID
 import org.nypl.drm.core.AdobeVendorID
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
+import org.nypl.simplified.files.FileUtilities
 import java.io.File
 import java.lang.IllegalStateException
 import java.util.concurrent.CancellationException
@@ -257,11 +258,12 @@ object AdobeDRMExtensions {
   }
 
   /**
-   * Retrieve activations for a device.
+   * Fulfill a book.
    *
    * @param executor The Adept executor to be used
    * @param onStart A function evaluated when the download starts
    * @param error A function to receive error messages
+   * @param progress A function that will receive progress reports for downloads
    * @param debug A function to receive debug messages
    * @param data The raw bytes of an ACSM file
    * @param userId The user ID performing the fulfillment
@@ -273,6 +275,7 @@ object AdobeDRMExtensions {
     debug: (String) -> Unit,
     onStart: (AdobeAdeptConnectorType) -> Unit,
     progress: (Double) -> Unit,
+    outputFile: File,
     data: ByteArray,
     userId: AdobeUserID)
     : ListenableFuture<Fulfillment> {
@@ -281,7 +284,7 @@ object AdobeDRMExtensions {
     executor.execute { connector ->
       try {
         onStart.invoke(connector)
-        val rawReceiver = FulfillmentReceiver(error, debug, progress, adeptFuture)
+        val rawReceiver = FulfillmentReceiver(error, debug, progress, outputFile, adeptFuture)
         debug("fulfilling ACSM")
         connector.fulfillACSM(rawReceiver, data, userId)
         debug("fulfillment ended")
@@ -313,6 +316,7 @@ object AdobeDRMExtensions {
     private val error: (String) -> Unit,
     private val debug: (String) -> Unit,
     private val progress: (Double) -> Unit,
+    private val outputFile: File,
     private val adeptFuture: SettableFuture<Fulfillment>
   ) : AdobeAdeptFulfillmentListenerType {
 
@@ -333,7 +337,12 @@ object AdobeDRMExtensions {
     }
 
     override fun onFulfillmentSuccess(file: File, loan: AdobeAdeptLoan) {
-      this.adeptFuture.set(Fulfillment(file, loan))
+      try {
+        FileUtilities.fileCopy(file, this.outputFile)
+      } catch (e: Throwable) {
+        this.adeptFuture.setException(e)
+      }
+      this.adeptFuture.set(Fulfillment(this.outputFile, loan))
     }
 
   }

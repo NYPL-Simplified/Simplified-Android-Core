@@ -108,6 +108,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
   private lateinit var clock: () -> Instant
   private lateinit var adeptExecutor: AdobeAdeptExecutorType
   private lateinit var adeptConnector: AdobeAdeptConnectorType
+  private lateinit var cacheDirectory: File
 
   private val bookBorrowStrings = MockBorrowStringResources()
 
@@ -141,6 +142,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
+    this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
+    this.cacheDirectory.delete()
+    this.cacheDirectory.mkdirs()
     this.clock = { Instant.now() }
 
     this.adeptConnector =
@@ -326,6 +330,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -342,7 +347,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.verify(formatHandle, Mockito.times(1))
       .setAdobeRightsInformation(loan)
     Mockito.verify(formatHandle, Mockito.times(1))
-      .copyInBook(file)
+      .copyInBook(anyNonNull())
   }
 
   /**
@@ -434,6 +439,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -595,6 +601,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -725,6 +732,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -841,6 +849,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -977,6 +986,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1108,6 +1118,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),

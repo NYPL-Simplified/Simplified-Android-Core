@@ -67,6 +67,7 @@ import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.net.URI
 import java.util.ArrayList
 import java.util.SortedMap
@@ -88,6 +89,7 @@ class Controller private constructor(
   private val bookRegistry: BookRegistryType,
   private val borrowStrings: BookBorrowStringResourcesType,
   private val bundledContent: BundledContentResolverType,
+  private val cacheDirectory: File,
   private val downloader: DownloaderType,
   private val feedLoader: FeedLoaderType,
   private val feedParser: OPDSFeedParserType,
@@ -345,6 +347,7 @@ class Controller private constructor(
       bookRegistry = this.bookRegistry,
       borrowStrings = this.borrowStrings,
       bundledContent = this.bundledContent,
+      cacheDirectory = this.cacheDirectory,
       clock = { Instant.now() },
       downloader = this.downloader,
       downloads = this.downloads,
@@ -447,6 +450,7 @@ class Controller private constructor(
       bookBorrowStrings: BookBorrowStringResourcesType,
       bookRegistry: BookRegistryType,
       bundledContent: BundledContentResolverType,
+      cacheDirectory: File,
       downloader: DownloaderType,
       exec: ExecutorService,
       feedLoader: FeedLoaderType,
@@ -468,6 +472,7 @@ class Controller private constructor(
         borrowStrings = bookBorrowStrings,
         bookRegistry = bookRegistry,
         bundledContent = bundledContent,
+        cacheDirectory = cacheDirectory,
         downloader = downloader,
         feedLoader = feedLoader,
         feedParser = feedParser,

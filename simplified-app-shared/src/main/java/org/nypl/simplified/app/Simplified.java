@@ -821,6 +821,7 @@ public final class Simplified extends MultiDexApplication {
         new CatalogBookBorrowStrings(this.getResources()),
         this.book_registry,
         this.bundled_content_resolver,
+        this.getCacheDir(),
         this.downloader,
         this.exec_books,
         this.feed_loader,

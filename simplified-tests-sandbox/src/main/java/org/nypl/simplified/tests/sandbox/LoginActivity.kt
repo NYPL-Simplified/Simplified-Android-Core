@@ -187,6 +187,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         bookBorrowStrings = MockBorrowStringResources(),
         bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDir,
         accountProviders = FunctionType { this.getAccountProviders() },
         timerExecutor = this.timerExecutor,
         adobeDrm = null,

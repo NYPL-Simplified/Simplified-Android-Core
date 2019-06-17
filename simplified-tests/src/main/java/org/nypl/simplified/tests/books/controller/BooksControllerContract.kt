@@ -106,6 +106,7 @@ abstract class BooksControllerContract {
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
+  private lateinit var cacheDirectory: File
 
   protected abstract fun context(): Context
 
@@ -209,6 +210,7 @@ abstract class BooksControllerContract {
       http = http,
       feedParser = parser,
       feedLoader = feedLoader,
+      cacheDirectory = this.cacheDirectory,
       downloader = downloader,
       profiles = profiles,
       analytics = analyticsLogger,
@@ -240,6 +242,9 @@ abstract class BooksControllerContract {
     this.profiles = profilesDatabaseWithoutAnonymous(this.accountEvents, this.directoryProfiles)
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
+    this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
+    this.cacheDirectory.delete()
+    this.cacheDirectory.mkdirs()
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.patronUserProfileParsers = Mockito.mock(PatronUserProfileParsersType::class.java)
   }

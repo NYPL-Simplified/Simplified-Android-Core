@@ -122,12 +122,13 @@ class BookBorrowTask(
   private val borrowStrings: BookBorrowStringResourcesType,
   private val borrowTimeoutDuration: Duration = Duration.standardMinutes(1L),
   private val bundledContent: BundledContentResolverType,
+  private val cacheDirectory: File,
   private val clock: () -> Instant,
   private val downloader: DownloaderType,
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
-  private val feedLoader: FeedLoaderType,
-  private val entry: OPDSAcquisitionFeedEntry) : Callable<BookStatusDownloadResult> {
+  private val entry: OPDSAcquisitionFeedEntry,
+  private val feedLoader: FeedLoaderType) : Callable<BookStatusDownloadResult> {
 
   private val contentTypeACSM =
     "application/vnd.adobe.adept+xml"
@@ -946,11 +947,19 @@ class BookBorrowTask(
     val fulfillment =
       this.runFulfillACSMWithConnectorDoDownload(adobe, acsmBytes, credentials)
 
-    this.adobeLoan = fulfillment.loan
-    this.saveFinalContent(
-      file = fulfillment.file,
-      expectedContentTypes = BookFormats.epubMimeTypes(),
-      receivedContentType = this.contentTypeEPUB)
+    try {
+      this.adobeLoan = fulfillment.loan
+      this.saveFinalContent(
+        file = fulfillment.file,
+        expectedContentTypes = BookFormats.epubMimeTypes(),
+        receivedContentType = this.contentTypeEPUB)
+    } finally {
+      try {
+        FileUtilities.fileDelete(fulfillment.file)
+      } catch (e: Exception) {
+        this.logger.debug("ignoring failed deletion of fulfillment file: ", e)
+      }
+    }
   }
 
   /**
@@ -970,6 +979,9 @@ class BookBorrowTask(
       expectedTotal = 100,
       unconditional = true)
 
+    val outputFile =
+      File.createTempFile("ADOBE-DRM", "data", this.cacheDirectory)
+
     val future =
       AdobeDRMExtensions.fulfill(
         adobe,
@@ -983,6 +995,7 @@ class BookBorrowTask(
             expectedTotal = 100,
             unconditional = false)
         },
+        outputFile,
         acsmBytes,
         credentials.userID)
 

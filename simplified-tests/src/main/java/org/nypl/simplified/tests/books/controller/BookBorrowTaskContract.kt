@@ -110,6 +110,7 @@ abstract class BookBorrowTaskContract {
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var feedLoader: FeedLoaderType
   private lateinit var clock: () -> Instant
+  private lateinit var cacheDirectory: File
 
   private val bookBorrowStrings = MockBorrowStringResources()
 
@@ -126,6 +127,9 @@ abstract class BookBorrowTaskContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
+    this.cacheDirectory.delete()
+    this.cacheDirectory.mkdirs()
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
     this.clock = { Instant.now() }
@@ -249,6 +253,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -348,6 +353,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -445,6 +451,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -542,6 +549,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -639,6 +647,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -744,6 +753,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -841,6 +851,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -951,6 +962,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1048,6 +1060,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1152,6 +1165,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1282,6 +1296,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1383,6 +1398,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1513,6 +1529,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1604,6 +1621,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1699,6 +1717,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1808,6 +1827,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -1922,6 +1942,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -2034,6 +2055,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -2143,6 +2165,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -2256,6 +2279,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -2367,6 +2391,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -2485,6 +2510,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -2611,6 +2637,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -2702,6 +2729,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
@@ -2776,6 +2804,7 @@ abstract class BookBorrowTaskContract {
         bookRegistry = this.bookRegistry,
         borrowStrings = this.bookBorrowStrings,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
