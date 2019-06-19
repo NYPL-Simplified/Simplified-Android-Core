@@ -73,6 +73,7 @@ import org.nypl.simplified.tests.MockAccountLoginStringResources
 import org.nypl.simplified.tests.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.MockBorrowStringResources
+import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
@@ -119,6 +120,7 @@ abstract class ProfilesControllerContract {
   private val accountLoginStringResources = MockAccountLoginStringResources()
   private val accountLogoutStringResources = MockAccountLogoutStringResources()
   private val bookBorrowStringResources = MockBorrowStringResources()
+  private val bookRevokeStringResources = MockRevokeStringResources()
 
   private fun fakeProvider(provider_id: String): AccountProviderType {
     return AccountProviders.builder().apply {
@@ -150,37 +152,38 @@ abstract class ProfilesControllerContract {
 
     val feedLoader =
       FeedLoader.create(
+        bookRegistry = this.bookRegistry,
+        bundledContent = bundledContent,
         exec = this.executorFeeds,
         parser = parser,
         searchParser = OPDSSearchParser.newParser(),
-        transport = transport,
-        bookRegistry = this.bookRegistry,
-        bundledContent = bundledContent)
+        transport = transport)
 
     val analyticsLogger =
       MockAnalytics()
 
     return Controller.create(
-      exec = this.executorBooks,
+      accountEvents = this.accountEvents,
       accountLoginStringResources = this.accountLoginStringResources,
       accountLogoutStringResources = this.accountLogoutStringResources,
-      accountEvents = this.accountEvents,
-      bookBorrowStrings = this.bookBorrowStringResources,
-      profileEvents = this.profileEvents,
-      readerBookmarkEvents = this.readerBookmarkEvents,
-      http = this.http,
-      feedParser = parser,
-      feedLoader = feedLoader,
-      cacheDirectory = this.cacheDirectory,
-      downloader = this.downloader,
-      profiles = profiles,
+      accountProviders = accountProviders,
+      adobeDrm = null,
       analytics = analyticsLogger,
+      bookBorrowStrings = this.bookBorrowStringResources,
       bookRegistry = this.bookRegistry,
       bundledContent = bundledContent,
-      accountProviders = accountProviders,
-      timerExecutor = this.executorTimer,
-      adobeDrm = null,
-      patronUserProfileParsers = this.patronUserProfileParsers
+      cacheDirectory = this.cacheDirectory,
+      downloader = this.downloader,
+      exec = this.executorBooks,
+      feedLoader = feedLoader,
+      feedParser = parser,
+      http = this.http,
+      patronUserProfileParsers = this.patronUserProfileParsers,
+      profileEvents = this.profileEvents,
+      profiles = profiles,
+      readerBookmarkEvents = this.readerBookmarkEvents,
+      revokeStrings = this.bookRevokeStringResources,
+      timerExecutor = this.executorTimer
     )
   }
 

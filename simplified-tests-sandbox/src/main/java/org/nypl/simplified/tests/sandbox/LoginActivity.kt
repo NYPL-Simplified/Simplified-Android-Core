@@ -174,26 +174,27 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
 
     this.profiles =
       Controller.create(
-        exec = this.executor,
         accountEvents = this.accountEvents,
-        profileEvents = this.profileEvents,
-        readerBookmarkEvents = this.readerBookmarkEvents,
-        http = this.http,
-        feedParser = this.feedParser,
-        feedLoader = this.feedLoader,
-        downloader = this.downloader,
-        profiles = this.profilesDatabase,
+        accountLoginStringResources = MockAccountLoginStringResources(),
+        accountLogoutStringResources = MockAccountLogoutStringResources(),
+        accountProviders = FunctionType { this.getAccountProviders() },
+        adobeDrm = null,
         analytics = this.analyticsLogger,
         bookBorrowStrings = MockBorrowStringResources(),
         bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent,
         cacheDirectory = this.cacheDir,
-        accountProviders = FunctionType { this.getAccountProviders() },
-        timerExecutor = this.timerExecutor,
-        adobeDrm = null,
+        downloader = this.downloader,
+        exec = this.executor,
+        feedLoader = this.feedLoader,
+        feedParser = this.feedParser,
+        http = this.http,
         patronUserProfileParsers = this.patronParsers,
-        accountLoginStringResources = MockAccountLoginStringResources(),
-        accountLogoutStringResources = MockAccountLogoutStringResources()
+        profileEvents = this.profileEvents,
+        profiles = this.profilesDatabase,
+        readerBookmarkEvents = this.readerBookmarkEvents,
+        revokeStrings = MockRevokeStringResources(),
+        timerExecutor = this.timerExecutor
       )
 
     val button0 = Button(this)

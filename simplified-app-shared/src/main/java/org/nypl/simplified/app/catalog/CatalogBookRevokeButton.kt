@@ -1,5 +1,6 @@
 package org.nypl.simplified.app.catalog
 
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import android.text.TextUtils
@@ -46,11 +47,24 @@ class CatalogBookRevokeButton(
     this.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.0f)
 
     this.setOnClickListener { view ->
-      val d = CatalogBookRevokeDialog.newDialog(
-        revokeType) { booksController.bookRevoke(account, bookID) }
+      val builder = AlertDialog.Builder(activity)
 
-      val fm = activity.supportFragmentManager
-      d.show(fm, "revoke-confirm")
+      when (revokeType) {
+        CatalogBookRevokeType.REVOKE_LOAN -> {
+          builder.setMessage(R.string.catalog_book_revoke_loan_confirm)
+          builder.setPositiveButton(R.string.catalog_book_revoke_loan) { _, _ ->
+            booksController.bookRevoke(account, bookID)
+          }
+        }
+        CatalogBookRevokeType.REVOKE_HOLD -> {
+          builder.setMessage(R.string.catalog_book_revoke_hold_confirm)
+          builder.setPositiveButton(R.string.catalog_book_revoke_hold) { _, _ ->
+            booksController.bookRevoke(account, bookID)
+          }
+        }
+      }
+
+      builder.create().show()
     }
   }
 }

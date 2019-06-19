@@ -78,7 +78,7 @@ public final class BookStatus {
   private static BookStatusType onIsRevoked(
     final OPDSAvailabilityRevoked a,
     final Book book) {
-    return new BookStatusRevoked(book.getId(), a.getRevoke());
+    return new BookStatusRevoked(book.getId());
   }
 
   @NotNull

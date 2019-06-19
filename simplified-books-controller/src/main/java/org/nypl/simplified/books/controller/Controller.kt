@@ -29,6 +29,8 @@ import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadResult
+import org.nypl.simplified.books.book_registry.BookStatusRevokeResult
+import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
@@ -98,6 +100,7 @@ class Controller private constructor(
   private val profileEvents: ObservableType<ProfileEvent>,
   private val profiles: ProfilesDatabaseType,
   private val readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
+  private val revokeStrings: BookRevokeStringResourcesType,
   private val taskExecutor: ListeningExecutorService,
   private val timerExecutor: ExecutorService
 ) : BooksControllerType, ProfilesControllerType {
@@ -408,13 +411,14 @@ class Controller private constructor(
 
   override fun bookRevoke(
     account: AccountType,
-    bookId: BookID): FluentFuture<Unit> {
+    bookId: BookID): FluentFuture<BookStatusRevokeResult> {
     return FluentFuture.from(this.taskExecutor.submit(BookRevokeTask(
+      account,
       this.adobeDrm,
+      bookId,
       this.bookRegistry,
       this.feedLoader,
-      account,
-      bookId)))
+      this.revokeStrings)))
   }
 
   override fun bookDelete(
@@ -460,6 +464,7 @@ class Controller private constructor(
       profileEvents: ObservableType<ProfileEvent>,
       profiles: ProfilesDatabaseType,
       readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
+      revokeStrings: BookRevokeStringResourcesType,
       timerExecutor: ExecutorService
     ): Controller {
       return Controller(
@@ -481,6 +486,7 @@ class Controller private constructor(
         profileEvents = profileEvents,
         profiles = profiles,
         readerBookmarkEvents = readerBookmarkEvents,
+        revokeStrings = revokeStrings,
         taskExecutor = MoreExecutors.listeningDecorator(exec),
         timerExecutor = timerExecutor
       )

@@ -1,31 +1,33 @@
 package org.nypl.simplified.books.book_registry
 
 import org.nypl.simplified.http.core.HTTPProblemReport
-import org.nypl.simplified.opds.core.OPDSAcquisition
 
 /**
- * Data related to errors during book borrowing.
+ * Data related to errors during book loan revocation.
  */
 
-sealed class BookStatusDownloadErrorDetails {
+sealed class BookStatusRevokeErrorDetails {
 
   /**
-   * An HTTP request failed.
+   * The loan is not revocable.
    */
 
-  data class HTTPRequestFailed(
-    val status: Int,
-    val errorReport: HTTPProblemReport?)
-    : BookStatusDownloadErrorDetails()
+  object NotRevocable : BookStatusRevokeErrorDetails()
 
   /**
-   * Attempting to load the feed for a borrow URI failed.
+   * Credentials are required, but none are available.
+   */
+
+  object NoCredentialsAvailable : BookStatusRevokeErrorDetails()
+
+  /**
+   * Attempting to load the feed for a revoke URI failed.
    */
 
   data class FeedLoaderFailed(
     val errorReport: HTTPProblemReport?,
     val exception: Throwable?)
-    : BookStatusDownloadErrorDetails()
+    : BookStatusRevokeErrorDetails()
 
   /**
    * An OPDS feed contained a corrupted entry.
@@ -33,28 +35,20 @@ sealed class BookStatusDownloadErrorDetails {
 
   data class FeedCorrupted(
     val exception: Throwable)
-    : BookStatusDownloadErrorDetails()
+    : BookStatusRevokeErrorDetails()
 
   /**
    * An OPDS feed was unusable for an unspecified reason.
    */
 
   object FeedUnusable
-    : BookStatusDownloadErrorDetails()
-
-  /**
-   * An acquisition relation is not supported.
-   */
-
-  data class UnsupportedAcquisition(
-    val type: OPDSAcquisition.Relation)
-    : BookStatusDownloadErrorDetails()
+    : BookStatusRevokeErrorDetails()
 
   /**
    * Errors related to DRM.
    */
 
-  sealed class DRMError : BookStatusDownloadErrorDetails() {
+  sealed class DRMError : BookStatusRevokeErrorDetails() {
 
     /**
      * The name of the DRM system
@@ -112,4 +106,6 @@ sealed class BookStatusDownloadErrorDetails {
       override val system: String)
       : DRMError()
   }
+
+
 }

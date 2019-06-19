@@ -42,6 +42,7 @@ import org.nypl.simplified.analytics.api.AnalyticsConfiguration;
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.catalog.CatalogBookBorrowStrings;
+import org.nypl.simplified.app.catalog.CatalogBookRevokeStrings;
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.helpstack.Helpstack;
 import org.nypl.simplified.app.helpstack.HelpstackType;
@@ -831,6 +832,7 @@ public final class Simplified extends MultiDexApplication {
         profile_events,
         profiles,
         reader_bookmark_events,
+        new CatalogBookRevokeStrings(this.getResources()),
         exec_profile_timer);
 
     LOG.debug("initializing reader bookmark service");

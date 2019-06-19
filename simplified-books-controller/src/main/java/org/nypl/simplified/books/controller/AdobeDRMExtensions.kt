@@ -8,6 +8,7 @@ import org.nypl.drm.core.AdobeAdeptDeactivationReceiverType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType
 import org.nypl.drm.core.AdobeAdeptLoan
+import org.nypl.drm.core.AdobeAdeptLoanReturnListenerType
 import org.nypl.drm.core.AdobeDeviceID
 import org.nypl.drm.core.AdobeUserID
 import org.nypl.drm.core.AdobeVendorID
@@ -15,7 +16,6 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.files.FileUtilities
 import java.io.File
-import java.lang.IllegalStateException
 import java.util.concurrent.CancellationException
 
 /**
@@ -344,6 +344,56 @@ object AdobeDRMExtensions {
       }
       this.adeptFuture.set(Fulfillment(this.outputFile, loan))
     }
+  }
 
+  /**
+   * Revoke a loan.
+   *
+   * @param executor The Adept executor to be used
+   * @param loan The loan
+   * @param userId The user ID
+   */
+
+  fun revoke(
+    executor: AdobeAdeptExecutorType,
+    loan: AdobeAdeptLoan,
+    userId: AdobeUserID)
+    : ListenableFuture<Unit> {
+
+    val adeptFuture = SettableFuture.create<Unit>()
+    executor.execute { connector ->
+      try {
+        connector.loanReturn(RevokeReceiver(adeptFuture), loan.id, userId)
+
+        if (!adeptFuture.isDone) {
+          adeptFuture.setException(IllegalStateException(
+            "Revoke receiver failed to report success or failure"))
+        }
+      } catch (e: Throwable) {
+        adeptFuture.setException(e)
+      }
+    }
+    return adeptFuture
+  }
+
+  /**
+   * The connector raised some sort of error code.
+   */
+
+  data class AdobeDRMRevokeException(
+    val errorCode: String)
+    : Exception(errorCode)
+
+  private class RevokeReceiver(
+    private val adeptFuture: SettableFuture<Unit>)
+    : AdobeAdeptLoanReturnListenerType {
+
+    override fun onLoanReturnSuccess() {
+      this.adeptFuture.set(Unit)
+    }
+
+    override fun onLoanReturnFailure(errorCode: String) {
+      this.adeptFuture.setException(AdobeDRMRevokeException(errorCode))
+    }
   }
 }

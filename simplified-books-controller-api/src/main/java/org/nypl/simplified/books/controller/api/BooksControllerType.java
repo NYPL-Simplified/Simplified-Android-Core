@@ -6,6 +6,7 @@ import com.io7m.jfunctional.Unit;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.books.api.BookID;
 import org.nypl.simplified.books.book_registry.BookStatusDownloadResult;
+import org.nypl.simplified.books.book_registry.BookStatusRevokeResult;
 import org.nypl.simplified.feeds.api.FeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -82,7 +83,7 @@ public interface BooksControllerType {
    * @param book_id The ID of the book
    */
 
-  FluentFuture<Unit> bookRevoke(
+  FluentFuture<BookStatusRevokeResult> bookRevoke(
     AccountType account,
     BookID book_id);
 
