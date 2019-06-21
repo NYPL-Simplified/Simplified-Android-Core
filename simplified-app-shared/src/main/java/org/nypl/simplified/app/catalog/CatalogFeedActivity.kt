@@ -851,7 +851,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun startDisplayingFeed() {
 
-    if (this.ageGateIsPresent()) {
+    if (this.ageGateIsPresent() && !this.isLocalFeed()) {
       Preconditions.checkArgument(
         this.ageGateIsSatisfied(),
         "Age gate must have been satisfied")
@@ -889,6 +889,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         this.doLoadRemoteFeed(arguments)
       is CatalogFeedArgumentsLocalBooks ->
         this.doLoadLocalFeed(arguments)
+    }
+  }
+
+  private fun isLocalFeed(): Boolean {
+    return when (this.feedArguments) {
+      is CatalogFeedArgumentsRemote -> false
+      is CatalogFeedArgumentsLocalBooks -> true
     }
   }
 
