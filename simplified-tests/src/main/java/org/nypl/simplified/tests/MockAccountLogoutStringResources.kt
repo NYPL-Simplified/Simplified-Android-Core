@@ -3,16 +3,15 @@ package org.nypl.simplified.tests
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 
 class MockAccountLogoutStringResources : AccountLogoutStringResourcesType {
+  override fun logoutDeactivatingDeviceAdobeFailed(errorCode: String, e: Throwable): String {
+    return "logoutDeactivatingDeviceAdobeFailed"
+  }
 
   override val logoutDeviceDeactivationPostDeviceManagerFinished: String
     get() = "logoutDeviceDeactivationPostDeviceManagerFinished"
 
   override val logoutDeviceDeactivationPostDeviceManager: String
     get() = "logoutDeviceDeactivationPostDeviceManager"
-
-  override fun logoutDeactivatingDeviceAdobeFailed(e: Throwable): String {
-    return "logoutDeactivatingDeviceAdobeFailed"
-  }
 
   override val logoutDeactivatingDeviceAdobeUnsupported: String
     get() = "logoutDeactivatingDeviceAdobeUnsupported"
