@@ -204,13 +204,13 @@ class ProfileAccountLogoutTask(
     when (ex) {
       is AdobeDRMExtensions.AdobeDRMLogoutConnectorException -> {
         this.steps.currentStepFailed(
-          this.logoutStrings.logoutDeactivatingDeviceAdobeFailed(ex),
+          this.logoutStrings.logoutDeactivatingDeviceAdobeFailed(ex.errorCode, ex),
           AccountLogoutDRMFailure(ex.errorCode),
           ex)
       }
       else -> {
         this.steps.currentStepFailed(
-          this.logoutStrings.logoutDeactivatingDeviceAdobeFailed(ex),
+          this.logoutStrings.logoutDeactivatingDeviceAdobeFailed("UNKNOWN", ex),
           null,
           ex)
       }

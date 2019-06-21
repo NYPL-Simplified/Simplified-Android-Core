@@ -10,7 +10,9 @@ interface AccountLogoutStringResourcesType {
    * The device could not be deactivated because the Adobe connector raised an exception.
    */
 
-  fun logoutDeactivatingDeviceAdobeFailed(e: Throwable): String
+  fun logoutDeactivatingDeviceAdobeFailed(
+    errorCode:String,
+    e: Throwable): String
 
   /**
    * Posting to the device manager URI has completed.

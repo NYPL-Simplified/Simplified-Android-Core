@@ -573,6 +573,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       }
 
       is AccountLogoutFailed -> {
+        this.pinText.setText(state.credentials.pin().value())
+        this.pinText.isEnabled = false
+
+        this.barcodeText.setText(state.credentials.barcode().value())
+        this.barcodeText.isEnabled = false
+
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.GONE
         this.actionText.text = state.steps.last().resolution
