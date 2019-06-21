@@ -6,7 +6,8 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/cell_downloading_failed"
   android:layout_width="match_parent"
-  android:layout_height="110dp"
+  android:layout_height="@dimen/bookCellHeight"
+  android:background="?attr/simplifiedColorPrimary"
   android:padding="8dp">
 
   <TextView
@@ -17,6 +18,7 @@
     android:layout_alignParentStart="true"
     android:maxLines="1"
     android:ellipsize="end"
+    android:textColor="@color/simplifiedColorBackground"
     android:text="@string/placeholder_long_title"
     android:textStyle="bold" />
 
@@ -25,6 +27,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_below="@id/cell_downloading_failed_title"
+    android:textColor="@color/simplifiedColorBackground"
     android:text="@string/catalog_download_failed" />
 
   <LinearLayout

@@ -294,7 +294,7 @@ class CatalogFeedBookCellView(
     val feedEntry = this.entry.get()
     val oe = feedEntry.feedEntry
 
-    this.cellDownloadingFailedLabel.text = status.detailMessage
+    this.cellDownloadingFailedLabel.setText(R.string.catalog_download_failed)
     this.cellDownloadingFailedTitle.text = oe.title
 
     val account =
