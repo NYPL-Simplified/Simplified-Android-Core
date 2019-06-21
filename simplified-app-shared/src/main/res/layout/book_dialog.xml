@@ -122,21 +122,21 @@
   </LinearLayout>
 
   <FrameLayout android:layout_width="match_parent"
-    android:layout_height="50dp">
+    android:layout_height="@dimen/bookDialogDownloadingHeight">
 
     <include layout="@layout/book_dialog_downloading"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="@dimen/bookDialogDownloadingHeight"
       android:visibility="visible" />
 
     <include layout="@layout/book_dialog_downloading_failed"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="@dimen/bookDialogDownloadingHeight"
       android:visibility="visible" />
 
     <include layout="@layout/book_dialog_download"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="@dimen/bookDialogDownloadingHeight"
       android:visibility="visible" />
   </FrameLayout>
 

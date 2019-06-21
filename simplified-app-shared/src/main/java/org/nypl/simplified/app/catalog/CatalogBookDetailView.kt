@@ -116,7 +116,6 @@ class CatalogBookDetailView(
 
   val scrollView: ScrollView
 
-  private val bookDownloadingLabel: TextView
   private val bookDownloadingFailedText: TextView
   private val bookDebugStatus: TextView
   private val bookHeader: ViewGroup
@@ -169,8 +168,6 @@ class CatalogBookDetailView(
 
     this.bookDownloading =
       layout.findViewById<View>(R.id.book_dialog_downloading) as ViewGroup
-    this.bookDownloadingLabel =
-      this.bookDownloading.findViewById<View>(R.id.book_dialog_downloading_label) as TextView
     this.bookDownloadingPercentText =
       this.bookDownloading.findViewById<View>(R.id.book_dialog_downloading_percent_text) as TextView
     this.bookDownloadingProgress =
@@ -384,7 +381,6 @@ class CatalogBookDetailView(
     this.bookDownloadingFailed.visibility = View.INVISIBLE
     this.bookDownloadingFailedButtons.visibility = View.INVISIBLE
 
-    this.bookDownloadingLabel.setText(R.string.catalog_downloading)
     CatalogDownloadProgressBar.setProgressBar(
       status.currentTotalBytes,
       status.expectedTotalBytes,
@@ -665,8 +661,6 @@ class CatalogBookDetailView(
     this.bookDownloadingFailed.visibility = View.INVISIBLE
     this.bookDownloadingFailedButtons.visibility = View.INVISIBLE
 
-    this.bookDownloadingLabel.setText(R.string.catalog_downloading)
-
     CatalogDownloadProgressBar.setProgressBar(
       0,
       100,
@@ -692,8 +686,6 @@ class CatalogBookDetailView(
     this.bookDownloadingFailed.visibility = View.INVISIBLE
     this.bookDownloadingFailedButtons.visibility = View.INVISIBLE
 
-    this.bookDownloadingLabel.setText(R.string.catalog_requesting_loan)
-
     CatalogDownloadProgressBar.setProgressBar(
       0,
       100,
@@ -718,8 +710,6 @@ class CatalogBookDetailView(
     this.bookDownloadingCancel.visibility = View.VISIBLE
     this.bookDownloadingFailed.visibility = View.INVISIBLE
     this.bookDownloadingFailedButtons.visibility = View.INVISIBLE
-
-    this.bookDownloadingLabel.setText(R.string.catalog_requesting_loan)
 
     CatalogDownloadProgressBar.setProgressBar(
       0,
