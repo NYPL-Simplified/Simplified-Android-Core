@@ -543,7 +543,27 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     this.current_location = bookmark;
 
+    UIThread.runOnUIThread(this::configureBookmarkButtonUI);
     Simplified.getReaderBookmarksService().bookmarkCreate(this.current_account.id(), bookmark);
+  }
+
+  /**
+   * Show the bookmark icon as selected if the current location is an explicit bookmark. Otherwise,
+   * show it as deselected.
+   */
+
+  private void configureBookmarkButtonUI() {
+    UIThread.checkIsUIThread();
+
+    final Bookmark location = this.current_location;
+    if (location != null) {
+      if (location.getKind().getClass() == BookmarkKind.ReaderBookmarkExplicit.class) {
+        this.view_bookmark.setImageResource(R.drawable.bookmark_on);
+        return;
+      }
+    }
+
+    this.view_bookmark.setImageResource(R.drawable.bookmark_off);
   }
 
   @Override
@@ -623,8 +643,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       });
 
       this.view_bookmark.setOnClickListener(v -> {
+        this.current_location = this.current_location.toExplicit();
+
         Simplified.getReaderBookmarksService()
-          .bookmarkCreate(this.current_account.id(), this.current_location.toExplicit());
+          .bookmarkCreate(this.current_account.id(), this.current_location);
+
+        this.configureBookmarkButtonUI();
       });
     });
 
