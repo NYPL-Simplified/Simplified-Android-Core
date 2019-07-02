@@ -122,7 +122,7 @@ class BookRevokeTask(
 
         Book(
           this.bookID,
-          this.account.id(),
+          this.account.id,
           null,
           null,
           entry,
@@ -188,6 +188,7 @@ class BookRevokeTask(
         } else {
           this.debug("no revoke URI, nothing to do")
           this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          Unit
         }
       }
 
@@ -198,6 +199,7 @@ class BookRevokeTask(
         } else {
           this.debug("no revoke URI, nothing to do")
           this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          Unit
         }
       }
 
@@ -217,6 +219,7 @@ class BookRevokeTask(
         } else {
           this.debug("no revoke URI, nothing to do")
           this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          Unit
         }
       }
 
@@ -236,6 +239,7 @@ class BookRevokeTask(
         } else {
           this.debug("no revoke URI, nothing to do")
           this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          Unit
         }
       }
 
@@ -388,6 +392,7 @@ class BookRevokeTask(
       null -> {
         this.debug("no format handle available, nothing to do!")
         this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
+        Unit
       }
     }
   }
@@ -569,7 +574,7 @@ class BookRevokeTask(
 
     try {
       this.debug("setting up book database entry")
-      val database = this.account.bookDatabase()
+      val database = this.account.bookDatabase
       this.databaseEntry = database.entry(this.bookID)
       this.databaseEntryInitialized = true
       this.publishRequestingRevokeStatus()
@@ -587,7 +592,7 @@ class BookRevokeTask(
    */
 
   private fun createHttpAuthIfRequired(): OptionType<HTTPAuthType> {
-    return if (this.account.requiresCredentials()) {
+    return if (this.account.requiresCredentials) {
       Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(this.getRequiredAccountCredentials()))
     } else {
       Option.none<HTTPAuthType>()
@@ -600,7 +605,7 @@ class BookRevokeTask(
    */
 
   private fun getRequiredAccountCredentials(): AccountAuthenticationCredentials {
-    val loginState = this.account.loginState()
+    val loginState = this.account.loginState
     val credentials = loginState.credentials
     if (credentials != null) {
       return credentials

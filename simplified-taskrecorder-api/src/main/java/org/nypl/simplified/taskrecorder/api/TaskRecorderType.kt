@@ -18,7 +18,7 @@ interface TaskRecorderType<E> {
    * Resolve the current step and mark it as having succeeded.
    */
 
-  fun currentStepSucceeded(message: String)
+  fun currentStepSucceeded(message: String): TaskStep<E>
 
   /**
    * Resolve the current step and mark it as having failed.
@@ -28,7 +28,7 @@ interface TaskRecorderType<E> {
     message: String,
     errorValue: E? = null,
     exception: Throwable? = null
-  )
+  ): TaskStep<E>
 
   /**
    * Complete recording of all steps.

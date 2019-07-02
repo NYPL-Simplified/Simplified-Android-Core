@@ -67,7 +67,7 @@ final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
               .setDateOfBirth(this.date)
               .build());
 
-      return ProfileCreationSucceeded.of(this.display_name, profile.id());
+      return ProfileCreationSucceeded.of(this.display_name, profile.getId());
     } catch (final Exception e) {
       return ProfileCreationFailed.of(this.display_name, ERROR_GENERAL, Option.some(e));
     }

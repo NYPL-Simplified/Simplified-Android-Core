@@ -191,7 +191,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.epub",
@@ -235,7 +235,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -291,7 +291,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandlePDF::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.pdf",
@@ -335,7 +335,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -389,7 +389,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.json",
@@ -433,7 +433,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -493,7 +493,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val acquisition =
       OPDSAcquisition(
@@ -529,7 +529,7 @@ abstract class BookBorrowTaskContract {
 
     Mockito.`when`(bundledContent.resolve(URI.create("simplified-bundled:0.epub")))
       .thenReturn(this.resource("/org/nypl/simplified/tests/books/4096.bin"))
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -591,7 +591,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val acquisition =
       OPDSAcquisition(
@@ -627,7 +627,7 @@ abstract class BookBorrowTaskContract {
 
     Mockito.`when`(bundledContent.resolve(URI.create("simplified-bundled:0.epub")))
       .thenThrow(FileNotFoundException("Missing"))
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -681,7 +681,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -735,7 +735,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -789,7 +789,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -833,7 +833,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -887,7 +887,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -944,7 +944,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -998,7 +998,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -1042,7 +1042,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1094,7 +1094,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1147,7 +1147,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1199,7 +1199,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1278,7 +1278,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1330,7 +1330,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1380,7 +1380,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1432,7 +1432,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1511,7 +1511,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1563,7 +1563,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1603,7 +1603,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1655,7 +1655,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -1699,7 +1699,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1751,7 +1751,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val error =
       HTTPResultError<InputStream>(
@@ -1809,7 +1809,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1866,7 +1866,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -1920,11 +1920,11 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.requiresCredentials())
+    Mockito.`when`(account.requiresCredentials)
       .thenReturn(true)
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1980,7 +1980,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -2037,7 +2037,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -2093,7 +2093,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -2147,7 +2147,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -2205,7 +2205,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val headers = HashMap<String, MutableList<String>>()
     headers.put("Content-Type", mutableListOf("application/vnd.librarysimplified.bearer-token+json"))
@@ -2261,7 +2261,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -2317,7 +2317,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val headers = HashMap<String, MutableList<String>>()
     headers.put("Content-Type", mutableListOf("application/vnd.librarysimplified.bearer-token+json"))
@@ -2373,7 +2373,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -2438,7 +2438,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -2492,7 +2492,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -2565,7 +2565,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -2619,7 +2619,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -2677,7 +2677,7 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val acquisition =
       OPDSAcquisition(
@@ -2711,7 +2711,7 @@ abstract class BookBorrowTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -2764,7 +2764,7 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     Mockito.`when`(bookDatabase.createOrUpdate(anyNonNull(), anyNonNull()))
       .thenThrow(BookDatabaseException("Ouch", listOf()))
@@ -2792,7 +2792,7 @@ abstract class BookBorrowTaskContract {
 
     this.logBookEventsFor(bookId)
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
     val task =

@@ -99,7 +99,7 @@ class AudioBookLoadingFragment : Fragment() {
       val credentials =
         Simplified.getProfilesController()
           .profileAccountForBook(this.playerParameters.bookID)
-          .loginState()
+          .loginState
           .credentials
 
       if (credentials != null) {
@@ -180,7 +180,7 @@ class AudioBookLoadingFragment : Fragment() {
     val handle =
       Simplified.getProfilesController()
         .profileAccountForBook(this.playerParameters.bookID)
-        .bookDatabase()
+        .bookDatabase
         .entry(this.playerParameters.bookID)
         .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 

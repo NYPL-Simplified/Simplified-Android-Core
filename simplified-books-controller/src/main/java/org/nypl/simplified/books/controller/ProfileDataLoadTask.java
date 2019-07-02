@@ -39,12 +39,12 @@ final class ProfileDataLoadTask implements Runnable {
 
   @Override
   public void run() {
-    LOG.debug("load: profile {}", this.profile.displayName());
+    LOG.debug("load: profile {}", this.profile.getDisplayName());
 
     final SortedMap<AccountID, AccountType> accounts = this.profile.accounts();
     for (final AccountType account : accounts.values()) {
-      LOG.debug("load: profile {} / account {}", this.profile.displayName(), account.id());
-      final BookDatabaseType books = account.bookDatabase();
+      LOG.debug("load: profile {} / account {}", this.profile.getDisplayName(), account.getId());
+      final BookDatabaseType books = account.getBookDatabase();
       final Collection<BookID> book_ids = books.books();
       LOG.debug("load: updating {} books", book_ids.size());
       for (final BookID book_id : book_ids) {

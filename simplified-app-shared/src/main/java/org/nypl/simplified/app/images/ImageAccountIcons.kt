@@ -5,6 +5,7 @@ import android.widget.ImageView
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
+import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.app.R
 import org.slf4j.LoggerFactory
@@ -26,11 +27,11 @@ object ImageAccountIcons {
   @JvmStatic
   fun loadAccountLogoIntoView(
     loader: Picasso,
-    account: AccountProviderType,
+    account: AccountProviderDescriptionType,
     iconView: ImageView) {
 
     val request: RequestCreator
-    val logoURI = account.logo
+    val logoURI = account.logoURI
     if (logoURI != null) {
       LOG.debug("configuring account logo: {}", logoURI)
       request = loader.load(logoURI.toString())

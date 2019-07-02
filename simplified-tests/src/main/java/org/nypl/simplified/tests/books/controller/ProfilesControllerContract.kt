@@ -3,9 +3,6 @@ package org.nypl.simplified.tests.books.controller
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.FunctionType
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.Unit
 import org.joda.time.LocalDate
 import org.junit.After
 import org.junit.Assert
@@ -14,21 +11,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.mockito.Mockito
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountEventCreation.AccountCreationSucceeded
-import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
-import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
-import org.nypl.simplified.accounts.api.AccountPIN
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.api.AccountProviderCollectionType
-import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.accounts.api.AccountProviders
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
-import org.nypl.simplified.accounts.database.AccountProviderCollection
 import org.nypl.simplified.accounts.database.AccountsDatabases
+import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -39,20 +25,13 @@ import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.http.core.HTTPProblemReport
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
-import org.nypl.simplified.parser.api.ParseResult
-import org.nypl.simplified.patron.api.PatronSettings
-import org.nypl.simplified.patron.api.PatronUserProfile
-import org.nypl.simplified.patron.api.PatronUserProfileParserType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
-import org.nypl.simplified.profiles.ProfilesDatabase
+import org.nypl.simplified.profiles.ProfilesDatabases
 import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed
 import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_DISPLAY_NAME_ALREADY_USED
 import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationSucceeded
@@ -60,7 +39,6 @@ import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
-import org.nypl.simplified.profiles.api.ProfileSelected
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
@@ -69,23 +47,22 @@ import org.nypl.simplified.reader.api.ReaderFontSelection
 import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MockAccountCreationStringResources
+import org.nypl.simplified.tests.MockAccountDeletionStringResources
 import org.nypl.simplified.tests.MockAccountLoginStringResources
 import org.nypl.simplified.tests.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.MockBorrowStringResources
 import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.InputStream
 import java.net.URI
 import java.util.ArrayList
 import java.util.Collections
-import java.util.HashMap
-import java.util.TreeMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -117,28 +94,22 @@ abstract class ProfilesControllerContract {
 
   protected abstract fun context(): Context
 
-  private val accountLoginStringResources = MockAccountLoginStringResources()
-  private val accountLogoutStringResources = MockAccountLogoutStringResources()
-  private val bookBorrowStringResources = MockBorrowStringResources()
-  private val bookRevokeStringResources = MockRevokeStringResources()
-
-  private fun fakeProvider(provider_id: String): AccountProviderType {
-    return AccountProviders.builder().apply {
-      this.id = URI.create(provider_id)
-      this.mainColor = "#ff0000"
-      this.displayName = "Fake Library"
-      this.subtitle = "Imaginary books"
-      this.logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")
-      this.catalogURI = URI.create("http://example.com/accounts0/feed.xml")
-      this.supportEmail = "postmaster@example.com"
-      this.annotationsURI = URI.create("http://example.com/accounts0/annotations")
-      this.patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me")
-    }.build()
-  }
+  private val accountLoginStringResources =
+    MockAccountLoginStringResources()
+  private val accountLogoutStringResources =
+    MockAccountLogoutStringResources()
+  private val bookBorrowStringResources =
+    MockBorrowStringResources()
+  private val bookRevokeStringResources =
+    MockRevokeStringResources()
+  private val profileAccountDeletionStringResources =
+    MockAccountDeletionStringResources()
+  private val profileAccountCreationStringResources =
+    MockAccountCreationStringResources()
 
   private fun controller(
     profiles: ProfilesDatabaseType,
-    accountProviders: FunctionType<Unit, AccountProviderCollectionType>
+    accountProviders: AccountProviderDescriptionRegistryType
   ): ProfilesControllerType {
 
     val parser =
@@ -179,6 +150,8 @@ abstract class ProfilesControllerContract {
       feedParser = parser,
       http = this.http,
       patronUserProfileParsers = this.patronUserProfileParsers,
+      profileAccountCreationStringResources = this.profileAccountCreationStringResources,
+      profileAccountDeletionStringResources = this.profileAccountDeletionStringResources,
       profileEvents = this.profileEvents,
       profiles = profiles,
       readerBookmarkEvents = this.readerBookmarkEvents,
@@ -237,7 +210,7 @@ abstract class ProfilesControllerContract {
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = FunctionType { this.accountProviders(it) })
+        accountProviders = MockAccountProviders.fakeAccountProviders())
 
     this.expected.expect(ProfileNoneCurrentException::class.java)
     controller.profileCurrent()
@@ -253,6 +226,9 @@ abstract class ProfilesControllerContract {
   @Throws(Exception::class)
   fun testProfilesCurrentSelectCurrent() {
 
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
+
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
     val downloader =
@@ -260,17 +236,19 @@ abstract class ProfilesControllerContract {
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = FunctionType { this.accountProviders(it) })
+        accountProviders = accountProviders)
 
-    val account_provider = this.accountProviders().providerDefault()
-    controller.profileCreate(account_provider, "Kermit", "Female", LocalDate.now()).get()
+    val accountProvider =
+      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
+
+    controller.profileCreate(accountProvider, "Kermit", "Female", LocalDate.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
 
     val p = controller.profileCurrent()
-    Assert.assertEquals("Kermit", p.displayName())
+    Assert.assertEquals("Kermit", p.displayName)
   }
 
   /**
@@ -285,18 +263,23 @@ abstract class ProfilesControllerContract {
 
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = FunctionType { this.accountProviders(it) }
+        accountProviders = accountProviders
       )
 
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
 
     val date = LocalDate.now()
-    val provider = this.accountProviders().providerDefault()
-    controller.profileCreate(provider, "Kermit", "Female", date).get()
-    controller.profileCreate(provider, "Kermit", "Female", date).get()
+
+    val accountProvider =
+      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
+
+    controller.profileCreate(accountProvider, "Kermit", "Female", date).get()
+    controller.profileCreate(accountProvider, "Kermit", "Female", date).get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
@@ -315,13 +298,17 @@ abstract class ProfilesControllerContract {
   @Throws(Exception::class)
   fun testProfilesPreferences() {
 
-    val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
+    val profiles =
+      this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = FunctionType { this.accountProviders(it) })
+        accountProviders = accountProviders)
 
-    val provider = this.fakeProvider("urn:fake:0")
+    val provider =
+      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(provider.id).get()
@@ -365,14 +352,17 @@ abstract class ProfilesControllerContract {
   @Throws(Exception::class)
   fun testProfilesFeed() {
 
-    val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
+    val profiles =
+      this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = FunctionType { this.accountProviders(it) }
-      )
+        accountProviders = accountProviders)
 
-    val provider = this.fakeProvider("urn:fake:0")
+    val provider =
+      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(provider.id).get()
@@ -389,45 +379,20 @@ abstract class ProfilesControllerContract {
 
   @Throws(ProfileDatabaseException::class)
   private fun profilesDatabaseWithoutAnonymous(dir_profiles: File): ProfilesDatabaseType {
-    return ProfilesDatabase.openWithAnonymousProfileDisabled(
+    return ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(Unit.unit()),
+      MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialsStore,
       AccountsDatabases,
+      this::onAccountResolution,
       dir_profiles)
   }
 
-  private fun accountProviders(unit: Unit): AccountProviderCollection {
-    return this.accountProviders()
-  }
-
-  private fun accountProviders(): AccountProviderCollection {
-    val fake0 = this.fakeProvider("urn:fake:0")
-    val fake1 = this.fakeProvider("urn:fake:1")
-    val fake2 = this.fakeProvider("urn:fake:2")
-    val fake3 = this.fakeAuthProvider("urn:fake-auth:0")
-
-    val providers = TreeMap<URI, AccountProviderType>()
-    providers[fake0.id] = fake0
-    providers[fake1.id] = fake1
-    providers[fake2.id] = fake2
-    providers[fake3.id] = fake3
-    return AccountProviderCollection.create(fake0, providers)
-  }
-
-  private fun fakeAuthProvider(uri: String): AccountProviderType {
-    return this.fakeProvider(uri)
-      .toBuilder()
-      .apply {
-        this.authentication =
-          AccountProviderAuthenticationDescription.builder()
-            .setLoginURI(URI.create(uri))
-            .setPassCodeLength(4)
-            .setPassCodeMayContainLetters(true)
-            .setRequiresPin(true)
-            .build()
-      }.build()
+  private fun onAccountResolution(
+    id: URI,
+    message: String) {
+    this.logger.debug("resolution: {}: {}", id, message)
   }
 }

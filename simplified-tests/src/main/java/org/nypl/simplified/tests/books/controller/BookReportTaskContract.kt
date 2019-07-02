@@ -34,7 +34,7 @@ abstract class BookReportTaskContract {
     val http = MockingHTTP()
 
     val account = Mockito.mock(AccountType::class.java)
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(AccountID.generate())
 
     val feedEntry =
@@ -70,9 +70,9 @@ abstract class BookReportTaskContract {
 
     val account =
       Mockito.mock(AccountType::class.java)
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(AccountID.generate())
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountNotLoggedIn)
 
     val entryBuilder =
@@ -112,9 +112,9 @@ abstract class BookReportTaskContract {
 
     val account =
       Mockito.mock(AccountType::class.java)
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(AccountID.generate())
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("abcd"),
@@ -160,9 +160,9 @@ abstract class BookReportTaskContract {
 
     val account =
       Mockito.mock(AccountType::class.java)
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(AccountID.generate())
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("abcd"),

@@ -6,9 +6,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription;
+import org.nypl.simplified.accounts.api.AccountProviderCollectionType;
 import org.nypl.simplified.accounts.api.AccountProviderType;
-import org.nypl.simplified.accounts.database.AccountProviderCollection;
-import org.nypl.simplified.accounts.database.AccountProvidersJSON;
+import org.nypl.simplified.accounts.source.filebased.AccountProvidersJSON;
 import org.nypl.simplified.json.core.JSONParseException;
 
 import java.io.ByteArrayOutputStream;
@@ -46,7 +46,7 @@ public abstract class AccountProvidersJSONContract {
   public final void testEmpty()
       throws Exception {
     expected.expect(JSONParseException.class);
-    AccountProvidersJSON.deserializeFromString("");
+    AccountProvidersJSON.INSTANCE.deserializeFromString("");
   }
 
   @Test
@@ -54,14 +54,14 @@ public abstract class AccountProvidersJSONContract {
       throws Exception {
     expected.expect(JSONParseException.class);
     expected.expectMessage(StringContains.containsString("No providers were parsed"));
-    AccountProvidersJSON.deserializeFromString("[]");
+    AccountProvidersJSON.INSTANCE.deserializeFromString("[]");
   }
 
   @Test
   public final void testEmptyWrongType()
       throws Exception {
     expected.expect(JSONParseException.class);
-    AccountProvidersJSON.deserializeFromString("{}");
+    AccountProvidersJSON.INSTANCE.deserializeFromString("{}");
   }
 
   @Test
@@ -69,15 +69,15 @@ public abstract class AccountProvidersJSONContract {
       throws Exception {
     expected.expect(JSONParseException.class);
     expected.expectMessage(StringContains.containsString("Duplicate provider"));
-    AccountProvidersJSON.deserializeFromString(
+    AccountProvidersJSON.INSTANCE.deserializeFromString(
         readAllFromResource("providers-duplicate.json"));
   }
 
   @Test
   public final void testNYPL()
       throws Exception {
-    final AccountProviderCollection c =
-        AccountProvidersJSON.deserializeFromString(
+    final AccountProviderCollectionType c =
+        AccountProvidersJSON.INSTANCE.deserializeFromString(
             readAllFromResource("providers-nypl.json"));
 
     Assert.assertEquals(1L, c.providers().size());
@@ -116,8 +116,8 @@ public abstract class AccountProvidersJSONContract {
   @Test
   public final void testSimplyE()
       throws Exception {
-    final AccountProviderCollection c =
-        AccountProvidersJSON.deserializeFromString(
+    final AccountProviderCollectionType c =
+        AccountProvidersJSON.INSTANCE.deserializeFromString(
             readAllFromResource("providers-simplye.json"));
 
     Assert.assertEquals(1L, c.providers().size());
@@ -149,8 +149,8 @@ public abstract class AccountProvidersJSONContract {
   @Test
   public final void testAll()
       throws Exception {
-    final AccountProviderCollection c =
-        AccountProvidersJSON.deserializeFromString(
+    final AccountProviderCollectionType c =
+        AccountProvidersJSON.INSTANCE.deserializeFromString(
             readAllFromResource("providers-all.json"));
 
     Assert.assertEquals(172L, c.providers().size());

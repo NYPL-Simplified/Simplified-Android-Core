@@ -125,10 +125,10 @@ public interface ProfilesControllerType {
    * an account already exists using the given provider.
    *
    * @param provider The account provider ID
-   * @return A future that returns a login event
+   * @return A future that returns the result of creating the account
    */
 
-  FluentFuture<AccountEventCreation> profileAccountCreate(
+  FluentFuture<AccountCreateTaskResult> profileAccountCreate(
     URI provider);
 
   /**
@@ -140,7 +140,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a login event
    */
 
-  FluentFuture<AccountEventDeletion> profileAccountDeleteByProvider(
+  FluentFuture<AccountDeleteTaskResult> profileAccountDeleteByProvider(
     URI provider);
 
   /**

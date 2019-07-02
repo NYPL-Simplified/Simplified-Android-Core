@@ -45,7 +45,7 @@ final class BookDeleteTask implements Callable<Unit> {
   private void execute() throws BookDatabaseException {
     LOG.debug("[{}] deleting book", this.book_id.brief());
 
-    final BookDatabaseType book_database = this.account.bookDatabase();
+    final BookDatabaseType book_database = this.account.getBookDatabase();
     final BookDatabaseEntryType entry = book_database.entry(this.book_id);
     entry.delete();
     final Book book = entry.getBook();

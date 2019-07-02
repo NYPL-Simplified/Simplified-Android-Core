@@ -28,6 +28,7 @@ dependencies {
 
   compileOnly "com.google.auto.value:auto-value:1.5"
   annotationProcessor "com.google.auto.value:auto-value:1.5"
+  compile project(path: ':simplified-accounts-source-api')
 }
 
 repositories {

@@ -77,16 +77,16 @@ final class BookSyncTask implements Callable<Unit> {
   @Override
   public Unit call() throws Exception {
     try {
-      LOG.debug("syncing account {}", this.account.id());
+      LOG.debug("syncing account {}", this.account.getId());
       return execute();
     } finally {
-      LOG.debug("finished syncing account {}", this.account.id());
+      LOG.debug("finished syncing account {}", this.account.getId());
     }
   }
 
   private Unit execute() throws Exception {
     final AccountProviderAuthenticationDescription provider_auth =
-        this.account.provider().getAuthentication();
+        this.account.getProvider().getAuthentication();
 
     if (provider_auth == null) {
       LOG.debug("account does not support syncing");
@@ -94,7 +94,7 @@ final class BookSyncTask implements Callable<Unit> {
     }
 
     final AccountAuthenticationCredentials credentials =
-      this.account.loginState().getCredentials();
+      this.account.getLoginState().getCredentials();
 
     if (credentials == null) {
       LOG.debug("no credentials, aborting!");
@@ -151,7 +151,7 @@ final class BookSyncTask implements Callable<Unit> {
      * expired and should be deleted.
      */
 
-    final BookDatabaseType book_database = this.account.bookDatabase();
+    final BookDatabaseType book_database = this.account.getBookDatabase();
     final Set<BookID> existing = book_database.books();
 
     /*

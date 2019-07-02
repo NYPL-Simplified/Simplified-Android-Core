@@ -231,9 +231,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -322,9 +322,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -414,9 +414,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("pin"),
@@ -431,7 +431,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
           )).build()
       ))
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -541,9 +541,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("pin"),
@@ -558,7 +558,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
           )).build()
       ))
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -665,9 +665,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("pin"),
@@ -682,7 +682,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
           )).build()
       ))
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -788,9 +788,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("pin"),
@@ -805,7 +805,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
           )).build()
       ))
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -916,9 +916,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("pin"),
@@ -931,7 +931,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
           .build()
           ))
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1022,12 +1022,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountNotLoggedIn)
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1118,9 +1118,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("pin"),
@@ -1135,7 +1135,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
           )).build()
       ))
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)

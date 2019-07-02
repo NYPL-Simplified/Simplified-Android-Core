@@ -444,4 +444,15 @@
   <string name="revokeACSTimedOut">Timed out waiting for Adobe ACS.</string>
   <string name="revokeCredentialsRequired">Credentials are required, but none were provided.</string>
 
+  <!-- Profile account creation -->
+  <string name="profileAccountCreationCreatingAccountFailed">Creating an account failed.</string>
+  <string name="profileAccountCreationCreatingAccount">Creating an account…</string>
+  <string name="profileAccountCreationResolvingAccountProviderFailed">Resolving an account provider failed.</string>
+  <string name="profileAccountCreationResolvingAccountProvider">Resolving account provider…</string>
+
+  <!-- Profile account deletion -->
+  <string name="profileAccountDeletionFailed">Deleting an account failed.</string>
+  <string name="profileAccountDeletionOnlyOneAccountRemaining">Cannot delete the one remaining account; at least one account must be present.</string>
+  <string name="profileAccountDeleting">Deleting account…</string>
+
 </resources>

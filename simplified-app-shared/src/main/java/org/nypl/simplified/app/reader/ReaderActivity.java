@@ -446,7 +446,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     try {
       this.formatHandle =
-        this.current_account.bookDatabase()
+        this.current_account.getBookDatabase()
           .entry(this.book_id)
           .findFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
     } catch (BookDatabaseException e) {
@@ -544,7 +544,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     this.current_location = bookmark;
 
     UIThread.runOnUIThread(this::configureBookmarkButtonUI);
-    Simplified.getReaderBookmarksService().bookmarkCreate(this.current_account.id(), bookmark);
+    Simplified.getReaderBookmarksService().bookmarkCreate(this.current_account.getId(), bookmark);
   }
 
   /**
@@ -571,7 +571,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     super.onPause();
 
     Simplified.getReaderBookmarksService()
-      .bookmarkCreate(this.current_account.id(), this.current_location);
+      .bookmarkCreate(this.current_account.getId(), this.current_location);
   }
 
   @Override
@@ -589,10 +589,10 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       Simplified.getAnalytics()
         .publishEvent(new AnalyticsEvent.BookClosed(
           LocalDateTime.now(),
-          this.current_account.loginState().getCredentials(),
-          Simplified.getProfilesController().profileCurrent().id().getUuid(),
-          this.current_account.provider().getId(),
-          this.current_account.id().getUuid(),
+          this.current_account.getLoginState().getCredentials(),
+          Simplified.getProfilesController().profileCurrent().getId().getUuid(),
+          this.current_account.getProvider().getId(),
+          this.current_account.getId().getUuid(),
           this.feed_entry.getID(),
           this.feed_entry.getTitle()));
     } catch (ProfileNoneCurrentException ex) {
@@ -646,7 +646,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
         this.current_location = this.current_location.toExplicit();
 
         Simplified.getReaderBookmarksService()
-          .bookmarkCreate(this.current_account.id(), this.current_location);
+          .bookmarkCreate(this.current_account.getId(), this.current_location);
 
         this.configureBookmarkButtonUI();
       });
@@ -664,7 +664,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   private ReaderBookmarks loadBookmarks() {
     try {
       return Simplified.getReaderBookmarksService()
-        .bookmarkLoad(this.current_account.id(), this.book_id)
+        .bookmarkLoad(this.current_account.getId(), this.book_id)
         .get(10L, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       LOG.error("could not load bookmarks: ", e);
@@ -691,7 +691,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   private String getDeviceIDString() {
-    final AccountLoginState state = this.current_account.loginState();
+    final AccountLoginState state = this.current_account.getLoginState();
     final AccountAuthenticationCredentials credentials = state.getCredentials();
 
     if (credentials != null) {
@@ -882,10 +882,10 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
           Simplified.getAnalytics()
             .publishEvent(new AnalyticsEvent.BookPageTurned(
               LocalDateTime.now(),
-              this.current_account.loginState().getCredentials(),
-              Simplified.getProfilesController().profileCurrent().id().getUuid(),
-              this.current_account.provider().getId(),
-              this.current_account.id().getUuid(),
+              this.current_account.getLoginState().getCredentials(),
+              Simplified.getProfilesController().profileCurrent().getId().getUuid(),
+              this.current_account.getProvider().getId(),
+              this.current_account.getId().getUuid(),
               this.feed_entry.getID(),
               this.feed_entry.getTitle(),
               this.current_page_index,

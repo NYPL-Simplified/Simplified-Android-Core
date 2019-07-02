@@ -558,12 +558,12 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         final AccountProviderType account =
           Simplified.getProfilesController()
             .profileAccountCurrent()
-            .provider();
+            .getProvider();
 
         text_view.setText(account.getDisplayName());
         ImageAccountIcons.loadAccountLogoIntoView(
           Simplified.getLocalImageLoader(),
-          account,
+          account.toDescription(),
           icon_view);
       } catch (final ProfileNoneCurrentException e) {
         throw new IllegalStateException(e);
@@ -887,7 +887,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       text_view.setText(this.account.getDisplayName());
       ImageAccountIcons.loadAccountLogoIntoView(
         Simplified.getLocalImageLoader(),
-        this.account,
+        this.account.toDescription(),
         icon_view);
     }
 

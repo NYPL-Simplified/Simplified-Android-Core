@@ -205,9 +205,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -276,9 +276,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -325,9 +325,9 @@ abstract class BookRevokeTaskContract {
 
     this.logBookEventsFor(bookId)
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .then {
@@ -394,9 +394,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -488,9 +488,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -580,9 +580,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -672,9 +672,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -750,9 +750,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -844,9 +844,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -937,9 +937,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1030,9 +1030,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1104,9 +1104,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1194,9 +1194,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1286,9 +1286,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1368,9 +1368,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1450,9 +1450,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1533,9 +1533,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1647,9 +1647,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1730,9 +1730,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1821,9 +1821,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf(bookFormat))
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)
@@ -1919,9 +1919,9 @@ abstract class BookRevokeTaskContract {
         entry = opdsEntry,
         formats = listOf(bookFormat))
 
-    Mockito.`when`(account.id())
+    Mockito.`when`(account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
       .thenReturn(bookDatabaseEntry)

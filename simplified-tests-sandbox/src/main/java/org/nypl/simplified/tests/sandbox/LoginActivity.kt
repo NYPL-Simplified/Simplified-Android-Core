@@ -12,7 +12,6 @@ import android.widget.LinearLayout
 import android.widget.ListView
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.OptionType
 import org.nypl.audiobook.android.tests.sandbox.R
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
@@ -20,12 +19,13 @@ import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
-import org.nypl.simplified.accounts.database.AccountProviderCollection
-import org.nypl.simplified.accounts.database.AccountProvidersJSON
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistry
+import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.BundledContentResolver
 import org.nypl.simplified.app.login.LoginDialog
@@ -54,13 +54,16 @@ import org.nypl.simplified.opds.core.OPDSFeedTransportType
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.opds.core.OPDSSearchParserType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
-import org.nypl.simplified.profiles.ProfilesDatabase
+import org.nypl.simplified.profiles.ProfilesDatabases
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
+import org.nypl.simplified.tests.MockAccountCreationStringResources
+import org.nypl.simplified.tests.MockAccountDeletionStringResources
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.net.URI
 import java.util.ServiceLoader
 import java.util.concurrent.Executors
 
@@ -72,7 +75,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
   private lateinit var analyticsLogger: AnalyticsType
   private lateinit var accountCredentials: AccountAuthenticationCredentialsStoreType
   private lateinit var accountBundledCredentials: AccountBundledCredentialsType
-  private lateinit var accountProviders: AccountProviderCollection
+  private lateinit var accountProviders: AccountProviderDescriptionRegistryType
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var feedTransport: OPDSFeedTransportType<OptionType<HTTPAuthType>>
@@ -140,10 +143,11 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         this.cacheDir,
         this.http)
 
+    val defaultProvider =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+
     this.accountProviders =
-      this.assets.open("Accounts.json").use { stream ->
-        AccountProvidersJSON.deserializeFromStream(stream)
-      }
+      AccountProviderDescriptionRegistry.createFromServiceLoader(this, defaultProvider)
 
     this.accountBundledCredentials =
       AccountBundledCredentialsEmpty.getInstance()
@@ -153,16 +157,19 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         File(this.filesDir, "credentials.json"),
         File(this.filesDir, "credentials.json.tmp"))
 
+    val profilesDir =
+      File(this.filesDir, "profiles")
+
     this.profilesDatabase =
-      ProfilesDatabase.openWithAnonymousProfileEnabled(
+      ProfilesDatabases.openWithAnonymousProfileEnabled(
         this,
         this.accountEvents,
         this.accountProviders,
         this.accountBundledCredentials,
         this.accountCredentials,
         AccountsDatabases,
-        this.accountProviders.providerDefault(),
-        File(this.filesDir, "profiles"))
+        this::onAccountResolutionStatus,
+        profilesDir)
 
     this.analyticsLogger =
       MockAnalytics()
@@ -177,7 +184,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         accountEvents = this.accountEvents,
         accountLoginStringResources = MockAccountLoginStringResources(),
         accountLogoutStringResources = MockAccountLogoutStringResources(),
-        accountProviders = FunctionType { this.getAccountProviders() },
+        accountProviders = this.accountProviders,
         adobeDrm = null,
         analytics = this.analyticsLogger,
         bookBorrowStrings = MockBorrowStringResources(),
@@ -190,6 +197,8 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         feedParser = this.feedParser,
         http = this.http,
         patronUserProfileParsers = this.patronParsers,
+        profileAccountCreationStringResources = MockAccountCreationStringResources(),
+        profileAccountDeletionStringResources = MockAccountDeletionStringResources(),
         profileEvents = this.profileEvents,
         profiles = this.profilesDatabase,
         readerBookmarkEvents = this.readerBookmarkEvents,
@@ -210,7 +219,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
     val button1 = Button(this)
     button1.text = "Logout"
     button1.setOnClickListener {
-      this.profiles.profileAccountLogout(this.profiles.profileAccountCurrent().id())
+      this.profiles.profileAccountLogout(this.profiles.profileAccountCurrent().id)
     }
 
     val div1 = View(this)
@@ -236,6 +245,10 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
     layout.addView(button1)
     layout.addView(div1)
     layout.addView(listView)
+  }
+
+  private fun onAccountResolutionStatus(id: URI, message: String) {
+
   }
 
   class ExampleViewHolder {
@@ -319,8 +332,8 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         this.controller.accountEvents()
           .subscribe { event -> this.onAccountEvent(event) }
 
-      val loginState = this.account.loginState()
-      if (account.requiresCredentials() && loginState.credentials == null) {
+      val loginState = this.account.loginState
+      if (account.requiresCredentials && loginState.credentials == null) {
         this.onShowLoginDialog.invoke()
       } else {
         this.tryBorrow()
@@ -333,7 +346,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
 
     private fun onAccountEvent(event: AccountEvent) {
       if (event is AccountEventLoginStateChanged) {
-        if (event.accountID == this.account.id()) {
+        if (event.accountID == this.account.id) {
           return this.configureForState(event.state)
         }
       }
@@ -364,9 +377,5 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         }
       }
     }
-  }
-
-  private fun getAccountProviders(): AccountProviderCollection {
-    return this.accountProviders
   }
 }

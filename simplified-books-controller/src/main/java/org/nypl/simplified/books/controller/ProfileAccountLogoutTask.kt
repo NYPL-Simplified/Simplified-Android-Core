@@ -41,7 +41,7 @@ class ProfileAccountLogoutTask(
 
   init {
     Preconditions.checkState(
-      this.profile.accounts().containsKey(this.account.id()),
+      this.profile.accounts().containsKey(this.account.id),
       "Profile must contain the given account")
   }
 
@@ -54,19 +54,19 @@ class ProfileAccountLogoutTask(
     TaskRecorder.create<AccountLogoutErrorData>()
 
   private fun warn(message: String, vararg arguments: Any?) =
-    this.logger.warn("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
+    this.logger.warn("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
+    this.logger.debug("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
+    this.logger.error("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
   override fun call(): AccountLogoutTaskResult {
     this.steps.beginNewStep(this.logoutStrings.logoutStarted)
 
     this.credentials =
-      when (val state = this.account.loginState()) {
+      when (val state = this.account.loginState) {
         is AccountLoginState.AccountLoggedIn -> state.credentials
         is AccountLogoutFailed -> state.credentials
         AccountNotLoggedIn,
@@ -228,7 +228,7 @@ class ProfileAccountLogoutTask(
     this.steps.beginNewStep(this.logoutStrings.logoutClearingBookRegistry)
     this.updateLoggingOutState()
     try {
-      for (book in this.account.bookDatabase().books()) {
+      for (book in this.account.bookDatabase.books()) {
         this.bookRegistry.clearFor(book)
       }
     } catch (e: Throwable) {
@@ -239,7 +239,7 @@ class ProfileAccountLogoutTask(
     this.steps.beginNewStep(this.logoutStrings.logoutClearingBookDatabase)
     this.updateLoggingOutState()
     try {
-      this.account.bookDatabase().delete()
+      this.account.bookDatabase.delete()
     } catch (e: Throwable) {
       this.error("could not clear book database: ", e)
       this.steps.currentStepFailed(this.logoutStrings.logoutClearingBookDatabaseFailed)

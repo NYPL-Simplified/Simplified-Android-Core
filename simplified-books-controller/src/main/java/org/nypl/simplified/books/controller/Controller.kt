@@ -4,24 +4,22 @@ import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
+import com.io7m.junreachable.UnimplementedCodeException
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountEventCreation
-import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
-import org.nypl.simplified.accounts.api.AccountProviderCollectionType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -63,15 +61,18 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.AccountCreateTaskResult
+import org.nypl.simplified.profiles.controller.api.AccountDeleteTaskResult
 import org.nypl.simplified.profiles.controller.api.AccountLoginTaskResult
 import org.nypl.simplified.profiles.controller.api.AccountLogoutTaskResult
+import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URI
-import java.util.ArrayList
 import java.util.SortedMap
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
@@ -85,7 +86,7 @@ class Controller private constructor(
   private val accountEvents: ObservableType<AccountEvent>,
   private val accountLoginStringResources: AccountLoginStringResourcesType,
   private val accountLogoutStringResources: AccountLogoutStringResourcesType,
-  private val accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
+  private val accountProviders: AccountProviderDescriptionRegistryType,
   private val adobeDrm: AdobeAdeptExecutorType?,
   private val analytics: AnalyticsType,
   private val bookRegistry: BookRegistryType,
@@ -97,6 +98,8 @@ class Controller private constructor(
   private val feedParser: OPDSFeedParserType,
   private val http: HTTPType,
   private val patronUserProfileParsers: PatronUserProfileParsersType,
+  private val profileAccountCreationStringResources: ProfileAccountCreationStringResourcesType,
+  private val profileAccountDeletionStringResources: ProfileAccountDeletionStringResourcesType,
   private val profileEvents: ObservableType<ProfileEvent>,
   private val profiles: ProfilesDatabaseType,
   private val readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
@@ -123,7 +126,7 @@ class Controller private constructor(
 
     if (this.profiles.anonymousProfileEnabled() == ANONYMOUS_PROFILE_ENABLED) {
       this.logger.debug("initializing anonymous profile")
-      this.profileSelect(this.profileCurrent().id())
+      this.profileSelect(this.profileCurrent().id)
     }
   }
 
@@ -230,23 +233,24 @@ class Controller private constructor(
     }
   }
 
-  override fun profileAccountCreate(provider: URI): FluentFuture<AccountEventCreation> {
+  override fun profileAccountCreate(provider: URI): FluentFuture<AccountCreateTaskResult> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfileAccountCreateTask(
-        this.profiles,
         this.accountEvents,
+        provider,
         this.accountProviders,
-        provider)))
+        this.profiles,
+        this.profileAccountCreationStringResources)))
   }
 
-  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<AccountEventDeletion> {
+  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<AccountDeleteTaskResult> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfileAccountDeleteTask(
-        this.profiles,
         this.accountEvents,
+        provider,
+        this.profiles,
         this.profileEvents,
-        this.accountProviders,
-        provider)))
+        this.profileAccountDeletionStringResources)))
   }
 
   override fun profileAccountSelectByProvider(provider: URI): FluentFuture<ProfileAccountSelectEvent> {
@@ -254,7 +258,6 @@ class Controller private constructor(
       ProfileAccountSelectionTask(
         this.profiles,
         this.profileEvents,
-        this.accountProviders,
         provider)))
   }
 
@@ -271,19 +274,7 @@ class Controller private constructor(
 
   @Throws(ProfileNoneCurrentException::class, ProfileNonexistentAccountProviderException::class)
   override fun profileCurrentlyUsedAccountProviders(): ImmutableList<AccountProviderType> {
-    val accounts = ArrayList<AccountProviderType>()
-    val accountProviders = this.accountProviders.call(Unit.unit())
-    val profile = this.profileCurrent()
-
-    for (account in profile.accounts().values) {
-      val provider = account.provider()
-      if (accountProviders.providers().containsKey(provider.id)) {
-        val accountProvider = accountProviders.providers()[provider.id]!!
-        accounts.add(accountProvider)
-      }
-    }
-
-    return ImmutableList.sortedCopyOf(accounts)
+    throw UnimplementedCodeException()
   }
 
   override fun profileAccountLogout(account: AccountID): FluentFuture<AccountLogoutTaskResult> {
@@ -368,7 +359,7 @@ class Controller private constructor(
     this.taskExecutor.submit(BookBorrowFailedDismissTask(
       this.downloader,
       this.downloads,
-      account.bookDatabase(),
+      account.bookDatabase,
       this.bookRegistry,
       id))
   }
@@ -434,7 +425,7 @@ class Controller private constructor(
     account: AccountType,
     bookId: BookID): FluentFuture<Unit> {
     return FluentFuture.from(this.taskExecutor.submit(BookRevokeFailedDismissTask(
-      account.bookDatabase(),
+      account.bookDatabase,
       this.bookRegistry,
       bookId)))
   }
@@ -448,7 +439,7 @@ class Controller private constructor(
       accountEvents: ObservableType<AccountEvent>,
       accountLoginStringResources: AccountLoginStringResourcesType,
       accountLogoutStringResources: AccountLogoutStringResourcesType,
-      accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
+      accountProviders: AccountProviderDescriptionRegistryType,
       adobeDrm: AdobeAdeptExecutorType?,
       analytics: AnalyticsType,
       bookBorrowStrings: BookBorrowStringResourcesType,
@@ -461,6 +452,8 @@ class Controller private constructor(
       feedParser: OPDSFeedParserType,
       http: HTTPType,
       patronUserProfileParsers: PatronUserProfileParsersType,
+      profileAccountCreationStringResources: ProfileAccountCreationStringResourcesType,
+      profileAccountDeletionStringResources: ProfileAccountDeletionStringResourcesType,
       profileEvents: ObservableType<ProfileEvent>,
       profiles: ProfilesDatabaseType,
       readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
@@ -474,8 +467,8 @@ class Controller private constructor(
         accountProviders = accountProviders,
         adobeDrm = adobeDrm,
         analytics = analytics,
-        borrowStrings = bookBorrowStrings,
         bookRegistry = bookRegistry,
+        borrowStrings = bookBorrowStrings,
         bundledContent = bundledContent,
         cacheDirectory = cacheDirectory,
         downloader = downloader,
@@ -483,6 +476,8 @@ class Controller private constructor(
         feedParser = feedParser,
         http = http,
         patronUserProfileParsers = patronUserProfileParsers,
+        profileAccountCreationStringResources = profileAccountCreationStringResources,
+        profileAccountDeletionStringResources = profileAccountDeletionStringResources,
         profileEvents = profileEvents,
         profiles = profiles,
         readerBookmarkEvents = readerBookmarkEvents,

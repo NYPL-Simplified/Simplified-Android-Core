@@ -11,23 +11,31 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
-import org.nypl.simplified.accounts.api.AccountProviderCollectionType
-import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.accounts.api.AccountProviders
+import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.profiles.ProfilesDatabases
+import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
+import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfileNonexistentException
+import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.net.URI
-import java.util.TreeMap
 import java.util.UUID
 
 abstract class ProfilesDatabaseContract {
+
+  private val logger = LoggerFactory.getLogger(ProfilesDatabaseContract::class.java)
 
   private lateinit var credentialStore: FakeAccountCredentialStorage
   private lateinit var accountEvents: ObservableType<org.nypl.simplified.accounts.api.AccountEvent>
@@ -55,12 +63,14 @@ abstract class ProfilesDatabaseContract {
 
   private class CausesContains<T : Exception> internal constructor(
     private val exception_type: Class<T>,
-    private val message: String) : BaseMatcher<org.nypl.simplified.profiles.api.ProfileDatabaseException>() {
+    private val message: String) : BaseMatcher<ProfileDatabaseException>() {
+
+    private val logger = LoggerFactory.getLogger(CausesContains::class.java)
 
     override fun matches(item: Any): Boolean {
-      if (item is org.nypl.simplified.profiles.api.ProfileDatabaseException) {
+      if (item is ProfileDatabaseException) {
         for (c in item.causes()) {
-          LOG.error("Cause: ", c)
+          this.logger.error("Cause: ", c)
           if (this.exception_type.isAssignableFrom(c.javaClass) && c.message!!.contains(this.message)) {
             return true
           }
@@ -76,23 +86,34 @@ abstract class ProfilesDatabaseContract {
     }
   }
 
+  private fun onAccountResolution(
+    id: URI,
+    message: String) {
+    this.logger.debug("resolution: {}: {}", id, message)
+  }
+
+  /**
+   * If the profile directory is not a directory, opening it fails.
+   */
+
   @Test
   @Throws(Exception::class)
   fun testOpenExistingNotDirectory() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
-    FileUtilities.fileWriteUTF8(f_pro, "Hello!")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
+    FileUtilities.fileWriteUTF8(fileProfiles, "Hello!")
 
-    this.expected.expect(org.nypl.simplified.profiles.api.ProfileDatabaseException::class.java)
+    this.expected.expect(ProfileDatabaseException::class.java)
     this.expected.expect(CausesContains(IOException::class.java, "Not a directory"))
-    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
   }
 
   /**
@@ -102,109 +123,159 @@ abstract class ProfilesDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenExistingBadSubdirectory() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    f_pro.mkdirs()
-    val f_bad = File(f_pro, "not-a-number")
+    fileProfiles.mkdirs()
+    val f_bad = File(fileProfiles, "not-a-number")
     f_bad.mkdirs()
 
-    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
   }
 
-  private fun accountsDatabases(): org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType {
+  /**
+   * A subdirectory that isn't a file causes a failure.
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testOpenExistingFileSubdirectory() {
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
+
+    fileProfiles.mkdirs()
+    val f_bad = File(fileProfiles, UUID.randomUUID().toString())
+    f_bad.writeText("Not a profile, clearly.")
+
+    this.expected.expect(ProfileDatabaseException::class.java)
+    this.expected.expect(CausesContains(IOException::class.java, "Not a directory"))
+    ProfilesDatabases.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.accountEvents,
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
+      this.accountsDatabases(),
+      this::onAccountResolution,
+      fileProfiles)
+  }
+
+  private fun accountsDatabases(): AccountsDatabaseFactoryType {
     return org.nypl.simplified.accounts.database.AccountsDatabases
   }
+
+  /**
+   * A profile with a missing metadata file is ignored.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testOpenExistingJSONMissing() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    f_pro.mkdirs()
-    val f_0 = File(f_pro, "0")
+    fileProfiles.mkdirs()
+    val f_0 = File(fileProfiles, "0")
     f_0.mkdirs()
 
-    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
   }
+
+  /**
+   * A profile with a broken metadata file causes an exception.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testOpenExistingJSONUnparseable() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    f_pro.mkdirs()
-    val f_0 = File(f_pro, "0")
+    fileProfiles.mkdirs()
+    val f_0 = File(fileProfiles, "0")
     f_0.mkdirs()
     val f_p = File(f_0, "profile.json")
     FileUtilities.fileWriteUTF8(f_p, "} { this is not JSON { } { }")
 
-    this.expected.expect(org.nypl.simplified.profiles.api.ProfileDatabaseException::class.java)
+    this.expected.expect(ProfileDatabaseException::class.java)
     this.expected.expect(CausesContains(IOException::class.java, "Could not parse profile: "))
-    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
   }
+
+  /**
+   * An empty set of profiles is empty!
+   */
 
   @Test
   @Throws(Exception::class)
   fun testOpenExistingEmpty() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
     Assert.assertEquals(0, db.profiles().size.toLong())
-    Assert.assertEquals(f_pro, db.directory())
+    Assert.assertEquals(fileProfiles, db.directory())
     Assert.assertTrue(db.currentProfile().isNone)
   }
+
+  /**
+   * Creating profiles works.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testOpenCreateProfiles() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val account_providers = this.accountProviders()
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
 
-    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      account_providers,
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      accountProviders,
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val acc =
+      MockAccountProviders.fakeProvider("urn:fake:0")
 
     val p0 = db.createProfile(acc, "Kermit")
     val p1 = db.createProfile(acc, "Gonzo")
@@ -214,120 +285,133 @@ abstract class ProfilesDatabaseContract {
     Assert.assertFalse("Profile is not anonymous", p1.isAnonymous)
     Assert.assertFalse("Profile is not anonymous", p2.isAnonymous)
 
-    Assert.assertEquals("Kermit", p0.displayName())
-    Assert.assertEquals("Gonzo", p1.displayName())
-    Assert.assertEquals("Beaker", p2.displayName())
+    Assert.assertEquals("Kermit", p0.displayName)
+    Assert.assertEquals("Gonzo", p1.displayName)
+    Assert.assertEquals("Beaker", p2.displayName)
 
-    Assert.assertNotEquals(p0.id(), p1.id())
-    Assert.assertNotEquals(p0.id(), p2.id())
-    Assert.assertNotEquals(p1.id(), p2.id())
+    Assert.assertNotEquals(p0.id, p1.id)
+    Assert.assertNotEquals(p0.id, p2.id)
+    Assert.assertNotEquals(p1.id, p2.id)
 
     Assert.assertTrue(
       "Kermit profile exists",
-      p0.directory().isDirectory)
+      p0.directory.isDirectory)
 
     Assert.assertTrue(
       "Kermit profile file exists",
-      File(p0.directory(), "profile.json").isFile)
+      File(p0.directory, "profile.json").isFile)
 
     Assert.assertTrue(
       "Gonzo profile exists",
-      p1.directory().isDirectory)
+      p1.directory.isDirectory)
 
     Assert.assertTrue(
       "Gonzo profile file exists",
-      File(p1.directory(), "profile.json").isFile)
+      File(p1.directory, "profile.json").isFile)
 
     Assert.assertTrue(
       "Beaker profile exists",
-      p1.directory().isDirectory)
+      p1.directory.isDirectory)
 
     Assert.assertTrue(
       "Beaker profile file exists",
-      File(p2.directory(), "profile.json").isFile)
+      File(p2.directory, "profile.json").isFile)
 
     Assert.assertFalse(p0.isCurrent)
     Assert.assertFalse(p1.isCurrent)
     Assert.assertFalse(p2.isCurrent)
 
     Assert.assertEquals(
-      account_providers.provider(URI.create("http://www.example.com/accounts0/")),
-      p0.accountCurrent().provider())
+      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0"),
+      p0.accountCurrent().provider)
     Assert.assertEquals(
-      account_providers.provider(URI.create("http://www.example.com/accounts0/")),
-      p1.accountCurrent().provider())
+      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0"),
+      p1.accountCurrent().provider)
     Assert.assertEquals(
-      account_providers.provider(URI.create("http://www.example.com/accounts0/")),
-      p2.accountCurrent().provider())
+      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0"),
+      p2.accountCurrent().provider)
 
     Assert.assertTrue(db.currentProfile().isNone)
   }
 
+  /**
+   * Creating profiles and then reopening the database shows the same profiles.
+   */
+
   @Test
   @Throws(Exception::class)
   fun testOpenCreateReopen() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val account_providers = this.accountProviders()
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      account_providers,
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      accountProviders,
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val acc =
+      MockAccountProviders.fakeProvider("urn:fake:0")
 
     val p0 = db0.createProfile(acc, "Kermit")
     val p1 = db0.createProfile(acc, "Gonzo")
     val p2 = db0.createProfile(acc, "Beaker")
 
-    val db1 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db1 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      account_providers,
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      accountProviders,
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val pr0 = db1.profiles()[p0.id()]
-    val pr1 = db1.profiles()[p1.id()]
-    val pr2 = db1.profiles()[p2.id()]
+    val pr0 = db1.profiles()[p0.id]!!
+    val pr1 = db1.profiles()[p1.id]!!
+    val pr2 = db1.profiles()[p2.id]!!
 
-    Assert.assertEquals(p0.directory(), pr0!!.directory())
-    Assert.assertEquals(p1.directory(), pr1!!.directory())
-    Assert.assertEquals(p2.directory(), pr2!!.directory())
+    Assert.assertEquals(p0.directory, pr0.directory)
+    Assert.assertEquals(p1.directory, pr1.directory)
+    Assert.assertEquals(p2.directory, pr2.directory)
 
-    Assert.assertEquals(p0.displayName(), pr0!!.displayName())
-    Assert.assertEquals(p1.displayName(), pr1!!.displayName())
-    Assert.assertEquals(p2.displayName(), pr2!!.displayName())
+    Assert.assertEquals(p0.displayName, pr0.displayName)
+    Assert.assertEquals(p1.displayName, pr1.displayName)
+    Assert.assertEquals(p2.displayName, pr2.displayName)
 
-    Assert.assertEquals(p0.id(), pr0!!.id())
-    Assert.assertEquals(p1.id(), pr1!!.id())
-    Assert.assertEquals(p2.id(), pr2!!.id())
+    Assert.assertEquals(p0.id, pr0.id)
+    Assert.assertEquals(p1.id, pr1.id)
+    Assert.assertEquals(p2.id, pr2.id)
   }
+
+  /**
+   * Updating preferences works.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testOpenCreateUpdatePreferences() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
     val p0 = db.createProfile(acc, "Kermit")
     p0.preferencesUpdate(
@@ -341,116 +425,144 @@ abstract class ProfilesDatabaseContract {
       p0.preferences().dateOfBirth())
   }
 
+  /**
+   * Creating duplicate profiles fails.
+   */
+
   @Test
   @Throws(Exception::class)
   fun testCreateProfileDuplicate() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
     val p0 = db.createProfile(acc, "Kermit")
 
-    this.expected.expect(org.nypl.simplified.profiles.api.ProfileDatabaseException::class.java)
+    this.expected.expect(ProfileDatabaseException::class.java)
     this.expected.expectMessage(StringContains.containsString("Display name is already used"))
     db.createProfile(acc, "Kermit")
   }
 
+  /**
+   * Creating a profile with an empty display name fails.
+   */
+
   @Test
   @Throws(Exception::class)
   fun testCreateProfileEmptyDisplayName() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
-    this.expected.expect(org.nypl.simplified.profiles.api.ProfileDatabaseException::class.java)
+    this.expected.expect(ProfileDatabaseException::class.java)
     this.expected.expectMessage(StringContains.containsString("Display name cannot be empty"))
     db.createProfile(acc, "")
   }
 
+  /**
+   * Setting a profile to current works.
+   */
+
   @Test
   @Throws(Exception::class)
   fun testSetCurrent() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
     val p0 = db0.createProfile(acc, "Kermit")
 
-    db0.setProfileCurrent(p0.id())
+    db0.setProfileCurrent(p0.id)
 
     Assert.assertTrue(p0.isCurrent)
     Assert.assertEquals(Option.some(p0), db0.currentProfile())
   }
 
+  /**
+   * Setting a nonexistent profile to current fails.
+   */
+
   @Test
   @Throws(Exception::class)
   fun testSetCurrentNonexistent() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
     val p0 = db0.createProfile(acc, "Kermit")
 
-    this.expected.expect(org.nypl.simplified.profiles.api.ProfileNonexistentException::class.java)
+    this.expected.expect(ProfileNonexistentException::class.java)
     this.expected.expectMessage(StringContains.containsString("Profile does not exist"))
-    db0.setProfileCurrent(org.nypl.simplified.profiles.api.ProfileID(UUID.fromString("135dec78-b89b-4a6c-bf6a-294c1694d40b")))
+    db0.setProfileCurrent(ProfileID(UUID.fromString("135dec78-b89b-4a6c-bf6a-294c1694d40b")))
   }
+
+  /**
+   * Opening a profile database in anonymous mode works.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testAnonymous() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileEnabled(
-      this.context(),
-      this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialStore,
-      this.accountsDatabases(),
-      exampleAccountProvider(),
-      f_pro)
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
+
+    val db0 =
+      ProfilesDatabases.openWithAnonymousProfileEnabled(
+        this.context(),
+        this.accountEvents,
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        this::onAccountResolution,
+        fileProfiles)
 
     Assert.assertEquals(1L, db0.profiles().size.toLong())
 
@@ -459,170 +571,218 @@ abstract class ProfilesDatabaseContract {
     Assert.assertEquals(Option.some(p0), db0.currentProfile())
   }
 
+  /**
+   * Setting a profile to current in anonymous mode fails.
+   */
+
   @Test
   @Throws(Exception::class)
   fun testAnonymousSetCurrent() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileEnabled(
-      this.context(),
-      this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialStore,
-      this.accountsDatabases(),
-      exampleAccountProvider(),
-      f_pro)
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
+
+    val db0 =
+      ProfilesDatabases.openWithAnonymousProfileEnabled(
+        this.context(),
+        this.accountEvents,
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        this::onAccountResolution,
+        fileProfiles)
 
     this.expected.expect(org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException::class.java)
-    db0.setProfileCurrent(org.nypl.simplified.profiles.api.ProfileID.generate())
+    db0.setProfileCurrent(ProfileID.generate())
   }
+
+  /**
+   * Creating and deleting a profile works.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testCreateDelete() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
-      this.context(),
-      this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialStore,
-      this.accountsDatabases(),
-      f_pro)
+    val db0 =
+      ProfilesDatabases.openWithAnonymousProfileDisabled(
+        this.context(),
+        this.accountEvents,
+        MockAccountProviders.fakeAccountProviders(),
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        this::onAccountResolution,
+        fileProfiles)
 
-    val acc0 = fakeProvider("http://www.example.com/accounts0/")
-    val acc1 = fakeProvider("http://www.example.com/accounts1/")
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val acc1 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
 
     val p0 = db0.createProfile(acc0, "Kermit")
-    db0.setProfileCurrent(p0.id())
+    db0.setProfileCurrent(p0.id)
 
     val a0 = p0.createAccount(acc1)
-    Assert.assertTrue("Account must exist", p0.accounts().containsKey(a0.id()))
-    p0.deleteAccountByProvider(acc1)
-    Assert.assertFalse("Account must not exist", p0.accounts().containsKey(a0.id()))
+    Assert.assertTrue("Account must exist", p0.accounts().containsKey(a0.id))
+    p0.deleteAccountByProvider(acc1.id)
+    Assert.assertFalse("Account must not exist", p0.accounts().containsKey(a0.id))
   }
+
+  /**
+   * Trying to delete an account with an unknown provider fails.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testDeleteUnknownProvider() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc0 = fakeProvider("http://www.example.com/accounts0/")
-    val acc1 = fakeProvider("http://www.example.com/accounts1/")
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val acc1 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
 
     val p0 = db0.createProfile(acc0, "Kermit")
-    db0.setProfileCurrent(p0.id())
+    db0.setProfileCurrent(p0.id)
 
-    this.expected.expect(org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException::class.java)
-    p0.deleteAccountByProvider(acc1)
+    this.expected.expect(AccountsDatabaseNonexistentException::class.java)
+    p0.deleteAccountByProvider(acc1.id)
   }
+
+  /**
+   * Trying to delete the last account fails.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testDeleteLastAccount() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc0 = fakeProvider("http://www.example.com/accounts0/")
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
     val p0 = db0.createProfile(acc0, "Kermit")
-    db0.setProfileCurrent(p0.id())
+    db0.setProfileCurrent(p0.id)
 
-    this.expected.expect(org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException::class.java)
-    p0.deleteAccountByProvider(acc0)
+    this.expected.expect(AccountsDatabaseLastAccountException::class.java)
+    p0.deleteAccountByProvider(acc0.id)
   }
+
+  /**
+   * Setting an account as current works.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testSetCurrentAccount() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc0 = fakeProvider("http://www.example.com/accounts0/")
-    val acc1 = fakeProvider("http://www.example.com/accounts1/")
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val acc1 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
 
     val p0 = db0.createProfile(acc0, "Kermit")
-    db0.setProfileCurrent(p0.id())
+    db0.setProfileCurrent(p0.id)
 
     val ac1 = p0.createAccount(acc1)
     Assert.assertNotEquals(ac1, p0.accountCurrent())
-    p0.selectAccount(acc1)
+    p0.selectAccount(acc1.id)
     Assert.assertEquals(ac1, p0.accountCurrent())
   }
+
+  /**
+   * Trying to set an account with an unknown provider as current, fails.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testSetCurrentAccountUnknown() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    val acc0 = fakeProvider("http://www.example.com/accounts0/")
-    val acc1 = fakeProvider("http://www.example.com/accounts1/")
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val acc1 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
 
     val p0 = db0.createProfile(acc0, "Kermit")
-    db0.setProfileCurrent(p0.id())
+    db0.setProfileCurrent(p0.id)
 
-    this.expected.expect(org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException::class.java)
-    p0.selectAccount(acc1)
+    this.expected.expect(AccountsDatabaseNonexistentException::class.java)
+    p0.selectAccount(acc1.id)
   }
+
+  /**
+   * Trying to fetch the anonymous profile outside of anonymous mode, fails.
+   */
 
   @Test
   @Throws(Exception::class)
   fun testAnonymousNotEnabled() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      this.accountProviders(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      this::onAccountResolution,
+      fileProfiles)
 
-    this.expected.expect(org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException::class.java)
+    this.expected.expect(ProfileAnonymousDisabledException::class.java)
     this.expected.expectMessage(StringContains.containsString("The anonymous profile is not enabled"))
     db0.anonymousProfile()
   }
@@ -637,33 +797,40 @@ abstract class ProfilesDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenCreateReopenMissingAccountProvider() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val account_providers = accountProviders()
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
 
-    val db0 = org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
-      this.context(),
-      this.accountEvents,
-      account_providers,
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialStore,
-      accountsDatabases(),
-      f_pro)
+    val db0 =
+      ProfilesDatabases.openWithAnonymousProfileDisabled(
+        this.context(),
+        this.accountEvents,
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        this::onAccountResolution,
+        fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val acc =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+    val newProvider =
+      MockAccountProviders.findAccountProviderDangerously(accountProviders, URI.create("urn:fake:1"))
 
     val p0 = db0.createProfile(acc, "Kermit")
-    p0.createAccount(account_providers.provider(URI.create("http://www.example.com/accounts1/")))
+    p0.createAccount(newProvider)
 
-    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      accountProvidersMissingOne(),
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProvidersMissing1(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
-      accountsDatabases(),
-      f_pro)
+      this.accountsDatabases(),
+      this::onAccountResolution,
+      fileProfiles)
   }
 
   /**
@@ -676,33 +843,37 @@ abstract class ProfilesDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenCreateReopenMissingAccountProviderNew() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val account_providers_no_zero = accountProvidersMissingZero()
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
 
     val db0 =
-      org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+      ProfilesDatabases.openWithAnonymousProfileDisabled(
         this.context(),
         this.accountEvents,
-        account_providers_no_zero,
-        org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+        MockAccountProviders.fakeAccountProvidersMissing0(),
+        AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
-        accountsDatabases(),
-        f_pro)
+        this.accountsDatabases(),
+        this::onAccountResolution,
+        fileProfiles)
 
-    val p0 = db0.createProfile(account_providers_no_zero.providerDefault(), "Kermit")
+    val p0 =
+      db0.createProfile(MockAccountProviders.findAccountProviderDangerously(
+        accountProviders, "urn:fake:0"),
+        "Kermit")
 
-    val account_providers_no_one = accountProvidersMissingOne()
-
-    org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+    ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
-      account_providers_no_one,
-      org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+      MockAccountProviders.fakeAccountProvidersMissing0(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
-      accountsDatabases(),
-      f_pro)
+      this.accountsDatabases(),
+      this::onAccountResolution,
+      fileProfiles)
   }
 
   /**
@@ -714,99 +885,82 @@ abstract class ProfilesDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenAnonymousNonAnonymousAlternating() {
-    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
-    val f_pro = File(f_tmp, "profiles")
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-    val account_providers = accountProviders()
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
 
     val db0 =
-      org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileDisabled(
+      ProfilesDatabases.openWithAnonymousProfileDisabled(
         this.context(),
         this.accountEvents,
-        account_providers,
-        org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
-        accountsDatabases(),
-        f_pro)
+        this.accountsDatabases(),
+        this::onAccountResolution,
+        fileProfiles)
 
-    val acc = fakeProvider("http://www.example.com/accounts0/")
-    val p0 = db0.createProfile(acc, "Kermit")
+    val acc =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+    val p0 =
+      db0.createProfile(acc, "Kermit")
     val acc0 =
-      p0.createAccount(account_providers.provider(URI.create("http://www.example.com/accounts1/")))
+      p0.createAccount(MockAccountProviders.fakeProvider("urn:fake:1"))
 
     val db1 =
-      org.nypl.simplified.profiles.ProfilesDatabase.openWithAnonymousProfileEnabled(
+      ProfilesDatabases.openWithAnonymousProfileEnabled(
         this.context(),
         this.accountEvents,
-        account_providers,
-        org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty.getInstance(),
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
-        accountsDatabases(),
-        acc,
-        f_pro)
+        this.accountsDatabases(),
+        this::onAccountResolution,
+        fileProfiles)
 
     val p1 = db1.anonymousProfile()
 
-    Assert.assertTrue(p0.accounts().containsKey(acc0.id()))
-    Assert.assertTrue(p0.accounts().containsKey(acc0.id()))
+    Assert.assertTrue(p0.accounts().containsKey(acc0.id))
+    Assert.assertTrue(p0.accounts().containsKey(acc0.id))
   }
 
+  /**
+   * Automatic accounts are resolved and added.
+   */
 
-  private fun accountProvidersMissingZero(): AccountProviderCollectionType {
-    val p1 = fakeProvider("http://www.example.com/accounts1/")
-    val providers = TreeMap<URI, AccountProviderType>()
-    providers[p1.id] = p1
-    return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p1, providers)
-  }
+  @Test
+  @Throws(Exception::class)
+  fun testOpenAutomatic() {
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
 
-  private fun accountProvidersMissingOne(): AccountProviderCollectionType {
-    val p0 = fakeProvider("http://www.example.com/accounts0/")
-    val providers = TreeMap<URI, AccountProviderType>()
-    providers[p0.id] = p0
-    return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p0, providers)
-  }
+    val accountProviders =
+      MockAccountProviders.fakeAccountProvidersWithAutomatic()
 
-  private fun accountProviders(): AccountProviderCollectionType {
-    val p0 = fakeProvider("http://www.example.com/accounts0/")
-    val p1 = fakeProvider("http://www.example.com/accounts1/")
-    val providers = TreeMap<URI, AccountProviderType>()
-    providers[p0.id] = p0
-    providers[p1.id] = p1
-    return org.nypl.simplified.accounts.database.AccountProviderCollection.create(p0, providers)
-  }
+    val db0 =
+      ProfilesDatabases.openWithAnonymousProfileDisabled(
+        this.context(),
+        this.accountEvents,
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        this::onAccountResolution,
+        fileProfiles)
 
-  companion object {
+    val acc =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+    val p0 =
+      db0.createProfile(acc, "Kermit")
+    val accountsDatabase =
+      p0.accountsDatabase()
+    val accountsByProvider =
+      accountsDatabase.accountsByProvider()
 
-    private val LOG = LoggerFactory.getLogger(ProfilesDatabaseContract::class.java)
-
-    private fun exampleAccountProvider(): AccountProviderType {
-      return AccountProviders.builder()
-        .apply {
-          this.catalogURI = URI.create("http://www.example.com")
-          this.supportEmail = "postmaster@example.com"
-          this.id = URI.create("urn:com.example")
-          this.mainColor = "#eeeeee"
-          this.logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")
-          this.subtitle = "Example Subtitle"
-          this.displayName = "Example Provider"
-          this.annotationsURI = URI.create("http://example.com/accounts0/annotations")
-          this.patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me")
-        }.build()
-    }
-
-    private fun fakeProvider(provider_id: String): AccountProviderType {
-      return AccountProviders.builder()
-        .apply {
-          this.id = URI.create(provider_id)
-          this.mainColor = "#ff0000"
-          this.displayName = "Fake Library"
-          this.subtitle = "Imaginary books"
-          this.logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")
-          this.catalogURI = URI.create("http://www.example.com/accounts0/feed.xml")
-          this.supportEmail = "postmaster@example.com"
-          this.annotationsURI = URI.create("http://example.com/accounts0/annotations")
-          this.patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me")
-        }.build()
-    }
+    Assert.assertEquals(2, accountsByProvider.size)
+    Assert.assertNotNull(accountsByProvider[acc.id])
+    Assert.assertNotNull(accountsByProvider[MockAccountProviders.fakeAccountProviderDefaultAutoURI()])
   }
 }

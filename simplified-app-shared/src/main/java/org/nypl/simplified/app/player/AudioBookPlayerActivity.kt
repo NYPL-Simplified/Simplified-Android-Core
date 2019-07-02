@@ -146,7 +146,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     val formatHandleOpt =
       Simplified.getProfilesController()
         .profileAccountForBook(this.parameters.bookID)
-        .bookDatabase()
+        .bookDatabase
         .entry(this.parameters.bookID)
         .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 

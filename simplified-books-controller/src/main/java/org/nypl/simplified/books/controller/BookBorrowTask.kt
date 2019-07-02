@@ -174,7 +174,7 @@ class BookBorrowTask(
   private val bookInitial: Book =
     Book(
       id = this.bookId,
-      account = this.account.id(),
+      account = this.account.id,
       cover = null,
       thumbnail = null,
       entry = this.entry,
@@ -275,7 +275,7 @@ class BookBorrowTask(
 
     try {
       this.debug("setting up book database entry")
-      val database = this.account.bookDatabase()
+      val database = this.account.bookDatabase
       this.databaseEntry = database.createOrUpdate(this.bookId, this.entry)
       this.databaseEntryInitialized = true
       this.publishBookStatus(BookStatusRequestingLoan(
@@ -1198,7 +1198,7 @@ class BookBorrowTask(
    */
 
   private fun createHttpAuthIfRequired(): OptionType<HTTPAuthType> {
-    return if (this.account.requiresCredentials()) {
+    return if (this.account.requiresCredentials) {
       Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(this.getRequiredAccountCredentials()))
     } else {
       Option.none<HTTPAuthType>()
@@ -1211,7 +1211,7 @@ class BookBorrowTask(
    */
 
   private fun getRequiredAccountCredentials(): AccountAuthenticationCredentials {
-    val loginState = this.account.loginState()
+    val loginState = this.account.loginState
     val credentials = loginState.credentials
     if (credentials != null) {
       return credentials

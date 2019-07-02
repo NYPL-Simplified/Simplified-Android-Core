@@ -1,5 +1,6 @@
 package org.nypl.simplified.accounts.api
 
+import org.joda.time.DateTime
 import java.net.URI
 
 /**
@@ -13,6 +14,12 @@ interface AccountProviderBuilderType {
    */
 
   var id: URI?
+
+  /**
+   * @see AccountProviderType.isProduction
+   */
+
+  var isProduction: Boolean
 
   /**
    * @see AccountProviderType.displayName
@@ -151,6 +158,12 @@ interface AccountProviderBuilderType {
    */
 
   var annotationsURI: URI?
+
+  /**
+   * @see AccountProviderType.updated
+   */
+
+  var updated: DateTime?
 
   /**
    * @return The constructed account provider

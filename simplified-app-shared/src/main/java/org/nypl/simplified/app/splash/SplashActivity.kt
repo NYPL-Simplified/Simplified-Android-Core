@@ -47,7 +47,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
   }
 
   override fun onSplashOpenProfileAnonymous() {
-    this.profileController.profileSelect(this.profileController.profileCurrent().id())
+    this.profileController.profileSelect(this.profileController.profileCurrent().id)
   }
 
   override fun onSplashOpenCatalog(account: AccountType) {
