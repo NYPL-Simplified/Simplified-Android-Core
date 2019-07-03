@@ -22,5 +22,8 @@ description = 'simplified-app-vanilla'
 dependencies {
   implementation project(':simplified-app-shared')
 
+  implementation project(":simplified-accounts-source-filebased")
+  implementation project(":simplified-accounts-source-nyplregistry")
+
   implementation 'com.android.support:appcompat-v7:27.1.1'
 }

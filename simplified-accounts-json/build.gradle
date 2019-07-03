@@ -18,6 +18,7 @@ description = 'simplified-accounts-json'
 
 dependencies {
   api project(':simplified-accounts-api')
+  api project(':simplified-parser-api')
 
   implementation project(':simplified-files')
   implementation project(':simplified-http-core')

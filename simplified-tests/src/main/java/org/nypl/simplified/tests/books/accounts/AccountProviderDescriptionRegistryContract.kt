@@ -7,16 +7,18 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionResult
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.*
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.SourceFailed
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.Updated
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryException
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.accounts.source.api.AccountProviderSourceType
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.*
+import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.tests.MockAccountProviders
 import org.slf4j.Logger
@@ -39,8 +41,7 @@ abstract class AccountProviderDescriptionRegistryContract {
   val expectedException: ExpectedException = ExpectedException.none()
 
   @Before
-  fun testSetup()
-  {
+  fun testSetup() {
     this.events = mutableListOf()
   }
 
@@ -49,8 +50,7 @@ abstract class AccountProviderDescriptionRegistryContract {
    */
 
   @Test
-  fun testEmpty()
-  {
+  fun testEmpty() {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
@@ -68,12 +68,11 @@ abstract class AccountProviderDescriptionRegistryContract {
    */
 
   @Test
-  fun testCrashingSource()
-  {
+  fun testCrashingSource() {
     val registry =
       this.createRegistry(
-          MockAccountProviders.fakeProvider("urn:fake:0"),
-          listOf(CrashingSource()))
+        MockAccountProviders.fakeProvider("urn:fake:0"),
+        listOf(CrashingSource()))
 
     this.expectedException.expect(AccountProviderRegistryException::class.java)
     registry.refresh()
@@ -84,8 +83,7 @@ abstract class AccountProviderDescriptionRegistryContract {
    */
 
   @Test
-  fun testRefresh()
-  {
+  fun testRefresh() {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
@@ -101,9 +99,9 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
-    Assert.assertEquals(URI.create("urn:0"), description0!!.id)
-    Assert.assertEquals(URI.create("urn:1"), description1!!.id)
-    Assert.assertEquals(URI.create("urn:2"), description2!!.id)
+    Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
 
     Assert.assertEquals(3, this.events.size)
     Assert.assertEquals(URI.create("urn:0"), (this.events[0] as Updated).id)
@@ -117,8 +115,7 @@ abstract class AccountProviderDescriptionRegistryContract {
    */
 
   @Test
-  fun testRefreshIgnoreOld()
-  {
+  fun testRefreshIgnoreOld() {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
@@ -134,13 +131,16 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
-    Assert.assertEquals(URI.create("urn:0"), description0!!.id)
-    Assert.assertEquals(URI.create("urn:1"), description1!!.id)
-    Assert.assertEquals(URI.create("urn:2"), description2!!.id)
+    Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
 
-    Assert.assertNotEquals(DateTime.parse("1900-01-01T00:00:00Z"), description0.updated)
-    Assert.assertNotEquals(DateTime.parse("1900-01-01T00:00:00Z"), description1.updated)
-    Assert.assertNotEquals(DateTime.parse("1900-01-01T00:00:00Z"), description2.updated)
+    Assert.assertNotEquals(
+      DateTime.parse("1900-01-01T00:00:00Z"), description0.metadata.updated)
+    Assert.assertNotEquals(
+      DateTime.parse("1900-01-01T00:00:00Z"), description1.metadata.updated)
+    Assert.assertNotEquals(
+      DateTime.parse("1900-01-01T00:00:00Z"), description2.metadata.updated)
 
     Assert.assertEquals(3, this.events.size)
     Assert.assertEquals(URI.create("urn:0"), (this.events[0] as Updated).id)
@@ -153,8 +153,7 @@ abstract class AccountProviderDescriptionRegistryContract {
    */
 
   @Test
-  fun testRefreshWithCrashing()
-  {
+  fun testRefreshWithCrashing() {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
@@ -170,9 +169,9 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
-    Assert.assertEquals(URI.create("urn:0"), description0!!.id)
-    Assert.assertEquals(URI.create("urn:1"), description1!!.id)
-    Assert.assertEquals(URI.create("urn:2"), description2!!.id)
+    Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
 
     Assert.assertEquals(4, this.events.size)
     Assert.assertEquals(URI.create("urn:0"), (this.events[0] as Updated).id)
@@ -186,8 +185,7 @@ abstract class AccountProviderDescriptionRegistryContract {
    */
 
   @Test
-  fun testRefreshWithFailing()
-  {
+  fun testRefreshWithFailing() {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
@@ -203,9 +201,9 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
-    Assert.assertEquals(URI.create("urn:0"), description0!!.id)
-    Assert.assertEquals(URI.create("urn:1"), description1!!.id)
-    Assert.assertEquals(URI.create("urn:2"), description2!!.id)
+    Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
 
     Assert.assertEquals(4, this.events.size)
     Assert.assertEquals(URI.create("urn:0"), (this.events[0] as Updated).id)
@@ -219,8 +217,7 @@ abstract class AccountProviderDescriptionRegistryContract {
    */
 
   @Test
-  fun testUpdateIgnoreOld()
-  {
+  fun testUpdateIgnoreOld() {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
@@ -236,7 +233,7 @@ abstract class AccountProviderDescriptionRegistryContract {
       registry.updateDescription(existing0)
 
     Assert.assertEquals(existing0, changed)
-    Assert.assertEquals(existing0, registry.accountProviderDescriptions()[existing0.id])
+    Assert.assertEquals(existing0, registry.accountProviderDescriptions()[existing0.metadata.id])
   }
 
   /**
@@ -244,8 +241,7 @@ abstract class AccountProviderDescriptionRegistryContract {
    */
 
   @Test
-  fun testUpdateIgnoreProviderOld()
-  {
+  fun testUpdateIgnoreProviderOld() {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
@@ -273,132 +269,114 @@ abstract class AccountProviderDescriptionRegistryContract {
 
   companion object {
 
+    val descriptionMeta0 =
+      AccountProviderDescriptionMetadata(
+        id = URI.create("urn:0"),
+        title = "Title 0",
+        updated = DateTime.now(),
+        links = listOf(),
+        images = listOf(),
+        isAutomatic = false,
+        isProduction = true)
+
     val description0 =
       object : AccountProviderDescriptionType {
-        override val id: URI
-          get() = URI.create("urn:0")
-        override val title: String
-          get() = "Title 0"
-        override val updated: DateTime
-          get() = DateTime.now()
-        override val links: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val images: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val isAutomatic: Boolean
-          get() = false
-        override val isProduction: Boolean
-          get() = true
+        override val metadata: AccountProviderDescriptionMetadata = descriptionMeta0
 
         override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
           return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
         }
       }
+
+    val descriptionMeta1 =
+      AccountProviderDescriptionMetadata(
+        id = URI.create("urn:1"),
+        title = "Title 1",
+        updated = DateTime.now(),
+        links = listOf(),
+        images = listOf(),
+        isAutomatic = false,
+        isProduction = true)
 
     val description1 =
       object : AccountProviderDescriptionType {
-        override val id: URI
-          get() = URI.create("urn:1")
-        override val title: String
-          get() = "Title 1"
-        override val updated: DateTime
-          get() = DateTime.now()
-        override val links: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val images: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val isAutomatic: Boolean
-          get() = false
-        override val isProduction: Boolean
-          get() = true
+        override val metadata: AccountProviderDescriptionMetadata = descriptionMeta1
 
         override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
           return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
         }
       }
+
+    val descriptionMeta2 =
+      AccountProviderDescriptionMetadata(
+        id = URI.create("urn:2"),
+        title = "Title 2",
+        updated = DateTime.now(),
+        links = listOf(),
+        images = listOf(),
+        isAutomatic = false,
+        isProduction = true)
 
     val description2 =
       object : AccountProviderDescriptionType {
-        override val id: URI
-          get() = URI.create("urn:2")
-        override val title: String
-          get() = "Title 2"
-        override val updated: DateTime
-          get() = DateTime.now()
-        override val links: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val images: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val isAutomatic: Boolean
-          get() = false
-        override val isProduction: Boolean
-          get() = true
+        override val metadata: AccountProviderDescriptionMetadata = descriptionMeta2
 
         override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
           return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
         }
       }
+
+    val descriptionMetaOld0 =
+      AccountProviderDescriptionMetadata(
+        id = URI.create("urn:0"),
+        title = "Title 0",
+        updated = DateTime.parse("1900-01-01T00:00:00Z"),
+        links = listOf(),
+        images = listOf(),
+        isAutomatic = false,
+        isProduction = true)
 
     val descriptionOld0 =
       object : AccountProviderDescriptionType {
-        override val id: URI
-          get() = URI.create("urn:0")
-        override val title: String
-          get() = "Title 0"
-        override val updated: DateTime
-          get() = DateTime.parse("1900-01-01T00:00:00Z")
-        override val links: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val images: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val isAutomatic: Boolean
-          get() = false
-        override val isProduction: Boolean
-          get() = true
+        override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld0
 
         override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
           return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
         }
       }
+
+    val descriptionMetaOld1 =
+      AccountProviderDescriptionMetadata(
+        id = URI.create("urn:1"),
+        title = "Title 1",
+        updated = DateTime.parse("1900-01-01T00:00:00Z"),
+        links = listOf(),
+        images = listOf(),
+        isAutomatic = false,
+        isProduction = true)
 
     val descriptionOld1 =
       object : AccountProviderDescriptionType {
-        override val id: URI
-          get() = URI.create("urn:1")
-        override val title: String
-          get() = "Title 1"
-        override val updated: DateTime
-          get() = DateTime.parse("1900-01-01T00:00:00Z")
-        override val links: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val images: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val isAutomatic: Boolean
-          get() = false
-        override val isProduction: Boolean
-          get() = true
+        override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld1
 
         override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
           return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
         }
       }
 
+    val descriptionMetaOld2 =
+      AccountProviderDescriptionMetadata(
+        id = URI.create("urn:2"),
+        title = "Title 2",
+        updated = DateTime.parse("1900-01-01T00:00:00Z"),
+        links = listOf(),
+        images = listOf(),
+        isAutomatic = false,
+        isProduction = true)
+
     val descriptionOld2 =
       object : AccountProviderDescriptionType {
-        override val id: URI
-          get() = URI.create("urn:2")
-        override val title: String
-          get() = "Title 2"
-        override val updated: DateTime
-          get() = DateTime.parse("1900-01-01T00:00:00Z")
-        override val links: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val images: List<AccountProviderDescriptionType.Link>
-          get() = listOf()
-        override val isAutomatic: Boolean
-          get() = false
-        override val isProduction: Boolean
-          get() = true
+        override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld2
 
         override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
           return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
@@ -410,9 +388,9 @@ abstract class AccountProviderDescriptionRegistryContract {
     override fun load(context: Context): SourceResult {
       return SourceResult.SourceSucceeded(
         mapOf(
-          Pair(descriptionOld0.id, descriptionOld0),
-          Pair(descriptionOld1.id, descriptionOld1),
-          Pair(descriptionOld2.id, descriptionOld2)))
+          Pair(descriptionOld0.metadata.id, descriptionOld0),
+          Pair(descriptionOld1.metadata.id, descriptionOld1),
+          Pair(descriptionOld2.metadata.id, descriptionOld2)))
     }
   }
 
@@ -420,9 +398,9 @@ abstract class AccountProviderDescriptionRegistryContract {
     override fun load(context: Context): SourceResult {
       return SourceResult.SourceSucceeded(
         mapOf(
-          Pair(description0.id, description0),
-          Pair(description1.id, description1),
-          Pair(description2.id, description2)))
+          Pair(description0.metadata.id, description0),
+          Pair(description1.metadata.id, description1),
+          Pair(description2.metadata.id, description2)))
     }
   }
 

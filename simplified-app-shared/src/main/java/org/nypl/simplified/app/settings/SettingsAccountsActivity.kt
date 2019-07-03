@@ -73,7 +73,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       itemTitleView: TextView,
       iconView: ImageView): Unit {
 
-      itemTitleView.text = accountProvider.title
+      itemTitleView.text = accountProvider.metadata.title
 
       ImageAccountIcons.loadAccountLogoIntoView(
         loader = picasso,
@@ -155,7 +155,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     profiles: ProfilesControllerType) {
     try {
       val selectedProvider = this.adapterAccounts.getItem(position)
-      this.openAccountSettings(profiles.profileAccountFindByProvider(selectedProvider.id).id)
+      this.openAccountSettings(profiles.profileAccountFindByProvider(selectedProvider.metadata.id).id)
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     } catch (e: AccountsDatabaseNonexistentException) {
@@ -180,9 +180,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
     val builder = AlertDialog.Builder(this)
     builder.setMessage(
-      this.resources.getString(R.string.settings_account_delete, accountProvider.title))
+      this.resources.getString(R.string.settings_account_delete, accountProvider.metadata.title))
     builder.setPositiveButton(R.string.settings_account_delete_button) { _, _ ->
-      profiles.profileAccountDeleteByProvider(accountProvider.id)
+      profiles.profileAccountDeleteByProvider(accountProvider.metadata.id)
     }
 
     builder.create().show()
@@ -518,8 +518,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
     availableAccountProviders.removeAll(usedAccountProviders)
     availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
-      val name0 = provider0.title.removePrefix("The ")
-      val name1 = provider1.title.removePrefix("The ")
+      val name0 = provider0.metadata.title.removePrefix("The ")
+      val name1 = provider1.metadata.title.removePrefix("The ")
       name0.toUpperCase().compareTo(name1.toUpperCase())
     })
 
@@ -548,7 +548,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   }
 
   private fun tryCreateAccount(accountProvider: AccountProviderDescriptionType): Unit {
-    Simplified.getProfilesController().profileAccountCreate(accountProvider.id)
+    Simplified.getProfilesController().profileAccountCreate(accountProvider.metadata.id)
     return Unit.unit()
   }
 

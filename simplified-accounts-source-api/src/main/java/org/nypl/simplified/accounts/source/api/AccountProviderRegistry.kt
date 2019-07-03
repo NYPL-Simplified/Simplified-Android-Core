@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.source.api
 
 import android.content.Context
+import com.google.common.base.Preconditions
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.*
@@ -80,16 +81,20 @@ class AccountProviderRegistry private constructor(
   }
 
   override fun updateProvider(accountProvider: AccountProviderType): AccountProviderType {
-    val existing = this.resolved[accountProvider.id]
+    val id = accountProvider.id
+    val existing = this.resolved[id]
     if (existing != null) {
+      Preconditions.checkState(
+        id == existing.id,
+        "ID $id must match existing id ${existing.id}")
       if (existing.updated.isAfter(accountProvider.updated)) {
         return existing
       }
     }
 
-    this.logger.debug("received updated version of resolved provider {}", accountProvider.id)
-    this.resolved[accountProvider.id] = accountProvider
-    this.eventsActual.send(Updated(accountProvider.id))
+    this.logger.debug("received updated version of resolved provider {}", id)
+    this.resolved[id] = accountProvider
+    this.eventsActual.send(Updated(id))
 
     this.updateDescription(accountProvider.toDescription())
     return accountProvider
@@ -98,16 +103,20 @@ class AccountProviderRegistry private constructor(
   override fun updateDescription(
     description: AccountProviderDescriptionType): AccountProviderDescriptionType {
 
-    val existing = this.descriptions[description.id]
+    val id = description.metadata.id
+    val existing = this.descriptions[id]
     if (existing != null) {
-      if (existing.updated.isAfter(description.updated)) {
+      Preconditions.checkState(
+        id == existing.metadata.id,
+        "ID $id must match existing id ${existing.metadata.id}")
+      if (existing.metadata.updated.isAfter(description.metadata.updated)) {
         return existing
       }
     }
 
-    this.logger.debug("received updated version of description {}", description.id)
-    this.descriptions[description.id] = description
-    this.eventsActual.send(Updated(description.id))
+    this.logger.debug("received updated version of description {}", id)
+    this.descriptions[id] = description
+    this.eventsActual.send(Updated(id))
     return description
   }
 

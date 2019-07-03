@@ -136,6 +136,7 @@ import kotlin.jvm.functions.Function2;
 public final class Simplified extends MultiDexApplication {
 
   private static final Logger LOG = LoggerFactory.getLogger(Simplified.class);
+
   private static volatile Simplified INSTANCE;
 
   private ListeningScheduledExecutorService exec_catalog_feeds;

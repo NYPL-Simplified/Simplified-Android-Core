@@ -1,7 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionType.Link
+
 import java.net.URI
 import javax.annotation.concurrent.ThreadSafe
 
@@ -40,9 +40,9 @@ data class AccountProviderImmutable(
 ) : AccountProviderType {
 
   override fun toDescription(): AccountProviderDescriptionType {
-    val imageLinks = mutableListOf<Link>()
+    val imageLinks = mutableListOf<AccountProviderDescriptionMetadata.Link>()
     this.logo?.let { uri ->
-      imageLinks.add(Link(
+      imageLinks.add(AccountProviderDescriptionMetadata.Link(
         href = uri,
         type = null,
         templated = false,
@@ -50,25 +50,24 @@ data class AccountProviderImmutable(
     }
 
     // XXX: TODO: Reconstruct links from above fields
-    val links = mutableListOf<Link>()
+    val links =
+      mutableListOf<AccountProviderDescriptionMetadata.Link>()
 
-    return object: AccountProviderDescriptionType {
-      override val id: URI
-        get() = this@AccountProviderImmutable.id
-      override val title: String
-        get() = this@AccountProviderImmutable.displayName
-      override val updated: DateTime
-        get() = this@AccountProviderImmutable.updated
-      override val links: List<Link>
-        get() = links.toList()
-      override val images: List<Link>
-        get() = imageLinks.toList()
-      override val isAutomatic: Boolean
-        get() = this@AccountProviderImmutable.addAutomatically
-      override val isProduction: Boolean
-        get() = this@AccountProviderImmutable.isProduction
+    val meta =
+      AccountProviderDescriptionMetadata(
+        id = this@AccountProviderImmutable.id,
+        title = this@AccountProviderImmutable.displayName,
+        updated = this@AccountProviderImmutable.updated,
+        links = links.toList(),
+        images = imageLinks.toList(),
+        isAutomatic = this@AccountProviderImmutable.addAutomatically,
+        isProduction = this@AccountProviderImmutable.isProduction)
+
+    return object : AccountProviderDescriptionType {
+      override val metadata: AccountProviderDescriptionMetadata = meta
+
       override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-        onProgress.invoke(this.id, "")
+        onProgress.invoke(this.metadata.id, "")
         return AccountProviderResolutionResult(this@AccountProviderImmutable, listOf())
       }
     }
