@@ -21,7 +21,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.joda.time.LocalDate;
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType;
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
@@ -160,7 +160,7 @@ public final class ProfileCreationActivity extends SimplifiedActivity implements
     LOG.debug("gender: {}", gender_text);
     LOG.debug("date: {}", date_value);
 
-    final AccountProviderDescriptionRegistryType providers = Simplified.getAccountProviders();
+    final AccountProviderRegistryType providers = Simplified.getAccountProviders();
     final ProfilesControllerType profiles = Simplified.getProfilesController();
     final ListeningExecutorService exec = Simplified.getBackgroundTaskExecutor();
 

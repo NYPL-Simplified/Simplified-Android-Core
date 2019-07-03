@@ -19,13 +19,12 @@ import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistry
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistry
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.BundledContentResolver
 import org.nypl.simplified.app.login.LoginDialog
@@ -75,7 +74,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
   private lateinit var analyticsLogger: AnalyticsType
   private lateinit var accountCredentials: AccountAuthenticationCredentialsStoreType
   private lateinit var accountBundledCredentials: AccountBundledCredentialsType
-  private lateinit var accountProviders: AccountProviderDescriptionRegistryType
+  private lateinit var accountProviders: AccountProviderRegistryType
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var feedTransport: OPDSFeedTransportType<OptionType<HTTPAuthType>>
@@ -147,7 +146,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
       MockAccountProviders.fakeProvider("urn:fake:0")
 
     this.accountProviders =
-      AccountProviderDescriptionRegistry.createFromServiceLoader(this, defaultProvider)
+      AccountProviderRegistry.createFromServiceLoader(this, defaultProvider)
 
     this.accountBundledCredentials =
       AccountBundledCredentialsEmpty.getInstance()
@@ -168,7 +167,6 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         this.accountBundledCredentials,
         this.accountCredentials,
         AccountsDatabases,
-        this::onAccountResolutionStatus,
         profilesDir)
 
     this.analyticsLogger =

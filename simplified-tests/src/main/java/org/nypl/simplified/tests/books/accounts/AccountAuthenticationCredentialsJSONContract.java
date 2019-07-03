@@ -17,7 +17,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationProvider;
 import org.nypl.simplified.accounts.api.AccountBarcode;
 import org.nypl.simplified.accounts.api.AccountPIN;
 import org.nypl.simplified.accounts.api.AccountPatron;
-import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsJSON;
+import org.nypl.simplified.accounts.json.AccountAuthenticationCredentialsJSON;
 import org.nypl.simplified.http.core.HTTPOAuthToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

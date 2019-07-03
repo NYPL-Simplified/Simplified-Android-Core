@@ -19,7 +19,7 @@ import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -86,7 +86,7 @@ class Controller private constructor(
   private val accountEvents: ObservableType<AccountEvent>,
   private val accountLoginStringResources: AccountLoginStringResourcesType,
   private val accountLogoutStringResources: AccountLogoutStringResourcesType,
-  private val accountProviders: AccountProviderDescriptionRegistryType,
+  private val accountProviders: AccountProviderRegistryType,
   private val adobeDrm: AdobeAdeptExecutorType?,
   private val analytics: AnalyticsType,
   private val bookRegistry: BookRegistryType,
@@ -274,7 +274,11 @@ class Controller private constructor(
 
   @Throws(ProfileNoneCurrentException::class, ProfileNonexistentAccountProviderException::class)
   override fun profileCurrentlyUsedAccountProviders(): ImmutableList<AccountProviderType> {
-    throw UnimplementedCodeException()
+    return ImmutableList.sortedCopyOf(
+      this.profileCurrent()
+        .accountsByProvider()
+        .values
+        .map { account -> account.provider })
   }
 
   override fun profileAccountLogout(account: AccountID): FluentFuture<AccountLogoutTaskResult> {
@@ -439,7 +443,7 @@ class Controller private constructor(
       accountEvents: ObservableType<AccountEvent>,
       accountLoginStringResources: AccountLoginStringResourcesType,
       accountLogoutStringResources: AccountLogoutStringResourcesType,
-      accountProviders: AccountProviderDescriptionRegistryType,
+      accountProviders: AccountProviderRegistryType,
       adobeDrm: AdobeAdeptExecutorType?,
       analytics: AnalyticsType,
       bookBorrowStrings: BookBorrowStringResourcesType,

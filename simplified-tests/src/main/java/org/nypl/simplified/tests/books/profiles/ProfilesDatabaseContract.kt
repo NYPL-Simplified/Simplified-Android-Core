@@ -112,7 +112,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
   }
 
@@ -137,7 +136,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
   }
 
@@ -164,7 +162,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
   }
 
@@ -193,7 +190,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
   }
 
@@ -222,7 +218,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
   }
 
@@ -243,7 +238,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     Assert.assertEquals(0, db.profiles().size.toLong())
@@ -271,7 +265,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc =
@@ -354,7 +347,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc =
@@ -371,7 +363,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val pr0 = db1.profiles()[p0.id]!!
@@ -408,7 +399,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -442,7 +432,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -471,7 +460,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -498,7 +486,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -528,7 +515,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -561,7 +547,6 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        this::onAccountResolution,
         fileProfiles)
 
     Assert.assertEquals(1L, db0.profiles().size.toLong())
@@ -592,7 +577,6 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        this::onAccountResolution,
         fileProfiles)
 
     this.expected.expect(org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException::class.java)
@@ -617,7 +601,6 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        this::onAccountResolution,
         fileProfiles)
 
     val acc0 =
@@ -651,7 +634,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc0 =
@@ -683,7 +665,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc0 =
@@ -713,7 +694,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc0 =
@@ -747,7 +727,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     val acc0 =
@@ -779,7 +758,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
 
     this.expected.expect(ProfileAnonymousDisabledException::class.java)
@@ -811,7 +789,6 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        this::onAccountResolution,
         fileProfiles)
 
     val acc =
@@ -829,7 +806,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
   }
 
@@ -857,7 +833,6 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        this::onAccountResolution,
         fileProfiles)
 
     val p0 =
@@ -872,7 +847,6 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      this::onAccountResolution,
       fileProfiles)
   }
 
@@ -899,7 +873,6 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        this::onAccountResolution,
         fileProfiles)
 
     val acc =
@@ -917,7 +890,6 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        this::onAccountResolution,
         fileProfiles)
 
     val p1 = db1.anonymousProfile()
@@ -947,7 +919,6 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        this::onAccountResolution,
         fileProfiles)
 
     val acc =

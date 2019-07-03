@@ -1,10 +1,10 @@
 package org.nypl.simplified.books.controller
 
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventCreation.*
 import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.AccountCreateErrorDetails
@@ -22,7 +22,7 @@ import java.util.concurrent.Callable
 class ProfileAccountCreateTask(
   private val accountEvents: ObservableType<AccountEvent>,
   private val accountProviderID: URI,
-  private val accountProviders: AccountProviderDescriptionRegistryType,
+  private val accountProviders: AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
   private val strings: ProfileAccountCreationStringResourcesType
 ) : Callable<AccountCreateTaskResult> {
@@ -34,8 +34,8 @@ class ProfileAccountCreateTask(
     return try {
       this.logger.debug("creating account for provider {}", this.accountProviderID)
       val accountProvider = this.resolveAccountProvider()
-      this.createAccount(accountProvider)
-
+      val account = this.createAccount(accountProvider)
+      this.publishSuccessEvent(account)
       AccountCreateTaskResult(this.taskRecorder.finish())
     } catch (e: Throwable) {
       this.logger.error("account creation failed: ", e)
@@ -55,10 +55,10 @@ class ProfileAccountCreateTask(
     }
   }
 
-  private fun createAccount(accountProvider: AccountProviderType) {
+  private fun createAccount(accountProvider: AccountProviderType): AccountType {
     this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.creatingAccount))
     
-    try {
+    return try {
       val profile = this.profiles.currentProfileUnsafe()
       profile.createAccount(accountProvider)
     } catch (e: Exception) {
@@ -67,6 +67,9 @@ class ProfileAccountCreateTask(
       throw e
     }
   }
+
+  private fun publishSuccessEvent(account: AccountType) =
+    this.accountEvents.send(AccountEventCreationSucceeded(account.id))
 
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
     this.accountEvents.send(AccountEventCreationFailed(step.resolution))

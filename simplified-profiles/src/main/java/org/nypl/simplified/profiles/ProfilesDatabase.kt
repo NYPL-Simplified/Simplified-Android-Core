@@ -11,7 +11,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
 import org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException
@@ -27,7 +27,6 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.net.URI
 import java.util.Collections
 import java.util.SortedMap
 import java.util.UUID
@@ -41,7 +40,7 @@ import javax.annotation.concurrent.GuardedBy
 internal class ProfilesDatabase internal constructor(
   private val accountBundledCredentials: AccountBundledCredentialsType,
   private val accountEvents: ObservableType<AccountEvent>,
-  private val accountProviders: AccountProviderDescriptionRegistryType,
+  private val accountProviders: AccountProviderRegistryType,
   private val accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
   private val accountsDatabases: AccountsDatabaseFactoryType,
   private val anonymousProfileEnabled: ProfilesDatabaseType.AnonymousProfileEnabled,
@@ -116,10 +115,6 @@ internal class ProfilesDatabase internal constructor(
       !this.profiles.containsKey(next),
       "Profile ID %s cannot have been used", next)
 
-    val accountResolutionListener: AccountProviderResolutionListenerType = { id, status ->
-      this.logger.debug("resolving account: {}: {}", id, status)
-    }
-
     val profile =
       ProfilesDatabases.createProfileActual(
         this.context,
@@ -129,7 +124,6 @@ internal class ProfilesDatabase internal constructor(
         this.accountsDatabases,
         this.accountCredentialsStore,
         accountProvider,
-        accountResolutionListener,
         this.directory,
         displayName,
         next)

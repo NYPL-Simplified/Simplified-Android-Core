@@ -6,15 +6,15 @@ import java.net.URI
  * The type of account provider description registry events.
  */
 
-sealed class AccountProviderDescriptionRegistryEvent {
+sealed class AccountProviderRegistryEvent {
 
   /**
-   * An account provider description was updated.
+   * An account provider was updated.
    */
 
   data class Updated(
     val id: URI)
-    : AccountProviderDescriptionRegistryEvent()
+    : AccountProviderRegistryEvent()
 
   /**
    * An account provider source failed.
@@ -23,6 +23,6 @@ sealed class AccountProviderDescriptionRegistryEvent {
   data class SourceFailed(
     val clazz: Class<*>,
     val exception: Exception)
-    : AccountProviderDescriptionRegistryEvent()
+    : AccountProviderRegistryEvent()
 
 }

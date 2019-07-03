@@ -5,7 +5,6 @@ import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.FunctionType
-import com.io7m.junreachable.UnimplementedCodeException
 
 import net.jcip.annotations.GuardedBy
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
@@ -25,8 +24,9 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountExce
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
-import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.json.AccountDescriptionJSON
+import org.nypl.simplified.accounts.json.AccountProvidersJSON
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
@@ -124,7 +124,8 @@ class AccountsDatabase private constructor(
         AccountPreferences(false)
 
       val accountDescription =
-        AccountDescription.builder(accountProvider.id, preferences).build()
+        AccountDescription.builder(accountProvider, preferences)
+          .build()
 
       writeDescription(
         accountLock = accountLock,
@@ -360,9 +361,8 @@ class AccountsDatabase private constructor(
       context: Context,
       accountEvents: ObservableType<AccountEvent>,
       bookDatabases: BookDatabaseFactoryType,
-      accountProviders: AccountProviderDescriptionRegistryType,
+      accountProviders: AccountProviderRegistryType,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
-      accountResolutionReceiver: AccountProviderResolutionListenerType,
       directory: File): AccountsDatabaseType {
 
       LOG.debug("opening account database: {}", directory)
@@ -386,7 +386,6 @@ class AccountsDatabase private constructor(
         accountCredentials = accountCredentials,
         accountEvents = accountEvents,
         accountProviders = accountProviders,
-        accountResolutionReceiver = accountResolutionReceiver,
         bookDatabases = bookDatabases,
         context = context,
         directory = directory,
@@ -417,8 +416,7 @@ class AccountsDatabase private constructor(
       accountsByProvider: SortedMap<URI, Account>,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       accountEvents: ObservableType<AccountEvent>,
-      accountProviders: AccountProviderDescriptionRegistryType,
-      accountResolutionReceiver: AccountProviderResolutionListenerType,
+      accountProviders: AccountProviderRegistryType,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       directory: File,
@@ -436,7 +434,6 @@ class AccountsDatabase private constructor(
               accountEvents = accountEvents,
               accountIdName = accountIdName,
               accountProviders = accountProviders,
-              accountResolutionStatusReceiver = accountResolutionReceiver,
               bookDatabases = bookDatabases,
               context = context,
               credentialsStore = accountCredentials,
@@ -549,8 +546,7 @@ class AccountsDatabase private constructor(
     private fun openOneAccount(
       accountEvents: ObservableType<AccountEvent>,
       accountIdName: String,
-      accountProviders: AccountProviderDescriptionRegistryType,
-      accountResolutionStatusReceiver: AccountProviderResolutionListenerType,
+      accountProviders: AccountProviderRegistryType,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       credentialsStore: AccountAuthenticationCredentialsStoreType,
@@ -560,7 +556,6 @@ class AccountsDatabase private constructor(
 
       val accountId =
         openOneAccountDirectory(errors, directory, accountIdName) ?: return null
-
       val accountDir =
         File(directory, accountId.toString())
       val accountFile =
@@ -573,30 +568,8 @@ class AccountsDatabase private constructor(
           bookDatabases.openDatabase(context, accountId, booksDir)
         val accountDescription =
           AccountDescriptionJSON.deserializeFromFile(jom, accountFile)
-
-        /*
-         * Find the account provider that created the account. If the account provider
-         * does not exist, the account is not opened.
-         */
-
-        val accountProviderDescription =
-          accountProviders.findAccountProviderDescription(accountDescription.provider())
-
-        if (accountProviderDescription == null) {
-          LOG.debug("account provider {} is not present, ignoring account",
-            accountDescription.provider())
-          return null
-        }
-
-        val accountProviderResolution =
-          accountProviderDescription.resolve(accountResolutionStatusReceiver)
-
-        if (accountProviderResolution.failed) {
-          throw UnimplementedCodeException()
-        }
-
         val accountProvider =
-          accountProviderResolution.result!!
+          accountDescription.provider()
         val authentication =
           accountProvider.authentication
         val credentials =
@@ -619,14 +592,11 @@ class AccountsDatabase private constructor(
           credentials = credentialsStore,
           accountLoginState = loginState)
 
-      } catch (e: IOException) {
-        errors.add(IOException("Could not parse account: $accountFile", e))
-        return null
-      } catch (e: IllegalArgumentException) {
+      } catch (e: Exception) {
         LOG.error("could not open account: {}: ", accountFile, e)
-        return null
-      } catch (e: BookDatabaseException) {
-        errors.add(e)
+        errors.add(IOException("Could not parse account: $accountFile", e))
+        LOG.debug("deleting {}", accountDir)
+        DirectoryUtilities.directoryDelete(accountDir)
         return null
       }
     }

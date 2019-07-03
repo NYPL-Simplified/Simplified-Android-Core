@@ -102,7 +102,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
   }
 
@@ -142,7 +141,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
   }
 
@@ -168,7 +166,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
   }
 
@@ -197,7 +194,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
   }
 
@@ -218,7 +214,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
 
     Assert.assertEquals(0, db.accounts().size.toLong())
@@ -245,7 +240,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       accountProviders,
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
 
     val provider0 =
@@ -297,7 +291,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
 
     val provider0 =
@@ -314,7 +307,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
 
     val acr0 = db1.accounts()[acc0.id]!!
@@ -324,8 +316,8 @@ abstract class AccountsDatabaseContract {
     Assert.assertEquals(acc1.id, acr1.id)
     Assert.assertEquals(acc0.directory, acr0.directory)
     Assert.assertEquals(acc1.directory, acr1.directory)
-    Assert.assertEquals(acc0.provider, acr0.provider)
-    Assert.assertEquals(acc1.provider, acr1.provider)
+    Assert.assertEquals(acc0.provider.id, acr0.provider.id)
+    Assert.assertEquals(acc1.provider.id, acr1.provider.id)
   }
 
   @Test
@@ -345,7 +337,6 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
-      this::onAccountResolutionStatus,
       f_acc)
 
     val provider0 =

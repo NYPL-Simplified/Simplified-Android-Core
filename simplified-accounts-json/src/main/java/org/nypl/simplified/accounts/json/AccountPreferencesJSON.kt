@@ -1,4 +1,4 @@
-package org.nypl.simplified.accounts.database
+package org.nypl.simplified.accounts.json
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -41,7 +41,7 @@ object AccountPreferencesJSON {
 
   @Throws(JSONParseException::class)
   fun deserializeFromJSON(node: JsonNode): org.nypl.simplified.accounts.api.AccountPreferences {
-    return AccountPreferencesJSON.deserializeFromJSON(JSONParserUtilities.checkObject(null, node))
+    return deserializeFromJSON(JSONParserUtilities.checkObject(null, node))
   }
 
 }

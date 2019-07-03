@@ -2,6 +2,7 @@ package org.nypl.simplified.books.controller
 
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectSucceeded
@@ -33,6 +34,9 @@ class ProfileAccountDeleteTask(
   private fun publishProgressEvent(step: TaskStep<AccountDeleteErrorDetails>) =
     this.accountEvents.send(AccountEventDeletion.AccountEventDeletionInProgress(step.description))
 
+  private fun publishSuccessEvent(accountThen: AccountType) =
+    this.accountEvents.send(AccountEventDeletion.AccountEventDeletionSucceeded(accountThen.id))
+
   override fun call(): AccountDeleteTaskResult {
     return try {
       this.logger.debug("deleting account for provider {}", this.accountProviderID)
@@ -45,10 +49,11 @@ class ProfileAccountDeleteTask(
       profile.deleteAccountByProvider(this.accountProviderID)
       val accountNow = profile.accountCurrent()
 
-      if (!accountNow.id.equals(accountThen.id)) {
+      if (accountNow.id != accountThen.id) {
         this.profileEvents.send(ProfileAccountSelectSucceeded.of(accountThen.id, accountNow.id))
       }
 
+      this.publishSuccessEvent(accountThen)
       AccountDeleteTaskResult(this.taskRecorder.finish())
     } catch (e: AccountsDatabaseLastAccountException) {
       this.publishFailureEvent(

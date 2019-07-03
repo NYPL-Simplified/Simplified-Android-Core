@@ -14,7 +14,7 @@ import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -109,7 +109,7 @@ abstract class ProfilesControllerContract {
 
   private fun controller(
     profiles: ProfilesDatabaseType,
-    accountProviders: AccountProviderDescriptionRegistryType
+    accountProviders: AccountProviderRegistryType
   ): ProfilesControllerType {
 
     val parser =
@@ -386,7 +386,6 @@ abstract class ProfilesControllerContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialsStore,
       AccountsDatabases,
-      this::onAccountResolution,
       dir_profiles)
   }
 

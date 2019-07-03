@@ -1,9 +1,8 @@
-package org.nypl.simplified.accounts.database;
+package org.nypl.simplified.accounts.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.nypl.simplified.accounts.api.AccountDescription;
@@ -16,6 +15,7 @@ import org.nypl.simplified.json.core.JSONSerializerUtilities;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Functions to serialize and deserialize account descriptions to/from JSON.
@@ -40,8 +40,8 @@ public final class AccountDescriptionJSON {
     final ObjectMapper jom,
     final File file)
     throws IOException {
-    NullCheck.notNull(jom, "Object mapper");
-    NullCheck.notNull(file, "File");
+    Objects.requireNonNull(jom, "Object mapper");
+    Objects.requireNonNull(file, "File");
     return deserializeFromText(jom, FileUtilities.fileReadUTF8(file));
   }
 
@@ -57,8 +57,8 @@ public final class AccountDescriptionJSON {
   public static AccountDescription deserializeFromText(
     final ObjectMapper jom,
     final String text) throws IOException {
-    NullCheck.notNull(jom, "Object mapper");
-    NullCheck.notNull(text, "Text");
+    Objects.requireNonNull(jom, "Object mapper");
+    Objects.requireNonNull(text, "Text");
     return deserializeFromJSON(jom, jom.readTree(text));
   }
 
@@ -75,8 +75,8 @@ public final class AccountDescriptionJSON {
     final ObjectMapper jom,
     final JsonNode node)
     throws JSONParseException {
-    NullCheck.notNull(jom, "Object mapper");
-    NullCheck.notNull(node, "JSON");
+    Objects.requireNonNull(jom, "Object mapper");
+    Objects.requireNonNull(node, "JSON");
 
     final ObjectNode obj =
       JSONParserUtilities.checkObject(null, node);
@@ -91,7 +91,7 @@ public final class AccountDescriptionJSON {
 
     final AccountDescription.Builder builder =
       AccountDescription.builder(
-        JSONParserUtilities.getURI(obj, "provider"),
+        AccountProvidersJSON.INSTANCE.deserializeFromJSON(JSONParserUtilities.getObject(obj, "provider")),
         preferences);
 
     return builder.build();
@@ -107,14 +107,14 @@ public final class AccountDescriptionJSON {
   public static ObjectNode serializeToJSON(
     final ObjectMapper jom,
     final AccountDescription description) {
-    NullCheck.notNull(jom, "Object mapper");
-    NullCheck.notNull(description, "Description");
+    Objects.requireNonNull(jom, "Object mapper");
+    Objects.requireNonNull(description, "Description");
 
     final ObjectNode jo = jom.createObjectNode();
-    jo.put(
+    jo.set(
       "provider",
-      description.provider().toString());
-    jo.put(
+      AccountProvidersJSON.INSTANCE.serializeToJSON(description.provider()));
+    jo.set(
       "preferences",
       AccountPreferencesJSON.INSTANCE.serializeToJSON(jom, description.preferences()));
 

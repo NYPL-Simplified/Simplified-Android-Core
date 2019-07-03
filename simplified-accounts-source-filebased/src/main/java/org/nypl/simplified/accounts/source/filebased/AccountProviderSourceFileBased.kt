@@ -2,6 +2,7 @@ package org.nypl.simplified.accounts.source.filebased
 
 import android.content.Context
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.json.AccountProvidersJSON
 import org.nypl.simplified.accounts.source.api.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.SourceResult
 import org.slf4j.LoggerFactory
@@ -36,8 +37,7 @@ class AccountProviderSourceFileBased(
     return try {
       this.logger.debug("loading providers from file")
       this.getFile.invoke(context).use { stream ->
-        val newResult =
-          AccountProvidersJSON.deserializeFromStream(stream).providers()
+        val newResult = AccountProvidersJSON.deserializeCollectionFromStream(stream)
         this.cache = newResult
         SourceResult.SourceSucceeded(mapResult(newResult))
       }

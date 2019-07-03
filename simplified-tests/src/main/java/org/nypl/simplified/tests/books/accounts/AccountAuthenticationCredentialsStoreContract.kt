@@ -6,6 +6,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountBarcode
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore
+import org.nypl.simplified.accounts.json.AccountAuthenticationCredentialsJSON
 import org.nypl.simplified.json.core.JSONParseException
 import org.slf4j.Logger
 import java.io.File
@@ -37,7 +43,7 @@ abstract class AccountAuthenticationCredentialsStoreContract {
   @Test
   fun testLoadEmpty() {
     val store =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+      AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
     Assert.assertEquals(0, store.size())
   }
@@ -45,20 +51,20 @@ abstract class AccountAuthenticationCredentialsStoreContract {
   @Test
   fun testLoadAfterSave() {
     val store0 =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+      AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
-    val accountID = org.nypl.simplified.accounts.api.AccountID.generate()
+    val accountID = AccountID.generate()
     val credentials =
-      org.nypl.simplified.accounts.api.AccountAuthenticationCredentials.builder(
-        org.nypl.simplified.accounts.api.AccountPIN.create("abcd"),
-        org.nypl.simplified.accounts.api.AccountBarcode.create("1234"))
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"),
+        AccountBarcode.create("1234"))
         .build()
 
     store0.put(accountID, credentials)
     Assert.assertEquals(credentials, store0.get(accountID))
 
     val store1 =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+      AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
     Assert.assertEquals(credentials, store1.get(accountID))
   }
@@ -76,7 +82,7 @@ abstract class AccountAuthenticationCredentialsStoreContract {
       }
 
     val store =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+      AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
     Assert.assertEquals(0, store.size())
   }
@@ -95,7 +101,7 @@ abstract class AccountAuthenticationCredentialsStoreContract {
       }
 
     this.expectedException.expect(JSONParseException::class.java)
-    org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+    AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
   }
 
   @Test
@@ -117,10 +123,10 @@ abstract class AccountAuthenticationCredentialsStoreContract {
      */
 
     val cred1 =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsJSON.serializeToJSON(
-        org.nypl.simplified.accounts.api.AccountAuthenticationCredentials.builder(
-          org.nypl.simplified.accounts.api.AccountPIN.create("abcd"),
-          org.nypl.simplified.accounts.api.AccountBarcode.create("1234"))
+      AccountAuthenticationCredentialsJSON.serializeToJSON(
+        AccountAuthenticationCredentials.builder(
+          AccountPIN.create("abcd"),
+          AccountBarcode.create("1234"))
           .build())
     cred1.remove("username")
     creds.set("8e058c17-6c59-490c-92c5-d950463c8632", cred1)
@@ -130,10 +136,10 @@ abstract class AccountAuthenticationCredentialsStoreContract {
      */
 
     val cred2 =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsJSON.serializeToJSON(
-        org.nypl.simplified.accounts.api.AccountAuthenticationCredentials.builder(
-          org.nypl.simplified.accounts.api.AccountPIN.create("abcd"),
-          org.nypl.simplified.accounts.api.AccountBarcode.create("1234"))
+      AccountAuthenticationCredentialsJSON.serializeToJSON(
+        AccountAuthenticationCredentials.builder(
+          AccountPIN.create("abcd"),
+          AccountBarcode.create("1234"))
           .build())
     creds.set("not a uuid", cred2)
 
@@ -142,10 +148,10 @@ abstract class AccountAuthenticationCredentialsStoreContract {
      */
 
     val cred3 =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsJSON.serializeToJSON(
-        org.nypl.simplified.accounts.api.AccountAuthenticationCredentials.builder(
-          org.nypl.simplified.accounts.api.AccountPIN.create("abcd"),
-          org.nypl.simplified.accounts.api.AccountBarcode.create("1234"))
+      AccountAuthenticationCredentialsJSON.serializeToJSON(
+        AccountAuthenticationCredentials.builder(
+          AccountPIN.create("abcd"),
+          AccountBarcode.create("1234"))
           .build())
     creds.set("37452e48-2235-4098-ad67-e72bce45ccb6", cred3)
 
@@ -156,22 +162,22 @@ abstract class AccountAuthenticationCredentialsStoreContract {
       }
 
     val store =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+      AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
     Assert.assertEquals(1, store.size())
-    Assert.assertNotNull(store.get(org.nypl.simplified.accounts.api.AccountID(UUID.fromString("37452e48-2235-4098-ad67-e72bce45ccb6"))))
+    Assert.assertNotNull(store.get(AccountID(UUID.fromString("37452e48-2235-4098-ad67-e72bce45ccb6"))))
   }
 
   @Test
   fun testPutRemove() {
     val store =
-      org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+      AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
-    val accountID = org.nypl.simplified.accounts.api.AccountID.generate()
+    val accountID = AccountID.generate()
     val credentials =
-      org.nypl.simplified.accounts.api.AccountAuthenticationCredentials.builder(
-        org.nypl.simplified.accounts.api.AccountPIN.create("abcd"),
-        org.nypl.simplified.accounts.api.AccountBarcode.create("1234"))
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"),
+        AccountBarcode.create("1234"))
         .build()
 
     store.put(accountID, credentials)

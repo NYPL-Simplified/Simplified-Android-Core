@@ -32,12 +32,13 @@ import org.nypl.simplified.accounts.api.AccountEvent;
 import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore;
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty;
-import org.nypl.simplified.accounts.database.AccountBundledCredentialsJSON;
 import org.nypl.simplified.accounts.database.AccountsDatabases;
 import org.nypl.simplified.accounts.database.api.AccountType;
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistry;
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryException;
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType;
+import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON;
+import org.nypl.simplified.accounts.json.AccountProvidersJSON;
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistry;
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryException;
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType;
 import org.nypl.simplified.analytics.api.Analytics;
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration;
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
@@ -165,7 +166,7 @@ public final class Simplified extends MultiDexApplication {
   private OPDSFeedTransportType<OptionType<HTTPAuthType>> feed_transport;
   private FeedLoaderType feed_loader;
   private ProfilesDatabaseType profiles;
-  private AccountProviderDescriptionRegistryType account_providers;
+  private AccountProviderRegistryType account_providers;
   private NetworkConnectivity network_connectivity;
   private BookRegistryType book_registry;
   private Controller book_controller;
@@ -245,7 +246,7 @@ public final class Simplified extends MultiDexApplication {
    * @return The account providers
    */
 
-  public static AccountProviderDescriptionRegistryType getAccountProviders() {
+  public static AccountProviderRegistryType getAccountProviders() {
     final Simplified i = Simplified.checkInitialized();
     return i.account_providers;
   }
@@ -489,7 +490,7 @@ public final class Simplified extends MultiDexApplication {
     final Resources resources,
     final ObservableType<AccountEvent> account_events,
     final ObservableType<ProfileEvent> profile_events,
-    final AccountProviderDescriptionRegistryType account_providers,
+    final AccountProviderRegistryType account_providers,
     final AccountBundledCredentialsType account_bundled_credentials,
     final AccountAuthenticationCredentialsStoreType account_credentials_store,
     final File directory)
@@ -515,7 +516,6 @@ public final class Simplified extends MultiDexApplication {
         account_bundled_credentials,
         account_credentials_store,
         AccountsDatabases.INSTANCE,
-        resolutionListener,
         directory);
     }
 
@@ -527,7 +527,6 @@ public final class Simplified extends MultiDexApplication {
       account_bundled_credentials,
       account_credentials_store,
       AccountsDatabases.INSTANCE,
-      resolutionListener,
       directory);
   }
 
@@ -704,13 +703,15 @@ public final class Simplified extends MultiDexApplication {
         loadDefaultAccountProvider(this);
 
       this.account_providers =
-        AccountProviderDescriptionRegistry.Companion.createFromServiceLoader(
+        AccountProviderRegistry.Companion.createFromServiceLoader(
           this, defaultAccountProvider);
       for (final URI id : this.account_providers.accountProviderDescriptions().keySet()) {
         LOG.debug("loaded account provider: {}", id);
       }
-    } catch (final AccountProviderDescriptionRegistryException e) {
+    } catch (final AccountProviderRegistryException e) {
       throw new IllegalStateException("Could not initialize account providers", e);
+    } catch (final IOException e) {
+      throw new IllegalStateException("Could not initialize default account provider", e);
     }
 
     try {
@@ -858,8 +859,11 @@ public final class Simplified extends MultiDexApplication {
     Simplified.INSTANCE = this;
   }
 
-  private AccountProviderType loadDefaultAccountProvider(final Context context) {
-    throw new UnimplementedCodeException();
+  private AccountProviderType loadDefaultAccountProvider(final Context context) throws IOException {
+    final AssetManager asset_manager = context.getAssets();
+    try (final InputStream stream = asset_manager.open("account_provider_default.json")) {
+      return AccountProvidersJSON.INSTANCE.deserializeOneFromStream(stream);
+    }
   }
 
   private OptionType<ThemeValue> loadOptionalBrandingThemeOverride() {

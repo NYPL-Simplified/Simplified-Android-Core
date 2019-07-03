@@ -42,6 +42,8 @@ dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-accounts-database")
   api project(":simplified-accounts-database-api")
+  api project(":simplified-accounts-json")
+  api project(":simplified-accounts-source-filebased")
   api project(":simplified-analytics-api")
   api project(":simplified-books-api")
   api project(":simplified-books-bundled-api")

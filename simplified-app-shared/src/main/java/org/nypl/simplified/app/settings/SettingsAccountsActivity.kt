@@ -18,13 +18,16 @@ import android.widget.ListView
 import android.widget.TextView
 import com.google.common.collect.ImmutableList
 import com.io7m.jfunctional.Unit
-import com.io7m.junreachable.UnimplementedCodeException
 import com.squareup.picasso.Picasso
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
-import org.nypl.simplified.accounts.api.AccountEventCreation.*
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationInProgress
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationSucceeded
 import org.nypl.simplified.accounts.api.AccountEventDeletion
-import org.nypl.simplified.accounts.api.AccountEventDeletion.*
+import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletionFailed
+import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletionInProgress
+import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletionSucceeded
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
@@ -44,7 +47,6 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
-import java.net.URI
 import java.util.ArrayList
 
 /**
@@ -215,6 +217,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       val itemSubtitleView =
         containerView.findViewById<TextView>(android.R.id.text2)
 
+      itemSubtitleView.visibility = View.INVISIBLE
+
       configureAccountListCellViews(
         picasso = this.picasso,
         accountProvider = accountProvider,
@@ -240,10 +244,15 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
       val titleText =
         currentAccountView.findViewById<TextView>(android.R.id.text1)
+      val subtitleText =
+        currentAccountView.findViewById<TextView>(android.R.id.text2)
+
       val iconView =
         currentAccountView.findViewById<ImageView>(R.id.cellIcon)
       val localImageLoader =
         Simplified.getLocalImageLoader()
+
+      subtitleText.visibility = View.INVISIBLE
 
       configureAccountListCellViews(
         picasso = localImageLoader,
@@ -424,6 +433,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       this.determineAvailableAccountProviderDescriptions()
 
     val dialog = Dialog(this)
+    dialog.setTitle(R.string.settings_accounts_select_library)
     dialog.setContentView(R.layout.accounts_picker)
 
     val adapter =
@@ -441,9 +451,54 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       adapter.notifyDataSetChanged()
       this.tryCreateAccount(accountProviderDescription)
       dialog.dismiss()
+      this.showProgressDialog()
       Unit.unit()
     }
 
+    dialog.show()
+  }
+
+  /**
+   * Show a progress dialog when account creation begins. For file-based accounts, this
+   * dialog will be dismissed so quickly that it's actually not visible. For accounts that
+   * need to perform network operations, this will obviously be a lot slower.
+   */
+
+  private fun showProgressDialog() {
+    val dialog = Dialog(this)
+    dialog.setContentView(R.layout.settings_account_progress)
+
+    val textView =
+      dialog.findViewById<TextView>(R.id.settingsAccountProgressText)
+
+    textView.text = ""
+
+    /*
+     * Subscribe to account creation events so that the progress bar can be updated.
+     */
+
+    val subscription =
+      Simplified.getProfilesController()
+        .accountEvents()
+        .subscribe { event ->
+          when (event) {
+            is AccountEventCreation -> {
+              when (event) {
+                is AccountEventCreationInProgress ->
+                  UIThread.runOnUIThread {
+                    textView.text = event.message
+                  }
+                is AccountEventCreationSucceeded,
+                is AccountEventCreationFailed ->
+                  UIThread.runOnUIThread {
+                    dialog.dismiss()
+                  }
+              }
+            }
+          }
+        }
+
+    dialog.setOnDismissListener { subscription.unsubscribe() }
     dialog.show()
   }
 
@@ -493,7 +548,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   }
 
   private fun tryCreateAccount(accountProvider: AccountProviderDescriptionType): Unit {
-    throw UnimplementedCodeException()
+    Simplified.getProfilesController().profileAccountCreate(accountProvider.id)
+    return Unit.unit()
   }
 
   /**

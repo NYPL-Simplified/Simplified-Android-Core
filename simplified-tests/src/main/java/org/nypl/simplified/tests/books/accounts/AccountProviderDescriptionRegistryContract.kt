@@ -11,10 +11,10 @@ import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionResult
 import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryEvent
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryEvent.*
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryException
-import org.nypl.simplified.accounts.source.api.AccountProviderDescriptionRegistryType
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.*
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryException
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.accounts.source.api.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.*
 import org.nypl.simplified.taskrecorder.api.TaskStep
@@ -24,7 +24,7 @@ import java.net.URI
 
 abstract class AccountProviderDescriptionRegistryContract {
 
-  private lateinit var events: MutableList<AccountProviderDescriptionRegistryEvent>
+  private lateinit var events: MutableList<AccountProviderRegistryEvent>
 
   protected abstract val logger: Logger
 
@@ -32,7 +32,7 @@ abstract class AccountProviderDescriptionRegistryContract {
 
   protected abstract fun createRegistry(
     defaultProvider: AccountProviderType,
-    sources: List<AccountProviderSourceType>): AccountProviderDescriptionRegistryType
+    sources: List<AccountProviderSourceType>): AccountProviderRegistryType
 
   @JvmField
   @Rule
@@ -75,7 +75,7 @@ abstract class AccountProviderDescriptionRegistryContract {
           MockAccountProviders.fakeProvider("urn:fake:0"),
           listOf(CrashingSource()))
 
-    this.expectedException.expect(AccountProviderDescriptionRegistryException::class.java)
+    this.expectedException.expect(AccountProviderRegistryException::class.java)
     registry.refresh()
   }
 
@@ -214,146 +214,210 @@ abstract class AccountProviderDescriptionRegistryContract {
     Assert.assertEquals(FailingSource::class.java, (this.events[3] as SourceFailed).clazz)
   }
 
+  /**
+   * Trying to update with an outdated description returns the newer description.
+   */
+
+  @Test
+  fun testUpdateIgnoreOld()
+  {
+    val registry =
+      this.createRegistry(
+        MockAccountProviders.fakeProvider("urn:fake:0"),
+        listOf(OKSource(), OKAncientSource()))
+
+    registry.events.subscribe { this.events.add(it) }
+    registry.refresh()
+
+    val existing0 =
+      registry.findAccountProviderDescription(URI.create("urn:0"))!!
+
+    val changed =
+      registry.updateDescription(existing0)
+
+    Assert.assertEquals(existing0, changed)
+    Assert.assertEquals(existing0, registry.accountProviderDescriptions()[existing0.id])
+  }
+
+  /**
+   * Trying to update with an outdated provider returns the newer provider.
+   */
+
+  @Test
+  fun testUpdateIgnoreProviderOld()
+  {
+    val registry =
+      this.createRegistry(
+        MockAccountProviders.fakeProvider("urn:fake:0"),
+        listOf())
+
+    registry.events.subscribe { this.events.add(it) }
+    registry.refresh()
+
+    val existing0 =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+
+    val older0 =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+        .copy(updated = DateTime.parse("1900-01-01T00:00:00Z"))
+
+    val initial =
+      registry.updateProvider(existing0)
+    val changed =
+      registry.updateProvider(older0)
+
+    Assert.assertEquals(existing0, initial)
+    Assert.assertEquals(existing0, changed)
+    Assert.assertEquals(registry.resolvedProviders[existing0.id], existing0)
+  }
+
+  companion object {
+
+    val description0 =
+      object : AccountProviderDescriptionType {
+        override val id: URI
+          get() = URI.create("urn:0")
+        override val title: String
+          get() = "Title 0"
+        override val updated: DateTime
+          get() = DateTime.now()
+        override val links: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val images: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val isAutomatic: Boolean
+          get() = false
+        override val isProduction: Boolean
+          get() = true
+
+        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
+          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        }
+      }
+
+    val description1 =
+      object : AccountProviderDescriptionType {
+        override val id: URI
+          get() = URI.create("urn:1")
+        override val title: String
+          get() = "Title 1"
+        override val updated: DateTime
+          get() = DateTime.now()
+        override val links: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val images: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val isAutomatic: Boolean
+          get() = false
+        override val isProduction: Boolean
+          get() = true
+
+        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
+          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        }
+      }
+
+    val description2 =
+      object : AccountProviderDescriptionType {
+        override val id: URI
+          get() = URI.create("urn:2")
+        override val title: String
+          get() = "Title 2"
+        override val updated: DateTime
+          get() = DateTime.now()
+        override val links: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val images: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val isAutomatic: Boolean
+          get() = false
+        override val isProduction: Boolean
+          get() = true
+
+        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
+          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        }
+      }
+
+    val descriptionOld0 =
+      object : AccountProviderDescriptionType {
+        override val id: URI
+          get() = URI.create("urn:0")
+        override val title: String
+          get() = "Title 0"
+        override val updated: DateTime
+          get() = DateTime.parse("1900-01-01T00:00:00Z")
+        override val links: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val images: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val isAutomatic: Boolean
+          get() = false
+        override val isProduction: Boolean
+          get() = true
+
+        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
+          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        }
+      }
+
+    val descriptionOld1 =
+      object : AccountProviderDescriptionType {
+        override val id: URI
+          get() = URI.create("urn:1")
+        override val title: String
+          get() = "Title 1"
+        override val updated: DateTime
+          get() = DateTime.parse("1900-01-01T00:00:00Z")
+        override val links: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val images: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val isAutomatic: Boolean
+          get() = false
+        override val isProduction: Boolean
+          get() = true
+
+        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
+          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        }
+      }
+
+    val descriptionOld2 =
+      object : AccountProviderDescriptionType {
+        override val id: URI
+          get() = URI.create("urn:2")
+        override val title: String
+          get() = "Title 2"
+        override val updated: DateTime
+          get() = DateTime.parse("1900-01-01T00:00:00Z")
+        override val links: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val images: List<AccountProviderDescriptionType.Link>
+          get() = listOf()
+        override val isAutomatic: Boolean
+          get() = false
+        override val isProduction: Boolean
+          get() = true
+
+        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
+          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        }
+      }
+  }
+
   class OKAncientSource : AccountProviderSourceType {
     override fun load(context: Context): SourceResult {
-
-      val description0 =
-        object: AccountProviderDescriptionType {
-          override val id: URI
-            get() = URI.create("urn:0")
-          override val title: String
-            get() = "Title 0"
-          override val updated: DateTime
-            get() = DateTime.parse("1900-01-01T00:00:00Z")
-          override val links: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val images: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val isAutomatic: Boolean
-            get() = false
-          override val isProduction: Boolean
-            get() = true
-          override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-            return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
-          }
-        }
-
-      val description1 =
-        object: AccountProviderDescriptionType {
-          override val id: URI
-            get() = URI.create("urn:1")
-          override val title: String
-            get() = "Title 1"
-          override val updated: DateTime
-            get() = DateTime.parse("1900-01-01T00:00:00Z")
-          override val links: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val images: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val isAutomatic: Boolean
-            get() = false
-          override val isProduction: Boolean
-            get() = true
-          override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-            return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
-          }
-        }
-
-      val description2 =
-        object: AccountProviderDescriptionType {
-          override val id: URI
-            get() = URI.create("urn:2")
-          override val title: String
-            get() = "Title 2"
-          override val updated: DateTime
-            get() = DateTime.parse("1900-01-01T00:00:00Z")
-          override val links: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val images: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val isAutomatic: Boolean
-            get() = false
-          override val isProduction: Boolean
-            get() = true
-          override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-            return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
-          }
-        }
-
       return SourceResult.SourceSucceeded(
         mapOf(
-          Pair(description0.id, description0),
-          Pair(description1.id, description1),
-          Pair(description2.id, description2)))
+          Pair(descriptionOld0.id, descriptionOld0),
+          Pair(descriptionOld1.id, descriptionOld1),
+          Pair(descriptionOld2.id, descriptionOld2)))
     }
   }
 
   class OKSource : AccountProviderSourceType {
     override fun load(context: Context): SourceResult {
-
-      val description0 =
-        object: AccountProviderDescriptionType {
-          override val id: URI
-            get() = URI.create("urn:0")
-          override val title: String
-            get() = "Title 0"
-          override val updated: DateTime
-            get() = DateTime.now()
-          override val links: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val images: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val isAutomatic: Boolean
-            get() = false
-          override val isProduction: Boolean
-            get() = true
-          override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-            return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
-          }
-        }
-
-      val description1 =
-        object: AccountProviderDescriptionType {
-          override val id: URI
-            get() = URI.create("urn:1")
-          override val title: String
-            get() = "Title 1"
-          override val updated: DateTime
-            get() = DateTime.now()
-          override val links: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val images: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val isAutomatic: Boolean
-            get() = false
-          override val isProduction: Boolean
-            get() = true
-          override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-            return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
-          }
-        }
-
-      val description2 =
-        object: AccountProviderDescriptionType {
-          override val id: URI
-            get() = URI.create("urn:2")
-          override val title: String
-            get() = "Title 2"
-          override val updated: DateTime
-            get() = DateTime.now()
-          override val links: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val images: List<AccountProviderDescriptionType.Link>
-            get() = listOf()
-          override val isAutomatic: Boolean
-            get() = false
-          override val isProduction: Boolean
-            get() = true
-          override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-            return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
-          }
-        }
-
       return SourceResult.SourceSucceeded(
         mapOf(
           Pair(description0.id, description0),
