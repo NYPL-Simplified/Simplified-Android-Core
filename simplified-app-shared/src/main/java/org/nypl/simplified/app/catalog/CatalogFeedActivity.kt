@@ -341,7 +341,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     feedURI: URI) {
     this.logger.debug("loading feed: {}", feedURI)
 
-    val loginState = this.account.loginState()
+    val loginState = this.account.loginState
     val authentication =
       if (loginState.credentials != null) {
         Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(loginState.credentials))
@@ -659,7 +659,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         title = this.resources.getString(R.string.catalog),
         upStack = ImmutableStack.empty(),
         drawerShouldOpen = false,
-        feedURI = this.account.provider().catalogURI,
+        feedURI = this.account.provider.catalogURI,
         isSearchResults = false)
     }
   }
@@ -694,13 +694,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private fun isRootOfCollection(): Boolean =
     when (val arguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote ->
-        arguments.feedURI == account.provider().catalogURI
+        arguments.feedURI == account.provider.catalogURI
       is CatalogFeedArgumentsLocalBooks ->
         false
     }
 
   private fun ageGateIsPresent(): Boolean =
-    this.account.provider().hasAgeGate()
+    this.account.provider.hasAgeGate()
 
   private fun ageGateIsSatisfied(): Boolean =
     this.profile.preferences().dateOfBirth() is Some<ProfileDateOfBirth>
@@ -841,7 +841,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         title = this.resources.getString(R.string.catalog),
         upStack = ImmutableStack.empty(),
         drawerShouldOpen = false,
-        feedURI = this.account.provider().catalogURIForAge(yearsOld),
+        feedURI = this.account.provider.catalogURIForAge(yearsOld),
         isSearchResults = false)
   }
 
@@ -1225,11 +1225,11 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
       Simplified.getAnalytics()
         .publishEvent(AnalyticsEvent.CatalogSearched(
-          profileUUID = profile.id().uuid,
+          profileUUID = profile.id.uuid,
           timestamp = LocalDateTime.now(),
-          credentials = account.loginState().credentials,
-          accountProvider = account.provider().id,
-          accountUUID = account.id().uuid,
+          credentials = account.loginState.credentials,
+          accountProvider = account.provider.id,
+          accountUUID = account.id.uuid,
           searchQuery = query))
 
       val target = this.search.getQueryURIForTerms(query)

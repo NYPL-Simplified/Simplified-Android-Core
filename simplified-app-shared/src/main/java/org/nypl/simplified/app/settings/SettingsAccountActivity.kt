@@ -129,7 +129,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     if (item.itemId == R.id.show_eula) {
       val eulaIntent = Intent(this, WebViewActivity::class.java)
-      this.account.provider().eula?.let { eula ->
+      this.account.provider.eula?.let { eula ->
         val argumentBundle = Bundle()
         WebViewActivity.setActivityArguments(
           arguments = argumentBundle,
@@ -212,7 +212,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     this.actionProgress =
       this.actionLayout.findViewById(R.id.settings_action_progress)
 
-    val accountProvider = this.account.provider()
+    val accountProvider = this.account.provider
     this.accountNameText.text = accountProvider.displayName
 
     val subtitle = accountProvider.subtitle
@@ -231,7 +231,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.reportIssue.setOnClickListener {
         val intent = Intent(this, ReportIssueActivity::class.java)
         val argumentBundle = Bundle()
-        argumentBundle.putSerializable("selected_account", this.account.id().uuid.toString())
+        argumentBundle.putSerializable("selected_account", this.account.id.uuid.toString())
         intent.putExtras(argumentBundle)
         this.startActivity(intent)
       }
@@ -364,10 +364,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
     if (accountProvider.supportsSimplyESynchronization) {
       this.syncSwitch.isEnabled = true
-      this.syncSwitch.isChecked = this.account.preferences().bookmarkSyncingPermitted
+      this.syncSwitch.isChecked = this.account.preferences.bookmarkSyncingPermitted
       this.syncSwitch.setOnCheckedChangeListener { _, isEnabled ->
         this.account.setPreferences(
-          this.account.preferences().copy(bookmarkSyncingPermitted = isEnabled))
+          this.account.preferences.copy(bookmarkSyncingPermitted = isEnabled))
       }
     } else {
       this.syncSwitch.isEnabled = false
@@ -407,7 +407,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   private fun onAccountEvent(event: AccountEvent): Unit {
     return if (event is AccountEventLoginStateChanged) {
-      if (event.accountID != this.account.id()) {
+      if (event.accountID != this.account.id) {
         return Unit.unit()
       }
 
@@ -498,10 +498,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       isSynthesized = true)
 
   private fun configureLoginFieldVisibilityAndContents() {
-    val state = this.account.loginState()
+    val state = this.account.loginState
 
     val ageGateRequired =
-      this.account.provider().hasAgeGate()
+      this.account.provider.hasAgeGate()
 
     this.ageCheckbox.visibility =
       if (ageGateRequired) {
@@ -673,7 +673,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   private fun tryLogout(): Unit {
     Simplified.getProfilesController()
-      .profileAccountLogout(this.account.id())
+      .profileAccountLogout(this.account.id)
       .onException(Exception::class.java) { exception: Exception ->
         this.logger.error("error during logout: ", exception)
         null
@@ -690,7 +690,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         .build()
 
     Simplified.getProfilesController()
-      .profileAccountLogin(this.account.id(), credentials)
+      .profileAccountLogin(this.account.id, credentials)
       .onException(Exception::class.java) { exception ->
         this.logger.error("error during login: ", exception)
         null

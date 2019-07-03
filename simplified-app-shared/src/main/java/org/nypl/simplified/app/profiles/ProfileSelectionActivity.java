@@ -98,8 +98,8 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
           new AnalyticsEvent.ProfileLoggedOut(
             LocalDateTime.now(),
             null,
-            profile.id().getUuid(),
-            profile.displayName()
+            profile.getId().getUuid(),
+            profile.getDisplayName()
           ));
       } catch (ProfileNoneCurrentException e) {
         LOG.error("profile is not current: ", e);
@@ -120,7 +120,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
   private void onSelectedProfile(
     final ProfileReadableType profile) {
 
-    LOG.debug("selected profile: {} ({})", profile.id(), profile.displayName());
+    LOG.debug("selected profile: {} ({})", profile.getId(), profile.getDisplayName());
     final ProfilesControllerType profiles = Simplified.getProfilesController();
 
     final ProfilePreferences preferences =
@@ -135,14 +135,14 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
       .publishEvent(new AnalyticsEvent.ProfileLoggedIn(
         LocalDateTime.now(),
         null,
-        profile.id().getUuid(),
-        profile.displayName(),
+        profile.getId().getUuid(),
+        profile.getDisplayName(),
         gender,
         birthday
       ));
 
     FluentFuture.from(
-      profiles.profileSelect(profile.id()))
+      profiles.profileSelect(profile.getId()))
       .addCallback(new FutureCallback<Unit>() {
         @Override
         public void onSuccess(final Unit result) {
@@ -234,8 +234,8 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
 
       final ViewHolder holder = (ViewHolder) row_view.getTag();
       final ProfileReadableType profile = this.list_items.get(position);
-      holder.text.setText(profile.displayName());
-      LOG.trace("getView: [{}] profile: {}", position, profile.displayName());
+      holder.text.setText(profile.getDisplayName());
+      LOG.trace("getView: [{}] profile: {}", position, profile.getDisplayName());
       return row_view;
     }
   }

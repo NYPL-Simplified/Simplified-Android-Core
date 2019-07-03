@@ -70,7 +70,7 @@ class CatalogFeedWithoutGroups(
   private val uriNext: AtomicReference<URI> =
     AtomicReference<URI>(feed.feedNext)
   private val httpAuth: OptionType<HTTPAuthType> =
-    createHttpAuth(this.account.loginState().credentials)
+    createHttpAuth(this.account.loginState.credentials)
 
   private fun createHttpAuth(
     credentials: org.nypl.simplified.accounts.api.AccountAuthenticationCredentials?): OptionType<HTTPAuthType> {

@@ -21,6 +21,7 @@ dependencies {
 
   implementation project(":simplified-files")
   implementation project(":simplified-json-core")
+  implementation project(":simplified-accounts-source-api")
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

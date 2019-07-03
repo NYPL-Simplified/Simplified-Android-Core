@@ -21,9 +21,9 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.squareup.picasso.Picasso;
 
-import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType;
@@ -32,11 +32,13 @@ import org.nypl.simplified.accounts.api.AccountEvent;
 import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore;
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty;
-import org.nypl.simplified.accounts.database.AccountBundledCredentialsJSON;
-import org.nypl.simplified.accounts.database.AccountProviderCollection;
-import org.nypl.simplified.accounts.database.AccountProvidersJSON;
 import org.nypl.simplified.accounts.database.AccountsDatabases;
 import org.nypl.simplified.accounts.database.api.AccountType;
+import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON;
+import org.nypl.simplified.accounts.json.AccountProvidersJSON;
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistry;
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryException;
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType;
 import org.nypl.simplified.analytics.api.Analytics;
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration;
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
@@ -49,6 +51,8 @@ import org.nypl.simplified.app.helpstack.HelpstackType;
 import org.nypl.simplified.app.images.ImageAccountIconRequestHandler;
 import org.nypl.simplified.app.login.LoginStringResources;
 import org.nypl.simplified.app.login.LogoutStringResources;
+import org.nypl.simplified.app.profiles.ProfileAccountCreationStringResources;
+import org.nypl.simplified.app.profiles.ProfileAccountDeletionStringResources;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
 import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
@@ -93,7 +97,7 @@ import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType;
-import org.nypl.simplified.profiles.ProfilesDatabase;
+import org.nypl.simplified.profiles.ProfilesDatabases;
 import org.nypl.simplified.profiles.api.ProfileDatabaseException;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileType;
@@ -116,13 +120,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.ServiceLoader;
-import java.util.SortedMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 
 /**
  * Global application state.
@@ -161,7 +166,7 @@ public final class Simplified extends MultiDexApplication {
   private OPDSFeedTransportType<OptionType<HTTPAuthType>> feed_transport;
   private FeedLoaderType feed_loader;
   private ProfilesDatabaseType profiles;
-  private AccountProviderCollection account_providers;
+  private AccountProviderRegistryType account_providers;
   private NetworkConnectivity network_connectivity;
   private BookRegistryType book_registry;
   private Controller book_controller;
@@ -241,7 +246,7 @@ public final class Simplified extends MultiDexApplication {
    * @return The account providers
    */
 
-  public static AccountProviderCollection getAccountProviders() {
+  public static AccountProviderRegistryType getAccountProviders() {
     final Simplified i = Simplified.checkInitialized();
     return i.account_providers;
   }
@@ -456,7 +461,7 @@ public final class Simplified extends MultiDexApplication {
       final AccountType accountCurrent =
         currentProfile.accountCurrent();
       final ThemeValue theme =
-        ThemeControl.getThemesByName().get(accountCurrent.provider().getMainColor());
+        ThemeControl.getThemesByName().get(accountCurrent.getProvider().getMainColor());
       if (theme != null) {
         return theme;
       }
@@ -480,49 +485,12 @@ public final class Simplified extends MultiDexApplication {
     return port;
   }
 
-  private static AccountProviderCollection createAccountProviders(
-    final Resources resources,
-    final AssetManager asset_manager)
-    throws IOException {
-
-    try (InputStream stream = asset_manager.open("Accounts.json")) {
-      final AccountProviderCollection providers =
-        AccountProvidersJSON.deserializeFromStream(stream);
-
-      /*
-       * If a default provider is specified, use that as the default.
-       */
-
-      final String default_uri_text = resources.getString(R.string.feature_default_provider_uri);
-      if (!default_uri_text.isEmpty()) {
-        try {
-          final URI default_uri = new URI(default_uri_text);
-          final SortedMap<URI, AccountProviderType> available = providers.providers();
-          if (available.containsKey(default_uri)) {
-            LOG.debug("using default provider {}", default_uri);
-            return AccountProviderCollection.create(available.get(default_uri), available);
-          } else {
-            LOG.error(
-              "specified feature_default_provider_uri {} but that provider does not exist",
-              default_uri_text);
-          }
-        } catch (URISyntaxException e) {
-          LOG.error("could not parse feature_default_provider_uri: ", e);
-        }
-      } else {
-        LOG.debug("no default provider is specified");
-      }
-
-      return providers;
-    }
-  }
-
   private static ProfilesDatabaseType createProfileDatabase(
     final Context context,
     final Resources resources,
     final ObservableType<AccountEvent> account_events,
     final ObservableType<ProfileEvent> profile_events,
-    final AccountProviderCollection account_providers,
+    final AccountProviderRegistryType account_providers,
     final AccountBundledCredentialsType account_bundled_credentials,
     final AccountAuthenticationCredentialsStoreType account_credentials_store,
     final File directory)
@@ -534,21 +502,25 @@ public final class Simplified extends MultiDexApplication {
 
     final boolean anonymous = !resources.getBoolean(R.bool.feature_profiles_enabled);
 
+    final Function2<? super URI, ? super String, Unit> resolutionListener = (uri, message) -> {
+      LOG.debug("resolution: {}: {}", uri, message);
+      return Unit.INSTANCE;
+    };
+
     if (anonymous) {
       LOG.debug("opening profile database with anonymous profile");
-      return ProfilesDatabase.openWithAnonymousProfileEnabled(
+      return ProfilesDatabases.INSTANCE.openWithAnonymousProfileEnabled(
         context,
         account_events,
         account_providers,
         account_bundled_credentials,
         account_credentials_store,
         AccountsDatabases.INSTANCE,
-        account_providers.providerDefault(),
         directory);
     }
 
     LOG.debug("opening profile database without anonymous profile");
-    return ProfilesDatabase.openWithAnonymousProfileDisabled(
+    return ProfilesDatabases.INSTANCE.openWithAnonymousProfileDisabled(
       context,
       account_events,
       account_providers,
@@ -727,12 +699,19 @@ public final class Simplified extends MultiDexApplication {
 
     try {
       LOG.debug("initializing account providers");
-      this.account_providers = createAccountProviders(resources, asset_manager);
-      for (final URI id : this.account_providers.providers().keySet()) {
+      final AccountProviderType defaultAccountProvider =
+        loadDefaultAccountProvider(this);
+
+      this.account_providers =
+        AccountProviderRegistry.Companion.createFromServiceLoader(
+          this, defaultAccountProvider);
+      for (final URI id : this.account_providers.accountProviderDescriptions().keySet()) {
         LOG.debug("loaded account provider: {}", id);
       }
-    } catch (final IOException e) {
+    } catch (final AccountProviderRegistryException e) {
       throw new IllegalStateException("Could not initialize account providers", e);
+    } catch (final IOException e) {
+      throw new IllegalStateException("Could not initialize default account provider", e);
     }
 
     try {
@@ -816,7 +795,7 @@ public final class Simplified extends MultiDexApplication {
         account_events,
         new LoginStringResources(this.getResources()),
         new LogoutStringResources(this.getResources()),
-        (unused) -> this.account_providers,
+        this.account_providers,
         this.adobe_drm,
         this.analytics,
         new CatalogBookBorrowStrings(this.getResources()),
@@ -829,6 +808,8 @@ public final class Simplified extends MultiDexApplication {
         this.feed_parser,
         this.http,
         this.patronProfileParsers,
+        new ProfileAccountCreationStringResources(this.getResources()),
+        new ProfileAccountDeletionStringResources(this.getResources()),
         profile_events,
         profiles,
         reader_bookmark_events,
@@ -876,6 +857,13 @@ public final class Simplified extends MultiDexApplication {
 
     LOG.debug("finished booting");
     Simplified.INSTANCE = this;
+  }
+
+  private AccountProviderType loadDefaultAccountProvider(final Context context) throws IOException {
+    final AssetManager asset_manager = context.getAssets();
+    try (final InputStream stream = asset_manager.open("account_provider_default.json")) {
+      return AccountProvidersJSON.INSTANCE.deserializeOneFromStream(stream);
+    }
   }
 
   private OptionType<ThemeValue> loadOptionalBrandingThemeOverride() {

@@ -113,7 +113,7 @@ class LoginDialog : AppCompatDialogFragment() {
         .profileAccountCurrent()
 
     val accountProvider =
-      account.provider()
+      account.provider
     val authentication =
       accountProvider.authentication
 
@@ -161,10 +161,10 @@ class LoginDialog : AppCompatDialogFragment() {
     this.loginButton.setOnClickListener { view ->
       this.disableUIElements()
       this.shownAlert = false
-      this.profiles.profileAccountLogin(this.account.id(), this.credentialsFromUI())
+      this.profiles.profileAccountLogin(this.account.id, this.credentialsFromUI())
     }
 
-    this.configureUIForAccountState(this.account.loginState())
+    this.configureUIForAccountState(this.account.loginState)
     return layout
   }
 
@@ -195,7 +195,7 @@ class LoginDialog : AppCompatDialogFragment() {
 
   private fun onAccountEvent(event: AccountEvent) {
     if (event is AccountEventLoginStateChanged) {
-      if (event.accountID != this.account.id()) {
+      if (event.accountID != this.account.id) {
         return
       }
       return this.configureUIForAccountState(event.state)
@@ -234,7 +234,7 @@ class LoginDialog : AppCompatDialogFragment() {
         }
 
         is AccountLoginState.AccountLoggedIn -> {
-          this.logger.debug("account {} is logged in: dismissing dialog", this.account.id())
+          this.logger.debug("account {} is logged in: dismissing dialog", this.account.id)
           this.loginActionLayout.visibility = View.INVISIBLE
           this.disableUIElements()
           this.dismiss()

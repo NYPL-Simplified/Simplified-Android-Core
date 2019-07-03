@@ -52,12 +52,12 @@ public interface AccountsDatabaseType {
    * exists with the given provider, or if deleting the account would leave the accounts
    * database empty.
    *
-   * @param account_provider The account provider for the account
+   * @param account_provider The ID of the account provider for the account
    * @return The ID of the account that was deleted
    * @throws AccountsDatabaseException On account deletion errors
    */
 
   AccountID deleteAccountByProvider(
-    AccountProviderType account_provider)
+    URI account_provider)
     throws AccountsDatabaseException;
 }

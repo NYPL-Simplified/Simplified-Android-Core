@@ -1,11 +1,16 @@
 package org.nypl.simplified.accounts.api
 
+import org.joda.time.DateTime
 import java.net.URI
+import javax.annotation.concurrent.ThreadSafe
 
 /**
  * A provider of accounts.
+ *
+ * Implementations are required to be safe to manipulate from multiple threads.
  */
 
+@ThreadSafe
 interface AccountProviderType : Comparable<AccountProviderType> {
 
   /**
@@ -13,6 +18,12 @@ interface AccountProviderType : Comparable<AccountProviderType> {
    */
 
   val id: URI
+
+  /**
+   * @return `true` if this account is in production
+   */
+
+  val isProduction: Boolean
 
   /**
    * @return The display name
@@ -186,6 +197,12 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   }
 
   /**
+   * @return The time that this account provider was most recently updated
+   */
+
+  val updated: DateTime
+
+  /**
    * @return `true` if the account has an age gate
    */
 
@@ -193,10 +210,10 @@ interface AccountProviderType : Comparable<AccountProviderType> {
     (this.catalogURIForOver13s != null) or (this.catalogURIForUnder13s != null)
 
   /**
-   * @return The current value as a mutable builder
+   * @return A description that, when resolved, produces this account provider
    */
 
-  fun toBuilder(): AccountProviderBuilderType
+  fun toDescription(): AccountProviderDescriptionType
 
   override fun compareTo(other: AccountProviderType): Int =
     this.id.compareTo(other.id)

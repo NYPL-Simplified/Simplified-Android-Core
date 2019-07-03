@@ -64,7 +64,7 @@ class ProfileAccountLoginTask(
 
   init {
     Preconditions.checkState(
-      this.profile.accounts().containsKey(this.account.id()),
+      this.profile.accounts().containsKey(this.account.id),
       "Profile must contain the given account")
   }
 
@@ -85,16 +85,16 @@ class ProfileAccountLoginTask(
     this.run()
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
+    this.logger.debug("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
+    this.logger.error("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun warn(message: String, vararg arguments: Any?) =
-    this.logger.warn("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
+    this.logger.warn("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun checkAuthenticationRequired(): AccountProviderAuthenticationDescription? {
-    val authentication = this.account.provider().authentication
+    val authentication = this.account.provider.authentication
     return if (authentication == null) {
       this.debug("account does not require authentication")
       this.steps.currentStepFailed(this.loginStrings.loginAuthNotRequired, AccountLoginNotRequired)
@@ -305,7 +305,7 @@ class ProfileAccountLoginTask(
     this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest)
     this.updateLoggingInState()
 
-    val patronSettingsURI = this.account.provider().patronSettingsURI
+    val patronSettingsURI = this.account.provider.patronSettingsURI
     if (patronSettingsURI == null) {
       this.steps.currentStepFailed(this.loginStrings.loginPatronSettingsRequestNoURI)
       throw Exception()

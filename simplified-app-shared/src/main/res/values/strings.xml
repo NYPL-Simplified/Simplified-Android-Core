@@ -189,6 +189,7 @@
   <string name="advanced_sync_switch_description">Delete all the bookmarks you have saved in the cloud.</string>
   <string name="settings_account_delete">Are you sure you want to remove your \"%s\" account from this device?</string>
   <string name="settings_account_delete_button">Delete</string>
+  <string name="settings_accounts_select_library">Please choose a library.</string>
 
   <string name="login_needed">You need to login to access the collection.</string>
   <string name="login_with_barcode">Login with Barcode</string>
@@ -443,5 +444,16 @@
   <string name="revokeFormatSpecific">Performing revocation for format %1$s…</string>
   <string name="revokeACSTimedOut">Timed out waiting for Adobe ACS.</string>
   <string name="revokeCredentialsRequired">Credentials are required, but none were provided.</string>
+
+  <!-- Profile account creation -->
+  <string name="profileAccountCreationCreatingAccountFailed">Creating an account failed.</string>
+  <string name="profileAccountCreationCreatingAccount">Creating an account…</string>
+  <string name="profileAccountCreationResolvingAccountProviderFailed">Resolving an account provider failed.</string>
+  <string name="profileAccountCreationResolvingAccountProvider">Resolving account provider…</string>
+
+  <!-- Profile account deletion -->
+  <string name="profileAccountDeletionFailed">Deleting an account failed.</string>
+  <string name="profileAccountDeletionOnlyOneAccountRemaining">Cannot delete the one remaining account; at least one account must be present.</string>
+  <string name="profileAccountDeleting">Deleting account…</string>
 
 </resources>

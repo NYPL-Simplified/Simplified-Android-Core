@@ -21,6 +21,7 @@
     "licenseUrl": "http://www.librarysimplified.org/license.html",
     "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
     "mainColor": "#da2527",
-    "styleNameOverride": "SimplifiedThemeNoActionBar_NYPL"
+    "styleNameOverride": "SimplifiedThemeNoActionBar_NYPL",
+    "updated": "2000-01-01T00:00:00Z"
   }
 ]

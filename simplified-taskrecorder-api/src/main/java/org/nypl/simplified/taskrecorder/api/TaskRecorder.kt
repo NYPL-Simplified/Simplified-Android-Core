@@ -28,20 +28,21 @@ class TaskRecorder<E> private constructor() : TaskRecorderType<E> {
     return step
   }
 
-  override fun currentStepSucceeded(message: String) {
+  override fun currentStepSucceeded(message: String): TaskStep<E> {
     Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
 
     val step = this.steps.last()
     step.resolution = message
     step.failed = false
     step.exception = null
+    return step
   }
 
   override fun currentStepFailed(
     message: String,
     errorValue: E?,
     exception: Throwable?
-  ) {
+  ): TaskStep<E> {
     Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
 
     val step = this.steps.last()
@@ -49,6 +50,7 @@ class TaskRecorder<E> private constructor() : TaskRecorderType<E> {
     step.failed = true
     step.errorValue = errorValue
     step.exception = exception
+    return step
   }
 
   override fun currentStep(): TaskStep<E>? =

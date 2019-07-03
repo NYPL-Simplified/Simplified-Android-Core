@@ -102,13 +102,13 @@ abstract class ProfileAccountLogoutTaskContract {
 
     Mockito.`when`(provider.authentication)
       .thenReturn(null)
-    Mockito.`when`(this.profile.id())
+    Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
     Mockito.`when`(this.profile.accounts())
       .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
-    Mockito.`when`(this.account.id())
+    Mockito.`when`(this.account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(this.account.provider())
+    Mockito.`when`(this.account.provider)
       .thenReturn(provider)
     Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
@@ -117,7 +117,7 @@ abstract class ProfileAccountLogoutTaskContract {
         this.loginState = newState
         this.loginState
       }
-    Mockito.`when`(this.account.loginState())
+    Mockito.`when`(this.account.loginState)
       .then { this.loginState }
 
     this.account.setLoginState(AccountNotLoggedIn)
@@ -136,7 +136,7 @@ abstract class ProfileAccountLogoutTaskContract {
     result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
-      this.account.loginState() as AccountNotLoggedIn
+      this.account.loginState as AccountNotLoggedIn
 
     Mockito.verify(this.bookDatabase, Mockito.times(0))
       .delete()
@@ -153,13 +153,13 @@ abstract class ProfileAccountLogoutTaskContract {
 
     Mockito.`when`(provider.authentication)
       .thenReturn(null)
-    Mockito.`when`(this.profile.id())
+    Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
     Mockito.`when`(this.profile.accounts())
       .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
-    Mockito.`when`(this.account.id())
+    Mockito.`when`(this.account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(this.account.provider())
+    Mockito.`when`(this.account.provider)
       .thenReturn(provider)
     Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
@@ -168,9 +168,9 @@ abstract class ProfileAccountLogoutTaskContract {
         this.loginState = newState
         this.loginState
       }
-    Mockito.`when`(this.account.loginState())
+    Mockito.`when`(this.account.loginState)
       .then { this.loginState }
-    Mockito.`when`(this.account.bookDatabase())
+    Mockito.`when`(this.account.bookDatabase)
       .thenReturn(this.bookDatabase)
 
     val books =
@@ -201,7 +201,7 @@ abstract class ProfileAccountLogoutTaskContract {
     result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
-      this.account.loginState() as AccountNotLoggedIn
+      this.account.loginState as AccountNotLoggedIn
 
     Mockito.verify(this.bookDatabase, Mockito.times(1))
       .delete()
@@ -225,13 +225,13 @@ abstract class ProfileAccountLogoutTaskContract {
 
     Mockito.`when`(provider.authentication)
       .thenReturn(null)
-    Mockito.`when`(this.profile.id())
+    Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
     Mockito.`when`(this.profile.accounts())
       .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
-    Mockito.`when`(this.account.id())
+    Mockito.`when`(this.account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(this.account.provider())
+    Mockito.`when`(this.account.provider)
       .thenReturn(provider)
     Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
@@ -240,9 +240,9 @@ abstract class ProfileAccountLogoutTaskContract {
         this.loginState = newState
         this.loginState
       }
-    Mockito.`when`(this.account.loginState())
+    Mockito.`when`(this.account.loginState)
       .then { this.loginState }
-    Mockito.`when`(this.account.bookDatabase())
+    Mockito.`when`(this.account.bookDatabase)
       .thenReturn(this.bookDatabase)
 
     val books =
@@ -281,7 +281,7 @@ abstract class ProfileAccountLogoutTaskContract {
     result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
-      this.account.loginState() as AccountNotLoggedIn
+      this.account.loginState as AccountNotLoggedIn
 
     Mockito.verify(this.bookDatabase, Mockito.times(1))
       .delete()
@@ -305,13 +305,13 @@ abstract class ProfileAccountLogoutTaskContract {
 
     Mockito.`when`(provider.authentication)
       .thenReturn(null)
-    Mockito.`when`(this.profile.id())
+    Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
     Mockito.`when`(this.profile.accounts())
       .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
-    Mockito.`when`(this.account.id())
+    Mockito.`when`(this.account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(this.account.provider())
+    Mockito.`when`(this.account.provider)
       .thenReturn(provider)
     Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
@@ -320,9 +320,9 @@ abstract class ProfileAccountLogoutTaskContract {
         this.loginState = newState
         this.loginState
       }
-    Mockito.`when`(this.account.loginState())
+    Mockito.`when`(this.account.loginState)
       .then { this.loginState }
-    Mockito.`when`(this.account.bookDatabase())
+    Mockito.`when`(this.account.bookDatabase)
       .thenReturn(this.bookDatabase)
 
     val books =
@@ -382,7 +382,7 @@ abstract class ProfileAccountLogoutTaskContract {
     result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
-      this.account.loginState() as AccountLogoutFailed
+      this.account.loginState as AccountLogoutFailed
 
     Assert.assertEquals(credentials, state.credentials)
 
@@ -404,13 +404,13 @@ abstract class ProfileAccountLogoutTaskContract {
 
     Mockito.`when`(provider.authentication)
       .thenReturn(null)
-    Mockito.`when`(this.profile.id())
+    Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
     Mockito.`when`(this.profile.accounts())
       .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
-    Mockito.`when`(this.account.id())
+    Mockito.`when`(this.account.id)
       .thenReturn(this.accountID)
-    Mockito.`when`(this.account.provider())
+    Mockito.`when`(this.account.provider)
       .thenReturn(provider)
     Mockito.`when`(this.account.setLoginState(anyNonNull()))
       .then {
@@ -419,9 +419,9 @@ abstract class ProfileAccountLogoutTaskContract {
         this.loginState = newState
         this.loginState
       }
-    Mockito.`when`(this.account.loginState())
+    Mockito.`when`(this.account.loginState)
       .then { this.loginState }
-    Mockito.`when`(this.account.bookDatabase())
+    Mockito.`when`(this.account.bookDatabase)
       .thenReturn(this.bookDatabase)
 
     val books =
@@ -492,7 +492,7 @@ abstract class ProfileAccountLogoutTaskContract {
     result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
 
     val state =
-      this.account.loginState() as AccountNotLoggedIn
+      this.account.loginState as AccountNotLoggedIn
 
     Mockito.verify(this.bookDatabase, Mockito.times(1))
       .delete()

@@ -207,7 +207,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val adobeCredentials =
       this.adobeCredentialsValid
@@ -218,7 +218,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         .setAdobeCredentials(adobeCredentials)
         .build()
 
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(credentials))
 
     val file =
@@ -312,7 +312,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -366,7 +366,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val headers =
       mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
@@ -421,7 +421,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -478,7 +478,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val adobeCredentials =
       this.adobeCredentialsValid
@@ -489,7 +489,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         .setAdobeCredentials(adobeCredentials)
         .build()
 
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(credentials))
 
     val file =
@@ -583,7 +583,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -641,7 +641,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val adobeCredentials =
       AccountAuthenticationAdobePreActivationCredentials(
@@ -656,7 +656,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         .setAdobeCredentials(adobeCredentials)
         .build()
 
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(credentials))
 
     val headers =
@@ -714,7 +714,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -771,9 +771,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(accountCredentialsValid))
 
     val headers =
@@ -831,7 +831,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -888,9 +888,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(accountCredentialsValid))
 
     /*
@@ -968,7 +968,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)
@@ -1020,9 +1020,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id()).thenReturn(this.accountID)
+    Mockito.`when`(account.id).thenReturn(this.accountID)
 
-    Mockito.`when`(account.loginState())
+    Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(accountCredentialsValid))
 
     /*
@@ -1100,7 +1100,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         entry = opdsEntry,
         formats = listOf())
 
-    Mockito.`when`(account.bookDatabase())
+    Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
       .thenReturn(bookDatabaseEntry)

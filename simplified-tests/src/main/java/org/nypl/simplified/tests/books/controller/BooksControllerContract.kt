@@ -3,11 +3,8 @@ package org.nypl.simplified.tests.books.controller
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.Unit
 import org.hamcrest.core.IsInstanceOf
-import org.joda.time.Instant
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -21,21 +18,16 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountPIN
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.api.AccountProviderCollectionType
-import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.accounts.api.AccountProviders
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
-import org.nypl.simplified.accounts.database.AccountProviderCollection
 import org.nypl.simplified.accounts.database.AccountsDatabases
+import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookEvent
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookStatusLoaned
-import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
-import org.nypl.simplified.books.book_registry.BookStatusRevoked
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BooksControllerType
@@ -55,21 +47,23 @@ import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
-import org.nypl.simplified.profiles.ProfilesDatabase
+import org.nypl.simplified.profiles.ProfilesDatabases
+import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MockAccountCreationStringResources
+import org.nypl.simplified.tests.MockAccountDeletionStringResources
 import org.nypl.simplified.tests.MockAccountLoginStringResources
 import org.nypl.simplified.tests.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.MockBorrowStringResources
 import org.nypl.simplified.tests.MockRevokeStringResources
-import org.nypl.simplified.tests.books.MappedHTTP
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -79,12 +73,13 @@ import java.util.ArrayList
 import java.util.Collections
 import java.util.HashMap
 import java.util.NoSuchElementException
-import java.util.TreeMap
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 abstract class BooksControllerContract {
+
+  private val logger = LoggerFactory.getLogger(BooksControllerContract::class.java)
 
   @JvmField
   @Rule
@@ -111,56 +106,18 @@ abstract class BooksControllerContract {
 
   protected abstract fun context(): Context
 
-  private val accountLoginStringResources = MockAccountLoginStringResources()
-  private val accountLogoutStringResources = MockAccountLogoutStringResources()
-  private val bookBorrowStringResources = MockBorrowStringResources()
-  private val revokeStringResources = MockRevokeStringResources()
-
-  private fun fakeProvider(providerId: String): AccountProviderType {
-    return AccountProviders.builder().apply {
-      this.id = URI.create(providerId)
-      this.mainColor = "#ff0000"
-      this.displayName = "Fake Library"
-      this.subtitle = "Imaginary books"
-      this.logo = URI.create("http://example.com/logo.png")
-      this.catalogURI = URI.create("http://example.com/accounts0/feed.xml")
-      this.supportEmail = "postmaster@example.com"
-      this.annotationsURI = URI.create("http://example.com/accounts0/annotations")
-      this.patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me")
-    }.build()
-  }
-
-  private fun accountProviders(unit: Unit): AccountProviderCollection {
-    return accountProviders()
-  }
-
-  private fun accountProviders(): AccountProviderCollection {
-    val fake0 = fakeProvider("urn:fake:0")
-    val fake1 = fakeProvider("urn:fake:1")
-    val fake2 = fakeProvider("urn:fake:2")
-    val fake3 = fakeAuthProvider("urn:fake-auth:0")
-
-    val providers = TreeMap<URI, AccountProviderType>()
-    providers[fake0.id] = fake0
-    providers[fake1.id] = fake1
-    providers[fake2.id] = fake2
-    providers[fake3.id] = fake3
-    return AccountProviderCollection.create(fake0, providers)
-  }
-
-  private fun fakeAuthProvider(uri: String): AccountProviderType {
-    return fakeProvider(uri)
-      .toBuilder()
-      .apply {
-        this.authentication =
-          AccountProviderAuthenticationDescription.builder()
-            .setLoginURI(URI.create(uri))
-            .setPassCodeLength(4)
-            .setPassCodeMayContainLetters(true)
-            .setRequiresPin(true)
-            .build()
-      }.build()
-  }
+  private val accountLoginStringResources =
+    MockAccountLoginStringResources()
+  private val accountLogoutStringResources =
+    MockAccountLogoutStringResources()
+  private val bookBorrowStringResources =
+    MockBorrowStringResources()
+  private val revokeStringResources =
+    MockRevokeStringResources()
+  private val profileAccountDeletionStringResources =
+    MockAccountDeletionStringResources()
+  private val profileAccountCreationStringResources =
+    MockAccountCreationStringResources()
 
   private fun correctCredentials(): AccountAuthenticationCredentials {
     return AccountAuthenticationCredentials.builder(
@@ -177,7 +134,7 @@ abstract class BooksControllerContract {
     books: BookRegistryType,
     profiles: ProfilesDatabaseType,
     downloader: DownloaderType,
-    accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
+    accountProviders: AccountProviderRegistryType,
     timerExec: ExecutorService,
     patronUserProfileParsers: PatronUserProfileParsersType
   ): BooksControllerType {
@@ -203,27 +160,29 @@ abstract class BooksControllerContract {
       MockAnalytics()
 
     return Controller.create(
-      exec = exec,
       accountEvents = accountEvents,
       accountLoginStringResources = this.accountLoginStringResources,
       accountLogoutStringResources = this.accountLogoutStringResources,
-      bookBorrowStrings = this.bookBorrowStringResources,
-      profileEvents = profileEvents,
-      http = http,
-      feedParser = parser,
-      feedLoader = feedLoader,
-      cacheDirectory = this.cacheDirectory,
-      downloader = downloader,
-      profiles = profiles,
+      accountProviders = accountProviders,
+      adobeDrm = null,
       analytics = analyticsLogger,
+      bookBorrowStrings = this.bookBorrowStringResources,
       bookRegistry = books,
       bundledContent = bundledContent,
-      accountProviders = accountProviders,
-      timerExecutor = timerExec,
-      adobeDrm = null,
+      cacheDirectory = this.cacheDirectory,
+      downloader = downloader,
+      exec = exec,
+      feedLoader = feedLoader,
+      feedParser = parser,
+      http = http,
+      patronUserProfileParsers = patronUserProfileParsers,
+      profileAccountCreationStringResources = this.profileAccountCreationStringResources,
+      profileAccountDeletionStringResources = this.profileAccountDeletionStringResources,
+      profileEvents = profileEvents,
+      profiles = profiles,
       readerBookmarkEvents = Observable.create(),
       revokeStrings = this.revokeStringResources,
-      patronUserProfileParsers = patronUserProfileParsers
+      timerExecutor = timerExec
     )
   }
 
@@ -278,15 +237,15 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeAuthProvider("urn:fake-auth:0")
+    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
@@ -324,15 +283,15 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeAuthProvider("urn:fake-auth:0")
+    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
@@ -348,7 +307,7 @@ abstract class BooksControllerContract {
         Option.none<HTTPProblemReport>()))
 
     controller.booksSync(account).get()
-    Assert.assertEquals(AccountNotLoggedIn, account.loginState())
+    Assert.assertEquals(AccountNotLoggedIn, account.loginState)
   }
 
   /**
@@ -369,21 +328,21 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeProvider("urn:fake:0")
+    val provider = MockAccountProviders.fakeProvider("urn:fake:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
-    Assert.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState())
+    Assert.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState)
     controller.booksSync(account).get()
-    Assert.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState())
+    Assert.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState)
   }
 
   /**
@@ -404,20 +363,20 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeAuthProvider("urn:fake-auth:0")
+    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
 
-    Assert.assertEquals(AccountNotLoggedIn, account.loginState())
+    Assert.assertEquals(AccountNotLoggedIn, account.loginState)
     controller.booksSync(account).get()
-    Assert.assertEquals(AccountNotLoggedIn, account.loginState())
+    Assert.assertEquals(AccountNotLoggedIn, account.loginState)
   }
 
   /**
@@ -438,15 +397,15 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeAuthProvider("urn:fake-auth:0")
+    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
@@ -483,15 +442,15 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeAuthProvider("urn:fake-auth:0")
+    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
@@ -512,11 +471,11 @@ abstract class BooksControllerContract {
     Assert.assertEquals(3L, this.bookRegistry.books().size.toLong())
 
     this.bookRegistry.bookOrException(
-      org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
     this.bookRegistry.bookOrException(
-      org.nypl.simplified.books.api.BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
+      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
     this.bookRegistry.bookOrException(
-      org.nypl.simplified.books.api.BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
+      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
 
     EventAssertions.isTypeAndMatches(
       BookStatusEvent::class.java,
@@ -553,15 +512,15 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeAuthProvider("urn:fake-auth:0")
+    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
@@ -582,11 +541,11 @@ abstract class BooksControllerContract {
     controller.booksSync(account).get()
 
     this.bookRegistry.bookOrException(
-      org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
     this.bookRegistry.bookOrException(
-      org.nypl.simplified.books.api.BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
+      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
     this.bookRegistry.bookOrException(
-      org.nypl.simplified.books.api.BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
+      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
 
     this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
 
@@ -624,7 +583,7 @@ abstract class BooksControllerContract {
     ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_REMOVED) }
 
     this.bookRegistry.bookOrException(
-      org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
 
     checkBookIsNotInRegistry("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
     checkBookIsNotInRegistry("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
@@ -632,7 +591,7 @@ abstract class BooksControllerContract {
 
   private fun checkBookIsNotInRegistry(id: String) {
     try {
-      this.bookRegistry.bookOrException(org.nypl.simplified.books.api.BookID.create(id))
+      this.bookRegistry.bookOrException(BookID.create(id))
       Assert.fail("Book should not exist!")
     } catch (e: NoSuchElementException) {
       // Correctly raised
@@ -658,15 +617,15 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeAuthProvider("urn:fake-auth:0")
+    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
@@ -682,7 +641,7 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account).get()
 
-    val bookId = org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     Assert.assertFalse(
       "Book must not have a saved EPUB file",
@@ -695,7 +654,7 @@ abstract class BooksControllerContract {
      */
 
     run {
-      val databaseEntry = account.bookDatabase().entry(bookId)
+      val databaseEntry = account.bookDatabase.entry(bookId)
 
       //      databaseEntry.writeEPUB(File.createTempFile("book", ".epub"));
       //      this.bookRegistry.update(
@@ -740,15 +699,15 @@ abstract class BooksControllerContract {
         books = this.bookRegistry,
         profiles = this.profiles,
         downloader = this.downloader,
-        accountProviders = FunctionType { accountProviders(it) },
+        accountProviders = MockAccountProviders.fakeAccountProviders(),
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
         patronUserProfileParsers = this.patronUserProfileParsers)
 
-    val provider = fakeAuthProvider("urn:fake-auth:0")
+    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
-    this.profiles.setProfileCurrent(profile.id())
+    this.profiles.setProfileCurrent(profile.id)
     val account = profile.createAccount(provider)
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
@@ -764,7 +723,7 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account).get()
 
-    val bookId = org.nypl.simplified.books.api.BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     val statusBefore = this.bookRegistry.bookOrException(bookId).status()
     Assert.assertThat(statusBefore, IsInstanceOf.instanceOf(BookStatusLoaned::class.java))
@@ -795,33 +754,23 @@ abstract class BooksControllerContract {
     return total
   }
 
-  @Throws(org.nypl.simplified.profiles.api.ProfileDatabaseException::class)
+  @Throws(ProfileDatabaseException::class)
   private fun profilesDatabaseWithoutAnonymous(
     accountEvents: ObservableType<AccountEvent>,
-    dirProfiles: File?): ProfilesDatabaseType {
-    return ProfilesDatabase.openWithAnonymousProfileDisabled(
+    dirProfiles: File): ProfilesDatabaseType {
+    return ProfilesDatabases.openWithAnonymousProfileDisabled(
       context(),
       accountEvents,
-      accountProviders(Unit.unit()),
+      MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialsStore,
       AccountsDatabases,
       dirProfiles)
   }
 
-
-  companion object {
-    private val LOG = LoggerFactory.getLogger(BooksControllerContract::class.java)
-    private val LOANS_URI = URI.create("http://example.com/loans/")
-    private val ROOT_URI = URI.create("http://example.com/")
-
-    private fun httpResource(name: String): MappedHTTP.MappedResource {
-      val stream = BooksControllerContract.javaClass.getResourceAsStream(name)
-      ByteArrayOutputStream().use { outStream ->
-        val size = stream.copyTo(outStream, 1024)
-        val copyStream = ByteArrayInputStream(outStream.toByteArray())
-        return MappedHTTP.MappedResource(copyStream, size)
-      }
-    }
+  private fun onAccountResolution(
+    id: URI,
+    message: String) {
+    this.logger.debug("resolution: {}: {}", id, message)
   }
 }

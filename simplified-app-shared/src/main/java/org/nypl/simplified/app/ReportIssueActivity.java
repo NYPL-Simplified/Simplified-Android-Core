@@ -58,7 +58,7 @@ public class ReportIssueActivity extends AppCompatActivity {
       if (extras != null) {
         accountId = new AccountID(UUID.fromString(extras.getString("selectedAccount")));
       } else {
-        accountId = profile.accountCurrent().id();
+        accountId = profile.accountCurrent().getId();
       }
 
       this.account =
@@ -134,7 +134,7 @@ public class ReportIssueActivity extends AppCompatActivity {
         b.setCancelable(true);
         b.create().show();
       } else {
-        final String email = this.account.provider().getSupportEmail();
+        final String email = this.account.getProvider().getSupportEmail();
         if (email != null) {
           this.launchEmailAppWithEmailAddress(this,
             email,
