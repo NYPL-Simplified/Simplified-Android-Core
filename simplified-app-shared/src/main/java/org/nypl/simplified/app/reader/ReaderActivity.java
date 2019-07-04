@@ -275,7 +275,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   @SuppressLint("SetJavaScriptEnabled")
   @Override
   protected void onCreate(final @Nullable Bundle state) {
-    this.setTheme(Simplified.getCurrentTheme().getThemeWithNoActionBar());
+    this.setTheme(Simplified.getServices().getCurrentTheme().getThemeWithNoActionBar());
 
     super.onCreate(state);
     this.setContentView(R.layout.reader);
@@ -299,7 +299,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     try {
       this.current_account =
-        Simplified.getProfilesController()
+        Simplified.getServices()
+          .getProfilesController()
           .profileAccountForBook(this.book_id);
     } catch (ProfileNoneCurrentException | AccountsDatabaseNonexistentException e) {
       this.onEPUBLoadFailed(e);
@@ -308,7 +309,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     }
 
     this.profile_subscription =
-      Simplified.getProfilesController()
+      Simplified.getServices()
+        .getProfilesController()
         .profileEvents()
         .subscribe(this::onProfileEvent);
 
@@ -316,7 +318,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     try {
       readerPreferences =
-        Simplified.getProfilesController()
+        Simplified.getServices()
+          .getProfilesController()
           .profileCurrent()
           .preferences()
           .readerPreferences();
@@ -458,7 +461,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     Objects.requireNonNull(this.formatHandle, "formatHandle");
 
     final BookFormat.BookFormatEPUB format = this.formatHandle.getFormat();
-    final ReaderReadiumEPUBLoaderType loader = Simplified.getReadiumEPUBLoader();
+    final ReaderReadiumEPUBLoaderType loader =
+      Simplified.getServices().getReaderEPUBLoader();
     final ReaderReadiumEPUBLoadRequest request =
       ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
         .setAdobeRightsFile(Option.of(format.getAdobeRightsFile()))
@@ -487,7 +491,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       LOG.debug("onProfileEventPreferencesChanged: reader settings changed");
 
       final ReaderPreferences preferences =
-        Simplified.getProfilesController()
+        Simplified.getServices()
+          .getProfilesController()
           .profileCurrent()
           .preferences()
           .readerPreferences();
@@ -544,7 +549,9 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     this.current_location = bookmark;
 
     UIThread.runOnUIThread(this::configureBookmarkButtonUI);
-    Simplified.getReaderBookmarksService().bookmarkCreate(this.current_account.getId(), bookmark);
+    Simplified.getServices()
+      .getReaderBookmarkService()
+      .bookmarkCreate(this.current_account.getId(), bookmark);
   }
 
   /**
@@ -570,7 +577,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   protected void onPause() {
     super.onPause();
 
-    Simplified.getReaderBookmarksService()
+    Simplified.getServices()
+      .getReaderBookmarkService()
       .bookmarkCreate(this.current_account.getId(), this.current_location);
   }
 
@@ -586,11 +594,16 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
      */
 
     try {
-      Simplified.getAnalytics()
+      Simplified.getServices()
+        .getAnalytics()
         .publishEvent(new AnalyticsEvent.BookClosed(
           LocalDateTime.now(),
           this.current_account.getLoginState().getCredentials(),
-          Simplified.getProfilesController().profileCurrent().getId().getUuid(),
+          Simplified.getServices()
+            .getProfilesController()
+            .profileCurrent()
+            .getId()
+            .getUuid(),
           this.current_account.getProvider().getId(),
           this.current_account.getId().getUuid(),
           this.feed_entry.getID(),
@@ -645,7 +658,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       this.view_bookmark.setOnClickListener(v -> {
         this.current_location = this.current_location.toExplicit();
 
-        Simplified.getReaderBookmarksService()
+        Simplified.getServices()
+          .getReaderBookmarkService()
           .bookmarkCreate(this.current_account.getId(), this.current_location);
 
         this.configureBookmarkButtonUI();
@@ -657,13 +671,14 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
      * will still be executed if the server is already running).
      */
 
-    final ReaderHTTPServerType server = Simplified.getReaderHTTPServer();
+    final ReaderHTTPServerType server = Simplified.getServices().getReaderHTTPServer();
     server.startIfNecessaryForPackage(p, this);
   }
 
   private ReaderBookmarks loadBookmarks() {
     try {
-      return Simplified.getReaderBookmarksService()
+      return Simplified.getServices()
+        .getReaderBookmarkService()
         .bookmarkLoad(this.current_account.getId(), this.book_id)
         .get(10L, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
@@ -737,7 +752,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     LOG.debug("onReadiumFunctionInitialize: readium initialize requested");
 
     final ReaderHTTPServerType hs =
-      Simplified.getReaderHTTPServer();
+      Simplified.getServices().getReaderHTTPServer();
     final Container c =
       Objects.requireNonNull(this.epub_container);
     final Package p =
@@ -785,7 +800,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     try {
       this.applyReaderPreferences(
-        Simplified.getProfilesController()
+        Simplified.getServices()
+          .getProfilesController()
           .profileCurrent()
           .preferences()
           .readerPreferences());
@@ -879,11 +895,16 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
          */
 
         try {
-          Simplified.getAnalytics()
+          Simplified.getServices()
+            .getAnalytics()
             .publishEvent(new AnalyticsEvent.BookPageTurned(
               LocalDateTime.now(),
               this.current_account.getLoginState().getCredentials(),
-              Simplified.getProfilesController().profileCurrent().getId().getUuid(),
+              Simplified.getServices()
+                .getProfilesController()
+                .profileCurrent()
+                .getId()
+                .getUuid(),
               this.current_account.getProvider().getId(),
               this.current_account.getId().getUuid(),
               this.feed_entry.getID(),
@@ -1089,11 +1110,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public ProfilesControllerType onReaderSettingsDialogWantsProfilesController() {
-    return Simplified.getProfilesController();
+    return Simplified.getServices().getProfilesController();
   }
 
   @Override
   public ScreenSizeInformationType onReaderSettingsDialogWantsScreenSize() {
-    return Simplified.getScreenSizeInformation();
+    return Simplified.getServices().getScreenSize();
   }
 }

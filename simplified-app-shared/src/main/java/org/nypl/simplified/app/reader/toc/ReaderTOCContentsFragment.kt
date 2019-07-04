@@ -73,7 +73,8 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
     this.readerTOCListView.adapter = this
 
     this.applyColorScheme(
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profileCurrent()
         .preferences()
         .readerPreferences()
@@ -88,7 +89,8 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
       this.listener = context
 
       this.profileSubscription =
-        Simplified.getProfilesController()
+        Simplified.application.services()
+          .profilesController
           .profileEvents()
           .subscribe { event -> this.onProfileEvent(event) }
     } else {
@@ -107,7 +109,8 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
     if (event is ProfilePreferencesChanged) {
       if (event.changedReaderPreferences()) {
         val colorScheme =
-          Simplified.getProfilesController()
+          Simplified.application.services()
+            .profilesController
             .profileCurrent()
             .preferences()
             .readerPreferences()
@@ -168,12 +171,12 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
     val layoutParams =
       RelativeLayout.LayoutParams(
-      ViewGroup.LayoutParams.WRAP_CONTENT,
-      ViewGroup.LayoutParams.WRAP_CONTENT)
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT)
 
     // Set the left margin based on the desired indentation level.
     val leftIndent = if (element != null) {
-      Simplified.getScreenSizeInformation().screenDPToPixels(element.indent * 16)
+      Simplified.application.services().screenSize.screenDPToPixels(element.indent * 16)
     } else {
       0.0
     }
@@ -181,11 +184,13 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
     layoutParams.setMargins(leftIndent.toInt(), 0, 0, 0)
     textView.layoutParams = layoutParams
     textView.setTextColor(
-      ReaderColorSchemes.foreground(Simplified.getProfilesController()
-        .profileCurrent()
-        .preferences()
-        .readerPreferences()
-        .colorScheme()))
+      ReaderColorSchemes.foreground(
+        Simplified.application.services()
+          .profilesController
+          .profileCurrent()
+          .preferences()
+          .readerPreferences()
+          .colorScheme()))
 
     itemView.setOnClickListener {
       this.listener.onTOCItemSelected(ReaderSelectedTOCElement(element))

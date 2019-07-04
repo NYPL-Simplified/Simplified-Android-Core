@@ -52,6 +52,7 @@ dependencies {
   api project(":simplified-books-database")
   api project(":simplified-books-database-api")
   api project(":simplified-books-registry-api")
+  api project(":simplified-boot-api")
   api project(":simplified-branding")
   api project(":simplified-bugsnag")
   api project(":simplified-datepicker")

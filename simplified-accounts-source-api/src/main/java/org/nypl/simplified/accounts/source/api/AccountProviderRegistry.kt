@@ -52,7 +52,6 @@ class AccountProviderRegistry private constructor(
   override fun refresh() {
     this.logger.debug("refreshing account provider descriptions")
 
-    val exceptions = mutableListOf<java.lang.Exception>()
     for (source in this.sources) {
       try {
         when (val result = source.load(this.context)) {
@@ -63,18 +62,12 @@ class AccountProviderRegistry private constructor(
             }
           }
           is AccountProviderSourceType.SourceResult.SourceFailed -> {
-            exceptions.add(result.exception)
             this.eventsActual.send(SourceFailed(source.javaClass, result.exception))
           }
         }
       } catch (e: Exception) {
-        exceptions.add(e)
         this.eventsActual.send(SourceFailed(source.javaClass, e))
       }
-    }
-
-    if (this.descriptions.isEmpty() && exceptions.isNotEmpty()) {
-      throw AccountProviderRegistryException(exceptions)
     }
 
     this.initialized = true

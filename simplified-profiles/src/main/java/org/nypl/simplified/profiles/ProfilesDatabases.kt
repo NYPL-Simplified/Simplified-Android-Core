@@ -14,7 +14,6 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryException
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
@@ -473,10 +472,8 @@ object ProfilesDatabases {
           this.logger.debug("[{}]: credentials for automatic account {} were not provided", pId, id)
         }
       }
-    } catch (e: AccountProviderRegistryException) {
-      throw AccountsDatabaseOpenException(
-        "Account provider description registry error.",
-        listOf<Exception>(e))
+    } catch (e: Exception) {
+      throw AccountsDatabaseOpenException(e.message, listOf(e))
     }
   }
 

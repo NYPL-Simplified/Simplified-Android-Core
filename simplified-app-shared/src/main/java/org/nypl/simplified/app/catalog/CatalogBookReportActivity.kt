@@ -56,7 +56,8 @@ class CatalogBookReportActivity : CatalogActivity() {
     this.feedEntry =
       a.getSerializable(FEED_ENTRY) as FeedEntryOPDS
     this.account =
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profileAccountForBook(this.feedEntry.bookID)
 
     val layout =
@@ -93,7 +94,8 @@ class CatalogBookReportActivity : CatalogActivity() {
   private fun submitReport() {
     val button = this.typeButtons.find { button -> button.isChecked }
     if (button != null) {
-      Simplified.getBooksController()
+      Simplified.application.services()
+        .booksController
         .bookReport(this.account, this.feedEntry, button.tag as String)
       this.finish()
     }

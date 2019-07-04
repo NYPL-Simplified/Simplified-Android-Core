@@ -35,13 +35,8 @@ interface AccountProviderRegistryType {
 
   /**
    * Refresh the available account providers from all sources.
-   *
-   * @throws AccountProviderRegistryException If one or more sources failed _and_ the resulting
-   * set of account providers is empty
-   *
    */
 
-  @Throws(AccountProviderRegistryException::class)
   fun refresh()
 
   /**
@@ -51,7 +46,6 @@ interface AccountProviderRegistryType {
    * been called.
    */
 
-  @Throws(AccountProviderRegistryException::class)
   fun accountProviderDescriptions(): Map<URI, AccountProviderDescriptionType>
 
   /**
@@ -61,7 +55,6 @@ interface AccountProviderRegistryType {
    * been called.
    */
 
-  @Throws(AccountProviderRegistryException::class)
   fun findAccountProviderDescription(id: URI): AccountProviderDescriptionType? =
     this.accountProviderDescriptions()[id]
 

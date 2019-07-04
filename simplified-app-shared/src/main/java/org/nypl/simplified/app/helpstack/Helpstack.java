@@ -2,6 +2,7 @@ package org.nypl.simplified.app.helpstack;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.res.AssetManager;
 
 import com.io7m.jfunctional.Option;
@@ -45,7 +46,7 @@ public final class Helpstack implements HelpstackType
    */
 
   public static OptionType<HelpstackType> get(
-    final Application in_app,
+    final Context in_app,
     final AssetManager in_mgr)
   {
     NullCheck.notNull(in_app);
@@ -81,7 +82,7 @@ public final class Helpstack implements HelpstackType
   }
 
   private static OptionType<HelpstackType> getFromProperties(
-    final Application in_app,
+    final Context in_app,
     final Properties p)
     throws
     HelpstackConfigurationMissingParameter,

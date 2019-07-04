@@ -15,7 +15,6 @@ import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.SourceFailed
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.Updated
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryException
 import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
 import org.nypl.simplified.accounts.source.api.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.SourceResult
@@ -56,6 +55,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         MockAccountProviders.fakeProvider("urn:fake:0"),
         listOf())
 
+    registry.events.subscribe { e -> this.events.add(e) }
+
     val notFound =
       registry.findAccountProviderDescription(
         URI.create("urn:uuid:6ba13d1e-c790-4247-9c80-067c6a7257f0"))
@@ -64,7 +65,7 @@ abstract class AccountProviderDescriptionRegistryContract {
   }
 
   /**
-   * A crashing source causes an exception if no other sources work.
+   * A crashing source raises the right events.
    */
 
   @Test
@@ -74,8 +75,12 @@ abstract class AccountProviderDescriptionRegistryContract {
         MockAccountProviders.fakeProvider("urn:fake:0"),
         listOf(CrashingSource()))
 
-    this.expectedException.expect(AccountProviderRegistryException::class.java)
+    registry.events.subscribe { e -> this.events.add(e) }
     registry.refresh()
+
+    Assert.assertEquals(1, this.events.size)
+    val event = this.events[0] as SourceFailed
+    Assert.assertEquals(CrashingSource::class.java, event.clazz)
   }
 
   /**

@@ -98,7 +98,7 @@ class CatalogBookReadController(
           manifestFile = manifest.manifestFile,
           manifestURI = manifest.manifestURI,
           opdsEntry = this.entry.feedEntry,
-          theme = Simplified.getCurrentTheme().themeWithActionBar,
+          theme = Simplified.application.services().currentTheme.themeWithActionBar,
           bookID = this.id))
     } else {
       ErrorDialogUtilities.showError(

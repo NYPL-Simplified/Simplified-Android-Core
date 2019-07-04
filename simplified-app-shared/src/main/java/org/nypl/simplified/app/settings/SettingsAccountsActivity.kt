@@ -111,11 +111,11 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     this.adapterAccounts =
       AccountsArrayAdapter(
         targetContext = this,
-        picasso = Simplified.getLocalImageLoader(),
+        picasso = Simplified.application.services().imageLoader,
         adapterAccountsArray = this.adapterAccountsArray,
         inflater = inflater)
 
-    val profiles = Simplified.getProfilesController()
+    val profiles = Simplified.application.services().profilesController
     this.accountListView.adapter = this.adapterAccounts
     this.accountListView.setOnItemClickListener { adapterView, view, position, id ->
       this.onWantShowAccount(position, profiles)
@@ -237,7 +237,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       UIThread.checkIsUIThread()
 
       val accountProvider =
-        Simplified.getProfilesController()
+        Simplified.application.services()
+          .profilesController
           .profileCurrent()
           .account(account)
           .provider
@@ -250,7 +251,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       val iconView =
         currentAccountView.findViewById<ImageView>(R.id.cellIcon)
       val localImageLoader =
-        Simplified.getLocalImageLoader()
+        Simplified.application.services()
+          .imageLoader
 
       subtitleText.visibility = View.INVISIBLE
 
@@ -408,7 +410,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       UIThread.checkIsUIThread()
 
       val providers =
-        Simplified.getProfilesController()
+        Simplified.application.services()
+          .profilesController
           .profileCurrentlyUsedAccountProviders()
 
       this.adapterAccountsArray.clear()
@@ -439,7 +442,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     val adapter =
       AccountsArrayAdapter(
         targetContext = this,
-        picasso = Simplified.getLocalImageLoader(),
+        picasso = Simplified.application.services().imageLoader,
         adapterAccountsArray = availableAccountProvidersDescriptions,
         inflater = this.layoutInflater)
 
@@ -478,7 +481,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
      */
 
     val subscription =
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .accountEvents()
         .subscribe { event ->
           when (event) {
@@ -509,12 +513,15 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun determineAvailableAccountProviderDescriptions(): ArrayList<AccountProviderDescriptionType> {
     val usedAccountProviders =
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profileCurrentlyUsedAccountProviders()
         .map { p -> p.toDescription() }
 
     val availableAccountProviders =
-      ArrayList(Simplified.getAccountProviders().accountProviderDescriptions().values)
+      ArrayList(Simplified.application.services()
+        .accountProviderRegistry
+        .accountProviderDescriptions().values)
 
     availableAccountProviders.removeAll(usedAccountProviders)
     availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
@@ -548,7 +555,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   }
 
   private fun tryCreateAccount(accountProvider: AccountProviderDescriptionType): Unit {
-    Simplified.getProfilesController().profileAccountCreate(accountProvider.metadata.id)
+    Simplified.application.services()
+      .profilesController
+      .profileAccountCreate(accountProvider.metadata.id)
     return Unit.unit()
   }
 
@@ -560,10 +569,15 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     try {
       val usedAccountProviders =
-        Simplified.getProfilesController().profileCurrentlyUsedAccountProviders()
+        Simplified.application.services()
+          .profilesController
+          .profileCurrentlyUsedAccountProviders()
+
       val availableAccountProviders =
         ImmutableList.sortedCopyOf(
-          Simplified.getAccountProviders().accountProviderDescriptions().values)
+          Simplified.application.services()
+            .accountProviderRegistry
+            .accountProviderDescriptions().values)
 
       if (usedAccountProviders.size != availableAccountProviders.size) {
         val inflater = this.menuInflater

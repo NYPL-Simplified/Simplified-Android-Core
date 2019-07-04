@@ -7,6 +7,11 @@ import java.net.URI
 
 /**
  * A source of account provider descriptions.
+ *
+ * An account provider source delivers lists of account providers on request, and is responsible
+ * for implementing the logic required to resolve an account provider description into a full
+ * account provider. Sources _SHOULD NOT_ cache their content in memory unless they are guaranteed
+ * to return identical content each and every time they are asked for content.
  */
 
 interface AccountProviderSourceType {

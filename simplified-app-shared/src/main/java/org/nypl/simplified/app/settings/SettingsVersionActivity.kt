@@ -36,7 +36,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
 
-    this.setTheme(Simplified.getCurrentTheme().themeWithActionBar)
+    this.setTheme(Simplified.application.services().currentTheme.themeWithActionBar)
     this.setContentView(R.layout.settings_version)
 
     this.developerOptions =
@@ -116,7 +116,10 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
     key.text = "Adobe ACS"
 
-    val executor = Simplified.getAdobeDRMExecutor()
+    val executor =
+      Simplified.application.services()
+        .adobeExecutor
+
     if (executor == null) {
       value.setTextColor(ContextCompat.getColor(this, R.color.simplified_material_red_primary))
       value.text = "Unsupported"

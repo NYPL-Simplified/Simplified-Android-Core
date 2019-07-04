@@ -14,8 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
@@ -50,7 +48,8 @@ public class ReportIssueActivity extends AppCompatActivity {
 
     try {
       final ProfileReadableType profile =
-        Simplified.getProfilesController()
+        Simplified.getServices()
+          .getProfilesController()
           .profileCurrent();
 
       final Bundle extras = getIntent().getExtras();

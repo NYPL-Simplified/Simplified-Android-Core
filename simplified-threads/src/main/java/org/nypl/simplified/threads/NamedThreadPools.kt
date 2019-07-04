@@ -1,6 +1,8 @@
 package org.nypl.simplified.threads
 
-import java.util.concurrent.ExecutorService
+import com.google.common.util.concurrent.ListeningExecutorService
+import com.google.common.util.concurrent.ListeningScheduledExecutorService
+import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 
@@ -8,44 +10,44 @@ import java.util.concurrent.ThreadFactory
  * Functions to create thread pools.
  */
 
-class NamedThreadPools {
+object NamedThreadPools {
 
-  companion object {
+  /**
+   * Create a named thread pool.
+   *
+   * @param count The maximum number of threads in the pool
+   * @param base The base name of the threads
+   * @param priority The thread priority
+   *
+   * @return An executor service
+   */
 
-    /**
-     * Create a named thread pool.
-     *
-     * @param count The maximum number of threads in the pool
-     * @param base The base name of the threads
-     * @param priority The thread priority
-     *
-     * @return An executor service
-     */
+  @JvmStatic
+  fun namedThreadPool(
+    count: Int,
+    base: String,
+    priority: Int): ListeningScheduledExecutorService {
 
-    fun namedThreadPool(
-      count: Int,
-      base: String,
-      priority: Int): ExecutorService {
-
-      val delegate = Executors.defaultThreadFactory()
-      val named = object : ThreadFactory {
-        private var id: Int = 0
-
-        override fun newThread(runnable: Runnable): Thread {
-          val t = delegate.newThread {
-            android.os.Process.setThreadPriority(priority)
-            runnable.run()
-          }
-          t.name = String.format("simplified-%s-tasks-%d", base, this.id)
-          ++this.id
-          return t
-        }
-      }
-
-      return Executors.newFixedThreadPool(count, named)
-    }
-
+    return MoreExecutors.listeningDecorator(
+      Executors.newScheduledThreadPool(count, namedThreadPoolFactory(base, priority)))
   }
 
+  @JvmStatic
+  fun namedThreadPoolFactory(base: String,
+                             priority: Int): ThreadFactory {
+    val delegate = Executors.defaultThreadFactory()
+    return object : ThreadFactory {
+      private var id: Int = 0
 
+      override fun newThread(runnable: Runnable): Thread {
+        val t = delegate.newThread {
+          android.os.Process.setThreadPriority(priority)
+          runnable.run()
+        }
+        t.name = String.format("simplified-%s-tasks-%d", base, this.id)
+        ++this.id
+        return t
+      }
+    }
+  }
 }

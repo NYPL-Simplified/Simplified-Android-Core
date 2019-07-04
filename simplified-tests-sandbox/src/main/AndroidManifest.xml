@@ -25,6 +25,11 @@
       android:name="org.nypl.simplified.tests.sandbox.LoginActivity"
       android:theme="@style/SimplifiedTheme_ActionBar_Blue"
       android:exported="true"/>
+
+    <activity
+      android:name="org.nypl.simplified.tests.sandbox.SplashActivity"
+      android:theme="@style/SimplifiedTheme_ActionBar_Blue"
+      android:exported="true"/>
   </application>
 
 </manifest>

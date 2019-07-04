@@ -97,7 +97,8 @@ class AudioBookLoadingFragment : Fragment() {
     val fragment = this
     if (this.listener.onLoadingFragmentIsNetworkConnectivityAvailable()) {
       val credentials =
-        Simplified.getProfilesController()
+        Simplified.application.services()
+          .profilesController
           .profileAccountForBook(this.playerParameters.bookID)
           .loginState
           .credentials
@@ -178,7 +179,8 @@ class AudioBookLoadingFragment : Fragment() {
      */
 
     val handle =
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profileAccountForBook(this.playerParameters.bookID)
         .bookDatabase
         .entry(this.playerParameters.bookID)

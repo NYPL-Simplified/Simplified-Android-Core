@@ -38,11 +38,11 @@ public final class HelpActivity extends NavigationDrawerActivity {
   protected void onCreate(final @Nullable Bundle state) {
     super.onCreate(state);
 
-    final OptionType<HelpstackType> helpstack = Simplified.getHelpStack();
-    helpstack.map_(hs -> {
-      hs.show(HelpActivity.this);
+    final HelpstackType helpstack = Simplified.getServices().getHelpStack();
+    if (helpstack != null) {
+      helpstack.show(HelpActivity.this);
       this.finish();
-    });
+    }
   }
 
 }
