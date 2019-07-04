@@ -22,6 +22,8 @@ import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.slf4j.LoggerFactory
+import android.view.animation.AnimationUtils
+
 
 class SplashFragment : Fragment() {
 
@@ -111,9 +113,9 @@ class SplashFragment : Fragment() {
      */
 
     this.viewsForImage.image.setImageResource(this.parameters.splashImageResource)
-    this.viewsForImage.image.visibility = View.INVISIBLE
-    this.viewsForImage.progress.visibility = View.VISIBLE
-    this.viewsForImage.text.visibility = View.VISIBLE
+    this.viewsForImage.image.visibility = View.VISIBLE
+    this.viewsForImage.progress.visibility = View.INVISIBLE
+    this.viewsForImage.text.visibility = View.INVISIBLE
     this.viewsForImage.text.text = ""
 
     /*
@@ -122,16 +124,9 @@ class SplashFragment : Fragment() {
      */
 
     this.viewsForImage.image.setOnClickListener {
-      this.viewsForImage.image.visibility = View.INVISIBLE
       this.viewsForImage.progress.visibility = View.VISIBLE
-    }
-
-    /*
-     * Clicking the progress bar makes the text visible.
-     */
-
-    this.viewsForImage.progress.setOnClickListener {
       this.viewsForImage.text.visibility = View.VISIBLE
+      this.viewsForImage.image.animation = AnimationUtils.loadAnimation(context, R.anim.zoom_fade)
     }
   }
 
