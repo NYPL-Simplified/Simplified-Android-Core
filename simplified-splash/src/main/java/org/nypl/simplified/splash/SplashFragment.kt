@@ -124,10 +124,14 @@ class SplashFragment : Fragment() {
      */
 
     this.viewsForImage.image.setOnClickListener {
-      this.viewsForImage.progress.visibility = View.VISIBLE
-      this.viewsForImage.text.visibility = View.VISIBLE
-      this.viewsForImage.image.animation = AnimationUtils.loadAnimation(context, R.anim.zoom_fade)
+      this.popImageView()
     }
+  }
+
+  private fun popImageView() {
+    this.viewsForImage.progress.visibility = View.VISIBLE
+    this.viewsForImage.text.visibility = View.VISIBLE
+    this.viewsForImage.image.animation = AnimationUtils.loadAnimation(context, R.anim.zoom_fade)
   }
 
   private fun configureViewsForEULA(eula: EULAType) {
@@ -215,6 +219,10 @@ class SplashFragment : Fragment() {
       }
 
       is BootEvent.BootFailed -> {
+        if (this.viewsForImage.image.alpha > 0.0) {
+          this.popImageView()
+        }
+
         // XXX: We need to do better than this.
         // Print a useful message rather than a raw exception message, and allow
         // the user to do something such as submitting a report.
