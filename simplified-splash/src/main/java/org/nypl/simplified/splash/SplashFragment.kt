@@ -4,10 +4,12 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.support.annotation.UiThread
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -16,13 +18,15 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.slf4j.LoggerFactory
-import android.view.animation.AnimationUtils
+import java.util.concurrent.TimeUnit
 
 
 class SplashFragment : Fragment() {
@@ -46,6 +50,7 @@ class SplashFragment : Fragment() {
   private lateinit var bootSubscription: ObservableSubscriptionType<BootEvent>
   private lateinit var viewsForImage: ViewsImage
   private lateinit var viewsForEULA: ViewsEULA
+  private lateinit var bootFuture: ListenableFuture<*>
 
   private class ViewsImage(
     val container: View,
@@ -68,6 +73,7 @@ class SplashFragment : Fragment() {
   override fun onAttach(context: Context?) {
     super.onAttach(context)
     this.listener = this.activity as SplashListenerType
+    this.bootFuture = this.listener.onSplashWantBootFuture()
   }
 
   override fun onCreateView(
@@ -153,7 +159,7 @@ class SplashFragment : Fragment() {
     this.viewsForEULA.eulaWebView.settings.allowUniversalAccessFromFileURLs = false
     this.viewsForEULA.eulaWebView.settings.javaScriptEnabled = false
 
-    this.viewsForEULA.eulaWebView.webViewClient = object: WebViewClient() {
+    this.viewsForEULA.eulaWebView.webViewClient = object : WebViewClient() {
       override fun onReceivedError(
         view: WebView?,
         errorCode: Int,
@@ -179,6 +185,20 @@ class SplashFragment : Fragment() {
     this.bootSubscription =
       this.listener.onSplashWantBootEvents()
         .subscribe { event -> this.onBootEvent(event) }
+
+    /*
+     * Subscribe to the boot future specifically so that we don't risk missing the delivery
+     * of important "boot completed" or "boot failed" messages.
+     */
+
+    this.bootFuture.addListener(Runnable {
+      try {
+        this.bootFuture.get(1L, TimeUnit.SECONDS)
+        this.onBootEvent(BootEvent.BootCompleted(""))
+      } catch (e: Throwable) {
+        this.onBootEvent(BootEvent.BootFailed(e.message ?: "", Exception(e)))
+      }
+    }, MoreExecutors.directExecutor())
   }
 
   override fun onStop() {
@@ -192,45 +212,52 @@ class SplashFragment : Fragment() {
     }
   }
 
+  @UiThread
   private fun onBootEventUI(event: BootEvent) {
     return when (event) {
       is BootEvent.BootInProgress -> {
         this.viewsForImage.text.text = event.message
       }
 
-      is BootEvent.BootCompleted -> {
-        this.viewsForImage.progress.isIndeterminate = false
-        this.viewsForImage.progress.progress = 100
-        this.viewsForImage.text.text = event.message
-
-        val eulaProvided = this.listener.onSplashEULAIsProvided()
-        if (!eulaProvided) {
-          this.onFinishEULASuccessfully()
-          return
-        }
-
-        val eula = this.listener.onSplashEULARequested()
-        if (eula.eulaHasAgreed()) {
-          this.onFinishEULASuccessfully()
-          return
-        }
-
-        this.configureViewsForEULA(eula)
-      }
-
-      is BootEvent.BootFailed -> {
-        if (this.viewsForImage.image.alpha > 0.0) {
-          this.popImageView()
-        }
-
-        // XXX: We need to do better than this.
-        // Print a useful message rather than a raw exception message, and allow
-        // the user to do something such as submitting a report.
-        this.viewsForImage.progress.isIndeterminate = false
-        this.viewsForImage.progress.progress = 100
-        this.viewsForImage.text.text = event.message
-      }
+      is BootEvent.BootCompleted ->
+        this.onBootEventCompletedUI(event.message)
+      is BootEvent.BootFailed ->
+        this.onBootEventFailedUI(event)
     }
+  }
+
+  @UiThread
+  private fun onBootEventFailedUI(event: BootEvent.BootFailed) {
+    if (this.viewsForImage.image.alpha > 0.0) {
+      this.popImageView()
+    }
+
+    // XXX: We need to do better than this.
+    // Print a useful message rather than a raw exception message, and allow
+    // the user to do something such as submitting a report.
+    this.viewsForImage.progress.isIndeterminate = false
+    this.viewsForImage.progress.progress = 100
+    this.viewsForImage.text.text = event.message
+  }
+
+  private fun onBootEventCompletedUI(message: String) {
+    this.viewsForImage.progress.isIndeterminate = false
+    this.viewsForImage.progress.progress = 100
+    this.viewsForImage.text.text = message
+
+    val eulaProvided = this.listener.onSplashEULAIsProvided()
+    if (!eulaProvided) {
+      this.onFinishEULASuccessfully()
+      return
+    }
+
+    val eula = this.listener.onSplashEULARequested()
+    if (eula.eulaHasAgreed()) {
+      this.onFinishEULASuccessfully()
+      return
+    }
+
+    this.configureViewsForEULA(eula)
   }
 
   /**
