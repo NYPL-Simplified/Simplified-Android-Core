@@ -249,7 +249,7 @@ class CatalogFeedWithoutGroups(
      * If the user is close enough to the end of the list, load the next feed.
      */
 
-    if (CatalogFeedWithoutGroups.shouldLoadNext(firstVisibleItem, totalCount)) {
+    if (shouldLoadNext(firstVisibleItem, totalCount)) {
       this.loadNext(this.uriNext)
     }
   }

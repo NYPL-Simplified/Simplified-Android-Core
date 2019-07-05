@@ -18,6 +18,7 @@ description = 'simplified-accounts-database-api'
 
 dependencies {
   api project(':simplified-accounts-api')
+  api project(':simplified-accounts-registry-api')
   api project(':simplified-books-database')
   api project(':simplified-observable')
 

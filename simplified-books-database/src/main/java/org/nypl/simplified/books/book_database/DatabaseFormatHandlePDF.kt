@@ -19,12 +19,12 @@ internal class DatabaseFormatHandlePDF internal constructor(
     File(this.parameters.directory, "pdf-book.pdf")
 
   private val formatLock: Any = Any()
-  private var formatRef: org.nypl.simplified.books.api.BookFormat.BookFormatPDF =
+  private var formatRef: BookFormat.BookFormatPDF =
     synchronized(this.formatLock) {
       loadInitial(fileBook = this.fileBook)
     }
 
-  override val format: org.nypl.simplified.books.api.BookFormat.BookFormatPDF
+  override val format: BookFormat.BookFormatPDF
     get() = synchronized(this.formatLock) { this.formatRef }
 
   override val formatDefinition: BookFormats.BookFormatDefinition
@@ -53,8 +53,8 @@ internal class DatabaseFormatHandlePDF internal constructor(
   companion object {
 
     @Throws(IOException::class)
-    private fun loadInitial(fileBook: File): org.nypl.simplified.books.api.BookFormat.BookFormatPDF {
-      return org.nypl.simplified.books.api.BookFormat.BookFormatPDF(file = if (fileBook.isFile) fileBook else null)
+    private fun loadInitial(fileBook: File): BookFormat.BookFormatPDF {
+      return BookFormat.BookFormatPDF(file = if (fileBook.isFile) fileBook else null)
     }
   }
 }

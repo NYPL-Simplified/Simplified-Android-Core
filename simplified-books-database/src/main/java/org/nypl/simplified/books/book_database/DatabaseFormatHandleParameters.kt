@@ -21,7 +21,7 @@ internal data class DatabaseFormatHandleParameters(
    * The ID of the book to which the owning database entry belongs.
    */
 
-  val bookID: org.nypl.simplified.books.api.BookID,
+  val bookID: BookID,
 
   /**
    * The directory containing data for the database entry.
@@ -35,7 +35,7 @@ internal data class DatabaseFormatHandleParameters(
    * of book states.
    */
 
-  val onUpdated: (org.nypl.simplified.books.api.BookFormat) -> Unit,
+  val onUpdated: (BookFormat) -> Unit,
 
   /**
    * The database entry that owns the format handle.

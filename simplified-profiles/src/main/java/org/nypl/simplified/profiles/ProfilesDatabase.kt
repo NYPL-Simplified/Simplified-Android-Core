@@ -39,7 +39,7 @@ import javax.annotation.concurrent.GuardedBy
 internal class ProfilesDatabase internal constructor(
   private val accountBundledCredentials: AccountBundledCredentialsType,
   private val accountEvents: ObservableType<AccountEvent>,
-  private val accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+  private val accountProviders: AccountProviderRegistryType,
   private val accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
   private val accountsDatabases: AccountsDatabaseFactoryType,
   private val anonymousProfileEnabled: ProfilesDatabaseType.AnonymousProfileEnabled,

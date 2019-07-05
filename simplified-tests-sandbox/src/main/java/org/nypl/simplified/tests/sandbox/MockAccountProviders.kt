@@ -18,7 +18,7 @@ object MockAccountProviders {
   private val logger = LoggerFactory.getLogger(MockAccountProviders::class.java)
 
   fun findAccountProviderDangerously (
-    registry: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+    registry: AccountProviderRegistryType,
     id: URI): AccountProviderType {
     val accountProviderDescription =
       registry.findAccountProviderDescription(id)
@@ -39,7 +39,7 @@ object MockAccountProviders {
   }
 
   fun findAccountProviderDangerously(
-    registry: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+    registry: AccountProviderRegistryType,
     id: String): AccountProviderType =
     this.findAccountProviderDangerously(registry, URI.create(id))
 
@@ -81,7 +81,7 @@ object MockAccountProviders {
     return URI.create("urn:fake:auto-4")
   }
 
-  fun fakeAccountProviders(): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  fun fakeAccountProviders(): AccountProviderRegistryType {
     val fake0 = fakeProvider("urn:fake:0")
     val fake1 = fakeProvider("urn:fake:1")
     val fake2 = fakeProvider("urn:fake:2")
@@ -94,7 +94,7 @@ object MockAccountProviders {
     providers[fake3.id] = fake3
 
     val registry =
-      org.nypl.simplified.accounts.registry.AccountProviderRegistry.createFrom(Mockito.mock(Context::class.java), listOf(), fake0)
+      AccountProviderRegistry.createFrom(Mockito.mock(Context::class.java), listOf(), fake0)
 
     for (provider in providers.values) {
       registry.updateProvider(provider)
@@ -103,7 +103,7 @@ object MockAccountProviders {
     return registry
   }
 
-  fun fakeAccountProvidersWithAutomatic(): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  fun fakeAccountProvidersWithAutomatic(): AccountProviderRegistryType {
     val fake0 = fakeProvider("urn:fake:0")
     val fake1 = fakeProvider("urn:fake:1")
     val fake2 = fakeProvider("urn:fake:2")
@@ -118,7 +118,7 @@ object MockAccountProviders {
     providers[fake4.id] = fake4
 
     val registry =
-      org.nypl.simplified.accounts.registry.AccountProviderRegistry.createFrom(Mockito.mock(Context::class.java), listOf(), fake0)
+      AccountProviderRegistry.createFrom(Mockito.mock(Context::class.java), listOf(), fake0)
 
     for (provider in providers.values) {
       registry.updateProvider(provider)
@@ -131,7 +131,7 @@ object MockAccountProviders {
     return fakeProvider(id).copy(addAutomatically = true)
   }
 
-  fun fakeAccountProvidersMissing0(): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  fun fakeAccountProvidersMissing0(): AccountProviderRegistryType {
     val fake1 = fakeProvider("urn:fake:1")
     val fake2 = fakeProvider("urn:fake:2")
     val fake3 = fakeAuthProvider("urn:fake-auth:0")
@@ -142,7 +142,7 @@ object MockAccountProviders {
     providers[fake3.id] = fake3
 
     val registry =
-      org.nypl.simplified.accounts.registry.AccountProviderRegistry.createFrom(Mockito.mock(Context::class.java), listOf(), fake1)
+      AccountProviderRegistry.createFrom(Mockito.mock(Context::class.java), listOf(), fake1)
 
     for (provider in providers.values) {
       registry.updateProvider(provider)
@@ -151,7 +151,7 @@ object MockAccountProviders {
     return registry
   }
 
-  fun fakeAccountProvidersMissing1(): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  fun fakeAccountProvidersMissing1(): AccountProviderRegistryType {
     val fake0 = fakeProvider("urn:fake:0")
     val fake2 = fakeProvider("urn:fake:2")
     val fake3 = fakeAuthProvider("urn:fake-auth:0")
@@ -162,7 +162,7 @@ object MockAccountProviders {
     providers[fake3.id] = fake3
 
     val registry =
-      org.nypl.simplified.accounts.registry.AccountProviderRegistry.createFrom(Mockito.mock(Context::class.java), listOf(), fake0)
+      AccountProviderRegistry.createFrom(Mockito.mock(Context::class.java), listOf(), fake0)
 
     for (provider in providers.values) {
       registry.updateProvider(provider)

@@ -114,7 +114,7 @@ object BookmarkJSON {
     bookmarks: List<Bookmark>): ArrayNode {
 
     val node = objectMapper.createArrayNode()
-    bookmarks.forEach { bookmark -> node.add(BookmarkJSON.serializeToJSON(objectMapper, bookmark)) }
+    bookmarks.forEach { bookmark -> node.add(serializeToJSON(objectMapper, bookmark)) }
     return node
   }
 
@@ -132,7 +132,7 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     description: Bookmark): String {
 
-    val json = BookmarkJSON.serializeToJSON(objectMapper, description)
+    val json = serializeToJSON(objectMapper, description)
     val output = ByteArrayOutputStream(1024)
     JSONSerializerUtilities.serialize(json, output)
     return output.toString("UTF-8")
@@ -152,7 +152,7 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     bookmarks: List<Bookmark>): String {
 
-    val json = BookmarkJSON.serializeToJSON(objectMapper, bookmarks)
+    val json = serializeToJSON(objectMapper, bookmarks)
     val output = ByteArrayOutputStream(1024)
     val writer = objectMapper.writerWithDefaultPrettyPrinter()
     writer.writeValue(output, json)

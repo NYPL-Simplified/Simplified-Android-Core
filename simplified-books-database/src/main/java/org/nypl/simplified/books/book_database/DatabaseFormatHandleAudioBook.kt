@@ -42,7 +42,7 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
     File(this.parameters.directory, "audiobook-position.json.tmp")
 
   private val formatLock: Any = Any()
-  private var formatRef: org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook =
+  private var formatRef: BookFormat.BookFormatAudioBook =
     synchronized(this.formatLock) {
       loadInitial(
         fileManifest = this.fileManifest,
@@ -50,7 +50,7 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
         filePosition = this.filePosition)
     }
 
-  override val format: org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
+  override val format: BookFormat.BookFormatAudioBook
     get() = synchronized(this.formatLock) { this.formatRef }
 
   override fun deleteBookData() {
@@ -130,7 +130,7 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
 
       this.formatRef =
         this.formatRef.copy(
-          manifest = org.nypl.simplified.books.api.BookFormat.AudioBookManifestReference(
+          manifest = BookFormat.AudioBookManifestReference(
             manifestURI = manifestURI,
             manifestFile = this.fileManifest))
       this.formatRef
@@ -170,8 +170,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
     private fun loadInitial(
       fileManifest: File,
       fileManifestURI: File,
-      filePosition: File): org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook {
-      return org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook(
+      filePosition: File): BookFormat.BookFormatAudioBook {
+      return BookFormat.BookFormatAudioBook(
         manifest = loadManifestIfNecessary(fileManifest, fileManifestURI),
         position = loadPositionIfNecessary(filePosition))
     }
@@ -207,7 +207,7 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
 
     private fun loadManifestIfNecessary(
       fileManifest: File,
-      fileManifestURI: File): org.nypl.simplified.books.api.BookFormat.AudioBookManifestReference? {
+      fileManifestURI: File): BookFormat.AudioBookManifestReference? {
       return if (fileManifest.isFile) {
         loadManifest(fileManifest, fileManifestURI)
       } else {
@@ -217,8 +217,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
 
     private fun loadManifest(
       fileManifest: File,
-      fileManifestURI: File): org.nypl.simplified.books.api.BookFormat.AudioBookManifestReference {
-      return org.nypl.simplified.books.api.BookFormat.AudioBookManifestReference(
+      fileManifestURI: File): BookFormat.AudioBookManifestReference {
+      return BookFormat.AudioBookManifestReference(
         manifestFile = fileManifest,
         manifestURI = URI.create(FileUtilities.fileReadUTF8(fileManifestURI)))
     }

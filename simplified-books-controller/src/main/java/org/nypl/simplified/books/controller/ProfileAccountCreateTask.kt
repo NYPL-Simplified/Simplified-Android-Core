@@ -22,7 +22,7 @@ import java.util.concurrent.Callable
 class ProfileAccountCreateTask(
   private val accountEvents: ObservableType<AccountEvent>,
   private val accountProviderID: URI,
-  private val accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+  private val accountProviders: AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
   private val strings: ProfileAccountCreationStringResourcesType
 ) : Callable<AccountCreateTaskResult> {

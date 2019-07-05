@@ -67,14 +67,14 @@ object SimplifiedBearerTokenJSON {
   fun deserializeFromJSON(
     now: LocalDateTime,
     node: JsonNode): SimplifiedBearerToken {
-    return SimplifiedBearerTokenJSON.deserializeFromJSON(now, JSONParserUtilities.checkObject(null, node))
+    return deserializeFromJSON(now, JSONParserUtilities.checkObject(null, node))
   }
 
   fun deserializeFromText(
     objectMapper: ObjectMapper,
     now: LocalDateTime,
     text: String): SimplifiedBearerToken {
-    return SimplifiedBearerTokenJSON.deserializeFromJSON(now, objectMapper.readTree(text))
+    return deserializeFromJSON(now, objectMapper.readTree(text))
   }
 
   fun deserializeFromFile(

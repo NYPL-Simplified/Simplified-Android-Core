@@ -21,7 +21,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.joda.time.LocalDate;
-import org.nypl.simplified.accounts.source.spi.AccountProviderRegistryType;
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;

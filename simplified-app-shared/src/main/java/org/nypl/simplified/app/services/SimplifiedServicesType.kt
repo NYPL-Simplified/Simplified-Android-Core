@@ -48,7 +48,7 @@ interface SimplifiedServicesType {
    * @return The registry of account providers
    */
 
-  val accountProviderRegistry: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+  val accountProviderRegistry: AccountProviderRegistryType
 
   /**
    * @return The network connectivity interface

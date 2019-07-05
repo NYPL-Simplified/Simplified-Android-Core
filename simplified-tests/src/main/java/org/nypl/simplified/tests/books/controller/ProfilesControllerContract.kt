@@ -109,7 +109,7 @@ abstract class ProfilesControllerContract {
 
   private fun controller(
     profiles: ProfilesDatabaseType,
-    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+    accountProviders: AccountProviderRegistryType
   ): ProfilesControllerType {
 
     val parser =

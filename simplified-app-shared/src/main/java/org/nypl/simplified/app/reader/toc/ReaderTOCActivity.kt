@@ -51,7 +51,7 @@ class ReaderTOCActivity : AppCompatActivity(), ReaderTOCSelectionListenerType {
 
   override fun onTOCItemSelected(selection: ReaderTOCSelection) {
     val intent = Intent()
-    intent.putExtra(ReaderTOCActivity.TOC_SELECTED_ID, selection)
+    intent.putExtra(TOC_SELECTED_ID, selection)
     this.setResult(Activity.RESULT_OK, intent)
     this.finish()
   }
@@ -94,8 +94,8 @@ class ReaderTOCActivity : AppCompatActivity(), ReaderTOCSelectionListenerType {
 
       val i = Intent(Intent.ACTION_PICK)
       i.setClass(from, ReaderTOCActivity::class.java)
-      i.putExtra(ReaderTOCActivity.PARAMETERS_ID, parameters)
-      from.startActivityForResult(i, ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE)
+      i.putExtra(PARAMETERS_ID, parameters)
+      from.startActivityForResult(i, TOC_SELECTION_REQUEST_CODE)
     }
   }
 }

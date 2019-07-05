@@ -30,7 +30,7 @@ interface AccountsDatabaseFactoryType {
   fun openDatabase(
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+    accountProviders: AccountProviderRegistryType,
     bookDatabases: BookDatabaseFactoryType,
     context: Context,
     directory: File): AccountsDatabaseType
@@ -50,7 +50,7 @@ interface AccountsDatabaseFactoryType {
   fun openDatabase(
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+    accountProviders: AccountProviderRegistryType,
     context: Context,
     directory: File): AccountsDatabaseType
 }

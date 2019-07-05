@@ -43,10 +43,10 @@ class BookDatabase private constructor(
 
     internal val mapsLock: Any = Any()
     @GuardedBy("mapsLock")
-    internal val entries: ConcurrentSkipListMap<org.nypl.simplified.books.api.BookID, BookDatabaseEntry> =
+    internal val entries: ConcurrentSkipListMap<BookID, BookDatabaseEntry> =
       ConcurrentSkipListMap()
     @GuardedBy("mapsLock")
-    internal val entriesRead: SortedMap<org.nypl.simplified.books.api.BookID, org.nypl.simplified.books.book_database.api.BookDatabaseEntryType> =
+    internal val entriesRead: SortedMap<BookID, org.nypl.simplified.books.book_database.api.BookDatabaseEntryType> =
       Collections.unmodifiableSortedMap(this.entries)
 
     internal fun clear() {
@@ -56,7 +56,7 @@ class BookDatabase private constructor(
       }
     }
 
-    internal fun delete(bookID: org.nypl.simplified.books.api.BookID) {
+    internal fun delete(bookID: BookID) {
       synchronized(this.mapsLock) {
         LOG.debug("BookMaps.delete: {}", bookID.value())
         this.entries.remove(bookID)
@@ -75,7 +75,7 @@ class BookDatabase private constructor(
     return this.owner
   }
 
-  override fun books(): SortedSet<org.nypl.simplified.books.api.BookID> {
+  override fun books(): SortedSet<BookID> {
     synchronized(this.maps.mapsLock) {
       return TreeSet(this.maps.entries.keys)
     }
@@ -94,7 +94,7 @@ class BookDatabase private constructor(
 
   @Throws(org.nypl.simplified.books.book_database.api.BookDatabaseException::class)
   override fun createOrUpdate(
-    id: org.nypl.simplified.books.api.BookID,
+    id: BookID,
     newEntry: OPDSAcquisitionFeedEntry): org.nypl.simplified.books.book_database.api.BookDatabaseEntryType {
 
     synchronized(this.maps.mapsLock) {
@@ -111,7 +111,7 @@ class BookDatabase private constructor(
           JSONSerializerUtilities.serializeToString(this.serializer.serializeFeedEntry(newEntry)))
 
         val book =
-          org.nypl.simplified.books.api.Book(
+          Book(
             id = id,
             account = this.owner,
             cover = null,
@@ -136,7 +136,7 @@ class BookDatabase private constructor(
   }
 
   @Throws(org.nypl.simplified.books.book_database.api.BookDatabaseException::class)
-  override fun entry(id: org.nypl.simplified.books.api.BookID): org.nypl.simplified.books.book_database.api.BookDatabaseEntryType {
+  override fun entry(id: BookID): org.nypl.simplified.books.book_database.api.BookDatabaseEntryType {
     synchronized(this.maps.mapsLock) {
       return this.maps.entries[id] ?: throw org.nypl.simplified.books.book_database.api.BookDatabaseException(
         "Nonexistent book entry: " + id.value(), emptyList())
@@ -224,7 +224,7 @@ class BookDatabase private constructor(
           return null
         }
 
-        val bookId = org.nypl.simplified.books.api.BookID.create(name)
+        val bookId = BookID.create(name)
         val fileMeta = File(directory, "meta.json")
         val entry: OPDSAcquisitionFeedEntry =
           FileInputStream(fileMeta).use { stream ->
@@ -245,7 +245,7 @@ class BookDatabase private constructor(
         }
 
         val book =
-          org.nypl.simplified.books.api.Book(
+          Book(
             id = bookId,
             account = accountID,
             cover = cover,

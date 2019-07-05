@@ -134,7 +134,7 @@ abstract class BooksControllerContract {
     books: BookRegistryType,
     profiles: ProfilesDatabaseType,
     downloader: DownloaderType,
-    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+    accountProviders: AccountProviderRegistryType,
     timerExec: ExecutorService,
     patronUserProfileParsers: PatronUserProfileParsersType
   ): BooksControllerType {

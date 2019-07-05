@@ -360,7 +360,7 @@ class AccountsDatabase private constructor(
       context: Context,
       accountEvents: ObservableType<AccountEvent>,
       bookDatabases: BookDatabaseFactoryType,
-      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+      accountProviders: AccountProviderRegistryType,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       directory: File): AccountsDatabaseType {
 
@@ -415,7 +415,7 @@ class AccountsDatabase private constructor(
       accountsByProvider: SortedMap<URI, Account>,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       accountEvents: ObservableType<AccountEvent>,
-      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+      accountProviders: AccountProviderRegistryType,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       directory: File,
@@ -545,7 +545,7 @@ class AccountsDatabase private constructor(
     private fun openOneAccount(
       accountEvents: ObservableType<AccountEvent>,
       accountIdName: String,
-      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+      accountProviders: AccountProviderRegistryType,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       credentialsStore: AccountAuthenticationCredentialsStoreType,
