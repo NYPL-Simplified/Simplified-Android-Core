@@ -9,11 +9,7 @@ import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSerializersType
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
-import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
-import org.nypl.simplified.accounts.api.AccountProviderResolutionResult
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerConnectionFailure
@@ -27,7 +23,6 @@ import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.parser.api.ParseResult
-import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -179,7 +174,7 @@ class AccountProviderSourceNYPLRegistry(
               result.result.providers.size,
               result.warnings.size)
             result.result.providers
-              .map { provider -> Pair(provider.id, Description(provider)) }
+              .map { provider -> Pair(provider.id, AccountProviderSourceNYPLRegistryDescription(provider)) }
               .toMap()
           }
         }
@@ -221,28 +216,9 @@ class AccountProviderSourceNYPLRegistry(
         !results.containsKey(id),
         "ID $id must not already be present in the results")
 
-      results[id] = Description(resultMetadata)
+      results[id] = AccountProviderSourceNYPLRegistryDescription(resultMetadata)
     }
     return results.toMap()
-  }
-
-  /**
-   * An account provider description augmented with the logic needed to resolve the description
-   * into a full provider.
-   */
-
-  private class Description(
-    override val metadata: AccountProviderDescriptionMetadata) : AccountProviderDescriptionType {
-
-    override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-      val taskRecorder =
-        TaskRecorder.create<AccountProviderResolutionErrorDetails>()
-
-      taskRecorder.beginNewStep("Resolving...")
-      taskRecorder.currentStepFailed("Failed!", null, null)
-      onProgress.invoke(this.metadata.id, "Resolving...")
-      return AccountProviderResolutionResult(null, taskRecorder.finish())
-    }
   }
 
   private fun fetchAndParse(target: URI): AccountProviderDescriptionCollection {
