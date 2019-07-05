@@ -10,8 +10,7 @@ import java.net.URI
  *
  * An account provider source delivers lists of account providers on request, and is responsible
  * for implementing the logic required to resolve an account provider description into a full
- * account provider. Sources _SHOULD NOT_ cache their content in memory unless they are guaranteed
- * to return identical content each and every time they are asked for content.
+ * account provider.
  */
 
 interface AccountProviderSourceType {
@@ -31,10 +30,12 @@ interface AccountProviderSourceType {
       : SourceResult()
 
     /**
-     * Querying the source failed.
+     * Querying the source failed. Sources are permitted to result partial results
+     * in the case of failure.
      */
 
     data class SourceFailed(
+      val results: Map<URI, AccountProviderDescriptionType>,
       val exception: Exception)
       : SourceResult()
   }

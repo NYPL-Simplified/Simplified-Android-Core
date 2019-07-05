@@ -4,7 +4,10 @@ import android.content.Context
 import com.google.common.base.Preconditions
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.*
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.Updated
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableReadableType
@@ -22,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 class AccountProviderRegistry private constructor(
   private val context: Context,
   private val sources: List<AccountProviderSourceType>,
-  override val defaultProvider: AccountProviderType) : org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  override val defaultProvider: AccountProviderType) : AccountProviderRegistryType {
 
   @Volatile
   private var initialized = false
@@ -34,10 +37,10 @@ class AccountProviderRegistry private constructor(
   private val logger =
     LoggerFactory.getLogger(AccountProviderRegistry::class.java)
 
-  private val eventsActual: ObservableType<org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent> =
+  private val eventsActual: ObservableType<AccountProviderRegistryEvent> =
     Observable.create()
 
-  override val events: ObservableReadableType<org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent> =
+  override val events: ObservableReadableType<AccountProviderRegistryEvent> =
     this.eventsActual
 
   override fun accountProviderDescriptions(): Map<URI, AccountProviderDescriptionType> {
@@ -123,7 +126,7 @@ class AccountProviderRegistry private constructor(
     fun createFromServiceLoader(
       context: Context,
       defaultProvider: AccountProviderType
-    ): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+    ): AccountProviderRegistryType {
       val loader =
         ServiceLoader.load(AccountProviderSourceType::class.java)
       val sources =

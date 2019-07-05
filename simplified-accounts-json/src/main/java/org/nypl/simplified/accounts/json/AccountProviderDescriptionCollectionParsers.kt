@@ -1,8 +1,7 @@
 package org.nypl.simplified.accounts.json
 
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
+import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParserType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
-import org.nypl.simplified.parser.api.ParserType
 import java.io.InputStream
 import java.net.URI
 
@@ -18,7 +17,7 @@ class AccountProviderDescriptionCollectionParsers : AccountProviderDescriptionCo
     uri: URI,
     stream: InputStream,
     warningsAsErrors: Boolean
-  ): ParserType<AccountProviderDescriptionCollection> {
+  ): AccountProviderDescriptionCollectionParserType {
     return AccountProviderDescriptionCollectionParser(uri, stream, warningsAsErrors)
   }
 

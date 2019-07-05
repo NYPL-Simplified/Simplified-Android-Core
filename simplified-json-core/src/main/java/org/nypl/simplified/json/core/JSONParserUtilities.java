@@ -807,7 +807,7 @@ public final class JSONParserUtilities {
     NullCheck.notNull(key);
 
     try {
-      return new URI(JSONParserUtilities.getString(n, key));
+      return new URI(JSONParserUtilities.getString(n, key).trim());
     } catch (final URISyntaxException e) {
       throw new JSONParseException(e);
     }

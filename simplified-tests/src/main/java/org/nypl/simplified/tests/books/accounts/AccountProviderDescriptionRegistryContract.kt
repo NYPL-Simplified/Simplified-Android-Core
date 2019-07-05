@@ -415,7 +415,7 @@ abstract class AccountProviderDescriptionRegistryContract {
 
   class FailingSource : AccountProviderSourceType {
     override fun load(context: Context): SourceResult {
-      return SourceResult.SourceFailed(java.lang.Exception())
+      return SourceResult.SourceFailed(mapOf(), java.lang.Exception())
     }
   }
 }

@@ -1,15 +1,18 @@
 package org.nypl.simplified.accounts.json
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionParserType
+import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.parser.api.ParseWarning
 import java.net.URI
+import java.net.URISyntaxException
 
 class AccountProviderDescriptionParser internal constructor(
   private val uri: URI,
@@ -20,6 +23,20 @@ class AccountProviderDescriptionParser internal constructor(
     mutableListOf<ParseError>()
   private val warnings =
     mutableListOf<ParseWarning>()
+
+  private fun publishWarning(warning: ParseWarning) {
+    if (this.warningsAsErrors) {
+      this.errors.add(ParseError(
+        source = this.uri,
+        message = warning.message,
+        line = 0,
+        column = 0,
+        exception = warning.exception
+      ))
+    } else {
+      this.warnings.add(warning)
+    }
+  }
 
   private fun publishErrorForException(e: Exception) {
     this.errors.add(ParseError(
@@ -33,7 +50,9 @@ class AccountProviderDescriptionParser internal constructor(
     val updated: DateTime,
     val description: String,
     val id: URI,
-    val title: String)
+    val title: String,
+    val isAutomatic: Boolean,
+    val isProduction: Boolean)
 
   override fun parse(): ParseResult<AccountProviderDescriptionMetadata> {
     return try {
@@ -51,8 +70,8 @@ class AccountProviderDescriptionParser internal constructor(
             updated = metadata.updated,
             links = links,
             images = images,
-            isAutomatic = false,
-            isProduction = false))
+            isAutomatic = metadata.isAutomatic,
+            isProduction = metadata.isProduction))
       } else {
         ParseResult.Failure(
           warnings = this.warnings.toList(),
@@ -77,7 +96,9 @@ class AccountProviderDescriptionParser internal constructor(
         updated = parseMetadataUpdated(metadata),
         description = parseMetadataDescription(metadata),
         id = parseMetadataId(metadata),
-        title = parseMetadataTitle(metadata))
+        title = parseMetadataTitle(metadata),
+        isProduction = JSONParserUtilities.getBooleanDefault(root, "isProduction", false),
+        isAutomatic = JSONParserUtilities.getBooleanDefault(root, "isAutomatic", false))
     } catch (e: Exception) {
       this.errors.add(ParseError(
         source = this.uri,
@@ -87,7 +108,9 @@ class AccountProviderDescriptionParser internal constructor(
         updated = DateTime.now(),
         description = "",
         id = URI.create("urn:invalid"),
-        title = "")
+        title = "",
+        isProduction = false,
+        isAutomatic = false)
     }
   }
 
@@ -141,10 +164,74 @@ class AccountProviderDescriptionParser internal constructor(
   }
 
   private fun parseImages(root: ObjectNode): List<AccountProviderDescriptionMetadata.Link> {
-    return listOf()
+    return try {
+      val results =
+        mutableListOf<AccountProviderDescriptionMetadata.Link>()
+      val arrayNode =
+        JSONParserUtilities.getArrayOrNull(root, "images") ?: return listOf()
+      for (arrayElement in arrayNode) {
+        parseLink(arrayElement)?.let { node -> results.add(node) }
+      }
+      results
+    } catch (e: Exception) {
+      this.errors.add(ParseError(
+        source = this.uri,
+        message = "Could not parse 'images' field as array",
+        exception = e))
+      listOf()
+    }
+  }
+
+  private fun parseLink(element: JsonNode): AccountProviderDescriptionMetadata.Link? {
+    return try {
+      val objectNode = JSONParserUtilities.checkObject("", element)
+      return AccountProviderDescriptionMetadata.Link(
+        href = JSONParserUtilities.getURI(objectNode, "href"),
+        type = JSONParserUtilities.getStringOrNull(objectNode, "type"),
+        templated = JSONParserUtilities.getBooleanDefault(objectNode, "templated", false),
+        relation = JSONParserUtilities.getStringOrNull(objectNode, "relation"))
+    } catch (e: JSONParseException) {
+      when (e.cause) {
+        is URISyntaxException -> {
+          this.publishWarning(ParseWarning(
+            source = this.uri,
+            message = "Could not parse 'link' object: Encountered an invalid URI in the feed",
+            exception = e))
+          null
+        }
+        else -> {
+          this.errors.add(ParseError(
+            source = this.uri,
+            message = "Could not parse 'link' object",
+            exception = e))
+          null
+        }
+      }
+    } catch (e: Exception) {
+      this.errors.add(ParseError(
+        source = this.uri,
+        message = "Could not parse 'link' object",
+        exception = e))
+      null
+    }
   }
 
   private fun parseLinks(root: ObjectNode): List<AccountProviderDescriptionMetadata.Link> {
-    return listOf()
+    return try {
+      val results =
+        mutableListOf<AccountProviderDescriptionMetadata.Link>()
+      val arrayNode =
+        JSONParserUtilities.getArray(root, "links") ?: return listOf()
+      for (arrayElement in arrayNode) {
+        parseLink(arrayElement)?.let { node -> results.add(node) }
+      }
+      results
+    } catch (e: Exception) {
+      this.errors.add(ParseError(
+        source = this.uri,
+        message = "Could not parse 'links' field as array",
+        exception = e))
+      listOf()
+    }
   }
 }

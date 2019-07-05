@@ -7,12 +7,14 @@ import org.nypl.drm.core.AdobeVendorID
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParserType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
+import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.parser.api.ParseWarning
 import java.io.InputStream
 import java.net.URI
+import java.net.URISyntaxException
 
 /**
  * A parser of provider description collections.
@@ -43,15 +45,6 @@ class AccountProviderDescriptionCollectionParser internal constructor(
     }
   }
 
-  private fun publishWarningMessage(message: String) {
-    return this.publishWarning(ParseWarning(
-      uri,
-      message,
-      line = 0,
-      column = 0,
-      exception = null))
-  }
-
   private fun publishErrorForException(e: Exception) {
     this.errors.add(ParseError(
       source = this.uri,
@@ -76,9 +69,7 @@ class AccountProviderDescriptionCollectionParser internal constructor(
         return ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
       }
 
-      val root =
-        JSONParserUtilities.checkObject(null, tree)
-
+      val root = JSONParserUtilities.checkObject(null, tree)
       val catalogs = parseCatalogs(root)
       val links = parseLinks(root)
       val metadata = parseMetadata(root)
@@ -141,8 +132,57 @@ class AccountProviderDescriptionCollectionParser internal constructor(
     }
   }
 
+  private fun parseLink(element: JsonNode): AccountProviderDescriptionCollection.Link? {
+    return try {
+      val objectNode = JSONParserUtilities.checkObject("", element)
+      return AccountProviderDescriptionCollection.Link(
+        href = JSONParserUtilities.getURI(objectNode, "href"),
+        type = JSONParserUtilities.getStringOrNull(objectNode, "type"),
+        templated = JSONParserUtilities.getBooleanDefault(objectNode, "templated", false),
+        relation = JSONParserUtilities.getStringOrNull(objectNode, "relation"))
+    } catch (e: JSONParseException) {
+      when (e.cause) {
+        is URISyntaxException -> {
+          this.publishWarning(ParseWarning(
+            source = this.uri,
+            message = "Could not parse 'link' object: Encountered an invalid URI in the feed",
+            exception = e))
+          null
+        }
+        else -> {
+          this.errors.add(ParseError(
+            source = this.uri,
+            message = "Could not parse 'link' object",
+            exception = e))
+          null
+        }
+      }
+    } catch (e: Exception) {
+      this.errors.add(ParseError(
+        source = this.uri,
+        message = "Could not parse 'link' object",
+        exception = e))
+      null
+    }
+  }
+
   private fun parseLinks(root: ObjectNode): List<AccountProviderDescriptionCollection.Link> {
-    return listOf()
+    return try {
+      val results =
+        mutableListOf<AccountProviderDescriptionCollection.Link>()
+      val arrayNode =
+        JSONParserUtilities.getArray(root, "links") ?: return listOf()
+      for (arrayElement in arrayNode) {
+        parseLink(arrayElement)?.let { node -> results.add(node) }
+      }
+      results
+    } catch (e: Exception) {
+      this.errors.add(ParseError(
+        source = this.uri,
+        message = "Could not parse 'links' field as array",
+        exception = e))
+      listOf()
+    }
   }
 
   private fun parseCatalogs(root: ObjectNode): List<AccountProviderDescriptionMetadata> {

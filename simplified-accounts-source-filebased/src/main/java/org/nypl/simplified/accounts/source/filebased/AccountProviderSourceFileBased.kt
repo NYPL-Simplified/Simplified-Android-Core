@@ -42,7 +42,7 @@ class AccountProviderSourceFileBased(
         SourceResult.SourceSucceeded(mapResult(newResult))
       }
     } catch (e: Exception) {
-      SourceResult.SourceFailed(e)
+      SourceResult.SourceFailed(mapOf(), e)
     }
   }
 
