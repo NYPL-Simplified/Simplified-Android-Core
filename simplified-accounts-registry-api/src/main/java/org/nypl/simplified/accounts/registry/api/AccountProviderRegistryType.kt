@@ -1,4 +1,4 @@
-package org.nypl.simplified.accounts.source.api
+package org.nypl.simplified.accounts.registry.api
 
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType

@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
-import com.io7m.junreachable.UnimplementedCodeException
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
@@ -19,7 +18,7 @@ import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -86,7 +85,7 @@ class Controller private constructor(
   private val accountEvents: ObservableType<AccountEvent>,
   private val accountLoginStringResources: AccountLoginStringResourcesType,
   private val accountLogoutStringResources: AccountLogoutStringResourcesType,
-  private val accountProviders: AccountProviderRegistryType,
+  private val accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
   private val adobeDrm: AdobeAdeptExecutorType?,
   private val analytics: AnalyticsType,
   private val bookRegistry: BookRegistryType,
@@ -443,7 +442,7 @@ class Controller private constructor(
       accountEvents: ObservableType<AccountEvent>,
       accountLoginStringResources: AccountLoginStringResourcesType,
       accountLogoutStringResources: AccountLogoutStringResourcesType,
-      accountProviders: AccountProviderRegistryType,
+      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
       adobeDrm: AdobeAdeptExecutorType?,
       analytics: AnalyticsType,
       bookBorrowStrings: BookBorrowStringResourcesType,

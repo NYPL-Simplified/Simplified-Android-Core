@@ -20,7 +20,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookFormats
@@ -134,7 +134,7 @@ abstract class BooksControllerContract {
     books: BookRegistryType,
     profiles: ProfilesDatabaseType,
     downloader: DownloaderType,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     timerExec: ExecutorService,
     patronUserProfileParsers: PatronUserProfileParsersType
   ): BooksControllerType {

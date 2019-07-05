@@ -14,7 +14,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.observable.ObservableType
@@ -60,7 +60,7 @@ object ProfilesDatabases {
   fun openWithAnonymousProfileDisabled(
     context: Context,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
@@ -110,7 +110,7 @@ object ProfilesDatabases {
   private fun openAllProfiles(
     context: Context,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
@@ -159,7 +159,7 @@ object ProfilesDatabases {
   fun openWithAnonymousProfileEnabled(
     context: Context,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
@@ -300,7 +300,7 @@ object ProfilesDatabases {
   private fun openOneProfile(
     context: Context,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     accountsDatabases: AccountsDatabaseFactoryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
@@ -378,7 +378,7 @@ object ProfilesDatabases {
     context: Context,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     accountsDatabases: AccountsDatabaseFactoryType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountProvider: AccountProviderType,
@@ -435,7 +435,7 @@ object ProfilesDatabases {
   private fun createAutomaticAccounts(
     accounts: AccountsDatabaseType,
     accountBundledCredentials: AccountBundledCredentialsType,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     profile: ProfileID) {
 
     val pId = profile.uuid

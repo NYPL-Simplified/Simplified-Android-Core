@@ -3,7 +3,7 @@ package org.nypl.simplified.app.services
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.squareup.picasso.Picasso
 import org.nypl.drm.core.AdobeAdeptExecutorType
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.ScreenSizeInformationType
@@ -48,7 +48,7 @@ interface SimplifiedServicesType {
    * @return The registry of account providers
    */
 
-  val accountProviderRegistry: AccountProviderRegistryType
+  val accountProviderRegistry: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 
   /**
    * @return The network connectivity interface

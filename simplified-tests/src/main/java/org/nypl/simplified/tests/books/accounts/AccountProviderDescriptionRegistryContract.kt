@@ -12,12 +12,10 @@ import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionResult
 import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.SourceFailed
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryEvent.Updated
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.SourceResult
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.Updated
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.tests.MockAccountProviders
 import org.slf4j.Logger
@@ -25,7 +23,7 @@ import java.net.URI
 
 abstract class AccountProviderDescriptionRegistryContract {
 
-  private lateinit var events: MutableList<AccountProviderRegistryEvent>
+  private lateinit var events: MutableList<org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent>
 
   protected abstract val logger: Logger
 
@@ -33,7 +31,7 @@ abstract class AccountProviderDescriptionRegistryContract {
 
   protected abstract fun createRegistry(
     defaultProvider: AccountProviderType,
-    sources: List<AccountProviderSourceType>): AccountProviderRegistryType
+    sources: List<AccountProviderSourceType>): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 
   @JvmField
   @Rule

@@ -24,8 +24,7 @@ import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON
 import org.nypl.simplified.accounts.json.AccountProvidersJSON
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistry
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.AccountProviderRegistry
 import org.nypl.simplified.analytics.api.Analytics
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
@@ -106,7 +105,7 @@ import java.util.ServiceLoader
 import java.util.concurrent.ExecutorService
 
 class SimplifiedServices private constructor(
-  override val accountProviderRegistry: AccountProviderRegistryType,
+  override val accountProviderRegistry: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
   override val analytics: AnalyticsType,
   override val adobeExecutor: AdobeAdeptExecutorType?,
   override val backgroundExecutor: ListeningScheduledExecutorService,
@@ -456,7 +455,7 @@ class SimplifiedServices private constructor(
       context: Context,
       resources: Resources,
       accountEvents: ObservableType<AccountEvent>,
-      accountProviders: AccountProviderRegistryType,
+      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
       accountBundledCredentials: AccountBundledCredentialsType,
       accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
       directory: File): ProfilesDatabaseType {

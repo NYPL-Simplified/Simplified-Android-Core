@@ -25,7 +25,7 @@ dependencies {
 
   implementation project(":simplified-accounts-api")
   implementation project(":simplified-accounts-database-api")
-  implementation project(":simplified-accounts-source-api")
+  implementation project(':simplified-accounts-source-spi')
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-registry-api")
   implementation project(":simplified-downloader-core")

@@ -14,7 +14,7 @@ android {
   }
 }
 
-description = 'simplified-accounts-source-api'
+description = 'simplified-accounts-registry-api'
 
 dependencies {
   api project(':simplified-accounts-api')

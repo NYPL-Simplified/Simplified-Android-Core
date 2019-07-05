@@ -24,9 +24,8 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountExce
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.accounts.json.AccountDescriptionJSON
-import org.nypl.simplified.accounts.json.AccountProvidersJSON
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
@@ -361,7 +360,7 @@ class AccountsDatabase private constructor(
       context: Context,
       accountEvents: ObservableType<AccountEvent>,
       bookDatabases: BookDatabaseFactoryType,
-      accountProviders: AccountProviderRegistryType,
+      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       directory: File): AccountsDatabaseType {
 
@@ -416,7 +415,7 @@ class AccountsDatabase private constructor(
       accountsByProvider: SortedMap<URI, Account>,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       accountEvents: ObservableType<AccountEvent>,
-      accountProviders: AccountProviderRegistryType,
+      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       directory: File,
@@ -546,7 +545,7 @@ class AccountsDatabase private constructor(
     private fun openOneAccount(
       accountEvents: ObservableType<AccountEvent>,
       accountIdName: String,
-      accountProviders: AccountProviderRegistryType,
+      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       credentialsStore: AccountAuthenticationCredentialsStoreType,

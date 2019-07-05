@@ -8,10 +8,9 @@ import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
 import org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException
@@ -40,7 +39,7 @@ import javax.annotation.concurrent.GuardedBy
 internal class ProfilesDatabase internal constructor(
   private val accountBundledCredentials: AccountBundledCredentialsType,
   private val accountEvents: ObservableType<AccountEvent>,
-  private val accountProviders: AccountProviderRegistryType,
+  private val accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
   private val accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
   private val accountsDatabases: AccountsDatabaseFactoryType,
   private val anonymousProfileEnabled: ProfilesDatabaseType.AnonymousProfileEnabled,

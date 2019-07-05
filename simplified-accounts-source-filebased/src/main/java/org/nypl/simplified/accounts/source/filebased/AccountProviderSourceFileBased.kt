@@ -3,8 +3,8 @@ package org.nypl.simplified.accounts.source.filebased
 import android.content.Context
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.json.AccountProvidersJSON
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.SourceResult
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.URI

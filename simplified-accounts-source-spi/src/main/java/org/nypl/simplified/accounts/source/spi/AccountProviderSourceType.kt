@@ -1,4 +1,4 @@
-package org.nypl.simplified.accounts.source.api
+package org.nypl.simplified.accounts.source.spi
 
 import android.content.Context
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType

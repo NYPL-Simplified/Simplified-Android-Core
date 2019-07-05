@@ -14,8 +14,8 @@ import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionResult
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.SourceResult
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerConnectionFailure
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerReturnedError
 import org.nypl.simplified.http.core.HTTP

@@ -6,7 +6,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
 import org.nypl.simplified.observable.ObservableType
@@ -22,7 +22,7 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
   override fun openDatabase(
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     bookDatabases: BookDatabaseFactoryType,
     context: Context,
     directory: File): AccountsDatabaseType {
@@ -39,7 +39,7 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
   override fun openDatabase(
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     context: Context,
     directory: File): AccountsDatabaseType {
     return AccountsDatabase.open(

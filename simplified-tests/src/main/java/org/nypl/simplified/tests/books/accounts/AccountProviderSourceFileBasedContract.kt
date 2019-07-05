@@ -3,8 +3,7 @@ package org.nypl.simplified.tests.books.accounts
 import android.content.Context
 import org.junit.Assert
 import org.junit.Test
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.SourceResult.SourceFailed
-import org.nypl.simplified.accounts.source.api.AccountProviderSourceType.SourceResult.SourceSucceeded
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult.SourceSucceeded
 import org.nypl.simplified.accounts.source.filebased.AccountProviderSourceFileBased
 import org.slf4j.Logger
 import java.io.InputStream

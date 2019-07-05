@@ -4,7 +4,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.*
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.AccountCreateErrorDetails
@@ -22,7 +22,7 @@ import java.util.concurrent.Callable
 class ProfileAccountCreateTask(
   private val accountEvents: ObservableType<AccountEvent>,
   private val accountProviderID: URI,
-  private val accountProviders: AccountProviderRegistryType,
+  private val accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
   private val strings: ProfileAccountCreationStringResourcesType
 ) : Callable<AccountCreateTaskResult> {

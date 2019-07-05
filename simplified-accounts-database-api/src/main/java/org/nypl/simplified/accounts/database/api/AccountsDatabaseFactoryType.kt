@@ -3,7 +3,7 @@ package org.nypl.simplified.accounts.database.api
 import android.content.Context
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.source.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
 import org.nypl.simplified.observable.ObservableType
 import java.io.File
@@ -30,7 +30,7 @@ interface AccountsDatabaseFactoryType {
   fun openDatabase(
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     bookDatabases: BookDatabaseFactoryType,
     context: Context,
     directory: File): AccountsDatabaseType
@@ -50,7 +50,7 @@ interface AccountsDatabaseFactoryType {
   fun openDatabase(
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountEvents: ObservableType<AccountEvent>,
-    accountProviders: AccountProviderRegistryType,
+    accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
     context: Context,
     directory: File): AccountsDatabaseType
 }

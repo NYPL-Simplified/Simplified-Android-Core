@@ -18,7 +18,7 @@ description = 'simplified-accounts-source-filebased'
 
 dependencies {
   api project(':simplified-accounts-api')
-  api project(':simplified-accounts-source-api')
+  api project(':simplified-accounts-source-spi')
 
   implementation project(":simplified-accounts-json")
 
