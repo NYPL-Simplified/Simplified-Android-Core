@@ -40,6 +40,4 @@ git add build.properties ||
 git commit --file="${WORKING_DIRECTORY}/.travis/commit-message.txt" ||
   fatal "could not commit"
 
-git pull || fatal "could not pull"
-git push || fatal "could not push"
-
+git push --force || fatal "could not push"
