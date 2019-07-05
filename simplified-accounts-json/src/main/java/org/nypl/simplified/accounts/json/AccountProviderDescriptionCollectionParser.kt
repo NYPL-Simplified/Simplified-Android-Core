@@ -139,7 +139,7 @@ class AccountProviderDescriptionCollectionParser internal constructor(
         href = JSONParserUtilities.getURI(objectNode, "href"),
         type = JSONParserUtilities.getStringOrNull(objectNode, "type"),
         templated = JSONParserUtilities.getBooleanDefault(objectNode, "templated", false),
-        relation = JSONParserUtilities.getStringOrNull(objectNode, "relation"))
+        relation = JSONParserUtilities.getStringOrNull(objectNode, "rel"))
     } catch (e: JSONParseException) {
       when (e.cause) {
         is URISyntaxException -> {
