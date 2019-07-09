@@ -67,7 +67,6 @@ android {
 description = 'simplified-app-simplye'
 
 dependencies {
-  implementation project(":simplified-accounts-source-filebased")
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(':simplified-analytics-circulation')
   implementation project(':simplified-app-shared')

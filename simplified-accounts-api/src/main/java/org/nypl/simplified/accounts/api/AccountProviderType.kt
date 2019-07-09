@@ -20,6 +20,13 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val id: URI
 
   /**
+   * @return The old-style numeric ID of the account
+   */
+
+  @Deprecated("Use URI-based IDs")
+  val idNumeric: Int
+
+  /**
    * @return `true` if this account is in production
    */
 
@@ -58,36 +65,22 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val supportsSimplyESynchronization: Boolean
 
   /**
-   * @return `true` iff the barcode scanner is supported
-   */
-
-  val supportsBarcodeScanner: Boolean
-
-  /**
-   * @return `true` iff the barcode display is supported
-   */
-
-  val supportsBarcodeDisplay: Boolean
-
-  /**
    * @return `true` iff reservations are supported
    */
 
   val supportsReservations: Boolean
 
   /**
-   * XXX: There is an associated Card Creator URL; this should be an OptionType[URI]
-   *
-   * @return `true` iff the card creator is supported
+   * @return The URI of the user loans feed, if supported
    */
 
-  val supportsCardCreator: Boolean
+  val loansURI: URI?
 
   /**
-   * @return `true` iff the help center is supported
+   * @return The URI of the card creator iff card creation is supported
    */
 
-  val supportsHelpCenter: Boolean
+  val cardCreatorURI: URI?
 
   /**
    * @return The address of the authentication document for the account provider
@@ -100,20 +93,6 @@ interface AccountProviderType : Comparable<AccountProviderType> {
    */
 
   val catalogURI: URI
-
-  /**
-   * The Over-13s catalog URI.
-   *
-   * @return The URI of the catalog for readers over the age of 13
-   */
-
-  val catalogURIForOver13s: URI?
-
-  /**
-   * @return The URI of the catalog for readers under the age of 13
-   */
-
-  val catalogURIForUnder13s: URI?
 
   /**
    * @return The support email address
@@ -144,12 +123,6 @@ interface AccountProviderType : Comparable<AccountProviderType> {
    */
 
   val mainColor: String
-
-  /**
-   * @return The name of the Android theme to use instead of the standard theme
-   */
-
-  val styleNameOverride: String?
 
   /**
    * @return `true` iff the account should be added by default
@@ -183,16 +156,18 @@ interface AccountProviderType : Comparable<AccountProviderType> {
    */
 
   fun catalogURIForAge(age: Int): URI {
-    return if (age >= 13) {
-      when (val o13 = this.catalogURIForOver13s) {
-        null -> this.catalogURI
-        else -> o13
-      }
-    } else {
-      when (val u13 = this.catalogURIForUnder13s) {
-        null -> this.catalogURI
-        else -> u13
-      }
+    return when (val auth = this.authentication) {
+      null -> this.catalogURI
+
+      is AccountProviderAuthenticationDescription.COPPAAgeGate ->
+        if (age >= 13) {
+          auth.greaterEqual13
+        } else {
+          auth.under13
+        }
+
+      is AccountProviderAuthenticationDescription.Basic ->
+        this.catalogURI
     }
   }
 
@@ -203,11 +178,20 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val updated: DateTime
 
   /**
-   * @return `true` if the account has an age gate
+   * @return `true` if the authentication settings imply that barcode scanning and display is supported
    */
 
-  fun hasAgeGate(): Boolean =
-    (this.catalogURIForOver13s != null) or (this.catalogURIForUnder13s != null)
+  val supportsBarcodeDisplay : Boolean
+    get() = when (val auth = this.authentication) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate -> false
+      is AccountProviderAuthenticationDescription.Basic -> {
+        when (auth.barcodeFormat) {
+          "Codabar" -> true
+          else -> false
+        }
+      }
+      null -> false
+    }
 
   /**
    * @return A description that, when resolved, produces this account provider

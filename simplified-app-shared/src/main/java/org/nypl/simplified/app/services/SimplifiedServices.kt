@@ -18,12 +18,12 @@ import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountProviderFallbackType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON
-import org.nypl.simplified.accounts.json.AccountProvidersJSON
 import org.nypl.simplified.accounts.registry.AccountProviderRegistry
 import org.nypl.simplified.analytics.api.Analytics
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
@@ -255,7 +255,7 @@ class SimplifiedServices private constructor(
 
       publishEvent(strings.bootingAccountProviders)
       val defaultAccountProvider =
-        this.loadDefaultAccountProvider(context)
+        this.loadDefaultAccountProvider()
       val accountProviders =
         AccountProviderRegistry.createFromServiceLoader(context, defaultAccountProvider)
 
@@ -489,11 +489,16 @@ class SimplifiedServices private constructor(
         directory)
     }
 
-    @Throws(IOException::class)
-    private fun loadDefaultAccountProvider(context: Context): AccountProviderType {
-      return context.assets.open("account_provider_default.json").use { stream ->
-        AccountProvidersJSON.deserializeOneFromStream(stream)
+    private fun loadDefaultAccountProvider(): AccountProviderType {
+      val providers =
+        ServiceLoader.load(AccountProviderFallbackType::class.java)
+          .map { provider -> provider.get() }
+          .toList()
+
+      if (providers.isEmpty()) {
+        throw java.lang.IllegalStateException("No fallback account providers available!")
       }
+      return providers.first()
     }
 
     @Throws(IOException::class)

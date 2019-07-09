@@ -469,11 +469,10 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun showProgressDialog() {
     val dialog = Dialog(this)
+    dialog.setTitle(R.string.profileAccountCreationCreatingAccount)
     dialog.setContentView(R.layout.settings_account_progress)
 
-    val textView =
-      dialog.findViewById<TextView>(R.id.settingsAccountProgressText)
-
+    val textView = dialog.findViewById<TextView>(R.id.settingsAccountProgressText)
     textView.text = ""
 
     /*

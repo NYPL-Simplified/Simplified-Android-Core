@@ -1,10 +1,12 @@
 package org.nypl.simplified.tests.books.accounts
 
 import android.content.Context
+import android.content.res.Resources
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParser
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
@@ -14,6 +16,7 @@ import org.nypl.simplified.accounts.source.filebased.AccountProviderSourceFileBa
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistry
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.http.core.HTTPResultOK
+import org.nypl.simplified.opds.auth_document.AuthenticationDocumentParsers
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
@@ -22,6 +25,7 @@ import java.io.InputStream
 
 abstract class AccountProviderNYPLRegistryContract {
 
+  private lateinit var resources: Resources
   private lateinit var cacheDir: File
   private lateinit var context: Context
 
@@ -37,13 +41,19 @@ abstract class AccountProviderNYPLRegistryContract {
   @Before
   fun testSetup()
   {
+    this.resources = Mockito.mock(Resources::class.java)
     this.context = Mockito.mock(Context::class.java)
+
     this.cacheDir = File.createTempFile("account-provider-nypl-registry", "dir")
     this.cacheDir.delete()
     this.cacheDir.mkdirs()
 
     Mockito.`when`(this.context.cacheDir)
       .thenReturn(this.cacheDir)
+    Mockito.`when`(this.context.resources)
+      .thenReturn(this.resources)
+    Mockito.`when`(this.resources.getString(Mockito.anyInt()))
+      .thenReturn("A STRING RESOURCE")
   }
 
   @After
@@ -83,9 +93,10 @@ abstract class AccountProviderNYPLRegistryContract {
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        mockHTTP,
-        AccountProviderDescriptionCollectionParsers(),
-        AccountProviderDescriptionCollectionSerializers())
+        http = mockHTTP,
+        authDocumentParsers = AuthenticationDocumentParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(),
+        serializers = AccountProviderDescriptionCollectionSerializers())
 
     val result = provider.load(this.context)
     this.logger.debug("status: {}", result)
@@ -118,9 +129,10 @@ abstract class AccountProviderNYPLRegistryContract {
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        mockHTTP,
-        AccountProviderDescriptionCollectionParsers(),
-        AccountProviderDescriptionCollectionSerializers())
+        http = mockHTTP,
+        authDocumentParsers = AuthenticationDocumentParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(),
+        serializers = AccountProviderDescriptionCollectionSerializers())
 
     val result = provider.load(this.context)
     this.logger.debug("status: {}", result)
@@ -164,9 +176,10 @@ abstract class AccountProviderNYPLRegistryContract {
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        mockHTTP,
-        AccountProviderDescriptionCollectionParsers(),
-        AccountProviderDescriptionCollectionSerializers())
+        http = mockHTTP,
+        authDocumentParsers = AuthenticationDocumentParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(),
+        serializers = AccountProviderDescriptionCollectionSerializers())
 
     val result = provider.load(this.context)
     this.logger.debug("status: {}", result)
@@ -216,9 +229,10 @@ abstract class AccountProviderNYPLRegistryContract {
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        mockHTTP,
-        AccountProviderDescriptionCollectionParsers(),
-        AccountProviderDescriptionCollectionSerializers())
+        http = mockHTTP,
+        authDocumentParsers = AuthenticationDocumentParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(),
+        serializers = AccountProviderDescriptionCollectionSerializers())
 
     val result = provider.load(this.context)
     this.logger.debug("status: {}", result)
@@ -244,9 +258,10 @@ abstract class AccountProviderNYPLRegistryContract {
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        mockHTTP,
-        AccountProviderDescriptionCollectionParsers(),
-        AccountProviderDescriptionCollectionSerializers())
+        http = mockHTTP,
+        authDocumentParsers = AuthenticationDocumentParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(),
+        serializers = AccountProviderDescriptionCollectionSerializers())
 
     run {
       val result = provider.load(this.context)

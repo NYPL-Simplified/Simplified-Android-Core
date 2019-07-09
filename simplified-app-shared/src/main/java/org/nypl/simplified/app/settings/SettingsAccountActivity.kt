@@ -26,8 +26,6 @@ import android.widget.Toast
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.junreachable.UnimplementedCodeException
-import com.tenmiles.helpstack.HSHelpStack
-import com.tenmiles.helpstack.gears.HSDeskGear
 import org.joda.time.LocalDate
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
@@ -41,6 +39,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
@@ -241,26 +240,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     }
 
     /*
-     * Show the "Help Center" section if the provider offers one.
-     */
-
-    if (accountProvider.supportsHelpCenter) {
-      this.supportCenter.visibility = View.VISIBLE
-      this.supportCenter.setOnClickListener {
-        val stack = HSHelpStack.getInstance(this)
-        val gear = HSDeskGear(" ", " ", null)
-        stack.gear = gear
-        stack.showHelp(this)
-      }
-    } else {
-      this.supportCenter.visibility = View.GONE
-    }
-
-    /*
      * Show the "Card Creator" section if the provider supports it.
      */
 
-    if (accountProvider.supportsCardCreator) {
+    if (accountProvider.cardCreatorURI != null) {
       this.tableSignup.visibility = View.VISIBLE
       this.signup.setOnClickListener {
         throw UnimplementedCodeException()
@@ -503,11 +486,15 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private fun configureLoginFieldVisibilityAndContents() {
     val state = this.account.loginState
 
-    val ageGateRequired =
-      this.account.provider.hasAgeGate()
+    val ageGateAuth =
+      when (val auth = account.provider.authentication) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate -> auth
+      is AccountProviderAuthenticationDescription.Basic -> null
+      null -> null
+    }
 
     this.ageCheckbox.visibility =
-      if (ageGateRequired) {
+      if (ageGateAuth != null) {
         View.VISIBLE
       } else {
         View.INVISIBLE

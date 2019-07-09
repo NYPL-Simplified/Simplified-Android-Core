@@ -9,6 +9,14 @@
     {"rel": "help", "href": "http://example.com/support", "type": "text/html"},
     {"rel": "register", "href": "http://example.com/registration", "type": "text/html"}
   ],
+  "features": {
+    "enabled": [
+      "feature0"
+    ],
+    "disabled": [
+      "feature1"
+    ]
+  },
   "authentication": [
     {
       "type": "http://opds-spec.org/auth/basic",

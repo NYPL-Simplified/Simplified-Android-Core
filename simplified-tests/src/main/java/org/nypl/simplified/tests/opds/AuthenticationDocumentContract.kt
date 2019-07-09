@@ -269,6 +269,12 @@ abstract class AuthenticationDocumentContract {
       Assert.assertEquals("image/png", this.type!!.fullType)
       Assert.assertEquals(null, this.width)
     }
+
+    Assert.assertEquals("CODABAR", document.authentication[0].inputs["LOGIN"]!!.barcodeFormat)
+    Assert.assertEquals("DEFAULT", document.authentication[0].inputs["LOGIN"]!!.keyboardType)
+
+    Assert.assertEquals(4, document.authentication[0].inputs["PASSWORD"]!!.maximumLength)
+    Assert.assertEquals("NUMBER PAD", document.authentication[0].inputs["PASSWORD"]!!.keyboardType)
   }
 
   @Test
@@ -384,8 +390,8 @@ abstract class AuthenticationDocumentContract {
     document.authentication[0].apply {
       Assert.assertEquals(URI("http://opds-spec.org/auth/basic"), this.type)
       Assert.assertEquals(2, this.labels.size)
-      Assert.assertEquals("Library card", this.labels["login"])
-      Assert.assertEquals("PIN", this.labels["password"])
+      Assert.assertEquals("Library card", this.labels["LOGIN"])
+      Assert.assertEquals("PIN", this.labels["PASSWORD"])
     }
     document.authentication[1].apply {
       Assert.assertEquals(URI("http://opds-spec.org/auth/oauth/implicit"), this.type)

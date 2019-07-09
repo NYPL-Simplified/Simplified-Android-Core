@@ -45,32 +45,28 @@ object MockAccountProviders {
 
   fun fakeProvider(providerId: String): AccountProviderImmutable {
     return AccountProviderImmutable(
+      addAutomatically = false,
+      annotationsURI = URI.create("http://example.com/accounts0/annotations"),
+      authentication = null,
+      authenticationDocumentURI = null,
+      cardCreatorURI = null,
+      catalogURI = URI.create("http://www.example.com/accounts0/feed.xml"),
+      displayName = "Fake Library",
+      eula = null,
       id = URI.create(providerId),
       isProduction = false,
-      displayName = "Fake Library",
-      subtitle = "Imaginary books",
-      logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo="),
-      authentication = null,
-      supportsSimplyESynchronization = false,
-      supportsBarcodeScanner = false,
-      supportsBarcodeDisplay = false,
-      supportsReservations = false,
-      supportsCardCreator = false,
-      supportsHelpCenter = false,
-      authenticationDocumentURI = null,
-      catalogURI = URI.create("http://www.example.com/accounts0/feed.xml"),
-      catalogURIForUnder13s = null,
-      catalogURIForOver13s = null,
-      supportEmail = "postmaster@example.com",
-      eula = null,
       license = null,
-      privacyPolicy = null,
+      loansURI = URI.create("http://www.example.com/accounts0/loans.xml"),
+      logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo="),
       mainColor = "#ff0000",
-      styleNameOverride = null,
-      addAutomatically = false,
       patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me"),
-      annotationsURI = URI.create("http://example.com/accounts0/annotations"),
-      updated = DateTime.parse("2000-01-01T00:00:00Z"))
+      privacyPolicy = null,
+      subtitle = "Imaginary books",
+      supportEmail = "postmaster@example.com",
+      supportsReservations = false,
+      supportsSimplyESynchronization = false,
+      updated = DateTime.parse("2000-01-01T00:00:00Z")
+    )
   }
 
   fun fakeAccountProviderDefaultURI(): URI {
@@ -173,11 +169,13 @@ object MockAccountProviders {
 
   fun fakeAuthProvider(uri: String): AccountProviderImmutable {
     return fakeProvider(uri)
-      .copy(authentication = AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create(uri))
-        .setPassCodeLength(4)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .copy(authentication = AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CodaBar",
+        keyboard = "Default",
+        passwordMaximumLength = 4,
+        passwordKeyboard = "Default",
+        description = "Stuff!",
+        labels = mapOf()
+      ))
   }
 }

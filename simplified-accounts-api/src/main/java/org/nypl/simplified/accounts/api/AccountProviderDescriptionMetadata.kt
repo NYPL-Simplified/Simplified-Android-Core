@@ -100,4 +100,11 @@ data class AccountProviderDescriptionMetadata(
 
   val logoURI: URI?
     get() = this.images.find { link -> link.relation == "http://opds-spec.org/image/thumbnail" }?.href
+
+  /**
+   * The authentication document URI, if one is available
+   */
+
+  val authenticationDocumentURI: URI?
+    get() = this.links.find { link -> link.type == "application/vnd.opds.authentication.v1.0+json" }?.href
 }

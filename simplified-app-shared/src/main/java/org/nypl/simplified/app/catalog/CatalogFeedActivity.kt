@@ -36,6 +36,7 @@ import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.app.R
@@ -706,7 +707,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     }
 
   private fun ageGateIsPresent(): Boolean =
-    this.account.provider.hasAgeGate()
+    this.account.provider.authentication is AccountProviderAuthenticationDescription.COPPAAgeGate
 
   private fun ageGateIsSatisfied(): Boolean =
     this.profile.preferences().dateOfBirth() is Some<ProfileDateOfBirth>

@@ -20,6 +20,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
@@ -114,47 +115,54 @@ class LoginDialog : AppCompatDialogFragment() {
 
     val accountProvider =
       account.provider
-    val authentication =
+    val authenticationDescription =
       accountProvider.authentication
 
-    if (authentication == null) {
-      this.logger.error("Login dialog created for account that does not require authentication!")
-      this.dismissAllowingStateLoss()
-      return layout
+    val authentication =
+      when (authenticationDescription) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate,
+      null -> {
+        this.logger.error("Login dialog created for account that does not require authentication!")
+        this.dismissAllowingStateLoss()
+        return layout
+      }
+      is AccountProviderAuthenticationDescription.Basic -> {
+        authenticationDescription
+      }
     }
 
     /*
      * If the passcode is not allowed to contain letters, then don't let users enter them.
      */
 
-    if (!authentication.passCodeMayContainLetters()) {
-      this.pinEdit.inputType =
-        InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+    when (authentication.passwordKeyboard) {
+      "DEFAULT" -> {
+
+      }
+      "NO INPUT" -> {
+        this.pinLabel.visibility = View.INVISIBLE
+        this.pinEdit.visibility = View.INVISIBLE
+      }
+      "NUMBER PAD" -> {
+        this.pinEdit.inputType =
+          InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+      }
     }
 
     /*
      * If the passcode has a known length, limit the input to that length.
      */
 
-    if (authentication.passCodeLength() != 0) {
+    if (authentication.passwordMaximumLength != 0) {
       this.pinEdit.filters =
-        arrayOf<InputFilter>(InputFilter.LengthFilter(authentication.passCodeLength()))
-    }
-
-    /*
-     * If a PIN is not required, hide the PIN entry elements.
-     */
-
-    if (!authentication.requiresPin()) {
-      this.pinLabel.visibility = View.INVISIBLE
-      this.pinEdit.visibility = View.INVISIBLE
+        arrayOf<InputFilter>(InputFilter.LengthFilter(authentication.passwordMaximumLength))
     }
 
     /*
      * If the account provider supports barcode scanning, show the scan button.
      */
 
-    if (accountProvider.supportsBarcodeScanner) {
+    if (accountProvider.supportsBarcodeDisplay) {
       this.barcodeScanButton.visibility = View.VISIBLE
     }
 

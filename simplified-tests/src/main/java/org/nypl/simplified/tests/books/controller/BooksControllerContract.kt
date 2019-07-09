@@ -250,7 +250,7 @@ abstract class BooksControllerContract {
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
-      "urn:fake-auth:0",
+      "http://www.example.com/accounts0/loans.xml",
       HTTPResultError(
         400,
         "BAD REQUEST",
@@ -296,7 +296,7 @@ abstract class BooksControllerContract {
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
-      "urn:fake-auth:0",
+      "http://www.example.com/accounts0/loans.xml",
       HTTPResultError(
         401,
         "UNAUTHORIZED",
@@ -410,7 +410,7 @@ abstract class BooksControllerContract {
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
-      "urn:fake-auth:0",
+      "http://www.example.com/accounts0/loans.xml",
       HTTPResultOK<InputStream>(
         "OK",
         200,
@@ -455,7 +455,7 @@ abstract class BooksControllerContract {
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
-      "urn:fake-auth:0",
+      "http://www.example.com/accounts0/loans.xml",
       HTTPResultOK(
         "OK",
         200,
@@ -529,7 +529,7 @@ abstract class BooksControllerContract {
      */
 
     this.http.addResponse(
-      "urn:fake-auth:0",
+      "http://www.example.com/accounts0/loans.xml",
       HTTPResultOK(
         "OK",
         200,
@@ -554,7 +554,7 @@ abstract class BooksControllerContract {
      */
 
     this.http.addResponse(
-      "urn:fake-auth:0",
+      "http://www.example.com/accounts0/loans.xml",
       HTTPResultOK(
         "OK",
         200,
@@ -630,7 +630,7 @@ abstract class BooksControllerContract {
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
-      "urn:fake-auth:0",
+      "http://www.example.com/accounts0/loans.xml",
       HTTPResultOK(
         "OK",
         200,
@@ -712,7 +712,7 @@ abstract class BooksControllerContract {
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
-      "urn:fake-auth:0",
+      "http://www.example.com/accounts0/loans.xml",
       HTTPResultOK(
         "OK",
         200,

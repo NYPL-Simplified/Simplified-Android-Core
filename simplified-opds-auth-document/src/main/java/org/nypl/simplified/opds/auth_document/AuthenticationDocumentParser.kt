@@ -9,6 +9,8 @@ import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParserType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObject
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectLink
+import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLFeatures
+import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLInput
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.parser.api.ParseWarning
@@ -77,6 +79,13 @@ internal class AuthenticationDocumentParser(
         JSONParserUtilities.getString(root, "title")
       val description =
         JSONParserUtilities.getStringOrNull(root, "description")
+      val mainColor =
+        JSONParserUtilities.getStringOrNull(root, "color_scheme") ?: "red"
+      val features =
+        JSONParserUtilities.getObjectOrNull(root, "features")
+          ?.let { obj -> parseFeatures(obj) }
+          ?: AuthenticationObjectNYPLFeatures(setOf(), setOf())
+
       val authentication =
         this.parseAuthentications(root)
       val links =
@@ -86,17 +95,41 @@ internal class AuthenticationDocumentParser(
         return ParseResult.Success(
           warnings = this.warnings.toList(),
           result = AuthenticationDocument(
-            id = id,
-            title = title,
+            authentication = authentication,
             description = description,
+            features = features,
+            id = id,
             links = links,
-            authentication = authentication))
+            mainColor = mainColor,
+            title = title
+          ))
       } else {
         ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
       }
     } catch (e: Exception) {
       this.publishErrorForException(e)
       ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
+    }
+  }
+
+  private fun parseFeatures(obj: ObjectNode): AuthenticationObjectNYPLFeatures {
+    return try {
+      val enabled =
+        JSONParserUtilities.getArrayOrNull(obj, "enabled")
+          ?.map { node -> JSONParserUtilities.checkString(node) }
+          ?: setOf<String>()
+
+      val disabled =
+        JSONParserUtilities.getArrayOrNull(obj, "disabled")
+          ?.map { node -> JSONParserUtilities.checkString(node) }
+          ?: setOf<String>()
+
+      AuthenticationObjectNYPLFeatures(
+        enabled = enabled.toSet(),
+        disabled = disabled.toSet())
+    } catch (e: Exception) {
+      this.publishErrorForException(e)
+      AuthenticationObjectNYPLFeatures(setOf(), setOf())
     }
   }
 
@@ -172,18 +205,67 @@ internal class AuthenticationDocumentParser(
         JSONParserUtilities.checkObject(null, node)
       val type =
         JSONParserUtilities.getURI(root, "type")
+      val description =
+        JSONParserUtilities.getStringOrNull(root, "description") ?: ""
+
       val links =
         JSONParserUtilities.getArrayOrNull(root, "links")
           ?.mapNotNull(this::parseLink)
           ?: listOf()
+
       val labels =
         JSONParserUtilities.getObjectOrNull(root, "labels")
           ?.let(this::parseLabels)
           ?: mapOf()
+
+      val inputs =
+        JSONParserUtilities.getObjectOrNull(root, "inputs")
+          ?.let(this::parseInputs)
+          ?: mapOf()
+
       AuthenticationObject(
-        type = type,
+        description = description,
+        inputs = inputs,
         labels = labels,
-        links = links)
+        links = links,
+        type = type
+      )
+    } catch (e: Exception) {
+      this.publishErrorForException(e)
+      null
+    }
+  }
+
+  private fun parseInputs(root: ObjectNode): Map<String, AuthenticationObjectNYPLInput>? {
+    val values = mutableMapOf<String, AuthenticationObjectNYPLInput>()
+    for (key in root.fieldNames()) {
+      try {
+        val keyUpper = key.toUpperCase()
+        val input = this.parseInput(keyUpper, JSONParserUtilities.getObject(root, key))
+        if (input != null) {
+          values[keyUpper] = input
+        }
+      } catch (e: Exception) {
+        this.publishErrorForException(e)
+        null
+      }
+    }
+    return values.toMap()
+  }
+
+  private fun parseInput(
+    fieldName: String,
+    root: ObjectNode?
+  ): AuthenticationObjectNYPLInput? {
+    return try {
+       AuthenticationObjectNYPLInput(
+        fieldName = fieldName,
+        keyboardType =
+        JSONParserUtilities.getStringOrNull(root, "keyboard")?.toUpperCase(),
+        maximumLength =
+        JSONParserUtilities.getIntegerDefault(root, "maximum_length", 0),
+        barcodeFormat =
+        JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase())
     } catch (e: Exception) {
       this.publishErrorForException(e)
       null
@@ -194,7 +276,7 @@ internal class AuthenticationDocumentParser(
     val values = mutableMapOf<String, String>()
     for (key in root.fieldNames()) {
       try {
-        values[key] = JSONParserUtilities.getString(root, key)
+        values[key.toUpperCase()] = JSONParserUtilities.getString(root, key)
       } catch (e: Exception) {
         this.publishErrorForException(e)
         null

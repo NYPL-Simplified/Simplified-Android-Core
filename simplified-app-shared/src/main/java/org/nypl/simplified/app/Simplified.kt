@@ -68,5 +68,5 @@ class Simplified : MultiDexApplication() {
    */
 
   fun services() : SimplifiedServicesType =
-    this.bootFuture.get(5L, TimeUnit.SECONDS)
+    this.bootFuture.get(30L, TimeUnit.SECONDS)
 }

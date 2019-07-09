@@ -21,7 +21,13 @@ import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.*
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMNotSupported
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountPIN
@@ -168,12 +174,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -244,12 +251,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -325,12 +333,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -396,12 +405,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(null)
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -465,12 +475,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -558,12 +569,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -651,12 +663,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -799,12 +812,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -898,12 +912,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -1015,12 +1030,13 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.builder()
-        .setLoginURI(URI.create("urn:auth"))
-        .setPassCodeLength(10)
-        .setPassCodeMayContainLetters(true)
-        .setRequiresPin(true)
-        .build())
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
+        passwordMaximumLength = 10,
+        passwordKeyboard = "DEFAULT",
+        description = "Library Login",
+        labels = mapOf()))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)

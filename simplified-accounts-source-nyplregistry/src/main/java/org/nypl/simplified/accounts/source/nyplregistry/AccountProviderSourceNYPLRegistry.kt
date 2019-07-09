@@ -10,6 +10,7 @@ import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSerializersType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
+import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerConnectionFailure
@@ -22,12 +23,14 @@ import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.parser.api.ParseResult
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
+import java.util.ServiceLoader
 
 /**
  * A server-based account provider.
@@ -35,8 +38,17 @@ import java.net.URI
 
 class AccountProviderSourceNYPLRegistry(
   private val http: HTTPType,
+  private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val parsers: AccountProviderDescriptionCollectionParsersType,
   private val serializers: AccountProviderDescriptionCollectionSerializersType) : AccountProviderSourceType {
+
+  companion object {
+    private fun findAuthenticationDocumentParsers(): AuthenticationDocumentParsersType {
+      return ServiceLoader.load(AuthenticationDocumentParsersType::class.java)
+        .firstOrNull()
+        ?: throw IllegalStateException("No available implementation of type ${AuthenticationDocumentParsersType::class.java}")
+    }
+  }
 
   /**
    * Secondary no-arg constructor for use in [java.util.ServiceLoader].
@@ -45,6 +57,7 @@ class AccountProviderSourceNYPLRegistry(
   constructor()
     : this(
     http = HTTP.newHTTP(),
+    authDocumentParsers = findAuthenticationDocumentParsers(),
     parsers = AccountProviderDescriptionCollectionParsers(),
     serializers = AccountProviderDescriptionCollectionSerializers())
 
@@ -65,11 +78,18 @@ class AccountProviderSourceNYPLRegistry(
   @Volatile
   private var firstCall = true
 
+  @Volatile
+  private var stringResources: AccountProviderResolutionStringsType? = null
+
   private data class CacheFiles(
     val file: File,
     val fileTemp: File)
 
   override fun load(context: Context): SourceResult {
+    if (this.stringResources == null) {
+      this.stringResources = AccountProviderSourceNYPLResolutionStrings(context.resources)
+    }
+
     val files = this.cacheFiles(context)
     val diskResults = this.fetchDiskResults(files)
 
@@ -174,7 +194,17 @@ class AccountProviderSourceNYPLRegistry(
               result.result.providers.size,
               result.warnings.size)
             result.result.providers
-              .map { provider -> Pair(provider.id, AccountProviderSourceNYPLRegistryDescription(provider)) }
+              .map { provider ->
+                Pair(
+                  provider.id,
+                  AccountProviderSourceNYPLRegistryDescription(
+                    stringResources = this.stringResources!!,
+                    authDocumentParsers = this.authDocumentParsers,
+                    http = this.http,
+                    metadata = provider
+                  )
+                )
+              }
               .toMap()
           }
         }
@@ -216,7 +246,11 @@ class AccountProviderSourceNYPLRegistry(
         !results.containsKey(id),
         "ID $id must not already be present in the results")
 
-      results[id] = AccountProviderSourceNYPLRegistryDescription(resultMetadata)
+      results[id] = AccountProviderSourceNYPLRegistryDescription(
+        stringResources = this.stringResources!!,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.http,
+        metadata = resultMetadata)
     }
     return results.toMap()
   }
@@ -245,7 +279,7 @@ class AccountProviderSourceNYPLRegistry(
   }
 
   private fun logParseFailure(
-    source : String,
+    source: String,
     parseResult: ParseResult.Failure<AccountProviderDescriptionCollection>) {
     this.logger.debug("failed to parse providers from $source ({} errors, {} warnings)",
       parseResult.errors.size,

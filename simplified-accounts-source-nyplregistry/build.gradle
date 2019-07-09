@@ -23,6 +23,7 @@ dependencies {
   implementation project(":simplified-accounts-json")
   implementation project(":simplified-files")
   implementation project(":simplified-http-core")
+  implementation project(":simplified-opds-auth-document-api")
 
   implementation 'org.slf4j:slf4j-api:1.7.25'
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
