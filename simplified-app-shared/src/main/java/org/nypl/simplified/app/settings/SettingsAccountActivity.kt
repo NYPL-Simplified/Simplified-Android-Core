@@ -258,6 +258,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * provider doesn't support/require authentication.
      */
 
+    // https://jira.nypl.org/browse/SIMPLY-2106
     // XXX: Get labels from the current authentication document.
     // XXX: This should be per-account
     val docs = Simplified.application.services().documentStore
