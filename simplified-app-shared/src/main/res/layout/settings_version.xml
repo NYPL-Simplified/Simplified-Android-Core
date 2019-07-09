@@ -1,139 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
-  android:orientation="vertical"
-  android:padding="16dp"
+  android:scrollbarAlwaysDrawHorizontalTrack="true"
   android:scrollbarAlwaysDrawVerticalTrack="true">
 
-  <TextView
-    android:id="@+id/settings_version_build_title"
-    android:layout_width="wrap_content"
+  <RelativeLayout
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
-    android:text="@string/versions_revision"
-    android:textSize="24sp"
-    android:textStyle="bold" />
-
-  <TextView
-    android:id="@+id/settings_version_build"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/settings_version_build_title"
-    android:layout_marginBottom="16dp"
-    android:fontFamily="monospace"
-    android:text="0c40e0a2c5936a90a29989252eb34c67cdf3876e" />
-
-  <TextView
-    android:id="@+id/settings_version_version_title"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/settings_version_build"
-    android:layout_marginBottom="16dp"
-    android:text="@string/versions_version"
-    android:textSize="24sp"
-    android:textStyle="bold" />
-
-  <TextView
-    android:id="@+id/settings_version_version"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/settings_version_version_title"
-    android:layout_marginBottom="16dp"
-    android:fontFamily="monospace"
-    android:text="1.0.0 (2000)" />
-
-  <LinearLayout
-    android:id="@+id/settings_version_dev"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/settings_version_version"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
-      android:id="@+id/settings_version_dev_title"
+      android:id="@+id/settings_version_build_title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
-      android:text="Developer Options"
+      android:text="@string/versions_revision"
       android:textSize="24sp"
       android:textStyle="bold" />
 
     <TextView
+      android:id="@+id/settings_version_build"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_below="@id/settings_version_build_title"
       android:layout_marginBottom="16dp"
-      android:text="Crash Application"
-      android:textSize="14sp"
-      android:textStyle="bold" />
-
-    <Button
-      android:id="@+id/settings_version_dev_crash"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"
-      android:text="Crash" />
+      android:fontFamily="monospace"
+      android:text="0c40e0a2c5936a90a29989252eb34c67cdf3876e" />
 
     <TextView
+      android:id="@+id/settings_version_version_title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_below="@id/settings_version_build"
       android:layout_marginBottom="16dp"
-      android:text="DRM Support"
-      android:textSize="14sp"
+      android:text="@string/versions_version"
+      android:textSize="24sp"
       android:textStyle="bold" />
-
-    <TableLayout
-      android:id="@+id/settings_version_drm_support"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"></TableLayout>
 
     <TextView
+      android:id="@+id/settings_version_version"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_below="@id/settings_version_version_title"
       android:layout_marginBottom="16dp"
-      android:text="Adobe DRM Activations"
-      android:textSize="14sp"
-      android:textStyle="bold" />
+      android:fontFamily="monospace"
+      android:text="1.0.0 (2000)" />
 
-    <HorizontalScrollView
+    <LinearLayout
+      android:id="@+id/settings_version_dev"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:scrollbars="vertical|horizontal"
-      android:scrollbarAlwaysDrawVerticalTrack="true"
-      android:scrollbarAlwaysDrawHorizontalTrack="true"
-      android:layout_marginBottom="16dp">
-      <TableLayout
-        android:id="@+id/settings_version_drm_adobe_activations"
+      android:layout_below="@id/settings_version_version"
+      android:orientation="vertical">
+
+      <TextView
+        android:id="@+id/settings_version_dev_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Developer Options"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Crash Application"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+      <Button
+        android:id="@+id/settings_version_dev_crash"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TableRow>
-          <TextView android:text="Placeholder" />
-          <TextView android:text="Placeholder" />
-          <TextView android:text="Placeholder" />
-          <TextView android:text="Placeholder" />
-          <TextView android:text="Placeholder" />
-        </TableRow>
-      </TableLayout>
-    </HorizontalScrollView>
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Crash" />
 
-    <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"
-      android:text="Testing Features"
-      android:textSize="14sp"
-      android:textStyle="bold" />
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="DRM Support"
+        android:textSize="14sp"
+        android:textStyle="bold" />
 
-    <Switch
-      android:id="@+id/settings_version_dev_production_libraries_switch"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:checked="false"
-      android:enabled="false"
-      android:text="Show non-production libraries" />
+      <TableLayout
+        android:id="@+id/settings_version_drm_support"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"></TableLayout>
 
-  </LinearLayout>
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Adobe DRM Activations"
+        android:textSize="14sp"
+        android:textStyle="bold" />
 
-</RelativeLayout>
+      <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:scrollbarAlwaysDrawHorizontalTrack="true"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbars="vertical|horizontal">
+
+        <TableLayout
+          android:id="@+id/settings_version_drm_adobe_activations"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+
+          <TableRow>
+
+            <TextView android:text="Placeholder" />
+
+            <TextView android:text="Placeholder" />
+
+            <TextView android:text="Placeholder" />
+
+            <TextView android:text="Placeholder" />
+
+            <TextView android:text="Placeholder" />
+          </TableRow>
+        </TableLayout>
+      </HorizontalScrollView>
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Testing Features"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+      <Switch
+        android:id="@+id/settings_version_dev_production_libraries_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:enabled="true"
+        android:text="Show non-production libraries" />
+
+    </LinearLayout>
+
+  </RelativeLayout>
+</ScrollView>
+

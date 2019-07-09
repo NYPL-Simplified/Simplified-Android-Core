@@ -45,6 +45,7 @@ import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccount
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
+import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
@@ -107,15 +108,23 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     this.accountCurrentView =
       this.findViewById(R.id.current_account)
 
+    val services = Simplified.application.services()
+    services
+      .backgroundExecutor
+      .execute {
+        this.logger.debug("refreshing account registry")
+        services.accountProviderRegistry.refresh()
+      }
+
     this.adapterAccountsArray = ArrayList()
     this.adapterAccounts =
       AccountsArrayAdapter(
         targetContext = this,
-        picasso = Simplified.application.services().imageLoader,
+        picasso = services.imageLoader,
         adapterAccountsArray = this.adapterAccountsArray,
         inflater = inflater)
 
-    val profiles = Simplified.application.services().profilesController
+    val profiles = services.profilesController
     this.accountListView.adapter = this.adapterAccounts
     this.accountListView.setOnItemClickListener { adapterView, view, position, id ->
       this.onWantShowAccount(position, profiles)
@@ -511,16 +520,24 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
    */
 
   private fun determineAvailableAccountProviderDescriptions(): ArrayList<AccountProviderDescriptionType> {
+    val profilesController =
+      Simplified.application.services().profilesController
+    val profileCurrent =
+      profilesController.profileCurrent()
+    val preferences =
+      profileCurrent.preferences()
+
     val usedAccountProviders =
-      Simplified.application.services()
-        .profilesController
+      profilesController
         .profileCurrentlyUsedAccountProviders()
         .map { p -> p.toDescription() }
 
     val availableAccountProviders =
       ArrayList(Simplified.application.services()
         .accountProviderRegistry
-        .accountProviderDescriptions().values)
+        .accountProviderDescriptions()
+        .values
+        .filter { provider -> showShowProvider(provider, preferences) })
 
     availableAccountProviders.removeAll(usedAccountProviders)
     availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
@@ -532,6 +549,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     this.logger.debug("returning {} available providers", availableAccountProviders.size)
     return availableAccountProviders
   }
+
+  private fun showShowProvider(provider: AccountProviderDescriptionType, preferences: ProfilePreferences) =
+    provider.metadata.isProduction || preferences.showTestingLibraries()
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     try {

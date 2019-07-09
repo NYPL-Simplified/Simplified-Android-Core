@@ -31,6 +31,12 @@ public abstract class ProfilePreferences {
   public abstract OptionType<ProfileDateOfBirth> dateOfBirth();
 
   /**
+   * @return {@code true} if non-production libraries should be displayed
+   */
+
+  public abstract boolean showTestingLibraries();
+
+  /**
    * @return The current value as a mutable builder
    */
 
@@ -52,6 +58,15 @@ public abstract class ProfilePreferences {
     Builder() {
 
     }
+
+    /**
+     * @param showTesting {@code true} if testing libraries should be shown
+     * @return The current builder
+     * @see #showTestingLibraries()
+     */
+
+    public abstract Builder setShowTestingLibraries(
+      boolean showTesting);
 
     /**
      * @param prefs The reader preferences
@@ -114,6 +129,7 @@ public abstract class ProfilePreferences {
   public static ProfilePreferences.Builder builder() {
     return new AutoValue_ProfilePreferences.Builder()
       .setReaderPreferences(ReaderPreferences.builder().build())
+      .setShowTestingLibraries(false)
       .setGender(Option.none())
       .setDateOfBirth(Option.none());
   }

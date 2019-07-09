@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Switch
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
@@ -17,10 +18,15 @@ import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.controller.AdobeDRMExtensions
+import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfilePreferences
+import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.slf4j.LoggerFactory
 
 class SettingsVersionActivity : ProfileTimeOutActivity() {
 
+  private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
   private var buildClicks = 1
   private lateinit var crashButton: Button
   private lateinit var drmTable: TableLayout
@@ -30,6 +36,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   private lateinit var buildText: TextView
   private lateinit var developerOptions: ViewGroup
   private lateinit var adobeDRMActivationTable: TableLayout
+  private lateinit var showTesting: Switch
 
   private val logger = LoggerFactory.getLogger(SettingsVersionActivity::class.java)
 
@@ -56,6 +63,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       this.findViewById(R.id.settings_version_drm_support)
     this.adobeDRMActivationTable =
       this.findViewById(R.id.settings_version_drm_adobe_activations)
+    this.showTesting =
+      this.findViewById(R.id.settings_version_dev_production_libraries_switch)
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -103,6 +112,53 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
     this.drmTable.removeAllViews()
     this.drmTable.addView(drmACSSupportRow())
+    this.adobeDRMActivationTable.removeAllViews()
+
+    val profilesController = Simplified.application.services()
+
+      .profilesController
+    this.profileEventSubscription =
+      profilesController
+        .profileEvents()
+        .subscribe(this::onProfileEvent)
+
+    this.showTesting.isChecked =
+      profilesController
+        .profileCurrent()
+        .preferences()
+        .showTestingLibraries()
+
+    /*
+     * Update the current profile's preferences whenever the testing switch is changed.
+     */
+
+    this.showTesting.setOnClickListener {
+      profilesController
+        .profilePreferencesUpdate(
+          profilesController.profileCurrent()
+            .preferences()
+            .toBuilder()
+            .setShowTestingLibraries(this.showTesting.isChecked)
+            .build())
+    }
+  }
+
+  override fun onStop() {
+    super.onStop()
+    this.profileEventSubscription?.unsubscribe()
+  }
+
+  private fun onProfileEvent(event: ProfileEvent) {
+    if (event is ProfilePreferencesChanged) {
+      UIThread.runOnUIThread {
+        this.showTesting.isChecked =
+          Simplified.application.services()
+            .profilesController
+            .profileCurrent()
+            .preferences()
+            .showTestingLibraries()
+      }
+    }
   }
 
   private fun drmACSSupportRow(): TableRow {

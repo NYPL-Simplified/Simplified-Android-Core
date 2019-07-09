@@ -13,14 +13,14 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
-import org.nypl.simplified.profiles.api.ProfileDateOfBirth;
-import org.nypl.simplified.reader.api.ReaderPreferencesJSON;
-import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.nypl.simplified.json.core.JSONSerializerUtilities;
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth;
 import org.nypl.simplified.profiles.api.ProfilePreferences;
+import org.nypl.simplified.reader.api.ReaderPreferences;
+import org.nypl.simplified.reader.api.ReaderPreferencesJSON;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -46,9 +46,9 @@ public final class ProfilePreferencesJSON {
    */
 
   public static ProfilePreferences deserializeFromFile(
-      final ObjectMapper jom,
-      final File file)
-      throws IOException {
+    final ObjectMapper jom,
+    final File file)
+    throws IOException {
 
     NullCheck.notNull(jom, "Object mapper");
     NullCheck.notNull(file, "File");
@@ -65,8 +65,8 @@ public final class ProfilePreferencesJSON {
    */
 
   public static ProfilePreferences deserializeFromText(
-      final ObjectMapper jom,
-      final String text) throws IOException {
+    final ObjectMapper jom,
+    final String text) throws IOException {
 
     NullCheck.notNull(jom, "Object mapper");
     NullCheck.notNull(text, "Text");
@@ -83,9 +83,9 @@ public final class ProfilePreferencesJSON {
    */
 
   public static ProfilePreferences deserializeFromJSON(
-      final ObjectMapper jom,
-      final JsonNode node)
-      throws JSONParseException {
+    final ObjectMapper jom,
+    final JsonNode node)
+    throws JSONParseException {
 
     NullCheck.notNull(jom, "Object mapper");
     NullCheck.notNull(node, "JSON");
@@ -93,20 +93,23 @@ public final class ProfilePreferencesJSON {
     final DateTimeFormatter date_formatter = standardDateFormatter();
 
     final ObjectNode obj =
-        JSONParserUtilities.checkObject(null, node);
+      JSONParserUtilities.checkObject(null, node);
 
-    final OptionType<String> gender=
-        JSONParserUtilities.getStringOptional(obj, "gender");
+    final OptionType<String> gender =
+      JSONParserUtilities.getStringOptional(obj, "gender");
+
+    final boolean showTestingLibraries =
+      JSONParserUtilities.getBooleanDefault(obj, "show-testing-libraries", false);
 
     final OptionType<LocalDate> date_of_birth_date =
-        JSONParserUtilities.getStringOptional(obj, "date-of-birth")
-            .mapPartial(text -> {
-              try {
-                return LocalDate.parse(text, date_formatter);
-              } catch (final IllegalArgumentException e) {
-                throw new JSONParseException(e);
-              }
-            });
+      JSONParserUtilities.getStringOptional(obj, "date-of-birth")
+        .mapPartial(text -> {
+          try {
+            return LocalDate.parse(text, date_formatter);
+          } catch (final IllegalArgumentException e) {
+            throw new JSONParseException(e);
+          }
+        });
 
     final boolean date_of_birth_synthesized =
       JSONParserUtilities.getBooleanDefault(obj, "date-of-birth-synthesized", false);
@@ -116,35 +119,36 @@ public final class ProfilePreferencesJSON {
         date_value -> new ProfileDateOfBirth(date_value, date_of_birth_synthesized));
 
     final ReaderPreferences reader_prefs =
-        JSONParserUtilities.getObjectOptional(obj, "reader-preferences")
-            .mapPartial(prefs_node -> ReaderPreferencesJSON.deserializeFromJSON(jom, prefs_node))
-            .accept(new OptionVisitorType<ReaderPreferences, ReaderPreferences>() {
-              @Override
-              public ReaderPreferences none(final None<ReaderPreferences> none) {
-                return ReaderPreferences.builder().build();
-              }
+      JSONParserUtilities.getObjectOptional(obj, "reader-preferences")
+        .mapPartial(prefs_node -> ReaderPreferencesJSON.deserializeFromJSON(jom, prefs_node))
+        .accept(new OptionVisitorType<ReaderPreferences, ReaderPreferences>() {
+          @Override
+          public ReaderPreferences none(final None<ReaderPreferences> none) {
+            return ReaderPreferences.builder().build();
+          }
 
-              @Override
-              public ReaderPreferences some(final Some<ReaderPreferences> some) {
-                return some.get();
-              }
-            });
+          @Override
+          public ReaderPreferences some(final Some<ReaderPreferences> some) {
+            return some.get();
+          }
+        });
 
     return ProfilePreferences.builder()
-        .setGender(gender)
-        .setDateOfBirth(date_of_birth)
-        .setReaderPreferences(reader_prefs)
-        .build();
+      .setGender(gender)
+      .setDateOfBirth(date_of_birth)
+      .setShowTestingLibraries(showTestingLibraries)
+      .setReaderPreferences(reader_prefs)
+      .build();
   }
 
   private static DateTimeFormatter standardDateFormatter() {
     return new DateTimeFormatterBuilder()
-        .appendYear(4, 5)
-        .appendLiteral("-")
-        .appendMonthOfYear(2)
-        .appendLiteral("-")
-        .appendDayOfMonth(2)
-        .toFormatter();
+      .appendYear(4, 5)
+      .appendLiteral("-")
+      .appendMonthOfYear(2)
+      .appendLiteral("-")
+      .appendDayOfMonth(2)
+      .toFormatter();
   }
 
   /**
@@ -155,8 +159,8 @@ public final class ProfilePreferencesJSON {
    */
 
   public static ObjectNode serializeToJSON(
-      final ObjectMapper jom,
-      final ProfilePreferences description) {
+    final ObjectMapper jom,
+    final ProfilePreferences description) {
 
     NullCheck.notNull(jom, "Object mapper");
     NullCheck.notNull(description, "Description");
@@ -165,14 +169,15 @@ public final class ProfilePreferencesJSON {
     final ObjectNode jo = jom.createObjectNode();
 
     description.gender().map_(
-        gender -> jo.put("gender", gender));
+      gender -> jo.put("gender", gender));
 
     description.dateOfBirth().map_(
-        date -> {
-          jo.put("date-of-birth", date_formatter.print(date.getDate()));
-          jo.put("date-of-birth-synthesized", date.isSynthesized());
-        });
+      date -> {
+        jo.put("date-of-birth", date_formatter.print(date.getDate()));
+        jo.put("date-of-birth-synthesized", date.isSynthesized());
+      });
 
+    jo.put("show-testing-libraries", description.showTestingLibraries());
     jo.set("reader-preferences", ReaderPreferencesJSON.serializeToJSON(jom, description.readerPreferences()));
     return jo;
   }
@@ -186,9 +191,9 @@ public final class ProfilePreferencesJSON {
    */
 
   public static String serializeToString(
-      final ObjectMapper jom,
-      final ProfilePreferences description)
-      throws IOException {
+    final ObjectMapper jom,
+    final ProfilePreferences description)
+    throws IOException {
 
     final ObjectNode jo = serializeToJSON(jom, description);
     final ByteArrayOutputStream bao = new ByteArrayOutputStream(1024);
