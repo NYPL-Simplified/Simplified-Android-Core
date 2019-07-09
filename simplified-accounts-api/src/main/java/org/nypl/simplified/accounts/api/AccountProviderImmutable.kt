@@ -45,9 +45,30 @@ data class AccountProviderImmutable(
         relation = "http://opds-spec.org/image/thumbnail"))
     }
 
-    // XXX: TODO: Reconstruct links from above fields
     val links =
       mutableListOf<AccountProviderDescriptionMetadata.Link>()
+
+    this.annotationsURI?.let { uri ->
+      addLink(links, uri, "http://www.w3.org/ns/oa#annotationService")
+    }
+    this.cardCreatorURI?.let {uri ->
+      addLink(links, uri, "register")
+    }
+    this.eula?.let {uri ->
+      addLink(links, uri, "terms-of-service")
+    }
+    this.license?.let {uri ->
+      addLink(links, uri, "license")
+    }
+    this.loansURI?.let {uri ->
+      addLink(links, uri, "http://opds-spec.org/shelf")
+    }
+    this.patronSettingsURI?.let {uri ->
+      addLink(links, uri, "http://librarysimplified.org/terms/rel/user-profile")
+    }
+    this.privacyPolicy?.let {uri ->
+      addLink(links, uri, "privacy-policy")
+    }
 
     val meta =
       AccountProviderDescriptionMetadata(
@@ -67,5 +88,14 @@ data class AccountProviderImmutable(
         return AccountProviderResolutionResult(this@AccountProviderImmutable, listOf())
       }
     }
+  }
+
+  private fun addLink(links: MutableList<AccountProviderDescriptionMetadata.Link>, uri: URI, relation: String): Boolean {
+    return links.add(AccountProviderDescriptionMetadata.Link(
+      href = uri,
+      type = null,
+      templated = false,
+      relation = relation
+    ))
   }
 }
