@@ -24,7 +24,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountExce
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseWrongProviderException
 import org.nypl.simplified.accounts.json.AccountDescriptionJSON
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
@@ -138,7 +138,7 @@ class AccountsDatabase private constructor(
           Account(
             id = accountId,
             directory = accountDir,
-            provider = accountProvider,
+            providerInitial = accountProvider,
             bookDatabase = bookDatabase,
             accountEvents = accountEvents,
             description = accountDescription,
@@ -185,7 +185,6 @@ class AccountsDatabase private constructor(
   private class Account internal constructor(
     override val id: AccountID,
     override val directory: File,
-    override val provider: AccountProviderType,
     override val bookDatabase: BookDatabaseType,
 
     private val accountEvents: ObservableType<AccountEvent>,
@@ -195,12 +194,15 @@ class AccountsDatabase private constructor(
 
     private val credentials: AccountAuthenticationCredentialsStoreType,
 
+    providerInitial: AccountProviderType,
     accountLoginState: AccountLoginState) : AccountType {
 
     private val descriptionLock: Any = Any()
 
     @GuardedBy("descriptionLock")
     private var loginStateActual: AccountLoginState = accountLoginState
+    @GuardedBy("descriptionLock")
+    private var providerActual: AccountProviderType = providerInitial
 
     init {
       this.description =
@@ -208,18 +210,37 @@ class AccountsDatabase private constructor(
 
     }
 
+    override fun setAccountProvider(accountProvider: AccountProviderType) {
+      this.setDescription(FunctionType { existing ->
+
+        val existingProvider = existing.provider()
+        if (existingProvider.id != accountProvider.id) {
+          throw AccountsDatabaseWrongProviderException(
+            "Provider id ${accountProvider.id} does not match the existing id ${existingProvider.id}")
+        }
+        if (existingProvider.updated.isAfter(accountProvider.updated)) {
+          LOG.warn("attempted to update provider {} with an older definition", existingProvider.id)
+          return@FunctionType existing
+        }
+
+        existing.toBuilder()
+          .setProvider(accountProvider)
+          .build()
+      })
+    }
+
+    override val provider: AccountProviderType
+      get() = synchronized(this.descriptionLock) {
+        return this.providerActual
+      }
+
+
     fun id(): AccountID {
       return this.id
     }
 
     fun directory(): File {
       return this.directory
-    }
-
-    fun provider(): AccountProviderType {
-      synchronized(this.descriptionLock) {
-        return this.provider
-      }
     }
 
     override val loginState: AccountLoginState
@@ -360,7 +381,6 @@ class AccountsDatabase private constructor(
       context: Context,
       accountEvents: ObservableType<AccountEvent>,
       bookDatabases: BookDatabaseFactoryType,
-      accountProviders: AccountProviderRegistryType,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       directory: File): AccountsDatabaseType {
 
@@ -384,7 +404,6 @@ class AccountsDatabase private constructor(
         accountsByProvider = accountsByProvider,
         accountCredentials = accountCredentials,
         accountEvents = accountEvents,
-        accountProviders = accountProviders,
         bookDatabases = bookDatabases,
         context = context,
         directory = directory,
@@ -415,7 +434,6 @@ class AccountsDatabase private constructor(
       accountsByProvider: SortedMap<URI, Account>,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       accountEvents: ObservableType<AccountEvent>,
-      accountProviders: AccountProviderRegistryType,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       directory: File,
@@ -432,7 +450,6 @@ class AccountsDatabase private constructor(
             openOneAccount(
               accountEvents = accountEvents,
               accountIdName = accountIdName,
-              accountProviders = accountProviders,
               bookDatabases = bookDatabases,
               context = context,
               credentialsStore = accountCredentials,
@@ -468,7 +485,7 @@ class AccountsDatabase private constructor(
             }
 
             accounts[account.id] = account
-            accountsByProvider[account.provider().id] = account
+            accountsByProvider[account.provider.id] = account
           }
         }
       }
@@ -545,7 +562,6 @@ class AccountsDatabase private constructor(
     private fun openOneAccount(
       accountEvents: ObservableType<AccountEvent>,
       accountIdName: String,
-      accountProviders: AccountProviderRegistryType,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       credentialsStore: AccountAuthenticationCredentialsStoreType,
@@ -582,14 +598,15 @@ class AccountsDatabase private constructor(
         }
 
         return Account(
-          id = accountId,
-          directory = accountDir,
-          provider = accountProvider,
-          bookDatabase = bookDatabase,
           accountEvents = accountEvents,
-          description = accountDescription,
+          accountLoginState = loginState,
+          bookDatabase = bookDatabase,
           credentials = credentialsStore,
-          accountLoginState = loginState)
+          description = accountDescription,
+          directory = accountDir,
+          id = accountId,
+          providerInitial = accountProvider
+        )
 
       } catch (e: Exception) {
         LOG.error("could not open account: {}: ", accountFile, e)

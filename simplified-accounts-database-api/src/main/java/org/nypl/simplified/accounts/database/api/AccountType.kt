@@ -2,6 +2,7 @@ package org.nypl.simplified.accounts.database.api
 
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPreferences
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 
@@ -42,4 +43,16 @@ interface AccountType : AccountReadableType {
 
   @Throws(AccountsDatabaseException::class)
   fun setPreferences(preferences: AccountPreferences)
+
+  /**
+   * Update the account provider. Note that only account providers with id fields matching
+   * that of the existing provider will be accepted.
+   *
+   * @see AccountProviderType.id
+   * @param accountProvider The new provider
+   * @throws AccountsDatabaseException On database errors
+   */
+
+  @Throws(AccountsDatabaseException::class)
+  fun setAccountProvider(accountProvider: AccountProviderType)
 }

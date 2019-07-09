@@ -18,6 +18,7 @@ import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
@@ -55,6 +56,7 @@ import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderExcepti
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileSelected
+import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
@@ -107,6 +109,7 @@ class Controller private constructor(
   private val timerExecutor: ExecutorService
 ) : BooksControllerType, ProfilesControllerType {
 
+  private val accountRegistrySubscription: ObservableSubscriptionType<AccountProviderRegistryEvent>
   private val profileEventSubscription: ObservableSubscriptionType<ProfileEvent>
   private val timer = ProfileIdleTimer.create(this.timerExecutor, this.profileEvents)
   private val downloads: ConcurrentHashMap<BookID, DownloadType> =
@@ -116,7 +119,10 @@ class Controller private constructor(
     LoggerFactory.getLogger(Controller::class.java)
 
   init {
-    this.profileEventSubscription = this.profileEvents.subscribe { this.onProfileEvent(it) }
+    this.profileEventSubscription =
+      this.profileEvents.subscribe { this.onProfileEvent(it) }
+    this.accountRegistrySubscription =
+      this.accountProviders.events.subscribe { event -> this.onAccountRegistryEvent(event) }
 
     /*
      * If the anonymous profile is enabled, then ensure that it is "selected" and will
@@ -126,6 +132,38 @@ class Controller private constructor(
     if (this.profiles.anonymousProfileEnabled() == ANONYMOUS_PROFILE_ENABLED) {
       this.logger.debug("initializing anonymous profile")
       this.profileSelect(this.profileCurrent().id)
+    }
+  }
+
+  /**
+   * Respond to account registry events.
+   */
+
+  private fun onAccountRegistryEvent(event: AccountProviderRegistryEvent) {
+    if (!this.profileAnyIsCurrent()) {
+      return
+    }
+
+    return when (event) {
+      is AccountProviderRegistryEvent.Updated ->
+        this.onAccountRegistryProviderUpdatedEvent(event)
+      is AccountProviderRegistryEvent.SourceFailed -> {
+
+      }
+    }
+  }
+
+  private fun onAccountRegistryProviderUpdatedEvent(event: AccountProviderRegistryEvent.Updated) {
+    val profileCurrentOpt = this.profiles.currentProfile()
+    if (profileCurrentOpt is Some<ProfileType>) {
+      val profileCurrent = profileCurrentOpt.get()
+      this.taskExecutor.submit(ProfileAccountProviderUpdatedTask(
+        profile = profileCurrent,
+        accountProviderID = event.id,
+        accountProviders = this.accountProviders))
+      Unit
+    } else {
+
     }
   }
 

@@ -30,7 +30,6 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
       context,
       accountEvents,
       bookDatabases,
-      accountProviders,
       accountAuthenticationCredentialsStore,
       directory)
   }
@@ -46,7 +45,6 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
       context,
       accountEvents,
       BookDatabases,
-      accountProviders,
       accountAuthenticationCredentialsStore,
       directory)
   }

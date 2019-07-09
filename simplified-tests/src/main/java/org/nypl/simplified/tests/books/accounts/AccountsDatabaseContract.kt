@@ -100,7 +100,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
       f_acc)
   }
@@ -139,7 +138,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
       f_acc)
   }
@@ -164,7 +162,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
       f_acc)
   }
@@ -192,7 +189,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
       f_acc)
   }
@@ -212,7 +208,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
       f_acc)
 
@@ -238,7 +233,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      accountProviders,
       this.credentialStore!!,
       f_acc)
 
@@ -289,7 +283,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
       f_acc)
 
@@ -305,7 +298,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
       f_acc)
 
@@ -335,7 +327,6 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents!!,
       this.bookDatabases(),
-      MockAccountProviders.fakeAccountProviders(),
       this.credentialStore!!,
       f_acc)
 
@@ -350,5 +341,61 @@ abstract class AccountsDatabaseContract {
 
     acc0.setLoginState(AccountLoginState.AccountLoggedIn(creds))
     Assert.assertEquals(AccountLoginState.AccountLoggedIn(creds), acc0.loginState)
+  }
+
+  @Test
+  @Throws(Exception::class)
+  fun testSetProviderWrongID() {
+
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
+    fileProfiles.mkdirs()
+    val f_p = File(fileProfiles, "0")
+    f_p.mkdirs()
+    val f_acc = File(f_p, "accounts")
+
+    val db0 = AccountsDatabase.open(
+      this.context(),
+      this.accountEvents!!,
+      this.bookDatabases(),
+      this.credentialStore!!,
+      f_acc)
+
+    val provider0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val provider1 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
+
+    val acc0 = db0.createAccount(provider0)
+
+    this.expected.expect(AccountsDatabaseException::class.java)
+    acc0.setAccountProvider(provider1)
+  }
+
+  @Test
+  @Throws(Exception::class)
+  fun testSetProviderOK() {
+
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
+    fileProfiles.mkdirs()
+    val f_p = File(fileProfiles, "0")
+    f_p.mkdirs()
+    val f_acc = File(f_p, "accounts")
+
+    val db0 = AccountsDatabase.open(
+      this.context(),
+      this.accountEvents!!,
+      this.bookDatabases(),
+      this.credentialStore!!,
+      f_acc)
+
+    val provider0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val provider1 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+
+    val acc0 = db0.createAccount(provider0)
+    acc0.setAccountProvider(provider1)
   }
 }
