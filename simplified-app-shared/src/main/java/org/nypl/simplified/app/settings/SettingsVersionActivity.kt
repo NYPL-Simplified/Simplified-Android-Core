@@ -114,9 +114,9 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
     this.drmTable.addView(drmACSSupportRow())
     this.adobeDRMActivationTable.removeAllViews()
 
-    val profilesController = Simplified.application.services()
+    val profilesController =
+      Simplified.application.services().profilesController
 
-      .profilesController
     this.profileEventSubscription =
       profilesController
         .profileEvents()
