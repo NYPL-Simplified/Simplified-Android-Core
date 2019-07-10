@@ -107,4 +107,11 @@ data class AccountProviderDescriptionMetadata(
 
   val authenticationDocumentURI: URI?
     get() = this.links.find { link -> link.type == "application/vnd.opds.authentication.v1.0+json" }?.href
+
+  /**
+   * The catalog URI, if one is available.
+   */
+
+  val catalogURI: URI?
+    get() = this.links.find { link -> link.relation == "http://opds-spec.org/catalog" }?.href
 }

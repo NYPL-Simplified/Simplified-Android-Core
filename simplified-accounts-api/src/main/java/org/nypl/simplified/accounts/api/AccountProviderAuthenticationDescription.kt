@@ -22,6 +22,12 @@ sealed class AccountProviderAuthenticationDescription {
      */
 
     const val COPPA_TYPE = "http://librarysimplified.org/terms/authentication/gate/coppa"
+
+    /**
+     * The type used to identify anonymous access (no authentication).
+     */
+
+    const val ANONYMOUS_TYPE = "http://librarysimplified.org/rel/auth/anonymous"
   }
 
   /**

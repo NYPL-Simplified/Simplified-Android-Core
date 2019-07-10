@@ -7,6 +7,7 @@ import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.ANONYMOUS_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
@@ -69,11 +70,12 @@ class AccountProviderSourceNYPLRegistryDescription(
        */
 
       val catalogURI = authDocument.startURI
-      if (catalogURI == null) {
-        taskRecorder.currentStepFailed(this.stringResources.resolvingAuthDocumentNoStartURI)
-        onProgress.invoke(this.metadata.id, this.stringResources.resolvingAuthDocumentNoStartURI)
-        throw IOException()
-      }
+        ?: this.metadata.catalogURI
+        ?: run {
+          taskRecorder.currentStepFailed(this.stringResources.resolvingAuthDocumentNoStartURI)
+          onProgress.invoke(this.metadata.id, this.stringResources.resolvingAuthDocumentNoStartURI)
+          throw IOException()
+        }
 
       /*
        * The annotations URI can only be located by an authenticated user. We'll update
@@ -144,6 +146,8 @@ class AccountProviderSourceNYPLRegistryDescription(
           return this.extractAuthenticationDescriptionBasic(authObject)
         COPPA_TYPE ->
           return this.extractAuthenticationDescriptionCOPPA(taskRecorder, authObject)
+        ANONYMOUS_TYPE ->
+          return null
         else ->
           this.logger.warn("encountered unrecognized authentication type: {}", authType)
       }
