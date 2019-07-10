@@ -180,6 +180,7 @@ class SplashFragment : Fragment() {
       }
     }
 
+    this.viewsForEULA.eulaWebView.loadUrl(url.toString())
     this.viewsForImage.container.visibility = View.INVISIBLE
     this.viewsForEULA.container.visibility = View.VISIBLE
   }
