@@ -6,7 +6,7 @@
   android:layout_height="match_parent">
 
   <Button
-    android:id="@+id/eula_agree"
+    android:id="@+id/splashEulaAgree"
     android:text="@string/eula_agree"
     android:layout_alignParentBottom="true"
     android:layout_alignParentEnd="true"
@@ -14,7 +14,7 @@
     android:layout_height="wrap_content" />
 
   <Button
-    android:id="@+id/eula_disagree"
+    android:id="@+id/splashEulaDisagree"
     android:text="@string/eula_disagree"
     android:layout_alignParentBottom="true"
     android:layout_alignParentStart="true"
@@ -22,10 +22,10 @@
     android:layout_height="wrap_content" />
 
   <WebView
+    android:id="@+id/splashEulaWebView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/eula_web_view"
-    android:layout_above="@id/eula_agree"
+    android:layout_above="@id/splashEulaAgree"
     android:layout_marginBottom="16dp"
     android:layout_alignParentTop="true"
     android:layout_alignParentStart="true"/>

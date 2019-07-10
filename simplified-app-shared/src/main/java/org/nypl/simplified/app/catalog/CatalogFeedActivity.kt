@@ -36,6 +36,7 @@ import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.app.R
@@ -109,7 +110,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private var bookEventSubscription: ObservableSubscriptionType<BookStatusEvent>? = null
 
   override fun onLoginDialogWantsProfilesController(): ProfilesControllerType =
-    Simplified.getProfilesController()
+    Simplified.application.services()
+      .profilesController
 
   /**
    * @return The specific logger instance provided by subclasses
@@ -341,7 +343,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     feedURI: URI) {
     this.logger.debug("loading feed: {}", feedURI)
 
-    val loginState = this.account.loginState()
+    val loginState = this.account.loginState
     val authentication =
       if (loginState.credentials != null) {
         Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(loginState.credentials))
@@ -479,9 +481,9 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     try {
       cfl = CatalogFeedWithGroups(
         this,
-        Simplified.getProfilesController().profileAccountCurrent(),
-        Simplified.getScreenSizeInformation(),
-        Simplified.getCoverProvider(),
+        Simplified.application.services().profilesController.profileAccountCurrent(),
+        Simplified.application.services().screenSize,
+        Simplified.application.services().bookCovers,
         laneListener,
         feed
       )
@@ -567,7 +569,9 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     this.configureFacetEntryPointButtons(
       feedWithoutGroups, layout)
     this.configureFacets(
-      Simplified.getScreenSizeInformation(), feedWithoutGroups, layout)
+      screen = Simplified.application.services().screenSize,
+      feed = feedWithoutGroups,
+      layout = layout)
 
     gridView.post { gridView.setSelection(this.savedScrollPosition) }
     this.listView = gridView
@@ -580,20 +584,21 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     val without: CatalogFeedWithoutGroups
     try {
+      val services = Simplified.application.services()
       without = CatalogFeedWithoutGroups(
         activity = this,
-        analytics = Simplified.getAnalytics(),
-        account = Simplified.getProfilesController().profileAccountCurrent(),
-        bookCoverProvider = Simplified.getCoverProvider(),
+        analytics = services.analytics,
+        account = services.profilesController.profileAccountCurrent(),
+        bookCoverProvider = services.bookCovers,
         bookSelectionListener = bookSelectListener,
-        bookRegistry = Simplified.getBooksRegistry(),
-        bookController = Simplified.getBooksController(),
-        profilesController = Simplified.getProfilesController(),
-        feedLoader = Simplified.getFeedLoader(),
+        bookRegistry = services.bookRegistry,
+        bookController = services.booksController,
+        profilesController = services.profilesController,
+        feedLoader = services.feedLoader,
         feed = feedWithoutGroups,
-        networkConnectivity = Simplified.getNetworkConnectivity(),
-        executor = Simplified.getBackgroundTaskExecutor(),
-        screenSizeInformation = Simplified.getScreenSizeInformation())
+        networkConnectivity = services.networkConnectivity,
+        executor = services.backgroundExecutor,
+        screenSizeInformation = services.screenSize)
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }
@@ -606,9 +611,11 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      * updated whenever the status of a book changes.
      */
 
-    this.bookEventSubscription = Simplified.getBooksRegistry()
-      .bookEvents()
-      .subscribe { event -> without.onBookEvent(event) }
+    this.bookEventSubscription =
+      Simplified.application.services()
+        .bookRegistry
+        .bookEvents()
+        .subscribe { event -> without.onBookEvent(event) }
   }
 
   override fun navigationDrawerShouldShowIndicator(): Boolean = this.upStack.isEmpty
@@ -659,7 +666,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         title = this.resources.getString(R.string.catalog),
         upStack = ImmutableStack.empty(),
         drawerShouldOpen = false,
-        feedURI = this.account.provider().catalogURI(),
+        feedURI = this.account.provider.catalogURI,
         isSearchResults = false)
     }
   }
@@ -679,7 +686,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     }
 
     try {
-      this.profile = Simplified.getProfilesController().profileCurrent()
+      this.profile = Simplified.application.services().profilesController.profileCurrent()
       this.account = this.profile.accountCurrent()
       this.initialized = true
     } catch (e: ProfileNoneCurrentException) {
@@ -694,13 +701,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private fun isRootOfCollection(): Boolean =
     when (val arguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote ->
-        arguments.feedURI == account.provider().catalogURI()
+        arguments.feedURI == account.provider.catalogURI
       is CatalogFeedArgumentsLocalBooks ->
         false
     }
 
   private fun ageGateIsPresent(): Boolean =
-    this.account.provider().hasAgeGate()
+    this.account.provider.authentication is AccountProviderAuthenticationDescription.COPPAAgeGate
 
   private fun ageGateIsSatisfied(): Boolean =
     this.profile.preferences().dateOfBirth() is Some<ProfileDateOfBirth>
@@ -727,7 +734,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      */
 
     buttonUnder13.setOnClickListener {
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profilePreferencesUpdate(
           this.profile.preferences()
             .toBuilder()
@@ -746,7 +754,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      */
 
     buttonOver13.setOnClickListener {
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profilePreferencesUpdate(
           this.profile.preferences()
             .toBuilder()
@@ -791,7 +800,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      */
 
     this.profileEventSubscription =
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profileEvents()
         .subscribe { event -> this.onProfileEvent(event) }
 
@@ -841,7 +851,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         title = this.resources.getString(R.string.catalog),
         upStack = ImmutableStack.empty(),
         drawerShouldOpen = false,
-        feedURI = this.account.provider().catalogURIForAge(yearsOld),
+        feedURI = this.account.provider.catalogURIForAge(yearsOld),
         isSearchResults = false)
   }
 
@@ -851,7 +861,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun startDisplayingFeed() {
 
-    if (this.ageGateIsPresent()) {
+    if (this.ageGateIsPresent() && !this.isLocalFeed()) {
       Preconditions.checkArgument(
         this.ageGateIsSatisfied(),
         "Age gate must have been satisfied")
@@ -866,7 +876,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      * available, then fail fast and display an error message.
      */
 
-    val net = Simplified.getNetworkConnectivity()
+    val net = Simplified.application.services().networkConnectivity
     if (this.feedArguments.requiresNetworkConnectivity) {
       if (!net.isNetworkAvailable) {
         this.onNetworkUnavailable()
@@ -889,6 +899,13 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
         this.doLoadRemoteFeed(arguments)
       is CatalogFeedArgumentsLocalBooks ->
         this.doLoadLocalFeed(arguments)
+    }
+  }
+
+  private fun isLocalFeed(): Boolean {
+    return when (this.feedArguments) {
+      is CatalogFeedArgumentsRemote -> false
+      is CatalogFeedArgumentsLocalBooks -> true
     }
   }
 
@@ -1105,7 +1122,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     return when (val arguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote -> {
         this.logger.debug("invalidating {} in feed cache", arguments.feedURI)
-        Simplified.getFeedLoader().invalidate(arguments.feedURI)
+        Simplified.application.services().feedLoader.invalidate(arguments.feedURI)
         this.startDisplayingFeed()
       }
       is CatalogFeedArgumentsLocalBooks -> {
@@ -1142,7 +1159,9 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     try {
       val future =
-        Simplified.getProfilesController().profileFeed(request)
+        Simplified.application.services()
+          .profilesController
+          .profileFeed(request)
 
       future.addCallback(object : FutureCallback<FeedWithoutGroups> {
         override fun onSuccess(result: FeedWithoutGroups?) {
@@ -1167,7 +1186,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    */
 
   private fun doLoadRemoteFeed(c: CatalogFeedArgumentsRemote) =
-    this.loadFeed(Simplified.getFeedLoader(), c.feedURI)
+    this.loadFeed(Simplified.application.services().feedLoader, c.feedURI)
 
   /**
    * A handler for local book searches.
@@ -1212,17 +1231,21 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     override fun onQueryTextSubmit(query: String): Boolean {
       val profile =
-        Simplified.getProfilesController().profileCurrent()
+        Simplified.application.services()
+          .profilesController
+          .profileCurrent()
+
       val account =
         profile.accountCurrent()
 
-      Simplified.getAnalytics()
+      Simplified.application.services()
+        .analytics
         .publishEvent(AnalyticsEvent.CatalogSearched(
-          profileUUID = profile.id().uuid,
+          profileUUID = profile.id.uuid,
           timestamp = LocalDateTime.now(),
-          credentials = account.loginState().credentials,
-          accountProvider = account.provider().id(),
-          accountUUID = account.id().uuid,
+          credentials = account.loginState.credentials,
+          accountProvider = account.provider.id,
+          accountUUID = account.id.uuid,
           searchQuery = query))
 
       val target = this.search.getQueryURIForTerms(query)
@@ -1329,7 +1352,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     private fun onPossiblyReceivedEULALink(latest: URI?) {
       if (latest != null) {
-        val docs = Simplified.getDocumentStore()
+        val docs = Simplified.application.services().documentStore
         docs.eula.map_ { eula ->
           try {
             eula.documentSetLatestURL(latest.toURL())

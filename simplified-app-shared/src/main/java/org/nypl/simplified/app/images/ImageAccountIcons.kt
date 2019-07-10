@@ -2,17 +2,13 @@ package org.nypl.simplified.app.images
 
 import android.view.View
 import android.widget.ImageView
-
-import com.io7m.jfunctional.Some
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
-
+import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.app.R
-import org.nypl.simplified.accounts.api.AccountProvider
 import org.slf4j.LoggerFactory
-
-import java.net.URI
 
 /**
  * Functions to efficiently load account logos.
@@ -31,13 +27,12 @@ object ImageAccountIcons {
   @JvmStatic
   fun loadAccountLogoIntoView(
     loader: Picasso,
-    account: org.nypl.simplified.accounts.api.AccountProvider,
+    account: AccountProviderDescriptionType,
     iconView: ImageView) {
 
     val request: RequestCreator
-    val logo = account.logo()
-    if (logo is Some<URI>) {
-      val logoURI = logo.get()
+    val logoURI = account.metadata.logoURI
+    if (logoURI != null) {
       LOG.debug("configuring account logo: {}", logoURI)
       request = loader.load(logoURI.toString())
     } else {

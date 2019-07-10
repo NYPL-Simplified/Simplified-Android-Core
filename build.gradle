@@ -6,7 +6,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.1.4'
+    classpath 'com.android.tools.build:gradle:3.4.1'
     classpath 'com.netflix.nebula:gradle-lint-plugin:7.4.0'
     classpath 'com.nabilhachicha:android-native-dependencies:0.1.2'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -26,6 +26,12 @@ ext {
    */
 
   nypl_audiobook_findaway_version = "2.0.0"
+
+  /*
+   * The minimum SDK target.
+   */
+
+  androidMinimumSDK = 21
 }
 
 allprojects {

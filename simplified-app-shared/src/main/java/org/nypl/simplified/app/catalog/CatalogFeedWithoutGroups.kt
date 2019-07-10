@@ -70,7 +70,7 @@ class CatalogFeedWithoutGroups(
   private val uriNext: AtomicReference<URI> =
     AtomicReference<URI>(feed.feedNext)
   private val httpAuth: OptionType<HTTPAuthType> =
-    createHttpAuth(this.account.loginState().credentials)
+    createHttpAuth(this.account.loginState.credentials)
 
   private fun createHttpAuth(
     credentials: org.nypl.simplified.accounts.api.AccountAuthenticationCredentials?): OptionType<HTTPAuthType> {
@@ -192,7 +192,7 @@ class CatalogFeedWithoutGroups(
       this.feedLoader.fetchURIWithBookRegistryEntries(next, this.httpAuth)
         .catching(
           Exception::class.java,
-          Function<Exception, FeedLoaderResult> { ex -> FeedLoaderFailedGeneral(ex!!) },
+          Function<Exception, FeedLoaderResult> { ex -> FeedLoaderFailedGeneral(null, ex!!) },
           this.executor)
         .transform(
           Function<FeedLoaderResult, Unit> { result -> this.onFeedResult(result!!) },
@@ -249,7 +249,7 @@ class CatalogFeedWithoutGroups(
      * If the user is close enough to the end of the list, load the next feed.
      */
 
-    if (CatalogFeedWithoutGroups.shouldLoadNext(firstVisibleItem, totalCount)) {
+    if (shouldLoadNext(firstVisibleItem, totalCount)) {
       this.loadNext(this.uriNext)
     }
   }

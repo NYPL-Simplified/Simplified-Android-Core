@@ -16,20 +16,21 @@ public abstract class ProfilePreferencesJSONContract {
 
   @Test
   public final void testRoundTrip()
-      throws Exception {
+    throws Exception {
 
     final ObjectMapper mapper = new ObjectMapper();
 
     final ProfilePreferences preferences_0 =
-        ProfilePreferences.builder()
-            .setDateOfBirth(new ProfileDateOfBirth(new LocalDate(1985, 1, 1), true))
-            .setReaderPreferences(ReaderPreferences.builder().build())
-            .build();
+      ProfilePreferences.builder()
+        .setDateOfBirth(new ProfileDateOfBirth(new LocalDate(1985, 1, 1), true))
+        .setReaderPreferences(ReaderPreferences.builder().build())
+        .setShowTestingLibraries(true)
+        .build();
 
     final ObjectNode node =
-        ProfilePreferencesJSON.serializeToJSON(mapper, preferences_0);
+      ProfilePreferencesJSON.serializeToJSON(mapper, preferences_0);
     final ProfilePreferences preferences_1 =
-        ProfilePreferencesJSON.deserializeFromJSON(mapper, node);
+      ProfilePreferencesJSON.deserializeFromJSON(mapper, node);
 
     Assert.assertEquals(preferences_0, preferences_1);
   }

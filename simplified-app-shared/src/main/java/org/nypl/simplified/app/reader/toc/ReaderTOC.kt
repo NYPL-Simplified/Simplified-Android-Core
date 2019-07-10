@@ -45,7 +45,7 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
         elements.add(tocElement)
 
         for (child in currentElement.children) {
-          ReaderTOC.accumulate(
+          accumulate(
             elements,
             indent + 1,
             parent,
@@ -68,7 +68,7 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
         val childElements = currentElement.getChildren()
         this.logger.debug("nav table: {} child elements", childElements.size)
         for (child in childElements) {
-          ReaderTOC.accumulate(
+          accumulate(
             elements,
             indent + 1,
             currentElement,
@@ -98,7 +98,7 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
         toc = Objects.requireNonNull(p.tableOfContents, "TOC")
       }
 
-      ReaderTOC.accumulate(elements, -1, toc, toc)
+      accumulate(elements, -1, toc, toc)
       return ReaderTOC(elements)
     }
   }

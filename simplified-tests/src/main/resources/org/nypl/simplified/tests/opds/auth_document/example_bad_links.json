@@ -1,0 +1,22 @@
+{
+  "id": "http://example.com/auth.json",
+  "title": "Public Library",
+  "description": "Enter a valid library card number and PIN code to authenticate on our service.",
+  "links": "this is supposed to be an array",
+  "authentication": [
+    {
+      "type": "http://opds-spec.org/auth/basic",
+      "labels": {
+        "login": "Library card",
+        "password": "PIN"
+      }
+    },
+    {
+      "type": "http://opds-spec.org/auth/oauth/implicit",
+      "links": [
+        {"rel": "authenticate", "href": "http://example.com/oauth", "type": "text/html"},
+        {"rel": "refresh", "href": "http://example.com/oauth/refresh", "type": "application/json"}
+      ]
+    }
+  ]
+}

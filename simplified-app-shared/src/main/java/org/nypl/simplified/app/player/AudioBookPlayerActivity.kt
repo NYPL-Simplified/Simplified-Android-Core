@@ -45,6 +45,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.slf4j.Logger
@@ -144,9 +145,10 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      */
 
     val formatHandleOpt =
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profileAccountForBook(this.parameters.bookID)
-        .bookDatabase()
+        .bookDatabase
         .entry(this.parameters.bookID)
         .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
@@ -174,7 +176,10 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       File(this.filesDir, "audiobook-player-downloads")
     DirectoryUtilities.directoryCreate(this.downloaderDir)
     this.downloader =
-      DownloaderHTTP.newDownloader(this.downloadExecutor, this.downloaderDir, Simplified.getHTTP())
+      DownloaderHTTP.newDownloader(
+        this.downloadExecutor,
+        this.downloaderDir,
+        Simplified.application.services().http)
     this.downloadProvider =
       DownloadProvider.create(this.downloadExecutor)
 
@@ -265,7 +270,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onLoadingFragmentIsNetworkConnectivityAvailable(): Boolean {
-    return Simplified.getNetworkConnectivity().isNetworkAvailable
+    return Simplified.application.services().networkConnectivity.isNetworkAvailable
   }
 
   override fun onLoadingFragmentWantsAudioBookParameters(): AudioBookPlayerParameters {
@@ -366,7 +371,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   private fun startAllPartsDownloading() {
-    if (Simplified.getNetworkConnectivity().isNetworkAvailable) {
+    if (Simplified.application.services().networkConnectivity.isNetworkAvailable) {
       this.book.wholeBookDownloadTask.fetch()
     }
   }
@@ -442,9 +447,12 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      * book list, if necessary.
      */
 
-    Simplified.getBooksController()
+    Simplified.application.services()
+      .booksController
       .bookRevoke(
-        Simplified.getProfilesController().profileAccountCurrent(),
+        Simplified.application.services()
+          .profilesController
+          .profileAccountCurrent(),
         this.parameters.bookID)
   }
 
@@ -550,12 +558,14 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      * reasonably close to the expected 3:4 cover image size ratio.
      */
 
-    val screen = Simplified.getScreenSizeInformation()
-    Simplified.getCoverProvider().loadCoverInto(
-      org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
-      view,
-      screen.screenDPToPixels(300).toInt(),
-      screen.screenDPToPixels(400).toInt())
+    val screen = Simplified.application.services().screenSize
+    Simplified.application.services()
+      .bookCovers
+      .loadCoverInto(
+        FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
+        view,
+        screen.screenDPToPixels(300).toInt(),
+        screen.screenDPToPixels(400).toInt())
   }
 
   override fun onPlayerWantsPlayer(): PlayerType {

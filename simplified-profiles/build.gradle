@@ -9,6 +9,9 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
+  defaultConfig {
+    minSdkVersion androidMinimumSDK
+  }
 }
 
 description = 'simplified-profiles'
@@ -18,6 +21,7 @@ dependencies {
 
   implementation project(":simplified-files")
   implementation project(":simplified-json-core")
+  implementation project(':simplified-accounts-source-spi')
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

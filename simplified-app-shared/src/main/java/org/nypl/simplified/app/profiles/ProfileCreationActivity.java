@@ -21,10 +21,11 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.joda.time.LocalDate;
-import org.nypl.simplified.accounts.database.AccountProviderCollection;
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
+import org.nypl.simplified.app.services.SimplifiedServicesType;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.datepicker.DatePicker;
@@ -61,7 +62,10 @@ public final class ProfileCreationActivity extends SimplifiedActivity implements
     // This activity is too tall for many phones in landscape mode.
     this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-    this.setTheme(Simplified.getCurrentTheme().getThemeWithNoActionBar());
+    this.setTheme(
+      Simplified.getServices()
+        .getCurrentTheme()
+        .getThemeWithNoActionBar());
     super.onCreate(state);
     this.setContentView(R.layout.profiles_creation);
 
@@ -160,13 +164,18 @@ public final class ProfileCreationActivity extends SimplifiedActivity implements
     LOG.debug("gender: {}", gender_text);
     LOG.debug("date: {}", date_value);
 
-    final AccountProviderCollection providers = Simplified.getAccountProviders();
-    final ProfilesControllerType profiles = Simplified.getProfilesController();
-    final ListeningExecutorService exec = Simplified.getBackgroundTaskExecutor();
+    final SimplifiedServicesType services =
+      Simplified.getServices();
+    final AccountProviderRegistryType providers =
+      services.getAccountProviderRegistry();
+    final ProfilesControllerType profiles =
+      services.getProfilesController();
+    final ListeningExecutorService exec =
+      services.getBackgroundExecutor();
 
     final ListenableFuture<ProfileCreationEvent> task =
       profiles.profileCreate(
-        providers.providerDefault(),
+        providers.getDefaultProvider(),
         name_text,
         gender_text,
         date_value);

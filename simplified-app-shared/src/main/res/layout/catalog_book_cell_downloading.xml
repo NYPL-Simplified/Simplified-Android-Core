@@ -5,9 +5,9 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/cell_downloading"
   android:layout_width="match_parent"
-  android:layout_height="110dp"
-  android:padding="8dp"
-  >
+  android:layout_height="@dimen/bookCellHeight"
+  android:background="?attr/simplifiedColorPrimary"
+  android:padding="8dp">
 
   <TextView
     android:id="@+id/cell_downloading_title"
@@ -15,6 +15,7 @@
     android:layout_height="wrap_content"
     android:maxLines="1"
     android:ellipsize="end"
+    android:textColor="?attr/simplifiedColorBackground"
     android:text="@string/placeholder_long_title"
     android:textStyle="bold" />
 
@@ -25,6 +26,7 @@
     android:layout_below="@id/cell_downloading_title"
     android:maxLines="1"
     android:ellipsize="end"
+    android:textColor="?attr/simplifiedColorBackground"
     android:text="@string/placeholder_long_author"
     android:textSize="12sp" />
 
@@ -40,6 +42,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_weight="1"
+      android:textColor="?attr/simplifiedColorBackground"
       android:text="@string/catalog_downloading"
       android:textSize="12sp" />
 
@@ -47,7 +50,7 @@
       android:id="@+id/cell_downloading_progress"
       style="?android:attr/progressBarStyleHorizontal"
       android:layout_width="wrap_content"
-      android:layout_height="3dp"
+      android:layout_height="8dp"
       android:layout_weight="10" />
 
     <TextView
@@ -58,6 +61,7 @@
       android:gravity="end"
       android:paddingStart="16dp"
       android:text="0%"
+      android:textColor="?attr/simplifiedColorBackground"
       android:textAlignment="gravity"
       android:textSize="12sp" />
   </LinearLayout>
@@ -66,7 +70,7 @@
     android:id="@+id/cell_downloading_cancel"
     style="?android:attr/buttonStyleSmall"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="32dp"
     android:layout_centerHorizontal="true"
     android:layout_alignParentBottom="true"
     android:background="@drawable/simplified_button"

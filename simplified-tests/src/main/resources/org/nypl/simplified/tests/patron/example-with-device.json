@@ -1,0 +1,20 @@
+{
+  "simplified:authorization_identifier": "6120696828384",
+  "drm": [
+    {
+      "drm:vendor": "NYPL",
+      "drm:scheme": "http://librarysimplified.org/terms/drm/scheme/ACS",
+      "drm:clientToken": "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
+      "links": [
+        {
+          "rel": "http://librarysimplified.org/terms/drm/rel/devices",
+          "href": "https://example.com/devices"
+        }
+      ]
+    }
+  ],
+  "simplified:authorization_expires": "2019-08-02T00:00:00Z",
+  "settings": {
+    "simplified:synchronize_annotations": true
+  }
+}

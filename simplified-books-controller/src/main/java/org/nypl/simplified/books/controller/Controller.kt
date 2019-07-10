@@ -2,34 +2,42 @@ package org.nypl.simplified.books.controller
 
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
-import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
+import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountEventCreation
-import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountProvider
-import org.nypl.simplified.accounts.api.AccountProviderCollectionType
+import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
+import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadResult
+import org.nypl.simplified.books.book_registry.BookStatusRevokeResult
+import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedLoaderType
+import org.nypl.simplified.futures.FluentFutureExtensions
+import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
+import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableSubscriptionType
@@ -37,6 +45,7 @@ import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
+import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
@@ -47,17 +56,24 @@ import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderExcepti
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileSelected
+import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.AccountCreateTaskResult
+import org.nypl.simplified.profiles.controller.api.AccountDeleteTaskResult
+import org.nypl.simplified.profiles.controller.api.AccountLoginTaskResult
+import org.nypl.simplified.profiles.controller.api.AccountLogoutTaskResult
+import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.net.URI
-import java.util.ArrayList
 import java.util.SortedMap
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
@@ -68,30 +84,45 @@ import java.util.concurrent.ExecutorService
  */
 
 class Controller private constructor(
-  private val profileEvents: ObservableType<ProfileEvent>,
   private val accountEvents: ObservableType<AccountEvent>,
-  private val readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
-  private val taskExecutor: ListeningExecutorService,
-  private val profiles: ProfilesDatabaseType,
-  private val bookRegistry: BookRegistryType,
-  private val bundledContent: BundledContentResolverType,
-  private val accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
-  private val http: HTTPType,
-  private val feedParser: OPDSFeedParserType,
-  private val feedLoader: FeedLoaderType,
-  private val downloader: DownloaderType,
+  private val accountLoginStringResources: AccountLoginStringResourcesType,
+  private val accountLogoutStringResources: AccountLogoutStringResourcesType,
+  private val accountProviders: AccountProviderRegistryType,
+  private val adobeDrm: AdobeAdeptExecutorType?,
   private val analytics: AnalyticsType,
-  private val timerExecutor: ExecutorService,
-  private val adobeDrm: AdobeAdeptExecutorType?)
-  : BooksControllerType, ProfilesControllerType {
+  private val bookRegistry: BookRegistryType,
+  private val borrowStrings: BookBorrowStringResourcesType,
+  private val bundledContent: BundledContentResolverType,
+  private val cacheDirectory: File,
+  private val downloader: DownloaderType,
+  private val feedLoader: FeedLoaderType,
+  private val feedParser: OPDSFeedParserType,
+  private val http: HTTPType,
+  private val patronUserProfileParsers: PatronUserProfileParsersType,
+  private val profileAccountCreationStringResources: ProfileAccountCreationStringResourcesType,
+  private val profileAccountDeletionStringResources: ProfileAccountDeletionStringResourcesType,
+  private val profileEvents: ObservableType<ProfileEvent>,
+  private val profiles: ProfilesDatabaseType,
+  private val readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
+  private val revokeStrings: BookRevokeStringResourcesType,
+  private val taskExecutor: ListeningExecutorService,
+  private val timerExecutor: ExecutorService
+) : BooksControllerType, ProfilesControllerType {
 
+  private val accountRegistrySubscription: ObservableSubscriptionType<AccountProviderRegistryEvent>
   private val profileEventSubscription: ObservableSubscriptionType<ProfileEvent>
   private val timer = ProfileIdleTimer.create(this.timerExecutor, this.profileEvents)
   private val downloads: ConcurrentHashMap<BookID, DownloadType> =
     ConcurrentHashMap(32)
 
+  private val logger =
+    LoggerFactory.getLogger(Controller::class.java)
+
   init {
-    this.profileEventSubscription = this.profileEvents.subscribe { this.onProfileEvent(it) }
+    this.profileEventSubscription =
+      this.profileEvents.subscribe { this.onProfileEvent(it) }
+    this.accountRegistrySubscription =
+      this.accountProviders.events.subscribe { event -> this.onAccountRegistryEvent(event) }
 
     /*
      * If the anonymous profile is enabled, then ensure that it is "selected" and will
@@ -99,8 +130,40 @@ class Controller private constructor(
      */
 
     if (this.profiles.anonymousProfileEnabled() == ANONYMOUS_PROFILE_ENABLED) {
-      LOG.debug("initializing anonymous profile")
-      this.profileSelect(this.profileCurrent().id())
+      this.logger.debug("initializing anonymous profile")
+      this.profileSelect(this.profileCurrent().id)
+    }
+  }
+
+  /**
+   * Respond to account registry events.
+   */
+
+  private fun onAccountRegistryEvent(event: AccountProviderRegistryEvent) {
+    if (!this.profileAnyIsCurrent()) {
+      return
+    }
+
+    return when (event) {
+      is AccountProviderRegistryEvent.Updated ->
+        this.onAccountRegistryProviderUpdatedEvent(event)
+      is AccountProviderRegistryEvent.SourceFailed -> {
+
+      }
+    }
+  }
+
+  private fun onAccountRegistryProviderUpdatedEvent(event: AccountProviderRegistryEvent.Updated) {
+    val profileCurrentOpt = this.profiles.currentProfile()
+    if (profileCurrentOpt is Some<ProfileType>) {
+      val profileCurrent = profileCurrentOpt.get()
+      this.taskExecutor.submit(ProfileAccountProviderUpdatedTask(
+        profile = profileCurrent,
+        accountProviderID = event.id,
+        accountProviders = this.accountProviders))
+      Unit
+    } else {
+
     }
   }
 
@@ -112,9 +175,9 @@ class Controller private constructor(
   }
 
   private fun onProfileEventSelected(ev: ProfileSelected) {
-    LOG.debug("onProfileEventSelected: {}", ev)
+    this.logger.debug("onProfileEventSelected: {}", ev)
 
-    LOG.debug("clearing the book registry")
+    this.logger.debug("clearing the book registry")
     this.bookRegistry.clear()
     try {
       this.taskExecutor.execute(
@@ -142,7 +205,7 @@ class Controller private constructor(
   }
 
   override fun profileCreate(
-    accountProvider: AccountProvider,
+    accountProvider: AccountProviderType,
     displayName: String,
     gender: String,
     date: LocalDate): FluentFuture<ProfileCreationEvent> {
@@ -167,35 +230,64 @@ class Controller private constructor(
   }
 
   override fun profileAccountLogin(
-    account: AccountID,
-    credentials: org.nypl.simplified.accounts.api.AccountAuthenticationCredentials): FluentFuture<Unit> {
+    accountID: AccountID,
+    credentials: AccountAuthenticationCredentials): FluentFuture<AccountLoginTaskResult> {
 
     return FluentFuture.from(
-      this.taskExecutor.submit(Callable {
-        val profile = this.profileCurrent()
-        val account = profile.account(account)
-        ProfileAccountLoginTask(this, this.http, profile, account, credentials).call()
-        Unit.unit()
-      }))
+      this.taskExecutor.submit(Callable { this.runProfileAccountLogin(accountID, credentials) }))
+      .flatMap { result -> this.runSyncIfLoginSucceeded(result, accountID) }
   }
 
-  override fun profileAccountCreate(provider: URI): FluentFuture<AccountEventCreation> {
+  private fun runProfileAccountLogin(
+    accountID: AccountID,
+    credentials: AccountAuthenticationCredentials
+  ): AccountLoginTaskResult {
+    val profile = this.profileCurrent()
+    val account = profile.account(accountID)
+    return ProfileAccountLoginTask(
+      adeptExecutor = this.adobeDrm,
+      http = this.http,
+      profile = profile,
+      account = account,
+      loginStrings = this.accountLoginStringResources,
+      patronParsers = this.patronUserProfileParsers,
+      initialCredentials = credentials
+    ).call()
+  }
+
+  private fun runSyncIfLoginSucceeded(
+    result: AccountLoginTaskResult,
+    accountID: AccountID
+  ): FluentFuture<AccountLoginTaskResult> {
+    return if (result.failed) {
+      this.logger.debug("logging in didn't succeed: not syncing account")
+      FluentFutureExtensions.fluentFutureOfValue(result)
+    } else {
+      this.logger.debug("logging in succeeded: syncing account")
+      val profile = this.profileCurrent()
+      val account = profile.account(accountID)
+      this.booksSync(account).map { result }
+    }
+  }
+
+  override fun profileAccountCreate(provider: URI): FluentFuture<AccountCreateTaskResult> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfileAccountCreateTask(
-        this.profiles,
         this.accountEvents,
+        provider,
         this.accountProviders,
-        provider)))
+        this.profiles,
+        this.profileAccountCreationStringResources)))
   }
 
-  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<AccountEventDeletion> {
+  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<AccountDeleteTaskResult> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfileAccountDeleteTask(
-        this.profiles,
         this.accountEvents,
+        provider,
+        this.profiles,
         this.profileEvents,
-        this.accountProviders,
-        provider)))
+        this.profileAccountDeletionStringResources)))
   }
 
   override fun profileAccountSelectByProvider(provider: URI): FluentFuture<ProfileAccountSelectEvent> {
@@ -203,7 +295,6 @@ class Controller private constructor(
       ProfileAccountSelectionTask(
         this.profiles,
         this.profileEvents,
-        this.accountProviders,
         provider)))
   }
 
@@ -219,29 +310,27 @@ class Controller private constructor(
   }
 
   @Throws(ProfileNoneCurrentException::class, ProfileNonexistentAccountProviderException::class)
-  override fun profileCurrentlyUsedAccountProviders(): ImmutableList<AccountProvider> {
-    val accounts = ArrayList<AccountProvider>()
-    val accountProviders = this.accountProviders.call(Unit.unit())
-    val profile = this.profileCurrent()
-
-    for (account in profile.accounts().values) {
-      val provider = account.provider()
-      if (accountProviders.providers().containsKey(provider.id())) {
-        val accountProvider = accountProviders.providers()[provider.id()]!!
-        accounts.add(accountProvider)
-      }
-    }
-
-    return ImmutableList.sortedCopyOf(accounts)
+  override fun profileCurrentlyUsedAccountProviders(): ImmutableList<AccountProviderType> {
+    return ImmutableList.sortedCopyOf(
+      this.profileCurrent()
+        .accountsByProvider()
+        .values
+        .map { account -> account.provider })
   }
 
-  override fun profileAccountLogout(account: AccountID): FluentFuture<Unit> {
+  override fun profileAccountLogout(account: AccountID): FluentFuture<AccountLogoutTaskResult> {
     return FluentFuture.from(
       this.taskExecutor.submit(Callable {
         val profile = this.profileCurrent()
         val account = profile.account(account)
-        ProfileAccountLogoutTask(this.bookRegistry, profile, account).call()
-        Unit.unit()
+        ProfileAccountLogoutTask(
+          adeptExecutor = this.adobeDrm,
+          account = account,
+          bookRegistry = this.bookRegistry,
+          http = this.http,
+          logoutStrings = this.accountLogoutStringResources,
+          profile = profile
+        ).call()
       }))
   }
 
@@ -283,24 +372,22 @@ class Controller private constructor(
     account: AccountType,
     id: BookID,
     acquisition: OPDSAcquisition,
-    entry: OPDSAcquisitionFeedEntry) {
+    entry: OPDSAcquisitionFeedEntry): FluentFuture<BookStatusDownloadResult> {
 
-    NullCheck.notNull(account, "Account")
-    NullCheck.notNull(id, "Book ID")
-    NullCheck.notNull(acquisition, "Acquisition")
-    NullCheck.notNull(entry, "Entry")
-
-    this.taskExecutor.submit(BookBorrowTask(
+    return FluentFuture.from(this.taskExecutor.submit(BookBorrowTask(
+      account = account,
+      acquisition = acquisition,
       adobeDRM = this.adobeDrm,
+      bookId = id,
+      bookRegistry = this.bookRegistry,
+      borrowStrings = this.borrowStrings,
+      bundledContent = this.bundledContent,
+      cacheDirectory = this.cacheDirectory,
+      clock = { Instant.now() },
       downloader = this.downloader,
       downloads = this.downloads,
       feedLoader = this.feedLoader,
-      bundledContent = this.bundledContent,
-      bookRegistry = this.bookRegistry,
-      bookId = id,
-      account = account,
-      acquisition = acquisition,
-      entry = entry))
+      entry = entry)))
   }
 
   override fun bookBorrowFailedDismiss(
@@ -313,7 +400,7 @@ class Controller private constructor(
     this.taskExecutor.submit(BookBorrowFailedDismissTask(
       this.downloader,
       this.downloads,
-      account.bookDatabase(),
+      account.bookDatabase,
       this.bookRegistry,
       id))
   }
@@ -325,10 +412,10 @@ class Controller private constructor(
     NullCheck.notNull(account, "Account")
     NullCheck.notNull(id, "Book ID")
 
-    LOG.debug("[{}] download cancel", id.brief())
+    this.logger.debug("[{}] download cancel", id.brief())
     val d = this.downloads[id]
     if (d != null) {
-      LOG.debug("[{}] cancelling download {}", d)
+      this.logger.debug("[{}] cancelling download {}", d)
       d.cancel()
       this.downloads.remove(id)
     }
@@ -337,50 +424,51 @@ class Controller private constructor(
   override fun bookReport(
     account: AccountType,
     feedEntry: FeedEntry.FeedEntryOPDS,
-    reportType: String): ListenableFuture<Unit> {
-    return this.taskExecutor.submit(BookReportTask(
+    reportType: String): FluentFuture<Unit> {
+    return FluentFuture.from(this.taskExecutor.submit(BookReportTask(
       http = this.http,
       account = account,
       feedEntry = feedEntry,
-      reportType = reportType))
+      reportType = reportType)))
   }
 
-  override fun booksSync(account: AccountType): ListenableFuture<Unit> {
-    return this.taskExecutor.submit(BookSyncTask(
+  override fun booksSync(account: AccountType): FluentFuture<Unit> {
+    return FluentFuture.from(this.taskExecutor.submit(BookSyncTask(
       this,
       account,
       this.bookRegistry,
       this.http,
-      this.feedParser))
+      this.feedParser)))
   }
 
   override fun bookRevoke(
     account: AccountType,
-    bookId: BookID): ListenableFuture<Unit> {
-    return this.taskExecutor.submit(BookRevokeTask(
+    bookId: BookID): FluentFuture<BookStatusRevokeResult> {
+    return FluentFuture.from(this.taskExecutor.submit(BookRevokeTask(
+      account,
       this.adobeDrm,
+      bookId,
       this.bookRegistry,
       this.feedLoader,
-      account,
-      bookId))
+      this.revokeStrings)))
   }
 
   override fun bookDelete(
     account: AccountType,
-    bookId: BookID): ListenableFuture<Unit> {
-    return this.taskExecutor.submit(BookDeleteTask(
+    bookId: BookID): FluentFuture<Unit> {
+    return FluentFuture.from(this.taskExecutor.submit(BookDeleteTask(
       account,
       this.bookRegistry,
-      bookId))
+      bookId)))
   }
 
   override fun bookRevokeFailedDismiss(
     account: AccountType,
-    bookId: BookID): ListenableFuture<Unit> {
-    return this.taskExecutor.submit(BookRevokeFailedDismissTask(
-      account.bookDatabase(),
+    bookId: BookID): FluentFuture<Unit> {
+    return FluentFuture.from(this.taskExecutor.submit(BookRevokeFailedDismissTask(
+      account.bookDatabase,
       this.bookRegistry,
-      bookId))
+      bookId)))
   }
 
   override fun profileAnyIsCurrent(): Boolean =
@@ -388,41 +476,56 @@ class Controller private constructor(
 
   companion object {
 
-    private val LOG = LoggerFactory.getLogger(Controller::class.java)
-
     fun create(
-      exec: ExecutorService,
       accountEvents: ObservableType<AccountEvent>,
-      profileEvents: ObservableType<ProfileEvent>,
-      readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
-      http: HTTPType,
-      feedParser: OPDSFeedParserType,
-      feedLoader: FeedLoaderType,
-      downloader: DownloaderType,
-      profiles: ProfilesDatabaseType,
+      accountLoginStringResources: AccountLoginStringResourcesType,
+      accountLogoutStringResources: AccountLogoutStringResourcesType,
+      accountProviders: AccountProviderRegistryType,
+      adobeDrm: AdobeAdeptExecutorType?,
       analytics: AnalyticsType,
+      bookBorrowStrings: BookBorrowStringResourcesType,
       bookRegistry: BookRegistryType,
       bundledContent: BundledContentResolverType,
-      accountProviders: FunctionType<Unit, AccountProviderCollectionType>,
-      timerExecutor: ExecutorService,
-      adobeDrm: AdobeAdeptExecutorType?): Controller {
-
+      cacheDirectory: File,
+      downloader: DownloaderType,
+      exec: ExecutorService,
+      feedLoader: FeedLoaderType,
+      feedParser: OPDSFeedParserType,
+      http: HTTPType,
+      patronUserProfileParsers: PatronUserProfileParsersType,
+      profileAccountCreationStringResources: ProfileAccountCreationStringResourcesType,
+      profileAccountDeletionStringResources: ProfileAccountDeletionStringResourcesType,
+      profileEvents: ObservableType<ProfileEvent>,
+      profiles: ProfilesDatabaseType,
+      readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
+      revokeStrings: BookRevokeStringResourcesType,
+      timerExecutor: ExecutorService
+    ): Controller {
       return Controller(
-        taskExecutor = MoreExecutors.listeningDecorator(exec),
         accountEvents = accountEvents,
-        profileEvents = profileEvents,
-        readerBookmarkEvents = readerBookmarkEvents,
-        profiles = profiles,
+        accountLoginStringResources = accountLoginStringResources,
+        accountLogoutStringResources = accountLogoutStringResources,
+        accountProviders = accountProviders,
+        adobeDrm = adobeDrm,
         analytics = analytics,
         bookRegistry = bookRegistry,
+        borrowStrings = bookBorrowStrings,
         bundledContent = bundledContent,
-        accountProviders = accountProviders,
-        http = http,
+        cacheDirectory = cacheDirectory,
+        downloader = downloader,
         feedLoader = feedLoader,
         feedParser = feedParser,
-        downloader = downloader,
-        timerExecutor = timerExecutor,
-        adobeDrm = adobeDrm)
+        http = http,
+        patronUserProfileParsers = patronUserProfileParsers,
+        profileAccountCreationStringResources = profileAccountCreationStringResources,
+        profileAccountDeletionStringResources = profileAccountDeletionStringResources,
+        profileEvents = profileEvents,
+        profiles = profiles,
+        readerBookmarkEvents = readerBookmarkEvents,
+        revokeStrings = revokeStrings,
+        taskExecutor = MoreExecutors.listeningDecorator(exec),
+        timerExecutor = timerExecutor
+      )
     }
 
     /**

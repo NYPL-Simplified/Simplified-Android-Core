@@ -25,7 +25,7 @@ class BookReportTask(
     return try {
       this.logger.debug(
         "[{}]: running {} for {}",
-        this.account.id().uuid,
+        this.account.id.uuid,
         this.reportType,
         this.feedEntry.bookID.brief())
 
@@ -33,12 +33,12 @@ class BookReportTask(
       if (!(issuesURIOpt is Some<URI>)) {
         this.logger.debug(
           "[{}]: no issues URI for {}, giving up",
-          this.account.id().uuid,
+          this.account.id.uuid,
           this.feedEntry.bookID.brief())
         return Unit.unit()
       }
 
-      val credentials = this.account.loginState().credentials
+      val credentials = this.account.loginState.credentials
       val authenticatedHTTP =
         if (credentials != null) {
           Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials))
@@ -64,13 +64,13 @@ class BookReportTask(
         Unit.unit()
       }, { error ->
         this.logger.error("[{}]: http exception for {}: ",
-          this.account.id().uuid,
+          this.account.id.uuid,
           this.feedEntry.bookID.brief(),
           error.error)
         Unit.unit()
       }, { ok ->
         this.logger.debug("[{}]: succeeded for {} ({} {})",
-          this.account.id().uuid,
+          this.account.id.uuid,
           this.feedEntry.bookID.brief(),
           ok.status,
           ok.message)
@@ -80,7 +80,7 @@ class BookReportTask(
     } catch (e: Exception) {
       this.logger.error(
         "[{}]: failed for {}: ",
-        this.account.id().uuid,
+        this.account.id.uuid,
         this.feedEntry.bookID.brief(),
         e)
       throw e

@@ -41,7 +41,7 @@ class CatalogBookReadController(
   }
 
   override fun onClick(@Nullable v: View) {
-    val database = this.account.bookDatabase()
+    val database = this.account.bookDatabase
     val entry = database.entry(this.id)
     val format = entry.book.findPreferredFormat()
 
@@ -98,7 +98,7 @@ class CatalogBookReadController(
           manifestFile = manifest.manifestFile,
           manifestURI = manifest.manifestURI,
           opdsEntry = this.entry.feedEntry,
-          theme = Simplified.getCurrentTheme().themeWithActionBar,
+          theme = Simplified.application.services().currentTheme.themeWithActionBar,
           bookID = this.id))
     } else {
       ErrorDialogUtilities.showError(
@@ -112,11 +112,11 @@ class CatalogBookReadController(
   private fun sendAnalytics(book: Book) {
     this.analytics.publishEvent(
       AnalyticsEvent.BookOpened(
-        credentials = this.account.loginState().credentials,
-        profileUUID = this.profile.id().uuid,
-        profileDisplayName = this.profile.displayName(),
-        accountProvider = this.account.provider().id(),
-        accountUUID = this.account.id().uuid,
+        credentials = this.account.loginState.credentials,
+        profileUUID = this.profile.id.uuid,
+        profileDisplayName = this.profile.displayName,
+        accountProvider = this.account.provider.id,
+        accountUUID = this.account.id.uuid,
         bookOPDSId = book.entry.id,
         bookTitle = book.entry.title,
         targetURI = this.orElseNull(book.entry.analytics)))

@@ -28,26 +28,6 @@ open class EmptyDocumentStore : DocumentStoreType {
     return Option.none()
   }
 
-  override fun getAuthenticationDocument(): AuthenticationDocumentType {
-    return object : AuthenticationDocumentType {
-      override fun getLabelLoginUserID(): String {
-        return "Login"
-      }
-
-      override fun getLabelLoginPassword(): String {
-        return "Password"
-      }
-
-      override fun getLabelLoginPatronName(): String {
-        return "Name"
-      }
-
-      override fun documentUpdate(data: InputStream) {
-        // Nothing
-      }
-    }
-  }
-
   override fun getEULA(): OptionType<EULAType> {
     return Option.none()
   }

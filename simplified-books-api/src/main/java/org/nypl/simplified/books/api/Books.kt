@@ -21,7 +21,7 @@ data class Book(
    * The unique ID of the book.
    */
 
-  val id: org.nypl.simplified.books.api.BookID,
+  val id: BookID,
 
   /**
    * The account that owns the book.
@@ -52,6 +52,7 @@ data class Book(
    */
 
   val formats: List<BookFormat>) {
+
   /**
    * If any format is downloaded, then the book as a whole is currently considered to be downloaded
    */

@@ -32,7 +32,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedArguments;
 import org.nypl.simplified.app.catalog.MainBooksActivity;
@@ -112,7 +112,10 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
     }
     drawer_items.add(new NavigationDrawerItemSettings(activity));
 
-    final ProfilesControllerType profiles = Simplified.getProfilesController();
+    final ProfilesControllerType profiles =
+      Simplified.getServices()
+        .getProfilesController();
+
     if (profiles.profileAnonymousEnabled() == AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED) {
       drawer_items.add(new NavigationDrawerItemSwitchProfile(activity));
     }
@@ -127,10 +130,12 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
       final ImmutableList.Builder<NavigationDrawerItemType> drawer_items =
         ImmutableList.builder();
-      final ImmutableList<AccountProvider> drawer_item_accounts =
-        Simplified.getProfilesController().profileCurrentlyUsedAccountProviders();
+      final ImmutableList<AccountProviderType> drawer_item_accounts =
+        Simplified.getServices()
+          .getProfilesController()
+          .profileCurrentlyUsedAccountProviders();
 
-      for (final AccountProvider account : drawer_item_accounts) {
+      for (final AccountProviderType account : drawer_item_accounts) {
         drawer_items.add(new NavigationDrawerItemAccountSelectSpecific(activity, account));
       }
 
@@ -151,8 +156,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
    * Replace the navigation drawer icon with an "up" indicator.
    */
 
-  protected final void navigationDrawerShowUpIndicatorUnconditionally()
-  {
+  protected final void navigationDrawerShowUpIndicatorUnconditionally() {
     final ActionBar bar = this.getSupportActionBar();
     if (bar != null) {
       bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
@@ -221,7 +225,11 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
   @Override
   protected void onCreate(final @Nullable Bundle state) {
-    this.setTheme(Simplified.getCurrentTheme().getThemeWithActionBar());
+    this.setTheme(
+      Simplified.getServices()
+        .getCurrentTheme()
+        .getThemeWithActionBar());
+
     super.onCreate(state);
 
     LOG.debug("onCreate: {}", this);
@@ -289,7 +297,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
      * profiles here to ensure safe passage.
      */
 
-    if (!Simplified.getProfilesController().profileAnyIsCurrent()) {
+    if (!Simplified.getServices()
+      .getProfilesController()
+      .profileAnyIsCurrent()) {
       LOG.debug("no profile is enabled, aborting!");
       return;
     }
@@ -337,7 +347,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
     }
 
     this.profile_event_subscription =
-      Simplified.getProfilesController()
+      Simplified.getServices()
+        .getProfilesController()
         .profileEvents()
         .subscribe(this::onProfileEvent);
 
@@ -555,15 +566,16 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       final boolean checked) {
 
       try {
-        final AccountProvider account =
-          Simplified.getProfilesController()
+        final AccountProviderType account =
+          Simplified.getServices()
+            .getProfilesController()
             .profileAccountCurrent()
-            .provider();
+            .getProvider();
 
-        text_view.setText(account.displayName());
+        text_view.setText(account.getDisplayName());
         ImageAccountIcons.loadAccountLogoIntoView(
-          Simplified.getLocalImageLoader(),
-          account,
+          Simplified.getServices().getImageLoader(),
+          account.toDescription(),
           icon_view);
       } catch (final ProfileNoneCurrentException e) {
         throw new IllegalStateException(e);
@@ -869,11 +881,11 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
   private static final class NavigationDrawerItemAccountSelectSpecific extends NavigationDrawerItem {
 
-    private final AccountProvider account;
+    private final AccountProviderType account;
 
     NavigationDrawerItemAccountSelectSpecific(
       final Activity activity,
-      final AccountProvider account) {
+      final AccountProviderType account) {
       super(activity);
       this.account = NullCheck.notNull(account, "account");
     }
@@ -884,10 +896,10 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       final ImageView icon_view,
       final boolean checked) {
 
-      text_view.setText(this.account.displayName());
+      text_view.setText(this.account.getDisplayName());
       ImageAccountIcons.loadAccountLogoIntoView(
-        Simplified.getLocalImageLoader(),
-        this.account,
+        Simplified.getServices().getImageLoader(),
+        this.account.toDescription(),
         icon_view);
     }
 
@@ -900,7 +912,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       drawer.closeDrawer(GravityCompat.START);
 
       UIThread.runOnUIThreadDelayed(() -> {
-        Simplified.getProfilesController().profileAccountSelectByProvider(this.account.id());
+        Simplified.getServices()
+          .getProfilesController()
+          .profileAccountSelectByProvider(this.account.getId());
 
         final List<NavigationDrawerItemType> items = array_adapter.getDrawerItems();
         items.clear();

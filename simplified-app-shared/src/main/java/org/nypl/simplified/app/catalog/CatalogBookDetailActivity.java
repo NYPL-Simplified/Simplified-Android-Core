@@ -17,6 +17,7 @@ import org.nypl.simplified.app.NavigationDrawerActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.login.LoginDialogListenerType;
+import org.nypl.simplified.app.services.SimplifiedServicesType;
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
 import org.nypl.simplified.books.book_registry.BookStatusEvent;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
@@ -110,10 +111,12 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
   protected void onCreate(final @Nullable Bundle state) {
     super.onCreate(state);
 
+    final SimplifiedServicesType services =
+      Simplified.getServices();
     final BookRegistryReadableType bookRegistry =
-      Simplified.getBooksRegistry();
+      services.getBookRegistry();
     final ProfilesControllerType profiles =
-      Simplified.getProfilesController();
+      services.getProfilesController();
 
     final FeedEntryOPDS entry = this.getFeedEntry();
     final AccountType account;
@@ -131,13 +134,13 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
         this,
         inflater,
         account,
-        Simplified.getCoverProvider(),
+        services.getBookCovers(),
         bookRegistry,
-        Simplified.getAnalytics(),
+        services.getAnalytics(),
         profiles,
-        Simplified.getBooksController(),
-        Simplified.getScreenSizeInformation(),
-        Simplified.getNetworkConnectivity(),
+        services.getBooksController(),
+        services.getScreenSize(),
+        services.getNetworkConnectivity(),
         entry);
 
     this.view = detailView;
@@ -158,7 +161,8 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
      */
 
     this.bookSubscription =
-      Simplified.getBooksRegistry()
+      Simplified.getServices()
+        .getBookRegistry()
         .bookEvents()
         .subscribe(this.view::onBookEvent);
   }
@@ -172,6 +176,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
   @NotNull
   @Override
   public ProfilesControllerType onLoginDialogWantsProfilesController() {
-    return Simplified.getProfilesController();
+    return Simplified.getServices()
+      .getProfilesController();
   }
 }

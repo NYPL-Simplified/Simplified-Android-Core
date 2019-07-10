@@ -1,5 +1,11 @@
 package org.nypl.simplified.accounts.api
 
+import org.nypl.simplified.http.core.HTTPProblemReport
+import org.nypl.simplified.parser.api.ParseError
+import org.nypl.simplified.parser.api.ParseWarning
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import java.net.URI
+
 /**
  * The current state of an account with respect to logging in/out.
  */
@@ -15,60 +21,100 @@ sealed class AccountLoginState {
   object AccountNotLoggedIn : AccountLoginState() {
     override val credentials: AccountAuthenticationCredentials?
       get() = null
+
+    override fun toString(): String =
+      this.javaClass.simpleName
   }
 
   /**
    * The account is currently logging in.
    */
 
-  object AccountLoggingIn : AccountLoginState() {
+  data class AccountLoggingIn(
+
+    /**
+     * A humanly-readable status message.
+     *
+     * @see AccountLoginStringResourcesType
+     */
+
+    val status: String) : AccountLoginState() {
+
     override val credentials: AccountAuthenticationCredentials?
       get() = null
   }
 
   /**
-   * The error codes that can be raised
+   * Error data associated with account login failures.
    */
 
-  enum class AccountLoginErrorCode {
+  sealed class AccountLoginErrorData {
 
     /**
-     * A profile or account configuration problem occurred (such as the user not having
-     * selected a profile).
+     * Logging in failed because the credentials were incorrect.
      */
 
-    ERROR_PROFILE_CONFIGURATION,
+    object AccountLoginCredentialsIncorrect : AccountLoginErrorData() {
+      override fun toString(): String =
+        this.javaClass.simpleName
+    }
 
     /**
-     * A network problem occurred whilst trying to contact a remote server.
+     * A login attempt was made on an account that doesn't support or require logins.
      */
 
-    ERROR_NETWORK_EXCEPTION,
+    object AccountLoginNotRequired : AccountLoginErrorData() {
+      override fun toString(): String =
+        this.javaClass.simpleName
+    }
 
     /**
-     * The provided credentials were rejected by the server.
+     * A connection could not be made to a remote server.
      */
 
-    ERROR_CREDENTIALS_INCORRECT,
+    object AccountLoginConnectionFailure : AccountLoginErrorData() {
+      override fun toString(): String =
+        this.javaClass.simpleName
+    }
 
     /**
-     * The server responded with an error.
+     * A connection could not be made to a remote server.
      */
 
-    ERROR_SERVER_ERROR,
+    data class AccountLoginServerParseError(
+      val warnings: List<ParseWarning>,
+      val errors: List<ParseError>)
+      : AccountLoginErrorData() {
+      override fun toString(): String =
+        this.javaClass.simpleName
+    }
 
     /**
-     * The specified account does not exist.
+     * Logging in failed because the server returned some sort of error.
      */
 
-    ERROR_ACCOUNT_NONEXISTENT,
+    data class AccountLoginServerError(
+      val uri: URI,
+      val statusCode: Int,
+      val errorMessage: String,
+      val errorReport: HTTPProblemReport?)
+      : AccountLoginErrorData()
 
     /**
-     * A general error code that is not specifically actionable (such as an I/O error
-     * or a programming mistake).
+     * A required DRM system is not supported by the application.
      */
 
-    ERROR_GENERAL
+    data class AccountLoginDRMNotSupported(
+      val system: String)
+      : AccountLoginErrorData()
+
+    /**
+     * A DRM system failed with an (opaque) error code.
+     */
+
+    data class AccountLoginDRMFailure(
+      val errorCode: String)
+      : AccountLoginErrorData()
   }
 
   /**
@@ -76,8 +122,7 @@ sealed class AccountLoginState {
    */
 
   data class AccountLoginFailed(
-    val errorCode: AccountLoginErrorCode,
-    val exception: Exception?)
+    val steps: List<TaskStep<AccountLoginErrorData>>)
     : AccountLoginState() {
     override val credentials: AccountAuthenticationCredentials?
       get() = null
@@ -95,44 +140,41 @@ sealed class AccountLoginState {
    * The account is currently logging out.
    */
 
-  object AccountLoggingOut : AccountLoginState() {
-    override val credentials: AccountAuthenticationCredentials?
-      get() = null
-  }
+  data class AccountLoggingOut(
+    override val credentials: AccountAuthenticationCredentials,
+
+    /**
+     * A humanly-readable status message.
+     *
+     * @see AccountLogoutStringResourcesType
+     */
+
+    val status: String)
+    : AccountLoginState()
 
   /**
-   * The error codes that can be raised
+   * Data associated with failed logout attempts.
    */
 
-  enum class AccountLogoutErrorCode {
+  sealed class AccountLogoutErrorData {
 
     /**
-     * A profile or account configuration problem occurred (such as the user not having
-     * selected a profile).
+     * A DRM system failed with an (opaque) error code.
      */
 
-    ERROR_PROFILE_CONFIGURATION,
+    data class AccountLogoutDRMFailure(
+      val errorCode: String)
+      : AccountLogoutErrorData()
 
-    ERROR_ACCOUNTS_DATABASE,
-
-    /**
-     * A general error code that is not specifically actionable (such as an I/O error
-     * or a programming mistake).
-     */
-
-    ERROR_GENERAL
   }
 
   /**
-   * The account is currently logging out.
+   * The account failed to log out
    */
 
   data class AccountLogoutFailed(
-    val errorCode: AccountLogoutErrorCode,
-    val exception: Exception?)
-    : AccountLoginState() {
-    override val credentials: AccountAuthenticationCredentials?
-      get() = null
-  }
+    val steps: List<TaskStep<AccountLogoutErrorData>>,
+    override val credentials: AccountAuthenticationCredentials)
+    : AccountLoginState()
 
 }

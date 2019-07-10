@@ -2,6 +2,8 @@ package org.nypl.simplified.downloader.core;
 
 import com.io7m.jfunctional.OptionType;
 
+import org.nypl.simplified.http.core.HTTPProblemReport;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -50,6 +52,7 @@ public interface DownloadListenerType
    * @param d             The download
    * @param status        The status code
    * @param running_total The number of bytes received
+   * @param problemReport The HTTP problem report if one is available
    * @param exception     The exception raised, if any
    */
 
@@ -57,6 +60,7 @@ public interface DownloadListenerType
     DownloadType d,
     int status,
     long running_total,
+    OptionType<HTTPProblemReport> problemReport,
     OptionType<Throwable> exception);
 
   /**

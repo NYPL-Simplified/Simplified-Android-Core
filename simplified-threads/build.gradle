@@ -9,6 +9,9 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
+  defaultConfig {
+    minSdkVersion androidMinimumSDK
+  }
 }
 
 description = 'simplified-threads'
@@ -18,5 +21,7 @@ repositories {
 }
 
 dependencies {
+  api "com.google.guava:guava:23.6-android"
+
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

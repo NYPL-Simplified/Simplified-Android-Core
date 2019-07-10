@@ -10,7 +10,7 @@ import org.nypl.simplified.accounts.api.AccountEvent;
 import org.nypl.simplified.accounts.api.AccountEventCreation;
 import org.nypl.simplified.accounts.api.AccountEventDeletion;
 import org.nypl.simplified.accounts.api.AccountID;
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.api.BookID;
@@ -81,7 +81,7 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<ProfileCreationEvent> profileCreate(
-    AccountProvider account_provider,
+    AccountProviderType account_provider,
     String display_name,
     String gender,
     LocalDate date);
@@ -113,10 +113,10 @@ public interface ProfilesControllerType {
    *
    * @param account     The account ID
    * @param credentials The credentials
-   * @return A future that returns a login event
+   * @return A future that returns the result of logging in
    */
 
-  FluentFuture<Unit> profileAccountLogin(
+  FluentFuture<AccountLoginTaskResult> profileAccountLogin(
     AccountID account,
     AccountAuthenticationCredentials credentials);
 
@@ -125,10 +125,10 @@ public interface ProfilesControllerType {
    * an account already exists using the given provider.
    *
    * @param provider The account provider ID
-   * @return A future that returns a login event
+   * @return A future that returns the result of creating the account
    */
 
-  FluentFuture<AccountEventCreation> profileAccountCreate(
+  FluentFuture<AccountCreateTaskResult> profileAccountCreate(
     URI provider);
 
   /**
@@ -140,7 +140,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a login event
    */
 
-  FluentFuture<AccountEventDeletion> profileAccountDeleteByProvider(
+  FluentFuture<AccountDeleteTaskResult> profileAccountDeleteByProvider(
     URI provider);
 
   /**
@@ -180,16 +180,16 @@ public interface ProfilesControllerType {
    * @see #profileAnonymousEnabled()
    */
 
-  ImmutableList<AccountProvider> profileCurrentlyUsedAccountProviders()
+  ImmutableList<AccountProviderType> profileCurrentlyUsedAccountProviders()
     throws ProfileNoneCurrentException, ProfileNonexistentAccountProviderException;
 
   /**
    * Attempt to log out of the given account of the current profile.
    *
-   * @return A future that returns a logout event
+   * @return A future that returns the result of logging out
    */
 
-  FluentFuture<Unit> profileAccountLogout(AccountID account);
+  FluentFuture<AccountLogoutTaskResult> profileAccountLogout(AccountID account);
 
   /**
    * Update preferences for the current profile.

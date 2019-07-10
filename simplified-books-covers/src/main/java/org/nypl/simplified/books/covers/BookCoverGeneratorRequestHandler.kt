@@ -27,14 +27,14 @@ class BookCoverGeneratorRequestHandler(
   @Throws(IOException::class)
   override fun load(
     @Nullable requestNullable: Request,
-    networkPolicy: Int): RequestHandler.Result {
+    networkPolicy: Int): Result {
     try {
       val request = NullCheck.notNull(requestNullable)
       val bitmap = this.generator.generateImage(
         NullCheck.notNull(URI.create(request.uri.toString())),
         request.targetWidth,
         request.targetHeight)
-      return RequestHandler.Result(bitmap, LoadedFrom.MEMORY)
+      return Result(bitmap, LoadedFrom.MEMORY)
     } catch (e: Throwable) {
       throw IOException(e)
     }

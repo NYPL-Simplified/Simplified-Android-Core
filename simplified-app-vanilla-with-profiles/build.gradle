@@ -9,6 +9,7 @@ android {
   }
   defaultConfig {
     multiDexEnabled true
+    minSdkVersion androidMinimumSDK
   }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -20,6 +21,7 @@ description = 'simplified-app-vanilla-with-profiles'
 
 dependencies {
   implementation project(':simplified-app-shared')
+  implementation project(":simplified-accounts-source-nyplregistry")
 
   implementation 'com.android.support:appcompat-v7:27.1.1'
 }

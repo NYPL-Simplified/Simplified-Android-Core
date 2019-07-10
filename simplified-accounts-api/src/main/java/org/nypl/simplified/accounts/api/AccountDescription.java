@@ -24,7 +24,7 @@ public abstract class AccountDescription {
    */
 
   public static Builder builder(
-    final URI provider,
+    final AccountProviderType provider,
     final AccountPreferences preferences) {
     return new AutoValue_AccountDescription.Builder()
       .setPreferences(preferences)
@@ -35,7 +35,7 @@ public abstract class AccountDescription {
    * @return The account provider associated with the account
    */
 
-  public abstract URI provider();
+  public abstract AccountProviderType provider();
 
   /**
    * @return The account preferences
@@ -65,7 +65,7 @@ public abstract class AccountDescription {
      */
 
     public abstract Builder setProvider(
-      URI provider);
+      AccountProviderType provider);
 
     /**
      * Set the preferences.

@@ -9,7 +9,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
 import org.nypl.simplified.accounts.api.AccountBarcode;
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType;
 import org.nypl.simplified.accounts.api.AccountPIN;
-import org.nypl.simplified.accounts.database.AccountBundledCredentialsJSON;
+import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

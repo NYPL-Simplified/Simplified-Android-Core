@@ -51,6 +51,7 @@ android {
     versionName = version.get(0)
     versionCode = version.get(1)
     setProperty("archivesBaseName", "simplye-${versionName}-${versionCode}")
+    minSdkVersion androidMinimumSDK
   }
 
   lintOptions {
@@ -66,8 +67,9 @@ android {
 description = 'simplified-app-simplye'
 
 dependencies {
-  implementation project(':simplified-app-shared')
+  implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(':simplified-analytics-circulation')
+  implementation project(':simplified-app-shared')
 
   implementation group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
   implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'

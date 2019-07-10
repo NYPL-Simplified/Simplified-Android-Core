@@ -9,6 +9,9 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
+  defaultConfig {
+    minSdkVersion androidMinimumSDK
+  }
 }
 
 description = 'simplified-tests'
@@ -23,6 +26,12 @@ dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-accounts-database")
   api project(":simplified-accounts-database-api")
+  api project(":simplified-accounts-json")
+  api project(":simplified-accounts-registry")
+  api project(":simplified-accounts-registry-api")
+  api project(':simplified-accounts-source-spi')
+  api project(":simplified-accounts-source-filebased")
+  api project(":simplified-accounts-source-nyplregistry")
   api project(":simplified-analytics-api")
   api project(":simplified-analytics-circulation")
   api project(":simplified-analytics-lfa")
@@ -34,6 +43,7 @@ dependencies {
   api project(":simplified-books-database")
   api project(":simplified-books-database-api")
   api project(":simplified-books-registry-api")
+  api project(":simplified-boot-api")
   api project(":simplified-branding")
 
   api(project(":simplified-bugsnag")) {
@@ -50,7 +60,11 @@ dependencies {
   api project(":simplified-http-core")
   api project(":simplified-json-core")
   api project(":simplified-observable")
+  api project(":simplified-opds-auth-document")
+  api project(":simplified-opds-auth-document-api")
   api project(":simplified-opds-core")
+  api project(":simplified-patron")
+  api project(":simplified-patron-api")
   api project(":simplified-profiles")
   api project(":simplified-profiles-api")
   api project(":simplified-profiles-controller-api")

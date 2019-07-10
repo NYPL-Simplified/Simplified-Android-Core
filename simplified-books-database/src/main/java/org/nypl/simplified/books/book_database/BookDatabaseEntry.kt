@@ -31,7 +31,7 @@ internal class BookDatabaseEntry internal constructor(
   private val bookDir: File,
   private val serializer: OPDSJSONSerializerType,
   @GuardedBy("bookLock")
-  private var bookRef: org.nypl.simplified.books.api.Book,
+  private var bookRef: Book,
   private val onDelete: Runnable) : BookDatabaseEntryType {
 
   private val LOG = LoggerFactory.getLogger(BookDatabaseEntry::class.java)
@@ -42,9 +42,9 @@ internal class BookDatabaseEntry internal constructor(
   private var formatHandlesRef: MutableMap<Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle> =
     mutableMapOf()
 
-  internal val id: org.nypl.simplified.books.api.BookID = this.bookRef.id
+  internal val id: BookID = this.bookRef.id
 
-  override val book: org.nypl.simplified.books.api.Book
+  override val book: Book
     get() = synchronized(this.bookLock) {
       Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
       return this.bookRef
@@ -108,7 +108,7 @@ internal class BookDatabaseEntry internal constructor(
   }
 
 
-  private fun onFormatUpdated(format: org.nypl.simplified.books.api.BookFormat) {
+  private fun onFormatUpdated(format: BookFormat) {
     synchronized(this.bookLock) {
       LOG.debug("onFormatUpdated: {}", format.javaClass.canonicalName)
       this.bookRef = this.bookRef.copy(
@@ -229,7 +229,7 @@ internal class BookDatabaseEntry internal constructor(
       constructors: EnumMap<BookFormats.BookFormatDefinition, DatabaseBookFormatHandleConstructor>,
       ownerDirectory: File,
       owner: BookDatabaseEntryType,
-      onUpdate: (org.nypl.simplified.books.api.BookFormat) -> Unit,
+      onUpdate: (BookFormat) -> Unit,
       existingFormats: MutableMap<Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle>,
       contentTypes: Set<String>) {
 

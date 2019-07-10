@@ -1,5 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -36,7 +37,8 @@ public final class CatalogDownloadProgressBar
     NullCheck.notNull(text);
     NullCheck.notNull(bar);
 
-    if (expected_total < 0L) {
+    if (expected_total < 0L || current_total == 0L) {
+      text.setText("");
       bar.setIndeterminate(true);
     } else {
       final double perc =

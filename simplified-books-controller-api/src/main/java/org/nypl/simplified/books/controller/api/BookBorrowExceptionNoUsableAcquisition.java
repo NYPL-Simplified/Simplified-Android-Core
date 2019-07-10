@@ -5,8 +5,7 @@ package org.nypl.simplified.books.controller.api;
  * links that the application knows how to handle.
  */
 
-public final class BookBorrowExceptionNoUsableAcquisition
-  extends BookBorrowException
+public final class BookBorrowExceptionNoUsableAcquisition extends BookBorrowException
 {
   /**
    * Construct an exception.

@@ -14,8 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
@@ -50,7 +48,8 @@ public class ReportIssueActivity extends AppCompatActivity {
 
     try {
       final ProfileReadableType profile =
-        Simplified.getProfilesController()
+        Simplified.getServices()
+          .getProfilesController()
           .profileCurrent();
 
       final Bundle extras = getIntent().getExtras();
@@ -58,7 +57,7 @@ public class ReportIssueActivity extends AppCompatActivity {
       if (extras != null) {
         accountId = new AccountID(UUID.fromString(extras.getString("selectedAccount")));
       } else {
-        accountId = profile.accountCurrent().id();
+        accountId = profile.accountCurrent().getId();
       }
 
       this.account =
@@ -134,9 +133,8 @@ public class ReportIssueActivity extends AppCompatActivity {
         b.setCancelable(true);
         b.create().show();
       } else {
-        final OptionType<String> emailOpt = this.account.provider().supportEmail();
-        if (emailOpt.isSome()) {
-          final String email = ((Some<String>) emailOpt).get();
+        final String email = this.account.getProvider().getSupportEmail();
+        if (email != null) {
           this.launchEmailAppWithEmailAddress(this,
             email,
             this.subject_field.getText().toString(),

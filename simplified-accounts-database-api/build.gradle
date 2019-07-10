@@ -9,12 +9,16 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
+  defaultConfig {
+    minSdkVersion androidMinimumSDK
+  }
 }
 
 description = 'simplified-accounts-database-api'
 
 dependencies {
   api project(':simplified-accounts-api')
+  api project(':simplified-accounts-registry-api')
   api project(':simplified-books-database')
   api project(':simplified-observable')
 
@@ -25,6 +29,7 @@ dependencies {
 
   compileOnly "com.google.auto.value:auto-value:1.5"
   annotationProcessor "com.google.auto.value:auto-value:1.5"
+  compile project(path: ':simplified-accounts-source-spi')
 }
 
 repositories {

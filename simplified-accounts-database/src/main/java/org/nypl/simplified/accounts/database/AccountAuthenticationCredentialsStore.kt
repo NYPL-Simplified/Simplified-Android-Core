@@ -4,6 +4,7 @@ import net.jcip.annotations.GuardedBy
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.json.AccountAuthenticationCredentialsStoreJSON
 import org.nypl.simplified.files.FileUtilities
 import java.io.File
 

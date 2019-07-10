@@ -3,6 +3,7 @@ package org.nypl.simplified.app.settings
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
+import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
@@ -23,10 +24,11 @@ class SettingsActivity : NavigationDrawerActivity(), SettingsFragmentListenerTyp
   }
 
   override fun helpstack(): OptionType<HelpstackType> =
-    Simplified.getHelpStack()
+    Option.of(Simplified.application.services().helpStack)
 
-  override fun documents(): org.nypl.simplified.documents.store.DocumentStoreType =
-    Simplified.getDocumentStore()
+  override fun documents(): DocumentStoreType =
+    Simplified.application.services()
+      .documentStore
 
   override fun navigationDrawerShouldShowIndicator(): Boolean =
     true

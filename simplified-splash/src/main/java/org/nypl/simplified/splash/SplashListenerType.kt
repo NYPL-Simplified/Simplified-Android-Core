@@ -1,31 +1,69 @@
 package org.nypl.simplified.splash
 
-import com.google.common.util.concurrent.ListeningScheduledExecutorService
-import org.nypl.simplified.accounts.database.api.AccountType
+import com.google.common.util.concurrent.ListenableFuture
+import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
-import org.nypl.simplified.observable.ObservableType
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.observable.ObservableReadableType
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+
+/**
+ * A listener interface for the splash screen fragment.
+ *
+ * This interface is expected to be implemented by the activity hosting the fragment.
+ *
+ * @see SplashFragment
+ */
 
 interface SplashListenerType {
 
-  val backgroundExecutor: ListeningScheduledExecutorService
+  /**
+   * The splash screen wants access to a future that represents the application startup
+   * procedure.
+   */
 
-  val splashEvents: ObservableType<SplashEvent>
+  fun onSplashWantBootFuture(): ListenableFuture<*>
 
-  val profileController: ProfilesControllerType
+  /**
+   * The splash screen wants access to an observable that publishes application startup events.
+   */
+
+  fun onSplashWantBootEvents(): ObservableReadableType<BootEvent>
+
+  /**
+   * @return `true` if a EULA document is bundled into the application
+   */
 
   fun onSplashEULAIsProvided(): Boolean
 
+  /**
+   * @return The EULA, assuming that [onSplashEULAIsProvided] returned `true`
+   */
+
   fun onSplashEULARequested(): EULAType
 
-  fun onSplashEULACreateFragment()
-
-  fun onSplashImageCreateFragment()
+  /**
+   * The splash screen wants the current activity to finish and the profile selection screen
+   * to be opened.
+   */
 
   fun onSplashOpenProfileSelector()
 
-  fun onSplashOpenCatalog(account: AccountType)
+  /**
+   * The splash screen wants the current activity to finish and the catalog to be opened.
+   */
+
+  fun onSplashOpenCatalog()
+
+  /**
+   * The splash screen wants the application to switch to the anonymous profile.
+   */
 
   fun onSplashOpenProfileAnonymous()
+
+  /**
+   * The splash screen wants to know what mode the profile system is in.
+   */
+
+  fun onSplashWantProfilesMode(): ProfilesDatabaseType.AnonymousProfileEnabled
 
 }

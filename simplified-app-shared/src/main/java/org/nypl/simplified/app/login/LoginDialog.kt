@@ -14,7 +14,6 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.io7m.jfunctional.Some
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -26,12 +25,14 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
 class LoginDialog : AppCompatDialogFragment() {
 
+  private lateinit var books: BooksControllerType
   private lateinit var profiles: ProfilesControllerType
   private lateinit var loginActionText: TextView
   private lateinit var loginProgress: ProgressBar
@@ -113,59 +114,65 @@ class LoginDialog : AppCompatDialogFragment() {
         .profileAccountCurrent()
 
     val accountProvider =
-      account.provider()
-    val authenticationOpt =
-      accountProvider.authentication()
+      account.provider
+    val authenticationDescription =
+      accountProvider.authentication
 
-    if (!(authenticationOpt is Some<AccountProviderAuthenticationDescription>)) {
-      this.logger.error("Login dialog created for account that does not require authentication!")
-      this.dismissAllowingStateLoss()
-      return layout
+    val authentication =
+      when (authenticationDescription) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate,
+      null -> {
+        this.logger.error("Login dialog created for account that does not require authentication!")
+        this.dismissAllowingStateLoss()
+        return layout
+      }
+      is AccountProviderAuthenticationDescription.Basic -> {
+        authenticationDescription
+      }
     }
 
     /*
      * If the passcode is not allowed to contain letters, then don't let users enter them.
      */
 
-    val authentication = authenticationOpt.get()
-    if (!authentication.passCodeMayContainLetters()) {
-      this.pinEdit.inputType =
-        InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+    when (authentication.passwordKeyboard) {
+      "DEFAULT" -> {
+
+      }
+      "NO INPUT" -> {
+        this.pinLabel.visibility = View.INVISIBLE
+        this.pinEdit.visibility = View.INVISIBLE
+      }
+      "NUMBER PAD" -> {
+        this.pinEdit.inputType =
+          InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+      }
     }
 
     /*
      * If the passcode has a known length, limit the input to that length.
      */
 
-    if (authentication.passCodeLength() != 0) {
+    if (authentication.passwordMaximumLength != 0) {
       this.pinEdit.filters =
-        arrayOf<InputFilter>(InputFilter.LengthFilter(authentication.passCodeLength()))
-    }
-
-    /*
-     * If a PIN is not required, hide the PIN entry elements.
-     */
-
-    if (!authentication.requiresPin()) {
-      this.pinLabel.visibility = View.INVISIBLE
-      this.pinEdit.visibility = View.INVISIBLE
+        arrayOf<InputFilter>(InputFilter.LengthFilter(authentication.passwordMaximumLength))
     }
 
     /*
      * If the account provider supports barcode scanning, show the scan button.
      */
 
-    if (accountProvider.supportsBarcodeScanner()) {
+    if (accountProvider.supportsBarcodeDisplay) {
       this.barcodeScanButton.visibility = View.VISIBLE
     }
 
     this.loginButton.setOnClickListener { view ->
       this.disableUIElements()
       this.shownAlert = false
-      this.profiles.profileAccountLogin(this.account.id(), this.credentialsFromUI())
+      this.profiles.profileAccountLogin(this.account.id, this.credentialsFromUI())
     }
 
-    this.configureUIForAccountState(this.account.loginState())
+    this.configureUIForAccountState(this.account.loginState)
     return layout
   }
 
@@ -196,7 +203,7 @@ class LoginDialog : AppCompatDialogFragment() {
 
   private fun onAccountEvent(event: AccountEvent) {
     if (event is AccountEventLoginStateChanged) {
-      if (event.accountID != this.account.id()) {
+      if (event.accountID != this.account.id) {
         return
       }
       return this.configureUIForAccountState(event.state)
@@ -211,7 +218,7 @@ class LoginDialog : AppCompatDialogFragment() {
           this.enableUIElements()
         }
 
-        AccountLoginState.AccountLoggingIn -> {
+        is AccountLoginState.AccountLoggingIn -> {
           this.loginActionLayout.visibility = View.VISIBLE
           this.loginProgress.visibility = View.VISIBLE
           this.loginActionText.setText(R.string.settings_login_in_progress)
@@ -223,8 +230,8 @@ class LoginDialog : AppCompatDialogFragment() {
             ErrorDialogUtilities.showError(
               this.activity,
               this.logger,
-              LoginErrorCodeStrings.stringOfLoginError(this.resources, state.errorCode),
-              state.exception)
+              state.steps.lastOrNull()?.resolution,
+              state.steps.lastOrNull()?.exception)
             this.shownAlert = true
           }
 
@@ -235,16 +242,16 @@ class LoginDialog : AppCompatDialogFragment() {
         }
 
         is AccountLoginState.AccountLoggedIn -> {
-          this.logger.debug("account {} is logged in: dismissing dialog", this.account.id())
+          this.logger.debug("account {} is logged in: dismissing dialog", this.account.id)
           this.loginActionLayout.visibility = View.INVISIBLE
           this.disableUIElements()
           this.dismiss()
         }
 
-        AccountLoginState.AccountLoggingOut -> {
+        is AccountLoginState.AccountLoggingOut -> {
           this.loginActionLayout.visibility = View.INVISIBLE
           this.loginProgress.visibility = View.VISIBLE
-          this.loginActionText.setText(R.string.settings_logout_in_progress)
+          this.loginActionText.text = state.status
           this.disableUIElements()
         }
 
@@ -253,8 +260,8 @@ class LoginDialog : AppCompatDialogFragment() {
             ErrorDialogUtilities.showError(
               this.activity,
               this.logger,
-              LoginErrorCodeStrings.stringOfLogoutError(this.resources, state.errorCode),
-              state.exception)
+              state.steps.lastOrNull()?.resolution,
+              state.steps.lastOrNull()?.exception)
             this.shownAlert = true
           }
 

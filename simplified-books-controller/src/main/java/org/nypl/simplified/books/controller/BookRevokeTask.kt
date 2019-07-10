@@ -3,12 +3,13 @@ package org.nypl.simplified.books.controller
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.jfunctional.Unit
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.DateTime
+import org.joda.time.Duration
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeAdeptLoan
-import org.nypl.drm.core.AdobeAdeptLoanReturnListenerType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
@@ -19,12 +20,18 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.*
 import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
+import org.nypl.simplified.books.book_registry.BookStatusRevokeResult
+import org.nypl.simplified.books.book_registry.BookStatusRevoked
+import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.books.controller.api.AccountNotReadyException
-import org.nypl.simplified.books.controller.api.BookRevokeExceptionDRMWorkflowError
+import org.nypl.simplified.books.controller.api.BookRevokeExceptionBadFeed
+import org.nypl.simplified.books.controller.api.BookRevokeExceptionDeviceNotActivated
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionNoCredentials
-import org.nypl.simplified.books.controller.api.BookRevokeExceptionNotReady
+import org.nypl.simplified.books.controller.api.BookRevokeExceptionNotRevocable
+import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
@@ -39,99 +46,255 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
-import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
-import org.nypl.simplified.opds.core.OPDSAvailabilityType
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.net.URI
 import java.util.concurrent.Callable
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CancellationException
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
-internal class BookRevokeTask(
+class BookRevokeTask(
+  private val account: AccountType,
   private val adobeDRM: AdobeAdeptExecutorType?,
+  private val bookID: BookID,
   private val bookRegistry: BookRegistryType,
   private val feedLoader: FeedLoaderType,
-  private val account: AccountType,
-  private val bookID: BookID) : Callable<Unit> {
+  private val revokeStrings: BookRevokeStringResourcesType,
+  private val revokeACSTimeoutDuration: Duration = Duration.standardMinutes(1L),
+  private val revokeServerTimeoutDuration: Duration = Duration.standardMinutes(3L))
+  : Callable<BookStatusRevokeResult> {
 
-  @Throws(Exception::class)
-  override fun call(): Unit {
-    LOG.debug("[{}] revoke", this.bookID.brief())
+  private val adobeACS = "Adobe ACS"
 
-    val databaseEntry = this.account.bookDatabase().entry(this.bookID)
-    val book = databaseEntry.book
+  private lateinit var databaseEntry: BookDatabaseEntryType
+  private var databaseEntryInitialized: Boolean = false
 
-    try {
-      this.bookRegistry.update(BookWithStatus.create(book, BookStatusRequestingRevoke(this.bookID)))
+  private val logger = LoggerFactory.getLogger(BookRevokeTask::class.java)
+  private val steps = TaskRecorder.create<BookStatusRevokeErrorDetails>()
 
-      val feedEntry = book.entry
-      val avail = feedEntry.availability
-      LOG.debug("[{}]: availability is {}", this.bookID.brief(), avail)
+  private fun debug(message: String, vararg arguments: Any?) =
+    this.logger.debug("[{}] ${message}", this.bookID.brief(), *arguments)
 
-      return avail.matchAvailability(object : OPDSAvailabilityMatcherType<Unit, Exception> {
-        private fun optionallyRevokeHeld(revokeOpt: OptionType<URI>?): Unit {
-          if (revokeOpt is Some<URI>) {
-            return revokeUsingOnlyURI(revokeOpt.get(), RevokeType.HOLD)
-          }
-          return Unit.unit()
-        }
+  private fun error(message: String, vararg arguments: Any?) =
+    this.logger.error("[{}] ${message}", this.bookID.brief(), *arguments)
 
-        override fun onHeldReady(availability: OPDSAvailabilityHeldReady): Unit {
-          return optionallyRevokeHeld(availability.revoke)
-        }
+  private fun warn(message: String, vararg arguments: Any?) =
+    this.logger.warn("[{}] ${message}", this.bookID.brief(), *arguments)
 
-        override fun onHeld(availability: OPDSAvailabilityHeld): Unit {
-          return optionallyRevokeHeld(availability.revoke)
-        }
-
-        override fun onHoldable(availability: OPDSAvailabilityHoldable): Unit {
-          return failBecauseNotRevocable(book, availability)
-        }
-
-        override fun onLoaned(availability: OPDSAvailabilityLoaned): Unit {
-          val revokeOpt = availability.revoke
-          if (revokeOpt is Some<URI>) {
-            return revokeLoaned(databaseEntry, revokeOpt.get())
-          } else {
-            return failBecauseNotRevocable(book, availability)
-          }
-        }
-
-        override fun onLoanable(availability: OPDSAvailabilityLoanable): Unit {
-          return failBecauseNotRevocable(book, availability)
-        }
-
-        override fun onOpenAccess(availability: OPDSAvailabilityOpenAccess): Unit {
-          val revokeOpt = availability.revoke
-          if (revokeOpt is Some<URI>) {
-            return revokeLoaned(databaseEntry, revokeOpt.get())
-          }
-          return failBecauseNotRevocable(book, availability)
-        }
-
-        override fun onRevoked(availability: OPDSAvailabilityRevoked): Unit {
-          return revokeUsingOnlyURI(availability.revoke, RevokeType.LOAN)
-        }
-      })
-    } catch (e: Exception) {
-      this.revokeFailed(book, Option.some(e), e.message!!)
-      throw e
-    } finally {
-      LOG.debug("[{}] revoke finished", this.bookID.brief())
+  private fun pickUsableMessage(message: String, e: Throwable): String {
+    val exMessage = e.message
+    return if (message.isEmpty()) {
+      if (exMessage != null) {
+        exMessage
+      } else {
+        e.javaClass.simpleName
+      }
+    } else {
+      message
     }
   }
 
-  @Throws(Exception::class)
-  private fun revokeUsingOnlyURI(
-    revokeURI: URI,
-    type: RevokeType): Unit {
+  private fun publishBookStatus(status: BookStatusType) {
+    val book =
+      if (this.databaseEntryInitialized) {
+        this.databaseEntry.book
+      } else {
+        this.warn("publishing book status with fake book!")
 
-    LOG.debug("[{}]: revoking URI {} of type {}", this.bookID.brief(), revokeURI, type)
+        /**
+         * Note that this is a synthesized value because we need to be able to open the book
+         * database to get a real book value, and that database call might fail. If the call fails,
+         * we have no "book" that we can refer to in order to publish a "book revoke has failed"
+         * status for the book, so we use this fake book in that (rare) situation.
+         */
 
-    val httpAuth = createHttpAuthIfRequired()
+        val entry =
+          OPDSAcquisitionFeedEntry.newBuilder(
+            this.bookID.value(),
+            "",
+            DateTime.now(),
+            OPDSAvailabilityLoanable.get())
+            .build()
+
+        Book(
+          this.bookID,
+          this.account.id,
+          null,
+          null,
+          entry,
+          listOf())
+      }
+
+    this.bookRegistry.update(BookWithStatus.create(book, status))
+  }
+
+  private fun publishRequestingRevokeStatus() {
+    this.publishBookStatus(BookStatusRequestingRevoke(this.bookID, this.steps.currentStep()!!.description))
+  }
+
+  private fun publishRevokedStatus() {
+    this.publishBookStatus(BookStatusRevoked(this.bookID))
+
+  }
+
+  override fun call(): BookStatusRevokeResult {
+    return try {
+      this.steps.beginNewStep(this.revokeStrings.revokeStarted)
+      this.debug("revoke")
+
+      this.setupBookDatabaseEntry()
+      this.revokeFormatHandle()
+      this.revokeNotifyServer()
+      this.revokeNotifyServerDeleteBook()
+      this.bookRegistry.clearFor(this.bookID)
+
+      BookStatusRevokeResult(this.steps.finish())
+    } catch (e: Throwable) {
+      this.error("revoke failed: ", e)
+
+      val step = this.steps.currentStep()!!
+      if (step.exception == null) {
+        this.steps.currentStepFailed(
+          message = this.pickUsableMessage(step.resolution, e),
+          errorValue = step.errorValue,
+          exception = e)
+      }
+
+      val result = BookStatusRevokeResult(this.steps.finish())
+      this.publishBookStatus(BookStatusRevokeFailed(this.bookID, result))
+      result
+    } finally {
+      this.debug("finished")
+    }
+  }
+
+  private fun revokeNotifyServer() {
+    this.debug("notifying server of revocation")
+    this.steps.beginNewStep(this.revokeStrings.revokeServerNotify)
+    this.publishRequestingRevokeStatus()
+
+    val availability = this.databaseEntry.book.entry.availability
+    this.debug("availability is {}", availability)
+
+    return when (availability) {
+      is OPDSAvailabilityHeldReady -> {
+        val uriOpt = availability.revoke
+        if (uriOpt is Some<URI>) {
+          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.HOLD)
+        } else {
+          this.debug("no revoke URI, nothing to do")
+          this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          Unit
+        }
+      }
+
+      is OPDSAvailabilityHeld -> {
+        val uriOpt = availability.revoke
+        if (uriOpt is Some<URI>) {
+          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.HOLD)
+        } else {
+          this.debug("no revoke URI, nothing to do")
+          this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          Unit
+        }
+      }
+
+      is OPDSAvailabilityHoldable -> {
+        val exception = BookRevokeExceptionNotRevocable()
+        this.steps.currentStepFailed(
+          this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName),
+          NotRevocable,
+          exception)
+        throw exception
+      }
+
+      is OPDSAvailabilityLoaned -> {
+        val uriOpt = availability.revoke
+        if (uriOpt is Some<URI>) {
+          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.LOAN)
+        } else {
+          this.debug("no revoke URI, nothing to do")
+          this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          Unit
+        }
+      }
+
+      is OPDSAvailabilityLoanable -> {
+        val exception = BookRevokeExceptionNotRevocable()
+        this.steps.currentStepFailed(
+          this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName),
+          NotRevocable,
+          exception)
+        throw exception
+      }
+
+      is OPDSAvailabilityOpenAccess -> {
+        val uriOpt = availability.revoke
+        if (uriOpt is Some<URI>) {
+          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.LOAN)
+        } else {
+          this.debug("no revoke URI, nothing to do")
+          this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          Unit
+        }
+      }
+
+      is OPDSAvailabilityRevoked ->
+        this.revokeNotifyServerURI(availability.revoke, RevokeType.LOAN)
+
+      else ->
+        throw UnreachableCodeException()
+    }
+  }
+
+  private fun revokeNotifyServerURI(
+    targetURI: URI,
+    revokeType: RevokeType) {
+    this.debug("notifying server of {} revocation via {}", revokeType, targetURI)
+    this.steps.beginNewStep(this.revokeStrings.revokeServerNotifyURI(targetURI))
+    this.publishRequestingRevokeStatus()
+
+    val feed =
+      this.revokeNotifyServerURIFeed(targetURI)
+    val entry =
+      this.revokeNotifyServerURIProcessFeed(feed)
+
+    this.revokeNotifyServerSaveNewEntry(entry)
+  }
+
+  private fun revokeNotifyServerSaveNewEntry(entry: FeedEntryOPDS) {
+    this.debug("saving received OPDS entry")
+    this.steps.beginNewStep(this.revokeStrings.revokeServerNotifySavingEntry)
+    this.publishRequestingRevokeStatus()
+
+    try {
+      this.databaseEntry.writeOPDSEntry(entry.feedEntry)
+    } catch (e: Exception) {
+      this.steps.currentStepFailed(
+        this.revokeStrings.revokeServerNotifySavingEntryFailed, null, e)
+      throw e
+    }
+  }
+
+  private fun revokeNotifyServerDeleteBook() {
+    this.debug("deleting book")
+    this.steps.beginNewStep(this.revokeStrings.revokeDeleteBook)
+    this.publishRevokedStatus()
+
+    try {
+      this.databaseEntry.delete()
+    } catch (e: Throwable) {
+      this.steps.currentStepFailed(this.revokeStrings.revokeDeleteBookFailed, null, e)
+      throw e
+    }
+  }
+
+  private fun revokeNotifyServerURIFeed(targetURI: URI): Feed {
+    val httpAuth = this.createHttpAuthIfRequired()
 
     /*
      * Hitting a revoke link yields a single OPDS entry indicating
@@ -139,37 +302,287 @@ internal class BookRevokeTask(
      * entry seen by an unauthenticated user browsing the catalog right now.
      */
 
-    val feedResult =
-      this.feedLoader.fetchURIRefreshing(revokeURI, httpAuth, "PUT")
-        .get(3L, TimeUnit.MINUTES)
+    val feedResult = try {
+      this.feedLoader.fetchURIRefreshing(targetURI, httpAuth, "PUT")
+        .get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
+    } catch (e: TimeoutException) {
+      this.steps.currentStepFailed(
+        this.revokeStrings.revokeServerNotifyFeedTimedOut, null, e)
+      throw e
+    } catch (e: ExecutionException) {
+      val ex = e.cause!!
+      this.steps.currentStepFailed(
+        this.revokeStrings.revokeServerNotifyFeedTimedOut,
+        FeedLoaderFailed(null, ex),
+        ex)
+      throw ex
+    }
 
     return when (feedResult) {
-      is FeedLoaderSuccess ->
-        revokeUsingOnlyURIReceivedFeed(feedResult.feed)
-      is FeedLoaderFailedGeneral ->
+      is FeedLoaderSuccess -> {
+        this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyFeedOK)
+        feedResult.feed
+      }
+
+      is FeedLoaderFailedGeneral -> {
+        this.steps.currentStepFailed(
+          this.revokeStrings.revokeServerNotifyFeedFailed,
+          FeedLoaderFailed(feedResult.problemReport, feedResult.exception))
         throw feedResult.exception
-      is FeedLoaderFailedAuthentication ->
+      }
+
+      is FeedLoaderFailedAuthentication -> {
+        this.steps.currentStepFailed(
+          this.revokeStrings.revokeServerNotifyFeedFailed,
+          FeedLoaderFailed(feedResult.problemReport, feedResult.exception))
         throw feedResult.exception
+      }
     }
   }
 
-  private fun revokeUsingOnlyURIReceivedFeed(feed: Feed): Unit {
+  private fun revokeNotifyServerURIProcessFeed(feed: Feed): FeedEntryOPDS {
+    this.debug("processing server revocation feed")
+    this.steps.beginNewStep(this.revokeStrings.revokeServerNotifyProcessingFeed)
+    this.publishRequestingRevokeStatus()
+
     if (feed.size == 0) {
-      throw IOException("Received empty feed")
+      val exception = BookRevokeExceptionBadFeed()
+      this.steps.currentStepFailed(this.revokeStrings.revokeServerNotifyFeedEmpty, FeedUnusable, exception)
+      throw exception
     }
 
     return when (feed) {
       is Feed.FeedWithoutGroups -> {
-        val feedEntry = feed.entriesInOrder[0]
-        when (feedEntry) {
-          is FeedEntryCorrupt ->
-            throw IOException("Received a corrupted feed")
+        when (val feedEntry = feed.entriesInOrder[0]) {
+          is FeedEntryCorrupt -> {
+            val exception = BookRevokeExceptionBadFeed()
+            this.steps.currentStepFailed(
+              this.revokeStrings.revokeServerNotifyFeedCorrupt,
+              FeedCorrupted(feedEntry.error),
+              exception)
+            throw exception
+          }
           is FeedEntryOPDS ->
-            this.revokeFeedEntryReceivedOPDS(feedEntry)
+            feedEntry
         }
       }
-      is Feed.FeedWithGroups ->
-        throw IOException("Received an unexpected type of feed (feed with groups)")
+      is Feed.FeedWithGroups -> {
+        val exception = BookRevokeExceptionBadFeed()
+        this.steps.currentStepFailed(
+          this.revokeStrings.revokeServerNotifyFeedWithGroups,
+          FeedUnusable,
+          exception)
+        throw exception
+      }
+    }
+  }
+
+  private fun revokeFormatHandle() {
+    this.debug("revoking via format handle")
+    this.steps.beginNewStep(this.revokeStrings.revokeFormat)
+    this.publishRequestingRevokeStatus()
+
+    return when (val handle = this.databaseEntry.findPreferredFormatHandle()) {
+      is BookDatabaseEntryFormatHandleEPUB ->
+        this.revokeFormatHandleEPUB(handle)
+      is BookDatabaseEntryFormatHandlePDF ->
+        this.revokeFormatHandlePDF(handle)
+      is BookDatabaseEntryFormatHandleAudioBook ->
+        this.revokeFormatHandleAudioBook(handle)
+      null -> {
+        this.debug("no format handle available, nothing to do!")
+        this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
+        Unit
+      }
+    }
+  }
+
+  private fun revokeFormatHandleEPUB(handle: BookDatabaseEntryFormatHandleEPUB) {
+    this.debug("revoking via EPUB format handle")
+    this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("EPUB"))
+    this.publishRequestingRevokeStatus()
+
+    val adobeRights = handle.format.adobeRights
+    if (adobeRights != null) {
+      this.revokeFormatHandleEPUBAdobe(handle, adobeRights)
+    } else {
+      this.debug("no Adobe rights, nothing to do!")
+    }
+  }
+
+  private fun revokeFormatHandleEPUBAdobe(
+    handle: BookDatabaseEntryFormatHandleEPUB,
+    adobeRights: AdobeAdeptLoan) {
+    this.debug("revoking Adobe ACS loan")
+    this.steps.beginNewStep(this.revokeStrings.revokeACSLoan)
+    this.publishRequestingRevokeStatus()
+
+    /*
+     * If the loan is not returnable, then there's no point trying to return it!
+     */
+
+    if (!adobeRights.isReturnable) {
+      this.debug("loan is not returnable")
+      this.steps.currentStepSucceeded(this.revokeStrings.revokeACSLoanNotReturnable)
+      this.deleteAdobeRights(handle)
+      return
+    }
+
+    /*
+     * If the Adept executor is not provided, it means that this build of the application
+     * has no support for Adobe DRM. We don't treat a missing Adept executor as failure case
+     * because if support for Adobe DRM is dropped in the future, it would suddenly become
+     * impossible for users to revoke loans that were previously made with activated devices.
+     */
+
+    if (this.adobeDRM == null) {
+      this.debug("DRM is not supported")
+      this.steps.currentStepSucceeded(this.revokeStrings.revokeACSLoanNotSupported)
+      this.deleteAdobeRights(handle)
+      return
+    }
+
+    this.revokeFormatHandleEPUBAdobeExecute(this.adobeDRM, adobeRights)
+    this.deleteAdobeRights(handle)
+  }
+
+  /**
+   * Execute the DRM connector commands required to revoke a loan.
+   */
+
+  private fun revokeFormatHandleEPUBAdobeExecute(
+    adobeDRM: AdobeAdeptExecutorType,
+    adobeRights: AdobeAdeptLoan) {
+
+    val credentials =
+      this.revokeFormatHandleEPUBAdobeWithConnectorGetCredentials()
+
+    this.steps.beginNewStep(this.revokeStrings.revokeACSExecute)
+    this.publishRequestingRevokeStatus()
+
+    val adeptFuture =
+      AdobeDRMExtensions.revoke(adobeDRM, adobeRights, credentials.userID)
+
+    try {
+      adeptFuture.get(this.revokeACSTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
+    } catch (e : TimeoutException) {
+      this.steps.currentStepFailed(
+        message = this.revokeStrings.revokeACSTimedOut,
+        errorValue = null,
+        exception = e)
+      throw e
+    } catch (e: ExecutionException) {
+      throw when (val cause = e.cause!!) {
+        is CancellationException -> {
+          this.steps.currentStepFailed(
+            message = this.revokeStrings.revokeBookCancelled,
+            errorValue = null,
+            exception = cause)
+          cause
+        }
+        is AdobeDRMExtensions.AdobeDRMRevokeException -> {
+          this.steps.currentStepFailed(
+            message = this.revokeStrings.revokeBookACSConnectorFailed(cause.errorCode),
+            errorValue = DRMError.DRMFailure(this.adobeACS, cause.errorCode),
+            exception = cause)
+          cause
+        }
+        else -> {
+          this.steps.currentStepFailed(
+            message = this.revokeStrings.revokeBookACSFailed,
+            errorValue = null,
+            exception = cause)
+          cause
+        }
+      }
+    } catch (e: Throwable) {
+      this.steps.currentStepFailed(
+        message = this.revokeStrings.revokeBookACSFailed,
+        errorValue = null,
+        exception = e)
+      throw e
+    }
+
+    this.steps.currentStepSucceeded(this.revokeStrings.revokeACSExecuteOK)
+  }
+
+  /**
+   * Retrieve the post-activation device credentials. These can only exist if the device
+   * has been activated.
+   */
+
+  private fun revokeFormatHandleEPUBAdobeWithConnectorGetCredentials(): AccountAuthenticationAdobePostActivationCredentials {
+    this.debug("getting Adobe ACS credentials")
+    this.steps.beginNewStep(this.revokeStrings.revokeACSGettingDeviceCredentials)
+    this.publishRequestingRevokeStatus()
+
+    val credentials =
+      this.someOrNull(this.getRequiredAccountCredentials().adobePostActivationCredentials())
+
+    if (credentials == null) {
+      val exception = BookRevokeExceptionDeviceNotActivated()
+      this.steps.currentStepFailed(
+        this.revokeStrings.revokeACSGettingDeviceCredentialsNotActivated,
+        errorValue = DRMError.DRMDeviceNotActive(this.adobeACS),
+        exception = exception)
+      throw exception
+    }
+
+    this.steps.currentStepSucceeded(this.revokeStrings.revokeACSGettingDeviceCredentialsOK)
+    return credentials
+  }
+
+  private fun <T> someOrNull(option: OptionType<T>): T? {
+    return if (option is Some<T>) {
+      option.get()
+    } else {
+      null
+    }
+  }
+
+  private fun deleteAdobeRights(handle: BookDatabaseEntryFormatHandleEPUB) {
+    this.debug("deleting Adobe ACS loan")
+    this.steps.beginNewStep(this.revokeStrings.revokeACSDeleteRights)
+    this.publishRequestingRevokeStatus()
+
+    try {
+      handle.setAdobeRightsInformation(null)
+    } catch (e: Exception) {
+      this.steps.currentStepFailed(this.revokeStrings.revokeACSDeleteRightsFailed, null, e)
+      throw e
+    }
+  }
+
+  private fun revokeFormatHandleAudioBook(handle: BookDatabaseEntryFormatHandleAudioBook) {
+    this.debug("revoking via AudioBook format handle")
+    this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("AudioBook"))
+    this.publishRequestingRevokeStatus()
+
+    this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
+  }
+
+  private fun revokeFormatHandlePDF(handle: BookDatabaseEntryFormatHandlePDF) {
+    this.debug("revoking via PDF format handle")
+    this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("PDF"))
+    this.publishRequestingRevokeStatus()
+
+    this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
+  }
+
+  private fun setupBookDatabaseEntry() {
+    this.steps.beginNewStep(this.revokeStrings.revokeBookDatabaseLookup)
+
+    try {
+      this.debug("setting up book database entry")
+      val database = this.account.bookDatabase
+      this.databaseEntry = database.entry(this.bookID)
+      this.databaseEntryInitialized = true
+      this.publishRequestingRevokeStatus()
+      this.steps.currentStepSucceeded(this.revokeStrings.revokeBookDatabaseLookupOK)
+    } catch (e: Exception) {
+      this.error("failed to set up book database entry: ", e)
+      this.steps.currentStepFailed(this.revokeStrings.revokeBookDatabaseLookupFailed, null, e)
+      throw e
     }
   }
 
@@ -179,8 +592,8 @@ internal class BookRevokeTask(
    */
 
   private fun createHttpAuthIfRequired(): OptionType<HTTPAuthType> {
-    return if (this.account.requiresCredentials()) {
-      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(getRequiredAccountCredentials()))
+    return if (this.account.requiresCredentials) {
+      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(this.getRequiredAccountCredentials()))
     } else {
       Option.none<HTTPAuthType>()
     }
@@ -192,240 +605,22 @@ internal class BookRevokeTask(
    */
 
   private fun getRequiredAccountCredentials(): AccountAuthenticationCredentials {
-    val loginState = this.account.loginState()
+    val loginState = this.account.loginState
     val credentials = loginState.credentials
     if (credentials != null) {
       return credentials
     } else {
-      LOG.error("[{}] revocation requires credentials, but none are available", this.bookID.brief())
-      throw BookRevokeExceptionNoCredentials()
+      this.error("revocation requires credentials, but none are available")
+      val exception = BookRevokeExceptionNoCredentials()
+      this.steps.currentStepFailed(
+        this.revokeStrings.revokeCredentialsRequired,
+        NoCredentialsAvailable,
+        exception)
+      throw exception
     }
-  }
-
-  @Throws(Exception::class)
-  private fun revokeLoaned(
-    databaseEntry: BookDatabaseEntryType,
-    revokeURI: URI): Unit {
-
-    val formatHandle = databaseEntry.findPreferredFormatHandle()
-    return if (formatHandle != null) {
-      when (formatHandle) {
-        is BookDatabaseEntryFormatHandleEPUB ->
-          revokeLoanedEPUB(databaseEntry, formatHandle, revokeURI)
-        is BookDatabaseEntryFormatHandleAudioBook ->
-          revokeLoanedAudioBook(formatHandle, revokeURI)
-        is BookDatabaseEntryFormatHandlePDF ->
-          revokeLoanedPDF(formatHandle, revokeURI)
-      }
-    } else {
-      throw UnreachableCodeException()
-    }
-  }
-
-  private fun revokeLoanedPDF(
-    formatHandle: BookDatabaseEntryFormatHandlePDF,
-    revokeURI: URI): Unit {
-    return this.revokeUsingOnlyURI(revokeURI, RevokeType.LOAN)
-  }
-
-  private fun revokeLoanedAudioBook(
-    formatHandle: BookDatabaseEntryFormatHandleAudioBook,
-    revokeURI: URI): Unit {
-    return this.revokeUsingOnlyURI(revokeURI, RevokeType.LOAN)
-  }
-
-  private fun revokeLoanedEPUB(
-    databaseEntry: BookDatabaseEntryType,
-    formatHandle: BookDatabaseEntryFormatHandleEPUB,
-    revokeURI: URI): Unit {
-
-    val adobeRights = formatHandle.format.adobeRights
-    if (adobeRights == null) {
-
-      /*
-       * If the Adobe loan information is gone, it's assumed that it is a non-drm
-       * book from a library that still needs to be "returned"
-       */
-
-      return revokeLoanedEPUBWithoutDRM(databaseEntry, revokeURI)
-    }
-
-    if (this.adobeDRM == null) {
-      throw java.lang.IllegalStateException(
-        "Loan has Adobe rights information, but DRM is not supported!")
-    }
-
-    /*
-     * If it turns out that the loan is not actually returnable, well, there's
-     * nothing we can do about that. This is a bug in the program.
-     */
-
-    if (adobeRights.isReturnable) {
-      this.revokeLoanedEPUBReturnAdobeLoan(databaseEntry, this.adobeDRM, adobeRights, revokeURI)
-    }
-
-    /*
-     * Everything went well... Finish the revocation by telling the server about it.
-     */
-
-    return this.revokeUsingOnlyURI(revokeURI, RevokeType.LOAN)
-  }
-
-  @Throws(IOException::class)
-  private fun revokeLoanedEPUBWithoutDRM(
-    databaseEntry: BookDatabaseEntryType,
-    revokeURI: URI): Unit {
-
-    /*
-     * Save the "revoked" state of the book.
-     * Finish the revocation by telling the server about it.
-     */
-
-    val b = OPDSAcquisitionFeedEntry.newBuilderFrom(databaseEntry.book.entry)
-    b.setAvailability(OPDSAvailabilityRevoked.get(revokeURI))
-    val ee = b.build()
-
-    databaseEntry.writeOPDSEntry(ee)
-    return this.revokeUsingOnlyURI(revokeURI, RevokeType.LOAN)
-  }
-
-  private fun revokeLoanedEPUBReturnAdobeLoan(
-    databaseEntry: BookDatabaseEntryType,
-    adobe: AdobeAdeptExecutorType,
-    adobeLoan: AdobeAdeptLoan,
-    revokeURI: URI) {
-
-    val accountCredentials = getRequiredAccountCredentials()
-
-    /*
-     * Execute a task using the Adobe DRM library, and wait for it to
-     * finish. The reason for the waiting, as opposed to calling further
-     * methods from inside the listener callbacks is to avoid any chance
-     * of the methods in question propagating an unchecked exception back
-     * to the native code. This will obviously crash the whole process,
-     * rather than just failing the revocation.
-     */
-
-    val latch = CountDownLatch(1)
-    val listener = AdobeLoanReturnResult(latch)
-    adobe.execute { connector ->
-      val adobeUserOpt = accountCredentials.adobePostActivationCredentials()
-      val creds = (adobeUserOpt as Some<org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials>).get()
-      connector.loanReturn(listener, adobeLoan.id, creds.userID())
-    }
-
-    /*
-     * Wait for the Adobe task to finish. Give up if it appears to be
-     * hanging.
-     */
-
-    try {
-      latch.await(3, TimeUnit.MINUTES)
-    } catch (x: InterruptedException) {
-      throw IOException("Timed out waiting for Adobe revocation!", x)
-    }
-
-    /*
-     * If Adobe couldn't revoke the book, then the book isn't revoked.
-     * The user can try again later.
-     */
-
-    val errorOpt = listener.error
-    if (errorOpt is Some<Throwable>) {
-      this.revokeFailed(databaseEntry.book, errorOpt, errorOpt.get().localizedMessage)
-      throw errorOpt.get()
-    }
-
-    /*
-     * Save the "revoked" state of the book.
-     */
-
-    val b = OPDSAcquisitionFeedEntry.newBuilderFrom(databaseEntry.book.entry)
-    b.setAvailability(OPDSAvailabilityRevoked.get(revokeURI))
-    val ee = b.build()
-    databaseEntry.writeOPDSEntry(ee)
-  }
-
-  /**
-   * An entry was received regarding the current state of the book. Publish a
-   * status value so that any views that are still looking at the book can
-   * re-render themselves with the new information, then delete the local book data.
-   */
-
-  @Throws(IOException::class)
-  private fun revokeFeedEntryReceivedOPDS(entry: FeedEntryOPDS): Unit {
-    LOG.debug("[{}] deleting book and publishing revocation status", this.bookID.brief())
-
-    val databaseEntry = this.account.bookDatabase().entry(this.bookID)
-    databaseEntry.delete()
-
-    this.bookRegistry.clearFor(this.bookID)
-    return Unit.unit()
   }
 
   private enum class RevokeType {
     LOAN, HOLD
-  }
-
-  private fun failBecauseNotRevocable(book: Book, availability: OPDSAvailabilityType): Unit {
-    return this.revokeFailed(
-      book, Option.none(), String.format("Status is %s, nothing to revoke!", availability))
-  }
-
-  /**
-   * The revocation failed.
-   */
-
-  private fun revokeFailed(
-    book: Book,
-    exception: OptionType<Throwable>,
-    message: String): Unit {
-    LOG.error("[{}] revocation failed: ", this.bookID.brief(), message)
-
-    if (exception.isSome) {
-      val ex = (exception as Some<Throwable>).get()
-      LOG.error("[{}] revocation failed, exception: ", this.bookID.brief(), ex)
-    }
-
-    LOG.debug("[{}] publishing failure status", this.bookID.brief())
-    this.bookRegistry.update(
-      BookWithStatus.create(book, BookStatusRevokeFailed(this.bookID, exception)))
-    return Unit.unit()
-  }
-
-  private class AdobeLoanReturnResult internal constructor(
-    private val latch: CountDownLatch) : AdobeAdeptLoanReturnListenerType {
-
-    var error: OptionType<Throwable> = Option.some(BookRevokeExceptionNotReady())
-
-    override fun onLoanReturnSuccess() {
-      try {
-        LOG.debug("onLoanReturnSuccess")
-        this.error = Option.none()
-      } finally {
-        this.latch.countDown()
-      }
-    }
-
-    override fun onLoanReturnFailure(in_error: String) {
-      try {
-        LOG.debug("onLoanReturnFailure: {}", in_error)
-
-        if (in_error.startsWith("E_ACT_NOT_READY")) {
-          this.error = Option.some(AccountNotReadyException(in_error))
-        } else if (in_error.startsWith("E_STREAM_ERROR")) {
-          LOG.debug("E_STREAM_ERROR: Ignore and continue with return.")
-          this.error = Option.none()
-        } else {
-          this.error = Option.some(BookRevokeExceptionDRMWorkflowError(in_error))
-        }
-      } finally {
-        this.latch.countDown()
-      }
-    }
-  }
-
-  companion object {
-    private val LOG = LoggerFactory.getLogger(BookRevokeTask::class.java)
   }
 }

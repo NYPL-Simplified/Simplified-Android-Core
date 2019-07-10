@@ -19,6 +19,7 @@ android {
 
   defaultConfig {
     buildConfigField "String", "GIT_COMMIT", "\"${getGitHash()}\""
+    minSdkVersion androidMinimumSDK
   }
 
   compileOptions {
@@ -41,6 +42,9 @@ dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-accounts-database")
   api project(":simplified-accounts-database-api")
+  api project(":simplified-accounts-json")
+  api project(":simplified-accounts-registry")
+  api project(":simplified-accounts-registry-api")
   api project(":simplified-analytics-api")
   api project(":simplified-books-api")
   api project(":simplified-books-bundled-api")
@@ -50,6 +54,7 @@ dependencies {
   api project(":simplified-books-database")
   api project(":simplified-books-database-api")
   api project(":simplified-books-registry-api")
+  api project(":simplified-boot-api")
   api project(":simplified-branding")
   api project(":simplified-bugsnag")
   api project(":simplified-datepicker")
@@ -61,7 +66,12 @@ dependencies {
   api project(":simplified-http-core")
   api project(":simplified-json-core")
   api project(":simplified-observable")
+  api project(":simplified-opds-auth-document")
+  api project(":simplified-opds-auth-document-api")
   api project(":simplified-opds-core")
+  api project(":simplified-parser-api")
+  api project(":simplified-patron")
+  api project(":simplified-patron-api")
   api project(":simplified-profiles")
   api project(":simplified-profiles-api")
   api project(":simplified-profiles-controller-api")

@@ -30,7 +30,7 @@
     A theme that makes the activity pure white and hides the action bar.
   -->
 
-  <style name="SimplifiedBlank">
+  <style name="SimplifiedBlank" parent="Theme.AppCompat.Light.NoActionBar">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowContentOverlay">@null</item>
     <item name="android:windowBackground">@drawable/simplified_blank</item>

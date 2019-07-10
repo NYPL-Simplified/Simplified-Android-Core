@@ -21,6 +21,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.files.FileUtilities
+import org.nypl.simplified.http.core.HTTPProblemReport
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -96,9 +97,10 @@ class AudioBookLoadingFragment : Fragment() {
     val fragment = this
     if (this.listener.onLoadingFragmentIsNetworkConnectivityAvailable()) {
       val credentials =
-        Simplified.getProfilesController()
+        Simplified.application.services()
+          .profilesController
           .profileAccountForBook(this.playerParameters.bookID)
-          .loginState()
+          .loginState
           .credentials
 
       if (credentials != null) {
@@ -150,6 +152,7 @@ class AudioBookLoadingFragment : Fragment() {
             download: DownloadType,
             status: Int,
             runningTotal: Long,
+            problemReport: OptionType<HTTPProblemReport>,
             exception: OptionType<Throwable>) {
             fragment.onManifestDownloadFailed(status, exception)
           }
@@ -176,9 +179,10 @@ class AudioBookLoadingFragment : Fragment() {
      */
 
     val handle =
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .profileAccountForBook(this.playerParameters.bookID)
-        .bookDatabase()
+        .bookDatabase
         .entry(this.playerParameters.bookID)
         .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 

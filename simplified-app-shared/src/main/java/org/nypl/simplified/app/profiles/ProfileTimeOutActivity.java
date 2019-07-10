@@ -8,6 +8,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
+import org.nypl.simplified.app.splash.SplashActivity;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.profiles.api.ProfileEvent;
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An activity that handles profile inactivity timeouts. Timeouts are not processed if the
  * anonymous profile is active.
- *
+ * <p>
  * Additionally, the activity checks to see if the profile system has been properly initialized
  * and redirects the user back to the profile selection screen if it hasn't. The reason for this
  * check is due to the awful Android architecture: When an app crashes, the app is restarted with
@@ -55,30 +56,25 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
 
     /*
      * If the profile system appears not to be initialized, then send the user back to the
-     * profile screen.
+     * profile screen. The reason this code is necessary is due to Anroid's horrendous approach
+     * to crash recovery, and will be made obsolete when the application is rewritten to use
+     * a single activity for all screens.
      */
 
-    final ProfilesControllerType profiles = Simplified.getProfilesController();
-    if (!profiles.profileAnyIsCurrent()) {
-      switch (profiles.profileAnonymousEnabled()) {
-        case ANONYMOUS_PROFILE_ENABLED: {
-          LOG.debug("no profile is current and the anonymous profile is enabled");
-          throw new UnreachableCodeException();
-        }
+    boolean booted =
+      Simplified.Companion.getApplication()
+        .getServicesBooting()
+        .isDone();
 
-        /*
-         * If no profile is selected, then we are presumably recovering from a crash
-         * and have been shoved back into the middle of the application without having
-         * gone via the splash screen. Go back to the profile selection screen.
-         */
+    /*
+     * If the application has not booted then we are presumably recovering from a crash
+     * and have been shoved back into the middle of the application without having
+     * gone via the splash screen. Go back to the splash screen!
+     */
 
-        case ANONYMOUS_PROFILE_DISABLED: {
-          LOG.debug("no profile is current, opening selection screen");
-          this.openProfileSelection();
-          this.finish();
-          return;
-        }
-      }
+    if (!booted) {
+      this.openSplashScreen();
+      this.finish();
     }
   }
 
@@ -91,7 +87,9 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
      * profile timeout events.
      */
 
-    final ProfilesControllerType profiles = Simplified.getProfilesController();
+    final ProfilesControllerType profiles =
+      Simplified.getServices().getProfilesController();
+
     switch (profiles.profileAnonymousEnabled()) {
       case ANONYMOUS_PROFILE_ENABLED: {
         break;
@@ -146,7 +144,8 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
     final ProfileTimeOutDialog dialog = this.warn_dialog;
     if (dialog != null) {
       this.warn_dialog = null;
-      dialog.setListener(view -> {});
+      dialog.setListener(view -> {
+      });
       dialog.dismiss();
     }
 
@@ -159,6 +158,16 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
     }
 
     UIThread.runOnUIThreadDelayed(this::finish, 500L);
+  }
+
+  private void openSplashScreen() {
+    LOG.debug("opening splash screen");
+    final Intent intent = new Intent();
+    intent.setClass(this, SplashActivity.class);
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    this.startActivity(intent);
   }
 
   private void openProfileSelection() {
@@ -184,8 +193,9 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
 
   private void resetTimer() {
     LOG.debug("reset profile idle timer");
-    Simplified.getProfilesController()
-        .profileIdleTimer()
-        .reset();
+    Simplified.getServices()
+      .getProfilesController()
+      .profileIdleTimer()
+      .reset();
   }
 }

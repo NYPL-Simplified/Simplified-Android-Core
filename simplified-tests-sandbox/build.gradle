@@ -17,6 +17,7 @@ android {
 
   defaultConfig {
     multiDexEnabled true
+    minSdkVersion androidMinimumSDK
   }
 
   lintOptions {
@@ -32,7 +33,11 @@ android {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-  implementation project(':simplified-app-shared')
+  implementation project(':simplified-books-controller-api')
+  implementation project(':simplified-analytics-api')
+  implementation project(':simplified-accounts-registry-api')
+  implementation project(':simplified-accounts-registry')
+  implementation project(':simplified-accounts-source-filebased')
   implementation project(':simplified-splash')
   implementation project(':simplified-theme')
 

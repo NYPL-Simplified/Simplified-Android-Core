@@ -217,6 +217,27 @@ public final class JSONParserUtilities {
 
   /**
    * @param key A key assumed to be holding a value
+   * @param s   A node
+   * @return An array from key {@code key}, or null if the key is not present
+   * @throws JSONParseException On type errors
+   */
+
+  public static ArrayNode getArrayOrNull(
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(s);
+    NullCheck.notNull(key);
+
+    if (s.has(key)) {
+      return getArray(s, key);
+    }
+    return null;
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
    * @param o   A node
    * @return A boolean value from key {@code key}
    * @throws JSONParseException On type errors
@@ -415,6 +436,27 @@ public final class JSONParserUtilities {
   /**
    * @param key A key assumed to be holding a value
    * @param s   A node
+   * @return An object value from key {@code key}, if the key exists
+   * @throws JSONParseException On type errors
+   */
+
+  public static ObjectNode getObjectOrNull(
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(s);
+    NullCheck.notNull(key);
+
+    if (s.has(key)) {
+      return JSONParserUtilities.getObject(s, key);
+    }
+    return null;
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param s   A node
    * @return A string value from key {@code key}
    * @throws JSONParseException On type errors
    */
@@ -474,6 +516,27 @@ public final class JSONParserUtilities {
       return Option.some(JSONParserUtilities.getInteger(n, key));
     }
     return Option.none();
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param n   A node
+   * @return An integer value from key {@code key}, if the key exists
+   * @throws JSONParseException On type errors
+   */
+
+  public static Integer getIntegerOrNull(
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+    NullCheck.notNull(key);
+
+    if (n.has(key)) {
+      return JSONParserUtilities.getInteger(n, key);
+    }
+    return null;
   }
 
   /**
@@ -584,6 +647,30 @@ public final class JSONParserUtilities {
   /**
    * @param key A key assumed to be holding a value
    * @param n   A node
+   * @return A string value from key {@code key}, if the key exists
+   * @throws JSONParseException On type errors
+   */
+
+  public static String getStringOrNull(
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+    NullCheck.notNull(key);
+
+    if (n.has(key)) {
+      if (n.get(key).isNull()) {
+        return null;
+      }
+      return JSONParserUtilities.getString(n, key);
+    }
+    return null;
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param n   A node
    * @return A string value from key {@code key}, if the key exists, or {@code default_value} otherwise.
    * @throws JSONParseException On type errors
    */
@@ -684,6 +771,29 @@ public final class JSONParserUtilities {
   /**
    * @param key A key assumed to be holding a value
    * @param n   A node
+   * @return A URI value from key {@code key}, if the key exists
+   * @throws JSONParseException On type errors
+   */
+
+  public static URI getURIOrNull(
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+    NullCheck.notNull(key);
+
+    OptionType<URI> opt = getURIOptional(n, key);
+    if (opt.isSome()) {
+      return ((Some<URI>) opt).get();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param n   A node
    * @return A URI value from key {@code key}
    * @throws JSONParseException On type errors
    */
@@ -697,7 +807,7 @@ public final class JSONParserUtilities {
     NullCheck.notNull(key);
 
     try {
-      return new URI(JSONParserUtilities.getString(n, key));
+      return new URI(JSONParserUtilities.getString(n, key).trim());
     } catch (final URISyntaxException e) {
       throw new JSONParseException(e);
     }

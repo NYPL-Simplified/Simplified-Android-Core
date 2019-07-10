@@ -1,5 +1,6 @@
 package org.nypl.simplified.feeds.api
 
+import org.nypl.simplified.http.core.HTTPProblemReport
 import java.lang.Exception
 
 /**
@@ -27,6 +28,7 @@ sealed class FeedLoaderResult {
      */
 
     data class FeedLoaderFailedGeneral(
+      val problemReport: HTTPProblemReport?,
       val exception: Exception)
       : FeedLoaderFailure()
 
@@ -35,6 +37,7 @@ sealed class FeedLoaderResult {
      */
 
     data class FeedLoaderFailedAuthentication(
+      val problemReport: HTTPProblemReport?,
       val exception: Exception)
       : FeedLoaderFailure()
 

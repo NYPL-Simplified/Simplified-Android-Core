@@ -13,6 +13,7 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.books.api.BookID;
 import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection;
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
 import org.nypl.simplified.books.book_registry.BookStatusDownloaded;
 import org.nypl.simplified.books.book_registry.BookStatusDownloadingType;
 import org.nypl.simplified.books.book_registry.BookStatusHeld;
@@ -159,7 +160,8 @@ public final class MainCatalogActivity extends CatalogFeedActivity
   }
 
   private boolean isAwaitingDownload() {
-    for (final BookWithStatus bookWithStatus : Simplified.getBooksRegistry().books().values()) {
+    BookRegistryReadableType bookRegistry = Simplified.getServices().getBookRegistry();
+    for (final BookWithStatus bookWithStatus : bookRegistry.books().values()) {
       if (this.bookStatusIsAwatingDownload(bookWithStatus.status())) {
         return true;
       }
@@ -171,7 +173,11 @@ public final class MainCatalogActivity extends CatalogFeedActivity
   protected void onCreate(Bundle state) {
     super.onCreate(state);
 
-    final boolean connected = Simplified.getNetworkConnectivity().isWifiAvailable();
+    final boolean connected =
+      Simplified.getServices()
+        .getNetworkConnectivity()
+        .isWifiAvailable();
+
     if (connected && this.isAwaitingDownload()) {
       final AlertDialog.Builder builder = new AlertDialog.Builder(this);
       builder.setTitle("Downloads Waiting");
@@ -179,8 +185,8 @@ public final class MainCatalogActivity extends CatalogFeedActivity
         "You have books waiting to be downloaded. Do you want to download them now?");
       builder.setPositiveButton("Download Now", (dialogInterface, i) -> {
         try {
-          final AccountType account = Simplified.getProfilesController().profileAccountCurrent();
-          final SortedMap<BookID, BookWithStatus> books = Simplified.getBooksRegistry().books();
+          final AccountType account = Simplified.getServices().getProfilesController().profileAccountCurrent();
+          final SortedMap<BookID, BookWithStatus> books = Simplified.getServices().getBookRegistry().books();
           for (BookWithStatus bookWithStatus : books.values()) {
             if (this.bookStatusIsAwatingDownload(bookWithStatus.status())) {
               final OPDSAcquisitionFeedEntry entry = bookWithStatus.book().getEntry();
@@ -189,7 +195,8 @@ public final class MainCatalogActivity extends CatalogFeedActivity
                 BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
 
               acquisition.map_((someAcquisition) -> {
-                Simplified.getBooksController()
+                Simplified.getServices()
+                  .getBooksController()
                   .bookBorrow(account, bookWithStatus.book().getId(), someAcquisition, entry);
               });
             }

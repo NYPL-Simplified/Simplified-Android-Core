@@ -70,8 +70,8 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
       ArrayAdapter(
         this.context,
         0,
-        this.parameters.bookmarks.bookmarks.sortedBy {
-          bookmark -> bookmark.bookProgress
+        this.parameters.bookmarks.bookmarks.sortedBy { bookmark ->
+          bookmark.bookProgress
         }.reversed())
 
     this.bookmarksTOCListView.adapter = this
@@ -133,11 +133,13 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     detailTextView.text = this.detailTextFrom(bookmark)
 
     textView.setTextColor(
-      ReaderColorSchemes.foreground(Simplified.getProfilesController()
-        .profileCurrent()
-        .preferences()
-        .readerPreferences()
-        .colorScheme()))
+      ReaderColorSchemes.foreground(
+        Simplified.application.services()
+          .profilesController
+          .profileCurrent()
+          .preferences()
+          .readerPreferences()
+          .colorScheme()))
 
     layoutView.setOnClickListener {
       this.listener.onTOCItemSelected(ReaderSelectedBookmark(bookmark))

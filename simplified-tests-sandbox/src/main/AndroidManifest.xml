@@ -5,9 +5,7 @@
   android:versionCode="1"
   android:versionName="0.0.1">
 
-  <uses-sdk
-    android:minSdkVersion="21"
-    android:targetSdkVersion="27"/>
+  <uses-sdk android:targetSdkVersion="27"/>
 
   <application android:allowBackup="false"
     android:label="SimplifiedSandbox"
@@ -25,6 +23,11 @@
 
     <activity
       android:name="org.nypl.simplified.tests.sandbox.LoginActivity"
+      android:theme="@style/SimplifiedTheme_ActionBar_Blue"
+      android:exported="true"/>
+
+    <activity
+      android:name="org.nypl.simplified.tests.sandbox.SplashActivity"
       android:theme="@style/SimplifiedTheme_ActionBar_Blue"
       android:exported="true"/>
   </application>

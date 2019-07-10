@@ -83,8 +83,8 @@ class CatalogAcquisitionButton(
    */
 
   private fun onClick() {
-    val loginState = this.account.loginState()
-    if (this.account.requiresCredentials() && loginState.credentials == null) {
+    val loginState = this.account.loginState
+    if (this.account.requiresCredentials && loginState.credentials == null) {
       this.tryLogin()
     } else {
       this.tryBorrow()
@@ -113,7 +113,7 @@ class CatalogAcquisitionButton(
 
   private fun onAccountEvent(event: AccountEvent) {
     if (event is AccountEventLoginStateChanged) {
-      if (event.accountID == this.account.id()) {
+      if (event.accountID == this.account.id) {
         return this.configureForState(event.state)
       }
     }
@@ -122,7 +122,7 @@ class CatalogAcquisitionButton(
   private fun configureForState(state: AccountLoginState) {
     UIThread.runOnUIThread {
       when (state) {
-        AccountLoginState.AccountLoggingIn,
+        is AccountLoginState.AccountLoggingIn,
         is AccountLoginState.AccountLoginFailed -> {
 
           /*
@@ -133,7 +133,7 @@ class CatalogAcquisitionButton(
         }
 
         is AccountLoginState.AccountLogoutFailed,
-        AccountLoginState.AccountLoggingOut,
+        is AccountLoginState.AccountLoggingOut,
         AccountLoginState.AccountNotLoggedIn -> {
           LOG.debug("[{}]: user aborted login", this.entry.bookID.brief())
           this.unsubscribe()

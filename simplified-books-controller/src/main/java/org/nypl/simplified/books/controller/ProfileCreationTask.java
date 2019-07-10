@@ -3,8 +3,7 @@ package org.nypl.simplified.books.controller;
 import com.io7m.jfunctional.Option;
 import com.io7m.jnull.NullCheck;
 
-import org.joda.time.LocalDate;
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.observable.ObservableType;
 import org.nypl.simplified.profiles.api.ProfileCreationEvent;
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth;
@@ -26,12 +25,12 @@ final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
   private final String display_name;
   private final String gender;
   private final ProfileDateOfBirth date;
-  private final AccountProvider account_provider;
+  private final AccountProviderType account_provider;
 
   ProfileCreationTask(
       final ProfilesDatabaseType in_profiles,
       final ObservableType<ProfileEvent> in_profile_events,
-      final AccountProvider in_account_provider,
+      final AccountProviderType in_account_provider,
       final String in_display_name,
       final String in_gender,
       final ProfileDateOfBirth in_date) {
@@ -68,7 +67,7 @@ final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
               .setDateOfBirth(this.date)
               .build());
 
-      return ProfileCreationSucceeded.of(this.display_name, profile.id());
+      return ProfileCreationSucceeded.of(this.display_name, profile.getId());
     } catch (final Exception e) {
       return ProfileCreationFailed.of(this.display_name, ERROR_GENERAL, Option.some(e));
     }

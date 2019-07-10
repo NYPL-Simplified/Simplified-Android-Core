@@ -10,6 +10,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
 import org.nypl.simplified.accounts.api.AccountLoginState;
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.books.api.Book;
 import org.nypl.simplified.books.api.BookID;
@@ -77,27 +78,26 @@ final class BookSyncTask implements Callable<Unit> {
   @Override
   public Unit call() throws Exception {
     try {
-      LOG.debug("syncing account {}", this.account.id());
+      LOG.debug("syncing account {}", this.account.getId());
       return execute();
     } finally {
-      LOG.debug("finished syncing account {}", this.account.id());
+      LOG.debug("finished syncing account {}", this.account.getId());
     }
   }
 
   private Unit execute() throws Exception {
-    final OptionType<AccountProviderAuthenticationDescription> provider_auth_opt =
-        this.account.provider().authentication();
+    final AccountProviderType provider =
+      this.account.getProvider();
+    final AccountProviderAuthenticationDescription provider_auth =
+        provider.getAuthentication();
 
-    if (!provider_auth_opt.isSome()) {
+    if (provider_auth == null) {
       LOG.debug("account does not support syncing");
       return Unit.unit();
     }
 
-    final AccountProviderAuthenticationDescription provider_auth =
-        ((Some<AccountProviderAuthenticationDescription>) provider_auth_opt).get();
-
     final AccountAuthenticationCredentials credentials =
-      this.account.loginState().getCredentials();
+      this.account.getLoginState().getCredentials();
 
     if (credentials == null) {
       LOG.debug("no credentials, aborting!");
@@ -108,13 +108,13 @@ final class BookSyncTask implements Callable<Unit> {
         AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials);
 
     final HTTPResultType<InputStream> result =
-        this.http.get(Option.some(auth), provider_auth.loginURI(), 0L);
+        this.http.get(Option.some(auth), provider.getLoansURI(), 0L);
 
     return result.matchResult(
         new HTTPResultMatcherType<InputStream, Unit, Exception>() {
           @Override
           public Unit onHTTPError(final HTTPResultError<InputStream> e) throws Exception {
-            return BookSyncTask.this.onHTTPError(e, provider_auth);
+            return BookSyncTask.this.onHTTPError(e, provider);
           }
 
           @Override
@@ -124,16 +124,17 @@ final class BookSyncTask implements Callable<Unit> {
 
           @Override
           public Unit onHTTPOK(final HTTPResultOKType<InputStream> e) throws Exception {
-            return BookSyncTask.this.onHTTPOK(e, provider_auth);
+            return BookSyncTask.this.onHTTPOK(e, provider, provider_auth);
           }
         });
   }
 
   private Unit onHTTPOK(
       final HTTPResultOKType<InputStream> result,
+      final AccountProviderType provider,
       final AccountProviderAuthenticationDescription provider_auth) throws IOException {
     try {
-      parseFeed(result, provider_auth);
+      parseFeed(result, provider, provider_auth);
       return Unit.unit();
     } finally {
       result.close();
@@ -142,11 +143,12 @@ final class BookSyncTask implements Callable<Unit> {
 
   private void parseFeed(
       final HTTPResultOKType<InputStream> result,
+      final AccountProviderType provider,
       final AccountProviderAuthenticationDescription provider_auth)
       throws OPDSParseException {
 
     final OPDSAcquisitionFeed feed =
-        this.feed_parser.parse(provider_auth.loginURI(), result.getValue());
+        this.feed_parser.parse(provider.getLoansURI(), result.getValue());
 
     /*
      * Obtain the set of books that are on disk already. If any
@@ -154,7 +156,7 @@ final class BookSyncTask implements Callable<Unit> {
      * expired and should be deleted.
      */
 
-    final BookDatabaseType book_database = this.account.bookDatabase();
+    final BookDatabaseType book_database = this.account.getBookDatabase();
     final Set<BookID> existing = book_database.books();
 
     /*
@@ -218,8 +220,8 @@ final class BookSyncTask implements Callable<Unit> {
   }
 
   private Unit onHTTPError(
-      final HTTPResultError<InputStream> result,
-      final AccountProviderAuthenticationDescription provider_auth) throws Exception {
+    final HTTPResultError<InputStream> result,
+    final AccountProviderType provider) throws Exception {
 
     if (result.getStatus() == HttpURLConnection.HTTP_UNAUTHORIZED) {
       LOG.debug("removing credentials due to 401 server response");
@@ -228,6 +230,6 @@ final class BookSyncTask implements Callable<Unit> {
     }
 
     throw new IOException(String.format(
-      "%s: %d: %s", provider_auth.loginURI(), result.getStatus(), result.getMessage()));
+      "%s: %d: %s", provider.getLoansURI(), result.getStatus(), result.getMessage()));
   }
 }

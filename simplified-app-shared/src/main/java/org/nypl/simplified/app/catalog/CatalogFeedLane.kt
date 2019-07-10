@@ -42,7 +42,7 @@ class CatalogFeedLane(
   private val inflater: LayoutInflater
 
   init {
-    this.orientation = LinearLayout.VERTICAL
+    this.orientation = VERTICAL
 
     this.inflater = this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     this.inflater.inflate(R.layout.catalog_feed_groups_lane, this, true)
@@ -148,7 +148,7 @@ class CatalogFeedLane(
 
     val imageView = ImageView(this.context)
     val imageWidth = (this.imageHeight.toDouble() / 4.0 * 3.0).toInt()
-    val layoutParams = LinearLayout.LayoutParams(imageWidth, this.imageHeight)
+    val layoutParams = LayoutParams(imageWidth, this.imageHeight)
     layoutParams.setMargins(0, 0, this.screen.screenDPToPixels(8).toInt(), 0)
 
     imageView.layoutParams = layoutParams

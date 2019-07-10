@@ -1,8 +1,16 @@
 package org.nypl.simplified.accounts.database.api
 
 import android.content.Context
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
 import org.nypl.simplified.observable.ObservableType
 import java.io.File
+
+/**
+ * The type of factories that provide account databases.
+ */
 
 interface AccountsDatabaseFactoryType {
 
@@ -20,11 +28,11 @@ interface AccountsDatabaseFactoryType {
 
   @Throws(AccountsDatabaseException::class)
   fun openDatabase(
+    accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
+    accountEvents: ObservableType<AccountEvent>,
+    accountProviders: AccountProviderRegistryType,
+    bookDatabases: BookDatabaseFactoryType,
     context: Context,
-    accountEvents: ObservableType<org.nypl.simplified.accounts.api.AccountEvent>,
-    bookDatabases: org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType,
-    accountProviders: org.nypl.simplified.accounts.api.AccountProviderCollectionType,
-    accountAuthenticationCredentialsStore: org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType,
     directory: File): AccountsDatabaseType
 
   /**
@@ -40,9 +48,9 @@ interface AccountsDatabaseFactoryType {
 
   @Throws(AccountsDatabaseException::class)
   fun openDatabase(
+    accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
+    accountEvents: ObservableType<AccountEvent>,
+    accountProviders: AccountProviderRegistryType,
     context: Context,
-    accountEvents: ObservableType<org.nypl.simplified.accounts.api.AccountEvent>,
-    accountProviders: org.nypl.simplified.accounts.api.AccountProviderCollectionType,
-    accountAuthenticationCredentialsStore: org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType,
     directory: File): AccountsDatabaseType
 }

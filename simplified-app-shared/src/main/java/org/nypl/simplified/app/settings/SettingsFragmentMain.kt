@@ -69,7 +69,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private fun configureLicenses(licenses: Preference) {
     val docLicensesOpt = this.listener.documents().licenses
-    if (docLicensesOpt is Some<org.nypl.simplified.documents.synced.SyncedDocumentType>) {
+    if (docLicensesOpt is Some<SyncedDocumentType>) {
       val docLicenses = docLicensesOpt.get()
       licenses.intent = this.showLicense(docLicenses)
     } else {
@@ -110,7 +110,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       title = this.resources.getString(R.string.settings_about))
   }
 
-  private fun showLicense(docLicenses: org.nypl.simplified.documents.synced.SyncedDocumentType): Intent {
+  private fun showLicense(docLicenses: SyncedDocumentType): Intent {
     return this.webViewIntent(
       uri = docLicenses.documentGetReadableURL().toString(),
       title = this.resources.getString(R.string.settings_licence_software))

@@ -1,20 +1,22 @@
 [
   {
-    "id_uuid" : "https://instantclassics.librarysimplified.org",
-    "name" : "SimplyE Collection",
-    "subtitle" : "E-books free to download and read without a library card",
-    "logo" : "data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=",
-    "needsAuth" : false,
-    "supportsSimplyESync" : false,
-    "supportsBarcodeScanner" : false,
-    "supportsBarcodeDisplay" : false,
-    "supportsCardCreator" : false,
-    "supportsReservations" : false,
-    "supportsHelpCenter" : false,
-    "catalogUrl" : "https://instantclassics.librarysimplified.org/index.xml",
-    "catalogUrlUnder13": "https://instantclassics.librarysimplified.org/childrens-books.xml",
-    "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
-    "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
-    "mainColor": "#497049"
+    "@version": "20190708",
+    "addAutomatically": false,
+    "displayName": "The SimplyE Collection",
+    "idNumeric": 2,
+    "idUUID": "urn:uuid:56906f26-2c9a-4ae9-bd02-552557720b99",
+    "isProduction": true,
+    "mainColor": "teal",
+    "supportsReservations": false,
+    "updated": "2000-01-01T00:00:00.000Z",
+    "catalogURI": "https://circulation.librarysimplified.org/CLASSICS/",
+    "license": "http://www.librarysimplified.org/iclicenses.html",
+    "subtitle": "A selection of classics and modern material available to anyone, with no library card necessary.",
+    "supportEmail": "ask@nypl.org",
+    "authentication": {
+      "type": "http://librarysimplified.org/terms/authentication/gate/coppa",
+      "greaterEqual13": "http://simplye-collection-redirects.librarysimplified.org/all-books.xml",
+      "under13": "http://simplye-collection-redirects.librarysimplified.org/childrens-books.xml"
+    }
   }
 ]

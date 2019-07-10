@@ -1,0 +1,13 @@
+{
+  "simplified:authorization_identifier": "6120696828384",
+  "drm": [
+    {
+      "drm:vendor": "NYPL",
+      "drm:scheme": "http://librarysimplified.org/terms/drm/scheme/AntiConsumerSystem"
+    }
+  ],
+  "simplified:authorization_expires": "2019-08-02T00:00:00Z",
+  "settings": {
+    "simplified:synchronize_annotations": true
+  }
+}

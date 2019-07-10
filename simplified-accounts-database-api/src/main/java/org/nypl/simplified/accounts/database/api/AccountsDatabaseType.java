@@ -1,7 +1,7 @@
 package org.nypl.simplified.accounts.database.api;
 
 import org.nypl.simplified.accounts.api.AccountID;
-import org.nypl.simplified.accounts.api.AccountProvider;
+import org.nypl.simplified.accounts.api.AccountProviderType;
 
 import java.io.File;
 import java.net.URI;
@@ -44,7 +44,7 @@ public interface AccountsDatabaseType {
    */
 
   AccountType createAccount(
-    AccountProvider account_provider)
+    AccountProviderType account_provider)
     throws AccountsDatabaseException;
 
   /**
@@ -52,12 +52,12 @@ public interface AccountsDatabaseType {
    * exists with the given provider, or if deleting the account would leave the accounts
    * database empty.
    *
-   * @param account_provider The account provider for the account
+   * @param account_provider The ID of the account provider for the account
    * @return The ID of the account that was deleted
    * @throws AccountsDatabaseException On account deletion errors
    */
 
   AccountID deleteAccountByProvider(
-    AccountProvider account_provider)
+    URI account_provider)
     throws AccountsDatabaseException;
 }

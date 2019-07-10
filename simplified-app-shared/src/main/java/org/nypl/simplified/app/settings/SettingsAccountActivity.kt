@@ -26,8 +26,6 @@ import android.widget.Toast
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.junreachable.UnimplementedCodeException
-import com.tenmiles.helpstack.HSHelpStack
-import com.tenmiles.helpstack.gears.HSDeskGear
 import org.joda.time.LocalDate
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
@@ -41,13 +39,13 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ReportIssueActivity
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.WebViewActivity
-import org.nypl.simplified.app.login.LoginErrorCodeStrings
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.documents.eula.EULAType
@@ -57,7 +55,6 @@ import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.slf4j.LoggerFactory
-import java.net.URI
 
 /**
  * An activity displaying settings for a specific account.
@@ -129,11 +126,11 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     if (item.itemId == R.id.show_eula) {
       val eulaIntent = Intent(this, WebViewActivity::class.java)
-      this.account.provider().eula().map_ { eula_uri ->
+      this.account.provider.eula?.let { eula ->
         val argumentBundle = Bundle()
         WebViewActivity.setActivityArguments(
           arguments = argumentBundle,
-          uri = eula_uri.toString(),
+          uri = eula.toString(),
           title = this.resources.getString(R.string.settings_eula))
         eulaIntent.putExtras(argumentBundle)
         this.startActivity(eulaIntent)
@@ -164,8 +161,11 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     contentArea.requestLayout()
 
     val extras = this.intent.extras
-    this.profile = Simplified.getProfilesController().profileCurrent()
-    this.account = org.nypl.simplified.app.settings.SettingsAccountActivity.Companion.getAccount(extras)
+    this.profile =
+      Simplified.application.services()
+        .profilesController
+        .profileCurrent()
+    this.account = getAccount(extras)
 
     this.accountNameText =
       this.findViewById(android.R.id.text1)
@@ -212,12 +212,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     this.actionProgress =
       this.actionLayout.findViewById(R.id.settings_action_progress)
 
-    val accountProvider = this.account.provider()
-    this.accountNameText.text = accountProvider.displayName()
+    val accountProvider = this.account.provider
+    this.accountNameText.text = accountProvider.displayName
 
-    val subtitleOpt = accountProvider.subtitle()
-    if (subtitleOpt is Some<String>) {
-      this.accountSubtitleText.text = subtitleOpt.get()
+    val subtitle = accountProvider.subtitle
+    if (subtitle != null) {
+      this.accountSubtitleText.text = subtitle
     } else {
       this.accountSubtitleText.text = ""
     }
@@ -226,12 +226,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Show the "Support Center" section if the provider offers one.
      */
 
-    if (accountProvider.supportEmail().isSome) {
+    if (accountProvider.supportEmail != null) {
       this.reportIssue.visibility = View.VISIBLE
       this.reportIssue.setOnClickListener {
         val intent = Intent(this, ReportIssueActivity::class.java)
         val argumentBundle = Bundle()
-        argumentBundle.putSerializable("selected_account", this.account.id().uuid.toString())
+        argumentBundle.putSerializable("selected_account", this.account.id.uuid.toString())
         intent.putExtras(argumentBundle)
         this.startActivity(intent)
       }
@@ -240,26 +240,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     }
 
     /*
-     * Show the "Help Center" section if the provider offers one.
-     */
-
-    if (accountProvider.supportsHelpCenter()) {
-      this.supportCenter.visibility = View.VISIBLE
-      this.supportCenter.setOnClickListener {
-        val stack = HSHelpStack.getInstance(this)
-        val gear = HSDeskGear(" ", " ", null)
-        stack.gear = gear
-        stack.showHelp(this)
-      }
-    } else {
-      this.supportCenter.visibility = View.GONE
-    }
-
-    /*
      * Show the "Card Creator" section if the provider supports it.
      */
 
-    if (accountProvider.supportsCardCreator()) {
+    if (accountProvider.cardCreatorURI != null) {
       this.tableSignup.visibility = View.VISIBLE
       this.signup.setOnClickListener {
         throw UnimplementedCodeException()
@@ -274,17 +258,14 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * provider doesn't support/require authentication.
      */
 
-    // Get labels from the current authentication document.
+    // https://jira.nypl.org/browse/SIMPLY-2106
+    // XXX: Get labels from the current authentication document.
     // XXX: This should be per-account
-    val docs = Simplified.getDocumentStore()
-    val auth_doc = docs.authenticationDocument
-    this.barcodeLabel.text = auth_doc.labelLoginUserID
-    this.pinLabel.text = auth_doc.labelLoginPassword
-
+    val docs = Simplified.application.services().documentStore
     this.pinText.transformationMethod = PasswordTransformationMethod.getInstance()
     this.handlePinReveal(this.pinText, this.pinReveal)
 
-    if (accountProvider.authentication().isSome) {
+    if (accountProvider.authentication != null) {
       this.tableWithCode.visibility = View.VISIBLE
       this.login.visibility = View.VISIBLE
       this.configureLoginFieldVisibilityAndContents()
@@ -297,15 +278,15 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Show the "Privacy Policy" section if the provider has one.
      */
 
-    val privacyPolicy = accountProvider.privacyPolicy()
-    if (privacyPolicy is Some<URI>) {
+    val privacyPolicy = accountProvider.privacyPolicy
+    if (privacyPolicy != null) {
       this.privacy.visibility = View.VISIBLE
       this.privacy.setOnClickListener {
         val intent = Intent(this, WebViewActivity::class.java)
         val intentBundle = Bundle()
         WebViewActivity.setActivityArguments(
           intentBundle,
-          privacyPolicy.get().toString(),
+          privacyPolicy.toString(),
           "Privacy Policy")
         intent.putExtras(intentBundle)
         this.startActivity(intent)
@@ -318,15 +299,15 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Show the "Content License" section if the provider has one.
      */
 
-    val license = accountProvider.license()
-    if (license is Some<URI>) {
+    val license = accountProvider.license
+    if (license != null) {
       this.license.visibility = View.VISIBLE
       this.license.setOnClickListener {
         val intent = Intent(this, WebViewActivity::class.java)
         val intentBundle = Bundle()
         WebViewActivity.setActivityArguments(
           intentBundle,
-          license.get().toString(),
+          license.toString(),
           "Content Licenses")
         intent.putExtras(intentBundle)
         this.startActivity(intent)
@@ -366,12 +347,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Configure the syncing switch.
      */
 
-    if (accountProvider.supportsSimplyESynchronization()) {
+    if (accountProvider.supportsSimplyESynchronization) {
       this.syncSwitch.isEnabled = true
-      this.syncSwitch.isChecked = this.account.preferences().bookmarkSyncingPermitted
+      this.syncSwitch.isChecked = this.account.preferences.bookmarkSyncingPermitted
       this.syncSwitch.setOnCheckedChangeListener { _, isEnabled ->
         this.account.setPreferences(
-          this.account.preferences().copy(bookmarkSyncingPermitted = isEnabled))
+          this.account.preferences.copy(bookmarkSyncingPermitted = isEnabled))
       }
     } else {
       this.syncSwitch.isEnabled = false
@@ -382,10 +363,11 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Configure the logo.
      */
 
-    val logo = accountProvider.logo()
-    if (logo is Some<URI>) {
-      Simplified.getLocalImageLoader()
-        .load(logo.get().toString())
+    val logo = accountProvider.logo
+    if (logo != null) {
+      Simplified.application.services()
+        .imageLoader
+        .load(logo.toString())
         .into(this.accountIcon)
     }
   }
@@ -396,7 +378,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     this.navigationDrawerShowUpIndicatorUnconditionally()
 
     this.accountEventSubscription =
-      Simplified.getProfilesController()
+      Simplified.application.services()
+        .profilesController
         .accountEvents()
         .subscribe { event -> this.onAccountEvent(event) }
 
@@ -411,20 +394,20 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   private fun onAccountEvent(event: AccountEvent): Unit {
     return if (event is AccountEventLoginStateChanged) {
-      if (event.accountID != this.account.id()) {
+      if (event.accountID != this.account.id) {
         return Unit.unit()
       }
 
       when (val state = event.state) {
         AccountNotLoggedIn ->
           this.onAccountEventNotLoggedIn()
-        AccountLoggingIn ->
+        is AccountLoggingIn ->
           this.onAccountEventLoggingIn()
         is AccountLoginFailed ->
           this.onAccountEventLoginFailed(state)
         is AccountLoggedIn ->
           this.onAccountEventLoginSucceeded()
-        AccountLoggingOut ->
+        is AccountLoggingOut ->
           this.onAccountEventLoggingOut()
         is AccountLogoutFailed ->
           this.onAccountEventLogoutFailed(state)
@@ -440,8 +423,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      LoginErrorCodeStrings.stringOfLoginError(this.resources, failed.errorCode), null)
-    { this.login.isEnabled = true }
+      failed.steps.lastOrNull()?.resolution,
+      failed.steps.lastOrNull()?.exception) {
+      this.login.isEnabled = true
+    }
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
@@ -467,8 +452,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      this.resources.getString(R.string.settings_logout_failed), null
-    ) { this.login.isEnabled = true }
+      failed.steps.lastOrNull()?.resolution,
+      failed.steps.lastOrNull()?.exception) {
+      this.login.isEnabled = true
+    }
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
@@ -498,13 +485,17 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       isSynthesized = true)
 
   private fun configureLoginFieldVisibilityAndContents() {
-    val state = this.account.loginState()
+    val state = this.account.loginState
 
-    val ageGateRequired =
-      this.account.provider().hasAgeGate()
+    val ageGateAuth =
+      when (val auth = account.provider.authentication) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate -> auth
+      is AccountProviderAuthenticationDescription.Basic -> null
+      null -> null
+    }
 
     this.ageCheckbox.visibility =
-      if (ageGateRequired) {
+      if (ageGateAuth != null) {
         View.VISIBLE
       } else {
         View.INVISIBLE
@@ -544,19 +535,19 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         }
       }
 
-      AccountLoggingOut -> {
+      is AccountLoggingOut -> {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.VISIBLE
-        this.actionText.setText(R.string.settings_logout_in_progress)
+        this.actionText.text = state.status
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = false
         this.configureDisableLoginForm()
       }
 
-      AccountLoggingIn -> {
+      is AccountLoggingIn -> {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.VISIBLE
-        this.actionText.setText(R.string.settings_login_in_progress)
+        this.actionText.text = state.status
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = false
         this.configureDisableLoginForm()
@@ -564,8 +555,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
       is AccountLoginFailed -> {
         this.actionLayout.visibility = View.VISIBLE
-        this.actionProgress.visibility = View.INVISIBLE
-        this.actionText.setText(R.string.settings_login_failed)
+        this.actionProgress.visibility = View.GONE
+        this.actionText.text = state.steps.last().resolution
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = true
         this.ageCheckbox.setOnClickListener {}
@@ -573,9 +564,15 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       }
 
       is AccountLogoutFailed -> {
+        this.pinText.setText(state.credentials.pin().value())
+        this.pinText.isEnabled = false
+
+        this.barcodeText.setText(state.credentials.barcode().value())
+        this.barcodeText.isEnabled = false
+
         this.actionLayout.visibility = View.VISIBLE
-        this.actionProgress.visibility = View.INVISIBLE
-        this.actionText.setText(R.string.settings_logout_failed)
+        this.actionProgress.visibility = View.GONE
+        this.actionText.text = state.steps.last().resolution
 
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = true
@@ -621,7 +618,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   }
 
   private fun setUnder13() {
-    Simplified.getProfilesController()
+    Simplified.application.services()
+      .profilesController
       .profilePreferencesUpdate(
         this.profile.preferences()
           .toBuilder()
@@ -630,7 +628,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   }
 
   private fun setOver13() {
-    Simplified.getProfilesController()
+    Simplified.application.services()
+      .profilesController
       .profilePreferencesUpdate(
         this.profile.preferences()
           .toBuilder()
@@ -666,11 +665,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   }
 
   private fun tryLogout(): Unit {
-    Simplified.getProfilesController()
-      .profileAccountLogout(this.account.id())
-      .onException(Exception::class.java) { exception : Exception ->
+    Simplified.application.services()
+      .profilesController
+      .profileAccountLogout(this.account.id)
+      .onException(Exception::class.java) { exception: Exception ->
         this.logger.error("error during logout: ", exception)
-        Unit.unit()
+        null
       }
 
     return Unit.unit()
@@ -683,11 +683,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         AccountBarcode.create(this.barcodeText.text.toString()))
         .build()
 
-    Simplified.getProfilesController()
-      .profileAccountLogin(this.account.id(), credentials)
+    Simplified.application.services()
+      .profilesController
+      .profileAccountLogin(this.account.id, credentials)
       .onException(Exception::class.java) { exception ->
         this.logger.error("error during login: ", exception)
-        Unit.unit()
+        null
       }
     return Unit.unit()
   }
@@ -738,7 +739,11 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
     private fun getAccount(extras: Bundle?): AccountType {
       return try {
-        val profile = Simplified.getProfilesController().profileCurrent()
+        val profile =
+          Simplified.application.services()
+            .profilesController
+            .profileCurrent()
+
         if (extras != null && extras.containsKey(this.ACCOUNT_ID)) {
           val accountID = extras.getSerializable(this.ACCOUNT_ID) as AccountID
           profile.accounts()[accountID]!!
