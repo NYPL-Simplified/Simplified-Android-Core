@@ -143,9 +143,11 @@ class SplashFragment : Fragment() {
   private fun configureViewsForEULA(eula: EULAType) {
     this.viewsForEULA.eulaAgree.setOnClickListener {
       eula.eulaSetHasAgreed(true)
+      this.onFinishEULASuccessfully()
     }
     this.viewsForEULA.eulaDisagree.setOnClickListener {
       eula.eulaSetHasAgreed(false)
+      this.activity?.finish()
     }
 
     val url = eula.documentGetReadableURL()
@@ -177,6 +179,9 @@ class SplashFragment : Fragment() {
         this@SplashFragment.logger.error("onReceivedError: {}", error)
       }
     }
+
+    this.viewsForImage.container.visibility = View.INVISIBLE
+    this.viewsForEULA.container.visibility = View.VISIBLE
   }
 
   override fun onStart() {
