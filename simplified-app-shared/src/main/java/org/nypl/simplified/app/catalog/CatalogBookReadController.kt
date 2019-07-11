@@ -11,6 +11,8 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.pdf.PdfReaderActivity
+import org.nypl.simplified.app.pdf.PdfReaderParameters
 import org.nypl.simplified.app.player.AudioBookPlayerActivity
 import org.nypl.simplified.app.player.AudioBookPlayerParameters
 import org.nypl.simplified.app.reader.ReaderActivity
@@ -59,12 +61,23 @@ class CatalogBookReadController(
     }
   }
 
+  /**
+   * Launches PDF Reader
+   *
+   * @param book
+   * @param format
+   */
   private fun launchPDFReader(book: Book, format: BookFormatPDF) {
-    ErrorDialogUtilities.showError(
-      this.activity,
-      LOG,
-      "PDF support is not yet implemented",
-      null)
+    if (format.isDownloaded && format.file != null) {
+      this.sendAnalytics(book)
+      PdfReaderActivity.startActivity(this.activity, PdfReaderParameters(book.entry.title, format.file!!, 0))
+    } else {
+      ErrorDialogUtilities.showError(
+              this.activity,
+              LOG,
+              "Bug: book claimed to be downloaded but no book file exists in storage",
+              null)
+    }
   }
 
   private fun <T> orElseNull(x: OptionType<T>): T? {
