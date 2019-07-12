@@ -14,6 +14,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.database.AccountsDatabase
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseDuplicateProviderException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.files.DirectoryUtilities
@@ -266,6 +267,33 @@ abstract class AccountsDatabaseContract {
 
     Assert.assertEquals(AccountLoginState.AccountNotLoggedIn, acc0.loginState)
     Assert.assertEquals(AccountLoginState.AccountNotLoggedIn, acc1.loginState)
+  }
+
+  @Test
+  @Throws(Exception::class)
+  fun testCreateAccountProviderAlreadyUsed() {
+
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
+    fileProfiles.mkdirs()
+    val f_p = File(fileProfiles, "0")
+    f_p.mkdirs()
+    val f_acc = File(f_p, "accounts")
+
+    val db =
+      AccountsDatabase.open(
+      this.context(),
+      this.accountEvents!!,
+      this.bookDatabases(),
+      this.credentialStore!!,
+      f_acc)
+
+    val provider0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+
+    val acc0 = db.createAccount(provider0)
+    this.expected.expect(AccountsDatabaseDuplicateProviderException::class.java)
+    val acc1 = db.createAccount(provider0)
   }
 
   @Test

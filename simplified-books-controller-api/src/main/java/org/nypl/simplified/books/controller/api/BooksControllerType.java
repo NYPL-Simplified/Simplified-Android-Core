@@ -5,11 +5,12 @@ import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.books.api.BookID;
-import org.nypl.simplified.books.book_registry.BookStatusDownloadResult;
-import org.nypl.simplified.books.book_registry.BookStatusRevokeResult;
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails;
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails;
 import org.nypl.simplified.feeds.api.FeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.taskrecorder.api.TaskResult;
 
 /**
  * The books controller.
@@ -26,7 +27,7 @@ public interface BooksControllerType {
    * @param entry       The OPDS feed entry for the book
    */
 
-  FluentFuture<BookStatusDownloadResult> bookBorrow(
+  FluentFuture<TaskResult<BookStatusDownloadErrorDetails, kotlin.Unit>> bookBorrow(
     AccountType account,
     BookID id,
     OPDSAcquisition acquisition,
@@ -83,7 +84,7 @@ public interface BooksControllerType {
    * @param book_id The ID of the book
    */
 
-  FluentFuture<BookStatusRevokeResult> bookRevoke(
+  FluentFuture<TaskResult<BookStatusRevokeErrorDetails, kotlin.Unit>> bookRevoke(
     AccountType account,
     BookID book_id);
 

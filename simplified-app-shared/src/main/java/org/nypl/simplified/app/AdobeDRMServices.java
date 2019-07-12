@@ -33,6 +33,7 @@ import org.nypl.drm.core.AdobeAdeptResourceProvider;
 import org.nypl.drm.core.AdobeAdeptResourceProviderType;
 import org.nypl.drm.core.DRMException;
 import org.nypl.drm.core.DRMUnsupportedException;
+import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +49,10 @@ import java.security.NoSuchAlgorithmException;
  * Functions to initialize and control Adobe DRM.
  */
 
-public final class AdobeDRMServices
-{
+public final class AdobeDRMServices {
   private static final Logger LOG = LoggerFactory.getLogger(AdobeDRMServices.class);
 
-  private AdobeDRMServices()
-  {
+  private AdobeDRMServices() {
     throw new UnreachableCodeException();
   }
 
@@ -62,12 +61,10 @@ public final class AdobeDRMServices
    * it if so.
    *
    * @param r Application resources
-   *
    * @return The package name override, if any
    */
 
-  public static OptionType<String> getPackageOverride(final Resources r)
-  {
+  public static OptionType<String> getPackageOverride(final Resources r) {
     final String override_raw =
       r.getString(R.string.feature_adobe_package_override);
     final OptionType<String> no_override = Option.none();
@@ -86,8 +83,7 @@ public final class AdobeDRMServices
    * @return A serial number unique to this device.
    */
 
-  public static String getDeviceSerial()
-  {
+  public static String getDeviceSerial() {
     try {
       final MessageDigest md = MessageDigest.getInstance("SHA-256");
       md.update(Build.SERIAL.getBytes());
@@ -109,7 +105,7 @@ public final class AdobeDRMServices
 
   /**
    * Attempt to load an Adobe DRM content filter implementation.
-   *
+   * <p>
    * The implementation checks the certificate for compatibility with the
    * package name given in the current Android manifest. However, the package
    * name can be overridden by passing {@code Some(p)} for {@code
@@ -119,17 +115,14 @@ public final class AdobeDRMServices
    *
    * @param context          Application context
    * @param package_name_opt An optional package name override
-   *
    * @return A DRM content filter
-   *
    * @throws DRMException If DRM is unavailable or cannot be initialized.
    */
 
   public static AdobeAdeptContentFilterType newAdobeContentFilter(
     final Context context,
     final OptionType<String> package_name_opt)
-    throws DRMException
-  {
+    throws DRMException, IOException {
     NullCheck.notNull(context);
     NullCheck.notNull(package_name_opt);
 
@@ -140,16 +133,24 @@ public final class AdobeDRMServices
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-    final File baseDirectory =
+    final File baseDir =
       context.getFilesDir();
+    final File baseDirVersioned =
+      new File(baseDir, "4.0");
+    final File baseDirVersionedAdobe =
+      new File(baseDirVersioned, "adobe");
     final File app_storage =
-      new File(baseDirectory, "app");
+      new File(baseDirVersionedAdobe, "app");
     final File xml_storage =
-      new File(baseDirectory,"xml");
+      new File(baseDirVersionedAdobe, "xml");
     final File book_storage =
-      new File(baseDirectory, "adobe-books-tmp");
+      new File(baseDirVersionedAdobe, "books-tmp");
     final File temp_storage =
-      new File(baseDirectory, "adobe-tmp");
+      new File(baseDirVersionedAdobe, "tmp");
+
+    DirectoryUtilities.directoryCreate(baseDir);
+    DirectoryUtilities.directoryCreate(baseDirVersioned);
+    DirectoryUtilities.directoryCreate(baseDirVersionedAdobe);
 
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);
@@ -200,7 +201,7 @@ public final class AdobeDRMServices
 
   /**
    * Attempt to load an Adobe DRM implementation.
-   *
+   * <p>
    * The implementation checks the certificate for compatibility with the
    * package name given in the current Android manifest. However, the package
    * name can be overridden by passing {@code Some(p)} for {@code
@@ -210,17 +211,14 @@ public final class AdobeDRMServices
    *
    * @param context          Application context
    * @param package_name_opt An optional package name override
-   *
    * @return A DRM implementation
-   *
    * @throws DRMException If DRM is unavailable or cannot be initialized.
    */
 
   public static AdobeAdeptExecutorType newAdobeDRM(
     final Context context,
     final OptionType<String> package_name_opt)
-    throws DRMException
-  {
+    throws DRMException, IOException {
     NullCheck.notNull(context);
     NullCheck.notNull(package_name_opt);
 
@@ -231,16 +229,24 @@ public final class AdobeDRMServices
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-    final File baseDirectory =
+    final File baseDir =
       context.getFilesDir();
+    final File baseDirVersioned =
+      new File(baseDir, "4.0");
+    final File baseDirVersionedAdobe =
+      new File(baseDirVersioned, "adobe");
     final File app_storage =
-      new File(baseDirectory, "app");
+      new File(baseDirVersionedAdobe, "app");
     final File xml_storage =
-      new File(baseDirectory,"xml");
+      new File(baseDirVersionedAdobe, "xml");
     final File book_storage =
-      new File(baseDirectory, "adobe-books-tmp");
+      new File(baseDirVersionedAdobe, "books-tmp");
     final File temp_storage =
-      new File(baseDirectory, "adobe-tmp");
+      new File(baseDirVersionedAdobe, "tmp");
+
+    DirectoryUtilities.directoryCreate(baseDir);
+    DirectoryUtilities.directoryCreate(baseDirVersioned);
+    DirectoryUtilities.directoryCreate(baseDirVersionedAdobe);
 
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);
@@ -301,7 +307,7 @@ public final class AdobeDRMServices
 
   /**
    * Attempt to load an Adobe DRM implementation.
-   *
+   * <p>
    * The implementation checks the certificate for compatibility with the
    * package name given in the current Android manifest. However, the package
    * name can be overridden by passing {@code Some(p)} for {@code
@@ -311,17 +317,15 @@ public final class AdobeDRMServices
    *
    * @param context          Application context
    * @param package_name_opt An optional package name override
-   *
    * @return A DRM implementation, if any are available
    */
 
   public static OptionType<AdobeAdeptExecutorType> newAdobeDRMOptional(
     final Context context,
-    final OptionType<String> package_name_opt)
-  {
+    final OptionType<String> package_name_opt) {
     try {
       return Option.some(AdobeDRMServices.newAdobeDRM(context, package_name_opt));
-    } catch (final DRMException e) {
+    } catch (final DRMException | IOException e) {
       AdobeDRMServices.LOG.error("DRM is not supported: ", e);
       return Option.none();
     }
@@ -329,7 +333,7 @@ public final class AdobeDRMServices
 
   /**
    * Attempt to load an Adobe DRM implementation.
-   *
+   * <p>
    * The implementation checks the certificate for compatibility with the
    * package name given in the current Android manifest. However, the package
    * name can be overridden by passing {@code Some(p)} for {@code
@@ -339,17 +343,15 @@ public final class AdobeDRMServices
    *
    * @param context          Application context
    * @param package_name_opt An optional package name override
-   *
    * @return A DRM implementation, if any are available
    */
 
   public static AdobeAdeptExecutorType newAdobeDRMOrNull(
     final Context context,
-    final OptionType<String> package_name_opt)
-  {
+    final OptionType<String> package_name_opt) {
     try {
       return AdobeDRMServices.newAdobeDRM(context, package_name_opt);
-    } catch (final DRMException e) {
+    } catch (final DRMException | IOException e) {
       AdobeDRMServices.LOG.error("DRM is not supported: ", e);
       return null;
     }
@@ -360,9 +362,7 @@ public final class AdobeDRMServices
    *
    * @param assets       The assets
    * @param package_name The current package name
-   *
    * @return A certificate
-   *
    * @throws DRMUnsupportedException If the certificate is missing,
    *                                 inaccessible, or does not appear to be
    *                                 compatible with the current application
@@ -371,8 +371,7 @@ public final class AdobeDRMServices
   private static byte[] getCertificateAsset(
     final AssetManager assets,
     final String package_name)
-    throws DRMUnsupportedException
-  {
+    throws DRMUnsupportedException {
     return AdobeDRMServices.checkCertificateValidity(
       package_name, AdobeDRMServices.readCertificateBytes(assets));
   }
@@ -382,17 +381,14 @@ public final class AdobeDRMServices
    *
    * @param package_name The package name
    * @param r            The certificate bytes
-   *
    * @return {@code r}, if valid
-   *
    * @throws DRMUnsupportedException If the certificate is not valid
    */
 
   private static byte[] checkCertificateValidity(
     final String package_name,
     final byte[] r)
-    throws DRMUnsupportedException
-  {
+    throws DRMUnsupportedException {
     try {
       final ObjectMapper jom = new ObjectMapper();
       final JsonNode json = jom.readTree(r);
@@ -407,8 +403,7 @@ public final class AdobeDRMServices
       }
 
       final StringBuilder sb = new StringBuilder(256);
-      sb.append(
-        "A certificate has been provided with the wrong application ID.\n");
+      sb.append("A certificate has been provided with the wrong application ID.\n");
       sb.append("  Expected: Either ");
       sb.append(package_name);
       sb.append(" or dev.");
@@ -425,8 +420,7 @@ public final class AdobeDRMServices
   }
 
   private static byte[] readCertificateBytes(final AssetManager assets)
-    throws DRMUnsupportedException
-  {
+    throws DRMUnsupportedException {
     try {
       final InputStream is = assets.open("ReaderClientCert.sig");
       try {

@@ -8,6 +8,8 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.AccountProviderRegistry
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.TreeMap
@@ -17,7 +19,7 @@ object MockAccountProviders {
   private val logger = LoggerFactory.getLogger(MockAccountProviders::class.java)
 
   fun findAccountProviderDangerously (
-    registry: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+    registry: AccountProviderRegistryType,
     id: URI): AccountProviderType {
     val accountProviderDescription =
       registry.findAccountProviderDescription(id)
@@ -30,15 +32,11 @@ object MockAccountProviders {
       accountProviderDescription!!
         .resolve { providerId, status -> logger.debug("status: {}: {}", providerId, status) }
 
-    Preconditions.checkState(
-      !result.failed,
-      "Resolving provider $id must not fail")
-
-    return result.result!!
+    return (result as TaskResult.Success).result
   }
 
   fun findAccountProviderDangerously(
-    registry: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+    registry: AccountProviderRegistryType,
     id: String): AccountProviderType =
     this.findAccountProviderDangerously(registry, URI.create(id))
 
@@ -76,7 +74,7 @@ object MockAccountProviders {
     return URI.create("urn:fake:auto-4")
   }
 
-  fun fakeAccountProviders(): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  fun fakeAccountProviders(): AccountProviderRegistryType {
     val fake0 = fakeProvider("urn:fake:0")
     val fake1 = fakeProvider("urn:fake:1")
     val fake2 = fakeProvider("urn:fake:2")
@@ -98,7 +96,7 @@ object MockAccountProviders {
     return registry
   }
 
-  fun fakeAccountProvidersWithAutomatic(): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  fun fakeAccountProvidersWithAutomatic(): AccountProviderRegistryType {
     val fake0 = fakeProvider("urn:fake:0")
     val fake1 = fakeProvider("urn:fake:1")
     val fake2 = fakeProvider("urn:fake:2")
@@ -126,7 +124,7 @@ object MockAccountProviders {
     return fakeProvider(id).copy(addAutomatically = true)
   }
 
-  fun fakeAccountProvidersMissing0(): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  fun fakeAccountProvidersMissing0(): AccountProviderRegistryType {
     val fake1 = fakeProvider("urn:fake:1")
     val fake2 = fakeProvider("urn:fake:2")
     val fake3 = fakeAuthProvider("urn:fake-auth:0")
@@ -146,7 +144,7 @@ object MockAccountProviders {
     return registry
   }
 
-  fun fakeAccountProvidersMissing1(): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+  fun fakeAccountProvidersMissing1(): AccountProviderRegistryType {
     val fake0 = fakeProvider("urn:fake:0")
     val fake2 = fakeProvider("urn:fake:2")
     val fake3 = fakeAuthProvider("urn:fake-auth:0")

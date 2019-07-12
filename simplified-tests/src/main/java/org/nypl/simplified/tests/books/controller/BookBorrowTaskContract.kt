@@ -37,7 +37,6 @@ import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.HTTPRequestFailed
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
-import org.nypl.simplified.books.book_registry.BookStatusDownloadResult
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
 import org.nypl.simplified.books.controller.api.BookUnexpectedTypeException
 import org.nypl.simplified.downloader.core.DownloadListenerType
@@ -65,6 +64,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockBorrowStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
@@ -142,16 +142,6 @@ abstract class BookBorrowTaskContract {
     this.executorFeeds.shutdown()
     this.executorDownloads.shutdown()
     this.executorTimer.shutdown()
-  }
-
-
-  private fun dump(results: BookStatusDownloadResult) {
-    this.logger.debug("RESULTS:")
-    for (step in results.steps) {
-      this.logger.debug("step description: {}", step.description)
-      this.logger.debug("step resolution:  {} (failed: {}) (exception: {}) (error: {})", step.resolution, step.failed, step.exception, step.errorValue)
-      this.logger.debug("--")
-    }
   }
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
@@ -260,8 +250,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -360,8 +350,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -458,8 +448,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -556,8 +546,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -654,8 +644,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -760,8 +750,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -858,8 +848,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -969,8 +959,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -1067,8 +1057,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1172,8 +1162,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1303,8 +1293,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1405,8 +1395,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1536,8 +1526,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1628,8 +1618,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1724,8 +1714,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1834,8 +1824,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1846,7 +1836,7 @@ abstract class BookBorrowTaskContract {
         as BookStatusDownloadFailed
 
     val exception =
-      bookStatus.result.steps.last().exception as FeedHTTPTransportException
+      bookStatus.result.steps.last().resolution.exception as FeedHTTPTransportException
     Assert.assertEquals(401, exception.code)
   }
 
@@ -1949,8 +1939,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1961,7 +1951,7 @@ abstract class BookBorrowTaskContract {
         as BookStatusDownloadFailed
 
     val exception =
-      bookStatus.result.steps.last().exception as BookBorrowExceptionNoCredentials
+      bookStatus.result.steps.last().resolution.exception as BookBorrowExceptionNoCredentials
   }
 
   /**
@@ -2062,8 +2052,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -2074,7 +2064,7 @@ abstract class BookBorrowTaskContract {
         as BookStatusDownloadFailed
 
     val exception =
-      bookStatus.result.steps.last().exception as BookUnexpectedTypeException
+      bookStatus.result.steps.last().resolution.exception as BookUnexpectedTypeException
   }
 
   /**
@@ -2172,8 +2162,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -2184,7 +2174,7 @@ abstract class BookBorrowTaskContract {
         as BookStatusDownloadFailed
 
     val exception =
-      bookStatus.result.steps.last().exception as IllegalStateException
+      bookStatus.result.steps.last().resolution.exception as IllegalStateException
   }
 
   /**
@@ -2286,8 +2276,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -2398,8 +2388,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -2517,11 +2507,11 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
     Assert.assertEquals(
       CancellationException::class.java,
-      results.steps.last().exception!!.javaClass)
+      results.steps.last().resolution.exception!!.javaClass)
 
     /*
      * Check that the download failed.
@@ -2644,11 +2634,11 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     val errorData =
-      results.steps.last().errorValue as HTTPRequestFailed
+      results.errors().last() as HTTPRequestFailed
 
     Assert.assertEquals(404, errorData.status)
     Assert.assertEquals(report, errorData.errorReport)
@@ -2736,11 +2726,11 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     val errorData =
-      results.steps.last().errorValue as UnsupportedAcquisition
+      results.errors().last() as UnsupportedAcquisition
 
     Assert.assertEquals(ACQUISITION_BUY, errorData.type)
 
@@ -2811,8 +2801,8 @@ abstract class BookBorrowTaskContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.

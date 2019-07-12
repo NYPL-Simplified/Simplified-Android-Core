@@ -1,0 +1,10 @@
+{
+  "username" : "someone",
+  "password" : "password",
+  "provider" : "Nowhere Public Library",
+  "user_id" : "urn:uuid:fe9cc4bc-a06b-4d21-8f93-4e9370ddb75b",
+  "device_id" : "urn:uuid:f975bee3-91ca-49ce-bfb0-3c099bc22f1b",
+  "adobe_token" : "DRMDRM|1562846999|fe9cc4bc-a06b-4d21-8f93-4e9370ddb75b|SSBBTSBOT1QgQSBOVU1CRVIK",
+  "licensor_url" : "https://circulation.librarysimplified.org/NYNYPL/AdobeAuth/devices",
+  "adobe-vendor" : "DRMDRM"
+}

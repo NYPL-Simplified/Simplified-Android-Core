@@ -32,30 +32,61 @@ class TaskRecorder<E> private constructor() : TaskRecorderType<E> {
     Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
 
     val step = this.steps.last()
-    step.resolution = message
-    step.failed = false
-    step.exception = null
+    step.resolution = TaskStepResolution.TaskStepSucceeded(message)
     return step
   }
 
   override fun currentStepFailed(
     message: String,
-    errorValue: E?,
+    errorValue: E,
     exception: Throwable?
   ): TaskStep<E> {
     Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
 
     val step = this.steps.last()
-    step.resolution = message
-    step.failed = true
-    step.errorValue = errorValue
-    step.exception = exception
+    step.resolution = TaskStepResolution.TaskStepFailed(
+      message = message,
+      errorValue = errorValue,
+      exception = exception)
     return step
   }
+
+  override fun currentStepFailedAppending(
+    message: String,
+    errorValue: E,
+    exception: Throwable): TaskStep<E> {
+    Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
+
+    val step = this.steps.last()
+    return when (val resolution = step.resolution) {
+      is TaskStepResolution.TaskStepSucceeded -> {
+        step.resolution = TaskStepResolution.TaskStepFailed(message, errorValue, exception)
+        step
+      }
+      is TaskStepResolution.TaskStepFailed -> {
+        when (val ex = resolution.exception) {
+          null -> {
+            step.resolution = resolution.copy(exception = exception)
+            step
+          }
+          else -> {
+            if (ex != exception) {
+              ex.addSuppressed(exception)
+            }
+            step
+          }
+        }
+      }
+    }
+  }
+
 
   override fun currentStep(): TaskStep<E>? =
     this.steps.lastOrNull()
 
-  override fun finish(): List<TaskStep<E>> =
-    this.steps.toList()
+  override fun <A> finishSuccess(result: A): TaskResult.Success<E, A> =
+    TaskResult.Success(result, this.steps)
+
+  override fun <A> finishFailure(): TaskResult.Failure<E, A> =
+    TaskResult.Failure(this.steps)
 }

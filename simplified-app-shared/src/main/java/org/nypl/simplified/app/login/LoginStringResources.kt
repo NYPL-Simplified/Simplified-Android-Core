@@ -10,6 +10,9 @@ import org.nypl.simplified.app.R
 
 class LoginStringResources(val resources: Resources) : AccountLoginStringResourcesType {
 
+  override val loginUnexpectedException: String
+    get() = this.resources.getString(R.string.unexpectedException)
+
   override fun loginDeviceActivationFailed(e: Throwable): String =
     this.resources.getString(R.string.loginDeviceActivationFailed)
 

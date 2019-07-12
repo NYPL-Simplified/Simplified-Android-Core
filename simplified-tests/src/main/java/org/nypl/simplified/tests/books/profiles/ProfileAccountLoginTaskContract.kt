@@ -49,7 +49,9 @@ import org.nypl.simplified.patron.api.PatronUserProfileParserType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockAccountLoginStringResources
+import org.nypl.simplified.tests.books.controller.TaskDumps
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
@@ -146,13 +148,13 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
 
     val state =
       this.account.loginState as AccountLoginFailed
 
-    Assert.assertEquals(AccountLoginNotRequired, state.steps.last().errorValue)
+    Assert.assertEquals(AccountLoginNotRequired, state.taskResult.errors().last())
   }
 
   /**
@@ -223,13 +225,12 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoginFailed
 
-    Assert.assertEquals(AccountLoginCredentialsIncorrect, state.steps.last().errorValue)
+    Assert.assertEquals(AccountLoginCredentialsIncorrect, state.taskResult.errors().last())
   }
 
   /**
@@ -300,8 +301,7 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoginFailed
@@ -311,7 +311,7 @@ abstract class ProfileAccountLoginTaskContract {
       404,
       "NOT FOUND",
       null
-    ), state.steps.last().errorValue)
+    ), state.taskResult.errors().last())
   }
 
   /**
@@ -377,13 +377,12 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoginFailed
 
-    Assert.assertEquals(AccountLoginConnectionFailure, state.steps.last().errorValue)
+    Assert.assertEquals(AccountLoginConnectionFailure, state.taskResult.errors().last())
   }
 
   /**
@@ -449,8 +448,7 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoginFailed
@@ -539,15 +537,14 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(
       AccountLoginServerParseError(parseWarnings, parseErrors),
-      state.steps.last().errorValue)
+      state.taskResult.errors().last())
   }
 
   /**
@@ -634,8 +631,7 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoggedIn
@@ -772,8 +768,7 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoggedIn
@@ -882,15 +877,14 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(
       AccountLoginDRMNotSupported("Adobe ACS"),
-      state.steps.last().errorValue)
+      state.taskResult.errors().last())
   }
 
   /**
@@ -1004,8 +998,7 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoginFailed
@@ -1120,15 +1113,14 @@ abstract class ProfileAccountLoginTaskContract {
         initialCredentials = credentials)
 
     val result = task.call()
-    this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    TaskDumps.dump(logger, result)
 
     val state =
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(
       AccountLoginDRMFailure("E_FAIL_OFTEN_AND_LOUDLY"),
-      state.steps.last().errorValue)
+      state.taskResult.errors().last())
   }
 
   private fun <T> anyNonNull(): T =

@@ -13,6 +13,12 @@ interface AccountLoginStringResourcesType {
   fun loginDeviceActivationFailed(e: Throwable): String
 
   /**
+   * An unexpected exception occurred.
+   */
+
+  val loginUnexpectedException: String
+
+  /**
    * Posting the device ID to the device manager has finished.
    */
 

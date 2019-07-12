@@ -11,8 +11,12 @@ import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
+import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderType
@@ -23,11 +27,11 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
-import org.nypl.simplified.books.book_registry.BookStatusDownloadResult
-import org.nypl.simplified.books.book_registry.BookStatusRevokeResult
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.downloader.core.DownloadType
@@ -62,15 +66,12 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
-import org.nypl.simplified.profiles.controller.api.AccountCreateTaskResult
-import org.nypl.simplified.profiles.controller.api.AccountDeleteTaskResult
-import org.nypl.simplified.profiles.controller.api.AccountLoginTaskResult
-import org.nypl.simplified.profiles.controller.api.AccountLogoutTaskResult
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URI
@@ -231,7 +232,7 @@ class Controller private constructor(
 
   override fun profileAccountLogin(
     accountID: AccountID,
-    credentials: AccountAuthenticationCredentials): FluentFuture<AccountLoginTaskResult> {
+    credentials: AccountAuthenticationCredentials): FluentFuture<TaskResult<AccountLoginErrorData, kotlin.Unit>> {
 
     return FluentFuture.from(
       this.taskExecutor.submit(Callable { this.runProfileAccountLogin(accountID, credentials) }))
@@ -241,7 +242,7 @@ class Controller private constructor(
   private fun runProfileAccountLogin(
     accountID: AccountID,
     credentials: AccountAuthenticationCredentials
-  ): AccountLoginTaskResult {
+  ): TaskResult<AccountLoginErrorData, kotlin.Unit> {
     val profile = this.profileCurrent()
     val account = profile.account(accountID)
     return ProfileAccountLoginTask(
@@ -256,21 +257,24 @@ class Controller private constructor(
   }
 
   private fun runSyncIfLoginSucceeded(
-    result: AccountLoginTaskResult,
+    result: TaskResult<AccountLoginErrorData, kotlin.Unit>,
     accountID: AccountID
-  ): FluentFuture<AccountLoginTaskResult> {
-    return if (result.failed) {
-      this.logger.debug("logging in didn't succeed: not syncing account")
-      FluentFutureExtensions.fluentFutureOfValue(result)
-    } else {
-      this.logger.debug("logging in succeeded: syncing account")
-      val profile = this.profileCurrent()
-      val account = profile.account(accountID)
-      this.booksSync(account).map { result }
+  ): FluentFuture<TaskResult<AccountLoginErrorData, kotlin.Unit>> {
+    return when (result) {
+      is TaskResult.Success -> {
+        this.logger.debug("logging in succeeded: syncing account")
+        val profile = this.profileCurrent()
+        val account = profile.account(accountID)
+        this.booksSync(account).map { result }
+      }
+      is TaskResult.Failure -> {
+        this.logger.debug("logging in didn't succeed: not syncing account")
+        FluentFutureExtensions.fluentFutureOfValue(result)
+      }
     }
   }
 
-  override fun profileAccountCreate(provider: URI): FluentFuture<AccountCreateTaskResult> {
+  override fun profileAccountCreate(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountID>> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfileAccountCreateTask(
         this.accountEvents,
@@ -280,7 +284,7 @@ class Controller private constructor(
         this.profileAccountCreationStringResources)))
   }
 
-  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<AccountDeleteTaskResult> {
+  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<TaskResult<AccountDeleteErrorDetails, kotlin.Unit>> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfileAccountDeleteTask(
         this.accountEvents,
@@ -318,7 +322,7 @@ class Controller private constructor(
         .map { account -> account.provider })
   }
 
-  override fun profileAccountLogout(account: AccountID): FluentFuture<AccountLogoutTaskResult> {
+  override fun profileAccountLogout(account: AccountID): FluentFuture<TaskResult<AccountLogoutErrorData, kotlin.Unit>> {
     return FluentFuture.from(
       this.taskExecutor.submit(Callable {
         val profile = this.profileCurrent()
@@ -372,7 +376,7 @@ class Controller private constructor(
     account: AccountType,
     id: BookID,
     acquisition: OPDSAcquisition,
-    entry: OPDSAcquisitionFeedEntry): FluentFuture<BookStatusDownloadResult> {
+    entry: OPDSAcquisitionFeedEntry): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, kotlin.Unit>> {
 
     return FluentFuture.from(this.taskExecutor.submit(BookBorrowTask(
       account = account,
@@ -443,7 +447,7 @@ class Controller private constructor(
 
   override fun bookRevoke(
     account: AccountType,
-    bookId: BookID): FluentFuture<BookStatusRevokeResult> {
+    bookId: BookID): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, kotlin.Unit>> {
     return FluentFuture.from(this.taskExecutor.submit(BookRevokeTask(
       account,
       this.adobeDrm,

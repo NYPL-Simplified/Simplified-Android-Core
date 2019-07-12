@@ -133,7 +133,7 @@ abstract class ProfileAccountLogoutTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.resolution) }
 
     val state =
       this.account.loginState as AccountNotLoggedIn
@@ -198,7 +198,7 @@ abstract class ProfileAccountLogoutTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.resolution) }
 
     val state =
       this.account.loginState as AccountNotLoggedIn
@@ -278,7 +278,7 @@ abstract class ProfileAccountLogoutTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.resolution) }
 
     val state =
       this.account.loginState as AccountNotLoggedIn
@@ -379,7 +379,7 @@ abstract class ProfileAccountLogoutTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.resolution) }
 
     val state =
       this.account.loginState as AccountLogoutFailed
@@ -489,7 +489,7 @@ abstract class ProfileAccountLogoutTaskContract {
 
     val result = task.call()
     this.logger.debug("result: {}", result)
-    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.exception) }
+    result.steps.forEach { step -> this.logger.debug("step {}: {}", step, step.resolution) }
 
     val state =
       this.account.loginState as AccountNotLoggedIn

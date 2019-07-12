@@ -7,6 +7,9 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringR
 class ProfileAccountCreationStringResources(
   val resources: Resources) : ProfileAccountCreationStringResourcesType {
 
+  override val unexpectedException: String
+    get() = this.resources.getString(R.string.unexpectedException)
+
   override val creatingAccountFailed: String
     get() = resources.getString(R.string.profileAccountCreationCreatingAccountFailed)
 

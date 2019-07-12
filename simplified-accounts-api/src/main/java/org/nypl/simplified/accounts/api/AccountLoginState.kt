@@ -3,6 +3,7 @@ package org.nypl.simplified.accounts.api
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseWarning
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import java.net.URI
 
@@ -115,6 +116,28 @@ sealed class AccountLoginState {
     data class AccountLoginDRMFailure(
       val errorCode: String)
       : AccountLoginErrorData()
+
+    /**
+     * A DRM system failed due to having too many device activations.
+     */
+
+    object AccountLoginDRMTooManyActivations
+      : AccountLoginErrorData()
+
+    /**
+     * An unexpected exception occurred.
+     */
+
+    class AccountLoginUnexpectedException(
+      val exception: Throwable)
+      : AccountLoginErrorData()
+
+    /**
+     * Logging in failed due to some missing information.
+     */
+
+    object AccountLoginMissingInformation
+      : AccountLoginErrorData()
   }
 
   /**
@@ -122,7 +145,7 @@ sealed class AccountLoginState {
    */
 
   data class AccountLoginFailed(
-    val steps: List<TaskStep<AccountLoginErrorData>>)
+    val taskResult: TaskResult.Failure<AccountLoginErrorData, *>)
     : AccountLoginState() {
     override val credentials: AccountAuthenticationCredentials?
       get() = null
@@ -166,6 +189,14 @@ sealed class AccountLoginState {
       val errorCode: String)
       : AccountLogoutErrorData()
 
+    /**
+     * An unexpected exception occurred.
+     */
+
+    data class AccountLogoutUnexpectedException(
+      val exception: Throwable)
+      : AccountLogoutErrorData()
+
   }
 
   /**
@@ -173,7 +204,7 @@ sealed class AccountLoginState {
    */
 
   data class AccountLogoutFailed(
-    val steps: List<TaskStep<AccountLogoutErrorData>>,
+    val taskResult: TaskResult.Failure<AccountLogoutErrorData, *>,
     override val credentials: AccountAuthenticationCredentials)
     : AccountLoginState()
 

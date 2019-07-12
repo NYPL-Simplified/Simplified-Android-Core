@@ -1,8 +1,11 @@
-package org.nypl.simplified.tests
+package org.nypl.simplified.tests.sandbox
 
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 
 class MockAccountCreationStringResources : ProfileAccountCreationStringResourcesType {
+
+  override val unexpectedException: String
+    get() = "unexpectedException"
 
   override val creatingAccountFailed: String
     get() = "creatingAccountFailed"

@@ -4,6 +4,9 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringR
 
 class MockAccountDeletionStringResources : ProfileAccountDeletionStringResourcesType {
 
+  override val unexpectedException: String
+    get() = "unexpectedException"
+
   override val deletionFailed: String
     get() = "deletionFailed"
 

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+  <string name="errorUnknownAccountProvider">Found an account with an unrecognized ID: %1$d. It cannot be migrated.</string>
+  <string name="errorAccountLoadFailure">Could not load the existing account with ID %1$d</string>
+</resources>

@@ -230,8 +230,8 @@ class LoginDialog : AppCompatDialogFragment() {
             ErrorDialogUtilities.showError(
               this.activity,
               this.logger,
-              state.steps.lastOrNull()?.resolution,
-              state.steps.lastOrNull()?.exception)
+              state.taskResult.steps.last().resolution.message,
+              state.taskResult.steps.last().resolution.exception)
             this.shownAlert = true
           }
 
@@ -260,8 +260,8 @@ class LoginDialog : AppCompatDialogFragment() {
             ErrorDialogUtilities.showError(
               this.activity,
               this.logger,
-              state.steps.lastOrNull()?.resolution,
-              state.steps.lastOrNull()?.exception)
+              state.taskResult.steps.last().resolution.message,
+              state.taskResult.steps.last().resolution.exception)
             this.shownAlert = true
           }
 

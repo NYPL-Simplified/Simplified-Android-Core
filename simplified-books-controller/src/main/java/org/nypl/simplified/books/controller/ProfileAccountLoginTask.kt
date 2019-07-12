@@ -15,13 +15,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMNotSupported
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.*
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
@@ -37,9 +31,9 @@ import org.nypl.simplified.patron.api.PatronDRM
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.profiles.controller.api.AccountLoginTaskResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -60,7 +54,7 @@ class ProfileAccountLoginTask(
   private val loginStrings: AccountLoginStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType,
-  initialCredentials: AccountAuthenticationCredentials) : Callable<AccountLoginTaskResult> {
+  initialCredentials: AccountAuthenticationCredentials) : Callable<TaskResult<AccountLoginErrorData, Unit>> {
 
   init {
     Preconditions.checkState(
@@ -93,45 +87,33 @@ class ProfileAccountLoginTask(
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
-  private fun checkAuthenticationRequired(): AccountProviderAuthenticationDescription? {
-    val authentication = this.account.provider.authentication
-    return if (authentication == null) {
-      this.debug("account does not require authentication")
-      this.steps.currentStepFailed(this.loginStrings.loginAuthNotRequired, AccountLoginNotRequired)
-      this.account.setLoginState(AccountLoginFailed(this.steps.finish()))
-      null
-    } else authentication
-  }
 
-  private fun run(): AccountLoginTaskResult {
-    try {
+  private fun run(): TaskResult<AccountLoginErrorData, Unit> {
+    return try {
       this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
       this.updateLoggingInState()
 
-      return when (this.checkAuthenticationRequired()) {
-        is AccountProviderAuthenticationDescription -> {
-          this.runPatronProfileRequest()
-          this.runDeviceActivation()
-          this.account.setLoginState(AccountLoggedIn(this.credentials))
-          AccountLoginTaskResult(this.steps.finish())
-        }
-        else -> {
-          this.steps.currentStepSucceeded(this.loginStrings.loginAuthNotRequired)
-          AccountLoginTaskResult(this.steps.finish())
-        }
-      }
-    } catch (e: Throwable) {
-      val step = this.steps.currentStep()!!
-      if (step.exception == null) {
-        this.steps.currentStepFailed(
-          message = pickUsableMessage(step.resolution, e),
-          errorValue = step.errorValue,
-          exception = e)
+      val authentication = this.account.provider.authentication
+      if (authentication == null) {
+        this.debug("account does not require authentication")
+        this.steps.currentStepFailed(this.loginStrings.loginAuthNotRequired, AccountLoginNotRequired)
+        this.account.setLoginState(AccountLoginFailed(this.steps.finishFailure<Unit>()))
+        return this.steps.finishFailure()
       }
 
-      val resultingSteps = this.steps.finish()
-      this.account.setLoginState(AccountLoginFailed(resultingSteps))
-      return AccountLoginTaskResult(resultingSteps)
+      this.runPatronProfileRequest()
+      this.runDeviceActivation()
+      this.account.setLoginState(AccountLoggedIn(this.credentials))
+      this.steps.finishSuccess(Unit)
+    } catch (e: Throwable) {
+      this.steps.currentStepFailedAppending(
+        message = this.loginStrings.loginUnexpectedException,
+        errorValue = AccountLoginUnexpectedException(e),
+        exception = e)
+
+      val failure = this.steps.finishFailure<Unit>()
+      this.account.setLoginState(AccountLoginFailed(failure))
+      failure
     }
   }
 
@@ -217,7 +199,7 @@ class ProfileAccountLoginTask(
       is AdobeDRMExtensions.AdobeDRMLoginNoActivationsException -> {
         this.steps.currentStepFailed(
           this.loginStrings.loginDeviceActivationFailed(ex),
-          null,
+          AccountLoginDRMTooManyActivations,
           ex)
       }
       is AdobeDRMExtensions.AdobeDRMLoginConnectorException -> {
@@ -229,7 +211,7 @@ class ProfileAccountLoginTask(
       else -> {
         this.steps.currentStepFailed(
           this.loginStrings.loginDeviceActivationFailed(ex),
-          null,
+          AccountLoginUnexpectedException(ex),
           ex)
       }
     }
@@ -307,7 +289,8 @@ class ProfileAccountLoginTask(
 
     val patronSettingsURI = this.account.provider.patronSettingsURI
     if (patronSettingsURI == null) {
-      this.steps.currentStepFailed(this.loginStrings.loginPatronSettingsRequestNoURI)
+      this.steps.currentStepFailed(
+        this.loginStrings.loginPatronSettingsRequestNoURI, AccountLoginMissingInformation)
       throw Exception()
     }
 

@@ -9,13 +9,15 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
-import org.nypl.simplified.accounts.api.AccountProviderResolutionResult
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.Updated
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.tests.MockAccountProviders
 import org.slf4j.Logger
@@ -286,10 +288,22 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMeta0
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        override fun resolve(onProgress: AccountProviderResolutionListenerType)
+          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+          return fail()
         }
       }
+
+    private fun fail(): TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType> {
+      val taskRecorder =
+        TaskRecorder.create<AccountProviderResolutionErrorDetails>()
+      val exception = Exception()
+      taskRecorder.currentStepFailed(
+        message = "x",
+        errorValue = AccountProviderResolutionErrorDetails.UnexpectedException("Unexpected exception", exception),
+        exception = exception)
+      return taskRecorder.finishFailure()
+    }
 
     val descriptionMeta1 =
       AccountProviderDescriptionMetadata(
@@ -305,8 +319,9 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMeta1
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        override fun resolve(onProgress: AccountProviderResolutionListenerType)
+          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+          return fail()
         }
       }
 
@@ -324,8 +339,9 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMeta2
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        override fun resolve(onProgress: AccountProviderResolutionListenerType)
+          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+          return fail()
         }
       }
 
@@ -343,8 +359,9 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld0
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        override fun resolve(onProgress: AccountProviderResolutionListenerType)
+          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+          return fail()
         }
       }
 
@@ -362,8 +379,9 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld1
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        override fun resolve(onProgress: AccountProviderResolutionListenerType)
+          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+          return fail()
         }
       }
 
@@ -381,8 +399,9 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld2
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
-          return AccountProviderResolutionResult(null, listOf(TaskStep(description = "x", failed = true)))
+        override fun resolve(onProgress: AccountProviderResolutionListenerType)
+          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+          return fail()
         }
       }
   }

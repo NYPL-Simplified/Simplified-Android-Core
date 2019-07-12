@@ -63,6 +63,12 @@ interface BookBorrowStringResourcesType {
   fun borrowBookFulfillACSMConnectorFailed(errorCode: String): String
 
   /**
+   * An unexpected exception occurred.
+   */
+
+  val borrowBookUnexpectedException: String
+
+  /**
    * The Adobe DRM connector failed in an unspecified manner.
    */
 

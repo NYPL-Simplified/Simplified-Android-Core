@@ -1,0 +1,32 @@
+package org.nypl.simplified.migration.spi
+
+import android.content.Context
+import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import java.net.URI
+
+/**
+ * The services required by migration services.
+ */
+
+data class MigrationServiceDependencies(
+
+  /**
+   * A function that, given the URI of an account provider,
+   * tries to create an account in the current profile.
+   */
+
+  val createAccount: (URI) -> TaskResult<AccountCreateErrorDetails, AccountType>,
+
+  /**
+   * `true` if the application is running in anonymous profile mode.
+   */
+
+  val applicationProfileIsAnonymous: Boolean,
+
+  /**
+   * The Android application context.
+   */
+
+  val context: Context)

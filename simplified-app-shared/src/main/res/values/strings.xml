@@ -486,4 +486,7 @@
   <string name="bootingHelpstack">Initializing HelpStack...</string>
   <string name="bootingCompleted">Startup completed!</string>
 
+  <!-- General error strings -->
+  <string name="unexpectedException">An unexpected exception occurred.</string>
+
 </resources>

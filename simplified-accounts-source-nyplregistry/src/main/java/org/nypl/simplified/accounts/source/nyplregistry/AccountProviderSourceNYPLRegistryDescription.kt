@@ -3,7 +3,6 @@ package org.nypl.simplified.accounts.source.nyplregistry
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
@@ -14,10 +13,10 @@ import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.HTTPRequestFailed
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.*
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
-import org.nypl.simplified.accounts.api.AccountProviderResolutionResult
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
@@ -30,6 +29,8 @@ import org.nypl.simplified.opds.auth_document.api.AuthenticationObject.Companion
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
@@ -49,11 +50,12 @@ class AccountProviderSourceNYPLRegistryDescription(
   private val logger =
     LoggerFactory.getLogger(AccountProviderSourceNYPLRegistryDescription::class.java)
 
-  override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
+  override fun resolve(onProgress: AccountProviderResolutionListenerType)
+    : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
     val taskRecorder =
       TaskRecorder.create<AccountProviderResolutionErrorDetails>()
 
-    try {
+    return try {
       taskRecorder.beginNewStep(this.stringResources.resolving)
       onProgress.invoke(this.metadata.id, this.stringResources.resolving)
 
@@ -72,8 +74,11 @@ class AccountProviderSourceNYPLRegistryDescription(
       val catalogURI = authDocument.startURI
         ?: this.metadata.catalogURI
         ?: run {
-          taskRecorder.currentStepFailed(this.stringResources.resolvingAuthDocumentNoStartURI)
-          onProgress.invoke(this.metadata.id, this.stringResources.resolvingAuthDocumentNoStartURI)
+          val message = this.stringResources.resolvingAuthDocumentNoStartURI
+          taskRecorder.currentStepFailed(
+            message = message,
+            errorValue = AuthDocumentUnusable(message))
+          onProgress.invoke(this.metadata.id, message)
           throw IOException()
         }
 
@@ -112,18 +117,13 @@ class AccountProviderSourceNYPLRegistryDescription(
           updated = updated
         )
 
-      return AccountProviderResolutionResult(
-        result = accountProvider,
-        steps = taskRecorder.finish())
+      taskRecorder.finishSuccess(accountProvider)
     } catch (e: Exception) {
-      val currentStep = taskRecorder.currentStep()!!
-      if (currentStep.exception == null) {
-        taskRecorder.currentStepFailed(
-          message = this.pickUsableMessage(currentStep.resolution, e),
-          errorValue = currentStep.errorValue,
-          exception = e)
-      }
-      return AccountProviderResolutionResult(null, taskRecorder.finish())
+      taskRecorder.currentStepFailedAppending(
+        this.stringResources.resolvingUnexpectedException,
+        UnexpectedException(this.stringResources.resolvingUnexpectedException, e),
+        e)
+      taskRecorder.finishFailure()
     }
   }
 
@@ -153,9 +153,9 @@ class AccountProviderSourceNYPLRegistryDescription(
       }
     }
 
-    taskRecorder.currentStepFailed(
-      this.stringResources.resolvingAuthDocumentNoUsableAuthenticationTypes)
-    throw IOException(this.stringResources.resolvingAuthDocumentNoUsableAuthenticationTypes)
+    val message = this.stringResources.resolvingAuthDocumentNoUsableAuthenticationTypes
+    taskRecorder.currentStepFailed(message, AuthDocumentUnusable(message))
+    throw IOException(message)
   }
 
   private fun extractAuthenticationDescriptionBasic(
@@ -191,8 +191,9 @@ class AccountProviderSourceNYPLRegistryDescription(
         under13 = under13
       )
     } else {
-      taskRecorder.currentStepFailed(this.stringResources.resolvingAuthDocumentCOPPAAgeGateMalformed)
-      throw IOException(this.stringResources.resolvingAuthDocumentCOPPAAgeGateMalformed)
+      val message = this.stringResources.resolvingAuthDocumentCOPPAAgeGateMalformed
+      taskRecorder.currentStepFailed(message, AuthDocumentUnusable(message))
+      throw IOException(message)
     }
   }
 
@@ -218,8 +219,9 @@ class AccountProviderSourceNYPLRegistryDescription(
 
     val targetURI = this.metadata.authenticationDocumentURI
     if (targetURI == null) {
-      taskRecorder.currentStepFailed(this.stringResources.resolvingAuthDocumentMissingURI)
-      onProgress.invoke(this.metadata.id, this.stringResources.resolvingAuthDocumentMissingURI)
+      val message = this.stringResources.resolvingAuthDocumentMissingURI
+      taskRecorder.currentStepFailed(message, AuthDocumentUnusable(message))
+      onProgress.invoke(this.metadata.id, message)
       throw NoSuchElementException()
     }
 
@@ -258,9 +260,10 @@ class AccountProviderSourceNYPLRegistryDescription(
         is ParseResult.Failure -> {
           taskRecorder.currentStepFailed(
             message = this.stringResources.resolvingAuthDocumentParseFailed,
-            errorValue = AccountProviderResolutionErrorDetails.AuthDocumentParseFailed(
-              parseResult.warnings,
-              parseResult.errors))
+            errorValue = AuthDocumentParseFailed(
+              message = this.stringResources.resolvingAuthDocumentParseFailed,
+              warnings = parseResult.warnings,
+              errors = parseResult.errors))
           throw IOException(this.stringResources.resolvingAuthDocumentParseFailed)
         }
       }

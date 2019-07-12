@@ -1,4 +1,4 @@
-package org.nypl.simplified.profiles.controller.api
+package org.nypl.simplified.accounts.api
 
 import java.lang.Exception
 

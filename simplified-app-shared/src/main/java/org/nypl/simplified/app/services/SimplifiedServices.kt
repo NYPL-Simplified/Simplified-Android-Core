@@ -153,8 +153,16 @@ class SimplifiedServices private constructor(
 
     private val logger = LoggerFactory.getLogger(SimplifiedServices::class.java)
 
+    /**
+     * The current on-disk data version. The entire directory tree the application uses
+     * to store data is versioned in order to make it easier to migrate data to new versions
+     * at a later date.
+     */
+
+    private const val CURRENT_DATA_VERSION = "4.0"
+
     private data class Directories(
-      val directoryBase: File,
+      val directoryBaseVersioned: File,
       val directoryDownloads: File,
       val directoryDocuments: File,
       val directoryProfiles: File)
@@ -276,9 +284,10 @@ class SimplifiedServices private constructor(
 
       publishEvent(strings.bootingCredentialStore)
       val accountCredentialsStore = try {
-        val privateDirectory = context.getFilesDir()
-        val credentials = File(privateDirectory, "credentials.json")
-        val credentialsTemp = File(privateDirectory, "credentials.json.tmp")
+        val privateDirectory = context.filesDir
+        val versionedDirectory = File(privateDirectory, CURRENT_DATA_VERSION)
+        val credentials = File(versionedDirectory, "credentials.json")
+        val credentialsTemp = File(versionedDirectory, "credentials.json.tmp")
 
         this.logger.debug("credentials store path: {}", credentials)
         AccountAuthenticationCredentialsStore.open(credentials, credentialsTemp)
@@ -523,15 +532,18 @@ class SimplifiedServices private constructor(
 
     private fun initializeDirectories(context: Context): Directories {
       this.logger.debug("initializing directories")
-      val directoryBase = this.determineDiskDataDirectory(context)
-      val directoryDownloads = File(directoryBase, "downloads")
-      val directoryDocuments = File(directoryBase, "documents")
-      val directoryProfiles = File(directoryBase, "profiles")
 
-      this.logger.debug("directory_base:      {}", directoryBase)
-      this.logger.debug("directory_downloads: {}", directoryDownloads)
-      this.logger.debug("directory_documents: {}", directoryDocuments)
-      this.logger.debug("directory_profiles:  {}", directoryProfiles)
+      val directoryBase = this.determineDiskDataDirectory(context)
+      val directoryBaseVersioned = File(directoryBase, CURRENT_DATA_VERSION)
+      val directoryDownloads = File(directoryBaseVersioned, "downloads")
+      val directoryDocuments = File(directoryBaseVersioned, "documents")
+      val directoryProfiles = File(directoryBaseVersioned, "profiles")
+
+      this.logger.debug("directoryBase:          {}", directoryBase)
+      this.logger.debug("directoryBaseVersioned: {}", directoryBaseVersioned)
+      this.logger.debug("directoryDownloads:     {}", directoryDownloads)
+      this.logger.debug("directoryDocuments:     {}", directoryDocuments)
+      this.logger.debug("directoryProfiles:      {}", directoryProfiles)
 
       /*
        * Make sure the required directories exist. There is no sane way to
@@ -540,6 +552,7 @@ class SimplifiedServices private constructor(
 
       try {
         DirectoryUtilities.directoryCreate(directoryBase)
+        DirectoryUtilities.directoryCreate(directoryBaseVersioned)
         DirectoryUtilities.directoryCreate(directoryDownloads)
         DirectoryUtilities.directoryCreate(directoryDocuments)
         DirectoryUtilities.directoryCreate(directoryProfiles)
@@ -549,7 +562,7 @@ class SimplifiedServices private constructor(
       }
 
       return Directories(
-        directoryBase = directoryBase,
+        directoryBaseVersioned = directoryBaseVersioned,
         directoryDownloads = directoryDownloads,
         directoryDocuments = directoryDocuments,
         directoryProfiles = directoryProfiles)

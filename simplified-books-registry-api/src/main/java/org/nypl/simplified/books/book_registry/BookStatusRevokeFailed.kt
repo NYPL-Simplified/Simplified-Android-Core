@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.book_registry
 
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.taskrecorder.api.TaskResult
 
 /**
  * The given book could not be revoked (hold cancelled, loan returned, etc).
@@ -18,7 +19,7 @@ data class BookStatusRevokeFailed(
    * The list of steps that lead to the failure.
    */
 
-  val result: BookStatusRevokeResult) : BookStatusType {
+  val result: TaskResult.Failure<BookStatusRevokeErrorDetails, Unit>) : BookStatusType {
 
   override fun getID(): BookID =
     this.id

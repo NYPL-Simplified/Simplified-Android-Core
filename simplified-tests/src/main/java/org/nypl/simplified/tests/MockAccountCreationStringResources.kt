@@ -4,6 +4,9 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringR
 
 class MockAccountCreationStringResources : ProfileAccountCreationStringResourcesType {
 
+  override val unexpectedException: String
+    get() = "unexpectedException"
+
   override val creatingAccountFailed: String
     get() = "creatingAccountFailed"
 

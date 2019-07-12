@@ -1,5 +1,7 @@
 package org.nypl.simplified.accounts.api
 
+import org.nypl.simplified.taskrecorder.api.TaskResult
+
 /**
  * A description of an account provider. Descriptions are _resolved_ to produce [AccountProviderType]
  * values.
@@ -19,7 +21,8 @@ interface AccountProviderDescriptionType : Comparable<AccountProviderDescription
    * resolution.
    */
 
-  fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult
+  fun resolve(onProgress: AccountProviderResolutionListenerType)
+    : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType>
 
   override fun compareTo(other: AccountProviderDescriptionType): Int =
     this.metadata.compareTo(other.metadata)
