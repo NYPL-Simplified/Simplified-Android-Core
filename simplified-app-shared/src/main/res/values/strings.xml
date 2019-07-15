@@ -492,6 +492,7 @@
   <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
   <string name="bootingHelpstack">Initializing HelpStack…</string>
   <string name="bootingCompleted">Startup completed!</string>
+  <string name="bootingNotificationsService">Initializing Notifications Service...</string>
 
   <!-- PDF Reader -->
   <string name="table_of_contents_title">Table of Contents</string>
