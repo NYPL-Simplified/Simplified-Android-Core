@@ -139,4 +139,10 @@ interface SimplifiedServicesType {
    */
 
   val currentTheme: ThemeValue
+
+  /**
+   * @return The notifications service
+   */
+
+  val notificationsService: NotificationsService
 }

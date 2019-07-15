@@ -127,7 +127,8 @@ class SimplifiedServices private constructor(
   override val readerBookmarkService: ReaderBookmarkServiceUsableType,
   override val readerEPUBLoader: ReaderReadiumEPUBLoaderType,
   override val readerHTTPServer: ReaderHTTPServerType,
-  override val screenSize: ScreenSizeInformationType
+  override val screenSize: ScreenSizeInformationType,
+  override val notificationsService: NotificationsService
 ) : SimplifiedServicesType {
 
   override val currentTheme: ThemeValue
@@ -408,6 +409,9 @@ class SimplifiedServices private constructor(
       bookController.profileIdleTimer().setWarningIdleSecondsRemaining(60)
       bookController.profileIdleTimer().setMaximumIdleSeconds(10 * 60)
 
+      publishEvent(strings.bootingNotificationsService)
+      val notificationsService = NotificationsService(context, profileEvents, bookRegistry)
+
       publishEvent(strings.bootingNetworkConnectivity)
       val networkConnectivity = SimplifiedNetworkConnectivity(context)
 
@@ -461,7 +465,8 @@ class SimplifiedServices private constructor(
         readerBookmarkService = readerBookmarksService,
         readerEPUBLoader = epubLoader,
         readerHTTPServer = httpd,
-        screenSize = screenSize
+        screenSize = screenSize,
+        notificationsService = notificationsService
       )
     }
 
