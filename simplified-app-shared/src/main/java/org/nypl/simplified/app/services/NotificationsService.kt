@@ -27,7 +27,7 @@ class NotificationsService(
             this.bookRegistry.bookEvents().subscribe(this::onBookEvent)
 
     private fun onProfileEvent(event: ProfileEvent) {
-        logger.debug("onProfileEvent $event")
+        logger.debug("NotificationsService::onProfileEvent $event")
         executor.execute {
             if (event is ProfileSelected) {
                 this.getBookStatuses()
@@ -36,7 +36,7 @@ class NotificationsService(
     }
 
     private fun onBookEvent(event: BookEvent) {
-        logger.debug("onBookEvent $event")
+        logger.debug("NotificationsService:: onBookEvent $event")
         executor.execute {
             this.getBookStatuses()
         }
