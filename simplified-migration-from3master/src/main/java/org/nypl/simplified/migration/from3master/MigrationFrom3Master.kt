@@ -4,17 +4,39 @@ import android.content.Context
 import android.os.Environment
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
+import org.nypl.audiobook.android.api.PlayerPosition
+import org.nypl.audiobook.android.api.PlayerPositions
+import org.nypl.audiobook.android.api.PlayerResult
+import org.nypl.drm.core.AdobeAdeptLoan
+import org.nypl.drm.core.AdobeLoanID
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.migration.spi.MigrationError
+import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.files.FileUtilities
+import org.nypl.simplified.json.core.JSONParserUtilities
+import org.nypl.simplified.migration.spi.MigrationNotice
+import org.nypl.simplified.migration.spi.MigrationNotice.MigrationError
+import org.nypl.simplified.migration.spi.MigrationNotice.MigrationInfo
+import org.nypl.simplified.migration.spi.MigrationNotice.Subject
+import org.nypl.simplified.migration.spi.MigrationNotice.Subject.ACCOUNT
+import org.nypl.simplified.migration.spi.MigrationNotice.Subject.BOOK
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.migration.spi.MigrationType
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.net.URI
+import java.nio.ByteBuffer
 
 /**
  * A migration from version 3.0 of the app (2019 pre-LFA master branch).
@@ -37,8 +59,19 @@ class MigrationFrom3Master(
   private val oldBaseAccountsDirectory =
     this.services.context.filesDir
 
+  private val oldBaseDataDirectory =
+    this.determineDiskDataDirectory(this.services.context)
+
   private val objectMapper = ObjectMapper()
-  private val errors = mutableListOf<MigrationError>()
+  private val notices = mutableListOf<MigrationNotice>()
+
+  private fun publishNotice(message: String) {
+    this.notices.add(MigrationInfo(message))
+  }
+
+  private fun publishNotice(subject: Subject, message: String) {
+    this.notices.add(MigrationInfo(message, subject))
+  }
 
   override fun needsToRun(): Boolean {
     if (!this.services.applicationProfileIsAnonymous) {
@@ -75,15 +108,291 @@ class MigrationFrom3Master(
     val loadedAccount: LoadedAccount,
     val account: AccountType)
 
+  data class LoadedBook(
+    val owner: CreatedAccount,
+    val bookID: BookID,
+    val bookDirectory: File,
+    val bookEntry: OPDSAcquisitionFeedEntry,
+    val epubFile: File,
+    val epubAdobeLoan: AdobeAdeptLoan?,
+    val audioBookPosition: PlayerPosition?,
+    val audioBookManifest: BookFormat.AudioBookManifestReference?)
+
+  data class CopiedBook(
+    val loadedBook: LoadedBook)
+
   override fun run(): MigrationReport {
     val accounts = this.enumerateAccountsToMigrate()
     this.logger.debug("{} accounts to migrate", accounts.size)
     val loadedAccounts = this.loadAccounts(accounts)
     this.logger.debug("{} accounts loaded", loadedAccounts.size)
-    val createdAccounts = this.createAccounts(loadedAccounts)
-    this.logger.debug("{} accounts created", createdAccounts.size)
-    return MigrationReport(errors = this.errors)
+
+    for (loadedAccount in loadedAccounts) {
+      val createdAccount = this.createAccount(loadedAccount)
+      if (createdAccount != null) {
+        this.publishNotice(ACCOUNT, this.strings.reportCreatedAccount(createdAccount.account.provider.displayName))
+        val books = this.loadBooksForAccount(createdAccount)
+        val copiedBooks = this.copyBooks(books)
+        for (copiedBook in copiedBooks) {
+          this.publishNotice(BOOK, this.strings.reportCopiedBook(copiedBook.loadedBook.bookEntry.title))
+        }
+      }
+    }
+
+    return MigrationReport(this.notices.toList())
   }
+
+  /**
+   * Load Adobe loan information from the given rights and JSON metadata files.
+   */
+
+  private fun loadAdobeRights(
+    fileAdobeRights: File,
+    fileAdobeMeta: File
+  ): AdobeAdeptLoan {
+    val serialized = FileUtilities.fileReadBytes(fileAdobeRights)
+    val objectMapper = ObjectMapper()
+    val rootNode = objectMapper.readTree(fileAdobeMeta)
+    val rootObject = JSONParserUtilities.checkObject(null, rootNode)
+    val loanID = AdobeLoanID(JSONParserUtilities.getString(rootObject, "loan-id"))
+    val returnable = JSONParserUtilities.getBoolean(rootObject, "returnable")
+    return AdobeAdeptLoan(loanID, ByteBuffer.wrap(serialized), returnable)
+  }
+
+  /**
+   * Copy all of the loaded books to their respective modern accounts.
+   */
+
+  private fun copyBooks(loadedBooks: List<LoadedBook>): List<CopiedBook> {
+    this.logger.debug("copying {} books", loadedBooks.size)
+    val copiedBooks = mutableListOf<CopiedBook>()
+    for (book in loadedBooks) {
+      this.copyBook(book)?.let { copied -> copiedBooks.add(copied) }
+    }
+    return copiedBooks.toList()
+  }
+
+  /**
+   * Copy the loaded book to its respective modern account.
+   */
+
+  private fun copyBook(book: LoadedBook): CopiedBook? {
+    this.logger.debug("copying book {}", book.bookID.value())
+
+    val account = book.owner.account
+    val bookDatabase = account.bookDatabase
+
+    val entry = bookDatabase.createOrUpdate(book.bookID, book.bookEntry)
+    entry.writeOPDSEntry(book.bookEntry)
+
+    val formatHandle = entry.findPreferredFormatHandle()
+    return when (formatHandle) {
+      is BookDatabaseEntryFormatHandleEPUB ->
+        this.copyBookEPUB(formatHandle, book)
+      is BookDatabaseEntryFormatHandleAudioBook ->
+        this.copyBookAudioBook(formatHandle, book)
+
+      is BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF,
+      null -> {
+        this.logger.error("strange format handle encountered")
+        val formatName = formatHandleName(formatHandle)
+        val exception = Exception("Unexpected format: $formatName")
+        this.notices.add(MigrationError(
+          message = this.strings.errorBookUnexpectedFormat(book.bookEntry.title, formatName),
+          attributes = mapOf(
+            Pair("bookTitle", book.bookEntry.title),
+            Pair("bookFormat", formatName),
+            Pair("bookID", book.bookID.value())
+          ),
+          exception = exception))
+        null
+      }
+    }
+  }
+
+  private fun formatHandleName(handle: BookDatabaseEntryFormatHandle?): String =
+    when (handle) {
+      is BookDatabaseEntryFormatHandleEPUB -> "EPUB"
+      is BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF -> "PDF"
+      is BookDatabaseEntryFormatHandleAudioBook -> "Audio book"
+      null -> "Unknown"
+    }
+
+  private fun copyBookAudioBook(
+    handle: BookDatabaseEntryFormatHandleAudioBook,
+    book: LoadedBook
+  ): CopiedBook {
+    if (book.audioBookManifest != null) {
+      handle.copyInManifestAndURI(
+        file = book.audioBookManifest.manifestFile,
+        manifestURI = book.audioBookManifest.manifestURI)
+    }
+    if (book.audioBookPosition != null) {
+      handle.savePlayerPosition(book.audioBookPosition)
+    }
+    return CopiedBook(book)
+  }
+
+  private fun copyBookEPUB(
+    handle: BookDatabaseEntryFormatHandleEPUB,
+    book: LoadedBook
+  ): CopiedBook {
+    if (book.epubFile.isFile) {
+      handle.copyInBook(book.epubFile)
+    }
+    handle.setAdobeRightsInformation(book.epubAdobeLoan)
+    return CopiedBook(book)
+  }
+
+  /**
+   * Load all of the books from the given list of accounts.
+   */
+
+  private fun loadBooks(createdAccounts: List<CreatedAccount>): List<LoadedBook> {
+    val enumeratedBooks = mutableListOf<LoadedBook>()
+    for (createdAccount in createdAccounts) {
+      enumeratedBooks.addAll(this.loadBooksForAccount(createdAccount))
+    }
+    return enumeratedBooks.toList()
+  }
+
+  /**
+   * Load all of the books from a given account.
+   */
+
+  private fun loadBooksForAccount(createdAccount: CreatedAccount): List<LoadedBook> {
+    val idNumeric = createdAccount.loadedAccount.enumeratedAccount.idNumeric
+    this.logger.debug("loading books for account {}", idNumeric)
+    val booksDirectory =
+      if (idNumeric == 0) {
+        File(File(this.oldBaseDataDirectory, "books"), "data")
+      } else {
+        File(File(File(this.oldBaseDataDirectory, idNumeric.toString()), "books"), "data")
+      }
+
+    this.logger.debug("enumerating books directory {}", booksDirectory)
+    val entries = booksDirectory.list()
+    if (entries == null) {
+      this.logger.error("could not list {}", booksDirectory)
+      return listOf()
+    }
+
+    val loadedBooks = mutableListOf<LoadedBook>()
+    for (entry in entries) {
+      val bookDirectory = File(booksDirectory, entry)
+
+      this.logger.debug("loading book {}", entry)
+
+      try {
+        val fileMeta =
+          File(bookDirectory, "meta.json")
+
+        val parser = OPDSJSONParser.newParser()
+        val bookEntry =
+          FileInputStream(fileMeta).use { stream ->
+            parser.parseAcquisitionFeedEntryFromStream(stream)
+          }
+
+        try {
+          val fileEPUB =
+            File(bookDirectory, "book.epub")
+          val fileAdobeRights =
+            File(bookDirectory, "rights_adobe.xml")
+          val fileAdobeMeta =
+            File(bookDirectory, "meta_adobe.json")
+          val fileAudioManifest =
+            File(bookDirectory, "audiobook-manifest.json")
+          val fileAudioManifestURI =
+            File(bookDirectory, "audiobook-manifest-uri.txt")
+          val fileAudioPosition =
+            File(bookDirectory, "audiobook-position.json")
+
+          val epubAdobeLoan =
+            if (fileAdobeRights.isFile && fileAdobeMeta.isFile) {
+              this.loadAdobeRights(fileAdobeRights, fileAdobeMeta)
+            } else {
+              null
+            }
+
+          val audioBookPosition =
+            this.loadAudioPlayerPositionOptionally(fileAudioPosition)
+
+          val audioBookManifest =
+            if (fileAudioManifest.isFile) {
+              BookFormat.AudioBookManifestReference(
+                manifestURI = this.loadAudioPlayerManifestURI(fileAudioManifestURI),
+                manifestFile = fileAudioManifest)
+            } else {
+              null
+            }
+
+          loadedBooks.add(LoadedBook(
+            owner = createdAccount,
+            bookID = BookIDs.newFromOPDSEntry(bookEntry),
+            bookDirectory = bookDirectory,
+            bookEntry = bookEntry,
+            epubFile = fileEPUB,
+            epubAdobeLoan = epubAdobeLoan,
+            audioBookManifest = audioBookManifest,
+            audioBookPosition = audioBookPosition
+          ))
+        } catch (e: Exception) {
+          this.logger.error("could not load book: ", e)
+          this.notices.add(MigrationError(
+            message = this.strings.errorBookLoadTitledFailure(bookEntry.title),
+            attributes = mapOf(
+              Pair("bookDirectory", bookDirectory.toString()),
+              Pair("bookTitle", bookEntry.title)
+            ),
+            exception = e))
+        }
+      } catch (e: Exception) {
+        this.logger.error("could not load book: ", e)
+        this.notices.add(MigrationError(
+          message = this.strings.errorBookLoadFailure(entry),
+          attributes = mapOf(Pair("bookDirectory", bookDirectory.toString())),
+          exception = e))
+      }
+    }
+    return loadedBooks.toList()
+  }
+
+  /**
+   * Try to load an audio player manifest URI from the given file.
+   */
+
+  private fun loadAudioPlayerManifestURI(fileAudioManifestURI: File): URI {
+    return URI.create(FileUtilities.fileReadUTF8(fileAudioManifestURI))
+  }
+
+  /**
+   * Try to load an audio player position from the given file, failing quietly if the file
+   * does not exist.
+   */
+
+  private fun loadAudioPlayerPositionOptionally(fileAudioPosition: File): PlayerPosition? {
+    return try {
+      FileInputStream(fileAudioPosition).use { stream ->
+        val objectMapper = ObjectMapper()
+        val result =
+          PlayerPositions.parseFromObjectNode(
+            JSONParserUtilities.checkObject(null, objectMapper.readTree(stream)))
+
+        when (result) {
+          is PlayerResult.Success -> result.result
+          is PlayerResult.Failure -> throw result.failure
+        }
+      }
+    } catch (e: FileNotFoundException) {
+      null
+    } catch (e: Exception) {
+      throw e
+    }
+  }
+
+  /**
+   * Create modern accounts based on the given loaded accounts.
+   */
 
   private fun createAccounts(accounts: List<LoadedAccount>): List<CreatedAccount> {
     val createdAccounts = mutableListOf<CreatedAccount>()
@@ -92,6 +401,10 @@ class MigrationFrom3Master(
     }
     return createdAccounts.toList()
   }
+
+  /**
+   * Create a modern account based on the given loaded account.
+   */
 
   private fun createAccount(account: LoadedAccount): CreatedAccount? {
     return when (val taskResult =
@@ -109,11 +422,15 @@ class MigrationFrom3Master(
             }
           }
 
-        this.errors.add(MigrationError(message = message, causes = causes))
+        this.notices.add(MigrationError(message = message, causes = causes))
         null
       }
     }
   }
+
+  /**
+   * Load all of the enumerated accounts.
+   */
 
   private fun loadAccounts(accounts: List<EnumeratedAccount>): List<LoadedAccount> {
     val loadedAccounts = mutableListOf<LoadedAccount>()
@@ -136,7 +453,7 @@ class MigrationFrom3Master(
       LoadedAccount(account, accountData)
     } catch (e: java.lang.Exception) {
       this.logger.error("could not load account: ", e)
-      this.errors.add(MigrationError(
+      this.notices.add(MigrationError(
         message = this.strings.errorAccountLoadFailure(account.idNumeric),
         attributes = mapOf(Pair("idNumeric", account.idNumeric.toString())),
         exception = e))
@@ -198,7 +515,7 @@ class MigrationFrom3Master(
 
     if (idURI == null) {
       this.logger.error("no account provider for id $idNumeric")
-      this.errors.add(MigrationError(
+      this.notices.add(MigrationError(
         message = this.strings.errorUnknownAccountProvider(idNumeric),
         attributes = mapOf(Pair("idNumeric", idNumeric.toString())),
         exception = Exception()))

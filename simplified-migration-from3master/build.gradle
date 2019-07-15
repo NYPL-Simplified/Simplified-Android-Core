@@ -18,6 +18,7 @@ description = 'simplified-migration-from-3_0-master'
 
 dependencies {
   api project(':simplified-migration-spi')
+  api project(':simplified-files')
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation 'org.slf4j:slf4j-api:1.7.25'

@@ -7,7 +7,7 @@ package org.nypl.simplified.migration.spi
 data class MigrationReport(
 
   /**
-   * The errors that occurred, if any.
+   * The notices that occurred, if any.
    */
 
-  val errors: List<MigrationError>)
+  val notices: List<MigrationNotice>)

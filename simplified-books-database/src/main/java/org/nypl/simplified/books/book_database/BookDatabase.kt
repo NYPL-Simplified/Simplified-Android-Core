@@ -4,8 +4,10 @@ import android.content.Context
 import com.io7m.jnull.Nullable
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
-import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_database.api.BookDatabaseException
+import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -46,7 +48,7 @@ class BookDatabase private constructor(
     internal val entries: ConcurrentSkipListMap<BookID, BookDatabaseEntry> =
       ConcurrentSkipListMap()
     @GuardedBy("mapsLock")
-    internal val entriesRead: SortedMap<BookID, org.nypl.simplified.books.book_database.api.BookDatabaseEntryType> =
+    internal val entriesRead: SortedMap<BookID, BookDatabaseEntryType> =
       Collections.unmodifiableSortedMap(this.entries)
 
     internal fun clear() {
@@ -81,21 +83,21 @@ class BookDatabase private constructor(
     }
   }
 
-  @Throws(org.nypl.simplified.books.book_database.api.BookDatabaseException::class)
+  @Throws(BookDatabaseException::class)
   override fun delete() {
     try {
       DirectoryUtilities.directoryDelete(this.directory)
     } catch (e: IOException) {
-      throw org.nypl.simplified.books.book_database.api.BookDatabaseException("Could not delete book database", listOf<Exception>(e))
+      throw BookDatabaseException("Could not delete book database", listOf<Exception>(e))
     } finally {
       this.maps.clear()
     }
   }
 
-  @Throws(org.nypl.simplified.books.book_database.api.BookDatabaseException::class)
+  @Throws(BookDatabaseException::class)
   override fun createOrUpdate(
     id: BookID,
-    newEntry: OPDSAcquisitionFeedEntry): org.nypl.simplified.books.book_database.api.BookDatabaseEntryType {
+    newEntry: OPDSAcquisitionFeedEntry): BookDatabaseEntryType {
 
     synchronized(this.maps.mapsLock) {
       try {
@@ -130,15 +132,15 @@ class BookDatabase private constructor(
         this.maps.addEntry(entry)
         return entry
       } catch (e: IOException) {
-        throw org.nypl.simplified.books.book_database.api.BookDatabaseException(e.message, listOf<Exception>(e))
+        throw BookDatabaseException(e.message, listOf<Exception>(e))
       }
     }
   }
 
-  @Throws(org.nypl.simplified.books.book_database.api.BookDatabaseException::class)
-  override fun entry(id: BookID): org.nypl.simplified.books.book_database.api.BookDatabaseEntryType {
+  @Throws(BookDatabaseException::class)
+  override fun entry(id: BookID): BookDatabaseEntryType {
     synchronized(this.maps.mapsLock) {
-      return this.maps.entries[id] ?: throw org.nypl.simplified.books.book_database.api.BookDatabaseException(
+      return this.maps.entries[id] ?: throw BookDatabaseException(
         "Nonexistent book entry: " + id.value(), emptyList())
     }
   }
@@ -147,7 +149,7 @@ class BookDatabase private constructor(
 
     private val LOG = LoggerFactory.getLogger(BookDatabase::class.java)
 
-    @Throws(org.nypl.simplified.books.book_database.api.BookDatabaseException::class)
+    @Throws(BookDatabaseException::class)
     fun open(
       context: Context,
       parser: OPDSJSONParserType,
@@ -162,7 +164,7 @@ class BookDatabase private constructor(
 
       if (!errors.isEmpty()) {
         errors.forEach { exception -> LOG.error("error opening book database: ", exception) }
-        throw org.nypl.simplified.books.book_database.api.BookDatabaseException(
+        throw BookDatabaseException(
           "One or more errors occurred whilst trying to open a book database.", errors)
       }
 

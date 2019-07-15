@@ -2,4 +2,9 @@
 <resources>
   <string name="errorUnknownAccountProvider">Found an account with an unrecognized ID: %1$d. It cannot be migrated.</string>
   <string name="errorAccountLoadFailure">Could not load the existing account with ID %1$d</string>
+  <string name="errorBookLoadFailure">Could not load book %1$s.</string>
+  <string name="errorBookLoadTitledFailure">Could not load book \"%1$s\".</string>
+  <string name="errorUnexpectedFormat">Book %1$s is of an unexpected format (%2$s).</string>
+  <string name="reportCreatedAccount">Created account \"%1$s\"</string>
+  <string name="reportCopiedBook">Migrated book \"%1$s\"</string>
 </resources>
