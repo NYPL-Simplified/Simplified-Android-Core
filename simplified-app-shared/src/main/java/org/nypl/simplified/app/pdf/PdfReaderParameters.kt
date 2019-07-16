@@ -1,5 +1,7 @@
 package org.nypl.simplified.app.pdf
 
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.books.api.BookID
 import java.io.File
 import java.io.Serializable
 
@@ -10,7 +12,9 @@ import java.io.Serializable
  * @param pageIndex The page to open the asset to
  */
 data class PdfReaderParameters(
+        val accountId: AccountID,
         val documentTile: String,
         val pdfFile: File,
-        val pageIndex: Int
+        val pageIndex: Int,
+        val id: BookID
 ) : Serializable

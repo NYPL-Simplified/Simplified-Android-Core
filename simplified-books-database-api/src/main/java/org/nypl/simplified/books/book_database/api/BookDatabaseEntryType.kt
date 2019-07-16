@@ -206,6 +206,16 @@ sealed class BookDatabaseEntryFormatHandle {
 
     @Throws(IOException::class)
     abstract fun copyInBook(file: File)
+
+    /**
+     * Set the last read location for the PDF book.
+     *
+     * @param pageNumber The Int page number of the PDF book
+     *
+     * @throws IOException On I/O errors
+     */
+    @Throws(IOException::class)
+    abstract fun setLastReadLocation(pageNumber: Int?)
   }
 
   /**
