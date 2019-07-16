@@ -136,9 +136,7 @@ public class AccountsRegistry implements Serializable {
       final JSONArray productionEntries = new JSONArray();
       for (int i = 0; i < allEntries.length(); i++) {
         final JSONObject entry = allEntries.getJSONObject(i);
-        if (entry.getBoolean("inProduction")) {
-          productionEntries.put(entry);
-        }
+        productionEntries.put(entry);
       }
 
       this.accounts = productionEntries;
@@ -168,9 +166,7 @@ public class AccountsRegistry implements Serializable {
       final JSONArray productionEntries = new JSONArray();
       for (int i = 0; i < allEntries.length(); i++) {
         final JSONObject entry = allEntries.getJSONObject(i);
-        // if (entry.getBoolean("inProduction")) {
-          productionEntries.put(entry);
-        //}
+        productionEntries.put(entry);
       }
 
       this.accounts = productionEntries;
