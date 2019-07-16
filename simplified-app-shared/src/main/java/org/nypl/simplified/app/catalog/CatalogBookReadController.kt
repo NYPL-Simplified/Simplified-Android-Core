@@ -57,7 +57,7 @@ class CatalogBookReadController(
             is BookFormatAudioBook ->
                 this.launchAudioBookPlayer(entry.book, format)
             is BookFormatPDF ->
-                this.launchPDFReader(entry.book, format, this.profile, this.account, this.id)
+                this.launchPDFReader(entry.book, format, this.id)
         }
     }
 
@@ -66,8 +66,9 @@ class CatalogBookReadController(
      *
      * @param book
      * @param format
+     * @param id
      */
-    private fun launchPDFReader(book: Book, format: BookFormatPDF, profile: ProfileReadableType, account: AccountType, id: BookID) {
+    private fun launchPDFReader(book: Book, format: BookFormatPDF, id: BookID) {
         if (format.isDownloaded && format.file != null) {
             this.sendAnalytics(book)
             PdfReaderActivity.startActivity(this.activity, PdfReaderParameters(

@@ -1,9 +1,7 @@
 package org.nypl.simplified.books.book_database
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.api.BookmarkJSON
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.files.FileUtilities
 import java.io.File
@@ -90,7 +88,7 @@ internal class DatabaseFormatHandlePDF internal constructor(
     @Throws(IOException::class)
     private fun loadLastReadLocation(fileLastRead: File): Int {
       val serialized = FileUtilities.fileReadUTF8(fileLastRead)
-      return 1
+      return serialized.toInt()
     }
 
     @Throws(IOException::class)

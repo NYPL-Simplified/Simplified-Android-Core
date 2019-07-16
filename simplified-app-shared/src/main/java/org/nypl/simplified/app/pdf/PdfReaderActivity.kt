@@ -9,21 +9,23 @@ import org.nypl.pdf.android.api.TableOfContentsItem
 import org.nypl.pdf.android.pdfviewer.PdfViewerFragment
 import org.nypl.pdf.android.pdfviewer.TableOfContentsFragment
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_database.api.BookDatabaseType
+import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStream
-import java.lang.Exception
 
 class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, TableOfContentsFragmentListenerType {
 
     companion object {
-        const val KEY_PAGE_INDEX = "page_index"
         const val TABLE_OF_CONTENTS = "table_of_contents"
 
         private const val PARAMS_ID = "org.nypl.pdf.android.pdfreader.PdfReaderActivity.params"
@@ -51,6 +53,11 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
     private lateinit var pdfFile: File
     private lateinit var accountId: AccountID
     private lateinit var id: BookID
+    private lateinit var profile: ProfileReadableType
+    private lateinit var account: AccountType
+    private lateinit var books: BookDatabaseType
+    private lateinit var entry: BookDatabaseEntryType
+    private lateinit var handle: BookDatabaseEntryFormatHandlePDF
 
     // vars for the activity to pass back to the reader or table of contents fragment
     private var documentPageIndex: Int = 0
@@ -67,12 +74,20 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
         this.accountId = intentParams.accountId
         this.id = intentParams.id
 
+        this.profile = Simplified.getServices()
+                .profilesController
+                .profileCurrent()
+
+        this.account = profile.account(accountId)
+        this.books = account.bookDatabase
+        this.entry = books.entry(id)
+        this.handle = entry.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)!!
+        this.documentPageIndex = handle.format.lastReadLocation!!
+
         if (savedInstanceState != null) {
-            this.documentPageIndex = savedInstanceState.getInt(KEY_PAGE_INDEX, 0)
             this.tableOfContentsList = savedInstanceState.getParcelableArrayList(TABLE_OF_CONTENTS)
                     ?: arrayListOf()
         } else {
-            this.documentPageIndex = getLastReadLocation()
 
             // Get the new instance of the reader you want to load here.
             val readerFragment = PdfViewerFragment.newInstance()
@@ -86,7 +101,6 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
 
     override fun onSaveInstanceState(outState: Bundle) {
         log.debug("onSaveInstanceState")
-        outState.putInt(KEY_PAGE_INDEX, documentPageIndex)
         outState.putParcelableArrayList(TABLE_OF_CONTENTS, tableOfContentsList)
         super.onSaveInstanceState(outState)
     }
@@ -110,7 +124,7 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
     override fun onReaderPageChanged(pageIndex: Int) {
         log.debug("onReaderPageChanged")
         this.documentPageIndex = pageIndex
-        saveLastReadLocation(pageIndex)
+        handle.setLastReadLocation(pageIndex)
     }
 
     override fun onReaderLoadedTableOfContents(tableOfContentsList: ArrayList<TableOfContentsItem>) {
@@ -154,51 +168,6 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
         // the reader fragment should be on the backstack and will ask for the page index when `onResume` is called
         this.documentPageIndex = pageSelected
         onBackPressed()
-    }
-
-    /**
-     * Saves last read location for PDF book
-     *
-     * @param pageNumber
-     */
-    private fun saveLastReadLocation(pageNumber: Int) {
-        try {
-            val profile = Simplified.getServices()
-                    .profilesController
-                    .profileCurrent()
-
-            log.debug("Saving at page $pageNumber")
-            val account = profile.account(accountId)
-            val books = account.bookDatabase
-            val entry = books.entry(id)
-            val handle = entry.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)
-            handle!!.setLastReadLocation(pageNumber)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * Gets last read location for PDF Book
-     *
-     * @return
-     */
-    private fun getLastReadLocation(): Int {
-        return try {
-            val profile = Simplified.getServices()
-                    .profilesController
-                    .profileCurrent()
-
-            log.debug("Getting last read page")
-            val account = profile.account(accountId)
-            val books = account.bookDatabase
-            val entry = books.entry(id)
-            val handle = entry.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)
-            handle!!.format.lastReadLocation!!
-        } catch (e: Exception) {
-            e.printStackTrace()
-            0
-        }
     }
     //endregion
 }
