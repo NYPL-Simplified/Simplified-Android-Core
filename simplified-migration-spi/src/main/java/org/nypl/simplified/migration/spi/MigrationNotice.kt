@@ -19,7 +19,8 @@ sealed class MigrationNotice {
   enum class Subject {
     PROFILE,
     ACCOUNT,
-    BOOK
+    BOOK,
+    BOOKMARK
   }
 
   /**

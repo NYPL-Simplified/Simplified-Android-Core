@@ -7,25 +7,52 @@ package org.nypl.simplified.migration.from3master
 interface MigrationFrom3MasterStringResourcesType {
 
   fun errorUnknownAccountProvider(
-    id: Int): String
+    id: Int
+  ): String
 
   fun errorAccountLoadFailure(
-    id: Int): String
+    id: Int
+  ): String
 
   fun errorBookLoadFailure(
-    entry: String): String
+    entry: String
+  ): String
 
   fun errorBookUnexpectedFormat(
     title: String,
-    receivedFormat: String)
-    : String
+    receivedFormat: String
+  ): String
 
   fun errorBookLoadTitledFailure(
-    title: String): String
+    title: String
+  ): String
+
+  fun errorBookCopyFailure(
+    title: String
+  ): String
+
+  fun errorBookAdobeDRMCopyFailure(
+    title: String
+  ): String
+
+  fun errorBookmarksCopyFailure(
+    title: String
+  ): String
+
+  fun errorBookmarksParseFailure(
+    title: String
+  ): String
 
   fun reportCreatedAccount(
-    title: String): String
+    title: String
+  ): String
 
   fun reportCopiedBook(
-    title: String): String
+    title: String
+  ): String
+
+  fun reportCopiedBookmarks(
+    title: String,
+    count: Int
+  ): String
 }

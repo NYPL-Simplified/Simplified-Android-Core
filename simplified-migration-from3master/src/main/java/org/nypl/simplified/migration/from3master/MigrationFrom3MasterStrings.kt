@@ -5,6 +5,21 @@ import android.content.res.Resources
 class MigrationFrom3MasterStrings(
   private val resources: Resources) : MigrationFrom3MasterStringResourcesType {
 
+  override fun errorBookCopyFailure(title: String): String =
+    this.resources.getString(R.string.errorBookCopyFailure, title)
+
+  override fun errorBookAdobeDRMCopyFailure(title: String): String =
+    this.resources.getString(R.string.errorBookAdobeDRMCopyFailure, title)
+
+  override fun errorBookmarksCopyFailure(title: String): String =
+    this.resources.getString(R.string.errorBookmarksCopyFailure, title)
+
+  override fun reportCopiedBookmarks(title: String, count: Int): String =
+    this.resources.getString(R.string.reportCopiedBookmarks, title, count)
+
+  override fun errorBookmarksParseFailure(title: String): String =
+    this.resources.getString(R.string.errorBookmarksParseFailure, title)
+
   override fun reportCreatedAccount(title: String): String =
     this.resources.getString(R.string.reportCreatedAccount, title)
 

@@ -7,4 +7,9 @@
   <string name="errorUnexpectedFormat">Book %1$s is of an unexpected format (%2$s).</string>
   <string name="reportCreatedAccount">Created account \"%1$s\"</string>
   <string name="reportCopiedBook">Migrated book \"%1$s\"</string>
+  <string name="errorBookmarksParseFailure">Could not parse a bookmark for book \"%1$s\".</string>
+  <string name="errorBookCopyFailure">Failed to copy book \"%1$s\" to new database.</string>
+  <string name="errorBookAdobeDRMCopyFailure">Failed to copy Adobe DRM rights information for book \"%1$s\".</string>
+  <string name="errorBookmarksCopyFailure">Failed to copy bookmarks for book \"%1$s\".</string>
+  <string name="reportCopiedBookmarks">Copied %2$s bookmarks for book \"%1$s\".</string>
 </resources>

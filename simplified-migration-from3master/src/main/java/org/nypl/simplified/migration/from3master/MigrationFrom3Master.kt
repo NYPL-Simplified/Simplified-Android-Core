@@ -2,8 +2,11 @@ package org.nypl.simplified.migration.from3master
 
 import android.content.Context
 import android.os.Environment
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
+import com.io7m.jfunctional.Option
+import org.joda.time.format.ISODateTimeFormat
 import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.audiobook.android.api.PlayerPositions
 import org.nypl.audiobook.android.api.PlayerResult
@@ -13,6 +16,9 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.api.BookLocation
+import org.nypl.simplified.books.api.Bookmark
+import org.nypl.simplified.books.api.BookmarkKind
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
@@ -24,6 +30,7 @@ import org.nypl.simplified.migration.spi.MigrationNotice.MigrationInfo
 import org.nypl.simplified.migration.spi.MigrationNotice.Subject
 import org.nypl.simplified.migration.spi.MigrationNotice.Subject.ACCOUNT
 import org.nypl.simplified.migration.spi.MigrationNotice.Subject.BOOK
+import org.nypl.simplified.migration.spi.MigrationNotice.Subject.BOOKMARK
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.migration.spi.MigrationType
@@ -35,6 +42,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
+import java.io.InputStream
 import java.net.URI
 import java.nio.ByteBuffer
 
@@ -115,6 +123,7 @@ class MigrationFrom3Master(
     val bookEntry: OPDSAcquisitionFeedEntry,
     val epubFile: File,
     val epubAdobeLoan: AdobeAdeptLoan?,
+    val epubBookmarks: List<Bookmark>?,
     val audioBookPosition: PlayerPosition?,
     val audioBookManifest: BookFormat.AudioBookManifestReference?)
 
@@ -236,24 +245,58 @@ class MigrationFrom3Master(
   private fun copyBookEPUB(
     handle: BookDatabaseEntryFormatHandleEPUB,
     book: LoadedBook
-  ): CopiedBook {
-    if (book.epubFile.isFile) {
-      handle.copyInBook(book.epubFile)
-    }
-    handle.setAdobeRightsInformation(book.epubAdobeLoan)
-    return CopiedBook(book)
-  }
+  ): CopiedBook? {
 
-  /**
-   * Load all of the books from the given list of accounts.
-   */
+    var result : CopiedBook? = CopiedBook(book)
 
-  private fun loadBooks(createdAccounts: List<CreatedAccount>): List<LoadedBook> {
-    val enumeratedBooks = mutableListOf<LoadedBook>()
-    for (createdAccount in createdAccounts) {
-      enumeratedBooks.addAll(this.loadBooksForAccount(createdAccount))
+    try {
+      if (book.epubFile.isFile) {
+        handle.copyInBook(book.epubFile)
+      }
+    } catch (e: Exception) {
+      this.logger.error("failed to copy epub: ", e)
+      this.notices.add(MigrationError(
+        message = this.strings.errorBookCopyFailure(book.bookEntry.title),
+        attributes = mapOf(
+          Pair("bookTitle", book.bookEntry.title),
+          Pair("bookID", book.bookID.value())
+        ),
+        exception = e))
+      result = null
     }
-    return enumeratedBooks.toList()
+
+    try {
+      if (book.epubBookmarks != null) {
+        handle.setBookmarks(book.epubBookmarks)
+        this.publishNotice(BOOKMARK, this.strings.reportCopiedBookmarks(book.bookEntry.title, book.epubBookmarks.size))
+      }
+    } catch (e: Exception) {
+      this.logger.error("failed to copy bookmarks: ", e)
+      this.notices.add(MigrationError(
+        message = this.strings.errorBookmarksCopyFailure(book.bookEntry.title),
+        attributes = mapOf(
+          Pair("bookTitle", book.bookEntry.title),
+          Pair("bookID", book.bookID.value())
+        ),
+        exception = e))
+      result = null
+    }
+
+    try {
+      handle.setAdobeRightsInformation(book.epubAdobeLoan)
+    } catch (e: Exception) {
+      this.logger.error("failed to copy adobe DRM information: ", e)
+      this.notices.add(MigrationError(
+        message = this.strings.errorBookAdobeDRMCopyFailure(book.bookEntry.title),
+        attributes = mapOf(
+          Pair("bookTitle", book.bookEntry.title),
+          Pair("bookID", book.bookID.value())
+        ),
+        exception = e))
+      result = null
+    }
+
+    return result
   }
 
   /**
@@ -300,6 +343,8 @@ class MigrationFrom3Master(
             File(bookDirectory, "rights_adobe.xml")
           val fileAdobeMeta =
             File(bookDirectory, "meta_adobe.json")
+          val fileAnnotations =
+            File(bookDirectory, "annotations.json")
           val fileAudioManifest =
             File(bookDirectory, "audiobook-manifest.json")
           val fileAudioManifestURI =
@@ -310,6 +355,13 @@ class MigrationFrom3Master(
           val epubAdobeLoan =
             if (fileAdobeRights.isFile && fileAdobeMeta.isFile) {
               this.loadAdobeRights(fileAdobeRights, fileAdobeMeta)
+            } else {
+              null
+            }
+
+          val epubBookmarks =
+            if (fileAnnotations.isFile) {
+              loadBookmarks(bookEntry.title, fileAnnotations)
             } else {
               null
             }
@@ -333,6 +385,7 @@ class MigrationFrom3Master(
             bookEntry = bookEntry,
             epubFile = fileEPUB,
             epubAdobeLoan = epubAdobeLoan,
+            epubBookmarks = epubBookmarks,
             audioBookManifest = audioBookManifest,
             audioBookPosition = audioBookPosition
           ))
@@ -355,6 +408,101 @@ class MigrationFrom3Master(
       }
     }
     return loadedBooks.toList()
+  }
+
+  /**
+   * Load bookmarks from the given file.
+   */
+
+  private fun loadBookmarks(
+    title: String,
+    file: File
+  ): List<Bookmark>? {
+    return try {
+      FileInputStream(file).use { stream ->
+        parseBookmarks(stream).mapNotNull { annotation ->
+          parseAnnotationToBookmark(title, annotation)
+        }
+      }
+    } catch (e: Exception) {
+      this.logger.error("could not parse bookmarks: ", e)
+      this.notices.add(MigrationError(
+        message = this.strings.errorBookmarksParseFailure(title),
+        exception = e,
+        attributes = mapOf(
+          Pair("bookTitle", title)
+        ),
+        subject = BOOKMARK
+      ))
+      null
+    }
+  }
+
+  /**
+   * Parse bookmarks from the given stream.
+   */
+
+  private fun parseBookmarks(stream: InputStream): List<BookmarkAnnotation> {
+    val mapper = ObjectMapper()
+    val jsonObj: Map<String, List<BookmarkAnnotation>> =
+      mapper.readValue(stream, object : TypeReference<Map<String, List<BookmarkAnnotation>>>() {
+
+      })
+    return jsonObj["bookmarks"] ?: listOf()
+  }
+
+  /**
+   * Map a bookmark from an old-style annotation to a modern bookmark.
+   */
+
+  private fun parseAnnotationToBookmark(
+    title: String,
+    annotation: BookmarkAnnotation
+  ): Bookmark? {
+
+    val formatter = ISODateTimeFormat.dateTimeParser()
+
+    return try {
+      val bookLocation =
+        BookLocation.create(Option.none(), "x")
+      val kind =
+        BookmarkKind.ofMotivation(annotation.motivation)
+      val time =
+        formatter.parseLocalDateTime(annotation.body.timestamp)
+      val chapterTitle =
+        annotation.body.chapterTitle ?: ""
+      val chapterProgress =
+        annotation.body.chapterProgress?.toDouble() ?: 0.0
+      val bookProgress =
+        annotation.body.bookProgress?.toDouble() ?: 0.0
+      val deviceId =
+        annotation.body.device
+      val uri =
+        annotation.id?.let(::URI)
+
+      Bookmark(
+        opdsId = annotation.target.source,
+        location = bookLocation,
+        kind = kind,
+        time = time,
+        chapterTitle = chapterTitle,
+        chapterProgress = chapterProgress,
+        bookProgress = bookProgress,
+        deviceID = deviceId,
+        uri = uri
+      )
+    } catch (e: Exception) {
+      this.logger.error("could not parse bookmarks: ", e)
+      this.notices.add(MigrationError(
+        message = this.strings.errorBookmarksParseFailure(title),
+        exception = e,
+        attributes = mapOf(
+          Pair("bookTitle", title)
+        ),
+        subject = BOOKMARK
+      ))
+      null
+    }
   }
 
   /**
@@ -388,18 +536,6 @@ class MigrationFrom3Master(
     } catch (e: Exception) {
       throw e
     }
-  }
-
-  /**
-   * Create modern accounts based on the given loaded accounts.
-   */
-
-  private fun createAccounts(accounts: List<LoadedAccount>): List<CreatedAccount> {
-    val createdAccounts = mutableListOf<CreatedAccount>()
-    for (account in accounts) {
-      this.createAccount(account)?.let { createdAccounts.add(it) }
-    }
-    return createdAccounts.toList()
   }
 
   /**
@@ -455,7 +591,9 @@ class MigrationFrom3Master(
       this.logger.error("could not load account: ", e)
       this.notices.add(MigrationError(
         message = this.strings.errorAccountLoadFailure(account.idNumeric),
-        attributes = mapOf(Pair("idNumeric", account.idNumeric.toString())),
+        attributes = mapOf(
+          Pair("idNumeric", account.idNumeric.toString())
+        ),
         exception = e))
       null
     }

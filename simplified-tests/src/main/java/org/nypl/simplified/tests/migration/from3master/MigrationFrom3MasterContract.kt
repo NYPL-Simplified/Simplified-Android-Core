@@ -4,28 +4,36 @@ import android.content.Context
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.api.BookFormat.*
+import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.*
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_database.api.BookDatabaseType
+import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.migration.from3master.EnvironmentQueriesType
 import org.nypl.simplified.migration.from3master.MigrationFrom3MasterProvider
 import org.nypl.simplified.migration.from3master.MigrationFrom3MasterStringResourcesType
-import org.nypl.simplified.migration.spi.MigrationNotice
-import org.nypl.simplified.migration.spi.MigrationNotice.*
+import org.nypl.simplified.migration.spi.MigrationNotice.MigrationError
+import org.nypl.simplified.migration.spi.MigrationNotice.MigrationInfo
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
+import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.Logger
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.IOException
 import java.util.UUID
 import kotlin.random.Random
 
@@ -68,6 +76,20 @@ abstract class MigrationFrom3MasterContract {
   }
 
   private class MockStrings : MigrationFrom3MasterStringResourcesType {
+    override fun errorBookCopyFailure(title: String): String =
+      "errorBookCopyFailure: $title"
+
+    override fun errorBookAdobeDRMCopyFailure(title: String): String =
+      "errorBookAdobeDRMCopyFailure: $title"
+
+    override fun errorBookmarksCopyFailure(title: String): String =
+      "errorBookmarksCopyFailure: $title"
+
+    override fun reportCopiedBookmarks(title: String, count: Int): String =
+      "reportCopiedBookmarks: $title $count"
+
+    override fun errorBookmarksParseFailure(title: String): String =
+      "errorBookmarksParseFailure: $title"
 
     override fun errorBookUnexpectedFormat(title: String, receivedFormat: String): String =
       "errorBookUnexpectedFormat: $title $receivedFormat"
@@ -351,14 +373,111 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(2, report.notices.size)
+    Assert.assertEquals(3, report.notices.size)
     Assert.assertEquals("reportCreatedAccount: Account 0", report.notices[0].message)
-    Assert.assertEquals("reportCopiedBook: Bossypants", report.notices[1].message)
+    Assert.assertEquals("reportCopiedBookmarks: Bossypants 1", report.notices[1].message)
+    Assert.assertEquals("reportCopiedBook: Bossypants", report.notices[2].message)
 
     val bookId = BookID.create("5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
     Assert.assertTrue(bookDatabase.books().contains(bookId))
     val format = bookDatabase.entry(bookId).book.findPreferredFormat() as BookFormatEPUB
     Assert.assertEquals(epubData.toList(), format.file!!.readBytes().toList())
+  }
+
+  /**
+   * Errors are reported for book database failures.
+   */
+
+  @Test
+  fun testRunAccountNYPLSingleOneBookDatabaseFailures() {
+    Mockito.`when`(this.queries.getExternalStorageState())
+      .thenReturn("UNKNOWN")
+    Mockito.`when`(this.context.filesDir)
+      .thenReturn(this.tempDir)
+
+    val bookDatabaseEntryFormatHandle =
+      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+    val bookDatabaseEntry =
+      Mockito.mock(BookDatabaseEntryType::class.java)
+    val bookDatabase =
+      Mockito.mock(BookDatabaseType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val account =
+      Mockito.mock(AccountType::class.java)
+
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Account 0")
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(account.bookDatabase)
+      .thenReturn(bookDatabase)
+
+    val opdsEntry =
+      this.opdsEntry("meta0.json")
+    val bookId =
+      BookID.create("5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
+
+    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
+      .thenReturn(bookDatabaseEntry)
+    Mockito.`when`(bookDatabaseEntry.findPreferredFormatHandle())
+      .thenReturn(bookDatabaseEntryFormatHandle)
+
+    this.services =
+      MigrationServiceDependencies(
+        applicationProfileIsAnonymous = true,
+        createAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountCreateErrorDetails>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.finishSuccess(account)
+        },
+        context = this.context)
+
+    val acc = File(this.tempDir, "12")
+    acc.mkdirs()
+    File(acc, "accounts").mkdirs()
+
+    val booksDir = File(acc, "books")
+    val booksDataDir = File(booksDir, "data")
+    val bookDir = File(booksDataDir, "5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
+    bookDir.mkdirs()
+
+    val bookEPUBFile = File(bookDir, "book.epub")
+    val epubData = Random.Default.nextBytes(32)
+    bookEPUBFile.writeBytes(epubData)
+    val bookMetaFile = File(bookDir, "meta.json")
+    bookMetaFile.writeBytes(this.resource("meta0.json"))
+    val bookAnnotationsFile = File(bookDir, "annotations.json")
+    bookAnnotationsFile.writeBytes(this.resource("annotations0.json"))
+
+    File(acc, "account.json").writeBytes(this.resource("account.json"))
+    File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
+
+    Mockito.`when`(bookDatabaseEntryFormatHandle.setAdobeRightsInformation(Mockito.any()))
+      .thenThrow(IOException("Bad rights"))
+    Mockito.`when`(bookDatabaseEntryFormatHandle.setBookmarks(Mockito.anyList()))
+      .thenThrow(IOException("Bad bookmarks"))
+    Mockito.`when`(bookDatabaseEntryFormatHandle.copyInBook(bookEPUBFile))
+      .thenThrow(IOException("Bad book"))
+
+    val migration = this.migrations.create(this.services)
+    Assert.assertEquals(true, migration.needsToRun())
+
+    val report = migration.run()
+    this.showReport(report)
+    Assert.assertEquals(4, report.notices.size)
+    Assert.assertEquals("reportCreatedAccount: Account 0", report.notices[0].message)
+    Assert.assertEquals("errorBookCopyFailure: Bossypants", report.notices[1].message)
+    Assert.assertEquals("errorBookmarksCopyFailure: Bossypants", report.notices[2].message)
+    Assert.assertEquals("errorBookAdobeDRMCopyFailure: Bossypants", report.notices[3].message)
+
+    Assert.assertFalse(bookDatabase.books().contains(bookId))
+  }
+
+  private fun opdsEntry(name: String): OPDSAcquisitionFeedEntry {
+    val parser = OPDSJSONParser.newParser()
+    return parser.parseAcquisitionFeedEntryFromStream(ByteArrayInputStream(resource(name)))
   }
 
   private fun showReport(report: MigrationReport) {
