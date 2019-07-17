@@ -154,7 +154,7 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoginFailed
 
-    Assert.assertEquals(AccountLoginNotRequired, state.taskResult.errors().last())
+    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginNotRequired)
   }
 
   /**
@@ -230,7 +230,7 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoginFailed
 
-    Assert.assertEquals(AccountLoginCredentialsIncorrect, state.taskResult.errors().last())
+    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginCredentialsIncorrect)
   }
 
   /**
@@ -307,6 +307,7 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(AccountLoginServerError(
+      "loginServerError 404 NOT FOUND",
       URI.create("urn:patron"),
       404,
       "NOT FOUND",
@@ -382,7 +383,7 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoginFailed
 
-    Assert.assertEquals(AccountLoginConnectionFailure, state.taskResult.errors().last())
+    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginConnectionFailure)
   }
 
   /**
@@ -542,9 +543,9 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoginFailed
 
-    Assert.assertEquals(
-      AccountLoginServerParseError(parseWarnings, parseErrors),
-      state.taskResult.errors().last())
+    val expected = AccountLoginServerParseError("loginPatronSettingsRequestParseFailed", parseWarnings, parseErrors)
+    val received = state.taskResult.errors().last()
+    Assert.assertEquals(expected, received)
   }
 
   /**
@@ -883,7 +884,7 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(
-      AccountLoginDRMNotSupported("Adobe ACS"),
+      AccountLoginDRMNotSupported("loginDeviceDRMNotSupported","Adobe ACS"),
       state.taskResult.errors().last())
   }
 
@@ -1119,7 +1120,7 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(
-      AccountLoginDRMFailure("E_FAIL_OFTEN_AND_LOUDLY"),
+      AccountLoginDRMFailure("loginDeviceActivationFailed","E_FAIL_OFTEN_AND_LOUDLY"),
       state.taskResult.errors().last())
   }
 

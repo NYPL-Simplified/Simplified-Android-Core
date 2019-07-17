@@ -34,6 +34,7 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -96,7 +97,8 @@ class ProfileAccountLoginTask(
       val authentication = this.account.provider.authentication
       if (authentication == null) {
         this.debug("account does not require authentication")
-        this.steps.currentStepFailed(this.loginStrings.loginAuthNotRequired, AccountLoginNotRequired)
+        val details = AccountLoginNotRequired(this.loginStrings.loginAuthNotRequired)
+        this.steps.currentStepFailed(details.message, details)
         this.account.setLoginState(AccountLoginFailed(this.steps.finishFailure<Unit>()))
         return this.steps.finishFailure()
       }
@@ -108,7 +110,7 @@ class ProfileAccountLoginTask(
     } catch (e: Throwable) {
       this.steps.currentStepFailedAppending(
         message = this.loginStrings.loginUnexpectedException,
-        errorValue = AccountLoginUnexpectedException(e),
+        errorValue = AccountLoginUnexpectedException(this.loginStrings.loginUnexpectedException, e),
         exception = e)
 
       val failure = this.steps.finishFailure<Unit>()
@@ -151,7 +153,9 @@ class ProfileAccountLoginTask(
     if (adeptExecutor == null) {
       this.steps.currentStepFailed(
         this.loginStrings.loginDeviceDRMNotSupported,
-        AccountLoginDRMNotSupported("Adobe ACS"))
+        AccountLoginDRMNotSupported(
+          message = this.loginStrings.loginDeviceDRMNotSupported,
+          system = "Adobe ACS"))
       throw DRMUnsupportedException("Adobe ACS")
     }
 
@@ -194,27 +198,29 @@ class ProfileAccountLoginTask(
     }
   }
 
-  private fun handleAdobeDRMConnectorException(ex: Throwable) =
-    when (ex) {
+  private fun handleAdobeDRMConnectorException(ex: Throwable): TaskStep<AccountLoginErrorData> {
+    val text = this.loginStrings.loginDeviceActivationFailed(ex)
+    return when (ex) {
       is AdobeDRMExtensions.AdobeDRMLoginNoActivationsException -> {
         this.steps.currentStepFailed(
-          this.loginStrings.loginDeviceActivationFailed(ex),
-          AccountLoginDRMTooManyActivations,
+          text,
+          AccountLoginDRMTooManyActivations(text),
           ex)
       }
       is AdobeDRMExtensions.AdobeDRMLoginConnectorException -> {
         this.steps.currentStepFailed(
-          this.loginStrings.loginDeviceActivationFailed(ex),
-          AccountLoginDRMFailure(ex.errorCode),
+          text,
+          AccountLoginDRMFailure(text, ex.errorCode),
           ex)
       }
       else -> {
         this.steps.currentStepFailed(
-          this.loginStrings.loginDeviceActivationFailed(ex),
-          AccountLoginUnexpectedException(ex),
+          text,
+          AccountLoginUnexpectedException(text, ex),
           ex)
       }
     }
+  }
 
   private fun runDeviceActivationAdobeSendDeviceManagerRequest(deviceManagerURI: URI) {
     this.debug("runDeviceActivationAdobeSendDeviceManagerRequest: posting device ID")
@@ -290,7 +296,8 @@ class ProfileAccountLoginTask(
     val patronSettingsURI = this.account.provider.patronSettingsURI
     if (patronSettingsURI == null) {
       this.steps.currentStepFailed(
-        this.loginStrings.loginPatronSettingsRequestNoURI, AccountLoginMissingInformation)
+        this.loginStrings.loginPatronSettingsRequestNoURI,
+        AccountLoginMissingInformation(this.loginStrings.loginPatronSettingsRequestNoURI))
       throw Exception()
     }
 
@@ -330,10 +337,16 @@ class ProfileAccountLoginTask(
         }
         is ParseResult.Failure -> {
           this.error("failed to parse patron profile")
+          val message =
+            this.loginStrings.loginPatronSettingsRequestParseFailed(
+              parseResult.errors.map(this::showParseError))
           this.steps.currentStepFailed(
-            message = this.loginStrings.loginPatronSettingsRequestParseFailed(
-              parseResult.errors.map(this::showParseError)),
-            errorValue = AccountLoginServerParseError(parseResult.warnings, parseResult.errors))
+            message = message,
+            errorValue = AccountLoginServerParseError(
+              message = message,
+              warnings = parseResult.warnings,
+              errors = parseResult.errors
+            ))
           throw Exception()
         }
       }
@@ -390,9 +403,10 @@ class ProfileAccountLoginTask(
   private fun onPatronProfileRequestHTTPException(
     patronSettingsURI: URI,
     result: HTTPResultException<InputStream>) {
+    val message = this.loginStrings.loginPatronSettingsConnectionFailed
     this.steps.currentStepFailed(
-      message = this.loginStrings.loginPatronSettingsConnectionFailed,
-      errorValue = AccountLoginConnectionFailure,
+      message = message,
+      errorValue = AccountLoginConnectionFailure(message),
       exception = result.error)
     throw result.error
   }
@@ -404,15 +418,18 @@ class ProfileAccountLoginTask(
 
     when (result.status) {
       HttpURLConnection.HTTP_UNAUTHORIZED -> {
+        val message = this.loginStrings.loginPatronSettingsInvalidCredentials
         this.steps.currentStepFailed(
-          message = this.loginStrings.loginPatronSettingsInvalidCredentials,
-          errorValue = AccountLoginCredentialsIncorrect)
+          message = message,
+          errorValue = AccountLoginCredentialsIncorrect(message))
         throw Exception()
       }
       else -> {
+        val message = this.loginStrings.loginServerError(result.status, result.message)
         this.steps.currentStepFailed(
-          message = this.loginStrings.loginServerError(result.status, result.message),
+          message = message,
           errorValue = AccountLoginServerError(
+            message = message,
             uri = patronSettingsURI,
             statusCode = result.status,
             errorMessage = result.message,

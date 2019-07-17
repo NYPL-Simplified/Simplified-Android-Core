@@ -3,6 +3,7 @@ package org.nypl.simplified.accounts.api
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseWarning
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import java.net.URI
@@ -49,13 +50,14 @@ sealed class AccountLoginState {
    * Error data associated with account login failures.
    */
 
-  sealed class AccountLoginErrorData {
+  sealed class AccountLoginErrorData : PresentableErrorType {
 
     /**
      * Logging in failed because the credentials were incorrect.
      */
 
-    object AccountLoginCredentialsIncorrect : AccountLoginErrorData() {
+    data class AccountLoginCredentialsIncorrect(
+      override val message: String) : AccountLoginErrorData() {
       override fun toString(): String =
         this.javaClass.simpleName
     }
@@ -64,7 +66,8 @@ sealed class AccountLoginState {
      * A login attempt was made on an account that doesn't support or require logins.
      */
 
-    object AccountLoginNotRequired : AccountLoginErrorData() {
+    data class AccountLoginNotRequired(
+      override val message: String) : AccountLoginErrorData() {
       override fun toString(): String =
         this.javaClass.simpleName
     }
@@ -73,7 +76,8 @@ sealed class AccountLoginState {
      * A connection could not be made to a remote server.
      */
 
-    object AccountLoginConnectionFailure : AccountLoginErrorData() {
+    data class AccountLoginConnectionFailure(
+      override val message: String) : AccountLoginErrorData() {
       override fun toString(): String =
         this.javaClass.simpleName
     }
@@ -83,6 +87,7 @@ sealed class AccountLoginState {
      */
 
     data class AccountLoginServerParseError(
+      override val message: String,
       val warnings: List<ParseWarning>,
       val errors: List<ParseError>)
       : AccountLoginErrorData() {
@@ -95,6 +100,7 @@ sealed class AccountLoginState {
      */
 
     data class AccountLoginServerError(
+      override val message: String,
       val uri: URI,
       val statusCode: Int,
       val errorMessage: String,
@@ -106,6 +112,7 @@ sealed class AccountLoginState {
      */
 
     data class AccountLoginDRMNotSupported(
+      override val message: String,
       val system: String)
       : AccountLoginErrorData()
 
@@ -114,6 +121,7 @@ sealed class AccountLoginState {
      */
 
     data class AccountLoginDRMFailure(
+      override val message: String,
       val errorCode: String)
       : AccountLoginErrorData()
 
@@ -121,22 +129,25 @@ sealed class AccountLoginState {
      * A DRM system failed due to having too many device activations.
      */
 
-    object AccountLoginDRMTooManyActivations
+    data class AccountLoginDRMTooManyActivations(
+      override val message: String)
       : AccountLoginErrorData()
 
     /**
      * An unexpected exception occurred.
      */
 
-    class AccountLoginUnexpectedException(
-      val exception: Throwable)
+    data class AccountLoginUnexpectedException(
+      override val message: String,
+      override val exception: Throwable)
       : AccountLoginErrorData()
 
     /**
      * Logging in failed due to some missing information.
      */
 
-    object AccountLoginMissingInformation
+    data class AccountLoginMissingInformation(
+      override val message: String)
       : AccountLoginErrorData()
   }
 

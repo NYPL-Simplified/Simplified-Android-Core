@@ -262,7 +262,10 @@ class AccountsDatabase private constructor(
         this.loginStateActual = state
       }
 
-      this.accountEvents.send(AccountEventLoginStateChanged(this.id, state))
+      this.accountEvents.send(AccountEventLoginStateChanged(
+        message = "",
+        accountID = this.id,
+        state = state))
 
       val credentials = state.credentials
       if (credentials != null) {
@@ -302,7 +305,7 @@ class AccountsDatabase private constructor(
           this.description = newDescription
         }
 
-        this.accountEvents.send(AccountEventUpdated(this.id))
+        this.accountEvents.send(AccountEventUpdated("", this.id))
       } catch (e: IOException) {
         throw AccountsDatabaseIOException("Could not write account data", e)
       }

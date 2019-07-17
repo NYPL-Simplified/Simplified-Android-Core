@@ -450,11 +450,13 @@
   <string name="profileAccountCreationCreatingAccount">Creating an account…</string>
   <string name="profileAccountCreationResolvingAccountProviderFailed">Resolving an account provider failed.</string>
   <string name="profileAccountCreationResolvingAccountProvider">Resolving account provider…</string>
+  <string name="profileAccountCreationSucceeded">Creating the account succeeded.</string>
 
   <!-- Profile account deletion -->
   <string name="profileAccountDeletionFailed">Deleting an account failed.</string>
   <string name="profileAccountDeletionOnlyOneAccountRemaining">Cannot delete the one remaining account; at least one account must be present.</string>
   <string name="profileAccountDeleting">Deleting account…</string>
+  <string name="profileAccountDeletionSucceeded">Deleting an account succeeded.</string>
 
   <!-- Services strings -->
   <string name="bootingBugSnag">Starting BugSnag…</string>

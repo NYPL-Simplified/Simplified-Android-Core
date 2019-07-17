@@ -14,22 +14,7 @@ import net.jcip.annotations.ThreadSafe
  */
 
 @ThreadSafe
-interface PresentableErrorType {
-
-  /**
-   * The complete error message, fit for presentation to the screen.
-   */
-
-  val message: String
-
-  /**
-   * A list of attributes that are associated with the error. These are arbitrary values
-   * that can be associated with the error and are intended to be included in saved error
-   * reports to give more context when debugging.
-   */
-
-  val attributes: Map<String, String>
-    get() = mapOf()
+interface PresentableErrorType : PresentableType {
 
   /**
    * An exception associated with the error, if any. This is primarily useful for providing

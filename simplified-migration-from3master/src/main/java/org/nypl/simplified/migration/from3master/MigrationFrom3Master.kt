@@ -12,6 +12,9 @@ import org.nypl.audiobook.android.api.PlayerPositions
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
+import org.nypl.simplified.accounts.api.AccountEventCreation
+import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -24,16 +27,16 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
-import org.nypl.simplified.migration.spi.MigrationNotice
-import org.nypl.simplified.migration.spi.MigrationNotice.MigrationError
-import org.nypl.simplified.migration.spi.MigrationNotice.MigrationInfo
-import org.nypl.simplified.migration.spi.MigrationNotice.Subject
-import org.nypl.simplified.migration.spi.MigrationNotice.Subject.ACCOUNT
-import org.nypl.simplified.migration.spi.MigrationNotice.Subject.BOOK
-import org.nypl.simplified.migration.spi.MigrationNotice.Subject.BOOKMARK
+import org.nypl.simplified.migration.spi.MigrationEvent
+import org.nypl.simplified.migration.spi.MigrationEvent.*
+import org.nypl.simplified.migration.spi.MigrationEvent.Subject.ACCOUNT
+import org.nypl.simplified.migration.spi.MigrationEvent.Subject.BOOK
+import org.nypl.simplified.migration.spi.MigrationEvent.Subject.BOOKMARK
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.migration.spi.MigrationType
+import org.nypl.simplified.observable.Observable
+import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -71,14 +74,26 @@ class MigrationFrom3Master(
     this.determineDiskDataDirectory(this.services.context)
 
   private val objectMapper = ObjectMapper()
-  private val notices = mutableListOf<MigrationNotice>()
+  private val noticesLog = mutableListOf<MigrationEvent>()
+  private val noticesObservable = Observable.create<MigrationEvent>()
 
-  private fun publishNotice(message: String) {
-    this.notices.add(MigrationInfo(message))
+  init {
+    this.noticesObservable.subscribe { notice -> this.noticesLog.add(notice) }
   }
 
-  private fun publishNotice(subject: Subject, message: String) {
-    this.notices.add(MigrationInfo(message, subject))
+  override val events: ObservableReadableType<MigrationEvent> =
+    this.noticesObservable
+
+  private fun publishStepSucceeded(subject: Subject, message: String) {
+    this.noticesObservable.send(MigrationStepSucceeded(message, subject))
+  }
+
+  private fun publishStepProgress(subject: Subject, message: String) {
+    this.noticesObservable.send(MigrationStepInProgress(message, subject))
+  }
+
+  private fun publishStepError(error: MigrationStepError) {
+    this.noticesObservable.send(error)
   }
 
   override fun needsToRun(): Boolean {
@@ -131,24 +146,61 @@ class MigrationFrom3Master(
     val loadedBook: LoadedBook)
 
   override fun run(): MigrationReport {
-    val accounts = this.enumerateAccountsToMigrate()
-    this.logger.debug("{} accounts to migrate", accounts.size)
-    val loadedAccounts = this.loadAccounts(accounts)
-    this.logger.debug("{} accounts loaded", loadedAccounts.size)
-
-    for (loadedAccount in loadedAccounts) {
-      val createdAccount = this.createAccount(loadedAccount)
-      if (createdAccount != null) {
-        this.publishNotice(ACCOUNT, this.strings.reportCreatedAccount(createdAccount.account.provider.displayName))
-        val books = this.loadBooksForAccount(createdAccount)
-        val copiedBooks = this.copyBooks(books)
-        for (copiedBook in copiedBooks) {
-          this.publishNotice(BOOK, this.strings.reportCopiedBook(copiedBook.loadedBook.bookEntry.title))
+    val subscription =
+      this.services.accountEvents.subscribe { event ->
+        when (event) {
+          is AccountEventCreation,
+          is AccountEventDeletion,
+          is AccountEventLoginStateChanged ->
+            this.publishStepProgress(ACCOUNT, event.message)
         }
       }
-    }
 
-    return MigrationReport(this.notices.toList())
+    try {
+      val accounts = this.enumerateAccountsToMigrate()
+      this.logger.debug("{} accounts to migrate", accounts.size)
+      val loadedAccounts = this.loadAccounts(accounts)
+      this.logger.debug("{} accounts loaded", loadedAccounts.size)
+
+      for (loadedAccount in loadedAccounts) {
+        val createdAccount = this.createAccount(loadedAccount)
+        if (createdAccount != null) {
+          this.publishStepSucceeded(ACCOUNT, this.strings.successCreatedAccount(createdAccount.account.provider.displayName))
+          val books = this.loadBooksForAccount(createdAccount)
+          val copiedBooks = this.copyBooks(books)
+          for (copiedBook in copiedBooks) {
+            this.publishStepSucceeded(BOOK, this.strings.successCopiedBook(copiedBook.loadedBook.bookEntry.title))
+          }
+          this.authenticateAccount(createdAccount)
+        }
+      }
+
+      return MigrationReport(this.noticesLog.toList())
+    } finally {
+      subscription.unsubscribe()
+    }
+  }
+
+  private fun authenticateAccount(createdAccount: CreatedAccount) {
+    this.logger.debug("authenticating account {}", createdAccount.account.id)
+
+    return when (val taskResult = this.services.loginAccount(createdAccount.account)) {
+      is TaskResult.Success -> {
+        this.publishStepSucceeded(ACCOUNT, this.strings.successAuthenticatedAccount(createdAccount.account.provider.displayName))
+      }
+      is TaskResult.Failure -> {
+        val message = taskResult.steps.last().resolution.message
+        val causes =
+          taskResult.steps.mapNotNull { step ->
+            when (val resolution = step.resolution) {
+              is TaskStepResolution.TaskStepSucceeded -> null
+              is TaskStepResolution.TaskStepFailed -> resolution.errorValue
+            }
+          }
+
+        this.publishStepError(MigrationStepError(message = message, causes = causes))
+      }
+    }
   }
 
   /**
@@ -204,10 +256,10 @@ class MigrationFrom3Master(
       is BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF,
       null -> {
         this.logger.error("strange format handle encountered")
-        val formatName = formatHandleName(formatHandle)
+        val formatName = this.formatHandleName(formatHandle)
         val exception = Exception("Unexpected format: $formatName")
-        this.notices.add(MigrationError(
-          message = this.strings.errorBookUnexpectedFormat(book.bookEntry.title, formatName),
+        this.publishStepError(MigrationStepError(
+          message = strings.errorBookUnexpectedFormat(book.bookEntry.title, formatName),
           attributes = mapOf(
             Pair("bookTitle", book.bookEntry.title),
             Pair("bookFormat", formatName),
@@ -255,7 +307,7 @@ class MigrationFrom3Master(
       }
     } catch (e: Exception) {
       this.logger.error("failed to copy epub: ", e)
-      this.notices.add(MigrationError(
+      this.publishStepError(MigrationStepError(
         message = this.strings.errorBookCopyFailure(book.bookEntry.title),
         attributes = mapOf(
           Pair("bookTitle", book.bookEntry.title),
@@ -268,11 +320,14 @@ class MigrationFrom3Master(
     try {
       if (book.epubBookmarks != null) {
         handle.setBookmarks(book.epubBookmarks)
-        this.publishNotice(BOOKMARK, this.strings.reportCopiedBookmarks(book.bookEntry.title, book.epubBookmarks.size))
+        this.publishStepSucceeded(BOOKMARK, this.strings.successCopiedBookmarks(book.bookEntry.title, book.epubBookmarks.size))
+        handle.setLastReadLocation(book.epubBookmarks.find {
+          bookmark -> bookmark.kind == BookmarkKind.ReaderBookmarkLastReadLocation
+        })
       }
     } catch (e: Exception) {
       this.logger.error("failed to copy bookmarks: ", e)
-      this.notices.add(MigrationError(
+      this.publishStepError(MigrationStepError(
         message = this.strings.errorBookmarksCopyFailure(book.bookEntry.title),
         attributes = mapOf(
           Pair("bookTitle", book.bookEntry.title),
@@ -286,7 +341,7 @@ class MigrationFrom3Master(
       handle.setAdobeRightsInformation(book.epubAdobeLoan)
     } catch (e: Exception) {
       this.logger.error("failed to copy adobe DRM information: ", e)
-      this.notices.add(MigrationError(
+      this.publishStepError(MigrationStepError(
         message = this.strings.errorBookAdobeDRMCopyFailure(book.bookEntry.title),
         attributes = mapOf(
           Pair("bookTitle", book.bookEntry.title),
@@ -361,7 +416,7 @@ class MigrationFrom3Master(
 
           val epubBookmarks =
             if (fileAnnotations.isFile) {
-              loadBookmarks(bookEntry.title, fileAnnotations)
+              this.loadBookmarks(bookEntry.title, fileAnnotations)
             } else {
               null
             }
@@ -391,7 +446,7 @@ class MigrationFrom3Master(
           ))
         } catch (e: Exception) {
           this.logger.error("could not load book: ", e)
-          this.notices.add(MigrationError(
+          this.publishStepError(MigrationStepError(
             message = this.strings.errorBookLoadTitledFailure(bookEntry.title),
             attributes = mapOf(
               Pair("bookDirectory", bookDirectory.toString()),
@@ -401,7 +456,7 @@ class MigrationFrom3Master(
         }
       } catch (e: Exception) {
         this.logger.error("could not load book: ", e)
-        this.notices.add(MigrationError(
+        this.publishStepError(MigrationStepError(
           message = this.strings.errorBookLoadFailure(entry),
           attributes = mapOf(Pair("bookDirectory", bookDirectory.toString())),
           exception = e))
@@ -420,13 +475,13 @@ class MigrationFrom3Master(
   ): List<Bookmark>? {
     return try {
       FileInputStream(file).use { stream ->
-        parseBookmarks(stream).mapNotNull { annotation ->
-          parseAnnotationToBookmark(title, annotation)
+        this.parseBookmarks(stream).mapNotNull { annotation ->
+          this.parseAnnotationToBookmark(title, annotation)
         }
       }
     } catch (e: Exception) {
       this.logger.error("could not parse bookmarks: ", e)
-      this.notices.add(MigrationError(
+      this.publishStepError(MigrationStepError(
         message = this.strings.errorBookmarksParseFailure(title),
         exception = e,
         attributes = mapOf(
@@ -493,7 +548,7 @@ class MigrationFrom3Master(
       )
     } catch (e: Exception) {
       this.logger.error("could not parse bookmarks: ", e)
-      this.notices.add(MigrationError(
+      this.publishStepError(MigrationStepError(
         message = this.strings.errorBookmarksParseFailure(title),
         exception = e,
         attributes = mapOf(
@@ -558,7 +613,7 @@ class MigrationFrom3Master(
             }
           }
 
-        this.notices.add(MigrationError(message = message, causes = causes))
+        this.publishStepError(MigrationStepError(message = message, causes = causes))
         null
       }
     }
@@ -589,7 +644,7 @@ class MigrationFrom3Master(
       LoadedAccount(account, accountData)
     } catch (e: java.lang.Exception) {
       this.logger.error("could not load account: ", e)
-      this.notices.add(MigrationError(
+      this.publishStepError(MigrationStepError(
         message = this.strings.errorAccountLoadFailure(account.idNumeric),
         attributes = mapOf(
           Pair("idNumeric", account.idNumeric.toString())
@@ -653,7 +708,7 @@ class MigrationFrom3Master(
 
     if (idURI == null) {
       this.logger.error("no account provider for id $idNumeric")
-      this.notices.add(MigrationError(
+      this.publishStepError(MigrationStepError(
         message = this.strings.errorUnknownAccountProvider(idNumeric),
         attributes = mapOf(Pair("idNumeric", idNumeric.toString())),
         exception = Exception()))

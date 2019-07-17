@@ -1,14 +1,13 @@
 package org.nypl.simplified.migration.spi
 
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.PresentableType
 
 /**
  * Something that occurred during migration.
  */
 
-sealed class MigrationNotice {
-
-  abstract val message: String
+sealed class MigrationEvent : PresentableType {
 
   abstract val subject: Subject?
 
@@ -27,21 +26,30 @@ sealed class MigrationNotice {
    * An informative event.
    */
 
-  data class MigrationInfo(
+  data class MigrationStepInProgress(
     override val message: String,
     override val subject: Subject? = null)
-    : MigrationNotice()
+    : MigrationEvent()
+
+  /**
+   * An informative event.
+   */
+
+  data class MigrationStepSucceeded(
+    override val message: String,
+    override val subject: Subject? = null)
+    : MigrationEvent()
 
   /**
    * An error that occurred during migration.
    */
 
-  data class MigrationError(
+  data class MigrationStepError(
     override val message: String,
     override val exception: Exception? = null,
     override val attributes: Map<String, String> = mapOf(),
     override val causes: List<PresentableErrorType> = listOf(),
     override val subject: Subject? = null)
-    : MigrationNotice(), PresentableErrorType
+    : MigrationEvent(), PresentableErrorType
 
 }

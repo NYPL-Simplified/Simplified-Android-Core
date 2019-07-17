@@ -36,7 +36,8 @@ class ProfileAccountDeleteTask(
     this.accountEvents.send(AccountEventDeletion.AccountEventDeletionInProgress(step.description))
 
   private fun publishSuccessEvent(accountThen: AccountType) =
-    this.accountEvents.send(AccountEventDeletion.AccountEventDeletionSucceeded(accountThen.id))
+    this.accountEvents.send(AccountEventDeletion.AccountEventDeletionSucceeded(
+      strings.deletionSucceeded, accountThen.id))
 
   override fun call(): TaskResult<AccountDeleteErrorDetails, Unit> {
     return try {

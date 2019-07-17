@@ -43,16 +43,20 @@ interface MigrationFrom3MasterStringResourcesType {
     title: String
   ): String
 
-  fun reportCreatedAccount(
+  fun successCreatedAccount(
     title: String
   ): String
 
-  fun reportCopiedBook(
+  fun successCopiedBook(
     title: String
   ): String
 
-  fun reportCopiedBookmarks(
+  fun successCopiedBookmarks(
     title: String,
     count: Int
+  ): String
+
+  fun successAuthenticatedAccount(
+    title: String
   ): String
 }

@@ -4,29 +4,31 @@ import android.content.Context
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
+import org.nypl.simplified.accounts.api.AccountCreateErrorDetails.*
+import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.*
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.BookDatabases
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.*
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.migration.from3master.EnvironmentQueriesType
 import org.nypl.simplified.migration.from3master.MigrationFrom3MasterProvider
 import org.nypl.simplified.migration.from3master.MigrationFrom3MasterStringResourcesType
-import org.nypl.simplified.migration.spi.MigrationNotice.MigrationError
-import org.nypl.simplified.migration.spi.MigrationNotice.MigrationInfo
+import org.nypl.simplified.migration.spi.MigrationEvent.MigrationStepError
+import org.nypl.simplified.migration.spi.MigrationEvent.MigrationStepSucceeded
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
+import org.nypl.simplified.observable.Observable
+import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -39,6 +41,7 @@ import kotlin.random.Random
 
 abstract class MigrationFrom3MasterContract {
 
+  private lateinit var accountEvents: ObservableType<AccountEvent>
   private lateinit var tempBookDatabaseDir: File
   private lateinit var services: MigrationServiceDependencies
   private lateinit var tempDir: File
@@ -63,10 +66,15 @@ abstract class MigrationFrom3MasterContract {
 
     this.migrations.setStrings(MockStrings())
 
+    this.accountEvents =
+      Observable.create()
+
     this.services =
       MigrationServiceDependencies(
         applicationProfileIsAnonymous = true,
         createAccount = { TaskResult.Failure(listOf()) },
+        loginAccount = { TaskResult.Failure(listOf()) },
+        accountEvents = this.accountEvents,
         context = this.context)
 
     this.tempDir.delete()
@@ -76,6 +84,10 @@ abstract class MigrationFrom3MasterContract {
   }
 
   private class MockStrings : MigrationFrom3MasterStringResourcesType {
+
+    override fun successAuthenticatedAccount(title: String): String =
+      "successAuthenticatedAccount: $title"
+
     override fun errorBookCopyFailure(title: String): String =
       "errorBookCopyFailure: $title"
 
@@ -85,8 +97,8 @@ abstract class MigrationFrom3MasterContract {
     override fun errorBookmarksCopyFailure(title: String): String =
       "errorBookmarksCopyFailure: $title"
 
-    override fun reportCopiedBookmarks(title: String, count: Int): String =
-      "reportCopiedBookmarks: $title $count"
+    override fun successCopiedBookmarks(title: String, count: Int): String =
+      "successCopiedBookmarks: $title $count"
 
     override fun errorBookmarksParseFailure(title: String): String =
       "errorBookmarksParseFailure: $title"
@@ -94,11 +106,11 @@ abstract class MigrationFrom3MasterContract {
     override fun errorBookUnexpectedFormat(title: String, receivedFormat: String): String =
       "errorBookUnexpectedFormat: $title $receivedFormat"
 
-    override fun reportCreatedAccount(title: String): String =
-      "reportCreatedAccount: $title"
+    override fun successCreatedAccount(title: String): String =
+      "successCreatedAccount: $title"
 
-    override fun reportCopiedBook(title: String): String =
-      "reportCopiedBook: $title"
+    override fun successCopiedBook(title: String): String =
+      "successCopiedBook: $title"
 
     override fun errorBookLoadFailure(entry: String): String =
       "errorBookLoadFailure: $entry"
@@ -158,9 +170,12 @@ abstract class MigrationFrom3MasterContract {
 
     this.services =
       MigrationServiceDependencies(
+        accountEvents = this.accountEvents,
         applicationProfileIsAnonymous = false,
+        context = this.context,
         createAccount = { TaskResult.Failure(listOf()) },
-        context = this.context)
+        loginAccount = { TaskResult.Failure(listOf()) }
+      )
 
     File(this.tempDir, "salt").writeBytes(ByteArray(16))
 
@@ -189,8 +204,8 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(1, report.notices.size)
-    Assert.assertEquals("errorUnknownAccountProvider: 9999", report.notices[0].message)
+    Assert.assertEquals(1, report.events.size)
+    Assert.assertEquals("errorUnknownAccountProvider: 9999", report.events[0].message)
   }
 
   /**
@@ -215,9 +230,9 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(1, report.notices.size)
-    Assert.assertEquals("errorAccountLoadFailure: 12", report.notices[0].message)
-    this.logger.debug("exception: ", (report.notices[0] as MigrationError).exception)
+    Assert.assertEquals(1, report.events.size)
+    Assert.assertEquals("errorAccountLoadFailure: 12", report.events[0].message)
+    this.logger.debug("exception: ", (report.events[0] as MigrationStepError).exception)
   }
 
   /**
@@ -238,9 +253,17 @@ abstract class MigrationFrom3MasterContract {
           val taskRecorder =
             TaskRecorder.create<AccountCreateErrorDetails>()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed("FAILED!", AccountCreateErrorDetails.UnexpectedException("Ouch", Exception()))
+          taskRecorder.currentStepFailed("FAILED!", UnexpectedException("Ouch", Exception()))
           taskRecorder.finishFailure()
         },
+        loginAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.currentStepFailed("FAILED!", AccountLoginUnexpectedException("Ouch", Exception()))
+          taskRecorder.finishFailure()
+        },
+        accountEvents = this.accountEvents,
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -254,9 +277,9 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(1, report.notices.size)
-    Assert.assertEquals("FAILED!", report.notices[0].message)
-    this.logger.debug("exception: ", (report.notices[0] as MigrationError).exception)
+    Assert.assertEquals(1, report.events.size)
+    Assert.assertEquals("FAILED!", report.events[0].message)
+    this.logger.debug("exception: ", (report.events[0] as MigrationStepError).exception)
   }
 
   /**
@@ -289,6 +312,13 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
+        loginAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.finishSuccess(Unit)
+        },
+        accountEvents = this.accountEvents,
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -304,8 +334,9 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(1, report.notices.size)
-    Assert.assertEquals("reportCreatedAccount: Account 0", report.notices[0].message)
+    Assert.assertEquals(2, report.events.size)
+    Assert.assertEquals("successCreatedAccount: Account 0", report.events[0].message)
+    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[1].message)
   }
 
   /**
@@ -346,6 +377,13 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
+        loginAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.finishSuccess(Unit)
+        },
+        accountEvents = this.accountEvents,
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -373,10 +411,11 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(3, report.notices.size)
-    Assert.assertEquals("reportCreatedAccount: Account 0", report.notices[0].message)
-    Assert.assertEquals("reportCopiedBookmarks: Bossypants 1", report.notices[1].message)
-    Assert.assertEquals("reportCopiedBook: Bossypants", report.notices[2].message)
+    Assert.assertEquals(4, report.events.size)
+    Assert.assertEquals("successCreatedAccount: Account 0", report.events[0].message)
+    Assert.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[1].message)
+    Assert.assertEquals("successCopiedBook: Bossypants", report.events[2].message)
+    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[3].message)
 
     val bookId = BookID.create("5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
     Assert.assertTrue(bookDatabase.books().contains(bookId))
@@ -432,6 +471,13 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
+        loginAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.finishSuccess(Unit)
+        },
+        accountEvents = this.accountEvents,
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -466,13 +512,99 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(4, report.notices.size)
-    Assert.assertEquals("reportCreatedAccount: Account 0", report.notices[0].message)
-    Assert.assertEquals("errorBookCopyFailure: Bossypants", report.notices[1].message)
-    Assert.assertEquals("errorBookmarksCopyFailure: Bossypants", report.notices[2].message)
-    Assert.assertEquals("errorBookAdobeDRMCopyFailure: Bossypants", report.notices[3].message)
+    Assert.assertEquals(5, report.events.size)
+    Assert.assertEquals("successCreatedAccount: Account 0", report.events[0].message)
+    Assert.assertEquals("errorBookCopyFailure: Bossypants", report.events[1].message)
+    Assert.assertEquals("errorBookmarksCopyFailure: Bossypants", report.events[2].message)
+    Assert.assertEquals("errorBookAdobeDRMCopyFailure: Bossypants", report.events[3].message)
+    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
 
     Assert.assertFalse(bookDatabase.books().contains(bookId))
+  }
+
+  /**
+   * Errors are reported for authentication failures.
+   */
+
+  @Test
+  fun testRunAccountNYPLAuthenticationFailure() {
+    Mockito.`when`(this.queries.getExternalStorageState())
+      .thenReturn("UNKNOWN")
+    Mockito.`when`(this.context.filesDir)
+      .thenReturn(this.tempDir)
+
+    val bookDatabase =
+      BookDatabases.openDatabase(
+        context = this.context,
+        owner = AccountID(UUID.randomUUID()),
+        directory = this.tempBookDatabaseDir)
+
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val account =
+      Mockito.mock(AccountType::class.java)
+
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Account 0")
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(account.bookDatabase)
+      .thenReturn(bookDatabase)
+
+    this.services =
+      MigrationServiceDependencies(
+        applicationProfileIsAnonymous = true,
+        createAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountCreateErrorDetails>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.finishSuccess(account)
+        },
+        loginAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.currentStepFailed("FAILURE!", AccountLoginUnexpectedException("FAILURE!", Exception()))
+          taskRecorder.finishFailure()
+        },
+        accountEvents = this.accountEvents,
+        context = this.context)
+
+    val acc = File(this.tempDir, "12")
+    acc.mkdirs()
+    File(acc, "accounts").mkdirs()
+
+    val booksDir = File(acc, "books")
+    val booksDataDir = File(booksDir, "data")
+    val bookDir = File(booksDataDir, "5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
+    bookDir.mkdirs()
+
+    val bookEPUBFile = File(bookDir, "book.epub")
+    val epubData = Random.Default.nextBytes(32)
+    bookEPUBFile.writeBytes(epubData)
+    val bookMetaFile = File(bookDir, "meta.json")
+    bookMetaFile.writeBytes(this.resource("meta0.json"))
+    val bookAnnotationsFile = File(bookDir, "annotations.json")
+    bookAnnotationsFile.writeBytes(this.resource("annotations0.json"))
+
+    File(acc, "account.json").writeBytes(this.resource("account.json"))
+    File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
+
+    val migration = this.migrations.create(this.services)
+    Assert.assertEquals(true, migration.needsToRun())
+
+    val report = migration.run()
+    this.showReport(report)
+    Assert.assertEquals(4, report.events.size)
+    Assert.assertEquals("successCreatedAccount: Account 0", report.events[0].message)
+    Assert.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[1].message)
+    Assert.assertEquals("successCopiedBook: Bossypants", report.events[2].message)
+    Assert.assertEquals("FAILURE!", report.events[3].message)
+
+    val bookId = BookID.create("5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
+    Assert.assertTrue(bookDatabase.books().contains(bookId))
+    val format = bookDatabase.entry(bookId).book.findPreferredFormat() as BookFormatEPUB
+    Assert.assertEquals(epubData.toList(), format.file!!.readBytes().toList())
   }
 
   private fun opdsEntry(name: String): OPDSAcquisitionFeedEntry {
@@ -481,11 +613,11 @@ abstract class MigrationFrom3MasterContract {
   }
 
   private fun showReport(report: MigrationReport) {
-    for (notice in report.notices) {
+    for (notice in report.events) {
       when (notice) {
-        is MigrationInfo ->
+        is MigrationStepSucceeded ->
           this.logger.debug("info: {}", notice)
-        is MigrationError ->
+        is MigrationStepError ->
           this.logger.error("error: {}", notice)
       }
     }

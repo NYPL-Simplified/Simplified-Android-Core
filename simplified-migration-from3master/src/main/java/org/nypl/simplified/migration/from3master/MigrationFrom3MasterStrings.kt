@@ -14,17 +14,20 @@ class MigrationFrom3MasterStrings(
   override fun errorBookmarksCopyFailure(title: String): String =
     this.resources.getString(R.string.errorBookmarksCopyFailure, title)
 
-  override fun reportCopiedBookmarks(title: String, count: Int): String =
+  override fun successCopiedBookmarks(title: String, count: Int): String =
     this.resources.getString(R.string.reportCopiedBookmarks, title, count)
 
   override fun errorBookmarksParseFailure(title: String): String =
     this.resources.getString(R.string.errorBookmarksParseFailure, title)
 
-  override fun reportCreatedAccount(title: String): String =
+  override fun successCreatedAccount(title: String): String =
     this.resources.getString(R.string.reportCreatedAccount, title)
 
-  override fun reportCopiedBook(title: String): String =
+  override fun successCopiedBook(title: String): String =
     this.resources.getString(R.string.reportCopiedBook, title)
+
+  override fun successAuthenticatedAccount(title: String): String =
+    this.resources.getString(R.string.successAuthenticatedAccount, title)
 
   override fun errorBookLoadTitledFailure(title: String): String =
     this.resources.getString(R.string.errorBookLoadTitledFailure, title)

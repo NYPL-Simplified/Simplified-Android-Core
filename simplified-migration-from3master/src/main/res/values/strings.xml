@@ -11,5 +11,6 @@
   <string name="errorBookCopyFailure">Failed to copy book \"%1$s\" to new database.</string>
   <string name="errorBookAdobeDRMCopyFailure">Failed to copy Adobe DRM rights information for book \"%1$s\".</string>
   <string name="errorBookmarksCopyFailure">Failed to copy bookmarks for book \"%1$s\".</string>
-  <string name="reportCopiedBookmarks">Copied %2$s bookmarks for book \"%1$s\".</string>
+  <string name="reportCopiedBookmarks">Copied %2$d bookmarks for book \"%1$s\".</string>
+  <string name="successAuthenticatedAccount">Successfully authenticated account \"%1$s\".</string>
 </resources>
