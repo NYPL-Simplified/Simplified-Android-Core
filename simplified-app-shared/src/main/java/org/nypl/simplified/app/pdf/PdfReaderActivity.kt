@@ -16,6 +16,7 @@ import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.slf4j.Logger
@@ -80,9 +81,15 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
 
         this.account = profile.account(accountId)
         this.books = account.bookDatabase
-        this.entry = books.entry(id)
-        this.handle = entry.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)!!
-        this.documentPageIndex = handle.format.lastReadLocation!!
+
+        try {
+            this.entry = books.entry(id)
+            this.handle = entry.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)!!
+            this.documentPageIndex = handle.format.lastReadLocation!!
+        } catch (e: BookDatabaseException) {
+            log.error("Could not get lastReadLocation, defaulting to the 1st page")
+            e.printStackTrace()
+        }
 
         if (savedInstanceState != null) {
             this.tableOfContentsList = savedInstanceState.getParcelableArrayList(TABLE_OF_CONTENTS)

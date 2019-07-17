@@ -75,7 +75,6 @@ class CatalogBookReadController(
                     this.account.id,
                     book.entry.title,
                     format.file!!,
-                    0,
                     id
             ))
         } else {

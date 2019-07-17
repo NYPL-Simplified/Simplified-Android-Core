@@ -22,7 +22,7 @@ def versionValues() {
 }
 
 android {
-  compileSdkVersion 27
+  compileSdkVersion 28
   buildToolsVersion "28.0.2"
 
   def version = versionValues()
@@ -75,7 +75,7 @@ dependencies {
   implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
   implementation group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
 
-  implementation "com.android.support:support-v4:27.1.1"
+  implementation "com.android.support:support-v4:28.0.0"
 }
 
 apply plugin: 'android-native-dependencies'
