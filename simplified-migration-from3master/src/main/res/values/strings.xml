@@ -13,4 +13,6 @@
   <string name="errorBookmarksCopyFailure">Failed to copy bookmarks for book \"%1$s\".</string>
   <string name="reportCopiedBookmarks">Copied %2$d bookmarks for book \"%1$s\".</string>
   <string name="successAuthenticatedAccount">Successfully authenticated account \"%1$s\".</string>
+  <string name="errorAccountAuthenticationFailure">Failed to authenticate account \"%1$s\".</string>
+  <string name="successDeletedOldData">Deleted old data.</string>
 </resources>

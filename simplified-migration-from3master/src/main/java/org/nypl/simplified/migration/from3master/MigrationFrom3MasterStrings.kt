@@ -5,6 +5,12 @@ import android.content.res.Resources
 class MigrationFrom3MasterStrings(
   private val resources: Resources) : MigrationFrom3MasterStringResourcesType {
 
+  override val successDeletedOldData: String
+    get() = this.resources.getString(R.string.successDeletedOldData)
+
+  override fun errorAccountAuthenticationFailure(title: String): String =
+    this.resources.getString(R.string.errorAccountAuthenticationFailure, title)
+
   override fun errorBookCopyFailure(title: String): String =
     this.resources.getString(R.string.errorBookCopyFailure, title)
 

@@ -25,6 +25,7 @@ import org.nypl.simplified.books.api.BookmarkKind
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.migration.spi.MigrationEvent
@@ -76,6 +77,15 @@ class MigrationFrom3Master(
   private val objectMapper = ObjectMapper()
   private val noticesLog = mutableListOf<MigrationEvent>()
   private val noticesObservable = Observable.create<MigrationEvent>()
+  private val filesToDelete = mutableListOf<File>()
+
+  /**
+   * The presence of any of these files will cause the migration to run.
+   */
+
+  private val filesTriggering =
+    listOf("accounts", "activation.xml", "device", "device.xml", "salt")
+      .map { name -> File(this.oldBaseAccountsDirectory, name).absoluteFile }
 
   init {
     this.noticesObservable.subscribe { notice -> this.noticesLog.add(notice) }
@@ -86,6 +96,10 @@ class MigrationFrom3Master(
 
   private fun publishStepSucceeded(subject: Subject, message: String) {
     this.noticesObservable.send(MigrationStepSucceeded(message, subject))
+  }
+
+  private fun publishStepSucceeded(message: String) {
+    this.noticesObservable.send(MigrationStepSucceeded(message))
   }
 
   private fun publishStepProgress(subject: Subject, message: String) {
@@ -102,11 +116,7 @@ class MigrationFrom3Master(
       return false
     }
 
-    val candidates =
-      listOf("accounts", "activation.xml", "device", "device.xml", "salt")
-        .map { name -> File(this.oldBaseAccountsDirectory, name) }
-
-    return candidates.any { file ->
+    return this.filesTriggering.any { file ->
       if (file.exists()) {
         this.logger.debug("file {} exists, so migration is needed", file)
         true
@@ -125,7 +135,10 @@ class MigrationFrom3Master(
 
   data class LoadedAccount(
     val enumeratedAccount: EnumeratedAccount,
-    val account: MigrationFrom3MasterAccount)
+    val booksDirectory: File,
+    val booksDataDirectory: File,
+    val account: MigrationFrom3MasterAccount,
+    val accountFile: File)
 
   data class CreatedAccount(
     val loadedAccount: LoadedAccount,
@@ -159,13 +172,19 @@ class MigrationFrom3Master(
     try {
       val accounts = this.enumerateAccountsToMigrate()
       this.logger.debug("{} accounts to migrate", accounts.size)
+
       val loadedAccounts = this.loadAccounts(accounts)
       this.logger.debug("{} accounts loaded", loadedAccounts.size)
 
+      var createdAccounts = 0
       for (loadedAccount in loadedAccounts) {
         val createdAccount = this.createAccount(loadedAccount)
         if (createdAccount != null) {
           this.publishStepSucceeded(ACCOUNT, this.strings.successCreatedAccount(createdAccount.account.provider.displayName))
+          ++createdAccounts
+
+          this.pushLoadedAccountToDeletionQueue(createdAccount.loadedAccount)
+
           val books = this.loadBooksForAccount(createdAccount)
           val copiedBooks = this.copyBooks(books)
           for (copiedBook in copiedBooks) {
@@ -175,31 +194,76 @@ class MigrationFrom3Master(
         }
       }
 
+      /*
+       * If there are no accounts left that couldn't be migrated, add all of the triggering files
+       * to the deletion queue so that the migration is not prompted to run again.
+       */
+
+      if (accounts.size == createdAccounts) {
+        this.filesTriggering.forEach(this::pushFileToDeletionQueue)
+      }
+
+      for (file in this.filesToDelete.filter(this::isSafeToDelete)) {
+        this.logger.debug("delete: {}", file)
+        try {
+          if (file.isFile) {
+            FileUtilities.fileDelete(file)
+          } else {
+            DirectoryUtilities.directoryDelete(file)
+          }
+        } catch (e: Exception) {
+          this.logger.error("could not delete file: {}: ", file, e)
+        }
+      }
+
+      this.publishStepSucceeded(this.strings.successDeletedOldData)
       return MigrationReport(this.noticesLog.toList())
     } finally {
       subscription.unsubscribe()
     }
   }
 
+  private fun pushLoadedAccountToDeletionQueue(l: LoadedAccount) {
+    this.pushFileToDeletionQueue(l.booksDataDirectory)
+    this.pushFileToDeletionQueue(l.booksDirectory)
+    this.pushFileToDeletionQueue(l.accountFile)
+  }
+
+  private fun isSafeToDelete(file: File): Boolean {
+    val context = this.services.context
+    return file != context.filesDir && file != context.getExternalFilesDir(null)
+  }
+
   private fun authenticateAccount(createdAccount: CreatedAccount) {
     this.logger.debug("authenticating account {}", createdAccount.account.id)
 
-    return when (val taskResult = this.services.loginAccount(createdAccount.account)) {
-      is TaskResult.Success -> {
-        this.publishStepSucceeded(ACCOUNT, this.strings.successAuthenticatedAccount(createdAccount.account.provider.displayName))
-      }
-      is TaskResult.Failure -> {
-        val message = taskResult.steps.last().resolution.message
-        val causes =
-          taskResult.steps.mapNotNull { step ->
-            when (val resolution = step.resolution) {
-              is TaskStepResolution.TaskStepSucceeded -> null
-              is TaskStepResolution.TaskStepFailed -> resolution.errorValue
+    return try {
+      when (val taskResult = this.services.loginAccount(createdAccount.account)) {
+        is TaskResult.Success -> {
+          this.publishStepSucceeded(ACCOUNT, this.strings.successAuthenticatedAccount(createdAccount.account.provider.displayName))
+        }
+        is TaskResult.Failure -> {
+          val message = taskResult.steps.last().resolution.message
+          val causes =
+            taskResult.steps.mapNotNull { step ->
+              when (val resolution = step.resolution) {
+                is TaskStepResolution.TaskStepSucceeded -> null
+                is TaskStepResolution.TaskStepFailed -> resolution.errorValue
+              }
             }
-          }
 
-        this.publishStepError(MigrationStepError(message = message, causes = causes))
+          this.publishStepError(MigrationStepError(message = message, causes = causes))
+        }
       }
+    } catch (e: Exception) {
+      this.logger.error("failed to authenticate account: ", e)
+      this.publishStepError(MigrationStepError(
+        message = this.strings.errorAccountAuthenticationFailure(createdAccount.account.provider.displayName),
+        attributes = mapOf(
+          Pair("accountID", createdAccount.account.id.uuid.toString()),
+          Pair("accountTitle", createdAccount.account.provider.displayName)
+        ),
+        exception = e))
     }
   }
 
@@ -259,7 +323,7 @@ class MigrationFrom3Master(
         val formatName = this.formatHandleName(formatHandle)
         val exception = Exception("Unexpected format: $formatName")
         this.publishStepError(MigrationStepError(
-          message = strings.errorBookUnexpectedFormat(book.bookEntry.title, formatName),
+          message = this.strings.errorBookUnexpectedFormat(book.bookEntry.title, formatName),
           attributes = mapOf(
             Pair("bookTitle", book.bookEntry.title),
             Pair("bookFormat", formatName),
@@ -359,14 +423,7 @@ class MigrationFrom3Master(
    */
 
   private fun loadBooksForAccount(createdAccount: CreatedAccount): List<LoadedBook> {
-    val idNumeric = createdAccount.loadedAccount.enumeratedAccount.idNumeric
-    this.logger.debug("loading books for account {}", idNumeric)
-    val booksDirectory =
-      if (idNumeric == 0) {
-        File(File(this.oldBaseDataDirectory, "books"), "data")
-      } else {
-        File(File(File(this.oldBaseDataDirectory, idNumeric.toString()), "books"), "data")
-      }
+    val booksDirectory = createdAccount.loadedAccount.booksDataDirectory
 
     this.logger.debug("enumerating books directory {}", booksDirectory)
     val entries = booksDirectory.list()
@@ -641,7 +698,24 @@ class MigrationFrom3Master(
       val accountData = FileInputStream(accountFile).use { stream ->
         this.objectMapper.readValue(stream, MigrationFrom3MasterAccount::class.java)
       }
-      LoadedAccount(account, accountData)
+
+      this.logger.debug("loading books for account {}", account.idNumeric)
+      val booksDirectory =
+        if (account.idNumeric == 0) {
+         File(this.oldBaseDataDirectory, "books")
+        } else {
+          File(File(this.oldBaseDataDirectory, account.idNumeric.toString()), "books")
+        }
+
+      val booksDataDirectory =
+        File(booksDirectory, "data")
+
+      LoadedAccount(
+        enumeratedAccount = account,
+        booksDirectory = booksDirectory,
+        booksDataDirectory = booksDataDirectory,
+        accountFile = accountFile,
+        account = accountData)
     } catch (e: java.lang.Exception) {
       this.logger.error("could not load account: ", e)
       this.publishStepError(MigrationStepError(
@@ -688,8 +762,9 @@ class MigrationFrom3Master(
         }
 
         if (id != null) {
+          val accountDirectory = File(this.oldBaseAccountsDirectory, id.toString())
           this.enumerateAccount(
-            accountDirectory = File(this.oldBaseAccountsDirectory, id.toString()),
+            accountDirectory = accountDirectory,
             idNumeric = id)
             ?.let { enumeratedAccounts.add(it) }
         }
@@ -721,6 +796,11 @@ class MigrationFrom3Master(
       adobeDeviceXML = this.isFileOrNull(adobeDeviceXML),
       idURI = idURI,
       idNumeric = idNumeric)
+  }
+
+  private fun pushFileToDeletionQueue(file: File) {
+    this.logger.debug("queueing file for deletion: {}", file)
+    this.filesToDelete.add(file)
   }
 
   private fun isFileOrNull(file: File): File? {

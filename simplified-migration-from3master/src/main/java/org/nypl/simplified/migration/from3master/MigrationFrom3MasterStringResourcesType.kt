@@ -1,10 +1,14 @@
 package org.nypl.simplified.migration.from3master
 
+import org.nypl.simplified.migration.spi.MigrationEvent
+
 /**
  * The strings published during migration.
  */
 
 interface MigrationFrom3MasterStringResourcesType {
+
+  val successDeletedOldData: String
 
   fun errorUnknownAccountProvider(
     id: Int
@@ -40,6 +44,10 @@ interface MigrationFrom3MasterStringResourcesType {
   ): String
 
   fun errorBookmarksParseFailure(
+    title: String
+  ): String
+
+  fun errorAccountAuthenticationFailure(
     title: String
   ): String
 
