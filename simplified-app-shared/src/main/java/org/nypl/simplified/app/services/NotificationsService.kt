@@ -5,6 +5,7 @@ import com.io7m.jfunctional.Some
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -38,7 +39,15 @@ class NotificationsService(
     private fun onBookEvent(event: BookEvent) {
         logger.debug("NotificationsService:: onBookEvent $event")
         executor.execute {
-            this.getBookStatuses()
+            if (event is BookStatusEvent) {
+                /*
+                   BookStatusEvent is only giving me BOOK_CHANGED and BOOK_REMOVED.
+                   While a book Download goes on, this fires repeatedly as the download
+                   progress get updated.
+                 */
+
+                // this.getBookStatuses()
+            }
         }
     }
 
