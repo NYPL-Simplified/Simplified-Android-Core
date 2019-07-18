@@ -1,10 +1,10 @@
 package org.nypl.simplified.migration.spi
 
 import android.content.Context
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountLoginState.*
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -27,7 +27,7 @@ data class MigrationServiceDependencies(
    * A function that, given an account, tries to log in.
    */
 
-  val loginAccount: (AccountType) -> TaskResult<AccountLoginErrorData, Unit>,
+  val loginAccount: (AccountType, AccountAuthenticationCredentials) -> TaskResult<AccountLoginErrorData, Unit>,
 
   /**
    * A source of account events.
@@ -40,6 +40,12 @@ data class MigrationServiceDependencies(
    */
 
   val applicationProfileIsAnonymous: Boolean,
+
+  /**
+   * The application name and version (such as `org.nypl.simplified.vanilla 0.0.1 (2000)`).
+   */
+
+  val applicationVersion: String,
 
   /**
    * The Android application context.

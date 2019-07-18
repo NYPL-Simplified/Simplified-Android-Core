@@ -67,4 +67,8 @@ interface MigrationFrom3MasterStringResourcesType {
   fun successAuthenticatedAccount(
     title: String
   ): String
+
+  fun successAuthenticatedAccountNotRequired(
+    title: String
+  ): String
 }

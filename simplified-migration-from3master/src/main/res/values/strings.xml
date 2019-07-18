@@ -15,4 +15,5 @@
   <string name="successAuthenticatedAccount">Successfully authenticated account \"%1$s\".</string>
   <string name="errorAccountAuthenticationFailure">Failed to authenticate account \"%1$s\".</string>
   <string name="successDeletedOldData">Deleted old data.</string>
+  <string name="successAuthenticatedAccountNotRequired">The account \"%1$s\" does not actually require credentials.</string>
 </resources>

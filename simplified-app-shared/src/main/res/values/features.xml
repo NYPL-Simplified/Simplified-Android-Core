@@ -11,6 +11,10 @@
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>
 
+  <!-- If a non-empty email address is supplied here, it will be used as the
+       target of migration reports -->
+  <string name="feature_migration_report_email"></string>
+
   <!-- The default Adobe vendor ID -->
   <string name="feature_adobe_vendor_id">NYPL</string>
 

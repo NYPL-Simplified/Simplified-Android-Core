@@ -11,6 +11,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
@@ -73,8 +74,9 @@ abstract class MigrationFrom3MasterContract {
       MigrationServiceDependencies(
         applicationProfileIsAnonymous = true,
         createAccount = { TaskResult.Failure(listOf()) },
-        loginAccount = { TaskResult.Failure(listOf()) },
+        loginAccount = { _,_-> TaskResult.Failure(listOf()) },
         accountEvents = this.accountEvents,
+        applicationVersion = "test suite 0.0.1",
         context = this.context)
 
     this.tempDir.delete()
@@ -84,6 +86,9 @@ abstract class MigrationFrom3MasterContract {
   }
 
   private class MockStrings : MigrationFrom3MasterStringResourcesType {
+
+    override fun successAuthenticatedAccountNotRequired(title: String): String =
+      "successAuthenticatedAccountNotRequired: $title"
 
     override val successDeletedOldData: String =
       "successDeletedOldData"
@@ -180,7 +185,8 @@ abstract class MigrationFrom3MasterContract {
         applicationProfileIsAnonymous = false,
         context = this.context,
         createAccount = { TaskResult.Failure(listOf()) },
-        loginAccount = { TaskResult.Failure(listOf()) }
+        loginAccount = { _, _ -> TaskResult.Failure(listOf()) },
+        applicationVersion = "test suite 0.0.1"
       )
 
     File(this.tempDir, "salt").writeBytes(ByteArray(16))
@@ -267,7 +273,7 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.currentStepFailed("FAILED!", UnexpectedException("Ouch", Exception()))
           taskRecorder.finishFailure()
         },
-        loginAccount = {
+        loginAccount = { _, _ ->
           val taskRecorder =
             TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
           taskRecorder.beginNewStep("Starting...")
@@ -275,6 +281,7 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.finishFailure()
         },
         accountEvents = this.accountEvents,
+        applicationVersion = "test suite 0.0.1",
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -304,7 +311,7 @@ abstract class MigrationFrom3MasterContract {
     for (file in listOf(
       accountFile,
       deviceFile
-    )){
+    )) {
       Assert.assertTrue("$file exists", file.exists())
     }
 
@@ -327,6 +334,8 @@ abstract class MigrationFrom3MasterContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
+    Mockito.`when`(accountProvider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(null,null,20,null,"Basic", mapOf()))
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
@@ -341,13 +350,14 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
-        loginAccount = {
+        loginAccount = { _, _ ->
           val taskRecorder =
             TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(Unit)
         },
         accountEvents = this.accountEvents,
+        applicationVersion = "test suite 0.0.1",
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -393,6 +403,8 @@ abstract class MigrationFrom3MasterContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
+    Mockito.`when`(accountProvider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(null,null,20,null,"Basic", mapOf()))
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
@@ -409,13 +421,14 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
-        loginAccount = {
+        loginAccount = { _, _ ->
           val taskRecorder =
             TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(Unit)
         },
         accountEvents = this.accountEvents,
+        applicationVersion = "test suite 0.0.1",
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -449,7 +462,7 @@ abstract class MigrationFrom3MasterContract {
       bookAnnotationsFile,
       accountFile,
       deviceFile
-    )){
+    )) {
       Assert.assertTrue("$file no exists", file.exists())
     }
 
@@ -483,7 +496,7 @@ abstract class MigrationFrom3MasterContract {
       bookAnnotationsFile,
       accountFile,
       deviceFile
-    )){
+    )) {
       Assert.assertTrue("$file no longer exists", !file.exists())
     }
 
@@ -521,6 +534,8 @@ abstract class MigrationFrom3MasterContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
+    Mockito.`when`(accountProvider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(null,null,20,null,"Basic", mapOf()))
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
@@ -547,13 +562,14 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
-        loginAccount = {
+        loginAccount = { _, _ ->
           val taskRecorder =
             TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(Unit)
         },
         accountEvents = this.accountEvents,
+        applicationVersion = "test suite 0.0.1",
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -623,6 +639,8 @@ abstract class MigrationFrom3MasterContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
+    Mockito.`when`(accountProvider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(null,null,20,null,"Basic", mapOf()))
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
@@ -639,7 +657,7 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
-        loginAccount = {
+        loginAccount = { _, _ ->
           val taskRecorder =
             TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
           taskRecorder.beginNewStep("Starting...")
@@ -647,6 +665,7 @@ abstract class MigrationFrom3MasterContract {
           taskRecorder.finishFailure()
         },
         accountEvents = this.accountEvents,
+        applicationVersion = "test suite 0.0.1",
         context = this.context)
 
     val acc = File(this.tempDir, "12")
@@ -701,7 +720,7 @@ abstract class MigrationFrom3MasterContract {
       bookAnnotationsFile,
       accountFile,
       deviceFile
-    )){
+    )) {
       Assert.assertTrue("$file no longer exists", !file.exists())
     }
 

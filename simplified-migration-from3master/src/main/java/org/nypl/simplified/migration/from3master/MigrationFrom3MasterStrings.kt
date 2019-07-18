@@ -35,6 +35,9 @@ class MigrationFrom3MasterStrings(
   override fun successAuthenticatedAccount(title: String): String =
     this.resources.getString(R.string.successAuthenticatedAccount, title)
 
+  override fun successAuthenticatedAccountNotRequired(title: String): String =
+    this.resources.getString(R.string.successAuthenticatedAccountNotRequired, title)
+
   override fun errorBookLoadTitledFailure(title: String): String =
     this.resources.getString(R.string.errorBookLoadTitledFailure, title)
 

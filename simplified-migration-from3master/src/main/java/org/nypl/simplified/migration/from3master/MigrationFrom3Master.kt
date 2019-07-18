@@ -6,15 +6,19 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
+import org.joda.time.LocalDateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.audiobook.android.api.PlayerPositions
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -29,7 +33,10 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.migration.spi.MigrationEvent
-import org.nypl.simplified.migration.spi.MigrationEvent.*
+import org.nypl.simplified.migration.spi.MigrationEvent.MigrationStepError
+import org.nypl.simplified.migration.spi.MigrationEvent.MigrationStepInProgress
+import org.nypl.simplified.migration.spi.MigrationEvent.MigrationStepSucceeded
+import org.nypl.simplified.migration.spi.MigrationEvent.Subject
 import org.nypl.simplified.migration.spi.MigrationEvent.Subject.ACCOUNT
 import org.nypl.simplified.migration.spi.MigrationEvent.Subject.BOOK
 import org.nypl.simplified.migration.spi.MigrationEvent.Subject.BOOKMARK
@@ -170,6 +177,8 @@ class MigrationFrom3Master(
       }
 
     try {
+      val time = LocalDateTime.now()
+
       val accounts = this.enumerateAccountsToMigrate()
       this.logger.debug("{} accounts to migrate", accounts.size)
 
@@ -217,7 +226,11 @@ class MigrationFrom3Master(
       }
 
       this.publishStepSucceeded(this.strings.successDeletedOldData)
-      return MigrationReport(this.noticesLog.toList())
+      return MigrationReport(
+        this.services.applicationVersion,
+        this.javaClass.canonicalName,
+        time,
+        this.noticesLog.toList())
     } finally {
       subscription.unsubscribe()
     }
@@ -237,10 +250,23 @@ class MigrationFrom3Master(
   private fun authenticateAccount(createdAccount: CreatedAccount) {
     this.logger.debug("authenticating account {}", createdAccount.account.id)
 
+    val accountTitle = createdAccount.account.provider.displayName
     return try {
-      when (val taskResult = this.services.loginAccount(createdAccount.account)) {
+      val authentication = createdAccount.account.provider.authentication
+      if (authentication == null) {
+        this.publishStepSucceeded(this.strings.successAuthenticatedAccountNotRequired(accountTitle))
+        return
+      }
+
+      val credentials =
+        AccountAuthenticationCredentials.builder(
+          AccountPIN.create(createdAccount.loadedAccount.account.password),
+          AccountBarcode.create(createdAccount.loadedAccount.account.username))
+          .build()
+
+      when (val taskResult = this.services.loginAccount(createdAccount.account, credentials)) {
         is TaskResult.Success -> {
-          this.publishStepSucceeded(ACCOUNT, this.strings.successAuthenticatedAccount(createdAccount.account.provider.displayName))
+          this.publishStepSucceeded(ACCOUNT, this.strings.successAuthenticatedAccount(accountTitle))
         }
         is TaskResult.Failure -> {
           val message = taskResult.steps.last().resolution.message
@@ -258,10 +284,10 @@ class MigrationFrom3Master(
     } catch (e: Exception) {
       this.logger.error("failed to authenticate account: ", e)
       this.publishStepError(MigrationStepError(
-        message = this.strings.errorAccountAuthenticationFailure(createdAccount.account.provider.displayName),
+        message = this.strings.errorAccountAuthenticationFailure(accountTitle),
         attributes = mapOf(
           Pair("accountID", createdAccount.account.id.uuid.toString()),
-          Pair("accountTitle", createdAccount.account.provider.displayName)
+          Pair("accountTitle", accountTitle)
         ),
         exception = e))
     }
@@ -363,7 +389,7 @@ class MigrationFrom3Master(
     book: LoadedBook
   ): CopiedBook? {
 
-    var result : CopiedBook? = CopiedBook(book)
+    var result: CopiedBook? = CopiedBook(book)
 
     try {
       if (book.epubFile.isFile) {
@@ -385,8 +411,8 @@ class MigrationFrom3Master(
       if (book.epubBookmarks != null) {
         handle.setBookmarks(book.epubBookmarks)
         this.publishStepSucceeded(BOOKMARK, this.strings.successCopiedBookmarks(book.bookEntry.title, book.epubBookmarks.size))
-        handle.setLastReadLocation(book.epubBookmarks.find {
-          bookmark -> bookmark.kind == BookmarkKind.ReaderBookmarkLastReadLocation
+        handle.setLastReadLocation(book.epubBookmarks.find { bookmark ->
+          bookmark.kind == BookmarkKind.ReaderBookmarkLastReadLocation
         })
       }
     } catch (e: Exception) {
@@ -702,7 +728,7 @@ class MigrationFrom3Master(
       this.logger.debug("loading books for account {}", account.idNumeric)
       val booksDirectory =
         if (account.idNumeric == 0) {
-         File(this.oldBaseDataDirectory, "books")
+          File(this.oldBaseDataDirectory, "books")
         } else {
           File(File(this.oldBaseDataDirectory, account.idNumeric.toString()), "books")
         }

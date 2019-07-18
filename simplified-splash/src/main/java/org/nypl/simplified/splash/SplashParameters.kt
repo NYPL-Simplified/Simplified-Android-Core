@@ -32,4 +32,10 @@ data class SplashParameters(
    * The number of seconds to keep the splash screen image visible.
    */
 
-  val splashImageSeconds: Long) : Serializable
+  val splashImageSeconds: Long,
+
+  /**
+   * The email address to which migration reports will be sent.
+   */
+
+  val splashMigrationReportEmail: String? = null) : Serializable
