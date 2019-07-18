@@ -37,6 +37,8 @@ sealed class MigrationEvent : PresentableType {
 
   data class MigrationStepSucceeded(
     override val message: String,
+    override val attributes: Map<String, String> = mapOf(),
+    val causes: List<PresentableType> = listOf(),
     override val subject: Subject? = null)
     : MigrationEvent()
 

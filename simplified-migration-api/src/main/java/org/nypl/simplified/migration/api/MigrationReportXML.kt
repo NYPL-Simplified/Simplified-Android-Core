@@ -3,6 +3,7 @@ package org.nypl.simplified.migration.api
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.PresentableType
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.ByteArrayOutputStream
@@ -49,19 +50,23 @@ object MigrationReportXML : MigrationReportXMLType {
         is MigrationEvent.MigrationStepInProgress -> {
           eventElement.setAttribute("type", "MigrationStepInProgress")
           eventElement.setAttribute("message", event.message)
-          eventElement.appendChild(this.saveAttributes(document, event))
+          eventElement.appendChild(this.saveAttributes(document, event.attributes))
         }
 
         is MigrationEvent.MigrationStepSucceeded -> {
           eventElement.setAttribute("type", "MigrationStepSucceeded")
           eventElement.setAttribute("message", event.message)
-          eventElement.appendChild(this.saveAttributes(document, event))
+          eventElement.appendChild(this.saveAttributes(document, event.attributes))
+
+          for (cause in event.causes) {
+            eventElement.appendChild(this.saveCauseTree(document, cause))
+          }
         }
 
         is MigrationEvent.MigrationStepError -> {
           eventElement.setAttribute("type", "MigrationStepError")
           eventElement.setAttribute("message", event.message)
-          eventElement.appendChild(this.saveAttributes(document, event))
+          eventElement.appendChild(this.saveAttributes(document, event.attributes))
 
           val exception = event.exception
           if (exception != null) {
@@ -101,6 +106,8 @@ object MigrationReportXML : MigrationReportXMLType {
   ): Element {
     val element = document.createElement("cause")
     element.setAttribute("message", cause.message)
+    this.saveAttributes(document, cause.attributes)
+
     val exception = cause.exception
     if (exception != null) {
       element.appendChild(this.saveException(document, exception))
@@ -108,6 +115,16 @@ object MigrationReportXML : MigrationReportXMLType {
     for (subCause in cause.causes) {
       element.appendChild(saveCauseTree(document, subCause))
     }
+    return element
+  }
+
+  private fun saveCauseTree(
+    document: Document,
+    cause: PresentableType
+  ): Element {
+    val element = document.createElement("cause")
+    element.setAttribute("message", cause.message)
+    element.appendChild(this.saveAttributes(document, cause.attributes))
     return element
   }
 
@@ -125,13 +142,13 @@ object MigrationReportXML : MigrationReportXMLType {
 
   private fun saveAttributes(
     document: Document,
-    event: MigrationEvent
+    attributes: Map<String, String>
   ): Element {
     val attributesElement = document.createElement("attributes")
-    for (key in event.attributes.keys) {
+    for (key in attributes.keys) {
       val attributeElement = document.createElement("attribute")
       attributeElement.setAttribute("name", key)
-      attributeElement.setAttribute("value", event.attributes[key] ?: "")
+      attributeElement.setAttribute("value", attributes[key] ?: "")
     }
     return attributesElement
   }

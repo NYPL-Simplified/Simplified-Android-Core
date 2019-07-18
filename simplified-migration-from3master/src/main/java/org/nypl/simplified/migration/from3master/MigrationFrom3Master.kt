@@ -48,6 +48,7 @@ import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONParser
+import org.nypl.simplified.presentableerror.api.PresentableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.slf4j.LoggerFactory
@@ -103,7 +104,18 @@ class MigrationFrom3Master(
     this.noticesObservable
 
   private fun publishStepSucceeded(subject: Subject, message: String) {
-    this.noticesObservable.send(MigrationStepSucceeded(message, subject))
+    this.noticesObservable.send(MigrationStepSucceeded(
+      message = message,
+      subject = subject
+    ))
+  }
+
+  private fun publishStepSucceeded(subject: Subject, message: String, steps: List<PresentableType>) {
+    this.noticesObservable.send(MigrationStepSucceeded(
+      message = message,
+      subject = subject,
+      causes = steps
+    ))
   }
 
   private fun publishStepSucceeded(message: String) {
@@ -258,7 +270,8 @@ class MigrationFrom3Master(
       when (createdAccount.account.provider.authentication) {
         is AccountProviderAuthenticationDescription.COPPAAgeGate,
         null -> {
-          this.publishStepSucceeded(this.strings.successAuthenticatedAccountNotRequired(accountTitle))
+          this.publishStepSucceeded(
+            ACCOUNT, this.strings.successAuthenticatedAccountNotRequired(accountTitle))
           return
         }
         is AccountProviderAuthenticationDescription.Basic -> {
