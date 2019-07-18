@@ -11,6 +11,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.SimplifiedActivity
@@ -31,6 +32,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.splash.SplashFragment
 import org.nypl.simplified.splash.SplashListenerType
 import org.nypl.simplified.splash.SplashParameters
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.theme.ThemeControl
 import org.nypl.simplified.threads.NamedThreadPools
@@ -93,7 +95,6 @@ class SplashActivity : SimplifiedActivity(), SplashListenerType {
     account: AccountType,
     credentials: AccountAuthenticationCredentials
   ): TaskResult<AccountLoginState.AccountLoginErrorData, Unit> {
-
     this.log.debug("doLoginAccount")
     return profilesController.profileAccountLogin(account.id, credentials)
       .get(3L, TimeUnit.MINUTES)
@@ -103,14 +104,9 @@ class SplashActivity : SimplifiedActivity(), SplashListenerType {
     profilesController: ProfilesControllerType,
     provider: URI
   ): TaskResult<AccountCreateErrorDetails, AccountType> {
-
     this.log.debug("doCreateAccount")
-    return profilesController.profileAccountCreate(provider)
+    return profilesController.profileAccountCreateOrReturnExisting(provider)
       .get(3L, TimeUnit.MINUTES)
-      .flatMap { accountId ->
-      TaskResult.Success<AccountCreateErrorDetails, AccountType>(
-        profilesController.profileCurrent().account(accountId), listOf())
-    }
   }
 
   private fun applicationVersion(): String {

@@ -73,8 +73,20 @@ abstract class MigrationFrom3MasterContract {
     this.services =
       MigrationServiceDependencies(
         applicationProfileIsAnonymous = true,
-        createAccount = { TaskResult.Failure(listOf()) },
-        loginAccount = { _,_-> TaskResult.Failure(listOf()) },
+        createAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountCreateErrorDetails>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.currentStepFailed("FAILED!", UnexpectedException("FAILED!", Exception()))
+          taskRecorder.finishFailure()
+        },
+        loginAccount = { _, _ ->
+          val taskRecorder =
+            TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
+          taskRecorder.beginNewStep("Starting...")
+          taskRecorder.currentStepFailed("FAILED!", AccountLoginUnexpectedException("Ouch", Exception()))
+          taskRecorder.finishFailure()
+        },
         accountEvents = this.accountEvents,
         applicationVersion = "test suite 0.0.1",
         context = this.context)
@@ -86,6 +98,11 @@ abstract class MigrationFrom3MasterContract {
   }
 
   private class MockStrings : MigrationFrom3MasterStringResourcesType {
+    override fun progressLoadingAccount(idNumeric: Int): String =
+      "progressLoadingAccount: $idNumeric"
+
+    override fun errorAccountAuthenticationNoCredentials(accountTitle: String): String =
+      "errorAccountAuthenticationNoCredentials: $accountTitle"
 
     override fun successAuthenticatedAccountNotRequired(title: String): String =
       "successAuthenticatedAccountNotRequired: $title"
@@ -244,10 +261,11 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(2, report.events.size)
-    Assert.assertEquals("errorAccountLoadFailure: 12", report.events[0].message)
-    Assert.assertEquals("successDeletedOldData", report.events[1].message)
-    this.logger.debug("exception: ", (report.events[0] as MigrationStepError).exception)
+    Assert.assertEquals(3, report.events.size)
+    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assert.assertEquals("FAILED!", report.events[1].message)
+    Assert.assertEquals("successDeletedOldData", report.events[2].message)
+    this.logger.debug("exception: ", (report.events[1] as MigrationStepError).exception)
 
     this.assertWouldASecondMigrationNeedToRun(true)
   }
@@ -288,7 +306,7 @@ abstract class MigrationFrom3MasterContract {
     acc.mkdirs()
     val accountsDir = File(acc, "accounts")
     accountsDir.mkdirs()
-    val accountFile = File(acc, "account.json")
+    val accountFile = File(accountsDir, "account.json")
     accountFile.writeBytes(this.resource("account.json"))
     val deviceFile = File(this.tempDir, "device.xml")
     deviceFile.writeBytes(ByteArray(16))
@@ -298,17 +316,19 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(2, report.events.size)
-    Assert.assertEquals("FAILED!", report.events[0].message)
-    Assert.assertEquals("successDeletedOldData", report.events[1].message)
+    Assert.assertEquals(3, report.events.size)
+    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assert.assertEquals("FAILED!", report.events[1].message)
+    Assert.assertEquals("successDeletedOldData", report.events[2].message)
 
-    this.logger.debug("exception: ", (report.events[0] as MigrationStepError).exception)
+    this.logger.debug("exception: ", (report.events[1] as MigrationStepError).exception)
 
     /*
      * Because account creation failed, the original files are not removed.
      */
 
     for (file in listOf(
+      accountsDir,
       accountFile,
       deviceFile
     )) {
@@ -335,11 +355,15 @@ abstract class MigrationFrom3MasterContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(accountProvider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(null,null,20,null,"Basic", mapOf()))
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(null, null, 20, null, "Basic", mapOf()))
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
       .thenReturn(accountProvider)
+
+    val accountID = AccountID(UUID.randomUUID())
+    Mockito.`when`(account.id)
+      .thenReturn(accountID)
 
     this.services =
       MigrationServiceDependencies(
@@ -362,10 +386,11 @@ abstract class MigrationFrom3MasterContract {
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
-    File(acc, "accounts").mkdirs()
+    val accountsSubdir = File(acc, "accounts")
+    accountsSubdir.mkdirs()
     File(acc, "books").mkdirs()
     File(File(acc, "books"), "data").mkdirs()
-    File(acc, "account.json").writeBytes(this.resource("account.json"))
+    File(accountsSubdir, "account.json").writeBytes(this.resource("account.json"))
     File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
 
     val migration = this.migrations.create(this.services)
@@ -373,10 +398,11 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(3, report.events.size)
-    Assert.assertEquals("successCreatedAccount: Account 0", report.events[0].message)
-    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[1].message)
-    Assert.assertEquals("successDeletedOldData", report.events[2].message)
+    Assert.assertEquals(4, report.events.size)
+    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
+    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[2].message)
+    Assert.assertEquals("successDeletedOldData", report.events[3].message)
 
     this.assertWouldASecondMigrationNeedToRun(false)
   }
@@ -404,11 +430,14 @@ abstract class MigrationFrom3MasterContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(accountProvider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(null,null,20,null,"Basic", mapOf()))
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(null, null, 20, null, "Basic", mapOf()))
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
       .thenReturn(accountProvider)
+    val accountID = AccountID(UUID.randomUUID())
+    Mockito.`when`(account.id)
+      .thenReturn(accountID)
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
@@ -433,7 +462,8 @@ abstract class MigrationFrom3MasterContract {
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
-    File(acc, "accounts").mkdirs()
+    val accountsSubDir = File(acc, "accounts")
+    accountsSubDir.mkdirs()
 
     val booksDir = File(acc, "books")
     val booksDataDir = File(booksDir, "data")
@@ -448,7 +478,7 @@ abstract class MigrationFrom3MasterContract {
     val bookAnnotationsFile = File(bookDir, "annotations.json")
     bookAnnotationsFile.writeBytes(this.resource("annotations0.json"))
 
-    val accountFile = File(acc, "account.json")
+    val accountFile = File(accountsSubDir, "account.json")
     accountFile.writeBytes(this.resource("account.json"))
     val deviceFile = File(this.tempDir, "device.xml")
     deviceFile.writeBytes(ByteArray(16))
@@ -471,12 +501,13 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(5, report.events.size)
-    Assert.assertEquals("successCreatedAccount: Account 0", report.events[0].message)
-    Assert.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[1].message)
-    Assert.assertEquals("successCopiedBook: Bossypants", report.events[2].message)
-    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[3].message)
-    Assert.assertEquals("successDeletedOldData", report.events[4].message)
+    Assert.assertEquals(6, report.events.size)
+    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
+    Assert.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[2].message)
+    Assert.assertEquals("successCopiedBook: Bossypants", report.events[3].message)
+    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
+    Assert.assertEquals("successDeletedOldData", report.events[5].message)
 
     val bookId = BookID.create("5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
     Assert.assertTrue(bookDatabase.books().contains(bookId))
@@ -494,6 +525,7 @@ abstract class MigrationFrom3MasterContract {
       bookEPUBFile,
       bookMetaFile,
       bookAnnotationsFile,
+      accountsSubDir,
       accountFile,
       deviceFile
     )) {
@@ -535,13 +567,16 @@ abstract class MigrationFrom3MasterContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(accountProvider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(null,null,20,null,"Basic", mapOf()))
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(null, null, 20, null, "Basic", mapOf()))
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
       .thenReturn(accountProvider)
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
+    val accountID = AccountID(UUID.randomUUID())
+    Mockito.`when`(account.id)
+      .thenReturn(accountID)
 
     val opdsEntry =
       this.opdsEntry("meta0.json")
@@ -574,7 +609,8 @@ abstract class MigrationFrom3MasterContract {
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
-    File(acc, "accounts").mkdirs()
+    val accountsDir = File(acc, "accounts")
+    accountsDir.mkdirs()
 
     val booksDir = File(acc, "books")
     val booksDataDir = File(booksDir, "data")
@@ -589,7 +625,7 @@ abstract class MigrationFrom3MasterContract {
     val bookAnnotationsFile = File(bookDir, "annotations.json")
     bookAnnotationsFile.writeBytes(this.resource("annotations0.json"))
 
-    File(acc, "account.json").writeBytes(this.resource("account.json"))
+    File(accountsDir, "account.json").writeBytes(this.resource("account.json"))
     File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
 
     Mockito.`when`(bookDatabaseEntryFormatHandle.setAdobeRightsInformation(Mockito.any()))
@@ -604,13 +640,14 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(6, report.events.size)
-    Assert.assertEquals("successCreatedAccount: Account 0", report.events[0].message)
-    Assert.assertEquals("errorBookCopyFailure: Bossypants", report.events[1].message)
-    Assert.assertEquals("errorBookmarksCopyFailure: Bossypants", report.events[2].message)
-    Assert.assertEquals("errorBookAdobeDRMCopyFailure: Bossypants", report.events[3].message)
-    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
-    Assert.assertEquals("successDeletedOldData", report.events[5].message)
+    Assert.assertEquals(7, report.events.size)
+    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
+    Assert.assertEquals("errorBookCopyFailure: Bossypants", report.events[2].message)
+    Assert.assertEquals("errorBookmarksCopyFailure: Bossypants", report.events[3].message)
+    Assert.assertEquals("errorBookAdobeDRMCopyFailure: Bossypants", report.events[4].message)
+    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[5].message)
+    Assert.assertEquals("successDeletedOldData", report.events[6].message)
 
     Assert.assertFalse(bookDatabase.books().contains(bookId))
 
@@ -640,13 +677,16 @@ abstract class MigrationFrom3MasterContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(accountProvider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(null,null,20,null,"Basic", mapOf()))
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(null, null, 20, null, "Basic", mapOf()))
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
       .thenReturn(accountProvider)
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
+    val accountID = AccountID(UUID.randomUUID())
+    Mockito.`when`(account.id)
+      .thenReturn(accountID)
 
     this.services =
       MigrationServiceDependencies(
@@ -670,7 +710,8 @@ abstract class MigrationFrom3MasterContract {
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
-    File(acc, "accounts").mkdirs()
+    val accountsSubDir = File(acc, "accounts")
+    accountsSubDir.mkdirs()
 
     val booksDir = File(acc, "books")
     val booksDataDir = File(booksDir, "data")
@@ -685,7 +726,7 @@ abstract class MigrationFrom3MasterContract {
     val bookAnnotationsFile = File(bookDir, "annotations.json")
     bookAnnotationsFile.writeBytes(this.resource("annotations0.json"))
 
-    val accountFile = File(acc, "account.json")
+    val accountFile = File(accountsSubDir, "account.json")
     accountFile.writeBytes(this.resource("account.json"))
     val deviceFile = File(this.tempDir, "device.xml")
     deviceFile.writeBytes(ByteArray(16))
@@ -695,12 +736,13 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(5, report.events.size)
-    Assert.assertEquals("successCreatedAccount: Account 0", report.events[0].message)
-    Assert.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[1].message)
-    Assert.assertEquals("successCopiedBook: Bossypants", report.events[2].message)
-    Assert.assertEquals("FAILURE!", report.events[3].message)
-    Assert.assertEquals("successDeletedOldData", report.events[4].message)
+    Assert.assertEquals(6, report.events.size)
+    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
+    Assert.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[2].message)
+    Assert.assertEquals("successCopiedBook: Bossypants", report.events[3].message)
+    Assert.assertEquals("FAILURE!", report.events[4].message)
+    Assert.assertEquals("successDeletedOldData", report.events[5].message)
 
     val bookId = BookID.create("5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
     Assert.assertTrue(bookDatabase.books().contains(bookId))
@@ -718,6 +760,7 @@ abstract class MigrationFrom3MasterContract {
       bookEPUBFile,
       bookMetaFile,
       bookAnnotationsFile,
+      accountsSubDir,
       accountFile,
       deviceFile
     )) {

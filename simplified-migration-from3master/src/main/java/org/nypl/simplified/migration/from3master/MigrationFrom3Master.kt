@@ -19,6 +19,7 @@ import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -144,7 +145,8 @@ class MigrationFrom3Master(
     val enumeratedAccount: EnumeratedAccount,
     val booksDirectory: File,
     val booksDataDirectory: File,
-    val account: MigrationFrom3MasterAccount,
+    val account: MigrationFrom3MasterAccount?,
+    val accountSubDirectory: File,
     val accountFile: File)
 
   data class CreatedAccount(
@@ -240,6 +242,7 @@ class MigrationFrom3Master(
     this.pushFileToDeletionQueue(l.booksDataDirectory)
     this.pushFileToDeletionQueue(l.booksDirectory)
     this.pushFileToDeletionQueue(l.accountFile)
+    this.pushFileToDeletionQueue(l.accountSubDirectory)
   }
 
   private fun isSafeToDelete(file: File): Boolean {
@@ -252,16 +255,33 @@ class MigrationFrom3Master(
 
     val accountTitle = createdAccount.account.provider.displayName
     return try {
-      val authentication = createdAccount.account.provider.authentication
-      if (authentication == null) {
-        this.publishStepSucceeded(this.strings.successAuthenticatedAccountNotRequired(accountTitle))
+      when (createdAccount.account.provider.authentication) {
+        is AccountProviderAuthenticationDescription.COPPAAgeGate,
+        null -> {
+          this.publishStepSucceeded(this.strings.successAuthenticatedAccountNotRequired(accountTitle))
+          return
+        }
+        is AccountProviderAuthenticationDescription.Basic -> {
+
+        }
+      }
+
+      val accountData = createdAccount.loadedAccount.account
+      if (accountData == null) {
+        this.publishStepError(MigrationStepError(
+          message = this.strings.errorAccountAuthenticationNoCredentials(accountTitle),
+          exception = java.lang.Exception("Missing credentials"),
+          attributes = mapOf(
+            Pair("accountID", createdAccount.account.id.uuid.toString()),
+            Pair("accountTitle", accountTitle)
+          )))
         return
       }
 
       val credentials =
         AccountAuthenticationCredentials.builder(
-          AccountPIN.create(createdAccount.loadedAccount.account.password),
-          AccountBarcode.create(createdAccount.loadedAccount.account.username))
+          AccountPIN.create(accountData.password),
+          AccountBarcode.create(accountData.username))
           .build()
 
       when (val taskResult = this.services.loginAccount(createdAccount.account, credentials)) {
@@ -719,11 +739,20 @@ class MigrationFrom3Master(
    */
 
   private fun loadAccount(account: EnumeratedAccount): LoadedAccount? {
+    this.publishStepProgress(ACCOUNT, this.strings.progressLoadingAccount(account.idNumeric))
+
     return try {
-      val accountFile = File(account.baseDirectory, "account.json")
-      val accountData = FileInputStream(accountFile).use { stream ->
-        this.objectMapper.readValue(stream, MigrationFrom3MasterAccount::class.java)
-      }
+      val accountAccounts = File(account.baseDirectory, "accounts")
+      val accountFile = File(accountAccounts, "account.json")
+
+      val accountData =
+        if (accountFile.isFile) {
+          FileInputStream(accountFile).use { stream ->
+            this.objectMapper.readValue(stream, MigrationFrom3MasterAccount::class.java)
+          }
+        } else {
+          null
+        }
 
       this.logger.debug("loading books for account {}", account.idNumeric)
       val booksDirectory =
@@ -740,6 +769,7 @@ class MigrationFrom3Master(
         enumeratedAccount = account,
         booksDirectory = booksDirectory,
         booksDataDirectory = booksDataDirectory,
+        accountSubDirectory = accountAccounts,
         accountFile = accountFile,
         account = accountData)
     } catch (e: java.lang.Exception) {

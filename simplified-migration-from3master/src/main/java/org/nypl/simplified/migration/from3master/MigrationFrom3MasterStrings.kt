@@ -5,6 +5,12 @@ import android.content.res.Resources
 class MigrationFrom3MasterStrings(
   private val resources: Resources) : MigrationFrom3MasterStringResourcesType {
 
+  override fun progressLoadingAccount(idNumeric: Int): String =
+    this.resources.getString(R.string.progressLoadingAccount, idNumeric)
+
+  override fun errorAccountAuthenticationNoCredentials(accountTitle: String): String =
+    this.resources.getString(R.string.errorAccountAuthenticationNoCredentials, accountTitle)
+
   override val successDeletedOldData: String
     get() = this.resources.getString(R.string.successDeletedOldData)
 

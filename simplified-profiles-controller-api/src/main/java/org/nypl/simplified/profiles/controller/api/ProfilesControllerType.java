@@ -134,7 +134,18 @@ public interface ProfilesControllerType {
    * @return A future that returns the result of creating the account
    */
 
-  FluentFuture<TaskResult<AccountCreateErrorDetails, AccountID>> profileAccountCreate(
+  FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> profileAccountCreate(
+    URI provider);
+
+  /**
+   * Create an account using the given account provider, or return an existing account
+   * with that provider.
+   *
+   * @param provider The account provider ID
+   * @return A future that returns the result of creating the account
+   */
+
+  FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> profileAccountCreateOrReturnExisting(
     URI provider);
 
   /**

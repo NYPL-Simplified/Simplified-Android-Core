@@ -51,6 +51,10 @@ interface MigrationFrom3MasterStringResourcesType {
     title: String
   ): String
 
+  fun errorAccountAuthenticationNoCredentials(
+    accountTitle: String
+  ): String
+
   fun successCreatedAccount(
     title: String
   ): String
@@ -70,5 +74,9 @@ interface MigrationFrom3MasterStringResourcesType {
 
   fun successAuthenticatedAccountNotRequired(
     title: String
+  ): String
+
+  fun progressLoadingAccount(
+    idNumeric: Int
   ): String
 }

@@ -274,7 +274,17 @@ class Controller private constructor(
     }
   }
 
-  override fun profileAccountCreate(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountID>> {
+  override fun profileAccountCreateOrReturnExisting(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+    return FluentFuture.from(this.taskExecutor.submit(
+      ProfileAccountCreateOrReturnExistingTask(
+        this.accountEvents,
+        provider,
+        this.accountProviders,
+        this.profiles,
+        this.profileAccountCreationStringResources)))
+  }
+
+  override fun profileAccountCreate(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfileAccountCreateTask(
         this.accountEvents,

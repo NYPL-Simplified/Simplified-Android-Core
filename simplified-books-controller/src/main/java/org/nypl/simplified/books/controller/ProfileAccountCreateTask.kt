@@ -29,18 +29,18 @@ class ProfileAccountCreateTask(
   private val accountProviders: AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
   private val strings: ProfileAccountCreationStringResourcesType
-) : Callable<TaskResult<AccountCreateErrorDetails, AccountID>> {
+) : Callable<TaskResult<AccountCreateErrorDetails, AccountType>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountCreateTask::class.java)
   private val taskRecorder = TaskRecorder.create<AccountCreateErrorDetails>()
 
-  override fun call(): TaskResult<AccountCreateErrorDetails, AccountID> {
+  override fun call(): TaskResult<AccountCreateErrorDetails, AccountType> {
     return try {
       this.logger.debug("creating account for provider {}", this.accountProviderID)
       val accountProvider = this.resolveAccountProvider()
       val account = this.createAccount(accountProvider)
       this.publishSuccessEvent(account)
-      this.taskRecorder.finishSuccess(account.id)
+      this.taskRecorder.finishSuccess(account)
     } catch (e: Throwable) {
       this.logger.error("account creation failed: ", e)
 
