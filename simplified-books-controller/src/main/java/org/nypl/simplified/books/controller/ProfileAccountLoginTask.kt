@@ -18,7 +18,6 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.*
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
@@ -88,11 +87,9 @@ class ProfileAccountLoginTask(
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
-
   private fun run(): TaskResult<AccountLoginErrorData, Unit> {
     return try {
-      this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
-      this.updateLoggingInState()
+      this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired))
 
       val authentication = this.account.provider.authentication
       if (authentication == null) {
@@ -131,8 +128,7 @@ class ProfileAccountLoginTask(
   private fun runDeviceActivationAdobe(adobeDRM: PatronDRMAdobe) {
     this.debug("runDeviceActivationAdobe: executing")
 
-    this.steps.beginNewStep(this.loginStrings.loginDeviceActivationAdobe)
-    this.updateLoggingInState()
+    this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginDeviceActivationAdobe))
 
     val deviceManagerURI = adobeDRM.deviceManagerURI
     val adobePreCredentials =
@@ -225,8 +221,7 @@ class ProfileAccountLoginTask(
   private fun runDeviceActivationAdobeSendDeviceManagerRequest(deviceManagerURI: URI) {
     this.debug("runDeviceActivationAdobeSendDeviceManagerRequest: posting device ID")
 
-    this.steps.beginNewStep(this.loginStrings.loginDeviceActivationPostDeviceManager)
-    this.updateLoggingInState()
+    this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginDeviceActivationPostDeviceManager))
 
     Preconditions.checkState(
       this.credentials.adobeCredentials().isSome,
@@ -261,19 +256,6 @@ class ProfileAccountLoginTask(
     this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivationPostDeviceManagerDone)
   }
 
-  private fun pickUsableMessage(message: String, e: Throwable): String {
-    val exMessage = e.message
-    return if (message.isEmpty()) {
-      if (exMessage != null) {
-        exMessage
-      } else {
-        e.javaClass.simpleName
-      }
-    } else {
-      message
-    }
-  }
-
   private fun <T> someOrNull(option: OptionType<T>): T? {
     return if (option is Some<T>) {
       option.get()
@@ -290,8 +272,7 @@ class ProfileAccountLoginTask(
   private fun runPatronProfileRequest() {
     this.debug("running patron profile request")
 
-    this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest)
-    this.updateLoggingInState()
+    this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest))
 
     val patronSettingsURI = this.account.provider.patronSettingsURI
     if (patronSettingsURI == null) {
@@ -439,8 +420,8 @@ class ProfileAccountLoginTask(
     }
   }
 
-  private fun updateLoggingInState() {
-    this.account.setLoginState(AccountLoggingIn(this.steps.currentStep()?.description ?: ""))
+  private fun updateLoggingInState(step: TaskStep<AccountLoginErrorData>) {
+    this.account.setLoginState(AccountLoggingIn(step.description))
   }
 
   private fun logParseWarning(warning: ParseWarning) {
