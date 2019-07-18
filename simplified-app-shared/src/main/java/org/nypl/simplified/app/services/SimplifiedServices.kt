@@ -157,9 +157,14 @@ class SimplifiedServices private constructor(
      * The current on-disk data version. The entire directory tree the application uses
      * to store data is versioned in order to make it easier to migrate data to new versions
      * at a later date.
+     *
+     * It's important that this version number begins with a letter: Old version of the software
+     * stored individual accounts in numbered directories, and we want to avoid any possibility
+     * of migration code thinking that this directory is an old account just because the name
+     * happens to parse as an integer.
      */
 
-    private const val CURRENT_DATA_VERSION = "4.0"
+    private const val CURRENT_DATA_VERSION = "v4.0"
 
     private data class Directories(
       val directoryBaseVersioned: File,
