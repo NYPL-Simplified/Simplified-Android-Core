@@ -38,6 +38,7 @@ dependencies {
   implementation project(':simplified-accounts-registry-api')
   implementation project(':simplified-accounts-registry')
   implementation project(':simplified-accounts-source-filebased')
+  implementation project(':simplified-migration-fake')
   implementation project(':simplified-splash')
   implementation project(':simplified-theme')
 

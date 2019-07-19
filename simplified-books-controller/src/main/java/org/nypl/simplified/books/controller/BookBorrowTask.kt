@@ -31,17 +31,13 @@ import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.*
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMDeviceNotActive
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMFailure
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnparseableACSM
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnreadableACSM
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedContentType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedSystem
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedCorrupted
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedLoaderFailed
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedUnusable
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.HTTPRequestFailed
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookStatusDownloadInProgress
 import org.nypl.simplified.books.book_registry.BookStatusHeld
@@ -62,7 +58,6 @@ import org.nypl.simplified.books.controller.api.BookBorrowExceptionDeviceNotActi
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoUsableAcquisition
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
-import org.nypl.simplified.books.book_registry.BookStatusDownloadResult
 import org.nypl.simplified.books.controller.api.BookUnexpectedTypeException
 import org.nypl.simplified.books.controller.api.BookUnsupportedTypeException
 import org.nypl.simplified.downloader.core.DownloadListenerType
@@ -97,6 +92,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
@@ -128,7 +124,7 @@ class BookBorrowTask(
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
-  private val feedLoader: FeedLoaderType) : Callable<BookStatusDownloadResult> {
+  private val feedLoader: FeedLoaderType) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
 
   private val contentTypeACSM =
     "application/vnd.adobe.adept+xml"
@@ -190,7 +186,7 @@ class BookBorrowTask(
     this.logger.warn("[{}] ${message}", this.bookId.brief(), *arguments)
 
   @Throws(Exception::class)
-  override fun call(): BookStatusDownloadResult {
+  override fun call(): TaskResult<BookStatusDownloadErrorDetails, Unit> {
     return try {
       this.debug("borrowing will time out after {} seconds",
         this.borrowTimeoutDuration.standardSeconds)
@@ -211,7 +207,7 @@ class BookBorrowTask(
 
       if (BundledURIs.isBundledURI(this.acquisition.uri)) {
         this.runAcquisitionBundled()
-        return BookStatusDownloadResult(this.steps.finish())
+        return this.steps.finishSuccess(Unit)
       }
 
       /*
@@ -222,17 +218,17 @@ class BookBorrowTask(
         ACQUISITION_BORROW -> {
           this.debug("acquisition type is {}, performing borrow", type)
           this.runAcquisitionBorrow()
-          BookStatusDownloadResult(this.steps.finish())
+          return this.steps.finishSuccess(Unit)
         }
         ACQUISITION_GENERIC -> {
           this.debug("acquisition type is {}, performing generic procedure", type)
           this.runAcquisitionFulfill(this.entry)
-          BookStatusDownloadResult(this.steps.finish())
+          return this.steps.finishSuccess(Unit)
         }
         ACQUISITION_OPEN_ACCESS -> {
           this.debug("acquisition type is {}, performing fulfillment", type)
           this.runAcquisitionFulfill(this.entry)
-          BookStatusDownloadResult(this.steps.finish())
+          return this.steps.finishSuccess(Unit)
         }
 
         ACQUISITION_BUY,
@@ -250,15 +246,12 @@ class BookBorrowTask(
     } catch (e: Throwable) {
       this.error("borrow failed: ", e)
 
-      val step = this.steps.currentStep()!!
-      if (step.exception == null) {
-        this.steps.currentStepFailed(
-          message = this.pickUsableMessage(step.resolution, e),
-          errorValue = step.errorValue,
-          exception = e)
-      }
+      this.steps.currentStepFailedAppending(
+        this.borrowStrings.borrowBookUnexpectedException,
+        UnexpectedException(e),
+        e)
 
-      val result = BookStatusDownloadResult(this.steps.finish())
+      val result = this.steps.finishFailure<Unit>()
       this.publishBookStatus(BookStatusDownloadFailed(this.bookId, result, Option.none()))
       result
     } finally {
@@ -283,21 +276,8 @@ class BookBorrowTask(
       this.steps.currentStepSucceeded(this.borrowStrings.borrowBookDatabaseUpdated)
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
-      this.steps.currentStepFailed(this.borrowStrings.borrowBookDatabaseFailed, null, e)
+      this.steps.currentStepFailed(this.borrowStrings.borrowBookDatabaseFailed, BookDatabaseFailed, e)
       throw e
-    }
-  }
-
-  private fun pickUsableMessage(message: String, e: Throwable): String {
-    val exMessage = e.message
-    return if (message.isEmpty()) {
-      if (exMessage != null) {
-        exMessage
-      } else {
-        e.javaClass.simpleName
-      }
-    } else {
-      message
     }
   }
 
@@ -562,9 +542,10 @@ class BookBorrowTask(
       this.runAcquisitionFulfill(feedEntry.feedEntry)
     } else {
       val exception = IllegalStateException()
+      val message = this.borrowStrings.borrowBookBorrowAvailabilityInappropriate(availability)
       this.steps.currentStepFailed(
-        message = this.borrowStrings.borrowBookBorrowAvailabilityInappropriate(availability),
-        errorValue = null,
+        message = message,
+        errorValue = WrongAvailability(message),
         exception = exception)
       throw exception
     }
@@ -594,9 +575,10 @@ class BookBorrowTask(
     }
 
     val exception = BookBorrowExceptionNoUsableAcquisition()
+    val message = this.borrowStrings.borrowBookFulfillNoUsableAcquisitions
     this.steps.currentStepFailed(
-      message = this.borrowStrings.borrowBookFulfillNoUsableAcquisitions,
-      errorValue = null,
+      message = message,
+      errorValue = UnusableAcquisitions(message),
       exception = exception)
     throw exception
   }
@@ -710,9 +692,10 @@ class BookBorrowTask(
     val result = try {
       downloadFuture.get(this.downloadTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (ex: TimeoutException) {
+      val message = this.borrowStrings.borrowBookFulfillTimedOut
       this.steps.currentStepFailed(
-        message = this.borrowStrings.borrowBookFulfillTimedOut,
-        errorValue = null,
+        message = message,
+        errorValue = TimedOut(message),
         exception = ex)
       download.cancel()
       downloadFuture.cancel(true)
@@ -760,8 +743,10 @@ class BookBorrowTask(
       }
 
       DownloadCancelled -> {
-        this.steps.currentStepFailed(this.borrowStrings.borrowBookFulfillCancelled)
-        throw CancellationException()
+        val exception = CancellationException()
+        val message = this.borrowStrings.borrowBookFulfillCancelled
+        this.steps.currentStepFailed(message, DownloadCancelled(message), exception)
+        throw exception
       }
     }
   }
@@ -819,9 +804,10 @@ class BookBorrowTask(
     } else {
       this.error("database entry does not have a format handle for {}", handleContentType)
       val exception = BookUnsupportedTypeException(handleContentType)
+      val message = this.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable
       this.steps.currentStepFailed(
-        message = this.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable,
-        errorValue = null,
+        message = message,
+        errorValue = UnsupportedType(message),
         exception = exception)
       throw exception
     }
@@ -879,9 +865,10 @@ class BookBorrowTask(
             expected = expectedContentTypes,
             received = receivedContentType)
 
+        val message = this.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable
         this.steps.currentStepFailed(
-          message = this.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable,
-          errorValue = null,
+          message = message,
+          errorValue = UnsupportedType(message),
           exception = exception)
 
         throw exception
@@ -1005,18 +992,20 @@ class BookBorrowTask(
         this.logger.debug("waiting for fulfillment for {} seconds", seconds)
         future.get(seconds, TimeUnit.SECONDS)
       } catch (e: TimeoutException) {
+        val message = this.borrowStrings.borrowBookFulfillTimedOut
         this.steps.currentStepFailed(
-          message = this.borrowStrings.borrowBookFulfillTimedOut,
-          errorValue = null,
+          message = message,
+          errorValue = TimedOut(message),
           exception = e)
         this.downloads[this.bookId]?.cancel()
         throw IOException("Timed out", e)
       } catch (e: ExecutionException) {
         throw when (val cause = e.cause!!) {
           is CancellationException -> {
+            val message = this.borrowStrings.borrowBookFulfillCancelled
             this.steps.currentStepFailed(
-              message = this.borrowStrings.borrowBookFulfillCancelled,
-              errorValue = null,
+              message = message,
+              errorValue = DownloadCancelled(message),
               exception = cause)
             cause
           }
@@ -1030,7 +1019,7 @@ class BookBorrowTask(
           else -> {
             this.steps.currentStepFailed(
               message = this.borrowStrings.borrowBookFulfillACSMFailed,
-              errorValue = null,
+              errorValue = UnexpectedException(cause),
               exception = cause)
             cause
           }
@@ -1038,7 +1027,7 @@ class BookBorrowTask(
       } catch (e: Throwable) {
         this.steps.currentStepFailed(
           message = this.borrowStrings.borrowBookFulfillACSMFailed,
-          errorValue = null,
+          errorValue = UnexpectedException(e),
           exception = e)
         throw e
       }
@@ -1172,9 +1161,10 @@ class BookBorrowTask(
       SimplifiedBearerTokenJSON.deserializeFromFile(ObjectMapper(), LocalDateTime.now(), file)
     } catch (ex: Exception) {
       this.error("failed to parse bearer token: {}: ", acquisition.uri, ex)
+      val message = this.borrowStrings.borrowBookFulfillUnparseableBearerToken
       this.steps.currentStepFailed(
-        message = this.borrowStrings.borrowBookFulfillUnparseableBearerToken,
-        errorValue = null,
+        message = message,
+        errorValue = UnparseableBearerToken(message),
         exception = ex)
       throw ex
     }
@@ -1275,9 +1265,10 @@ class BookBorrowTask(
         this.publishBookStatus(BookStatus.fromBook(this.databaseEntry.book))
       }
     } catch (e: Exception) {
+      val message = this.borrowStrings.borrowBookBundledCopyFailed
       this.steps.currentStepFailed(
-        message = this.borrowStrings.borrowBookBundledCopyFailed,
-        errorValue = null,
+        message = message,
+        errorValue = BundledCopyFailed(message),
         exception = e)
       FileUtilities.fileDelete(file)
       throw e

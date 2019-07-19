@@ -5,5 +5,6 @@ package org.nypl.simplified.accounts.api
  */
 
 data class AccountEventUpdated(
+  override val message: String,
   val accountID: AccountID)
   : AccountEvent()

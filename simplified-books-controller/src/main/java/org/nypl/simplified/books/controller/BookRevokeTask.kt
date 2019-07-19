@@ -23,7 +23,6 @@ import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.*
 import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
-import org.nypl.simplified.books.book_registry.BookStatusRevokeResult
 import org.nypl.simplified.books.book_registry.BookStatusRevoked
 import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.book_registry.BookWithStatus
@@ -49,6 +48,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.Callable
@@ -66,7 +66,7 @@ class BookRevokeTask(
   private val revokeStrings: BookRevokeStringResourcesType,
   private val revokeACSTimeoutDuration: Duration = Duration.standardMinutes(1L),
   private val revokeServerTimeoutDuration: Duration = Duration.standardMinutes(3L))
-  : Callable<BookStatusRevokeResult> {
+  : Callable<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
 
   private val adobeACS = "Adobe ACS"
 
@@ -84,19 +84,6 @@ class BookRevokeTask(
 
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}] ${message}", this.bookID.brief(), *arguments)
-
-  private fun pickUsableMessage(message: String, e: Throwable): String {
-    val exMessage = e.message
-    return if (message.isEmpty()) {
-      if (exMessage != null) {
-        exMessage
-      } else {
-        e.javaClass.simpleName
-      }
-    } else {
-      message
-    }
-  }
 
   private fun publishBookStatus(status: BookStatusType) {
     val book =
@@ -141,7 +128,7 @@ class BookRevokeTask(
 
   }
 
-  override fun call(): BookStatusRevokeResult {
+  override fun call(): TaskResult<BookStatusRevokeErrorDetails, Unit> {
     return try {
       this.steps.beginNewStep(this.revokeStrings.revokeStarted)
       this.debug("revoke")
@@ -152,21 +139,16 @@ class BookRevokeTask(
       this.revokeNotifyServerDeleteBook()
       this.bookRegistry.clearFor(this.bookID)
 
-      BookStatusRevokeResult(this.steps.finish())
+      this.steps.finishSuccess(Unit)
     } catch (e: Throwable) {
       this.error("revoke failed: ", e)
 
-      val step = this.steps.currentStep()!!
-      if (step.exception == null) {
-        this.steps.currentStepFailed(
-          message = this.pickUsableMessage(step.resolution, e),
-          errorValue = step.errorValue,
-          exception = e)
-      }
+      this.steps.currentStepFailedAppending(
+        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e)
 
-      val result = BookStatusRevokeResult(this.steps.finish())
-      this.publishBookStatus(BookStatusRevokeFailed(this.bookID, result))
-      result
+      val failure = this.steps.finishFailure<Unit>()
+      this.publishBookStatus(BookStatusRevokeFailed(this.bookID, failure))
+      failure
     } finally {
       this.debug("finished")
     }
@@ -275,7 +257,7 @@ class BookRevokeTask(
       this.databaseEntry.writeOPDSEntry(entry.feedEntry)
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeServerNotifySavingEntryFailed, null, e)
+        this.revokeStrings.revokeServerNotifySavingEntryFailed, UnexpectedException(e), e)
       throw e
     }
   }
@@ -288,7 +270,8 @@ class BookRevokeTask(
     try {
       this.databaseEntry.delete()
     } catch (e: Throwable) {
-      this.steps.currentStepFailed(this.revokeStrings.revokeDeleteBookFailed, null, e)
+      this.steps.currentStepFailed(
+        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e)
       throw e
     }
   }
@@ -307,7 +290,7 @@ class BookRevokeTask(
         .get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeServerNotifyFeedTimedOut, null, e)
+        this.revokeStrings.revokeServerNotifyFeedTimedOut, TimedOut, e)
       throw e
     } catch (e: ExecutionException) {
       val ex = e.cause!!
@@ -468,7 +451,7 @@ class BookRevokeTask(
     } catch (e : TimeoutException) {
       this.steps.currentStepFailed(
         message = this.revokeStrings.revokeACSTimedOut,
-        errorValue = null,
+        errorValue = TimedOut,
         exception = e)
       throw e
     } catch (e: ExecutionException) {
@@ -476,7 +459,7 @@ class BookRevokeTask(
         is CancellationException -> {
           this.steps.currentStepFailed(
             message = this.revokeStrings.revokeBookCancelled,
-            errorValue = null,
+            errorValue = Cancelled,
             exception = cause)
           cause
         }
@@ -490,7 +473,7 @@ class BookRevokeTask(
         else -> {
           this.steps.currentStepFailed(
             message = this.revokeStrings.revokeBookACSFailed,
-            errorValue = null,
+            errorValue = UnexpectedException(cause),
             exception = cause)
           cause
         }
@@ -498,7 +481,7 @@ class BookRevokeTask(
     } catch (e: Throwable) {
       this.steps.currentStepFailed(
         message = this.revokeStrings.revokeBookACSFailed,
-        errorValue = null,
+        errorValue = UnexpectedException(e),
         exception = e)
       throw e
     }
@@ -548,7 +531,8 @@ class BookRevokeTask(
     try {
       handle.setAdobeRightsInformation(null)
     } catch (e: Exception) {
-      this.steps.currentStepFailed(this.revokeStrings.revokeACSDeleteRightsFailed, null, e)
+      this.steps.currentStepFailed(
+        this.revokeStrings.revokeACSDeleteRightsFailed, UnexpectedException(e), e)
       throw e
     }
   }
@@ -581,7 +565,8 @@ class BookRevokeTask(
       this.steps.currentStepSucceeded(this.revokeStrings.revokeBookDatabaseLookupOK)
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
-      this.steps.currentStepFailed(this.revokeStrings.revokeBookDatabaseLookupFailed, null, e)
+      this.steps.currentStepFailed(
+        this.revokeStrings.revokeBookDatabaseLookupFailed, UnexpectedException(e), e)
       throw e
     }
   }

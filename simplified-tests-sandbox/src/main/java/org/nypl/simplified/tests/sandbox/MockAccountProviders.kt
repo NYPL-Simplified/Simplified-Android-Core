@@ -9,6 +9,7 @@ import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.AccountProviderRegistry
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.TreeMap
@@ -31,17 +32,13 @@ object MockAccountProviders {
       accountProviderDescription!!
         .resolve { providerId, status -> logger.debug("status: {}: {}", providerId, status) }
 
-    Preconditions.checkState(
-      !result.failed,
-      "Resolving provider $id must not fail")
-
-    return result.result!!
+    return (result as TaskResult.Success).result
   }
 
   fun findAccountProviderDangerously(
     registry: AccountProviderRegistryType,
     id: String): AccountProviderType =
-    this.findAccountProviderDangerously(registry, URI.create(id))
+    findAccountProviderDangerously(registry, URI.create(id))
 
   fun fakeProvider(providerId: String): AccountProviderImmutable {
     return AccountProviderImmutable(
@@ -170,10 +167,10 @@ object MockAccountProviders {
   fun fakeAuthProvider(uri: String): AccountProviderImmutable {
     return fakeProvider(uri)
       .copy(authentication = AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CodaBar",
-        keyboard = "Default",
+        barcodeFormat = "CODABAR",
+        keyboard = "DEFAULT",
         passwordMaximumLength = 4,
-        passwordKeyboard = "Default",
+        passwordKeyboard = "DEFAULT",
         description = "Stuff!",
         labels = mapOf()
       ))

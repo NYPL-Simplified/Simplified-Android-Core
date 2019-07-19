@@ -40,6 +40,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -48,7 +49,6 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.*
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMDeviceNotActive
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedContentType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedSystem
-import org.nypl.simplified.books.book_registry.BookStatusDownloadResult
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedLoader
@@ -62,6 +62,8 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.tests.MockBorrowStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
@@ -160,16 +162,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
     this.executorFeeds.shutdown()
     this.executorDownloads.shutdown()
     this.executorTimer.shutdown()
-  }
-
-
-  private fun dump(results: BookStatusDownloadResult) {
-    this.logger.debug("RESULTS:")
-    for (step in results.steps) {
-      this.logger.debug("step description: {}", step.description)
-      this.logger.debug("step resolution:  {} (failed: {}) (exception: {}) (error: {})", step.resolution, step.failed, step.exception, step.errorValue)
-      this.logger.debug("--")
-    }
   }
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
@@ -337,8 +329,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(false, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
 
     /*
      * Check that the book was saved to the database.
@@ -446,11 +438,11 @@ abstract class BookBorrowTaskAdobeDRMContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     val errorData =
-      results.steps.last().errorValue as DRMUnsupportedSystem
+      results.errors().last() as DRMUnsupportedSystem
 
     Assert.assertEquals("Adobe ACS", errorData.system)
 
@@ -608,11 +600,11 @@ abstract class BookBorrowTaskAdobeDRMContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     val error =
-      results.steps.last().errorValue as DRMUnsupportedContentType
+      results.errors().last() as DRMUnsupportedContentType
 
     Assert.assertEquals("Adobe ACS", error.system)
     Assert.assertEquals("application/pdf", error.contentType)
@@ -739,11 +731,11 @@ abstract class BookBorrowTaskAdobeDRMContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     val error =
-      results.steps.last().errorValue as DRMDeviceNotActive
+      results.errors().last() as DRMDeviceNotActive
 
     Assert.assertEquals("Adobe ACS", error.system)
 
@@ -856,11 +848,11 @@ abstract class BookBorrowTaskAdobeDRMContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     val error =
-      results.steps.last().errorValue as DRMError.DRMUnparseableACSM
+      results.errors().last() as DRMError.DRMUnparseableACSM
 
     Assert.assertEquals("Adobe ACS", error.system)
 
@@ -993,8 +985,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     /*
      * Check that the download failed.
@@ -1125,11 +1117,11 @@ abstract class BookBorrowTaskAdobeDRMContract {
         feedLoader = this.feedLoader,
         entry = opdsEntry)
 
-    val results = task.call(); this.dump(results)
-    Assert.assertEquals(true, results.failed)
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Failure
 
     val error =
-      results.steps.last().errorValue as DRMError.DRMFailure
+      results.errors().last() as DRMError.DRMFailure
 
     Assert.assertEquals("Adobe ACS", error.system)
     Assert.assertEquals("E_TYPICAL", error.errorCode)

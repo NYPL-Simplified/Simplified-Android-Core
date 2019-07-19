@@ -9,9 +9,10 @@ import java.net.URI
  * Status strings for revocation.
  */
 
-class CatalogBookRevokeStrings(
+class CatalogBookRevokeStrings(private val resources: Resources) : BookRevokeStringResourcesType {
 
-  private val resources: Resources) : BookRevokeStringResourcesType {
+  override val revokeUnexpectedException: String
+    get() = this.resources.getString(R.string.unexpectedException)
 
   override val revokeCredentialsRequired: String
     get() = this.resources.getString(R.string.revokeCredentialsRequired)

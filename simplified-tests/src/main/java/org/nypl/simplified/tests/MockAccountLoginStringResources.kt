@@ -4,6 +4,9 @@ import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 
 class MockAccountLoginStringResources : AccountLoginStringResourcesType {
 
+  override val loginUnexpectedException: String
+    get() = "loginUnexpectedException"
+
   override val loginDeviceActivationPostDeviceManagerDone: String
     get() = "loginDeviceActivationPostDeviceManagerDone"
 

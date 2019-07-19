@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.nypl.audiobook.android.tests.sandbox"
+  package="org.nypl.simplified.tests.sandbox"
   android:versionCode="1"
   android:versionName="0.0.1">
 
   <uses-sdk android:targetSdkVersion="27"/>
+
+  <uses-permission android:name="android.permission.INTERNET"/>
 
   <application android:allowBackup="false"
     android:label="SimplifiedSandbox"
@@ -20,11 +22,6 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.LoginActivity"
-      android:theme="@style/SimplifiedTheme_ActionBar_Blue"
-      android:exported="true"/>
 
     <activity
       android:name="org.nypl.simplified.tests.sandbox.SplashActivity"

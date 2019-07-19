@@ -4,21 +4,47 @@ import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import org.nypl.audiobook.android.tests.sandbox.R
+import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
+import org.nypl.simplified.migration.api.Migrations
+import org.nypl.simplified.migration.api.MigrationsType
+import org.nypl.simplified.migration.spi.MigrationReport
+import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.splash.SplashFragment
 import org.nypl.simplified.splash.SplashListenerType
 import org.nypl.simplified.splash.SplashParameters
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.theme.ThemeControl
 import java.net.URL
 import java.util.concurrent.Executors
 
 class SplashActivity : AppCompatActivity(), SplashListenerType {
+
+  override fun onSplashDone() {
+    this.finish()
+  }
+
+  override fun onSplashWantMigrations(): MigrationsType {
+    return migrations
+  }
+
+  override fun onSplashWantMigrationExecutor(): ListeningExecutorService {
+    return this.migrationExecutor
+  }
+
+  override fun onSplashMigrationReport(report: MigrationReport) {
+
+  }
+
+  private val migrationExecutor =
+    MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor())
 
   private val executor =
     MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor())
@@ -43,7 +69,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
     this.bootEvents
 
   override fun onSplashEULAIsProvided(): Boolean {
-    return false
+    return true
   }
 
   override fun onSplashEULARequested(): EULAType {
@@ -57,21 +83,13 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
       }
 
       override fun documentGetReadableURL(): URL {
-        return URL("https://www.io7m.com")
+        return URL("http://www.librarysimplified.org/EULA.html")
       }
 
       override fun eulaSetHasAgreed(t: Boolean) {
 
       }
     }
-  }
-
-  override fun onSplashOpenProfileSelector() {
-
-  }
-
-  override fun onSplashOpenCatalog() {
-
   }
 
   override fun onSplashOpenProfileAnonymous() {
@@ -85,16 +103,38 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
   private lateinit var splashMainFragment: SplashFragment
   private lateinit var parameters: SplashParameters
 
+  private val migrations =
+    Migrations.create(
+      MigrationServiceDependencies(
+        accountEvents = Observable.create(),
+        createAccount = {
+          val taskRecorder =
+            TaskRecorder.create<AccountCreateErrorDetails>()
+          taskRecorder.beginNewStep("OK")
+          taskRecorder.finishFailure()
+        },
+        loginAccount = { _,_->
+          val taskRecorder =
+            TaskRecorder.create<AccountLoginErrorData>()
+          taskRecorder.beginNewStep("OK")
+          taskRecorder.finishFailure()
+        },
+        applicationProfileIsAnonymous = true,
+        applicationVersion = "Sandbox 0.0.1",
+        context = this
+      ))
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    this.setTheme(R.style.SimplifiedTheme_ActionBar_Blue)
+    this.setTheme(R.style.SimplifiedTheme_NoActionBar_DeepPurple)
     this.setContentView(R.layout.splash_host)
 
     this.parameters =
       SplashParameters(
         textColor = resources.getColor(ThemeControl.themeFallback.color),
         background = Color.WHITE,
+        splashMigrationReportEmail = "co+org.librarysimplified.tests.sandbox@io7m.com",
         splashImageResource = R.drawable.sandbox,
         splashImageSeconds = 2L)
 

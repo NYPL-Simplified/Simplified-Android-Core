@@ -15,6 +15,12 @@ interface AccountLogoutStringResourcesType {
     e: Throwable): String
 
   /**
+   * An unexpected exception occurred.
+   */
+
+  val logoutUnexpectedException: String
+
+  /**
    * Posting to the device manager URI has completed.
    */
 

@@ -43,6 +43,13 @@ sealed class BookStatusDownloadErrorDetails {
     : BookStatusDownloadErrorDetails()
 
   /**
+   * A problem occurred with the book database.
+   */
+
+  object BookDatabaseFailed
+    : BookStatusDownloadErrorDetails()
+
+  /**
    * An acquisition relation is not supported.
    */
 
@@ -112,4 +119,36 @@ sealed class BookStatusDownloadErrorDetails {
       override val system: String)
       : DRMError()
   }
+
+  data class UnusableAcquisitions(
+    val message: String)
+    : BookStatusDownloadErrorDetails()
+
+  data class WrongAvailability(
+    val message: String)
+    : BookStatusDownloadErrorDetails()
+
+  data class TimedOut(
+    val message: String)
+    : BookStatusDownloadErrorDetails()
+
+  data class UnsupportedType(
+    val message: String)
+    : BookStatusDownloadErrorDetails()
+
+  data class UnparseableBearerToken(
+    val message: String)
+    : BookStatusDownloadErrorDetails()
+
+  data class BundledCopyFailed(
+    val message: String)
+    : BookStatusDownloadErrorDetails()
+
+  data class DownloadCancelled(
+    val message: String)
+    : BookStatusDownloadErrorDetails()
+
+  data class UnexpectedException(
+    val exception: Throwable)
+    : BookStatusDownloadErrorDetails()
 }

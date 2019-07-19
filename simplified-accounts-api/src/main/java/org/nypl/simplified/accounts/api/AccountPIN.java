@@ -3,7 +3,7 @@ package org.nypl.simplified.accounts.api;
 import com.google.auto.value.AutoValue;
 
 /**
- * The type of account PINs.
+ * The type of account PINs. This is equivalent to a password in a username/password pair.
  *
  * Account PINs are expected to be 4 digit numbers, but the type does not
  * (currently) enforce this fact.

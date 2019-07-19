@@ -25,6 +25,7 @@ import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON
 import org.nypl.simplified.accounts.registry.AccountProviderRegistry
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.Analytics
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
@@ -105,7 +106,7 @@ import java.util.ServiceLoader
 import java.util.concurrent.ExecutorService
 
 class SimplifiedServices private constructor(
-  override val accountProviderRegistry: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+  override val accountProviderRegistry: AccountProviderRegistryType,
   override val analytics: AnalyticsType,
   override val adobeExecutor: AdobeAdeptExecutorType?,
   override val backgroundExecutor: ListeningScheduledExecutorService,
@@ -153,11 +154,25 @@ class SimplifiedServices private constructor(
 
     private val logger = LoggerFactory.getLogger(SimplifiedServices::class.java)
 
+    /**
+     * The current on-disk data version. The entire directory tree the application uses
+     * to store data is versioned in order to make it easier to migrate data to new versions
+     * at a later date.
+     *
+     * It's important that this version number begins with a letter: Old version of the software
+     * stored individual accounts in numbered directories, and we want to avoid any possibility
+     * of migration code thinking that this directory is an old account just because the name
+     * happens to parse as an integer.
+     */
+
+    private const val CURRENT_DATA_VERSION = "v4.0"
+
     private data class Directories(
-      val directoryBase: File,
-      val directoryDownloads: File,
-      val directoryDocuments: File,
-      val directoryProfiles: File)
+      val directoryPrivateBaseVersioned: File,
+      val directoryStorageBaseVersioned: File,
+      val directoryStorageDownloads: File,
+      val directoryStorageDocuments: File,
+      val directoryStorageProfiles: File)
 
     fun create(
       context: Context,
@@ -193,7 +208,7 @@ class SimplifiedServices private constructor(
       val execDownloader =
         NamedThreadPools.namedThreadPool(4, "downloader", 19)
       val downloader =
-        DownloaderHTTP.newDownloader(execDownloader, directories.directoryDownloads, http)
+        DownloaderHTTP.newDownloader(execDownloader, directories.directoryStorageDownloads, http)
 
       publishEvent(strings.bootingBookRegistry)
       val bookRegistry = BookRegistry.create()
@@ -251,7 +266,7 @@ class SimplifiedServices private constructor(
         clock,
         http,
         execDownloader,
-        directories.directoryDocuments)
+        directories.directoryStorageDocuments)
 
       publishEvent(strings.bootingAccountProviders)
       val defaultAccountProvider =
@@ -276,9 +291,10 @@ class SimplifiedServices private constructor(
 
       publishEvent(strings.bootingCredentialStore)
       val accountCredentialsStore = try {
-        val privateDirectory = context.getFilesDir()
-        val credentials = File(privateDirectory, "credentials.json")
-        val credentialsTemp = File(privateDirectory, "credentials.json.tmp")
+        val credentials =
+          File(directories.directoryPrivateBaseVersioned, "credentials.json")
+        val credentialsTemp =
+          File(directories.directoryPrivateBaseVersioned, "credentials.json.tmp")
 
         this.logger.debug("credentials store path: {}", credentials)
         AccountAuthenticationCredentialsStore.open(credentials, credentialsTemp)
@@ -304,7 +320,7 @@ class SimplifiedServices private constructor(
           accountProviders,
           bundledCredentials,
           accountCredentialsStore,
-          directories.directoryProfiles)
+          directories.directoryStorageProfiles)
       } catch (e: ProfileDatabaseException) {
         throw IllegalStateException("Could not initialize profile database", e)
       }
@@ -455,7 +471,7 @@ class SimplifiedServices private constructor(
       context: Context,
       resources: Resources,
       accountEvents: ObservableType<AccountEvent>,
-      accountProviders: org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType,
+      accountProviders: AccountProviderRegistryType,
       accountBundledCredentials: AccountBundledCredentialsType,
       accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
       directory: File): ProfilesDatabaseType {
@@ -511,7 +527,7 @@ class SimplifiedServices private constructor(
     private fun loadOptionalBrandingThemeOverride(): OptionType<ThemeValue> {
       val iter =
         ServiceLoader.load(BrandingThemeOverrideServiceType::class.java)
-        .iterator()
+          .iterator()
 
       if (iter.hasNext()) {
         val service = iter.next()
@@ -523,36 +539,68 @@ class SimplifiedServices private constructor(
 
     private fun initializeDirectories(context: Context): Directories {
       this.logger.debug("initializing directories")
-      val directoryBase = this.determineDiskDataDirectory(context)
-      val directoryDownloads = File(directoryBase, "downloads")
-      val directoryDocuments = File(directoryBase, "documents")
-      val directoryProfiles = File(directoryBase, "profiles")
 
-      this.logger.debug("directory_base:      {}", directoryBase)
-      this.logger.debug("directory_downloads: {}", directoryDownloads)
-      this.logger.debug("directory_documents: {}", directoryDocuments)
-      this.logger.debug("directory_profiles:  {}", directoryProfiles)
+      val directoryPrivateBase =
+        context.filesDir
+      val directoryPrivateBaseVersioned =
+        File(directoryPrivateBase, CURRENT_DATA_VERSION)
+      val directoryStorageBase =
+        this.determineDiskDataDirectory(context)
+      val directoryStorageBaseVersioned =
+        File(directoryStorageBase, CURRENT_DATA_VERSION)
+      val directoryStorageDownloads =
+        File(directoryStorageBaseVersioned, "downloads")
+      val directoryStorageDocuments =
+        File(directoryStorageBaseVersioned, "documents")
+      val directoryStorageProfiles =
+        File(directoryStorageBaseVersioned, "profiles")
+
+      this.logger.debug("directoryPrivateBase:          {}", directoryPrivateBase)
+      this.logger.debug("directoryPrivateBaseVersioned: {}", directoryPrivateBaseVersioned)
+      this.logger.debug("directoryStorageBase:          {}", directoryStorageBase)
+      this.logger.debug("directoryStorageBaseVersioned: {}", directoryStorageBaseVersioned)
+      this.logger.debug("directoryStorageDownloads:     {}", directoryStorageDownloads)
+      this.logger.debug("directoryStorageDocuments:     {}", directoryStorageDocuments)
+      this.logger.debug("directoryStorageProfiles:      {}", directoryStorageProfiles)
 
       /*
        * Make sure the required directories exist. There is no sane way to
        * recover if they cannot be created!
        */
 
-      try {
-        DirectoryUtilities.directoryCreate(directoryBase)
-        DirectoryUtilities.directoryCreate(directoryDownloads)
-        DirectoryUtilities.directoryCreate(directoryDocuments)
-        DirectoryUtilities.directoryCreate(directoryProfiles)
-      } catch (e: IOException) {
-        this.logger.error("could not create directories: {}", e.message, e)
-        throw IllegalStateException(e)
+      val directories =
+        listOf<File>(
+          directoryPrivateBase,
+          directoryPrivateBaseVersioned,
+          directoryStorageBase,
+          directoryStorageBaseVersioned,
+          directoryStorageDownloads,
+          directoryStorageDocuments,
+          directoryStorageProfiles)
+
+      var exception : Exception? = null
+      for (directory in directories) {
+        try {
+          DirectoryUtilities.directoryCreate(directory)
+        } catch (e: Exception) {
+          if (exception == null) {
+            exception = e
+          } else {
+            exception.addSuppressed(exception)
+          }
+        }
+      }
+
+      if (exception != null) {
+        throw exception
       }
 
       return Directories(
-        directoryBase = directoryBase,
-        directoryDownloads = directoryDownloads,
-        directoryDocuments = directoryDocuments,
-        directoryProfiles = directoryProfiles)
+        directoryPrivateBaseVersioned = directoryPrivateBaseVersioned,
+        directoryStorageBaseVersioned = directoryStorageBaseVersioned,
+        directoryStorageDownloads = directoryStorageDownloads,
+        directoryStorageDocuments = directoryStorageDocuments,
+        directoryStorageProfiles = directoryStorageProfiles)
     }
 
 

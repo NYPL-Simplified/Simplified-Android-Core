@@ -9,6 +9,9 @@ import java.io.File
 
 class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResourcesType {
 
+  override val borrowBookUnexpectedException: String
+    get() = this.resources.getString(R.string.unexpectedException)
+
   override fun borrowBookUnsupportedAcquisition(type: OPDSAcquisition.Relation): String {
     return this.resources.getString(R.string.borrowBookUnsupportedAcquisition, type)
   }

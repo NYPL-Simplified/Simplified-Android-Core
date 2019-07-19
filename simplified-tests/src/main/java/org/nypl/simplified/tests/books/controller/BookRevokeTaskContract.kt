@@ -23,7 +23,6 @@ import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.*
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
@@ -32,7 +31,6 @@ import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
-import org.nypl.simplified.books.book_registry.BookStatusRevokeResult
 import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
@@ -58,6 +56,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
@@ -131,15 +130,6 @@ abstract class BookRevokeTaskContract {
     this.executorFeeds.shutdown()
     this.executorDownloads.shutdown()
     this.executorTimer.shutdown()
-  }
-
-  private fun dump(results: BookStatusRevokeResult) {
-    this.logger.debug("RESULTS:")
-    for (step in results.steps) {
-      this.logger.debug("step description: {}", step.description)
-      this.logger.debug("step resolution:  {} (failed: {}) (exception: {}) (error: {})", step.resolution, step.failed, step.exception, step.errorValue)
-      this.logger.debug("--")
-    }
   }
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
@@ -224,9 +214,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -299,10 +289,12 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("I/O error", result.steps.last().exception!!.message)
+    result as TaskResult.Failure
+    Assert.assertEquals(
+      "I/O error",
+      result.steps.last().resolution.exception!!.message)
     Assert.assertEquals(
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
@@ -344,10 +336,10 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("I/O error", result.steps.last().exception!!.message)
+    result as TaskResult.Failure
+    Assert.assertEquals("I/O error", result.steps.last().resolution.exception!!.message)
   }
 
   /**
@@ -436,10 +428,10 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
 
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("I/O error", result.steps.last().exception!!.message)
+    Assert.assertEquals("I/O error", result.steps.last().resolution.exception!!.message)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -526,9 +518,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -618,9 +610,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -694,9 +686,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -788,9 +780,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -882,9 +874,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -975,9 +967,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -1052,9 +1044,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -1142,9 +1134,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -1232,9 +1224,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
+    result as TaskResult.Failure
     Assert.assertEquals(
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
@@ -1314,9 +1306,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
+    result as TaskResult.Failure
     Assert.assertEquals(
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
@@ -1394,9 +1386,9 @@ abstract class BookRevokeTaskContract {
         revokeServerTimeoutDuration = Duration.standardSeconds(2L))
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
+    result as TaskResult.Failure
     Assert.assertEquals(
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
@@ -1476,15 +1468,15 @@ abstract class BookRevokeTaskContract {
         revokeServerTimeoutDuration = Duration.standardSeconds(5L))
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
+    result as TaskResult.Failure
     Assert.assertEquals(
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
     Assert.assertEquals(
       UniqueException::class.java,
-      result.steps.last().exception!!.javaClass)
+      result.steps.last().resolution.exception!!.javaClass)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -1593,9 +1585,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
+    result as TaskResult.Failure
     Assert.assertEquals(
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
@@ -1673,15 +1665,15 @@ abstract class BookRevokeTaskContract {
         revokeServerTimeoutDuration = Duration.standardSeconds(5L))
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
+    result as TaskResult.Failure
     Assert.assertEquals(
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
     Assert.assertEquals(
       BookStatusRevokeErrorDetails.NotRevocable,
-      result.steps.last().errorValue)
+      result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -1756,15 +1748,15 @@ abstract class BookRevokeTaskContract {
         revokeServerTimeoutDuration = Duration.standardSeconds(5L))
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertTrue(result.failed)
+    result as TaskResult.Failure
     Assert.assertEquals(
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
     Assert.assertEquals(
       BookStatusRevokeErrorDetails.NotRevocable,
-      result.steps.last().errorValue)
+      result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -1861,9 +1853,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -1961,9 +1953,9 @@ abstract class BookRevokeTaskContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Success
 
-    Assert.assertFalse(result.failed)
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()

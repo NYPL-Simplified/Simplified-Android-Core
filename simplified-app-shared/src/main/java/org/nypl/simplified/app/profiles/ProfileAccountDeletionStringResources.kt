@@ -6,14 +6,19 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringR
 
 class ProfileAccountDeletionStringResources(
   val resources: Resources) : ProfileAccountDeletionStringResourcesType {
+  override val deletionSucceeded: String
+    get() = this.resources.getString(R.string.profileAccountDeletionSucceeded)
+
+  override val unexpectedException: String
+    get() = this.resources.getString(R.string.unexpectedException)
 
   override val deletionFailed: String
-    get() = resources.getString(R.string.profileAccountDeletionFailed)
+    get() = this.resources.getString(R.string.profileAccountDeletionFailed)
 
   override val onlyOneAccountRemaining: String
-    get() = resources.getString(R.string.profileAccountDeletionOnlyOneAccountRemaining)
+    get() = this.resources.getString(R.string.profileAccountDeletionOnlyOneAccountRemaining)
 
   override val deletingAccount: String
-    get() = resources.getString(R.string.profileAccountDeleting)
+    get() = this.resources.getString(R.string.profileAccountDeleting)
 
 }

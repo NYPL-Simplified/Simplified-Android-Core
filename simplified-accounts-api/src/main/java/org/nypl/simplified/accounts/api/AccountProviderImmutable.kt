@@ -1,6 +1,8 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
+import org.nypl.simplified.taskrecorder.api.TaskResult
 
 import java.net.URI
 import javax.annotation.concurrent.ThreadSafe
@@ -83,9 +85,15 @@ data class AccountProviderImmutable(
     return object : AccountProviderDescriptionType {
       override val metadata: AccountProviderDescriptionMetadata = meta
 
-      override fun resolve(onProgress: AccountProviderResolutionListenerType): AccountProviderResolutionResult {
+      override fun resolve(onProgress: AccountProviderResolutionListenerType)
+        : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
         onProgress.invoke(this.metadata.id, "")
-        return AccountProviderResolutionResult(this@AccountProviderImmutable, listOf())
+
+        val taskRecorder =
+          TaskRecorder.create<AccountProviderResolutionErrorDetails>()
+        taskRecorder.beginNewStep("Resolving...")
+
+        return taskRecorder.finishSuccess(this@AccountProviderImmutable)
       }
     }
   }

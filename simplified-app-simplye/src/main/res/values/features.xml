@@ -21,4 +21,7 @@
   <!-- The account provider that will be considered the default provider. -->
   <string name="feature_default_provider_uri">urn:uuid:56906f26-2c9a-4ae9-bd02-552557720b99</string>
 
+  <!-- The default email address used for migration reports. -->
+  <string name="feature_migration_report_email">co+org.librarysimplified.tests.sandbox@io7m.com</string>
+
 </resources>

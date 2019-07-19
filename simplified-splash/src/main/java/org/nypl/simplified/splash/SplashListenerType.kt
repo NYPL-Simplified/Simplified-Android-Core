@@ -1,8 +1,11 @@
 package org.nypl.simplified.splash
 
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.ListeningExecutorService
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
+import org.nypl.simplified.migration.api.MigrationsType
+import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 
@@ -42,17 +45,10 @@ interface SplashListenerType {
   fun onSplashEULARequested(): EULAType
 
   /**
-   * The splash screen wants the current activity to finish and the profile selection screen
-   * to be opened.
+   * The splash screen is completely finished.
    */
 
-  fun onSplashOpenProfileSelector()
-
-  /**
-   * The splash screen wants the current activity to finish and the catalog to be opened.
-   */
-
-  fun onSplashOpenCatalog()
+  fun onSplashDone()
 
   /**
    * The splash screen wants the application to switch to the anonymous profile.
@@ -65,5 +61,24 @@ interface SplashListenerType {
    */
 
   fun onSplashWantProfilesMode(): ProfilesDatabaseType.AnonymousProfileEnabled
+
+  /**
+   * The splash screen wants to run migrations, if necessary.
+   */
+
+  fun onSplashWantMigrations(): MigrationsType
+
+  /**
+   * The splash screen wants to execute one or more long-running migrations and therefore
+   * needs access to an executor.
+   */
+
+  fun onSplashWantMigrationExecutor(): ListeningExecutorService
+
+  /**
+   * A migration finished executing and produced a report.
+   */
+
+  fun onSplashMigrationReport(report: MigrationReport)
 
 }

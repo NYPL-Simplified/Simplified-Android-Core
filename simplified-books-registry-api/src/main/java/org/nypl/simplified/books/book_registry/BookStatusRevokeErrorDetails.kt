@@ -21,6 +21,18 @@ sealed class BookStatusRevokeErrorDetails {
   object NoCredentialsAvailable : BookStatusRevokeErrorDetails()
 
   /**
+   * Timed out waiting for an operation to complete.
+   */
+
+  object TimedOut : BookStatusRevokeErrorDetails()
+
+  /**
+   * An operation was cancelled.
+   */
+
+  object Cancelled : BookStatusRevokeErrorDetails()
+
+  /**
    * Attempting to load the feed for a revoke URI failed.
    */
 
@@ -107,5 +119,12 @@ sealed class BookStatusRevokeErrorDetails {
       : DRMError()
   }
 
+  /**
+   * An unexpected exception occurred.
+   */
+
+  data class UnexpectedException(
+    val exception: Throwable)
+    : BookStatusRevokeErrorDetails()
 
 }

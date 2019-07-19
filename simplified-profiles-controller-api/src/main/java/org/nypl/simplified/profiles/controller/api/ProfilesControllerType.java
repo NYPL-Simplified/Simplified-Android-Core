@@ -6,10 +6,13 @@ import com.io7m.jfunctional.Unit;
 
 import org.joda.time.LocalDate;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
+import org.nypl.simplified.accounts.api.AccountCreateErrorDetails;
+import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails;
 import org.nypl.simplified.accounts.api.AccountEvent;
 import org.nypl.simplified.accounts.api.AccountEventCreation;
 import org.nypl.simplified.accounts.api.AccountEventDeletion;
 import org.nypl.simplified.accounts.api.AccountID;
+import org.nypl.simplified.accounts.api.AccountLoginState;
 import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
@@ -26,9 +29,12 @@ import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileReadableType;
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType;
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType;
+import org.nypl.simplified.taskrecorder.api.TaskResult;
 
 import java.net.URI;
 import java.util.SortedMap;
+
+import static org.nypl.simplified.accounts.api.AccountLoginState.*;
 
 /**
  * The profiles controller.
@@ -116,7 +122,7 @@ public interface ProfilesControllerType {
    * @return A future that returns the result of logging in
    */
 
-  FluentFuture<AccountLoginTaskResult> profileAccountLogin(
+  FluentFuture<TaskResult<AccountLoginErrorData, kotlin.Unit>> profileAccountLogin(
     AccountID account,
     AccountAuthenticationCredentials credentials);
 
@@ -128,7 +134,18 @@ public interface ProfilesControllerType {
    * @return A future that returns the result of creating the account
    */
 
-  FluentFuture<AccountCreateTaskResult> profileAccountCreate(
+  FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> profileAccountCreate(
+    URI provider);
+
+  /**
+   * Create an account using the given account provider, or return an existing account
+   * with that provider.
+   *
+   * @param provider The account provider ID
+   * @return A future that returns the result of creating the account
+   */
+
+  FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> profileAccountCreateOrReturnExisting(
     URI provider);
 
   /**
@@ -137,10 +154,10 @@ public interface ProfilesControllerType {
    * in there being no accounts left.
    *
    * @param provider The account provider ID
-   * @return A future that returns a login event
+   * @return A future that returns details of the task execution
    */
 
-  FluentFuture<AccountDeleteTaskResult> profileAccountDeleteByProvider(
+  FluentFuture<TaskResult<AccountDeleteErrorDetails, kotlin.Unit>> profileAccountDeleteByProvider(
     URI provider);
 
   /**
@@ -189,7 +206,8 @@ public interface ProfilesControllerType {
    * @return A future that returns the result of logging out
    */
 
-  FluentFuture<AccountLogoutTaskResult> profileAccountLogout(AccountID account);
+  FluentFuture<TaskResult<AccountLogoutErrorData, kotlin.Unit>>
+  profileAccountLogout(AccountID account);
 
   /**
    * Update preferences for the current profile.

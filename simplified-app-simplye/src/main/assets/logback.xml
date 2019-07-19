@@ -15,13 +15,13 @@
   </appender>
 
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>/sdcard/org.nypl.simplified.simplye/log.txt</file>
+    <file>/storage/emulated/legacy/Android/data/org.nypl.simplified.simplye/cache/log.txt</file>
     <encoder>
       <pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %level %logger{128} - %msg%n</pattern>
     </encoder>
 
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>/sdcard/org.nypl.labs.OpenEbooks.app/log.txt.%d</fileNamePattern>
+      <fileNamePattern>/storage/emulated/legacy/Android/data/org.nypl.simplified.simplye/cache/log.txt.%d</fileNamePattern>
       <maxHistory>7</maxHistory>
     </rollingPolicy>
   </appender>
@@ -46,7 +46,6 @@
     name="org.nypl.drm"
     level="DEBUG" />
 
-  <!-- Log level - change this to ERROR on release -->
   <root level="DEBUG">
     <appender-ref ref="LOG_CAT" />
     <appender-ref ref="ASYNC_FILE" />

@@ -4,6 +4,12 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringR
 
 class MockAccountCreationStringResources : ProfileAccountCreationStringResourcesType {
 
+  override val creatingAccountSucceeded: String
+    get() = "creatingAccountSucceeded"
+
+  override val unexpectedException: String
+    get() = "unexpectedException"
+
   override val creatingAccountFailed: String
     get() = "creatingAccountFailed"
 

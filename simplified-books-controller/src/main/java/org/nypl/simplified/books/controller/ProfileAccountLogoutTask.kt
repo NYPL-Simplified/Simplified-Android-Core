@@ -12,6 +12,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData.AccountLogoutDRMFailure
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData.AccountLogoutUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
@@ -19,8 +20,8 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.profiles.controller.api.AccountLogoutTaskResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.Callable
@@ -37,7 +38,7 @@ class ProfileAccountLogoutTask(
   private val bookRegistry: BookRegistryType,
   private val http: HTTPType,
   private val logoutStrings: AccountLogoutStringResourcesType,
-  private val profile: ProfileReadableType) : Callable<AccountLogoutTaskResult> {
+  private val profile: ProfileReadableType) : Callable<TaskResult<AccountLogoutErrorData, Unit>> {
 
   init {
     Preconditions.checkState(
@@ -62,7 +63,7 @@ class ProfileAccountLogoutTask(
   private fun error(message: String, vararg arguments: Any?) =
     this.logger.error("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
-  override fun call(): AccountLogoutTaskResult {
+  override fun call(): TaskResult<AccountLogoutErrorData, Unit> {
     this.steps.beginNewStep(this.logoutStrings.logoutStarted)
 
     this.credentials =
@@ -75,7 +76,7 @@ class ProfileAccountLogoutTask(
         is AccountLoggingOut -> {
           this.warn("attempted to log out with account in state {}", state.javaClass.canonicalName)
           this.steps.currentStepSucceeded(this.logoutStrings.logoutNotLoggedIn)
-          return AccountLogoutTaskResult(this.steps.finish())
+          return this.steps.finishSuccess(Unit)
         }
       }
 
@@ -84,19 +85,16 @@ class ProfileAccountLogoutTask(
       this.runDeviceDeactivation()
       this.runBookRegistryClear()
       this.account.setLoginState(AccountNotLoggedIn)
-      AccountLogoutTaskResult(this.steps.finish())
+      return this.steps.finishSuccess(Unit)
     } catch (e: Throwable) {
-      val step = this.steps.currentStep()!!
-      if (step.exception == null) {
-        this.steps.currentStepFailed(
-          message = this.pickUsableMessage(step.resolution, e),
-          errorValue = step.errorValue,
-          exception = e)
-      }
+      this.steps.currentStepFailedAppending(
+        message = this.logoutStrings.logoutUnexpectedException,
+        errorValue = AccountLogoutUnexpectedException(e),
+        exception = e)
 
-      val resultingSteps = this.steps.finish()
-      this.account.setLoginState(AccountLogoutFailed(resultingSteps, this.credentials))
-      AccountLogoutTaskResult(this.steps.finish())
+      val failure = this.steps.finishFailure<Unit>()
+      this.account.setLoginState(AccountLogoutFailed(failure, this.credentials))
+      failure
     }
   }
 
@@ -211,7 +209,7 @@ class ProfileAccountLogoutTask(
       else -> {
         this.steps.currentStepFailed(
           this.logoutStrings.logoutDeactivatingDeviceAdobeFailed("UNKNOWN", ex),
-          null,
+          AccountLogoutUnexpectedException(ex),
           ex)
       }
     }
@@ -233,7 +231,8 @@ class ProfileAccountLogoutTask(
       }
     } catch (e: Throwable) {
       this.error("could not clear book registry: ", e)
-      this.steps.currentStepFailed(this.logoutStrings.logoutClearingBookRegistryFailed)
+      this.steps.currentStepFailed(
+        this.logoutStrings.logoutClearingBookRegistryFailed, AccountLogoutUnexpectedException(e))
     }
 
     this.steps.beginNewStep(this.logoutStrings.logoutClearingBookDatabase)
@@ -242,20 +241,8 @@ class ProfileAccountLogoutTask(
       this.account.bookDatabase.delete()
     } catch (e: Throwable) {
       this.error("could not clear book database: ", e)
-      this.steps.currentStepFailed(this.logoutStrings.logoutClearingBookDatabaseFailed)
-    }
-  }
-
-  private fun pickUsableMessage(message: String, e: Throwable): String {
-    val exMessage = e.message
-    return if (message.isEmpty()) {
-      if (exMessage != null) {
-        exMessage
-      } else {
-        e.javaClass.simpleName
-      }
-    } else {
-      message
+      this.steps.currentStepFailed(
+        this.logoutStrings.logoutClearingBookDatabaseFailed, AccountLogoutUnexpectedException(e))
     }
   }
 }

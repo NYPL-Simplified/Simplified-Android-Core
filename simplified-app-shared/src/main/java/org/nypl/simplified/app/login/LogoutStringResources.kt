@@ -11,6 +11,9 @@ import org.nypl.simplified.app.R
 
 class LogoutStringResources(val resources: Resources) : AccountLogoutStringResourcesType {
 
+  override val logoutUnexpectedException: String
+    get() = this.resources.getString(R.string.unexpectedException)
+
   override fun logoutDeactivatingDeviceAdobeFailed(
     errorCode: String,
     e: Throwable): String {
