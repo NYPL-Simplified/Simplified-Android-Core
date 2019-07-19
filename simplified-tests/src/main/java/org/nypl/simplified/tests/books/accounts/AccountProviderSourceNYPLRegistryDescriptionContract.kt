@@ -24,6 +24,8 @@ import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectLink
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLFeatures
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLInput
 import org.nypl.simplified.parser.api.ParseResult
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
@@ -77,8 +79,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("resolvingAuthDocumentMissingURI", result.steps.last().resolution)
+    result as TaskResult.Failure
+    Assert.assertEquals("resolvingAuthDocumentMissingURI", result.steps.last().resolution.message)
   }
 
   /**
@@ -126,8 +128,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("resolvingAuthDocumentRetrievalFailed", result.steps.last().resolution)
+    result as TaskResult.Failure
+    Assert.assertEquals("resolvingAuthDocumentRetrievalFailed", result.steps.last().resolution.message)
   }
 
   /**
@@ -170,8 +172,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("Connection failed", result.steps.last().resolution)
+    result as TaskResult.Failure
+    Assert.assertEquals("resolvingUnexpectedException", result.steps.last().resolution.message)
   }
 
   /**
@@ -225,8 +227,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("resolvingAuthDocumentParseFailed", result.steps.last().resolution)
+    result as TaskResult.Failure
+    Assert.assertEquals("resolvingAuthDocumentParseFailed", result.steps.last().resolution.message)
   }
 
   /**
@@ -351,7 +353,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertFalse(result.failed)
+    result as TaskResult.Success
 
     val provider = AccountProviderImmutable(
       addAutomatically = false,
@@ -505,7 +507,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertFalse(result.failed)
+    result as TaskResult.Success
 
     val provider = AccountProviderImmutable(
       addAutomatically = false,
@@ -640,7 +642,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertFalse(result.failed)
+    result as TaskResult.Success
 
     val provider = AccountProviderImmutable(
       addAutomatically = false,
@@ -778,8 +780,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("resolvingAuthDocumentCOPPAAgeGateMalformed", result.steps.last().resolution)
+    result as TaskResult.Failure
+    Assert.assertEquals("resolvingAuthDocumentCOPPAAgeGateMalformed", result.steps.last().resolution.message)
   }
 
   /**
@@ -892,8 +894,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("resolvingAuthDocumentNoUsableAuthenticationTypes", result.steps.last().resolution)
+    result as TaskResult.Failure
+    Assert.assertEquals("resolvingAuthDocumentNoUsableAuthenticationTypes", result.steps.last().resolution.message)
   }
 
   /**
@@ -995,8 +997,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       description.resolve { _, message -> this.logger.debug("{}", message) }
 
     this.logger.debug("result: {}", result)
-    Assert.assertTrue(result.failed)
-    Assert.assertEquals("resolvingAuthDocumentNoStartURI", result.steps.last().resolution)
+    result as TaskResult.Failure
+    Assert.assertEquals("resolvingAuthDocumentNoStartURI", result.steps.last().resolution.message)
   }
 
   private fun <T> anyNotNull(): T {

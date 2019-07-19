@@ -5,6 +5,9 @@ import java.net.URI
 
 class MockRevokeStringResources : BookRevokeStringResourcesType {
 
+  override val revokeUnexpectedException: String
+    get() = "revokeUnexpectedException"
+
   override val revokeCredentialsRequired: String
     get() = "revokeCredentialsRequired"
 

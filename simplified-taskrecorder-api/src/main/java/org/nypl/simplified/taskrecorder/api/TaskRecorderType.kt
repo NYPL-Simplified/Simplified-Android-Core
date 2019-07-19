@@ -26,15 +26,33 @@ interface TaskRecorderType<E> {
 
   fun currentStepFailed(
     message: String,
-    errorValue: E? = null,
+    errorValue: E,
     exception: Throwable? = null
+  ): TaskStep<E>
+
+  /**
+   * If the current step has not failed, fail it with the given error. If the current step
+   * has failed but no exception is present, add the given exception. Otherwise, if an exception
+   * is present, add a suppressed exception.
+   */
+
+  fun currentStepFailedAppending(
+    message: String,
+    errorValue: E,
+    exception: Throwable
   ): TaskStep<E>
 
   /**
    * Complete recording of all steps.
    */
 
-  fun finish(): List<TaskStep<E>>
+  fun <A> finishSuccess(result: A): TaskResult.Success<E, A>
+
+  /**
+   * Complete recording of all steps.
+   */
+
+  fun <A> finishFailure(): TaskResult.Failure<E, A>
 
   /**
    * @return The current step

@@ -15,16 +15,9 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMNotSupported
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.*
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
@@ -37,9 +30,10 @@ import org.nypl.simplified.patron.api.PatronDRM
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.profiles.controller.api.AccountLoginTaskResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -60,7 +54,7 @@ class ProfileAccountLoginTask(
   private val loginStrings: AccountLoginStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType,
-  initialCredentials: AccountAuthenticationCredentials) : Callable<AccountLoginTaskResult> {
+  initialCredentials: AccountAuthenticationCredentials) : Callable<TaskResult<AccountLoginErrorData, Unit>> {
 
   init {
     Preconditions.checkState(
@@ -93,45 +87,32 @@ class ProfileAccountLoginTask(
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
 
-  private fun checkAuthenticationRequired(): AccountProviderAuthenticationDescription? {
-    val authentication = this.account.provider.authentication
-    return if (authentication == null) {
-      this.debug("account does not require authentication")
-      this.steps.currentStepFailed(this.loginStrings.loginAuthNotRequired, AccountLoginNotRequired)
-      this.account.setLoginState(AccountLoginFailed(this.steps.finish()))
-      null
-    } else authentication
-  }
+  private fun run(): TaskResult<AccountLoginErrorData, Unit> {
+    return try {
+      this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired))
 
-  private fun run(): AccountLoginTaskResult {
-    try {
-      this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
-      this.updateLoggingInState()
-
-      return when (this.checkAuthenticationRequired()) {
-        is AccountProviderAuthenticationDescription -> {
-          this.runPatronProfileRequest()
-          this.runDeviceActivation()
-          this.account.setLoginState(AccountLoggedIn(this.credentials))
-          AccountLoginTaskResult(this.steps.finish())
-        }
-        else -> {
-          this.steps.currentStepSucceeded(this.loginStrings.loginAuthNotRequired)
-          AccountLoginTaskResult(this.steps.finish())
-        }
+      val authentication = this.account.provider.authentication
+      if (authentication == null) {
+        this.debug("account does not require authentication")
+        val details = AccountLoginNotRequired(this.loginStrings.loginAuthNotRequired)
+        this.steps.currentStepFailed(details.message, details)
+        this.account.setLoginState(AccountLoginFailed(this.steps.finishFailure<Unit>()))
+        return this.steps.finishFailure()
       }
+
+      this.runPatronProfileRequest()
+      this.runDeviceActivation()
+      this.account.setLoginState(AccountLoggedIn(this.credentials))
+      this.steps.finishSuccess(Unit)
     } catch (e: Throwable) {
-      val step = this.steps.currentStep()!!
-      if (step.exception == null) {
-        this.steps.currentStepFailed(
-          message = pickUsableMessage(step.resolution, e),
-          errorValue = step.errorValue,
-          exception = e)
-      }
+      this.steps.currentStepFailedAppending(
+        message = this.loginStrings.loginUnexpectedException,
+        errorValue = AccountLoginUnexpectedException(this.loginStrings.loginUnexpectedException, e),
+        exception = e)
 
-      val resultingSteps = this.steps.finish()
-      this.account.setLoginState(AccountLoginFailed(resultingSteps))
-      return AccountLoginTaskResult(resultingSteps)
+      val failure = this.steps.finishFailure<Unit>()
+      this.account.setLoginState(AccountLoginFailed(failure))
+      failure
     }
   }
 
@@ -147,8 +128,7 @@ class ProfileAccountLoginTask(
   private fun runDeviceActivationAdobe(adobeDRM: PatronDRMAdobe) {
     this.debug("runDeviceActivationAdobe: executing")
 
-    this.steps.beginNewStep(this.loginStrings.loginDeviceActivationAdobe)
-    this.updateLoggingInState()
+    this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginDeviceActivationAdobe))
 
     val deviceManagerURI = adobeDRM.deviceManagerURI
     val adobePreCredentials =
@@ -169,7 +149,9 @@ class ProfileAccountLoginTask(
     if (adeptExecutor == null) {
       this.steps.currentStepFailed(
         this.loginStrings.loginDeviceDRMNotSupported,
-        AccountLoginDRMNotSupported("Adobe ACS"))
+        AccountLoginDRMNotSupported(
+          message = this.loginStrings.loginDeviceDRMNotSupported,
+          system = "Adobe ACS"))
       throw DRMUnsupportedException("Adobe ACS")
     }
 
@@ -212,33 +194,34 @@ class ProfileAccountLoginTask(
     }
   }
 
-  private fun handleAdobeDRMConnectorException(ex: Throwable) =
-    when (ex) {
+  private fun handleAdobeDRMConnectorException(ex: Throwable): TaskStep<AccountLoginErrorData> {
+    val text = this.loginStrings.loginDeviceActivationFailed(ex)
+    return when (ex) {
       is AdobeDRMExtensions.AdobeDRMLoginNoActivationsException -> {
         this.steps.currentStepFailed(
-          this.loginStrings.loginDeviceActivationFailed(ex),
-          null,
+          text,
+          AccountLoginDRMTooManyActivations(text),
           ex)
       }
       is AdobeDRMExtensions.AdobeDRMLoginConnectorException -> {
         this.steps.currentStepFailed(
-          this.loginStrings.loginDeviceActivationFailed(ex),
-          AccountLoginDRMFailure(ex.errorCode),
+          text,
+          AccountLoginDRMFailure(text, ex.errorCode),
           ex)
       }
       else -> {
         this.steps.currentStepFailed(
-          this.loginStrings.loginDeviceActivationFailed(ex),
-          null,
+          text,
+          AccountLoginUnexpectedException(text, ex),
           ex)
       }
     }
+  }
 
   private fun runDeviceActivationAdobeSendDeviceManagerRequest(deviceManagerURI: URI) {
     this.debug("runDeviceActivationAdobeSendDeviceManagerRequest: posting device ID")
 
-    this.steps.beginNewStep(this.loginStrings.loginDeviceActivationPostDeviceManager)
-    this.updateLoggingInState()
+    this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginDeviceActivationPostDeviceManager))
 
     Preconditions.checkState(
       this.credentials.adobeCredentials().isSome,
@@ -273,19 +256,6 @@ class ProfileAccountLoginTask(
     this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivationPostDeviceManagerDone)
   }
 
-  private fun pickUsableMessage(message: String, e: Throwable): String {
-    val exMessage = e.message
-    return if (message.isEmpty()) {
-      if (exMessage != null) {
-        exMessage
-      } else {
-        e.javaClass.simpleName
-      }
-    } else {
-      message
-    }
-  }
-
   private fun <T> someOrNull(option: OptionType<T>): T? {
     return if (option is Some<T>) {
       option.get()
@@ -302,12 +272,13 @@ class ProfileAccountLoginTask(
   private fun runPatronProfileRequest() {
     this.debug("running patron profile request")
 
-    this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest)
-    this.updateLoggingInState()
+    this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest))
 
     val patronSettingsURI = this.account.provider.patronSettingsURI
     if (patronSettingsURI == null) {
-      this.steps.currentStepFailed(this.loginStrings.loginPatronSettingsRequestNoURI)
+      this.steps.currentStepFailed(
+        this.loginStrings.loginPatronSettingsRequestNoURI,
+        AccountLoginMissingInformation(this.loginStrings.loginPatronSettingsRequestNoURI))
       throw Exception()
     }
 
@@ -347,10 +318,16 @@ class ProfileAccountLoginTask(
         }
         is ParseResult.Failure -> {
           this.error("failed to parse patron profile")
+          val message =
+            this.loginStrings.loginPatronSettingsRequestParseFailed(
+              parseResult.errors.map(this::showParseError))
           this.steps.currentStepFailed(
-            message = this.loginStrings.loginPatronSettingsRequestParseFailed(
-              parseResult.errors.map(this::showParseError)),
-            errorValue = AccountLoginServerParseError(parseResult.warnings, parseResult.errors))
+            message = message,
+            errorValue = AccountLoginServerParseError(
+              message = message,
+              warnings = parseResult.warnings,
+              errors = parseResult.errors
+            ))
           throw Exception()
         }
       }
@@ -407,9 +384,10 @@ class ProfileAccountLoginTask(
   private fun onPatronProfileRequestHTTPException(
     patronSettingsURI: URI,
     result: HTTPResultException<InputStream>) {
+    val message = this.loginStrings.loginPatronSettingsConnectionFailed
     this.steps.currentStepFailed(
-      message = this.loginStrings.loginPatronSettingsConnectionFailed,
-      errorValue = AccountLoginConnectionFailure,
+      message = message,
+      errorValue = AccountLoginConnectionFailure(message),
       exception = result.error)
     throw result.error
   }
@@ -421,15 +399,18 @@ class ProfileAccountLoginTask(
 
     when (result.status) {
       HttpURLConnection.HTTP_UNAUTHORIZED -> {
+        val message = this.loginStrings.loginPatronSettingsInvalidCredentials
         this.steps.currentStepFailed(
-          message = this.loginStrings.loginPatronSettingsInvalidCredentials,
-          errorValue = AccountLoginCredentialsIncorrect)
+          message = message,
+          errorValue = AccountLoginCredentialsIncorrect(message))
         throw Exception()
       }
       else -> {
+        val message = this.loginStrings.loginServerError(result.status, result.message)
         this.steps.currentStepFailed(
-          message = this.loginStrings.loginServerError(result.status, result.message),
+          message = message,
           errorValue = AccountLoginServerError(
+            message = message,
             uri = patronSettingsURI,
             statusCode = result.status,
             errorMessage = result.message,
@@ -439,8 +420,8 @@ class ProfileAccountLoginTask(
     }
   }
 
-  private fun updateLoggingInState() {
-    this.account.setLoginState(AccountLoggingIn(this.steps.currentStep()?.description ?: ""))
+  private fun updateLoggingInState(step: TaskStep<AccountLoginErrorData>) {
+    this.account.setLoginState(AccountLoggingIn(step.description))
   }
 
   private fun logParseWarning(warning: ParseWarning) {

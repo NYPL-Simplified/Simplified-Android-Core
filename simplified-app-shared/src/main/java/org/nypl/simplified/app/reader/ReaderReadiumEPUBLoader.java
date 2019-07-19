@@ -141,7 +141,7 @@ public final class ReaderReadiumEPUBLoader implements ReaderReadiumEPUBLoaderTyp
         LOG.debug("Content filter registered");
       } catch (final DRMUnsupportedException e) {
         LOG.error("DRM is not supported: ", e);
-      } catch (final DRMException e) {
+      } catch (final DRMException | IOException e) {
         LOG.error("DRM could not be initialized: ", e);
       }
     };

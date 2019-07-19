@@ -1,18 +1,37 @@
 package org.nypl.simplified.accounts.api
 
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.PresentableType
 
-sealed class AccountEventDeletion : AccountEvent() {
+/**
+ * The type of account deletion events.
+ */
+
+sealed class AccountEventDeletion : AccountEvent(), PresentableType {
+
+  /**
+   * Deleting an account is in progress.
+   */
 
   data class AccountEventDeletionInProgress(
-    val message: String)
+    override val message: String)
     : AccountEventDeletion()
 
+  /**
+   * Deleting an account succeeded.
+   */
+
   data class AccountEventDeletionSucceeded(
+    override val message: String,
     val id: AccountID)
     : AccountEventDeletion()
 
+  /**
+   * Deleting an account failed.
+   */
+
   data class AccountEventDeletionFailed(
-    val message: String)
-    : AccountEventDeletion()
+    override val message: String)
+    : AccountEventDeletion(), PresentableErrorType
 
 }

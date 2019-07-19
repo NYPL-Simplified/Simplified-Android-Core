@@ -59,6 +59,8 @@ dependencies {
   api project(":simplified-futures")
   api project(":simplified-http-core")
   api project(":simplified-json-core")
+  api project(":simplified-migration-from3master")
+  api project(":simplified-migration-spi")
   api project(":simplified-observable")
   api project(":simplified-opds-auth-document")
   api project(":simplified-opds-auth-document-api")

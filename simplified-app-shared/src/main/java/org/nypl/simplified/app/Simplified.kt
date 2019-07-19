@@ -41,6 +41,7 @@ class Simplified : MultiDexApplication() {
 
   override fun onCreate() {
     super.onCreate()
+    this.externalCacheDir?.mkdirs()
     this.logger.debug("starting app: pid {}", android.os.Process.myPid())
     this.bootFuture = this.boot.start()
     INSTANCE = this

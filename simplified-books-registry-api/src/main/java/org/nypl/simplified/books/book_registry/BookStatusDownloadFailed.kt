@@ -1,9 +1,9 @@
 package org.nypl.simplified.books.book_registry
 
-import com.google.common.base.Preconditions
 import com.io7m.jfunctional.OptionType
 import org.joda.time.DateTime
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.taskrecorder.api.TaskResult
 
 /**
  * The given book failed to download properly.
@@ -21,7 +21,7 @@ data class BookStatusDownloadFailed(
    * The list of steps that lead to the failure.
    */
 
-  val result: BookStatusDownloadResult,
+  val result: TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>,
 
   /**
    * The expiry date of the loan, if any
@@ -29,13 +29,8 @@ data class BookStatusDownloadFailed(
 
   val loanEndDate: OptionType<DateTime>) : BookStatusDownloadingType {
 
-  init {
-    Preconditions.checkArgument(
-      this.result.failed, "Result should have failed!")
-  }
-
   val detailMessage: String
-    get() = this.result.steps.last().resolution
+    get() = this.result.steps.last().resolution.message
 
   override fun getID(): BookID =
     this.id

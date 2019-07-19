@@ -27,6 +27,12 @@ interface BookRevokeStringResourcesType {
   fun revokeServerNotifyURI(targetURI: URI): String
 
   /**
+   * An unexpected exception occurred.
+   */
+
+  val revokeUnexpectedException: String
+
+  /**
    * Credentials are required, but none are provided.
    */
 

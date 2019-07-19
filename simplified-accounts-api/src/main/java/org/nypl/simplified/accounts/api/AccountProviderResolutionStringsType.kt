@@ -7,6 +7,12 @@ package org.nypl.simplified.accounts.api
 interface AccountProviderResolutionStringsType {
 
   /**
+   * Received an unexpected exception during resolution.
+   */
+
+  val resolvingUnexpectedException: String
+
+  /**
    * Fetching an authentication document failed.
    */
 

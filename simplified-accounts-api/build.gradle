@@ -17,8 +17,9 @@ android {
 description = 'simplified-accounts-api'
 
 dependencies {
-  api project(":simplified-taskrecorder-api")
   api project(":simplified-parser-api")
+  api project(":simplified-presentableerror-api")
+  api project(":simplified-taskrecorder-api")
 
   implementation project(':simplified-http-core')
   implementation project(':simplified-opds-core')

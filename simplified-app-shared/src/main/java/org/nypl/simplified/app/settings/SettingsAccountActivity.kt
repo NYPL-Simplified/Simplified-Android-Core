@@ -423,8 +423,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      failed.steps.lastOrNull()?.resolution,
-      failed.steps.lastOrNull()?.exception) {
+      failed.taskResult.steps.last().resolution.message,
+      failed.taskResult.steps.last().resolution.exception) {
       this.login.isEnabled = true
     }
 
@@ -452,8 +452,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      failed.steps.lastOrNull()?.resolution,
-      failed.steps.lastOrNull()?.exception) {
+      failed.taskResult.steps.last().resolution.message,
+      failed.taskResult.steps.last().resolution.exception) {
       this.login.isEnabled = true
     }
 
@@ -556,7 +556,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       is AccountLoginFailed -> {
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.GONE
-        this.actionText.text = state.steps.last().resolution
+        this.actionText.text = state.taskResult.steps.last().resolution.message
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = true
         this.ageCheckbox.setOnClickListener {}
@@ -572,7 +572,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
         this.actionLayout.visibility = View.VISIBLE
         this.actionProgress.visibility = View.GONE
-        this.actionText.text = state.steps.last().resolution
+        this.actionText.text = state.taskResult.steps.last().resolution.message
 
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = true

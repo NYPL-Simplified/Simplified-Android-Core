@@ -3,7 +3,7 @@ package org.nypl.simplified.accounts.api;
 import com.google.auto.value.AutoValue;
 
 /**
- * The type of account barcodes.
+ * The type of account barcodes. This is equivalent to a username in username/password pair.
  * <p>
  * Account barcodes are expected to be 5-14 digit numbers, but the type does not
  * (currently) enforce this fact.

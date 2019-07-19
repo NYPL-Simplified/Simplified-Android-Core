@@ -6,7 +6,6 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import org.joda.time.DateTime
-import org.joda.time.Duration
 import org.joda.time.Instant
 import org.junit.After
 import org.junit.Assert
@@ -44,10 +43,8 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.*
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.*
-import org.nypl.simplified.books.book_registry.BookStatusRevokeResult
 import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
@@ -62,6 +59,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
@@ -142,14 +140,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     this.executorTimer.shutdown()
   }
 
-  private fun dump(results: BookStatusRevokeResult) {
-    this.logger.debug("RESULTS:")
-    for (step in results.steps) {
-      this.logger.debug("step description: {}", step.description)
-      this.logger.debug("step resolution:  {} (failed: {}) (exception: {}) (error: {})", step.resolution, step.failed, step.exception, step.errorValue)
-      this.logger.debug("--")
-    }
-  }
+
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
     val entryParser =
@@ -254,9 +245,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertFalse(result.failed)
+    result as TaskResult.Success
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -345,9 +336,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertFalse(result.failed)
+    result as TaskResult.Success
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -473,9 +464,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
 
-    Assert.assertFalse(result.failed)
+    result as TaskResult.Success
     Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
@@ -598,9 +589,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
-
-    Assert.assertTrue(result.failed)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(0))
@@ -721,9 +711,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
-
-    Assert.assertTrue(result.failed)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(0))
@@ -846,12 +835,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
 
-    Assert.assertTrue(result.failed)
     Assert.assertEquals(
       DRMFailure("Adobe ACS", "E_DEFECTIVE"),
-      result.steps.last().errorValue)
+      result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(0))
@@ -952,12 +941,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
 
-    Assert.assertTrue(result.failed)
     Assert.assertEquals(
       DRMDeviceNotActive("Adobe ACS"),
-      result.steps.last().errorValue)
+      result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(0))
@@ -1048,12 +1037,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
 
-    Assert.assertTrue(result.failed)
     Assert.assertEquals(
       NoCredentialsAvailable,
-      result.steps.last().errorValue)
+      result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(0))
@@ -1181,12 +1170,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
         revokeStrings = this.bookRevokeStrings)
 
     val result = task.call()
-    this.dump(result)
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
 
-    Assert.assertTrue(result.failed)
     Assert.assertEquals(
       IOException::class.java,
-      result.steps.last().exception!!::class.java)
+      result.steps.last().resolution.exception!!::class.java)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(1))

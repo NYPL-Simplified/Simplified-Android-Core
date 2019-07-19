@@ -16,11 +16,12 @@ android {
   }
 }
 
-description = 'simplified-splash_image'
+description = 'simplified-splash'
 
 dependencies {
   api project(':simplified-boot-api')
   api project(':simplified-documents')
+  api project(':simplified-migration-api')
   api project(':simplified-observable')
   api project(':simplified-profiles-controller-api')
 

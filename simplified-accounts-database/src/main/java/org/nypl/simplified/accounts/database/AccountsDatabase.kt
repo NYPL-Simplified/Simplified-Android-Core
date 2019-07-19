@@ -18,6 +18,7 @@ import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseBooksException
+import org.nypl.simplified.accounts.database.api.AccountsDatabaseDuplicateProviderException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseIOException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException
@@ -91,9 +92,12 @@ class AccountsDatabase private constructor(
 
   @Throws(AccountsDatabaseException::class)
   override fun createAccount(accountProvider: AccountProviderType): AccountType {
-
     val accountId: AccountID
     synchronized(this.accountsLock) {
+      if (this.accountsByProvider.containsKey(accountProvider.id)) {
+        throw AccountsDatabaseDuplicateProviderException(accountProvider.id.toString())
+      }
+
       accountId = freshAccountID(this.accounts)
 
       LOG.debug("creating account {} (provider {})", accountId, accountProvider.id)
@@ -258,7 +262,10 @@ class AccountsDatabase private constructor(
         this.loginStateActual = state
       }
 
-      this.accountEvents.send(AccountEventLoginStateChanged(this.id, state))
+      this.accountEvents.send(AccountEventLoginStateChanged(
+        message = "",
+        accountID = this.id,
+        state = state))
 
       val credentials = state.credentials
       if (credentials != null) {
@@ -298,7 +305,7 @@ class AccountsDatabase private constructor(
           this.description = newDescription
         }
 
-        this.accountEvents.send(AccountEventUpdated(this.id))
+        this.accountEvents.send(AccountEventUpdated("", this.id))
       } catch (e: IOException) {
         throw AccountsDatabaseIOException("Could not write account data", e)
       }

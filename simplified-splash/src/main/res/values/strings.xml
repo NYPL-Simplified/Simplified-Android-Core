@@ -3,4 +3,11 @@
   <!-- EULA strings -->
   <string name="eula_disagree">Disagree</string>
   <string name="eula_agree">Agree</string>
+
+  <!-- Migration strings -->
+  <string name="migrationFailure">There were one or more problems migrating your data…</string>
+  <string name="migrationSuccess">Your data was migrated successfully!</string>
+  <string name="migrationSendReport">Send Report</string>
+  <string name="migrationOK">OK</string>
+
 </resources>
