@@ -22,6 +22,7 @@ import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.files.DirectoryUtilities
@@ -368,11 +369,14 @@ abstract class ProfilesControllerContract {
     controller.profileAccountCreate(provider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
 
-    val feed = controller.profileFeed(
-      ProfileFeedRequest.builder(
-        URI.create("Books"), "Books", "Sort by") { t -> "Sort by title" }
-        .build())
-      .get()
+    val feed =
+      controller.profileFeed(
+        ProfileFeedRequest(
+          uri = URI.create("Books"),
+          title = "Books",
+          facetGroup = "Sort by",
+          facetTitleProvider = FeedFacetPseudoTitleProviderType { t -> "Sort by title" }))
+        .get()
 
     Assert.assertEquals(0L, feed.size.toLong())
   }

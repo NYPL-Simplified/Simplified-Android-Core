@@ -1144,18 +1144,20 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    */
 
   private fun doLoadLocalFeed(c: CatalogFeedArgumentsLocalBooks) {
-    val booksUri = URI.create("Books")
+    val booksUri =
+      URI.create("Books")
+    val searchTerms =
+      if (c.searchTerms is Some<String>) { c.searchTerms.get() } else { null }
 
     val request =
-      ProfileFeedRequest.builder(
-        booksUri,
-        this.resources.getString(R.string.books),
-        this.resources.getString(R.string.books_sort_by),
-        CatalogFacetPseudoTitleProvider(this.resources))
-        .setFeedSelection(c.selection)
-        .setSearch(c.searchTerms)
-        .setFacetActive(c.facetType)
-        .build()
+      ProfileFeedRequest(
+        facetActive = c.facetType,
+        facetGroup = this.resources.getString(R.string.books_sort_by),
+        facetTitleProvider = CatalogFacetPseudoTitleProvider(this.resources),
+        feedSelection = c.selection,
+        search = searchTerms,
+        title = this.resources.getString(R.string.books),
+        uri = booksUri)
 
     try {
       val future =
