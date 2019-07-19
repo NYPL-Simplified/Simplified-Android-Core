@@ -49,5 +49,9 @@ interface AccountReadableType {
    */
 
   val requiresCredentials: Boolean
-    get() = this.provider.authentication != null
+    get() = when (this.provider.authentication) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate -> false
+      is AccountProviderAuthenticationDescription.Basic -> true
+      null -> false
+    }
 }
