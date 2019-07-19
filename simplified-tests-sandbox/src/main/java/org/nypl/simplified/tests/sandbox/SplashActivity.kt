@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import org.nypl.audiobook.android.tests.sandbox.R
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.boot.api.BootEvent

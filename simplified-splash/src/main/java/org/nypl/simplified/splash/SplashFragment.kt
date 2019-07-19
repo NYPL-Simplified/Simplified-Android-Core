@@ -35,11 +35,14 @@ import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.slf4j.LoggerFactory
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.StringBuilder
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
+import java.util.zip.GZIPOutputStream
 
 class SplashFragment : Fragment() {
 
@@ -251,7 +254,8 @@ class SplashFragment : Fragment() {
   @UiThread
   private fun configureViewsForMigrationReport(
     report: MigrationReport,
-    savedReportFile: File?
+    savedReportFile: File?,
+    compressedLogFile: File?
   ) {
     this.viewsForEULA.container.visibility = View.INVISIBLE
     this.viewsForImage.container.visibility = View.INVISIBLE
@@ -278,12 +282,18 @@ class SplashFragment : Fragment() {
     val reportEmail = this.parameters.splashMigrationReportEmail
     if (savedReportFile != null && reportEmail != null) {
       this.viewsForMigrationReport.sendButton.setOnClickListener {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-          this.type = "text/xml"
+        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+          this.type = "text/plain"
           this.putExtra(Intent.EXTRA_EMAIL, arrayOf(reportEmail))
           this.putExtra(Intent.EXTRA_SUBJECT, this@SplashFragment.reportEmailSubject(report))
           this.putExtra(Intent.EXTRA_TEXT, this@SplashFragment.reportEmailBody(report))
-          this.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(savedReportFile))
+
+          val attachments = java.util.ArrayList<Uri>()
+          attachments.add(Uri.fromFile(savedReportFile))
+          if (compressedLogFile != null) {
+            attachments.add(Uri.fromFile(compressedLogFile))
+          }
+          this.putExtra(Intent.EXTRA_STREAM, attachments)
         }
         this.startActivity(intent)
       }
@@ -297,13 +307,14 @@ class SplashFragment : Fragment() {
   }
 
   private fun reportEmailBody(report: MigrationReport): String {
-    val errors =
-      report.events.filter { e -> e is MigrationEvent.MigrationStepError}.size
+    val errors = report.events.filterIsInstance<MigrationEvent.MigrationStepError>().size
 
     return StringBuilder(128)
       .append("On ${report.timestamp}, a migration of ${report.application} occurred.")
       .append("\n")
-      .append("  There were ${errors} errors.")
+      .append("There were ${errors} errors.")
+      .append("\n")
+      .append("The attached log files give details of the migration.")
       .append("\n")
       .toString()
   }
@@ -482,9 +493,36 @@ class SplashFragment : Fragment() {
 
     val savedReportFile =
       this.processMigrationReportSaveToDisk(report)
+    val compressedLogFile =
+      this.compressLogFileIfAvailable()
 
     this.runOnUIThread {
-      this.configureViewsForMigrationReport(report, savedReportFile)
+      this.configureViewsForMigrationReport(report, savedReportFile, compressedLogFile)
+    }
+  }
+
+  private fun compressLogFileIfAvailable(): File? {
+    return try {
+      val cacheDir = this.context!!.externalCacheDir
+      val logFile = File(cacheDir, "log.txt")
+      val logFileGz = File(cacheDir, "log.txt.gz")
+
+      this.logger.debug("attempting to compress log file: {}", logFile)
+      FileInputStream(logFile).use { inputStream ->
+        FileOutputStream(logFileGz, false).use { stream ->
+          BufferedOutputStream(stream).use { bstream ->
+            GZIPOutputStream(stream).use { zstream ->
+              inputStream.copyTo(zstream)
+              zstream.finish()
+              zstream.flush()
+              logFileGz
+            }
+          }
+        }
+      }
+    } catch (e: Exception) {
+      this.logger.error("could not compress log file: ", e)
+      null
     }
   }
 
