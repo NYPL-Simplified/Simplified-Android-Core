@@ -86,8 +86,7 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
             this.handle = entry.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)!!
             this.documentPageIndex = handle.format.lastReadLocation!!
         } catch (e: Exception) {
-            log.error("Could not get lastReadLocation, defaulting to the 1st page")
-            e.printStackTrace()
+            log.error("Could not get lastReadLocation, defaulting to the 1st page", e)
         }
 
         if (savedInstanceState != null) {
