@@ -1149,12 +1149,30 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     val searchTerms =
       if (c.searchTerms is Some<String>) { c.searchTerms.get() } else { null }
 
+    val showAllCollections =
+      try {
+        this.resources.getBoolean(R.bool.featureShowAllCollectionsInMyBooks)
+      } catch (e: Exception) {
+        true
+      }
+
+    val filterAccountID =
+      if (!showAllCollections) {
+        Simplified.application.services()
+          .profilesController
+          .profileAccountCurrent()
+          .id
+      } else {
+        null
+      }
+
     val request =
       ProfileFeedRequest(
         facetActive = c.facetType,
         facetGroup = this.resources.getString(R.string.books_sort_by),
         facetTitleProvider = CatalogFacetPseudoTitleProvider(this.resources),
         feedSelection = c.selection,
+        filterByAccountID = filterAccountID,
         search = searchTerms,
         title = this.resources.getString(R.string.books),
         uri = booksUri)
