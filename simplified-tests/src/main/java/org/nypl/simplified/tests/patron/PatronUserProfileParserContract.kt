@@ -136,6 +136,32 @@ abstract class PatronUserProfileParserContract {
     Assert.assertTrue(result.warnings[0].message.contains("Unrecognized DRM scheme"))
   }
 
+  @Test
+  fun testSimply2126() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("simply-2126.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Success::class.java))
+
+    val success = result as Success
+    val profile = success.result
+
+    Assert.assertEquals(
+      "1278371823781",
+      profile.authorization?.identifier)
+    Assert.assertEquals(
+      "2020-04-13T00:00:00.000Z",
+      profile.authorization?.expires.toString())
+    Assert.assertEquals(
+      false,
+      profile.settings.synchronizeAnnotations)
+
+    Assert.assertEquals(1, profile.drm.size)
+    Assert.assertEquals(0, result.warnings.size)
+  }
+
   private fun resource(file: String): InputStream {
     val path = "/org/nypl/simplified/tests/patron/${file}"
     return PatronUserProfileParserContract::class.java.getResourceAsStream(path)
