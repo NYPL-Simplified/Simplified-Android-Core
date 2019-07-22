@@ -11,6 +11,7 @@ import com.io7m.jfunctional.Some
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.utilities.UIThread
@@ -84,10 +85,19 @@ class CatalogAcquisitionButton(
 
   private fun onClick() {
     val loginState = this.account.loginState
-    if (this.account.requiresCredentials && loginState.credentials == null) {
-      this.tryLogin()
-    } else {
-      this.tryBorrow()
+    return when (this.account.provider.authentication) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate,
+        null -> {
+        this.tryBorrow()
+      }
+
+      is AccountProviderAuthenticationDescription.Basic -> {
+        if (loginState.credentials == null) {
+          this.tryLogin()
+        } else {
+          this.tryBorrow()
+        }
+      }
     }
   }
 

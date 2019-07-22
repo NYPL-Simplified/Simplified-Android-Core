@@ -34,7 +34,7 @@ import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.profiles.api.ProfileSelected
+import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotation
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotations
@@ -493,7 +493,7 @@ class ReaderBookmarkService private constructor(
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
-    if (event is ProfileSelected) {
+    if (event is ProfileSelection.ProfileSelectionInProgress) {
       try {
         val currentProfile = this.profilesController.profileCurrent()
         this.logger.debug("[{}]: a new profile was selected", currentProfile.id.uuid)

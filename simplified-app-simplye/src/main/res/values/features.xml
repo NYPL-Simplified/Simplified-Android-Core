@@ -5,21 +5,12 @@
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>
 
-  <!-- qa or prod  - currently used only in card creator -->
-  <string name="feature_environment">prod</string>
-
-  <!-- authentication providers -->
-  <!-- default authentication provider -->
-  <string name="feature_default_auth_provider_name">New York Public Library</string>
-  <string name="feature_catalog_start_uri">https://circulation.librarysimplified.org/</string>
+  <bool name="featureShowAllCollectionsInMyBooks">false</bool>
 
   <!-- A non-empty string here will override the package name given to
        the Adobe DRM implementation. An empty string will cause the
        implementation to use the package name defined in the Android manifest. -->
   <string name="feature_adobe_package_override">org.nypl.simplified.simplye</string>
-
-  <!-- The account provider that will be considered the default provider. -->
-  <string name="feature_default_provider_uri">urn:uuid:56906f26-2c9a-4ae9-bd02-552557720b99</string>
 
   <!-- The default email address used for migration reports. -->
   <string name="feature_migration_report_email">co+org.librarysimplified.tests.sandbox@io7m.com</string>

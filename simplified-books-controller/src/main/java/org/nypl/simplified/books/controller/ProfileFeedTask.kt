@@ -1,9 +1,5 @@
 package org.nypl.simplified.books.controller
 
-import com.io7m.jfunctional.None
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.OptionVisitorType
-import com.io7m.jfunctional.Some
 import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -36,24 +32,23 @@ internal class ProfileFeedTask(
   val request: ProfileFeedRequest) : Callable<Feed.FeedWithoutGroups> {
 
   override fun call(): Feed.FeedWithoutGroups {
-
     LOG.debug("generating local feed")
 
     /*
      * Generate facets.
      */
 
-    val facet_groups = HashMap<String, List<FeedFacet>>(32)
+    val facetGroups = HashMap<String, List<FeedFacet>>(32)
     val facets = ArrayList<FeedFacet>(32)
 
-    facets(this.request, facet_groups, facets)
+    facets(this.request, facetGroups, facets)
 
     val feed =
       Feed.empty(
-        feedURI = this.request.uri(),
-        feedID = this.request.id(),
+        feedURI = this.request.uri,
+        feedID = this.request.id,
         feedSearch = FeedSearch.FeedSearchLocal,
-        feedTitle = this.request.title())
+        feedTitle = this.request.title)
 
     try {
       LOG.debug("book registry contains {} books", this.bookRegistry.books().size)
@@ -61,12 +56,11 @@ internal class ProfileFeedTask(
       LOG.debug("collected {} candidate books", books.size)
 
       val filter = selectFeedFilter(this.request)
-
       filterBooks(filter, books)
       LOG.debug("after filtering, {} candidate books remain", books.size)
-      searchBooks(this.request.search(), books)
+      searchBooks(this.request.search, books)
       LOG.debug("after searching, {} candidate books remain", books.size)
-      sortBooks(this.request.facetActive(), books)
+      sortBooks(this.request.facetActive, books)
       LOG.debug("after sorting, {} candidate books remain", books.size)
 
       for (book in books) {
@@ -84,15 +78,19 @@ internal class ProfileFeedTask(
    */
 
   private fun searchBooks(
-    search: OptionType<String>,
+    search: String?,
     books: ArrayList<BookWithStatus>) {
 
-    val terms_upper = searchTermsSplitUpper(search)
-    val iter = books.iterator()
-    while (iter.hasNext()) {
-      val book = iter.next()
-      if (!searchMatches(terms_upper, book)) {
-        iter.remove()
+    if (search == null) {
+      return
+    }
+
+    val termsUpper = searchTermsSplitUpper(search)
+    val iterator = books.iterator()
+    while (iterator.hasNext()) {
+      val book = iterator.next()
+      if (!searchMatches(termsUpper, book)) {
+        iterator.remove()
       }
     }
   }
@@ -101,21 +99,13 @@ internal class ProfileFeedTask(
    * Split the given search string into a list of uppercase search terms.
    */
 
-  private fun searchTermsSplitUpper(search: OptionType<String>): List<String> {
-    return search.accept(object : OptionVisitorType<String, List<String>> {
-      override fun none(none: None<String>): List<String> {
-        return emptyList()
-      }
-
-      override fun some(some: Some<String>): List<String> {
-        val terms = some.get().split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        val terms_upper = ArrayList<String>(8)
-        for (term in terms) {
-          terms_upper.add(term.toUpperCase())
-        }
-        return terms_upper
-      }
-    })
+  private fun searchTermsSplitUpper(search: String): List<String> {
+    val terms = search.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+    val termsUpper = ArrayList<String>(8)
+    for (term in terms) {
+      termsUpper.add(term.toUpperCase())
+    }
+    return termsUpper
   }
 
   /**
@@ -180,7 +170,13 @@ internal class ProfileFeedTask(
   }
 
   private fun collectAllBooks(book_registry: BookRegistryReadableType): ArrayList<BookWithStatus> {
-    return ArrayList(book_registry.books().values)
+    val accountID = this.request.filterByAccountID
+    val values = book_registry.books().values
+    return ArrayList(if (accountID != null) {
+      values.filter { book -> book.book().account == accountID }
+    } else {
+      values
+    })
   }
 
   /**
@@ -279,11 +275,11 @@ internal class ProfileFeedTask(
       facets: ArrayList<FeedFacet>) {
       val values = FacetType.values()
       for (v in values) {
-        val active = v == request.facetActive()
-        val f = FeedFacet.FeedFacetPseudo(request.facetTitleProvider().getTitle(v), active, v)
+        val active = v == request.facetActive
+        val f = FeedFacet.FeedFacetPseudo(request.facetTitleProvider.getTitle(v), active, v)
         facets.add(f)
       }
-      facet_groups[request.facetGroup()] = facets
+      facet_groups[request.facetGroup] = facets
     }
 
     /**
@@ -319,17 +315,12 @@ internal class ProfileFeedTask(
     }
 
     private fun selectFeedFilter(
-      request: ProfileFeedRequest): BookStatusMatcherType<Boolean, UnreachableCodeException> {
-      when (request.feedSelection()) {
-        FeedBooksSelection.BOOKS_FEED_LOANED -> {
-          return UsableForBooksFeed()
-        }
-        FeedBooksSelection.BOOKS_FEED_HOLDS -> {
-          return UsableForHoldsFeed()
-        }
+      request: ProfileFeedRequest
+    ): BookStatusMatcherType<Boolean, UnreachableCodeException> {
+      return when (request.feedSelection) {
+        FeedBooksSelection.BOOKS_FEED_LOANED -> UsableForBooksFeed()
+        FeedBooksSelection.BOOKS_FEED_HOLDS -> UsableForHoldsFeed()
       }
-
-      throw UnreachableCodeException()
     }
   }
 }
