@@ -115,6 +115,7 @@ class NotificationsService(
                 .setSmallIcon(R.drawable.audiobook_icon)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationContent)
+                .setOnlyAlertOnce(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         notificationManager.notify(0, builder.build())
