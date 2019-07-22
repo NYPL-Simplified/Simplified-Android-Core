@@ -8,6 +8,7 @@ import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.observable.ObservableReadableType
+import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileSelected
 import org.nypl.simplified.threads.NamedThreadPools
@@ -23,19 +24,26 @@ class NotificationsService(
     private val executor: ExecutorService = NamedThreadPools.namedThreadPool(1, "notifications", 19)
 
     val profileSubscription =
-            this.profileEvents.subscribe(this::onProfileEvent)
+            profileEvents.subscribe(this::onProfileEvent)
     val bookRegistrySubscription =
-            this.bookRegistry.bookEvents().subscribe(this::onBookEvent)
+            bookRegistry.bookEvents().subscribe(this::onBookEvent)
 
+    /*
+    When changing from SimplyE to NYPL, the ProfileAccountSelectSucceededEvent is firing
+     */
     private fun onProfileEvent(event: ProfileEvent) {
         logger.debug("NotificationsService::onProfileEvent $event")
         executor.execute {
-            if (event is ProfileSelected) {
-                this.getBookStatuses()
+            if (event is ProfileSelected ||
+                    event is ProfileAccountSelectEvent.ProfileAccountSelectSucceeded) {
+                getBookStatuses()
             }
         }
     }
 
+    /*
+
+     */
     private fun onBookEvent(event: BookEvent) {
         logger.debug("NotificationsService:: onBookEvent $event")
         executor.execute {
@@ -46,7 +54,7 @@ class NotificationsService(
                    progress get updated.
                  */
 
-                // this.getBookStatuses()
+                // getBookStatuses()
             }
         }
     }
@@ -73,12 +81,12 @@ class NotificationsService(
     }
 
     private fun getBookStatusesFromRegistry(): Map<BookID, BookWithStatus> {
-        var books = this.bookRegistry.books()
+        var books = bookRegistry.books()
         var statuses: MutableMap<BookID, BookWithStatus> = mutableMapOf()
 
         for(book in books){
             val bookId = book.key
-            statuses[bookId] = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
+            statuses[bookId] = (bookRegistry.book(bookId) as Some<BookWithStatus>).get()
         }
 
         return statuses.toMap()
