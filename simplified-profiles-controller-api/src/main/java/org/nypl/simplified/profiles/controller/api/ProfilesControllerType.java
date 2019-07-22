@@ -9,10 +9,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails;
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails;
 import org.nypl.simplified.accounts.api.AccountEvent;
-import org.nypl.simplified.accounts.api.AccountEventCreation;
-import org.nypl.simplified.accounts.api.AccountEventDeletion;
 import org.nypl.simplified.accounts.api.AccountID;
-import org.nypl.simplified.accounts.api.AccountLoginState;
 import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
@@ -34,7 +31,8 @@ import org.nypl.simplified.taskrecorder.api.TaskResult;
 import java.net.URI;
 import java.util.SortedMap;
 
-import static org.nypl.simplified.accounts.api.AccountLoginState.*;
+import static org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData;
+import static org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData;
 
 /**
  * The profiles controller.
@@ -100,7 +98,7 @@ public interface ProfilesControllerType {
    * @return A future that returns unit
    */
 
-  FluentFuture<Unit> profileSelect(
+  FluentFuture<kotlin.Unit> profileSelect(
     ProfileID id);
 
   /**

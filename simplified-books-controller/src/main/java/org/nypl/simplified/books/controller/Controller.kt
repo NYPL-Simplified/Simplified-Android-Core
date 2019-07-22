@@ -59,7 +59,7 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.profiles.api.ProfileSelected
+import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled
@@ -111,7 +111,6 @@ class Controller private constructor(
 ) : BooksControllerType, ProfilesControllerType {
 
   private val accountRegistrySubscription: ObservableSubscriptionType<AccountProviderRegistryEvent>
-  private val profileEventSubscription: ObservableSubscriptionType<ProfileEvent>
   private val timer = ProfileIdleTimer.create(this.timerExecutor, this.profileEvents)
   private val downloads: ConcurrentHashMap<BookID, DownloadType> =
     ConcurrentHashMap(32)
@@ -120,8 +119,6 @@ class Controller private constructor(
     LoggerFactory.getLogger(Controller::class.java)
 
   init {
-    this.profileEventSubscription =
-      this.profileEvents.subscribe { this.onProfileEvent(it) }
     this.accountRegistrySubscription =
       this.accountProviders.events.subscribe { event -> this.onAccountRegistryEvent(event) }
 
@@ -168,26 +165,6 @@ class Controller private constructor(
     }
   }
 
-  private fun onProfileEvent(e: ProfileEvent) {
-    if (e is ProfileSelected) {
-      this.onProfileEventSelected(e)
-      return
-    }
-  }
-
-  private fun onProfileEventSelected(ev: ProfileSelected) {
-    this.logger.debug("onProfileEventSelected: {}", ev)
-
-    this.logger.debug("clearing the book registry")
-    this.bookRegistry.clear()
-    try {
-      this.taskExecutor.execute(
-        ProfileDataLoadTask(this.profiles.currentProfileUnsafe(), this.bookRegistry))
-    } catch (e: ProfileNoneCurrentException) {
-      throw IllegalStateException(e)
-    }
-  }
-
   override fun profiles(): SortedMap<ProfileID, ProfileReadableType> {
     return castMap(this.profiles.profiles())
   }
@@ -219,9 +196,13 @@ class Controller private constructor(
       ProfileDateOfBirth(date = date, isSynthesized = false))))
   }
 
-  override fun profileSelect(id: ProfileID): FluentFuture<Unit> {
+  override fun profileSelect(id: ProfileID): FluentFuture<kotlin.Unit> {
     return FluentFuture.from(this.taskExecutor.submit(
-      ProfileSelectionTask(this.profiles, this.profileEvents, id)))
+      ProfileSelectionTask(
+        profiles = this.profiles,
+        bookRegistry = this.bookRegistry,
+        events = this.profileEvents,
+        id = id)))
   }
 
   @Throws(ProfileNoneCurrentException::class)
