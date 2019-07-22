@@ -410,6 +410,13 @@ class SimplifiedServices private constructor(
       bookController.profileIdleTimer().setMaximumIdleSeconds(10 * 60)
 
       publishEvent(strings.bootingNotificationsService)
+
+      /*
+       Calling bookRegistry.books() here is returning the books, should we maybe
+       inject these into the NotificationService? Not sure what event
+       we could listen to when the task is done syncing.
+        */
+      val books = bookRegistry.books()
       val notificationsService = NotificationsService(context, profileEvents, bookRegistry)
 
       publishEvent(strings.bootingNetworkConnectivity)
