@@ -149,9 +149,9 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
 
     FluentFuture.from(
       profiles.profileSelect(profile.getId()))
-      .addCallback(new FutureCallback<Unit>() {
+      .addCallback(new FutureCallback<kotlin.Unit>() {
         @Override
-        public void onSuccess(final Unit result) {
+        public void onSuccess(final kotlin.Unit result) {
           onProfileSelectionSucceeded(result);
         }
 
@@ -178,7 +178,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
       null);
   }
 
-  private void onProfileSelectionSucceeded(final Unit ignored) {
+  private void onProfileSelectionSucceeded(final kotlin.Unit ignored) {
     LOG.debug("onProfileSelectionSucceeded");
     LOG.debug("starting profile idle timer");
     Simplified.getServices()

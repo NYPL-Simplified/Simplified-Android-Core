@@ -3,6 +3,7 @@ package org.nypl.simplified.patron
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.json.core.JSONParserUtilities
@@ -157,7 +158,7 @@ internal class PatronUserProfileParser(
     val clientToken =
       JSONParserUtilities.getString(root, "drm:clientToken")
     val links =
-      linksNode ?.mapNotNull { node -> parseLink(node) }
+      linksNode?.mapNotNull { node -> parseLink(node) }
     val deviceManagerURI =
       links?.find { link -> link.rel == "http://librarysimplified.org/terms/drm/rel/devices" }
         ?.href
@@ -182,7 +183,7 @@ internal class PatronUserProfileParser(
       val rel =
         JSONParserUtilities.getStringOrNull(root, "rel")
       return Link(href, rel)
-    }catch (e: Exception) {
+    } catch (e: Exception) {
       this.publishErrorForException(e)
       null
     }
@@ -206,8 +207,16 @@ internal class PatronUserProfileParser(
   private fun parseSettings(root: ObjectNode): PatronSettings {
     return try {
       val settingsRoot = JSONParserUtilities.getObject(root, "settings")
-      return PatronSettings(synchronizeAnnotations =
-      JSONParserUtilities.getBoolean(settingsRoot, "simplified:synchronize_annotations"))
+
+      val synchronizeAnnotations =
+        when (settingsRoot["simplified:synchronize_annotations"]) {
+          is NullNode, null ->
+            false
+          else ->
+            JSONParserUtilities.getBoolean(settingsRoot, "simplified:synchronize_annotations")
+        }
+
+      return PatronSettings(synchronizeAnnotations = synchronizeAnnotations)
     } catch (e: Exception) {
       this.publishErrorForException(e)
       PatronSettings(synchronizeAnnotations = false)

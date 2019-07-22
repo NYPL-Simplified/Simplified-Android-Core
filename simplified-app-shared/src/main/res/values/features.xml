@@ -4,6 +4,9 @@
   <!-- The configurable application name -->
   <string name="feature_app_name">Simply\uFEFFE</string>
 
+  <!-- If true, then "My Books" will show books from all of the collections. -->
+  <bool name="featureShowAllCollectionsInMyBooks">true</bool>
+
   <!-- If true, the application presents selectable profiles. -->
   <bool name="feature_profiles_enabled">false</bool>
 
@@ -15,36 +18,9 @@
        target of migration reports -->
   <string name="feature_migration_report_email"></string>
 
-  <!-- The default Adobe vendor ID -->
-  <string name="feature_adobe_vendor_id">NYPL</string>
-
-  <!-- qa or prod  - currently used only in card creator -->
-  <string name="feature_environment">qa</string>
-
-  <!-- authentication providers -->
-  <!-- default authentication provider -->
-  <bool name="feature_default_auth_provider">true</bool>
-  <string name="feature_default_auth_provider_name">Library</string>
-  <bool name="feature_default_auth_provider_request_new_code">false</bool>
-  <string name="feature_default_auth_provider_request_new_code_uri"> </string>
-
-  <!-- clever authentication provider -->
-  <bool name="feature_auth_provider_clever">false</bool>
-  <string name="feature_auth_provider_clever_name">Clever</string>
-  <string name="feature_auth_provider_clever_uri"> </string>
-
-  <!-- The initial catalog URI that will be loaded on program start -->
-  <string name="feature_catalog_start_uri">http://circulation.alpha.librarysimplified.org/</string>
-
-  <!-- The initial catalog loans URI that will be used to sync accounts -->
-  <string name="feature_catalog_loans_uri_component">loans/</string>
-
   <!-- A non-empty string here will override the package name given to
        the Adobe DRM implementation. An empty string will cause the
         implementation to use the package name defined in the Android manifest. -->
   <string name="feature_adobe_package_override">org.nypl.simplified.app</string>
-
-  <!-- The account provider that will be considered the default provider. -->
-  <string name="feature_default_provider_uri">urn:uuid:56906f26-2c9a-4ae9-bd02-552557720b99</string>
 
 </resources>
