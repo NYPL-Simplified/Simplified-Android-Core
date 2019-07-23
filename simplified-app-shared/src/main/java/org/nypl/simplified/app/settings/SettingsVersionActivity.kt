@@ -1,5 +1,6 @@
 package org.nypl.simplified.app.settings
 
+import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -23,11 +24,13 @@ import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.slf4j.LoggerFactory
+import java.lang.StringBuilder
 
 class SettingsVersionActivity : ProfileTimeOutActivity() {
 
   private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
   private var buildClicks = 1
+  private lateinit var cacheButton: Button
   private lateinit var crashButton: Button
   private lateinit var drmTable: TableLayout
   private lateinit var versionText: TextView
@@ -50,6 +53,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       this.findViewById(R.id.settings_version_dev)
     this.crashButton =
       this.developerOptions.findViewById(R.id.settings_version_dev_crash)
+    this.cacheButton =
+      this.developerOptions.findViewById(R.id.settings_version_dev_show_cache_dir)
 
     this.buildTitle =
       this.findViewById(R.id.settings_version_build_title)
@@ -97,6 +102,22 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
     this.crashButton.setOnClickListener {
       throw OutOfMemoryError("Pretending to have run out of memory!")
+    }
+
+    this.cacheButton.setOnClickListener {
+      val message = StringBuilder(128)
+      message.append("Cache directory is: ")
+      message.append(this.externalCacheDir)
+      message.append("\n")
+      message.append("\n")
+      message.append("Exists: ")
+      message.append(this.externalCacheDir?.isDirectory ?: false)
+      message.append("\n")
+
+      AlertDialog.Builder(this)
+        .setTitle("Cache Directory")
+        .setMessage(message.toString())
+        .show()
     }
 
     try {

@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.support.annotation.UiThread
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
@@ -491,10 +492,15 @@ class SplashFragment : Fragment() {
       this.logger.error("ignored onSplashMigrationReport exception: ", e)
     }
 
-    val savedReportFile =
-      this.processMigrationReportSaveToDisk(report)
-    val compressedLogFile =
-      this.compressLogFileIfAvailable()
+    var savedReportFile : File? = null
+    var compressedLogFile : File? = null
+
+    try {
+      savedReportFile = this.processMigrationReportSaveToDisk(report)
+      compressedLogFile = this.compressLogFileIfAvailable()
+    } catch (e: Exception) {
+      this.logger.error("unable to save log and/or report file: ", e)
+    }
 
     this.runOnUIThread {
       this.configureViewsForMigrationReport(report, savedReportFile, compressedLogFile)
@@ -503,7 +509,15 @@ class SplashFragment : Fragment() {
 
   private fun compressLogFileIfAvailable(): File? {
     return try {
-      val cacheDir = this.context!!.externalCacheDir
+      val cacheDir = this.requireContext().externalCacheDir
+      if (cacheDir == null) {
+        AlertDialog.Builder(this.requireContext())
+          .setTitle("Could not compress log.")
+          .setMessage("External cache directory is unavailable.")
+          .show()
+        return null
+      }
+
       val logFile = File(cacheDir, "log.txt")
       val logFileGz = File(cacheDir, "log.txt.gz")
 
@@ -534,12 +548,21 @@ class SplashFragment : Fragment() {
 
   private fun processMigrationReportSaveToDisk(report: MigrationReport): File? {
     return try {
+      val cacheDir = this.requireContext().externalCacheDir
+      if (cacheDir == null) {
+        AlertDialog.Builder(this.requireContext())
+          .setTitle("Could not save migration report.")
+          .setMessage("External cache directory is unavailable.")
+          .show()
+        return null
+      }
+
       val formatter =
         DateTimeFormat.forPattern("YYYY-MM-dd-HHmmss-SSSS")
       val timestamp =
         formatter.print(report.timestamp)
       val reportsDir =
-        File(this.context!!.externalCacheDir, "migrations")
+        File(cacheDir, "migrations")
       val reportFile =
         File(reportsDir, "report-${timestamp}.xml")
 

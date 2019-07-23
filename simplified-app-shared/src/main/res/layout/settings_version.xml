@@ -80,6 +80,13 @@
         android:layout_marginBottom="16dp"
         android:text="Crash" />
 
+      <Button
+        android:id="@+id/settings_version_dev_show_cache_dir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Show Cache Directory" />
+
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

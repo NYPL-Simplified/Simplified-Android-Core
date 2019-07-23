@@ -9,6 +9,7 @@ import org.nypl.simplified.boot.api.BootLoader
 import org.nypl.simplified.boot.api.BootProcessType
 import org.nypl.simplified.observable.ObservableReadableType
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
@@ -41,7 +42,7 @@ class Simplified : MultiDexApplication() {
 
   override fun onCreate() {
     super.onCreate()
-    this.externalCacheDir?.mkdirs()
+
     this.logger.debug("starting app: pid {}", android.os.Process.myPid())
     this.bootFuture = this.boot.start()
     INSTANCE = this

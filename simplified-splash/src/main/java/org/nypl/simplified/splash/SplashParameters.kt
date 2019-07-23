@@ -2,6 +2,7 @@ package org.nypl.simplified.splash
 
 import android.support.annotation.ColorInt
 import android.support.annotation.DrawableRes
+import java.io.File
 import java.io.Serializable
 
 /**
