@@ -1,44 +1,13 @@
 package org.nypl.simplified.app.catalog;
 
-import android.app.AlertDialog;
 import android.content.res.Resources;
-import android.os.Bundle;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 
-import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.books.api.BookID;
-import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection;
-import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
-import org.nypl.simplified.books.book_registry.BookStatusDownloaded;
-import org.nypl.simplified.books.book_registry.BookStatusDownloadingType;
-import org.nypl.simplified.books.book_registry.BookStatusHeld;
-import org.nypl.simplified.books.book_registry.BookStatusHeldReady;
-import org.nypl.simplified.books.book_registry.BookStatusHoldable;
-import org.nypl.simplified.books.book_registry.BookStatusLoanable;
-import org.nypl.simplified.books.book_registry.BookStatusLoaned;
-import org.nypl.simplified.books.book_registry.BookStatusLoanedMatcherType;
-import org.nypl.simplified.books.book_registry.BookStatusLoanedType;
-import org.nypl.simplified.books.book_registry.BookStatusMatcherType;
-import org.nypl.simplified.books.book_registry.BookStatusRequestingDownload;
-import org.nypl.simplified.books.book_registry.BookStatusRequestingLoan;
-import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke;
-import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed;
-import org.nypl.simplified.books.book_registry.BookStatusRevoked;
-import org.nypl.simplified.books.book_registry.BookStatusType;
-import org.nypl.simplified.books.book_registry.BookWithStatus;
 import org.nypl.simplified.feeds.api.FeedBooksSelection;
-import org.nypl.simplified.opds.core.OPDSAcquisition;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.SortedMap;
 
 /**
  * The main catalog feed activity, responsible for displaying different types of
@@ -81,132 +50,5 @@ public final class MainCatalogActivity extends CatalogFeedActivity
   @Override protected String catalogFeedGetEmptyText()
   {
     return this.getResources().getString(R.string.catalog_empty_feed);
-  }
-
-  private boolean bookStatusIsAwatingDownload(final BookStatusType status) {
-    final boolean[] isAwaiting = {false};
-
-    status.matchBookStatus(new BookStatusMatcherType<Unit, UnreachableCodeException>() {
-      @Override
-      public Unit onBookStatusHoldable(BookStatusHoldable s) {
-        return Unit.unit();
-      }
-
-      @Override
-      public Unit onBookStatusHeld(BookStatusHeld s) {
-        return Unit.unit();
-      }
-
-      @Override
-      public Unit onBookStatusHeldReady(BookStatusHeldReady s) {
-        return Unit.unit();
-      }
-
-      @Override
-      public Unit onBookStatusLoanedType(BookStatusLoanedType s) {
-        s.matchBookLoanedStatus(new BookStatusLoanedMatcherType<Unit, UnreachableCodeException>() {
-          @Override
-          public Unit onBookStatusDownloaded(BookStatusDownloaded s) {
-            return Unit.unit();
-          }
-
-          @Override
-          public Unit onBookStatusDownloading(BookStatusDownloadingType s) {
-            return Unit.unit();
-          }
-
-          @Override
-          public Unit onBookStatusLoaned(BookStatusLoaned s) {
-            isAwaiting[0] = true;
-            return Unit.unit();
-          }
-
-          @Override
-          public Unit onBookStatusRequestingDownload(BookStatusRequestingDownload s) {
-            return Unit.unit();
-          }
-        });
-
-        return Unit.unit();
-      }
-
-      @Override
-      public Unit onBookStatusRequestingLoan(BookStatusRequestingLoan s) {
-        return Unit.unit();
-      }
-
-      @Override
-      public Unit onBookStatusRequestingRevoke(BookStatusRequestingRevoke s) {
-        return Unit.unit();
-      }
-
-      @Override
-      public Unit onBookStatusLoanable(BookStatusLoanable s) {
-        return Unit.unit();
-      }
-
-      @Override
-      public Unit onBookStatusRevokeFailed(BookStatusRevokeFailed s) {
-        return Unit.unit();
-      }
-
-      @Override
-      public Unit onBookStatusRevoked(BookStatusRevoked s) {
-        return Unit.unit();
-      }
-    });
-
-    return isAwaiting[0];
-  }
-
-  private boolean isAwaitingDownload() {
-    BookRegistryReadableType bookRegistry = Simplified.getServices().getBookRegistry();
-    for (final BookWithStatus bookWithStatus : bookRegistry.books().values()) {
-      if (this.bookStatusIsAwatingDownload(bookWithStatus.status())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @Override
-  protected void onCreate(Bundle state) {
-    super.onCreate(state);
-
-    final boolean connected =
-      Simplified.getServices()
-        .getNetworkConnectivity()
-        .isWifiAvailable();
-
-    if (connected && this.isAwaitingDownload()) {
-      final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-      builder.setTitle("Downloads Waiting");
-      builder.setMessage(
-        "You have books waiting to be downloaded. Do you want to download them now?");
-      builder.setPositiveButton("Download Now", (dialogInterface, i) -> {
-        try {
-          final AccountType account = Simplified.getServices().getProfilesController().profileAccountCurrent();
-          final SortedMap<BookID, BookWithStatus> books = Simplified.getServices().getBookRegistry().books();
-          for (BookWithStatus bookWithStatus : books.values()) {
-            if (this.bookStatusIsAwatingDownload(bookWithStatus.status())) {
-              final OPDSAcquisitionFeedEntry entry = bookWithStatus.book().getEntry();
-
-              final OptionType<OPDSAcquisition> acquisition =
-                BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
-
-              acquisition.map_((someAcquisition) -> {
-                Simplified.getServices()
-                  .getBooksController()
-                  .bookBorrow(account, bookWithStatus.book().getId(), someAcquisition, entry);
-              });
-            }
-          }
-        } catch (ProfileNoneCurrentException e) {
-          throw new IllegalStateException();
-        }
-      });
-      builder.setNegativeButton("Later", (dialogInterface, i) -> {});
-      builder.show();
-    }
   }
 }
