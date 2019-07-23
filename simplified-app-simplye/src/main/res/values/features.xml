@@ -13,6 +13,6 @@
   <string name="feature_adobe_package_override">org.nypl.simplified.simplye</string>
 
   <!-- The default email address used for migration reports. -->
-  <string name="feature_migration_report_email">co+org.librarysimplified.tests.sandbox@io7m.com</string>
+  <string name="feature_migration_report_email">simplyemigrationreports@nypl.org</string>
 
 </resources>
