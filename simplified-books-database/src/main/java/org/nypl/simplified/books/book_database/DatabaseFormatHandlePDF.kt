@@ -17,11 +17,17 @@ internal class DatabaseFormatHandlePDF internal constructor(
 
   private val fileBook: File =
     File(this.parameters.directory, "pdf-book.pdf")
+  private val fileLastRead: File =
+          File(this.parameters.directory, "pdf-meta_last_read.json")
+  private val fileLastReadTmp: File =
+          File(this.parameters.directory, "pdf-meta_last_read.json.tmp")
 
   private val formatLock: Any = Any()
   private var formatRef: BookFormat.BookFormatPDF =
     synchronized(this.formatLock) {
-      loadInitial(fileBook = this.fileBook)
+      loadInitial(
+              fileBook = this.fileBook,
+              fileLastRead = this.fileLastRead)
     }
 
   override val format: BookFormat.BookFormatPDF
@@ -50,11 +56,49 @@ internal class DatabaseFormatHandlePDF internal constructor(
     this.parameters.onUpdated.invoke(newFormat)
   }
 
+  override fun setLastReadLocation(pageNumber: Int?) {
+    val newFormat = synchronized(this.formatLock) {
+      if (pageNumber != null) {
+        FileUtilities.fileWriteUTF8Atomically(
+                this.fileLastRead,
+                this.fileLastReadTmp,
+                pageNumber.toString())
+      } else {
+        FileUtilities.fileDelete(this.fileLastRead)
+      }
+
+      this.formatRef = this.formatRef.copy(lastReadLocation = pageNumber)
+      this.formatRef
+    }
+
+    this.parameters.onUpdated.invoke(newFormat)
+  }
+
   companion object {
 
     @Throws(IOException::class)
-    private fun loadInitial(fileBook: File): BookFormat.BookFormatPDF {
-      return BookFormat.BookFormatPDF(file = if (fileBook.isFile) fileBook else null)
+    private fun loadInitial(
+            fileBook: File,
+            fileLastRead: File): BookFormat.BookFormatPDF {
+            return BookFormat.BookFormatPDF(
+              file = if (fileBook.isFile) fileBook else null,
+              lastReadLocation = loadLastReadLocationIfPresent(fileLastRead))
+    }
+
+    @Throws(IOException::class)
+    private fun loadLastReadLocation(fileLastRead: File): Int {
+      val serialized = FileUtilities.fileReadUTF8(fileLastRead)
+      return serialized.toInt()
+    }
+
+    @Throws(IOException::class)
+    private fun loadLastReadLocationIfPresent(
+            fileLastRead: File): Int? {
+      return if (fileLastRead.isFile) {
+        loadLastReadLocation(fileLastRead)
+      } else {
+        null
+      }
     }
   }
 }

@@ -187,6 +187,12 @@ sealed class BookFormat {
   data class BookFormatPDF(
 
     /**
+     * The last read location of the PDF book, if any.
+     */
+
+    val lastReadLocation: Int?,
+
+    /**
      * The PDF file on disk, if one has been downloaded.
      */
 

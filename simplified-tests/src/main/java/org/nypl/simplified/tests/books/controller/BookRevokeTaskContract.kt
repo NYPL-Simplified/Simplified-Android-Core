@@ -1880,7 +1880,9 @@ abstract class BookRevokeTaskContract {
       BookID.create("a")
 
     val bookFormat =
-      BookFormat.BookFormatPDF(null)
+      BookFormat.BookFormatPDF(
+              lastReadLocation = null,
+              file = null)
 
     val acquisition =
       OPDSAcquisition(

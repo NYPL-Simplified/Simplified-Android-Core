@@ -117,6 +117,15 @@
       android:exported="false"
       android:label="@string/reader_toc" />
 
+    <!-- PDF Reader -->
+    <activity
+        android:name="org.nypl.simplified.app.pdf.PdfReaderActivity"
+        android:exported="true"
+        android:configChanges="orientation|screenSize"
+        android:label="@string/reader"
+        android:contentDescription="@string/reader"
+        />
+
     <!-- Audio book player -->
     <activity android:name="org.nypl.simplified.app.player.AudioBookPlayerActivity"
       android:configChanges="orientation|screenSize"

@@ -102,7 +102,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   override fun onActivityResult(
     requestCode: Int,
     resultCode: Int,
-    data: Intent) {
+    data: Intent?) {
 
     /*
      * Retrieve the PIN from the activity that was launched to collect it.
