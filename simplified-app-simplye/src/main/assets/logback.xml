@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
 
+  <property name="EXT_FILES_DIR" value="${EXT_DIR:-/sdcard}/Android/data/${PACKAGE_NAME}/files"/>
+  <property name="EXT_CACHE_DIR" value="${EXT_DIR:-/sdcard}/Android/data/${PACKAGE_NAME}/cache"/>
+
   <appender
     name="BUGSNAG"
     class="org.nypl.simplified.bugsnag.BugsnagLogbackAppender"/>
@@ -15,13 +18,13 @@
   </appender>
 
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>/storage/emulated/legacy/Android/data/org.nypl.simplified.simplye/cache/log.txt</file>
+    <file>${EXT_CACHE_DIR}/log.txt</file>
     <encoder>
       <pattern>%d{"yyyy-MM-dd'T'HH:mm:ss,SSS"} %level %logger{128} - %msg%n</pattern>
     </encoder>
 
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>/storage/emulated/legacy/Android/data/org.nypl.simplified.simplye/cache/log.txt.%d</fileNamePattern>
+      <fileNamePattern>${EXT_CACHE_DIR}/log.txt.%d</fileNamePattern>
       <maxHistory>7</maxHistory>
     </rollingPolicy>
   </appender>
