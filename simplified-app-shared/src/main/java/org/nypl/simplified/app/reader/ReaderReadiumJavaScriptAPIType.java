@@ -90,11 +90,4 @@ public interface ReaderReadiumJavaScriptAPIType
 
   void setPageStyleSettings(
     ReaderPreferences r);
-
-  /**
-   * Inject any configurable fonts into the web view. This should be called
-   * once, prior to opening a book.
-   */
-
-  void injectFonts();
 }

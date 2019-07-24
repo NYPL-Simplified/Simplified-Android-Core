@@ -760,13 +760,6 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     p.setRootUrls(hs.getURIBase().toString(), null);
 
-    LOG.debug("onReadiumFunctionInitialize: scheduling font injection");
-    // is this correct? inject fonts before book opens or after
-    UIThread.runOnUIThreadDelayed(() -> {
-      LOG.debug("onReadiumFunctionInitialize: injecting fonts now");
-      this.readium_js_api.injectFonts();
-    }, 300L);
-
     /*
      * If there's a bookmark for the current book, send a request to open the
      * book to that specific page. Otherwise, start at the beginning.
