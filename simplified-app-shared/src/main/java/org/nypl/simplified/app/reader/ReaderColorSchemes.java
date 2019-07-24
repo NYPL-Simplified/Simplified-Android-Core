@@ -26,9 +26,9 @@ public final class ReaderColorSchemes {
       case SCHEME_BLACK_ON_BEIGE:
         return Color.argb(0xff, 242, 228, 203);
       case SCHEME_BLACK_ON_WHITE:
-        return Color.WHITE;
+        return 0xff000000 | (Color.WHITE & 0xffffff);
       case SCHEME_WHITE_ON_BLACK:
-        return Color.BLACK;
+        return 0xff000000 | (Color.BLACK & 0xffffff);
     }
 
     throw new UnreachableCodeException();
@@ -40,11 +40,11 @@ public final class ReaderColorSchemes {
 
     switch (scheme) {
       case SCHEME_BLACK_ON_BEIGE:
-        return Color.BLACK;
+        return 0xff000000 | (Color.BLACK & 0xffffff);
       case SCHEME_BLACK_ON_WHITE:
-        return Color.BLACK;
+        return 0xff000000 | (Color.BLACK & 0xffffff);
       case SCHEME_WHITE_ON_BLACK:
-        return Color.WHITE;
+        return 0xff000000 | (Color.WHITE & 0xffffff);
     }
 
     throw new UnreachableCodeException();
