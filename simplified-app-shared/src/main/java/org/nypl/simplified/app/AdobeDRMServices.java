@@ -33,6 +33,7 @@ import org.nypl.drm.core.AdobeAdeptResourceProvider;
 import org.nypl.drm.core.AdobeAdeptResourceProviderType;
 import org.nypl.drm.core.DRMException;
 import org.nypl.drm.core.DRMUnsupportedException;
+import org.nypl.simplified.app.services.SimplifiedServices;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.slf4j.Logger;
@@ -136,7 +137,7 @@ public final class AdobeDRMServices {
     final File baseDir =
       context.getFilesDir();
     final File baseDirVersioned =
-      new File(baseDir, "4.0");
+      new File(baseDir, SimplifiedServices.CURRENT_DATA_VERSION);
     final File baseDirVersionedAdobe =
       new File(baseDirVersioned, "adobe");
     final File app_storage =
@@ -232,7 +233,7 @@ public final class AdobeDRMServices {
     final File baseDir =
       context.getFilesDir();
     final File baseDirVersioned =
-      new File(baseDir, "4.0");
+      new File(baseDir, SimplifiedServices.CURRENT_DATA_VERSION);
     final File baseDirVersionedAdobe =
       new File(baseDirVersioned, "adobe");
     final File app_storage =

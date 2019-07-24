@@ -165,7 +165,7 @@ class SimplifiedServices private constructor(
      * happens to parse as an integer.
      */
 
-    private const val CURRENT_DATA_VERSION = "v4.0"
+    const val CURRENT_DATA_VERSION = "v4.0"
 
     private data class Directories(
       val directoryPrivateBaseVersioned: File,
