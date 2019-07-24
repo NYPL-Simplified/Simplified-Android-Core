@@ -1,8 +1,6 @@
 package org.nypl.simplified.splash
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -35,6 +33,7 @@ import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
+import org.nypl.simplified.reports.Reports
 import org.slf4j.LoggerFactory
 import java.io.BufferedOutputStream
 import java.io.File
@@ -253,11 +252,7 @@ class SplashFragment : Fragment() {
   }
 
   @UiThread
-  private fun configureViewsForMigrationReport(
-    report: MigrationReport,
-    savedReportFile: File?,
-    compressedLogFile: File?
-  ) {
+  private fun configureViewsForMigrationReport(report: MigrationReport) {
     this.viewsForEULA.container.visibility = View.INVISIBLE
     this.viewsForImage.container.visibility = View.INVISIBLE
     this.viewsForMigrationReport.container.visibility = View.VISIBLE
@@ -281,22 +276,13 @@ class SplashFragment : Fragment() {
     }
 
     val reportEmail = this.parameters.splashMigrationReportEmail
-    if (savedReportFile != null && reportEmail != null) {
+    if (reportEmail != null) {
       this.viewsForMigrationReport.sendButton.setOnClickListener {
-        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-          this.type = "text/plain"
-          this.putExtra(Intent.EXTRA_EMAIL, arrayOf(reportEmail))
-          this.putExtra(Intent.EXTRA_SUBJECT, this@SplashFragment.reportEmailSubject(report))
-          this.putExtra(Intent.EXTRA_TEXT, this@SplashFragment.reportEmailBody(report))
-
-          val attachments = java.util.ArrayList<Uri>()
-          attachments.add(Uri.fromFile(savedReportFile))
-          if (compressedLogFile != null) {
-            attachments.add(Uri.fromFile(compressedLogFile))
-          }
-          this.putExtra(Intent.EXTRA_STREAM, attachments)
-        }
-        this.startActivity(intent)
+        Reports.sendReportsDefault(
+          context = requireContext(),
+          address = reportEmail,
+          subject = reportEmailSubject(report),
+          body = reportEmailBody(report))
       }
     } else {
       this.viewsForMigrationReport.sendButton.visibility = View.INVISIBLE
@@ -492,51 +478,11 @@ class SplashFragment : Fragment() {
       this.logger.error("ignored onSplashMigrationReport exception: ", e)
     }
 
-    var savedReportFile : File? = null
-    var compressedLogFile : File? = null
-
-    try {
-      savedReportFile = this.processMigrationReportSaveToDisk(report)
-      compressedLogFile = this.compressLogFileIfAvailable()
-    } catch (e: Exception) {
-      this.logger.error("unable to save log and/or report file: ", e)
-    }
+    this.logger.debug("saving migration report")
+    this.processMigrationReportSaveToDisk(report)
 
     this.runOnUIThread {
-      this.configureViewsForMigrationReport(report, savedReportFile, compressedLogFile)
-    }
-  }
-
-  private fun compressLogFileIfAvailable(): File? {
-    return try {
-      val cacheDir = this.requireContext().externalCacheDir
-      if (cacheDir == null) {
-        AlertDialog.Builder(this.requireContext())
-          .setTitle("Could not compress log.")
-          .setMessage("External cache directory is unavailable.")
-          .show()
-        return null
-      }
-
-      val logFile = File(cacheDir, "log.txt")
-      val logFileGz = File(cacheDir, "log.txt.gz")
-
-      this.logger.debug("attempting to compress log file: {}", logFile)
-      FileInputStream(logFile).use { inputStream ->
-        FileOutputStream(logFileGz, false).use { stream ->
-          BufferedOutputStream(stream).use { bstream ->
-            GZIPOutputStream(stream).use { zstream ->
-              inputStream.copyTo(zstream)
-              zstream.finish()
-              zstream.flush()
-              logFileGz
-            }
-          }
-        }
-      }
-    } catch (e: Exception) {
-      this.logger.error("could not compress log file: ", e)
-      null
+      this.configureViewsForMigrationReport(report)
     }
   }
 

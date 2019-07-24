@@ -65,14 +65,6 @@
         android:textSize="24sp"
         android:textStyle="bold" />
 
-      <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Crash Application"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
       <Button
         android:id="@+id/settings_version_dev_crash"
         android:layout_width="match_parent"
@@ -86,6 +78,13 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:text="Show Cache Directory" />
+
+      <Button
+        android:id="@+id/settings_version_dev_send_reports"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Send Error Logs" />
 
       <TextView
         android:layout_width="wrap_content"

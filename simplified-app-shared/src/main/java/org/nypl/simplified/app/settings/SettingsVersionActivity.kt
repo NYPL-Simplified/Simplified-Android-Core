@@ -23,6 +23,7 @@ import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.reports.Reports
 import org.slf4j.LoggerFactory
 import java.lang.StringBuilder
 
@@ -32,6 +33,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   private var buildClicks = 1
   private lateinit var cacheButton: Button
   private lateinit var crashButton: Button
+  private lateinit var sendReportButton: Button
   private lateinit var drmTable: TableLayout
   private lateinit var versionText: TextView
   private lateinit var versionTitle: TextView
@@ -55,6 +57,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       this.developerOptions.findViewById(R.id.settings_version_dev_crash)
     this.cacheButton =
       this.developerOptions.findViewById(R.id.settings_version_dev_show_cache_dir)
+    this.sendReportButton =
+      this.developerOptions.findViewById(R.id.settings_version_dev_send_reports)
 
     this.buildTitle =
       this.findViewById(R.id.settings_version_build_title)
@@ -126,6 +130,15 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       this.versionText.text = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
     } catch (e: PackageManager.NameNotFoundException) {
       this.versionText.text = "Unavailable"
+    }
+
+    val email = this.resources.getString(R.string.feature_migration_report_email)
+    this.sendReportButton.setOnClickListener {
+      Reports.sendReportsDefault(
+        context = this,
+        address = email,
+        subject = "[simplye-error-report] ${this.versionText.text}",
+        body = "")
     }
 
     this.developerOptions.visibility = View.GONE
