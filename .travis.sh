@@ -33,6 +33,7 @@ mkdir -p .travis || exit 1
 org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
 org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 
+org.librarysimplified.with_bugsnag=true
 org.librarysimplified.with_drm_adobe=true
 org.librarysimplified.with_findaway=true
 
