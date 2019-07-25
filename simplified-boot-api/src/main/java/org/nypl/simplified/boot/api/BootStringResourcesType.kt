@@ -13,6 +13,12 @@ interface BootStringResourcesType {
   val bootStarted: String
 
   /**
+   * The boot failed with a generic error message.
+   */
+
+  val bootFailedGeneric: String
+
+  /**
    * Booting completed.
    */
 

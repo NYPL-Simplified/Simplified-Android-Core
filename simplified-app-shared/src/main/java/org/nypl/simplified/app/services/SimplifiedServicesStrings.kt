@@ -2,11 +2,17 @@ package org.nypl.simplified.app.services
 
 import android.content.res.Resources
 import org.nypl.simplified.app.R
+import org.nypl.simplified.boot.api.BootStringResourcesType
 
-class SimplifiedServicesStrings(
-  private val resources: Resources) {
+class SimplifiedServicesStrings(private val resources: Resources): BootStringResourcesType {
 
-  val bootCompleted: String =
+  override val bootStarted: String =
+    this.resources.getString(R.string.bootStarted)
+
+  override val bootFailedGeneric: String =
+    this.resources.getString(R.string.bootFailedGeneric)
+
+  override val bootCompleted: String =
     this.resources.getString(R.string.bootingCompleted)
 
   val bootingHelpstack: String =

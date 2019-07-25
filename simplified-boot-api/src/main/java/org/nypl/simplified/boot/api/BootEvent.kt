@@ -1,5 +1,8 @@
 package org.nypl.simplified.boot.api
 
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.PresentableType
+
 /**
  * The type of events that are published while the application boots.
  */
@@ -11,23 +14,26 @@ sealed class BootEvent {
    */
 
   data class BootInProgress(
-    val message: String)
-    : BootEvent()
+    override val message: String,
+    override val attributes: Map<String, String> = mapOf())
+    : BootEvent(), PresentableType
 
   /**
    * Booting has completed.
    */
 
   data class BootCompleted(
-    val message: String)
-    : BootEvent()
+    override val message: String)
+    : BootEvent(), PresentableType
 
   /**
    * Booting has failed.
    */
 
   data class BootFailed(
-    val message: String,
-    val exception: Exception)
-    : BootEvent()
+    override val message: String,
+    override val exception: Exception,
+    override val causes: List<PresentableErrorType> = listOf(),
+    override val attributes: Map<String, String> = mapOf())
+    : BootEvent(), PresentableErrorType
 }

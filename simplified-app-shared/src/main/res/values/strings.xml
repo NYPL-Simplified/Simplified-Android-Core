@@ -459,6 +459,8 @@
   <string name="profileAccountDeletionSucceeded">Deleting an account succeeded.</string>
 
   <!-- Services strings -->
+  <string name="bootFailedGeneric">We found a problem. Please check your connection or close and reopen the app to retry.</string>
+  <string name="bootStarted">Starting application…</string>
   <string name="bootingBugSnag">Starting BugSnag…</string>
   <string name="bootingAdobeDRM">Starting Adobe DRM…</string>
   <string name="bootingScreenSize">Starting screen size…</string>
@@ -466,26 +468,26 @@
   <string name="bootingDirectories">Initializing directories…</string>
   <string name="bootingDownloadService">Starting download service…</string>
   <string name="bootingBookRegistry">Starting book registry…</string>
-  <string name="bootingBrandingServices">Initializing branding services...</string>
-  <string name="bootingTenPrint">Booting TenPrint...</string>
-  <string name="bootingCoverGenerator">Starting cover generator...</string>
-  <string name="bootingCoverBadgeProvider">Starting cover badge provider...</string>
-  <string name="bootingCoverProvider">Starting cover provider...</string>
-  <string name="bootingLocalImageLoader">Starting local image loader...</string>
-  <string name="bootingEPUBLoader">Starting EPUB loader...</string>
-  <string name="bootingDocumentStore">Initializing document store...</string>
-  <string name="bootingAccountProviders">Initializing account providers...</string>
-  <string name="bootingBundledCredentials">Initializing bundled credentials...</string>
-  <string name="bootingCredentialStore">Initializing credential store...</string>
-  <string name="bootingProfilesDatabase">Initializing profiles database...</string>
-  <string name="bootingBundledContent">Initializing bundled content...</string>
-  <string name="bootingFeedLoader">Starting OPDS feed loader...</string>
-  <string name="bootingAnalytics">Starting analytics...</string>
-  <string name="bootingPatronProfileParsers">Initializing patron profile parsers...</string>
-  <string name="bootingBookController">Initializing book controller...</string>
-  <string name="bootingReaderBookmarkService">Starting reader bookmark service...</string>
-  <string name="bootingNetworkConnectivity">Initializing network connectivity monitor...</string>
-  <string name="bootingHelpstack">Initializing HelpStack...</string>
+  <string name="bootingBrandingServices">Initializing branding services…</string>
+  <string name="bootingTenPrint">Booting TenPrint…</string>
+  <string name="bootingCoverGenerator">Starting cover generator…</string>
+  <string name="bootingCoverBadgeProvider">Starting cover badge provider…</string>
+  <string name="bootingCoverProvider">Starting cover provider…</string>
+  <string name="bootingLocalImageLoader">Starting local image loader…</string>
+  <string name="bootingEPUBLoader">Starting EPUB loader…</string>
+  <string name="bootingDocumentStore">Initializing document store…</string>
+  <string name="bootingAccountProviders">Initializing account providers…</string>
+  <string name="bootingBundledCredentials">Initializing bundled credentials…</string>
+  <string name="bootingCredentialStore">Initializing credential store…</string>
+  <string name="bootingProfilesDatabase">Initializing profiles database…</string>
+  <string name="bootingBundledContent">Initializing bundled content…</string>
+  <string name="bootingFeedLoader">Starting OPDS feed loader…</string>
+  <string name="bootingAnalytics">Starting analytics…</string>
+  <string name="bootingPatronProfileParsers">Initializing patron profile parsers…</string>
+  <string name="bootingBookController">Initializing book controller…</string>
+  <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
+  <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
+  <string name="bootingHelpstack">Initializing HelpStack…</string>
   <string name="bootingCompleted">Startup completed!</string>
 
   <!-- PDF Reader -->
@@ -494,4 +496,5 @@
 
   <!-- General error strings -->
   <string name="unexpectedException">An unexpected exception occurred.</string>
+
 </resources>

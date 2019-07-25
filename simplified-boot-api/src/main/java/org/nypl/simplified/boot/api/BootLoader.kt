@@ -1,12 +1,14 @@
 package org.nypl.simplified.boot.api
 
+import android.content.Context
+import android.content.res.Resources
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableReadableType
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.slf4j.LoggerFactory
-import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
 /**
@@ -15,6 +17,12 @@ import java.util.concurrent.Executors
  */
 
 class BootLoader<T>(
+
+  /**
+   * The string resources used by the boot process.
+   */
+
+  private val bootStringResources: (Resources) -> BootStringResourcesType,
 
   /**
    * A function that sets up services.
@@ -39,24 +47,38 @@ class BootLoader<T>(
   override val events: ObservableReadableType<BootEvent> =
     this.eventsActual
 
-  override fun start(): FluentFuture<T> {
+  override fun start(context: Context): FluentFuture<T> {
     return synchronized(this.bootLock) {
       if (this.boot == null) {
-        this.boot = this.runBoot()
+        this.boot = this.runBoot(context)
       }
       this.boot!!
     }
   }
 
-  private fun runBoot(): FluentFuture<T> {
+  private fun runBoot(context: Context): FluentFuture<T> {
     val future = SettableFuture.create<T>()
     this.executor.execute {
+      val strings = this.bootStringResources.invoke(context.resources)
+
       try {
         future.set(this.bootProcess.execute { event -> this.eventsActual.send(event) })
         this.logger.debug("finished executing boot")
       } catch (e: Throwable) {
         this.logger.error("boot failed: ", e)
-        this.eventsActual.send(BootEvent.BootFailed(e.message ?: "", Exception(e)))
+        val event = if (e is PresentableErrorType) {
+          BootEvent.BootFailed(
+            message = e.message,
+            exception = Exception(e),
+            causes = listOf(e),
+            attributes = e.attributes)
+        } else {
+          BootEvent.BootFailed(
+            message = strings.bootFailedGeneric,
+            exception = Exception(e))
+        }
+
+        this.eventsActual.send(event)
         future.setException(e)
       }
     }

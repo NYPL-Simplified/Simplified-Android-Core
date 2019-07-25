@@ -1,5 +1,6 @@
 package org.nypl.simplified.boot.api
 
+import android.content.Context
 import com.google.common.util.concurrent.FluentFuture
 import org.nypl.simplified.observable.ObservableReadableType
 
@@ -23,6 +24,6 @@ interface BootLoaderType<T> {
    * the boot in progress.
    */
 
-  fun start(): FluentFuture<T>
+  fun start(context: Context): FluentFuture<T>
 
 }
