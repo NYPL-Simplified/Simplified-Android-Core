@@ -3,6 +3,7 @@ package org.nypl.simplified.reports
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.support.v4.content.FileProvider
 import org.nypl.simplified.reports.Reports.Result.*
 import org.slf4j.LoggerFactory
 import java.io.BufferedOutputStream
@@ -96,9 +97,10 @@ object Reports {
     try {
       val files =
         this.collectFiles(baseDirectories, includeFile)
-
       val compressedFiles =
         files.mapNotNull(this::compressFile)
+      val contentUris =
+        compressedFiles.map { file -> this.mapFileToContentURI(context, file) }
 
       this.logger.debug("compressed {} files", compressedFiles.size)
 
@@ -108,11 +110,9 @@ object Reports {
           this.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
           this.putExtra(Intent.EXTRA_SUBJECT, subject)
           this.putExtra(Intent.EXTRA_TEXT, body)
-          val attachments = ArrayList<Uri>()
-          for (file in compressedFiles) {
-            attachments.add(Uri.fromFile(file))
-          }
+          val attachments = ArrayList<Uri>(contentUris)
           this.putExtra(Intent.EXTRA_STREAM, attachments)
+          this.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(intent)
         Sent
@@ -124,6 +124,9 @@ object Reports {
       return RaisedException(e)
     }
   }
+
+  private fun mapFileToContentURI(context: Context, file: File) =
+    FileProvider.getUriForFile(context, context.packageName + ".fileProvider", file)
 
   @JvmStatic
   private fun collectFiles(
