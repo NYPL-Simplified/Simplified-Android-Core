@@ -23,6 +23,7 @@ dependencies {
   api project(':simplified-documents')
   api project(':simplified-migration-api')
   api project(':simplified-observable')
+  api project(':simplified-presentableerror-api')
   api project(':simplified-profiles-controller-api')
   api project(':simplified-reports')
 

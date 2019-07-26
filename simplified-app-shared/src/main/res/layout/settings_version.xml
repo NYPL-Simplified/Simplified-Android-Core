@@ -152,6 +152,14 @@
         android:enabled="true"
         android:text="Show non-production libraries" />
 
+      <Switch
+        android:id="@+id/settings_version_dev_fail_next_boot_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:enabled="true"
+        android:text="Cause the next application startup to fail" />
+
     </LinearLayout>
 
   </RelativeLayout>

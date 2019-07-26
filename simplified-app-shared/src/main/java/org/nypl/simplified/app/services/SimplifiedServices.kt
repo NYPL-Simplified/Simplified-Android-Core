@@ -1,6 +1,8 @@
 package org.nypl.simplified.app.services
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
@@ -183,6 +185,8 @@ class SimplifiedServices private constructor(
         onProgress.invoke(BootEvent.BootInProgress(message))
         Thread.sleep(100)
       }
+
+      BootTesting.failBootProcessForTestingPurposesIfRequested(context)
 
       val assets = context.assets
       val strings = SimplifiedServicesStrings(context.resources)

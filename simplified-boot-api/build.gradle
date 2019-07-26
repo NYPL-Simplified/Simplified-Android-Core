@@ -20,6 +20,7 @@ description = 'simplified-boot'
 
 dependencies {
   api project(":simplified-observable")
+  api project(":simplified-presentableerror-api")
 
   api "com.google.guava:guava:23.6-android"
 

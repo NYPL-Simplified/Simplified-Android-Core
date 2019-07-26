@@ -35,14 +35,12 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.reports.Reports
 import org.slf4j.LoggerFactory
-import java.io.BufferedOutputStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.StringBuilder
 import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
-import java.util.zip.GZIPOutputStream
 
 class SplashFragment : Fragment() {
 
@@ -75,7 +73,8 @@ class SplashFragment : Fragment() {
     val container: View,
     val image: ImageView,
     val text: TextView,
-    val progress: ProgressBar)
+    val progress: ProgressBar,
+    val error: ImageView)
 
   private class ViewsEULA(
     val container: View,
@@ -128,6 +127,7 @@ class SplashFragment : Fragment() {
         container = imageView,
         image = imageView.findViewById(R.id.splashImage),
         progress = imageView.findViewById(R.id.splashProgress),
+        error = imageView.findViewById<ImageView>(R.id.splashImageError),
         text = imageView.findViewById(R.id.splashText))
 
     this.viewsForEULA =
@@ -174,6 +174,7 @@ class SplashFragment : Fragment() {
     this.viewsForImage.image.setImageResource(this.parameters.splashImageResource)
     this.viewsForImage.image.visibility = View.VISIBLE
     this.viewsForImage.progress.visibility = View.INVISIBLE
+    this.viewsForImage.error.visibility = View.INVISIBLE
     this.viewsForImage.text.visibility = View.INVISIBLE
     this.viewsForImage.text.text = ""
 
@@ -336,7 +337,8 @@ class SplashFragment : Fragment() {
         this.bootFuture.get(1L, TimeUnit.SECONDS)
         this.onBootFinished()
       } catch (e: Throwable) {
-        this.onBootEvent(BootEvent.BootFailed(e.message ?: "", Exception(e)))
+        val actual = if (e is ExecutionException) { e.cause } else { e }
+        this.onBootEvent(BootEvent.BootFailed(actual?.message ?: "", Exception(e)))
       }
     }, MoreExecutors.directExecutor())
   }
@@ -378,6 +380,7 @@ class SplashFragment : Fragment() {
     // XXX: We need to do better than this.
     // Print a useful message rather than a raw exception message, and allow
     // the user to do something such as submitting a report.
+    this.viewsForImage.error.visibility = View.VISIBLE
     this.viewsForImage.progress.isIndeterminate = false
     this.viewsForImage.progress.progress = 100
     this.viewsForImage.text.text = event.message

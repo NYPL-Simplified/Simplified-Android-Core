@@ -17,6 +17,7 @@ import org.nypl.simplified.app.BuildConfig
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
+import org.nypl.simplified.app.services.BootTesting
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.controller.AdobeDRMExtensions
 import org.nypl.simplified.observable.ObservableSubscriptionType
@@ -42,6 +43,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   private lateinit var developerOptions: ViewGroup
   private lateinit var adobeDRMActivationTable: TableLayout
   private lateinit var showTesting: Switch
+  private lateinit var failNextBoot: Switch
 
   private val logger = LoggerFactory.getLogger(SettingsVersionActivity::class.java)
 
@@ -74,6 +76,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       this.findViewById(R.id.settings_version_drm_adobe_activations)
     this.showTesting =
       this.findViewById(R.id.settings_version_dev_production_libraries_switch)
+    this.failNextBoot =
+      this.findViewById(R.id.settings_version_dev_fail_next_boot_switch)
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -161,6 +165,15 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
         .profileCurrent()
         .preferences()
         .showTestingLibraries()
+
+    /*
+     * Configure the "fail next boot" switch to enable/disable boot failures.
+     */
+
+    this.failNextBoot.isChecked = BootTesting.isBootFailureEnabled(this)
+    this.failNextBoot.setOnClickListener {
+      BootTesting.enableBootFailures(this, !BootTesting.isBootFailureEnabled(this))
+    }
 
     /*
      * Update the current profile's preferences whenever the testing switch is changed.
