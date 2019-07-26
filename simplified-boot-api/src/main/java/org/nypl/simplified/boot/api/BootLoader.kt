@@ -56,6 +56,10 @@ class BootLoader<T>(
     }
   }
 
+  private class PresentableException(
+    override val message: String,
+    override val cause: Throwable) : Exception(message, cause), PresentableErrorType
+
   private fun runBoot(context: Context): FluentFuture<T> {
     val future = SettableFuture.create<T>()
     this.executor.execute {
@@ -69,17 +73,17 @@ class BootLoader<T>(
         val event = if (e is PresentableErrorType) {
           BootEvent.BootFailed(
             message = e.message,
-            exception = Exception(e),
+            exception = PresentableException(e.message, e),
             causes = listOf(e),
             attributes = e.attributes)
         } else {
           BootEvent.BootFailed(
             message = strings.bootFailedGeneric,
-            exception = Exception(e))
+            exception = PresentableException(strings.bootFailedGeneric, e))
         }
 
         this.eventsActual.send(event)
-        future.setException(e)
+        future.setException(event.exception)
       }
     }
     return future
