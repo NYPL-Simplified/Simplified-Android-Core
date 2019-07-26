@@ -2,6 +2,7 @@ package org.nypl.simplified.app.services
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.os.Build
@@ -104,7 +105,7 @@ class NotificationsService(
         // TODO: Validate this behavior.
         var cachedBookStatus = registryCache[bookStatus?.book()?.id]
         if (statusChangedSufficiently(bookStatus, cachedBookStatus)) {
-            publishNotification("Hold Ready", "One or more book holds are available for checkout")
+            publishNotification(context.getString(R.string.notification_title_ready_title), context.getString(R.string.notification_title_ready_content))
         }
     }
 
@@ -192,7 +193,7 @@ class NotificationsService(
         createNotificationChannel(notificationManager, "Channel Name", "Channel Description")
 
         var builder = NotificationCompat.Builder(context, NOTIFICATION_PRIMARY_CHANNEL_ID)
-                .setSmallIcon(R.drawable.audiobook_icon)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationContent)
                 .setOnlyAlertOnce(true)
