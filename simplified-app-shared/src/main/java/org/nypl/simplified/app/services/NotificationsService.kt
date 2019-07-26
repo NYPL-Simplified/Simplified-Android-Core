@@ -5,10 +5,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
+import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import com.io7m.jfunctional.Some
 import org.nypl.simplified.app.R
+import org.nypl.simplified.app.catalog.MainHoldsActivity
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -160,6 +162,7 @@ class NotificationsService(
 //    }
 
     private fun statusChangedSufficiently(statusBefore: BookWithStatus?, statusNow: BookWithStatus?): Boolean {
+        // TODO: Compare statusBefore and statusNow, only return true if statusNow is actually [BookStatusHeldReady]
         logger.debug("NotificationsService::statusChangedSufficiently comparing $statusBefore to $statusNow")
         if (statusBefore != null) {
             return statusBefore.status() is BookStatusHeld
@@ -192,12 +195,18 @@ class NotificationsService(
 
         createNotificationChannel(notificationManager, "Channel Name", "Channel Description")
 
+        val intent = Intent(context, MainHoldsActivity::class.java)
+
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+
         var builder = NotificationCompat.Builder(context, NOTIFICATION_PRIMARY_CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationContent)
                 .setOnlyAlertOnce(true)
+                .setContentIntent(pendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
 
         notificationManager.notify(0, builder.build())
     }
