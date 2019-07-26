@@ -498,4 +498,7 @@
   <!-- General error strings -->
   <string name="unexpectedException">An unexpected exception occurred.</string>
 
+  <string name="notification_title_ready_title">Your book is ready</string>
+  <string name="notification_title_ready_content">The title you reserved is available.</string>
+
 </resources>
