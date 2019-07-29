@@ -1,8 +1,8 @@
 package org.nypl.simplified.notifications
 
 interface NotificationResourcesType {
-    val notification_title_ready_content: Int
-    val notification_title_ready_title: Int
+    val titleReadyNotificationContent: String
+    val titleReadyNotificationTitle: String
 
     // Resource Id for icon
     val smallIcon: Int
