@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.services
+package org.nypl.simplified.notifications
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,8 +9,6 @@ import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import com.io7m.jfunctional.Some
-import org.nypl.simplified.app.R
-import org.nypl.simplified.app.splash.SplashActivity
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -28,7 +26,8 @@ import java.util.concurrent.ExecutorService
 class NotificationsService(
         val context: Context,
         val profileEvents: ObservableReadableType<ProfileEvent>,
-        val bookRegistry: BookRegistryReadableType) {
+        val bookRegistry: BookRegistryReadableType,
+        val notificationResourcesType: NotificationResourcesType) {
 
 
     companion object {
@@ -41,6 +40,7 @@ class NotificationsService(
 
     val profileSubscription: ObservableSubscriptionType<ProfileEvent>? =
             profileEvents.subscribe(this::onProfileEvent)
+
     var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
 
     var registryCache: Map<BookID, BookWithStatus> = mapOf()
@@ -108,7 +108,8 @@ class NotificationsService(
         // TODO: Validate this behavior.
         var cachedBookStatus = registryCache[bookStatus?.book()?.id]
         if (statusChangedSufficiently(bookStatus, cachedBookStatus)) {
-            publishNotification(context.getString(R.string.notification_title_ready_title), context.getString(R.string.notification_title_ready_content))
+            publishNotification(context.getString(notificationResourcesType.notification_title_ready_title),
+                    context.getString(notificationResourcesType.notification_title_ready_content))
         }
     }
 
@@ -175,12 +176,12 @@ class NotificationsService(
 
         createNotificationChannel(notificationManager, "Channel Name", "Channel Description")
 
-        val intent = Intent(context, SplashActivity::class.java)
+        val intent = Intent(context, notificationResourcesType.intentClass)
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
         var builder = NotificationCompat.Builder(context, NOTIFICATION_PRIMARY_CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(notificationResourcesType.smallIcon)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationContent)
                 .setOnlyAlertOnce(true)

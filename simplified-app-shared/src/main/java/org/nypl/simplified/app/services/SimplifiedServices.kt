@@ -54,6 +54,7 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync
 import org.nypl.simplified.app.reader.ReaderHTTPServerType
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType
+import org.nypl.simplified.app.splash.SplashActivity
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -78,6 +79,8 @@ import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.notifications.NotificationResourcesType
+import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
@@ -411,7 +414,18 @@ class SimplifiedServices private constructor(
 
       publishEvent(strings.bootingNotificationsService)
 
-      val notificationsService = NotificationsService(context, profileEvents, bookRegistry)
+      val notificationResourcesType = object : NotificationResourcesType {
+        override val intentClass: Class<*>
+          get() = SplashActivity::class.java
+        override val notification_title_ready_content: Int
+          get() = R.string.notification_title_ready_content
+        override val notification_title_ready_title: Int
+          get() = R.string.notification_title_ready_title
+        override val smallIcon: Int
+          get() = R.mipmap.ic_launcher
+      }
+
+      val notificationsService = NotificationsService(context, profileEvents, bookRegistry, notificationResourcesType)
 
       publishEvent(strings.bootingNetworkConnectivity)
       val networkConnectivity = SimplifiedNetworkConnectivity(context)

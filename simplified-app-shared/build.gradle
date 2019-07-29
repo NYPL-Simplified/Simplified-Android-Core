@@ -146,4 +146,5 @@ dependencies {
 
   implementation "org.nypl.pdf:api:0.0.4"
   implementation "org.nypl.pdf:pdfviewer:0.0.4"
+    compile project(path: ':simplified-notifications')
 }
