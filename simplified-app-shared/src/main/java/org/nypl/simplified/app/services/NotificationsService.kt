@@ -104,6 +104,7 @@ class NotificationsService(
     }
 
     private fun compareToCache(bookStatus: BookWithStatus?) {
+        logger.debug("NotificationsService::compareToCache ${bookStatus?.status()}")
         // TODO: Validate this behavior.
         var cachedBookStatus = registryCache[bookStatus?.book()?.id]
         if (statusChangedSufficiently(bookStatus, cachedBookStatus)) {
@@ -146,24 +147,9 @@ class NotificationsService(
         bookRegistrySubscription.unsubscribe()
     }
 
-//    private fun getBookStatuses() {
-//        val statusesBefore: Map<BookID, BookWithStatus> = mapOf()
-//        val statusesNow = getBookStatusesFromRegistry()
-//        for (book in statusesBefore) {
-//            var bookId = book.key
-//            val statusBefore = statusesBefore[bookId]
-//            val statusNow = statusesNow[bookId]
-//
-//            // Do any comparison on statuses here
-//            if (statusChangedSufficiently(statusBefore, statusNow)) {
-////                publishNotification(...)
-//            }
-//        }
-//    }
-
     private fun statusChangedSufficiently(statusBefore: BookWithStatus?, statusNow: BookWithStatus?): Boolean {
         // TODO: Compare statusBefore and statusNow, only return true if statusNow is actually [BookStatusHeldReady]
-        logger.debug("NotificationsService::statusChangedSufficiently comparing $statusBefore to $statusNow")
+        logger.debug("NotificationsService::statusChangedSufficiently comparing ${statusBefore?.status()} to ${statusNow?.status()}")
         if (statusBefore != null) {
             return statusBefore.status() is BookStatusHeld
         }
