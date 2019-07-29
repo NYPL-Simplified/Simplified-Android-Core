@@ -417,10 +417,10 @@ class SimplifiedServices private constructor(
       val notificationResourcesType = object : NotificationResourcesType {
         override val intentClass: Class<*>
           get() = SplashActivity::class.java
-        override val notification_title_ready_content: Int
-          get() = R.string.notification_title_ready_content
-        override val notification_title_ready_title: Int
-          get() = R.string.notification_title_ready_title
+        override val titleReadyNotificationContent: String
+          get() = context.getString(R.string.notification_title_ready_content)
+        override val titleReadyNotificationTitle: String
+          get() = context.getString(R.string.notification_title_ready_title)
         override val smallIcon: Int
           get() = R.mipmap.ic_launcher
       }

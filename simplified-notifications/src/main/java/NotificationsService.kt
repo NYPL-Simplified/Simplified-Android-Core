@@ -108,8 +108,8 @@ class NotificationsService(
         // TODO: Validate this behavior.
         var cachedBookStatus = registryCache[bookStatus?.book()?.id]
         if (statusChangedSufficiently(bookStatus, cachedBookStatus)) {
-            publishNotification(context.getString(notificationResourcesType.notification_title_ready_title),
-                    context.getString(notificationResourcesType.notification_title_ready_content))
+            publishNotification(notificationResourcesType.titleReadyNotificationTitle,
+                    notificationResourcesType.titleReadyNotificationContent)
         }
     }
 
