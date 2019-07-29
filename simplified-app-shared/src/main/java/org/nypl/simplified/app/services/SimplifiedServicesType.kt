@@ -16,6 +16,7 @@ import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
 import org.nypl.simplified.theme.ThemeValue
