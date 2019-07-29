@@ -10,7 +10,7 @@ import android.os.Build
 import android.support.v4.app.NotificationCompat
 import com.io7m.jfunctional.Some
 import org.nypl.simplified.app.R
-import org.nypl.simplified.app.catalog.MainHoldsActivity
+import org.nypl.simplified.app.splash.SplashActivity
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -18,6 +18,7 @@ import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookStatusHeld
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.observable.ObservableReadableType
+import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.threads.NamedThreadPools
@@ -38,10 +39,9 @@ class NotificationsService(
 
     private val executor: ExecutorService = NamedThreadPools.namedThreadPool(1, "notifications", 19)
 
-    val profileSubscription =
+    val profileSubscription: ObservableSubscriptionType<ProfileEvent>? =
             profileEvents.subscribe(this::onProfileEvent)
-    var bookRegistrySubscription =
-            bookRegistry.bookEvents().subscribe(this::onBookEvent)
+    var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
 
     var registryCache: Map<BookID, BookWithStatus> = mapOf()
 
@@ -120,6 +120,7 @@ class NotificationsService(
     private fun cacheBookRegistry() {
         logger.debug("In NotificationsService::cacheBookRegistry")
         registryCache = getBookStatusesFromRegistry()
+        logger.debug("registryCache has been populated with ${registryCache.size} books")
     }
 
     /**
@@ -144,7 +145,7 @@ class NotificationsService(
      */
     private fun unsubscribeFromBookEvents() {
         logger.debug("NotificationsService::unsubscribeFromBookEvents")
-        bookRegistrySubscription.unsubscribe()
+        bookRegistrySubscription?.unsubscribe()
     }
 
     private fun statusChangedSufficiently(statusBefore: BookWithStatus?, statusNow: BookWithStatus?): Boolean {
@@ -163,14 +164,7 @@ class NotificationsService(
      */
     private fun getBookStatusesFromRegistry(): Map<BookID, BookWithStatus> {
         logger.debug("NotificationsService::getBookStatusesFromRegistry")
-        var books = bookRegistry.books()
-//        var statuses: MutableMap<BookID, BookWithStatus> = mutableMapOf()
-//
-//        for (book in books) {
-//            val bookId = book.key
-//            statuses[bookId] = (bookRegistry.book(bookId) as Some<BookWithStatus>).get()
-//        }
-
+        logger.debug("bookRegistry has ${bookRegistry.books().size} books")
         return bookRegistry.books().toMap()
     }
 
@@ -181,7 +175,7 @@ class NotificationsService(
 
         createNotificationChannel(notificationManager, "Channel Name", "Channel Description")
 
-        val intent = Intent(context, MainHoldsActivity::class.java)
+        val intent = Intent(context, SplashActivity::class.java)
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
