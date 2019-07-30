@@ -1,6 +1,6 @@
 rootProject.name = 'simplified'
 
-include ':simplified-accessibility'
+include ':simplified-accessibility', ':simplifiedcardcreator', ':simplifiedprefs'
 include ':simplified-accounts-api'
 include ':simplified-accounts-database'
 include ':simplified-accounts-database-api'

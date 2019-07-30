@@ -1,0 +1,56 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/WizardPageContainer">
+
+    <TextView style="@style/WizardPageTitle" />
+
+    <TextView style="@style/WizardPageDescription" />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp"
+        android:scrollbarStyle="outsideOverlay">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/liveInNYC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onAddressRadioButtonClicked"
+                    android:text="I Live in New York" android:visibility="gone"/>
+
+                <RadioButton
+                    android:id="@+id/workInNYC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onAddressRadioButtonClicked"
+                    android:text="I Work in New York" />
+
+                <RadioButton
+                    android:id="@+id/goToSchoolInNYC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onAddressRadioButtonClicked"
+                    android:text="I Attend School in New York" />
+            </RadioGroup>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView style="@style/WizardPageFooter" />
+
+</LinearLayout>

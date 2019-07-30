@@ -85,6 +85,8 @@ dependencies {
   api project(":simplified-tenprint")
   api project(":simplified-theme")
   api project(":simplified-threads")
+  api project(":simplifiedprefs")
+  api project(":simplifiedcardcreator")
 
   annotationProcessor "com.google.auto.value:auto-value:1.3"
 
