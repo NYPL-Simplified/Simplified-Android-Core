@@ -52,7 +52,7 @@ public class WorkAddressConfirmFragment extends Fragment {
         if (getArguments() != null) {
             this.response = (AddressResponse) getArguments().getSerializable(ARG_PARAM2);
         }
-        this.prefs = new Prefs(getContext());
+        this.prefs = new Prefs(getActivity());
     }
 
     @Override

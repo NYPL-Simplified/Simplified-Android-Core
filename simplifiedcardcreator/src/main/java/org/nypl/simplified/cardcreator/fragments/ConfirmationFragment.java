@@ -70,7 +70,7 @@ public class ConfirmationFragment extends Fragment {
     public void onCreate(final Bundle state) {
         super.onCreate(state);
 
-        this.prefs = new Prefs(getContext());
+        this.prefs = new Prefs(getActivity());
     }
 
     @Override

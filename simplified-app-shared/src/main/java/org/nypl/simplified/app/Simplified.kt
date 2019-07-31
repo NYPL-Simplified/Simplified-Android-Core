@@ -1,6 +1,6 @@
 package org.nypl.simplified.app
 
-import android.accounts.Account
+import android.app.Activity
 import android.support.multidex.MultiDexApplication
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.rolling.RollingFileAppender
@@ -64,9 +64,9 @@ class Simplified : MultiDexApplication() {
      * @return Shared Preferences
      */
     @JvmStatic
-    fun getSharedPrefs(): Prefs {
+    fun getSharedPrefs(activity: Activity): Prefs {
       val i = checkInitialized()
-      return Prefs(i)
+      return Prefs(activity)
     }
   }
 

@@ -83,9 +83,10 @@ public class CardCreatorActivity extends FragmentActivity implements
         LocationListenerType {
 
   protected static final String TAG = "CardCreatorActivity";
-  private Prefs prefs = Simplified.getSharedPrefs();
+  private Prefs prefs = Simplified.getSharedPrefs(this);
   private Bundle extras;
   private Logger logger = LoggerFactory.getLogger(CardCreatorActivity.TAG);
+  private TextView mToolbarTitle;
 
   /**
    *
@@ -118,9 +119,8 @@ public class CardCreatorActivity extends FragmentActivity implements
 
     extras = getIntent().getExtras();
 
-    final ActionBar bar = this.getActionBar();
-
-    bar.setTitle(R.string.library_signup_title);
+    mToolbarTitle = findViewById(R.id.tv_toolbar_title);
+    mToolbarTitle.setText(R.string.library_signup_title);
 
     findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON)));
 

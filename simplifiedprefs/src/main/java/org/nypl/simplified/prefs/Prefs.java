@@ -1,5 +1,6 @@
 package org.nypl.simplified.prefs;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -14,7 +15,7 @@ public class Prefs {
     /**
      * @param in_context context
      */
-    public Prefs(final Context in_context) {
+    public Prefs(final Activity in_context) {
         this.context = in_context;
     }
 

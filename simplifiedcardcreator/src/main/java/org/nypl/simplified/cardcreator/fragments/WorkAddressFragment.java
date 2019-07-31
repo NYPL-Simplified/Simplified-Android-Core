@@ -91,7 +91,7 @@ public class WorkAddressFragment extends Fragment {
   @Override
   public void onCreate(final Bundle instance_state) {
     super.onCreate(instance_state);
-    this.prefs = new Prefs(getContext());
+    this.prefs = new Prefs(getActivity());
   }
 
   @Override
