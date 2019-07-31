@@ -14,6 +14,7 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookStatusHeld
+import org.nypl.simplified.books.book_registry.BookStatusHeldReady
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableSubscriptionType
@@ -150,10 +151,11 @@ class NotificationsService(
     }
 
     private fun statusChangedSufficiently(statusBefore: BookWithStatus?, statusNow: BookWithStatus?): Boolean {
-        // TODO: Compare statusBefore and statusNow, only return true if statusNow is actually [BookStatusHeldReady]
+        // Compare statusBefore and statusNow, only return true if statusNow is actually [BookStatusHeldReady]
         logger.debug("NotificationsService::statusChangedSufficiently comparing ${statusBefore?.status()} to ${statusNow?.status()}")
-        if (statusBefore != null) {
-            return statusBefore.status() is BookStatusHeld
+        if (statusBefore != null && statusNow != null) {
+            return statusBefore.status() is BookStatusHeld &&
+                    statusNow.status() is BookStatusHeldReady
         }
 
         // No status change met criteria
