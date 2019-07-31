@@ -248,6 +248,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.tableSignup.visibility = View.VISIBLE
       this.signup.setOnClickListener {
         val intent = Intent(this, CardCreatorActivity::class.java)
+        intent.putExtra("extras", this.intent.extras)
         this.startActivity(intent)      }
       this.signup.setText(R.string.need_card_button)
     } else {
