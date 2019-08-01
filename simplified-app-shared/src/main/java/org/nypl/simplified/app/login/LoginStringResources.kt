@@ -14,7 +14,7 @@ class LoginStringResources(val resources: Resources) : AccountLoginStringResourc
     get() = this.resources.getString(R.string.unexpectedException)
 
   override fun loginDeviceActivationFailed(e: Throwable): String =
-    this.resources.getString(R.string.loginDeviceActivationFailed)
+    this.resources.getString(R.string.loginDeviceActivationFailed, e.localizedMessage, e.javaClass.simpleName)
 
   override val loginDeviceActivationPostDeviceManagerDone: String
     get() = this.resources.getString(R.string.loginDeviceActivationPostDeviceManagerDone)
