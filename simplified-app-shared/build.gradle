@@ -29,6 +29,12 @@ android {
 
   packagingOptions {
     exclude 'META-INF/LICENSE'
+
+    // The PDF library and Readium both provide this shared library. This will
+    // cause the build to fail because Gradle doesn't know which one to pick.
+    pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+    pickFirst 'lib/x86/libc++_shared.so'
   }
 }
 
@@ -93,8 +99,9 @@ dependencies {
   implementation group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
 
-  implementation 'org.nypl.readium:readium-sdk-android-runtime:0.25.0'
-  implementation 'org.nypl.readium:readium-shared-js:0.27.0'
+  implementation 'org.librarysimplified:org.librarysimplified.readium:0.30.0'
+  implementation 'org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0'
+
   implementation 'com.koushikdutta.async:androidasync:2.2.1'
   implementation group: 'com.squareup.picasso', name: 'picasso', version: '2.5.2'
   implementation 'com.nanohttpd:nanohttpd:2.2.0'
@@ -145,5 +152,5 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
   implementation "org.nypl.pdf:api:0.0.4"
-  implementation "org.nypl.pdf:pdfviewer:0.0.4"
+  implementation("org.nypl.pdf:pdfviewer:0.0.4")
 }

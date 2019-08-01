@@ -16,7 +16,6 @@ import org.nypl.simplified.app.AdobeDRMServices;
 import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.files.FileUtilities;
 import org.readium.sdk.android.Container;
-import org.readium.sdk.android.ContentFilterErrorHandler;
 import org.readium.sdk.android.EPub3;
 import org.readium.sdk.android.Package;
 import org.readium.sdk.android.SdkErrorHandler;
@@ -107,14 +106,6 @@ public final class ReaderReadiumEPUBLoader implements ReaderReadiumEPUBLoaderTyp
       return true;
     };
 
-    final ContentFilterErrorHandler content_filter_errors = (filter_id, error_code, message) -> {
-      LOG.error("{}:{}: {}", filter_id, error_code, message);
-      IfBugsnag.get().notify(
-          new ReaderReadiumContentFilterException(
-              String.format("%s:%d: %s", filter_id, error_code, message)),
-          Severity.ERROR);
-    };
-
     /*
      * The Readium SDK will call the given filter handler when the
      * filter chain has been populated. It is at this point that it
@@ -147,7 +138,6 @@ public final class ReaderReadiumEPUBLoader implements ReaderReadiumEPUBLoaderTyp
     };
 
     EPub3.setSdkErrorHandler(errors);
-    EPub3.setContentFilterErrorHandler(content_filter_errors);
     EPub3.setContentFiltersRegistrationHandler(filter_handler);
     final Container c = EPub3.openBook(request.epubFile().toString());
     EPub3.setSdkErrorHandler(null);

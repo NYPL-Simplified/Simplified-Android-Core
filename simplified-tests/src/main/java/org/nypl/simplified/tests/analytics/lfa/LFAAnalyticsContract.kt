@@ -1,6 +1,6 @@
 package org.nypl.simplified.tests.analytics.lfa
 
-import android.test.mock.MockContext
+import android.content.Context
 import com.io7m.jfunctional.Option
 import junit.framework.Assert
 import org.junit.After
@@ -8,6 +8,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.mockito.Mockito
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.lfa.LFAAnalyticsConfiguration
@@ -52,9 +53,8 @@ abstract class LFAAnalyticsContract {
 
   @Test
   fun testSimpleRolloverFailure() {
-    val context = object : MockContext() {
-
-    }
+    val context =
+      Mockito.mock(Context::class.java)
 
     val file = File.createTempFile("lfa-analytics-", "dir")
     file.delete()
@@ -116,9 +116,8 @@ abstract class LFAAnalyticsContract {
 
   @Test
   fun testSimpleRollover() {
-    val context = object : MockContext() {
-
-    }
+    val context =
+      Mockito.mock(Context::class.java)
 
     val file = File.createTempFile("lfa-analytics-", "dir")
     file.delete()
