@@ -74,21 +74,24 @@ abstract class NotificationsServiceContract {
     }
 
     @Test(timeout = 3_000L)
-    fun testOnProfileSelectionCompletedSetsBookRegistrySubscription() {
+    fun testProfileEventSubscriptionAndUnsubscription() {
 
         /*
          * Create a countdown latch that only accepts one count down.
          */
 
         val subscriptionLatch = CountDownLatch(1)
+        val unsubscriptionLatch = CountDownLatch(1)
 
         /*
          * Create a fake observable that counts down the above latch each time someone
          * subscribes to it.
          */
 
-        val mockSubscription = ObservableSubscriptionType<BookStatusEvent> {
-
+        val mockSubscription = object: ObservableSubscriptionType<BookStatusEvent> {
+            override fun unsubscribe() {
+                unsubscriptionLatch.countDown()
+            }
         }
 
         val mockObservable = object: ObservableReadableType<BookStatusEvent> {
@@ -115,9 +118,17 @@ abstract class NotificationsServiceContract {
 
         /*
          * Wait for the subscription latch to count down.
+         * If we don't hit the await before we timeout, the subscription wasn't received.
          */
 
         subscriptionLatch.await()
+
+        /**
+         * Test that we can unsubscribe.
+         */
+        this.profileEvents.send(ProfileSelection.ProfileSelectionInProgress(ProfileID(UUID.randomUUID())))
+
+        unsubscriptionLatch.await()
     }
 
     @Test
