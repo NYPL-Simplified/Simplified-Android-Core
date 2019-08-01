@@ -26,11 +26,14 @@ object NamedThreadPools {
   fun namedThreadPool(
     count: Int,
     base: String,
-    priority: Int): ListeningScheduledExecutorService {
+    priority: Int): ListeningScheduledExecutorService =
+    this.namedThreadPoolOf(count, this.namedThreadPoolFactory(base, priority))
 
-    return MoreExecutors.listeningDecorator(
-      Executors.newScheduledThreadPool(count, namedThreadPoolFactory(base, priority)))
-  }
+  @JvmStatic
+  fun namedThreadPoolOf(
+    count: Int,
+    factory: ThreadFactory): ListeningScheduledExecutorService =
+    MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(count, factory))
 
   @JvmStatic
   fun namedThreadPoolFactory(base: String,

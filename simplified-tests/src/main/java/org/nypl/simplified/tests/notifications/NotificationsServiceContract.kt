@@ -18,6 +18,7 @@ import org.nypl.simplified.tests.R
 import org.nypl.simplified.tests.books.book_database.BookDatabaseContract
 import org.slf4j.LoggerFactory
 import java.util.UUID
+import java.util.concurrent.ThreadFactory
 
 abstract class NotificationsServiceContract {
     private val logger =
@@ -27,12 +28,14 @@ abstract class NotificationsServiceContract {
     private lateinit var profileEvents: ObservableType<ProfileEvent>
     private lateinit var bookRegistry: BookRegistryType
     private lateinit var notificationsService: NotificationsService
+    private lateinit var threadFactory: ThreadFactory
 
     @Before
     fun setUp() {
         this.bookRegistry = BookRegistry.create()
         this.profileEvents = Observable.create<ProfileEvent>()
         this.context = Mockito.mock(Context::class.java)
+        this.threadFactory = ThreadFactory { Thread(it) }
 
         val notificationResourcesType = object : NotificationResourcesType {
             override val intentClass: Class<*>
@@ -45,7 +48,7 @@ abstract class NotificationsServiceContract {
                 get() = R.drawable.simplified_button
         }
 
-        this.notificationsService = NotificationsService(context, profileEvents, bookRegistry, notificationResourcesType)
+        this.notificationsService = NotificationsService(context, this.threadFactory, profileEvents, bookRegistry, notificationResourcesType)
     }
 
     @Test
