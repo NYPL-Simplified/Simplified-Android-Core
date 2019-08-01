@@ -1,8 +1,6 @@
 package org.nypl.simplified.app.services
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
@@ -425,7 +423,15 @@ class SimplifiedServices private constructor(
           get() = R.mipmap.ic_launcher
       }
 
-      val notificationsService = NotificationsService(context, profileEvents, bookRegistry, notificationResourcesType)
+      val notificationsThreads =
+        NamedThreadPools.namedThreadPoolFactory("notifications", 19)
+
+      val notificationsService = NotificationsService(
+        context = context,
+        threadFactory = notificationsThreads,
+        profileEvents = profileEvents,
+        bookRegistry = bookRegistry,
+        notificationResourcesType = notificationResourcesType)
 
       publishEvent(strings.bootingNetworkConnectivity)
       val networkConnectivity = SimplifiedNetworkConnectivity(context)

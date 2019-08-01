@@ -23,9 +23,11 @@ import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.threads.NamedThreadPools
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.ThreadFactory
 
 class NotificationsService(
         val context: Context,
+        val threadFactory: ThreadFactory,
         val profileEvents: ObservableReadableType<ProfileEvent>,
         val bookRegistry: BookRegistryReadableType,
         val notificationResourcesType: NotificationResourcesType) {
@@ -37,7 +39,7 @@ class NotificationsService(
 
     private val logger = LoggerFactory.getLogger(NotificationsService::class.java)
 
-    private val executor: ExecutorService = NamedThreadPools.namedThreadPool(1, "notifications", 19)
+    private val executor: ExecutorService = NamedThreadPools.namedThreadPoolOf(1, this.threadFactory)
 
     val profileSubscription: ObservableSubscriptionType<ProfileEvent>? =
             profileEvents.subscribe(this::onProfileEvent)
