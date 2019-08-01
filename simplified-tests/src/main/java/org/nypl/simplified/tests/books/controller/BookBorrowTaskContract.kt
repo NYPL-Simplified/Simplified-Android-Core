@@ -31,12 +31,12 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.HTTPRequestFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.HTTPRequestFailed
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
 import org.nypl.simplified.books.controller.api.BookUnexpectedTypeException
 import org.nypl.simplified.downloader.core.DownloadListenerType
@@ -248,6 +248,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -348,6 +349,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -446,6 +448,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -543,7 +546,7 @@ abstract class BookBorrowTaskContract {
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = feedLoader,
+        feedLoader = feedLoader, http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -641,7 +644,7 @@ abstract class BookBorrowTaskContract {
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = feedLoader,
+        feedLoader = feedLoader, http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -748,6 +751,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -846,6 +850,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -957,6 +962,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1055,6 +1061,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1159,7 +1166,7 @@ abstract class BookBorrowTaskContract {
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = feedLoader,
+        feedLoader = feedLoader, http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1290,7 +1297,7 @@ abstract class BookBorrowTaskContract {
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = feedLoader,
+        feedLoader = feedLoader, http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1392,7 +1399,7 @@ abstract class BookBorrowTaskContract {
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = feedLoader,
+        feedLoader = feedLoader, http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1523,7 +1530,7 @@ abstract class BookBorrowTaskContract {
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = feedLoader,
+        feedLoader = feedLoader, http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1615,7 +1622,7 @@ abstract class BookBorrowTaskContract {
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = feedLoader,
+        feedLoader = feedLoader, http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1712,6 +1719,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1822,6 +1830,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1937,6 +1946,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2050,6 +2060,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2160,6 +2171,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2273,7 +2285,7 @@ abstract class BookBorrowTaskContract {
         clock = this.clock,
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = feedLoader,
+        feedLoader = feedLoader, http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2386,6 +2398,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2505,6 +2518,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2632,6 +2646,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2724,6 +2739,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2799,6 +2815,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2812,13 +2829,246 @@ abstract class BookBorrowTaskContract {
     Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
   }
 
-  private fun <T> optionUnsafe(opt: OptionType<T>): T {
-    return if (opt is Some<T>) {
-      opt.get()
-    } else {
-      throw IllegalStateException("Expected something, got nothing!")
-    }
+  /**
+   * Borrowing a book with a cover results in fetching the cover.
+   */
+
+  @Test(timeout = 5_000L)
+  fun testBorrowCoverOK() {
+
+    val feedLoader =
+      Mockito.mock(FeedLoaderType::class.java)
+    val account =
+      Mockito.mock(AccountType::class.java)
+    val bookDatabase =
+      Mockito.mock(BookDatabaseType::class.java)
+    val bookDatabaseEntry =
+      Mockito.mock(BookDatabaseEntryType::class.java)
+    val formatHandle =
+      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+
+    Mockito.`when`(account.id).thenReturn(this.accountID)
+
+    this.http.addResponse(
+      "http://www.example.com/0.epub",
+      HTTPResultOK(
+        "OK",
+        200,
+        this.resource("/org/nypl/simplified/tests/books/empty.epub"),
+        this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
+        HashMap(),
+        0L))
+
+    this.http.addResponse(
+      "http://www.example.com/cover.jpg",
+      HTTPResultOK(
+        "OK",
+        200,
+        this.resource("/org/nypl/simplified/tests/books/empty.epub"),
+        this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
+        HashMap(),
+        0L))
+
+    val acquisition =
+      OPDSAcquisition(
+        ACQUISITION_OPEN_ACCESS,
+        URI.create("http://www.example.com/0.epub"),
+        Option.some("application/epub+zip"),
+        listOf())
+
+    val opdsEntryBuilder =
+      OPDSAcquisitionFeedEntry.newBuilder(
+        "a",
+        "Title",
+        DateTime.now(),
+        OPDSAvailabilityOpenAccess.get(Option.none()))
+    opdsEntryBuilder.setCoverOption(Option.some(URI.create("http://www.example.com/cover.jpg")))
+    opdsEntryBuilder.addAcquisition(acquisition)
+
+    val opdsEntry =
+      opdsEntryBuilder.build()
+
+    val bookId =
+      BookID.create("a")
+
+    this.logBookEventsFor(bookId)
+
+    val book =
+      Book(
+        id = bookId,
+        account = this.accountID,
+        cover = null,
+        thumbnail = null,
+        entry = opdsEntry,
+        formats = listOf())
+
+    val tempCoverFile =
+      File.createTempFile("borrow-contract", "jpg")
+
+    Mockito.`when`(account.bookDatabase)
+      .thenReturn(bookDatabase)
+    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
+      .thenReturn(bookDatabaseEntry)
+    Mockito.`when`(bookDatabaseEntry.book)
+      .thenReturn(book)
+    Mockito.`when`(bookDatabaseEntry.temporaryFile())
+      .thenReturn(tempCoverFile)
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+      .thenReturn(formatHandle)
+
+    val task =
+      BookBorrowTask(
+        account = account,
+        acquisition = acquisition,
+        adobeDRM = null,
+        bookId = bookId,
+        bookRegistry = this.bookRegistry,
+        borrowStrings = this.bookBorrowStrings,
+        bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
+        clock = this.clock,
+        downloader = this.downloader,
+        downloads = ConcurrentHashMap(),
+        feedLoader = feedLoader,
+        http = this.http,
+        entry = opdsEntry)
+
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
+
+    /*
+     * Check that the book was saved to the database.
+     */
+
+    Mockito.verify(bookDatabaseEntry, Mockito.times(1))
+      .setCover(tempCoverFile)
+    Mockito.verify(formatHandle, Mockito.times(1))
+      .setAdobeRightsInformation(null)
+    Mockito.verify(formatHandle, Mockito.times(1))
+      .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
+
+  /**
+   * Failing fetching a cover doesn't fail the borrowing as a whole.
+   */
+
+  @Test(timeout = 5_000L)
+  fun testBorrowCoverFailure() {
+
+    val feedLoader =
+      Mockito.mock(FeedLoaderType::class.java)
+    val account =
+      Mockito.mock(AccountType::class.java)
+    val bookDatabase =
+      Mockito.mock(BookDatabaseType::class.java)
+    val bookDatabaseEntry =
+      Mockito.mock(BookDatabaseEntryType::class.java)
+    val formatHandle =
+      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+
+    Mockito.`when`(account.id).thenReturn(this.accountID)
+
+    this.http.addResponse(
+      "http://www.example.com/0.epub",
+      HTTPResultOK(
+        "OK",
+        200,
+        this.resource("/org/nypl/simplified/tests/books/empty.epub"),
+        this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
+        HashMap(),
+        0L))
+
+    this.http.addResponse(
+      "http://www.example.com/cover.jpg",
+      HTTPResultError(
+        400,
+        "BAD!",
+        0L,
+        mutableMapOf(),
+        0L,
+        ByteArrayInputStream(ByteArray(0)),
+        Option.none()))
+
+    val acquisition =
+      OPDSAcquisition(
+        ACQUISITION_OPEN_ACCESS,
+        URI.create("http://www.example.com/0.epub"),
+        Option.some("application/epub+zip"),
+        listOf())
+
+    val opdsEntryBuilder =
+      OPDSAcquisitionFeedEntry.newBuilder(
+        "a",
+        "Title",
+        DateTime.now(),
+        OPDSAvailabilityOpenAccess.get(Option.none()))
+    opdsEntryBuilder.setCoverOption(Option.some(URI.create("http://www.example.com/cover.jpg")))
+    opdsEntryBuilder.addAcquisition(acquisition)
+
+    val opdsEntry =
+      opdsEntryBuilder.build()
+
+    val bookId =
+      BookID.create("a")
+
+    this.logBookEventsFor(bookId)
+
+    val book =
+      Book(
+        id = bookId,
+        account = this.accountID,
+        cover = null,
+        thumbnail = null,
+        entry = opdsEntry,
+        formats = listOf())
+
+    val tempCoverFile =
+      File.createTempFile("borrow-contract", "jpg")
+
+    Mockito.`when`(account.bookDatabase)
+      .thenReturn(bookDatabase)
+    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
+      .thenReturn(bookDatabaseEntry)
+    Mockito.`when`(bookDatabaseEntry.book)
+      .thenReturn(book)
+    Mockito.`when`(bookDatabaseEntry.temporaryFile())
+      .thenReturn(tempCoverFile)
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+      .thenReturn(formatHandle)
+
+    val task =
+      BookBorrowTask(
+        account = account,
+        acquisition = acquisition,
+        adobeDRM = null,
+        bookId = bookId,
+        bookRegistry = this.bookRegistry,
+        borrowStrings = this.bookBorrowStrings,
+        bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
+        clock = this.clock,
+        downloader = this.downloader,
+        downloads = ConcurrentHashMap(),
+        feedLoader = feedLoader,
+        http = this.http,
+        entry = opdsEntry)
+
+    val results = task.call(); TaskDumps.dump(logger, results)
+    results as TaskResult.Success
+
+    /*
+     * Check that the book was saved to the database.
+     */
+
+    Mockito.verify(bookDatabaseEntry, Mockito.times(0))
+      .setCover(tempCoverFile)
+    Mockito.verify(formatHandle, Mockito.times(1))
+      .setAdobeRightsInformation(null)
+    Mockito.verify(formatHandle, Mockito.times(1))
+      .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
+  }
+
+
 
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }

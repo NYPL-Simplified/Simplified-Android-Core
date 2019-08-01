@@ -405,6 +405,8 @@
   <string name="borrowBookFulfillACSMCheckContentTypeOK">ACSM file delivered content of an acceptable type (%1$s).</string>
   <string name="borrowBookSaving">Saving a book of type %1$s.</string>
   <string name="borrowBookSavingCheckingContentType">Checking that book content type (%1$s) is acceptable.</string>
+  <string name="borrowBookSavingCover">Saving book cover...</string>
+  <string name="borrowBookFetchingCover">Fetching book cover...</string>
 
   <!-- Revocation strings -->
   <string name="revokeStarted">Revocation started…</string>

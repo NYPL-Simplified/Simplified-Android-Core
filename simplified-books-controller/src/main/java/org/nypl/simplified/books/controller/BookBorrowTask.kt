@@ -75,6 +75,7 @@ import org.nypl.simplified.http.core.HTTPAuthOAuth
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPOAuthToken
 import org.nypl.simplified.http.core.HTTPProblemReport
+import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
@@ -124,7 +125,8 @@ class BookBorrowTask(
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
-  private val feedLoader: FeedLoaderType) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+  private val feedLoader: FeedLoaderType,
+  private val http: HTTPType) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
 
   private val contentTypeACSM =
     "application/vnd.adobe.adept+xml"
@@ -563,8 +565,12 @@ class BookBorrowTask(
     for (ea in ee.acquisitions) {
       when (ea.relation) {
         ACQUISITION_GENERIC,
-        ACQUISITION_OPEN_ACCESS ->
-          return this.runAcquisitionFulfillDoDownload(ea, this.createHttpAuthIfRequired())
+        ACQUISITION_OPEN_ACCESS -> {
+          val httpAuth = this.createHttpAuthIfRequired()
+          this.runAcquisitionFulfillDoDownload(ea, httpAuth)
+          this.runFetchCover(ee, httpAuth)
+          return
+        }
         ACQUISITION_BORROW,
         ACQUISITION_BUY,
         ACQUISITION_SAMPLE,
@@ -581,6 +587,32 @@ class BookBorrowTask(
       errorValue = UnusableAcquisitions(message),
       exception = exception)
     throw exception
+  }
+
+  private fun runFetchCover(
+    opdsEntry: OPDSAcquisitionFeedEntry,
+    httpAuth: OptionType<HTTPAuthType>
+  ) {
+    this.steps.beginNewStep(this.borrowStrings.borrowBookFetchingCover)
+    this.debug("fetching cover")
+
+    return when (val result =
+      BookCoverFetchTask(
+        bookRegistry = this.bookRegistry,
+        borrowStrings = this.borrowStrings,
+        databaseEntry = this.databaseEntry,
+        feedEntry = opdsEntry,
+        http = this.http,
+        httpAuth = httpAuth).call()) {
+      is TaskResult.Success -> {
+        this.debug("fetched cover successfully")
+        this.steps.addAll(result.steps)
+      }
+      is TaskResult.Failure -> {
+        this.debug("failed to fetch cover")
+        this.steps.addAll(result.steps)
+      }
+    }
   }
 
   /**

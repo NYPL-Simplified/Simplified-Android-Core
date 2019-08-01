@@ -327,6 +327,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -436,6 +437,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -598,6 +600,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -729,6 +732,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -846,6 +850,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -983,6 +988,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1115,6 +1121,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
+        http = this.http,
         entry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)

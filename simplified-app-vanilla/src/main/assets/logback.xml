@@ -43,7 +43,7 @@
 
   <logger
     name="org.nypl.simplified.app.BookCoverProvider"
-    level="INFO" />
+    level="DEBUG" />
 
   <logger
     name="org.nypl.drm"
