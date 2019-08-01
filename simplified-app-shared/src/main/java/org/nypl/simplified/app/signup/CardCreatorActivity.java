@@ -266,7 +266,7 @@ public class CardCreatorActivity extends FragmentActivity implements
               ((HomeAddressFragment) current_fragment).getLine_2().getText().toString(),
               ((HomeAddressFragment) current_fragment).getCity().getText().toString(),
               ((HomeAddressFragment) current_fragment).getState().getText().toString(),
-              ((HomeAddressFragment) current_fragment).getZip().getText().toString(), false, Simplified.getCardCreator()).run();
+              ((HomeAddressFragment) current_fragment).getZip().getText().toString(), false, Simplified.getCardCreator(this)).run();
 
     } else if (current_fragment instanceof HomeAddressConfirmFragment) {
 
@@ -304,7 +304,7 @@ public class CardCreatorActivity extends FragmentActivity implements
               ((WorkAddressFragment) current_fragment).getLine_2().getText().toString(),
               ((WorkAddressFragment) current_fragment).getCity().getText().toString(),
               ((WorkAddressFragment) current_fragment).getState().getText().toString(),
-              ((WorkAddressFragment) current_fragment).getZip().getText().toString(), true, Simplified.getCardCreator()).run();
+              ((WorkAddressFragment) current_fragment).getZip().getText().toString(), true, Simplified.getCardCreator(this)).run();
 
     } else if (current_fragment instanceof WorkAddressConfirmFragment) {
       if (getString(R.string.nav_confirm).equals(((Button) findViewById(R.id.next_button)).getText())) {
@@ -325,13 +325,13 @@ public class CardCreatorActivity extends FragmentActivity implements
 
       this.showProgress(false);
       new UsernameValidationTask(CardCreatorActivity.this,
-              ((CredentialsFragment) current_fragment).getUsername().getText().toString(), Simplified.getCardCreator()).run();
+              ((CredentialsFragment) current_fragment).getUsername().getText().toString(), Simplified.getCardCreator(this)).run();
 
     } else if (current_fragment instanceof ReviewFragment) {
 
       this.showProgress(false);
 
-      new CreatePatronTask(CardCreatorActivity.this, CardCreatorActivity.this.prefs, Simplified.getCardCreator()).run();
+      new CreatePatronTask(CardCreatorActivity.this, CardCreatorActivity.this.prefs, Simplified.getCardCreator(this)).run();
 
     } else if (current_fragment instanceof ConfirmationFragment) {
 

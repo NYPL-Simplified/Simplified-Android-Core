@@ -1,6 +1,7 @@
 package org.nypl.simplified.app
 
 import android.app.Activity
+import android.content.Context
 import android.support.multidex.MultiDexApplication
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.rolling.RollingFileAppender
@@ -55,9 +56,9 @@ class Simplified : MultiDexApplication() {
      * @return cardcreator
      */
     @JvmStatic
-    fun getCardCreator(): CardCreator {
+    fun getCardCreator(context: Context): CardCreator {
       val i = checkInitialized()
-      return i.getActualCardCreator()
+      return i.getActualCardCreator(context)
     }
 
     /**
@@ -70,7 +71,6 @@ class Simplified : MultiDexApplication() {
     }
   }
 
-  private lateinit var cardCreator: CardCreator
   private lateinit var bootFuture: ListenableFuture<SimplifiedServicesType>
   private val logger = LoggerFactory.getLogger(Simplified::class.java)
   private val boot: BootLoader<SimplifiedServicesType> =
@@ -142,13 +142,7 @@ class Simplified : MultiDexApplication() {
 
 
   @Synchronized
-  private fun getActualCardCreator(): CardCreator {
-    var cardCreator: CardCreator = this.cardCreator
-    if (cardCreator != null) {
-      return cardCreator
-    }
-    cardCreator = CardCreator(this.assets, "prod", this.resources)
-    this.cardCreator = cardCreator
-    return cardCreator
+  private fun getActualCardCreator(context: Context): CardCreator {
+      return CardCreator(context.assets, "prod", context.resources)
   }
 }
