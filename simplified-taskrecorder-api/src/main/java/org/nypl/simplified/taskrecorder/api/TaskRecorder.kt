@@ -80,6 +80,9 @@ class TaskRecorder<E> private constructor() : TaskRecorderType<E> {
     }
   }
 
+  override fun addAll(steps: List<TaskStep<E>>) {
+    this.steps.addAll(steps)
+  }
 
   override fun currentStep(): TaskStep<E>? =
     this.steps.lastOrNull()

@@ -7,6 +7,15 @@ import java.io.File
 
 class MockBorrowStringResources : BookBorrowStringResourcesType {
 
+  override val borrowBookCoverUnexpectedException: String
+    get() = "borrowBookCoverUnexpectedException"
+
+  override val borrowBookSavingCover: String
+    get() = "borrowBookSavingCover"
+
+  override val borrowBookFetchingCover: String
+    get() = "borrowBookFetchingCover"
+
   override val borrowBookUnexpectedException: String
     get() = "borrowBookUnexpectedException"
 

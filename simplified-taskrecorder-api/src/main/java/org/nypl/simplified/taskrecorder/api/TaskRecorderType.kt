@@ -60,4 +60,10 @@ interface TaskRecorderType<E> {
 
   fun currentStep(): TaskStep<E>?
 
+  /**
+   * Add a series of steps.
+   */
+
+  fun addAll(steps: List<TaskStep<E>>)
+
 }

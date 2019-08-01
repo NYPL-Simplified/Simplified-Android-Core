@@ -107,7 +107,6 @@ internal class BookDatabaseEntry internal constructor(
     }
   }
 
-
   private fun onFormatUpdated(format: BookFormat) {
     synchronized(this.bookLock) {
       LOG.debug("onFormatUpdated: {}", format.javaClass.canonicalName)

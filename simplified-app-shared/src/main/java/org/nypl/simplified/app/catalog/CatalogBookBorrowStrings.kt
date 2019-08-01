@@ -9,6 +9,15 @@ import java.io.File
 
 class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResourcesType {
 
+  override val borrowBookCoverUnexpectedException: String
+    get() = this.resources.getString(R.string.unexpectedException)
+
+  override val borrowBookSavingCover: String
+    get() = this.resources.getString(R.string.borrowBookSavingCover)
+
+  override val borrowBookFetchingCover: String
+    get() = this.resources.getString(R.string.borrowBookFetchingCover)
+
   override val borrowBookUnexpectedException: String
     get() = this.resources.getString(R.string.unexpectedException)
 

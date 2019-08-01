@@ -382,6 +382,7 @@ class Controller private constructor(
       downloader = this.downloader,
       downloads = this.downloads,
       feedLoader = this.feedLoader,
+      http = this.http,
       entry = entry)))
   }
 
