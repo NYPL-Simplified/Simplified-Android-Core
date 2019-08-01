@@ -41,12 +41,12 @@ class NotificationsService(
 
     private val executor: ExecutorService = NamedThreadPools.namedThreadPoolOf(1, this.threadFactory)
 
-    val profileSubscription: ObservableSubscriptionType<ProfileEvent>? =
+    private val profileSubscription: ObservableSubscriptionType<ProfileEvent>? =
             profileEvents.subscribe(this::onProfileEvent)
 
-    var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
+    private var registryCache: Map<BookID, BookWithStatus> = mapOf()
 
-    var registryCache: Map<BookID, BookWithStatus> = mapOf()
+    var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
 
 
     /**

@@ -1,28 +1,39 @@
 package org.nypl.simplified.tests.notifications
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
+import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.ProcedureType
 import junit.framework.Assert
+import org.joda.time.DateTime
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.books.book_registry.BookRegistry
-import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.book_registry.BookStatusEvent
+import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.book_registry.*
 import org.nypl.simplified.notifications.NotificationResourcesType
 import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.observable.ObservableType
-import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
+import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.tests.R
 import org.nypl.simplified.tests.books.book_database.BookDatabaseContract
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ThreadFactory
@@ -37,16 +48,73 @@ abstract class NotificationsServiceContract {
     private lateinit var notificationsService: NotificationsService
     private lateinit var threadFactory: ThreadFactory
     private lateinit var notificationResources: NotificationResources
+    private lateinit var mockNotificationManager: NotificationManager
 
     @Before
     fun setUp() {
         this.bookRegistry = BookRegistry.create()
+
+        val acquisition =
+                OPDSAcquisition(
+                        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+                        URI.create("http://www.example.com/0.feed"),
+                        Option.some("application/vnd.adobe.adept+xml"),
+                        listOf())
+
+        val opdsEntryBuilder =
+                OPDSAcquisitionFeedEntry.newBuilder(
+                        "a",
+                        "Title",
+                        DateTime.now(),
+                        OPDSAvailabilityLoanable.get())
+        opdsEntryBuilder.addAcquisition(acquisition)
+
+        val opdsEntry =
+                opdsEntryBuilder.build()
+
+        val bookId =
+                BookID.create("a")
+
+        val book =
+                Book(
+                        id = bookId,
+                        account = AccountID.generate(),
+                        cover = null,
+                        thumbnail = null,
+                        entry = opdsEntry,
+                        formats = listOf())
+
+        val bookStatusHeld = Mockito.mock(BookStatusHeld::class.java)
+        Mockito.`when`(bookStatusHeld.id).thenReturn(bookId)
+
+        val bookStatusHeldReady = Mockito.mock(BookStatusHeldReady::class.java)
+        Mockito.`when`(bookStatusHeldReady.id).thenReturn(bookId)
+
+        // Populate book registry
+        val bookWithStatusHeld = BookWithStatus.create(
+                book,
+                bookStatusHeld
+        )
+
+        val bookWithStatusHeldReady = BookWithStatus.create(
+                book,
+                bookStatusHeldReady
+        )
+
+        bookRegistry.update(bookWithStatusHeld)
+
         this.profileEvents = Observable.create<ProfileEvent>()
         this.context = Mockito.mock(Context::class.java)
         this.threadFactory = ThreadFactory { Thread(it) }
         this.notificationResources = NotificationResources()
 
-        this.notificationsService = NotificationsService(context, this.threadFactory, profileEvents, bookRegistry, this.notificationResources)
+        this.mockNotificationManager = Mockito.mock(NotificationManager::class.java)
+
+        // Mock NotificationManager
+        Mockito.`when`(context.getSystemService(NOTIFICATION_SERVICE))
+                .thenReturn(mockNotificationManager)
+
+        this.notificationsService = NotificationsService(context, threadFactory, profileEvents, bookRegistry, notificationResources)
     }
 
     class NotificationResources : NotificationResourcesType {
@@ -126,30 +194,17 @@ abstract class NotificationsServiceContract {
         /**
          * Test that we can unsubscribe.
          */
+
         this.profileEvents.send(ProfileSelection.ProfileSelectionInProgress(ProfileID(UUID.randomUUID())))
 
         unsubscriptionLatch.await()
     }
 
     @Test
-    fun testOnProfileSelectionCompletedSetBookRegistryCache() {
-        Assert.fail()
-    }
-
-    @Test
-    fun testOnProfileSelectionInProgressUnsubscribeBookEvents() {
-        Assert.fail()
-    }
-
-    @Test
-    fun testOnProfileSelectionInProgressClearsBookRegistryCache() {
-        Assert.fail()
-    }
-
-    @Test
     fun testNoNotificationOnHeldReadyToHeldReadyStatus() {
         // If the book in the registry is already HeldReady we don't need to show the notification
         Assert.fail()
+
     }
 
     @Test
