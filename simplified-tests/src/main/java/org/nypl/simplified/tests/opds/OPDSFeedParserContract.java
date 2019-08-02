@@ -23,6 +23,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSGroup;
 import org.nypl.simplified.opds.core.OPDSParseException;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
+import org.nypl.simplified.parser.api.ParseError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -31,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
@@ -262,13 +264,17 @@ public abstract class OPDSFeedParserContract {
     final URI uri =
         URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
-    expected.expect(OPDSParseException.class);
-
     final OPDSFeedParserType p = OPDSFeedParser.newParser(
         OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes()));
     final InputStream d =
         OPDSFeedParserContract.getResource("bad-uri-syntax.xml");
-    p.parse(uri, d);
+    final OPDSAcquisitionFeed result =
+      p.parse(uri, d);
+    final List<ParseError> errors =
+      result.getErrors();
+
+    Assert.assertEquals(1, errors.size());
+    Assert.assertEquals(URISyntaxException.class, errors.get(0).getException().getClass());
   }
 
   @Test

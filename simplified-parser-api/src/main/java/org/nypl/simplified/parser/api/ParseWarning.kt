@@ -1,5 +1,6 @@
 package org.nypl.simplified.parser.api
 
+import java.io.Serializable
 import java.lang.Exception
 import java.net.URI
 
@@ -12,4 +13,4 @@ data class ParseWarning(
   val message: String,
   val line: Int = 0,
   val column: Int = 0,
-  val exception: Exception? = null)
+  val exception: Exception? = null): Serializable

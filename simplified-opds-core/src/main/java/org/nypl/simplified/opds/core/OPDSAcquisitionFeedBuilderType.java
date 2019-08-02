@@ -2,6 +2,8 @@ package org.nypl.simplified.opds.core;
 
 import com.io7m.jfunctional.OptionType;
 
+import org.nypl.simplified.parser.api.ParseError;
+
 import java.net.URI;
 
 /**
@@ -11,12 +13,21 @@ import java.net.URI;
 public interface OPDSAcquisitionFeedBuilderType
 {
   /**
+   * Add a parse error.
+   *
+   * @param error The parse error
+   */
+
+  OPDSAcquisitionFeedBuilderType addParseError(
+    ParseError error);
+
+  /**
    * Add an entry to the feed being constructed.
    *
    * @param e The entry
    */
 
-  void addEntry(
+  OPDSAcquisitionFeedBuilderType addEntry(
     OPDSAcquisitionFeedEntry e);
 
   /**
@@ -25,7 +36,7 @@ public interface OPDSAcquisitionFeedBuilderType
    * @param u The privacy policy URI, if any
    */
 
-  void setPrivacyPolicyOption(OptionType<URI> u);
+  OPDSAcquisitionFeedBuilderType setPrivacyPolicyOption(OptionType<URI> u);
 
   /**
    * @return A feed consisting of all the values given so far
@@ -39,7 +50,7 @@ public interface OPDSAcquisitionFeedBuilderType
    * @param next The next URI, if any
    */
 
-  void setNextOption(
+  OPDSAcquisitionFeedBuilderType setNextOption(
     OptionType<URI> next);
 
   /**
@@ -48,7 +59,7 @@ public interface OPDSAcquisitionFeedBuilderType
    * @param s The search URI, if any
    */
 
-  void setSearchOption(
+  OPDSAcquisitionFeedBuilderType setSearchOption(
     OptionType<OPDSSearchLink> s);
 
   /**
@@ -57,7 +68,7 @@ public interface OPDSAcquisitionFeedBuilderType
    * @param f The facet
    */
 
-  void addFacet(
+  OPDSAcquisitionFeedBuilderType addFacet(
     OPDSFacet f);
 
   /**
@@ -66,7 +77,8 @@ public interface OPDSAcquisitionFeedBuilderType
    * @param u The App About URI, if any
    */
 
-  void setAboutOption(OptionType<URI> u);
+  OPDSAcquisitionFeedBuilderType setAboutOption(
+    OptionType<URI> u);
 
   /**
    * Set the URI of the terms of service document for the feed, if any
@@ -74,10 +86,13 @@ public interface OPDSAcquisitionFeedBuilderType
    * @param u The terms of service URI, if any
    */
 
-  void setTermsOfServiceOption(OptionType<URI> u);
+  OPDSAcquisitionFeedBuilderType setTermsOfServiceOption(
+    OptionType<URI> u);
 
   /**
    * @param licensor drm licensor info
    */
-  void setLisensor(OptionType<DRMLicensor> licensor);
+
+  OPDSAcquisitionFeedBuilderType setLisensor(
+    OptionType<DRMLicensor> licensor);
 }

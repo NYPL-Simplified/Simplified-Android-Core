@@ -8,6 +8,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import org.joda.time.DateTime;
+import org.nypl.simplified.parser.api.ParseError;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -44,6 +45,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
   private final OptionType<URI> alternate;
   private final OptionType<URI> analytics;
   private final OptionType<DRMLicensor> licensor;
+  private final ArrayList<ParseError> errors;
 
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
@@ -65,10 +67,10 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
     final List<OPDSCategory> in_categories,
     final OptionType<URI> in_alternate,
     final OptionType<URI> in_analytics,
-    final OptionType<DRMLicensor> in_licensor) {
+    final OptionType<DRMLicensor> in_licensor,
+    final ArrayList<ParseError> in_errors) {
     this.authors = NullCheck.notNull(Collections.unmodifiableList(in_authors));
-    this.acquisitions =
-      NullCheck.notNull(Collections.unmodifiableList(in_acquisitions));
+    this.acquisitions = NullCheck.notNull(Collections.unmodifiableList(in_acquisitions));
     this.availability = NullCheck.notNull(in_availability);
     this.groups = NullCheck.notNull(in_groups);
     this.cover = NullCheck.notNull(in_cover);
@@ -87,6 +89,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
     this.alternate = NullCheck.notNull(in_alternate);
     this.analytics = NullCheck.notNull(in_analytics);
     this.licensor = NullCheck.notNull(in_licensor);
+    this.errors = NullCheck.notNull(in_errors);
   }
 
   /**
@@ -236,7 +239,6 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
     return this.cover;
   }
 
-
   /**
    * @return the annotations url
    */
@@ -355,6 +357,14 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
   }
 
   /**
+   * @return The list of parse errors encountered, if any
+   */
+
+  public List<ParseError> getErrors() {
+    return this.errors;
+  }
+
+  /**
    * @return The authors as a comma separated string
    */
 
@@ -446,8 +456,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
     return NullCheck.notNull(b.toString());
   }
 
-  private static final class Builder
-    implements OPDSAcquisitionFeedEntryBuilderType {
+  private static final class Builder implements OPDSAcquisitionFeedEntryBuilderType {
     private final List<OPDSAcquisition> acquisitions;
     private final List<String> authors;
     private final List<OPDSCategory> categories;
@@ -455,6 +464,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
     private final String id;
     private final String title;
     private final DateTime updated;
+    private final ArrayList<ParseError> errors;
     private OPDSAvailabilityType availability;
     private OptionType<URI> cover;
     private OptionType<URI> alternate;
@@ -477,6 +487,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
       this.id = NullCheck.notNull(in_id);
       this.issues = Option.none();
       this.related = Option.none();
+      this.errors = new ArrayList<ParseError>();
       this.title = NullCheck.notNull(in_title);
       this.updated = NullCheck.notNull(in_updated);
       this.availability = NullCheck.notNull(in_availability);
@@ -497,30 +508,40 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
     }
 
     @Override
-    public void addAcquisition(
+    public OPDSAcquisitionFeedEntryBuilderType addParseError(ParseError error) {
+      this.errors.add(NullCheck.notNull(error, "error"));
+      return this;
+    }
+
+    @Override
+    public OPDSAcquisitionFeedEntryBuilderType addAcquisition(
       final OPDSAcquisition a) {
       this.acquisitions.add(NullCheck.notNull(a));
+      return this;
     }
 
     @Override
-    public void addAuthor(
+    public OPDSAcquisitionFeedEntryBuilderType addAuthor(
       final String name) {
       this.authors.add(NullCheck.notNull(name));
+      return this;
     }
 
     @Override
-    public void addCategory(
+    public OPDSAcquisitionFeedEntryBuilderType addCategory(
       final OPDSCategory c) {
       this.categories.add(NullCheck.notNull(c));
+      return this;
     }
 
     @Override
-    public void addGroup(
+    public OPDSAcquisitionFeedEntryBuilderType addGroup(
       final URI uri,
       final String b) {
       NullCheck.notNull(uri);
       NullCheck.notNull(b);
       this.groups.add(Pair.pair(b, uri));
+      return this;
     }
 
     @Override
@@ -545,7 +566,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
         this.categories,
         this.alternate,
         this.analytics,
-        this.licensor);
+        this.licensor,
+        this.errors);
     }
 
     @Override
@@ -554,86 +576,98 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
     }
 
     @Override
-    public void setAvailability(
+    public OPDSAcquisitionFeedEntryBuilderType setAvailability(
       final OPDSAvailabilityType a) {
       this.availability = NullCheck.notNull(a);
+      return this;
     }
 
     @Override
-    public void setCoverOption(
+    public OPDSAcquisitionFeedEntryBuilderType setCoverOption(
       final OptionType<URI> uri) {
       this.cover = NullCheck.notNull(uri);
+      return this;
     }
 
-
     @Override
-    public void setAlternateOption(
+    public OPDSAcquisitionFeedEntryBuilderType setAlternateOption(
       final OptionType<URI> uri) {
       this.alternate = NullCheck.notNull(uri);
+      return this;
     }
 
     @Override
-    public void setAnalyticsOption(
+    public OPDSAcquisitionFeedEntryBuilderType setAnalyticsOption(
       final OptionType<URI> uri) {
       this.analytics = NullCheck.notNull(uri);
+      return this;
     }
 
     @Override
-    public void setAnnotationsOption(
+    public OPDSAcquisitionFeedEntryBuilderType setAnnotationsOption(
       final OptionType<URI> uri) {
       this.annotations = NullCheck.notNull(uri);
+      return this;
     }
 
     @Override
-    public void setIssuesOption(
+    public OPDSAcquisitionFeedEntryBuilderType setIssuesOption(
       final OptionType<URI> uri) {
       this.issues = NullCheck.notNull(uri);
+      return this;
     }
 
     @Override
-    public void setRelatedOption(
+    public OPDSAcquisitionFeedEntryBuilderType setRelatedOption(
       final OptionType<URI> uri) {
       this.related = NullCheck.notNull(uri);
+      return this;
     }
 
     @Override
-    public void setPublishedOption(
+    public OPDSAcquisitionFeedEntryBuilderType setPublishedOption(
       final OptionType<DateTime> pub) {
       this.published = NullCheck.notNull(pub);
+      return this;
     }
 
     @Override
-    public void setPublisherOption(
+    public OPDSAcquisitionFeedEntryBuilderType setPublisherOption(
       final OptionType<String> pub) {
       this.publisher = NullCheck.notNull(pub);
+      return this;
     }
 
     @Override
-    public void setDistribution(
+    public OPDSAcquisitionFeedEntryBuilderType setDistribution(
       final String dist) {
       this.distribution = NullCheck.notNull(dist);
+      return this;
     }
 
     @Override
-    public void setSummaryOption(
+    public OPDSAcquisitionFeedEntryBuilderType setSummaryOption(
       final OptionType<String> text) {
       if (text.isNone()) {
         this.summary = "";
       } else {
         this.summary = ((Some<String>) text).get();
       }
+      return this;
     }
 
     @Override
-    public void setThumbnailOption(
+    public OPDSAcquisitionFeedEntryBuilderType setThumbnailOption(
       final OptionType<URI> uri) {
       this.thumbnail = NullCheck.notNull(uri);
+      return this;
     }
 
     @Override
-    public void setLicensorOption(
+    public OPDSAcquisitionFeedEntryBuilderType setLicensorOption(
       final OptionType<DRMLicensor> lic) {
       this.licensor = NullCheck.notNull(lic);
+      return this;
     }
   }
 }

@@ -47,7 +47,7 @@ public abstract class OPDSJSONSerializerContract {
 
     final InputStream rs0 =
       OPDSJSONSerializerContract.getResource("entry-0.xml");
-    final OPDSAcquisitionFeedEntry e0 = p.parseEntryStream(rs0);
+    final OPDSAcquisitionFeedEntry e0 = p.parseEntryStream(URI.create("urn:test"), rs0);
 
     final ByteArrayOutputStream bao0 = new ByteArrayOutputStream();
     s.serializeToStream(s.serializeFeedEntry(e0), bao0);

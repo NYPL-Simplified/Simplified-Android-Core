@@ -3,6 +3,7 @@ package org.nypl.simplified.opds.core;
 import com.io7m.jfunctional.OptionType;
 
 import org.joda.time.DateTime;
+import org.nypl.simplified.parser.api.ParseError;
 
 import java.net.URI;
 import java.util.List;
@@ -14,12 +15,21 @@ import java.util.List;
 public interface OPDSAcquisitionFeedEntryBuilderType
 {
   /**
+   * Add a parse error.
+   *
+   * @param error The parse error
+   */
+
+  OPDSAcquisitionFeedEntryBuilderType addParseError(
+    ParseError error);
+
+  /**
    * Add an acquisition.
    *
    * @param a The acquisition
    */
 
-  void addAcquisition(
+  OPDSAcquisitionFeedEntryBuilderType addAcquisition(
     OPDSAcquisition a);
 
   /**
@@ -28,7 +38,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param name The author
    */
 
-  void addAuthor(
+  OPDSAcquisitionFeedEntryBuilderType addAuthor(
     final String name);
 
   /**
@@ -37,7 +47,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param c The category
    */
 
-  void addCategory(
+  OPDSAcquisitionFeedEntryBuilderType addCategory(
     final OPDSCategory c);
 
   /**
@@ -47,7 +57,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param b   The group name
    */
 
-  void addGroup(
+  OPDSAcquisitionFeedEntryBuilderType addGroup(
     final URI uri,
     final String b);
 
@@ -69,7 +79,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param a The availability
    */
 
-  void setAvailability(
+  OPDSAcquisitionFeedEntryBuilderType setAvailability(
     OPDSAvailabilityType a);
 
   /**
@@ -78,27 +88,28 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param uri The cover URI
    */
 
-  void setCoverOption(
+  OPDSAcquisitionFeedEntryBuilderType setCoverOption(
     OptionType<URI> uri);
-
 
   /**
    * @param uri The annotations URI
    */
 
-  void setAnnotationsOption(
+  OPDSAcquisitionFeedEntryBuilderType setAnnotationsOption(
     OptionType<URI> uri);
 
   /**
    * @param uri The alternate URI
    */
-  void setAlternateOption(
+
+  OPDSAcquisitionFeedEntryBuilderType setAlternateOption(
     OptionType<URI> uri);
 
   /**
    * @param uri The analytics URI
    */
-  void setAnalyticsOption(
+
+  OPDSAcquisitionFeedEntryBuilderType setAnalyticsOption(
     OptionType<URI> uri);
 
   /**
@@ -107,15 +118,14 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param uri The report issues URI
    */
 
-  void setIssuesOption(
+  OPDSAcquisitionFeedEntryBuilderType setIssuesOption(
     OptionType<URI> uri);
-
 
   /**
    * @param uri The Related feed URI
    */
 
-  void setRelatedOption(
+  OPDSAcquisitionFeedEntryBuilderType setRelatedOption(
     OptionType<URI> uri);
 
   /**
@@ -124,7 +134,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param pub The publication date
    */
 
-  void setPublishedOption(
+  OPDSAcquisitionFeedEntryBuilderType setPublishedOption(
     OptionType<DateTime> pub);
 
   /**
@@ -133,7 +143,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param pub The publisher
    */
 
-  void setPublisherOption(
+  OPDSAcquisitionFeedEntryBuilderType setPublisherOption(
     OptionType<String> pub);
 
   /**
@@ -142,7 +152,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param dist The distribution
    */
 
-  void setDistribution(
+  OPDSAcquisitionFeedEntryBuilderType setDistribution(
     String dist);
 
   /**
@@ -151,7 +161,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param text The summary
    */
 
-  void setSummaryOption(
+  OPDSAcquisitionFeedEntryBuilderType setSummaryOption(
     OptionType<String> text);
 
   /**
@@ -160,13 +170,14 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    * @param uri The thumbnail
    */
 
-  void setThumbnailOption(
+  OPDSAcquisitionFeedEntryBuilderType setThumbnailOption(
     OptionType<URI> uri);
 
   /**
    * @param licensor The Licensor
    */
-  void setLicensorOption(
+
+  OPDSAcquisitionFeedEntryBuilderType setLicensorOption(
     OptionType<DRMLicensor> licensor);
 
 }

@@ -4,10 +4,9 @@ import com.google.common.base.Preconditions;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheck;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDateTime;
+import org.nypl.simplified.parser.api.ParseError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -21,9 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -49,14 +48,13 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
   private static final Logger LOG;
 
   static {
-    LOG = NullCheck.notNull(LoggerFactory.getLogger(OPDSFeedParser.class));
+    LOG = Objects.requireNonNull(LoggerFactory.getLogger(OPDSFeedParser.class));
   }
 
   private final OPDSAcquisitionFeedEntryParserType entry_parser;
 
-  private OPDSFeedParser(
-    final OPDSAcquisitionFeedEntryParserType in_entry_parser) {
-    this.entry_parser = NullCheck.notNull(in_entry_parser);
+  private OPDSFeedParser(final OPDSAcquisitionFeedEntryParserType in_entry_parser) {
+    this.entry_parser = Objects.requireNonNull(in_entry_parser);
   }
 
   /**
@@ -70,10 +68,11 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
   }
 
   private static OptionType<OPDSFacet> parseFacet(
-    final Element e)
-    throws URISyntaxException {
+    final URI source,
+    final OPDSAcquisitionFeedBuilderType builder,
+    final Element e) {
     final boolean has_name =
-      OPDSXML.nodeHasName(NullCheck.notNull(e), ATOM_URI, "link");
+      OPDSXML.nodeHasName(Objects.requireNonNull(e), ATOM_URI, "link");
 
     Preconditions.checkArgument(has_name, "Node has name 'link'");
 
@@ -84,18 +83,23 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
 
     if (has_everything) {
       final String title =
-        NullCheck.notNull(e.getAttribute("title"));
+        Objects.requireNonNull(e.getAttribute("title"));
       final String rel =
-        NullCheck.notNull(e.getAttribute("rel"));
+        Objects.requireNonNull(e.getAttribute("rel"));
       final String href =
-        NullCheck.notNull(e.getAttribute("href"));
+        Objects.requireNonNull(e.getAttribute("href"));
       final String group =
-        NullCheck.notNull(e.getAttributeNS(OPDS_URI_TEXT, "facetGroup"));
+        Objects.requireNonNull(e.getAttributeNS(OPDS_URI_TEXT, "facetGroup"));
 
       if (FACET_URI_TEXT.equals(rel)) {
         final OptionType<String> group_type = parseFacetGroupType(e);
         final boolean active = parseFacetIsActive(e);
-        return Option.some(new OPDSFacet(active, new URI(href), group, title, group_type));
+        try {
+          return Option.some(new OPDSFacet(active, scrubURI(href), group, title, group_type));
+        } catch (URISyntaxException ex) {
+          builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel(FACET_URI_TEXT), ex));
+          return Option.none();
+        }
       }
     }
 
@@ -119,8 +123,9 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
   }
 
   private static OptionType<URI> parseNextLink(
-    final Element e)
-    throws URISyntaxException {
+    final URI source,
+    final OPDSAcquisitionFeedBuilderType builder,
+    final Element e) {
     Preconditions.checkArgument(
       "link".equals(e.getLocalName()),
       "localname %s == %s",
@@ -130,19 +135,29 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final String rel = e.getAttribute("rel");
     if ("next".equals(rel)) {
       if (e.hasAttribute("href")) {
-        final URI uri = new URI(e.getAttribute("href"));
-        return Option.some(uri);
+        try {
+          final URI uri = scrubURI(e.getAttribute("href"));
+          return Option.some(uri);
+        } catch (URISyntaxException ex) {
+          builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("next"), ex));
+          return Option.none();
+        }
       }
     }
 
     return Option.none();
   }
 
+  private static URI scrubURI(String text) throws URISyntaxException {
+    return new URI(text.trim());
+  }
+
   private static OptionType<OPDSSearchLink> parseSearchLink(
-    final Element e)
-    throws URISyntaxException {
+    final URI source,
+    final OPDSAcquisitionFeedBuilderType builder,
+    final Element e) {
     final boolean has_name = OPDSXML.nodeHasName(
-      NullCheck.notNull(e), ATOM_URI, "link");
+      Objects.requireNonNull(e), ATOM_URI, "link");
 
     Preconditions.checkArgument(has_name, "Node has name 'link'");
 
@@ -150,14 +165,19 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
       e.hasAttribute("type") && e.hasAttribute("rel") && e.hasAttribute("href");
 
     if (has_everything) {
-      final String t = NullCheck.notNull(e.getAttribute("type"));
-      final String r = NullCheck.notNull(e.getAttribute("rel"));
-      final String h = NullCheck.notNull(e.getAttribute("href"));
+      final String t = Objects.requireNonNull(e.getAttribute("type"));
+      final String r = Objects.requireNonNull(e.getAttribute("rel"));
+      final String h = Objects.requireNonNull(e.getAttribute("href"));
 
       if ("search".equals(r)) {
-        final URI u = NullCheck.notNull(new URI(h));
-        final OPDSSearchLink sl = new OPDSSearchLink(t, u);
-        return Option.some(sl);
+        try {
+          final URI u = Objects.requireNonNull(scrubURI(h));
+          final OPDSSearchLink sl = new OPDSSearchLink(t, u);
+          return Option.some(sl);
+        } catch (URISyntaxException ex) {
+          builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("search"), ex));
+          return Option.none();
+        }
       }
     }
 
@@ -170,15 +190,17 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     dbf.setNamespaceAware(true);
     final DocumentBuilder db = dbf.newDocumentBuilder();
-    return NullCheck.notNull(db.parse(s));
+    return Objects.requireNonNull(db.parse(s));
   }
 
-  private static OptionType<URI> parseTermsOfService(final Element e)
-    throws URISyntaxException {
-    NullCheck.notNull(e);
+  private static OptionType<URI> parseTermsOfService(
+    final URI source,
+    final OPDSAcquisitionFeedBuilderType builder,
+    final Element e) {
+    Objects.requireNonNull(e);
 
     final boolean has_name = OPDSXML.nodeHasName(
-      NullCheck.notNull(e), ATOM_URI, "link");
+      Objects.requireNonNull(e), ATOM_URI, "link");
 
     Preconditions.checkArgument(has_name, "Node has name 'link'");
 
@@ -186,23 +208,30 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
       e.hasAttribute("rel") && e.hasAttribute("href");
 
     if (has_everything) {
-      final String r = NullCheck.notNull(e.getAttribute("rel"));
-      final String h = NullCheck.notNull(e.getAttribute("href"));
+      final String r = Objects.requireNonNull(e.getAttribute("rel"));
+      final String h = Objects.requireNonNull(e.getAttribute("href"));
 
       if ("terms-of-service".equals(r)) {
-        return Option.some(new URI(h));
+        try {
+          return Option.some(scrubURI(h));
+        } catch (URISyntaxException ex) {
+          builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("terms-of-service"), ex));
+          return Option.none();
+        }
       }
     }
 
     return Option.none();
   }
 
-  private static OptionType<URI> parseAbout(final Element e)
-    throws URISyntaxException {
-    NullCheck.notNull(e);
+  private static OptionType<URI> parseAbout(
+    final URI source,
+    final OPDSAcquisitionFeedBuilderType builder,
+    final Element e) {
+    Objects.requireNonNull(e);
 
     final boolean has_name = OPDSXML.nodeHasName(
-      NullCheck.notNull(e), ATOM_URI, "link");
+      Objects.requireNonNull(e), ATOM_URI, "link");
 
     Preconditions.checkArgument(has_name, "Node has name 'link'");
 
@@ -210,23 +239,30 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
       e.hasAttribute("rel") && e.hasAttribute("href");
 
     if (has_everything) {
-      final String r = NullCheck.notNull(e.getAttribute("rel"));
-      final String h = NullCheck.notNull(e.getAttribute("href"));
+      final String r = Objects.requireNonNull(e.getAttribute("rel"));
+      final String h = Objects.requireNonNull(e.getAttribute("href"));
 
       if ("about".equals(r)) {
-        return Option.some(new URI(h));
+        try {
+          return Option.some(scrubURI(h));
+        } catch (URISyntaxException ex) {
+          builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("about"), ex));
+          return Option.none();
+        }
       }
     }
 
     return Option.none();
   }
 
-  private static OptionType<URI> parsePrivacyPolicy(final Element e)
-    throws URISyntaxException {
-    NullCheck.notNull(e);
+  private static OptionType<URI> parsePrivacyPolicy(
+    final URI source,
+    final OPDSAcquisitionFeedBuilderType builder,
+    final Element e) {
+    Objects.requireNonNull(e);
 
     final boolean has_name = OPDSXML.nodeHasName(
-      NullCheck.notNull(e), ATOM_URI, "link");
+      Objects.requireNonNull(e), ATOM_URI, "link");
 
     Preconditions.checkArgument(has_name, "Node has name 'link'");
 
@@ -234,15 +270,42 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
       e.hasAttribute("rel") && e.hasAttribute("href");
 
     if (has_everything) {
-      final String r = NullCheck.notNull(e.getAttribute("rel"));
-      final String h = NullCheck.notNull(e.getAttribute("href"));
+      final String r = Objects.requireNonNull(e.getAttribute("rel"));
+      final String h = Objects.requireNonNull(e.getAttribute("href"));
 
       if ("privacy-policy".equals(r)) {
-        return Option.some(new URI(h));
+        try {
+          return Option.some(scrubURI(h));
+        } catch (URISyntaxException ex) {
+          builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("privacy-policy"), ex));
+          return Option.none();
+        }
       }
     }
 
     return Option.none();
+  }
+
+  private static String hrefAttributeOfLinkRel(String relValue) {
+    return "'href' attribute of 'link' with 'rel' " + relValue;
+  }
+
+  private static ParseError invalidURI(
+    final URI source,
+    final String sourceLocation,
+    final Exception e) {
+    final StringBuilder builder = new StringBuilder(128);
+    builder.append("Could not parse URI: ");
+    builder.append(sourceLocation);
+    builder.append(": ");
+    builder.append(e.getMessage());
+
+    return new ParseError(
+      source,
+      builder.toString(),
+      -1,
+      0,
+      e);
   }
 
   @Override
@@ -250,18 +313,18 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final URI uri,
     final InputStream s)
     throws OPDSParseException {
-    NullCheck.notNull(s);
+    Objects.requireNonNull(s);
 
     final long time_pre_parse = System.nanoTime();
     long time_post_parse = time_pre_parse;
 
     try {
-      OPDSFeedParser.LOG.debug("parsing: {}", uri);
+      LOG.debug("parsing: {}", uri);
 
       final Document d = OPDSFeedParser.parseStream(s);
       time_post_parse = System.nanoTime();
 
-      final Node root = NullCheck.notNull(d.getFirstChild());
+      final Node root = Objects.requireNonNull(d.getFirstChild());
       if (root instanceof Element) {
         final Element root_e = (Element) root;
         if (OPDSXML.nodeHasName(root_e, ATOM_URI, "feed")) {
@@ -289,15 +352,11 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
       throw new OPDSParseException(e);
     } catch (final DOMException e) {
       throw new OPDSParseException(e);
-    } catch (final ParseException e) {
-      throw new OPDSParseException(e);
-    } catch (final URISyntaxException e) {
-      throw new OPDSParseException(e);
     } finally {
       final long time_now = System.nanoTime();
       final long time_parse = time_post_parse - time_pre_parse;
       final long time_interp = time_now - time_post_parse;
-      OPDSFeedParser.LOG.debug(
+      LOG.debug(
         "parsing completed ({}ms - parse: {}ms, interp: {}ms): {}",
         TimeUnit.MILLISECONDS.convert(
           time_parse + time_interp, TimeUnit.NANOSECONDS),
@@ -313,22 +372,22 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final URI uri,
     final Element e)
     throws OPDSParseException {
-    OPDSFeedParser.LOG.debug("parsing feed as single entry: {}", uri);
+    LOG.debug("parsing feed as single entry: {}", uri);
 
     final String id = "urn:simplified-entry";
     final DateTime updated = DateTime.now();
     final String title = "Entry";
     final OPDSAcquisitionFeedBuilderType b =
       OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
-    b.addEntry(this.entry_parser.parseEntry(e));
+    b.addEntry(this.entry_parser.parseEntry(uri, e));
     return b.build();
   }
 
   private OPDSAcquisitionFeed parseAsFeed(
     final URI uri,
     final Node root)
-    throws OPDSParseException, ParseException, URISyntaxException {
-    OPDSFeedParser.LOG.debug("parsing feed as ordinary feed: {}", uri);
+    throws OPDSParseException {
+    LOG.debug("parsing feed as ordinary feed: {}", uri);
 
     final Element e_feed = OPDSXML.nodeAsElementWithName(
       root, ATOM_URI, "feed");
@@ -337,18 +396,18 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final String title = OPDSAtom.findTitle(e_feed);
     final DateTime updated = OPDSAtom.findUpdated(e_feed);
 
-    final OPDSAcquisitionFeedBuilderType b =
+    final OPDSAcquisitionFeedBuilderType builder =
       OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
 
-    final List<Element> links = new ArrayList<Element>(32);
+    final List<Element> links = new ArrayList<>(32);
     final NodeList children = e_feed.getChildNodes();
 
     for (int index = 0; index < children.getLength(); ++index) {
-      final Node child = NullCheck.notNull(children.item(index));
+      final Node child = Objects.requireNonNull(children.item(index));
 
       if (child instanceof Element) {
 
-        /**
+        /*
          * Links.
          */
 
@@ -358,78 +417,80 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
           final Element e = OPDSXML.nodeAsElement(child);
           links.add(e);
 
-          /**
+          /*
            * Search links.
            */
 
           {
             final OptionType<OPDSSearchLink> search_opt =
-              OPDSFeedParser.parseSearchLink(e);
+              OPDSFeedParser.parseSearchLink(uri, builder, e);
             if (search_opt.isSome()) {
-              b.setSearchOption(search_opt);
+              builder.setSearchOption(search_opt);
               continue;
             }
           }
 
-          /**
+          /*
            * Next links.
            */
 
           {
-            final OptionType<URI> next_opt = OPDSFeedParser.parseNextLink(e);
+            final OptionType<URI> next_opt =
+              OPDSFeedParser.parseNextLink(uri, builder, e);
             if (next_opt.isSome()) {
-              b.setNextOption(next_opt);
+              builder.setNextOption(next_opt);
               continue;
             }
           }
 
-          /**
+          /*
            * Facet links.
            */
 
           {
             final OptionType<OPDSFacet> facet_opt =
-              OPDSFeedParser.parseFacet(e);
+              OPDSFeedParser.parseFacet(uri, builder, e);
             if (facet_opt.isSome()) {
-              b.addFacet(((Some<OPDSFacet>) facet_opt).get());
+              builder.addFacet(((Some<OPDSFacet>) facet_opt).get());
               continue;
             }
           }
 
-          /**
+          /*
            * App About links.
            */
 
           {
             final OptionType<URI> about_opt =
-              OPDSFeedParser.parseAbout(e);
+              OPDSFeedParser.parseAbout(uri, builder, e);
             if (about_opt.isSome()) {
-              b.setAboutOption(about_opt);
+              builder.setAboutOption(about_opt);
               continue;
             }
           }
 
-          /**
+          /*
            * Terms of service links.
            */
 
           {
             final OptionType<URI> tos_opt =
-              OPDSFeedParser.parseTermsOfService(e);
+              OPDSFeedParser.parseTermsOfService(uri, builder, e);
             if (tos_opt.isSome()) {
-              b.setTermsOfServiceOption(tos_opt);
+              builder.setTermsOfServiceOption(tos_opt);
               continue;
             }
           }
 
-          /**
+          /*
            * Privacy policy links.
            */
 
           {
-            final OptionType<URI> pp_opt = OPDSFeedParser.parsePrivacyPolicy(e);
+            final OptionType<URI> pp_opt =
+              OPDSFeedParser.parsePrivacyPolicy(uri, builder, e);
             if (pp_opt.isSome()) {
-              b.setPrivacyPolicyOption(pp_opt);
+              builder.setPrivacyPolicyOption(pp_opt);
               continue;
             }
           }
@@ -459,8 +520,8 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
                   element.hasAttribute("rel") && element.hasAttribute("href");
 
                 if (has_everything) {
-                  final String r = NullCheck.notNull(element.getAttribute("rel"));
-                  final String h = NullCheck.notNull(element.getAttribute("href"));
+                  final String r = Objects.requireNonNull(element.getAttribute("rel"));
+                  final String h = Objects.requireNonNull(element.getAttribute("href"));
 
                   if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
 
@@ -471,26 +532,24 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
               }
               if (in_vendor != null && in_client_token != null) {
                 final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token, in_device_manager);
-                b.setLisensor(Option.some(licensor));
+                builder.setLisensor(Option.some(licensor));
               }
             }
           }
 
         }
 
-        /**
+        /*
          * Entries.
          */
 
-        if (OPDSXML.nodeHasName(
-          (Element) child, ATOM_URI, "entry")) {
+        if (OPDSXML.nodeHasName((Element) child, ATOM_URI, "entry")) {
           final Element e = OPDSXML.nodeAsElement(child);
-          b.addEntry(this.entry_parser.parseEntry(e));
-//          continue;
+          builder.addEntry(this.entry_parser.parseEntry(uri, e));
         }
       }
     }
 
-    return b.build();
+    return builder.build();
   }
 }
