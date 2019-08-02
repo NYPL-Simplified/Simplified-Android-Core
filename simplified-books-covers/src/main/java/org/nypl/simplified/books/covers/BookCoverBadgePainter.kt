@@ -35,9 +35,10 @@ class BookCoverBadgePainter(
     val bottom = source.height
     val targetRect = Rect(left, top, right, bottom)
 
-    if (badge.backgroundColorRGBA != null) {
+    val colorBackground = badge.backgroundColorRGBA()
+    if (colorBackground != 0x00_00_00_00) {
       val backgroundPaint = Paint()
-      backgroundPaint.color = badge.backgroundColorRGBA
+      backgroundPaint.color = colorBackground
       backgroundPaint.isAntiAlias = true
       canvas.drawRect(targetRect, backgroundPaint)
     }

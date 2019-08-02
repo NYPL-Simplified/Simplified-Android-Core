@@ -18,10 +18,11 @@ import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 
 class CatalogCoverBadgeImages private constructor(
   private val screenSize: ScreenSizeInformationType,
-  private val backgroundColorRGBA: Int?,
+  private val backgroundColorRGBA: () -> Int,
   private val audioBookIcon: Bitmap) : BookCoverBadgeLookupType {
 
-  override fun badgeForEntry(entry: FeedEntryOPDS): BookCoverBadge? {
+  override fun badgeForEntry(
+    entry: FeedEntryOPDS): BookCoverBadge? {
     return when (entry.probableFormat) {
       BOOK_FORMAT_EPUB -> {
         null
@@ -31,7 +32,7 @@ class CatalogCoverBadgeImages private constructor(
           bitmap = this.audioBookIcon,
           width = this.screenSize.screenDPToPixels(24).toInt(),
           height = this.screenSize.screenDPToPixels(24).toInt(),
-          backgroundColorRGBA = this.backgroundColorRGBA)
+          backgroundColorRGBA = { this.backgroundColorRGBA() })
       }
       BOOK_FORMAT_PDF -> {
         null
@@ -50,7 +51,7 @@ class CatalogCoverBadgeImages private constructor(
 
     fun create(
       resources: Resources,
-      backgroundColorRGBA: Int?,
+      backgroundColorRGBA: () -> Int,
       screenSize: ScreenSizeInformationType): BookCoverBadgeLookupType {
       val audioBookIcon = BitmapFactory.decodeResource(resources, R.drawable.audiobook_icon)
       return CatalogCoverBadgeImages(

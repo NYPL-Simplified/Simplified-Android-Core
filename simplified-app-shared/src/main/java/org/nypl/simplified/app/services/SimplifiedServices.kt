@@ -1,12 +1,11 @@
 package org.nypl.simplified.app.services
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.os.Environment
+import android.support.v4.content.ContextCompat
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
@@ -137,24 +136,24 @@ class SimplifiedServices private constructor(
     if (this.brandingThemeOverride.isSome) {
       return (this.brandingThemeOverride as Some<ThemeValue>).get()
     }
-
-    val currentProfileOpt = this.profilesDatabase.currentProfile()
-    if (currentProfileOpt.isSome) {
-      val currentProfile = (currentProfileOpt as Some<ProfileType>).get()
-      val accountCurrent = currentProfile.accountCurrent()
-      val theme = ThemeControl.themesByName[accountCurrent.provider.mainColor]
-      if (theme != null) {
-        return theme
-      }
-    }
-
-    return ThemeControl.themeFallback
+    return themeForProfile(this.profilesDatabase.currentProfile())
   }
-
 
   companion object {
 
     private val logger = LoggerFactory.getLogger(SimplifiedServices::class.java)
+
+    private fun themeForProfile(profile: OptionType<ProfileType>): ThemeValue {
+      if (profile.isSome) {
+        val currentProfile = (profile as Some<ProfileType>).get()
+        val accountCurrent = currentProfile.accountCurrent()
+        val theme = ThemeControl.themesByName[accountCurrent.provider.mainColor]
+        if (theme != null) {
+          return theme
+        }
+      }
+      return ThemeControl.themeFallback
+    }
 
     /**
      * The current on-disk data version. The entire directory tree the application uses
@@ -225,25 +224,6 @@ class SimplifiedServices private constructor(
 
       publishEvent(strings.bootingCoverGenerator)
       val coverGenerator = BookCoverGenerator(tenPrint)
-
-      publishEvent(strings.bootingCoverBadgeProvider)
-      val coverBadges = CatalogCoverBadgeImages.create(
-        context.resources,
-        ThemeControl.resolveColorAttribute(context.theme, R.attr.colorPrimary),
-        screenSize)
-
-      publishEvent(strings.bootingCoverProvider)
-      val execCovers =
-        NamedThreadPools.namedThreadPool(2, "cover", 19)
-      val coverProvider =
-        BookCoverProvider.newCoverProvider(
-          context,
-          bookRegistry,
-          coverGenerator,
-          coverBadges,
-          execCovers,
-          false,
-          false)
 
       publishEvent(strings.bootingLocalImageLoader)
       val localImageLoader =
@@ -401,6 +381,26 @@ class SimplifiedServices private constructor(
             bookController
           ))
 
+      publishEvent(strings.bootingCoverBadgeProvider)
+      val coverBadges =
+        CatalogCoverBadgeImages.create(
+          context.resources,
+          { this.currentThemeColor(context, bookController) },
+          screenSize)
+
+      publishEvent(strings.bootingCoverProvider)
+      val execCovers =
+        NamedThreadPools.namedThreadPool(2, "cover", 19)
+      val coverProvider =
+        BookCoverProvider.newCoverProvider(
+          context,
+          bookRegistry,
+          coverGenerator,
+          coverBadges,
+          execCovers,
+          false,
+          false)
+
       /*
        * Log out the current profile after ten minutes, warning one minute before this happens.
        */
@@ -463,6 +463,23 @@ class SimplifiedServices private constructor(
         readerHTTPServer = httpd,
         screenSize = screenSize
       )
+    }
+
+    private fun currentThemeColor(context: Context, profilesController: ProfilesControllerType): Int {
+      val theme = try {
+        val profile =
+          profilesController.profileCurrent()
+        val account =
+          profile.accountCurrent()
+
+        ThemeControl.themesByName[account.provider.mainColor] ?: ThemeControl.themeFallback
+      } catch (e: Exception) {
+        ThemeControl.themeFallback
+      }
+
+      val color = ContextCompat.getColor(context, theme.color)
+      this.logger.trace("current theme color: 0x{}", String.format("%06x", color))
+      return color
     }
 
     private fun createFeedParser(): OPDSFeedParserType {
@@ -582,7 +599,7 @@ class SimplifiedServices private constructor(
           directoryStorageDocuments,
           directoryStorageProfiles)
 
-      var exception : Exception? = null
+      var exception: Exception? = null
       for (directory in directories) {
         try {
           DirectoryUtilities.directoryCreate(directory)
