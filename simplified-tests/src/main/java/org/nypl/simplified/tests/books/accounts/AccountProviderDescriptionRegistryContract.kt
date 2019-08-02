@@ -13,13 +13,15 @@ import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.StatusChanged
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.Updated
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.Idle
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.Refreshing
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.tests.MockAccountProviders
 import org.slf4j.Logger
 import java.net.URI
@@ -62,7 +64,7 @@ abstract class AccountProviderDescriptionRegistryContract {
       registry.findAccountProviderDescription(
         URI.create("urn:uuid:6ba13d1e-c790-4247-9c80-067c6a7257f0"))
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+    Assert.assertEquals(Idle, registry.status)
     Assert.assertEquals(null, notFound)
   }
 
@@ -80,10 +82,21 @@ abstract class AccountProviderDescriptionRegistryContract {
     registry.events.subscribe { e -> this.events.add(e) }
     registry.refresh()
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
-    Assert.assertEquals(1, this.events.size)
-    val event = this.events[0] as SourceFailed
-    Assert.assertEquals(CrashingSource::class.java, event.clazz)
+    Assert.assertEquals(Idle, registry.status)
+    Assert.assertEquals(3, this.events.size)
+
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
+
+    run {
+      val event = this.events.removeAt(0) as SourceFailed
+      Assert.assertEquals(CrashingSource::class.java, event.clazz)
+    }
+
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
   }
 
   /**
@@ -107,16 +120,29 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+    Assert.assertEquals(Idle, registry.status)
 
     Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
     Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
     Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
 
-    Assert.assertEquals(3, this.events.size)
-    Assert.assertEquals(URI.create("urn:0"), (this.events[0] as Updated).id)
-    Assert.assertEquals(URI.create("urn:1"), (this.events[1] as Updated).id)
-    Assert.assertEquals(URI.create("urn:2"), (this.events[2] as Updated).id)
+    Assert.assertEquals(5, this.events.size)
+
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:0"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:1"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:2"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
   }
 
   /**
@@ -141,7 +167,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+    Assert.assertEquals(Idle, registry.status)
 
     Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
     Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
@@ -154,10 +180,23 @@ abstract class AccountProviderDescriptionRegistryContract {
     Assert.assertNotEquals(
       DateTime.parse("1900-01-01T00:00:00Z"), description2.metadata.updated)
 
-    Assert.assertEquals(3, this.events.size)
-    Assert.assertEquals(URI.create("urn:0"), (this.events[0] as Updated).id)
-    Assert.assertEquals(URI.create("urn:1"), (this.events[1] as Updated).id)
-    Assert.assertEquals(URI.create("urn:2"), (this.events[2] as Updated).id)
+    Assert.assertEquals(5, this.events.size)
+
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:0"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:1"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:2"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
   }
 
   /**
@@ -181,17 +220,31 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+    Assert.assertEquals(Idle, registry.status)
 
     Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
     Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
     Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
 
-    Assert.assertEquals(4, this.events.size)
-    Assert.assertEquals(URI.create("urn:0"), (this.events[0] as Updated).id)
-    Assert.assertEquals(URI.create("urn:1"), (this.events[1] as Updated).id)
-    Assert.assertEquals(URI.create("urn:2"), (this.events[2] as Updated).id)
-    Assert.assertEquals(CrashingSource::class.java, (this.events[3] as SourceFailed).clazz)
+    Assert.assertEquals(6, this.events.size)
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:0"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:1"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:2"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(CrashingSource::class.java, (this.events.removeAt(0) as SourceFailed).clazz)
+    }
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
   }
 
   /**
@@ -215,17 +268,32 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+    Assert.assertEquals(Idle, registry.status)
 
     Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
     Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
     Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
 
-    Assert.assertEquals(4, this.events.size)
-    Assert.assertEquals(URI.create("urn:0"), (this.events[0] as Updated).id)
-    Assert.assertEquals(URI.create("urn:1"), (this.events[1] as Updated).id)
-    Assert.assertEquals(URI.create("urn:2"), (this.events[2] as Updated).id)
-    Assert.assertEquals(FailingSource::class.java, (this.events[3] as SourceFailed).clazz)
+    Assert.assertEquals(6, this.events.size)
+
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:0"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:1"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(URI.create("urn:2"), (this.events.removeAt(0) as Updated).id)
+    }
+    run {
+      Assert.assertEquals(FailingSource::class.java, (this.events.removeAt(0) as SourceFailed).clazz)
+    }
+    run {
+      this.events.removeAt(0) as StatusChanged
+    }
   }
 
   /**
@@ -248,7 +316,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     val changed =
       registry.updateDescription(existing0)
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+    Assert.assertEquals(Idle, registry.status)
     Assert.assertEquals(existing0, changed)
     Assert.assertEquals(existing0, registry.accountProviderDescriptions()[existing0.metadata.id])
   }
@@ -279,7 +347,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     val changed =
       registry.updateProvider(older0)
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+    Assert.assertEquals(Idle, registry.status)
     Assert.assertEquals(existing0, initial)
     Assert.assertEquals(existing0, changed)
     Assert.assertEquals(registry.resolvedProviders[existing0.id], existing0)
@@ -296,22 +364,23 @@ abstract class AccountProviderDescriptionRegistryContract {
         MockAccountProviders.fakeProvider("urn:fake:0"),
         listOf(OKSource()))
 
-    var refreshing = false
+    val eventsWithRefreshing =
+      mutableListOf<AccountProviderRegistryStatus>()
 
     registry.events.subscribe {
-      this.events.add(it)
-      if (refreshing) {
-        Assert.assertEquals(AccountProviderRegistryStatus.Refreshing, registry.status)
-      } else {
-        Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
-      }
+      eventsWithRefreshing.add(registry.status)
     }
 
-    refreshing = true
     registry.refresh()
-    refreshing = false
 
-    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+    Assert.assertEquals(5, eventsWithRefreshing.size)
+    Assert.assertEquals(Refreshing::class.java, eventsWithRefreshing[0].javaClass)
+    Assert.assertEquals(Refreshing::class.java, eventsWithRefreshing[1].javaClass)
+    Assert.assertEquals(Refreshing::class.java, eventsWithRefreshing[2].javaClass)
+    Assert.assertEquals(Refreshing::class.java, eventsWithRefreshing[3].javaClass)
+    Assert.assertEquals(Idle::class.java, eventsWithRefreshing[4].javaClass)
+
+    Assert.assertEquals(Idle, registry.status)
   }
 
   companion object {
