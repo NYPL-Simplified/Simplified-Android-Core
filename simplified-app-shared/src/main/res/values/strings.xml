@@ -190,6 +190,7 @@
   <string name="settings_account_delete">Are you sure you want to remove your \"%s\" account from this device?</string>
   <string name="settings_account_delete_button">Delete</string>
   <string name="settings_accounts_select_library">Please choose a library.</string>
+  <string name="settings_account_refresh">Refresh</string>
 
   <string name="login_needed">You need to login to access the collection.</string>
   <string name="login_with_barcode">Login with Barcode</string>

@@ -34,6 +34,12 @@ interface AccountProviderRegistryType {
   val resolvedProviders: Map<URI, AccountProviderType>
 
   /**
+   * The status of the account registry.
+   */
+
+  val status: AccountProviderRegistryStatus
+
+  /**
    * Refresh the available account providers from all sources.
    */
 

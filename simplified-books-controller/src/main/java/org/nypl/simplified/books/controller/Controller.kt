@@ -145,7 +145,8 @@ class Controller private constructor(
     return when (event) {
       is AccountProviderRegistryEvent.Updated ->
         this.onAccountRegistryProviderUpdatedEvent(event)
-      is AccountProviderRegistryEvent.SourceFailed -> {
+      is AccountProviderRegistryEvent.SourceFailed,
+      AccountProviderRegistryEvent.StatusChanged -> {
 
       }
     }
