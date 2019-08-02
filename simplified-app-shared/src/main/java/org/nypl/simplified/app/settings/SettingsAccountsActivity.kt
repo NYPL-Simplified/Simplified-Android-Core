@@ -12,9 +12,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.ProgressBar
 import android.widget.TextView
 import com.google.common.collect.ImmutableList
 import com.io7m.jfunctional.Unit
@@ -32,6 +34,8 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
@@ -47,6 +51,7 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.theme.ThemeControl
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
 
@@ -441,25 +446,35 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
    */
 
   private fun openAccountCreationDialog() {
-    val availableAccountProvidersDescriptions =
-      this.determineAvailableAccountProviderDescriptions()
-
-    val dialog = Dialog(this)
+    // XXX: This is not really the correct theme to use for dialogs, but we will be
+    //      replacing this dialog with a full-screen fragment later anyway.
+    val dialog = Dialog(this, Simplified.application.services().currentTheme.themeWithNoActionBar)
     dialog.setTitle(R.string.settings_accounts_select_library)
     dialog.setContentView(R.layout.accounts_picker)
+
+    val availableAccountProviders =
+      ArrayList<AccountProviderDescriptionType>()
 
     val adapter =
       AccountsArrayAdapter(
         targetContext = this,
         picasso = Simplified.application.services().imageLoader,
-        adapterAccountsArray = availableAccountProvidersDescriptions,
+        adapterAccountsArray = availableAccountProviders,
         inflater = this.layoutInflater)
 
-    val listView = dialog.findViewById<ListView>(R.id.account_list)
+    val refresh =
+      dialog.findViewById<Button>(R.id.accountListRefreshButton)
+    val progress =
+      dialog.findViewById<ProgressBar>(R.id.accountListProgress)
+    val progressText =
+      dialog.findViewById<TextView>(R.id.accountListProgressText)
+    val listView =
+      dialog.findViewById<ListView>(R.id.accountList)
+
     listView.adapter = adapter
     listView.setOnItemClickListener { _, _, position, _ ->
-      val accountProviderDescription = availableAccountProvidersDescriptions[position]
-      availableAccountProvidersDescriptions.remove(accountProviderDescription)
+      val accountProviderDescription = availableAccountProviders[position]
+      availableAccountProviders.remove(accountProviderDescription)
       adapter.notifyDataSetChanged()
       this.tryCreateAccount(accountProviderDescription)
       dialog.dismiss()
@@ -467,6 +482,59 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       Unit.unit()
     }
 
+    val accountProviderRegistry =
+      Simplified.application.services().accountProviderRegistry
+
+    fun reconfigureUI() {
+      this.logger.debug("reconfiguring dialog UI")
+
+      when (accountProviderRegistry.status) {
+        AccountProviderRegistryStatus.Idle -> {
+          UIThread.runOnUIThread {
+            val providers = this.determineAvailableAccountProviderDescriptions()
+            this.logger.debug("registry is idle ({} providers)", providers.size)
+            availableAccountProviders.clear()
+            availableAccountProviders.addAll(providers)
+            adapter.notifyDataSetChanged()
+            listView.visibility = View.VISIBLE
+            progressText.visibility = View.INVISIBLE
+            progress.visibility = View.INVISIBLE
+          }
+        }
+        AccountProviderRegistryStatus.Refreshing -> {
+          UIThread.runOnUIThread {
+            this.logger.debug("registry is refreshing")
+            availableAccountProviders.clear()
+            adapter.notifyDataSetChanged()
+            listView.visibility = View.INVISIBLE
+            progressText.visibility = View.VISIBLE
+            progress.visibility = View.VISIBLE
+          }
+        }
+      }
+    }
+
+    val subscription =
+      accountProviderRegistry.events.subscribe { event ->
+        when (event) {
+          AccountProviderRegistryEvent.StatusChanged -> reconfigureUI()
+          is AccountProviderRegistryEvent.Updated,
+          is AccountProviderRegistryEvent.SourceFailed -> {
+
+          }
+        }
+      }
+
+    refresh.setOnClickListener {
+      Simplified.application.services()
+        .backgroundExecutor
+        .execute {
+          accountProviderRegistry.refresh()
+        }
+    }
+
+    dialog.setOnDismissListener { subscription.unsubscribe() }
+    reconfigureUI()
     dialog.show()
   }
 

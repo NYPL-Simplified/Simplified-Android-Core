@@ -1,15 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   android:id="@+id/accounts_layout"
   android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:orientation="vertical">
-  <ListView android:id="@+id/account_list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="start"
-    android:layout_marginTop="20dp"
+  android:layout_height="match_parent">
+
+  <TextView
+    android:id="@+id/accountListTitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    android:text="@string/settings_accounts_select_library"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/accountListProgressText"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:layout_margin="16dp"
+    android:textSize="24sp"
+    android:text="@string/bootingAccountProviders"
+    app:layout_constraintBottom_toTopOf="@+id/accountListProgress"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent" />
+
+  <ProgressBar
+    android:id="@+id/accountListProgress"
+    style="?android:attr/progressBarStyleHorizontal"
+    android:layout_width="256dp"
+    android:layout_height="32dp"
+    android:indeterminate="true"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <ListView
+    android:id="@+id/accountList"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="16dp"
     android:choiceMode="singleChoice"
     android:divider="@android:color/transparent"
-    android:dividerHeight="0dp" />
-</LinearLayout>
+    android:dividerHeight="0dp"
+    app:layout_constraintHeight_min="384dp"
+    app:layout_constraintBottom_toTopOf="@+id/accountButtons"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/accountListTitle" />
+
+  <android.support.constraint.ConstraintLayout
+    android:id="@+id/accountButtons"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
+
+    <Button
+      android:id="@+id/accountListRefreshButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/settings_account_refresh"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent" />
+
+  </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>

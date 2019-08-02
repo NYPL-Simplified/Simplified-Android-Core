@@ -14,6 +14,7 @@ import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.Updated
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -61,6 +62,7 @@ abstract class AccountProviderDescriptionRegistryContract {
       registry.findAccountProviderDescription(
         URI.create("urn:uuid:6ba13d1e-c790-4247-9c80-067c6a7257f0"))
 
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
     Assert.assertEquals(null, notFound)
   }
 
@@ -78,6 +80,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     registry.events.subscribe { e -> this.events.add(e) }
     registry.refresh()
 
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
     Assert.assertEquals(1, this.events.size)
     val event = this.events[0] as SourceFailed
     Assert.assertEquals(CrashingSource::class.java, event.clazz)
@@ -103,6 +106,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       registry.findAccountProviderDescription(URI.create("urn:1"))
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
+
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
 
     Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
     Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
@@ -135,6 +140,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       registry.findAccountProviderDescription(URI.create("urn:1"))
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
+
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
 
     Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
     Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
@@ -174,6 +181,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+
     Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
     Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
     Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
@@ -206,6 +215,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val description2 =
       registry.findAccountProviderDescription(URI.create("urn:2"))
 
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+
     Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
     Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
     Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
@@ -237,6 +248,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     val changed =
       registry.updateDescription(existing0)
 
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
     Assert.assertEquals(existing0, changed)
     Assert.assertEquals(existing0, registry.accountProviderDescriptions()[existing0.metadata.id])
   }
@@ -267,9 +279,39 @@ abstract class AccountProviderDescriptionRegistryContract {
     val changed =
       registry.updateProvider(older0)
 
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
     Assert.assertEquals(existing0, initial)
     Assert.assertEquals(existing0, changed)
     Assert.assertEquals(registry.resolvedProviders[existing0.id], existing0)
+  }
+
+  /**
+   * Refreshing publishes the correct status.
+   */
+
+  @Test
+  fun testRefreshStatus() {
+    val registry =
+      this.createRegistry(
+        MockAccountProviders.fakeProvider("urn:fake:0"),
+        listOf(OKSource()))
+
+    var refreshing = false
+
+    registry.events.subscribe {
+      this.events.add(it)
+      if (refreshing) {
+        Assert.assertEquals(AccountProviderRegistryStatus.Refreshing, registry.status)
+      } else {
+        Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
+      }
+    }
+
+    refreshing = true
+    registry.refresh()
+    refreshing = false
+
+    Assert.assertEquals(AccountProviderRegistryStatus.Idle, registry.status)
   }
 
   companion object {

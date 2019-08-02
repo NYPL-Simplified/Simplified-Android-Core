@@ -5,8 +5,9 @@ import com.google.common.base.Preconditions
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.Updated
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.*
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.*
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.observable.Observable
@@ -29,6 +30,10 @@ class AccountProviderRegistry private constructor(
 
   @Volatile
   private var initialized = false
+
+  @Volatile
+  private var statusRef : AccountProviderRegistryStatus = Idle
+
   private val descriptions = ConcurrentHashMap<URI, AccountProviderDescriptionType>()
   private val descriptionsReadOnly = Collections.unmodifiableMap(this.descriptions)
   private val resolved = ConcurrentHashMap<URI, AccountProviderType>()
@@ -43,6 +48,9 @@ class AccountProviderRegistry private constructor(
   override val events: ObservableReadableType<AccountProviderRegistryEvent> =
     this.eventsActual
 
+  override val status: AccountProviderRegistryStatus
+    get() = this.statusRef
+
   override fun accountProviderDescriptions(): Map<URI, AccountProviderDescriptionType> {
     if (!this.initialized) {
       this.refresh()
@@ -56,25 +64,32 @@ class AccountProviderRegistry private constructor(
   override fun refresh() {
     this.logger.debug("refreshing account provider descriptions")
 
-    for (source in this.sources) {
-      try {
-        when (val result = source.load(this.context)) {
-          is AccountProviderSourceType.SourceResult.SourceSucceeded -> {
-            val newDescriptions = result.results
-            for (key in newDescriptions.keys) {
-              this.updateDescription(newDescriptions[key]!!)
+    this.statusRef = Refreshing
+    this.eventsActual.send(StatusChanged)
+
+    try {
+      for (source in this.sources) {
+        try {
+          when (val result = source.load(this.context)) {
+            is AccountProviderSourceType.SourceResult.SourceSucceeded -> {
+              val newDescriptions = result.results
+              for (key in newDescriptions.keys) {
+                this.updateDescription(newDescriptions[key]!!)
+              }
+            }
+            is AccountProviderSourceType.SourceResult.SourceFailed -> {
+              this.eventsActual.send(SourceFailed(source.javaClass, result.exception))
             }
           }
-          is AccountProviderSourceType.SourceResult.SourceFailed -> {
-            this.eventsActual.send(SourceFailed(source.javaClass, result.exception))
-          }
+        } catch (e: Exception) {
+          this.eventsActual.send(SourceFailed(source.javaClass, e))
         }
-      } catch (e: Exception) {
-        this.eventsActual.send(SourceFailed(source.javaClass, e))
       }
+    } finally {
+      this.initialized = true
+      this.statusRef = Idle
+      this.eventsActual.send(StatusChanged)
     }
-
-    this.initialized = true
   }
 
   override fun updateProvider(accountProvider: AccountProviderType): AccountProviderType {

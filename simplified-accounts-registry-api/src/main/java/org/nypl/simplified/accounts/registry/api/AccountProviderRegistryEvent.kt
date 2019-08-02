@@ -9,6 +9,12 @@ import java.net.URI
 sealed class AccountProviderRegistryEvent {
 
   /**
+   * The status of the registry changed.
+   */
+
+  object StatusChanged: AccountProviderRegistryEvent()
+
+  /**
    * An account provider was updated.
    */
 
