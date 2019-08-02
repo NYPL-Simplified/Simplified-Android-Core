@@ -9,7 +9,7 @@
   <string name="label_street1">Street 1</string>
   <string name="label_street2">Street 2</string>
   <string name="label_city">City</string>
-  <string name="label_state">State</string>
+  <string name="label_region">Region</string>
   <string name="label_zip">Zip</string>
 
 

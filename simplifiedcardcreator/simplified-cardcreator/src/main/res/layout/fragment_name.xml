@@ -1,6 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               style="@style/WizardPageContainer">
 
@@ -26,46 +23,40 @@
 
       <TextView
         style="@style/WizardFormLabel"
-        android:text="@string/label_street1"/>
+        android:text="@string/label_firstname"/>
 
       <EditText
-        android:id="@+id/street1"
-        style="@style/WizardFormEditText"/>
+        android:id="@+id/firstname"
+        style="@style/WizardFormEditText"
+        android:inputType="text"/>
 
       <TextView
         style="@style/WizardFormLabel"
-        android:text="@string/label_street2"/>
+        android:text="@string/label_middletname"/>
 
       <EditText
-        android:id="@+id/street2"
+        android:id="@+id/middlename"
         style="@style/WizardFormEditText"
+        android:inputType="text"
         android:hint="Optional"/>
 
       <TextView
         style="@style/WizardFormLabel"
-        android:text="@string/label_city"/>
+        android:text="@string/label_lastname"/>
 
       <EditText
-        android:id="@+id/city"
-        style="@style/WizardFormEditText"/>
-
-
-      <TextView
-        style="@style/WizardFormLabel"
-        android:text="@string/label_state"/>
-
-      <EditText
-        android:id="@+id/region"
-        style="@style/WizardFormEditText"/>
-
-      <TextView
-        style="@style/WizardFormLabel"
-        android:text="@string/label_zip"/>
-
-      <EditText
-        android:id="@+id/zip"
+        android:id="@+id/lastname"
         style="@style/WizardFormEditText"
-        android:inputType="number"/>
+        android:inputType="text"/>
+
+      <TextView
+        style="@style/WizardFormLabel"
+        android:text="@string/label_email"/>
+
+      <EditText
+        android:id="@+id/email"
+        style="@style/WizardFormEditText"
+        android:inputType="textEmailAddress"/>
 
     </LinearLayout>
   </ScrollView>

@@ -25,7 +25,6 @@ import android.widget.TextView
 import android.widget.Toast
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
-import com.io7m.junreachable.UnimplementedCodeException
 import org.joda.time.LocalDate
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
@@ -372,6 +371,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         .load(logo.toString())
         .into(this.accountIcon)
     }
+  }
+
+  override fun onResume() {
+    super.onResume()
+    // Show logged in UI if user has pressed the back button from the card creator sscreen
+    configureLoginFieldVisibilityAndContents()
   }
 
   override fun onStart() {

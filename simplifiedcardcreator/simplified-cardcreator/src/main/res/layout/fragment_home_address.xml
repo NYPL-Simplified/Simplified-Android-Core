@@ -52,7 +52,7 @@
 
       <TextView
         style="@style/WizardFormLabel"
-        android:text="@string/label_state"/>
+        android:text="@string/label_region"/>
 
       <EditText
         android:id="@+id/region"
@@ -67,9 +67,11 @@
         style="@style/WizardFormEditText"
         android:inputType="number"/>
 
+
     </LinearLayout>
   </ScrollView>
 
   <TextView style="@style/WizardPageFooter"/>
 
 </LinearLayout>
+

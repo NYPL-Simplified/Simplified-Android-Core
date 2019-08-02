@@ -52,10 +52,11 @@
 
       <TextView
         style="@style/WizardFormLabel"
-        android:text="@string/label_region"/>
+        android:text="@string/label_state"/>
 
       <EditText
         android:id="@+id/region"
+        android:maxLength="2"
         style="@style/WizardFormEditText"/>
 
       <TextView
@@ -64,6 +65,7 @@
 
       <EditText
         android:id="@+id/zip"
+        android:maxLength="5"
         style="@style/WizardFormEditText"
         android:inputType="number"/>
 

@@ -1,7 +1,6 @@
 package org.nypl.simplified.app.signup;
 
 import android.Manifest;
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -552,6 +551,11 @@ public class CardCreatorActivity extends FragmentActivity implements
     this.showProgress(false);
     ((Button) findViewById(R.id.next_button)).setText(R.string.nav_next);
 
+    // Close card creator and go back to login screen
+    if (this.getVisibleFragment() instanceof ConfirmationFragment) {
+      this.finish();
+    }
+
     if (this.getVisibleFragment() == null || this.getVisibleFragment() instanceof AgeFragment) {
       this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON), false);
       findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON)));
@@ -755,7 +759,8 @@ public class CardCreatorActivity extends FragmentActivity implements
 
               @Override
               public void onSuccess(@NullableDecl TaskResult<AccountLoginState.AccountLoginErrorData, Unit> result) {
-                runOnUiThread(() -> finish());
+                logger.debug("login successful");
+                clearPrefs();
               }
 
               @Override
@@ -764,6 +769,13 @@ public class CardCreatorActivity extends FragmentActivity implements
                 showProgress(false);
               }
             }, services.getBackgroundExecutor());
+  }
+
+  /**
+   * Clear the preferences that caches the state and input value of the card creator flow
+   */
+  private void clearPrefs() {
+    Simplified.getSharedPrefs(this).clearAllPreferences();
   }
 
   @Override
