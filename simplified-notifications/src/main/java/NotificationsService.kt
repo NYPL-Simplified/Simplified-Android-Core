@@ -108,9 +108,8 @@ class NotificationsService(
 
     private fun compareToCache(bookStatus: BookWithStatus?) {
         logger.debug("NotificationsService::compareToCache ${bookStatus?.status()}")
-        // TODO: Validate this behavior.
         var cachedBookStatus = registryCache[bookStatus?.book()?.id]
-        if (statusChangedSufficiently(bookStatus, cachedBookStatus)) {
+        if (statusChangedSufficiently(cachedBookStatus, bookStatus)) {
             publishNotification(notificationResourcesType.titleReadyNotificationTitle,
                     notificationResourcesType.titleReadyNotificationContent)
         }
@@ -181,7 +180,6 @@ class NotificationsService(
         createNotificationChannel(notificationManager, "Channel Name", "Channel Description")
 
         val intent = Intent(context, notificationResourcesType.intentClass)
-
         val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
 
         var builder = NotificationCompat.Builder(context, NOTIFICATION_PRIMARY_CHANNEL_ID)

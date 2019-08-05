@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import com.io7m.jfunctional.Option
+import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.ProcedureType
 import junit.framework.Assert
 import org.joda.time.DateTime
@@ -49,6 +50,9 @@ abstract class NotificationsServiceContract {
     private lateinit var threadFactory: ThreadFactory
     private lateinit var notificationResources: NotificationResources
     private lateinit var mockNotificationManager: NotificationManager
+    private var notificationCounter = 0
+    private lateinit var bookWithStatusHeld: BookWithStatus
+    private lateinit var bookWithStatusHeldReady: BookWithStatus
 
     @Before
     fun setUp() {
@@ -91,12 +95,12 @@ abstract class NotificationsServiceContract {
         Mockito.`when`(bookStatusHeldReady.id).thenReturn(bookId)
 
         // Populate book registry
-        val bookWithStatusHeld = BookWithStatus.create(
+        bookWithStatusHeld = BookWithStatus.create(
                 book,
                 bookStatusHeld
         )
 
-        val bookWithStatusHeldReady = BookWithStatus.create(
+        bookWithStatusHeldReady = BookWithStatus.create(
                 book,
                 bookStatusHeldReady
         )
@@ -108,7 +112,14 @@ abstract class NotificationsServiceContract {
         this.threadFactory = ThreadFactory { Thread(it) }
         this.notificationResources = NotificationResources()
 
+        notificationCounter = 0
+
         this.mockNotificationManager = Mockito.mock(NotificationManager::class.java)
+        val mockNotification = Mockito.mock(Notification::class.java)
+        Mockito.`when`(mockNotificationManager.notify(0, mockNotification))
+                .then {
+                    notificationCounter++
+                }
 
         // Mock NotificationManager
         Mockito.`when`(context.getSystemService(NOTIFICATION_SERVICE))
@@ -156,13 +167,13 @@ abstract class NotificationsServiceContract {
          * subscribes to it.
          */
 
-        val mockSubscription = object: ObservableSubscriptionType<BookStatusEvent> {
+        val mockSubscription = object : ObservableSubscriptionType<BookStatusEvent> {
             override fun unsubscribe() {
                 unsubscriptionLatch.countDown()
             }
         }
 
-        val mockObservable = object: ObservableReadableType<BookStatusEvent> {
+        val mockObservable = object : ObservableReadableType<BookStatusEvent> {
             override fun subscribe(receiver: ProcedureType<BookStatusEvent>?): ObservableSubscriptionType<BookStatusEvent> {
                 subscriptionLatch.countDown()
                 return mockSubscription
@@ -174,13 +185,13 @@ abstract class NotificationsServiceContract {
         }
 
         val mockRegistry =
-          Mockito.mock(BookRegistryType::class.java)
+                Mockito.mock(BookRegistryType::class.java)
 
         Mockito.`when`(mockRegistry.bookEvents())
-          .thenReturn(mockObservable)
+                .thenReturn(mockObservable)
 
         this.notificationsService =
-          NotificationsService(context, this.threadFactory, profileEvents, mockRegistry, this.notificationResources)
+                NotificationsService(context, this.threadFactory, profileEvents, mockRegistry, this.notificationResources)
 
         this.profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
 
@@ -204,12 +215,27 @@ abstract class NotificationsServiceContract {
     fun testNoNotificationOnHeldReadyToHeldReadyStatus() {
         // If the book in the registry is already HeldReady we don't need to show the notification
         Assert.fail()
-
     }
 
     @Test
     fun testShowNotificationOnHeldReadyStatusChange() {
         // Show notification if new status is HeldReady and cache is Held
-        Assert.fail()
+
+        /**
+         * Register profile event completed so we subscribe to the events from books
+         */
+        this.profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+
+        Thread.sleep(5000)
+
+        /**
+         * Send a book update that should trigger the notification
+         */
+
+        bookRegistry.update(bookWithStatusHeldReady)
+
+
+        Thread.sleep(5000)
+        Assert.assertEquals(1, notificationCounter)
     }
 }
