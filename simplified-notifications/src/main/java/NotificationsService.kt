@@ -1,21 +1,10 @@
 package org.nypl.simplified.notifications
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Context.NOTIFICATION_SERVICE
-import android.content.Intent
-import android.os.Build
-import android.support.v4.app.NotificationCompat
 import com.io7m.jfunctional.Some
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.book_registry.BookStatusEvent
-import org.nypl.simplified.books.book_registry.BookStatusHeld
-import org.nypl.simplified.books.book_registry.BookStatusHeldReady
-import org.nypl.simplified.books.book_registry.BookWithStatus
+import org.nypl.simplified.books.book_registry.*
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -30,6 +19,7 @@ class NotificationsService(
         val threadFactory: ThreadFactory,
         val profileEvents: ObservableReadableType<ProfileEvent>,
         val bookRegistry: BookRegistryReadableType,
+        private val notificationsWrapper: NotificationsWrapper,
         val notificationResourcesType: NotificationResourcesType) {
 
 
@@ -39,15 +29,15 @@ class NotificationsService(
 
     private val logger = LoggerFactory.getLogger(NotificationsService::class.java)
 
-    private val executor: ExecutorService = NamedThreadPools.namedThreadPoolOf(1, this.threadFactory)
+    private val executor: ExecutorService = NamedThreadPools.namedThreadPoolOf(1, threadFactory)
 
     private val profileSubscription: ObservableSubscriptionType<ProfileEvent>? =
-            profileEvents.subscribe(this::onProfileEvent)
+            profileEvents.subscribe(::onProfileEvent)
 
     private var registryCache: Map<BookID, BookWithStatus> = mapOf()
 
+    // Start null until we have a profile selected event
     var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
-
 
     /**
      * Method for handling [ProfileEvent]s the service is subscribed to.
@@ -106,6 +96,10 @@ class NotificationsService(
         }
     }
 
+    /**
+     * Performs a check of the new status against our [BookRegistry] cache and
+     * posts a notification if it satisfies the rules for doing so.
+     */
     private fun compareToCache(bookStatus: BookWithStatus?) {
         logger.debug("NotificationsService::compareToCache ${bookStatus?.status()}")
         var cachedBookStatus = registryCache[bookStatus?.book()?.id]
@@ -140,7 +134,7 @@ class NotificationsService(
     private fun subscribeToBookEvents() {
         logger.debug("NotificationsService::subscribeToBookEvents")
         bookRegistrySubscription =
-                bookRegistry.bookEvents().subscribe(this::onBookEvent)
+                bookRegistry.bookEvents().subscribe(::onBookEvent)
     }
 
     /**
@@ -151,6 +145,9 @@ class NotificationsService(
         bookRegistrySubscription?.unsubscribe()
     }
 
+    /**
+     * Checks that the new status satisfies the rules for prompting us to show a notification.
+     */
     private fun statusChangedSufficiently(statusBefore: BookWithStatus?, statusNow: BookWithStatus?): Boolean {
         // Compare statusBefore and statusNow, only return true if statusNow is actually [BookStatusHeldReady]
         logger.debug("NotificationsService::statusChangedSufficiently comparing ${statusBefore?.status()} to ${statusNow?.status()}")
@@ -164,7 +161,7 @@ class NotificationsService(
     }
 
     /**
-     *
+     * Returns a map of the books in the [BookRegistry]
      */
     private fun getBookStatusesFromRegistry(): Map<BookID, BookWithStatus> {
         logger.debug("NotificationsService::getBookStatusesFromRegistry")
@@ -172,46 +169,12 @@ class NotificationsService(
         return bookRegistry.books().toMap()
     }
 
+    /**
+     * Calls to the [NotificationsWrapper] to post a notification.
+     */
     private fun publishNotification(notificationTitle: String, notificationContent: String) {
         logger.debug("NotificationsService::publishNotification " +
                 "with title $notificationTitle and content $notificationContent")
-        val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-        createNotificationChannel(notificationManager, "Channel Name", "Channel Description")
-
-        val intent = Intent(context, notificationResourcesType.intentClass)
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
-
-        var builder = NotificationCompat.Builder(context, NOTIFICATION_PRIMARY_CHANNEL_ID)
-                .setSmallIcon(notificationResourcesType.smallIcon)
-                .setContentTitle(notificationTitle)
-                .setContentText(notificationContent)
-                .setOnlyAlertOnce(true)
-                .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-
-        notificationManager.notify(0, builder.build())
-    }
-
-    private fun createNotificationChannel(notificationManager: NotificationManager,
-                                          channelName: String,
-                                          channelDescription: String) {
-        logger.debug("NotificationsService::createNotificationChannel " +
-                "with channel name $channelName and description $channelDescription")
-
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = channelName
-            val descriptionText = channelDescription
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(NOTIFICATION_PRIMARY_CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-
-            // Register the channel with the system
-            notificationManager.createNotificationChannel(channel)
-        }
+        notificationsWrapper.postDefaultNotification(notificationResourcesType)
     }
 }

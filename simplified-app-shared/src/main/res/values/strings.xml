@@ -503,5 +503,7 @@
 
   <string name="notification_title_ready_title">Your book is ready</string>
   <string name="notification_title_ready_content">The title you reserved is available.</string>
+    <string name="notification_channel_description">Notifications related to items becoming available for checkout.</string>
+  <string name="notification_channel_name">Item Available</string>
 
 </resources>

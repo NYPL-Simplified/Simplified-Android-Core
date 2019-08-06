@@ -1,26 +1,22 @@
 package org.nypl.simplified.tests.notifications
 
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.ProcedureType
 import junit.framework.Assert
 import org.joda.time.DateTime
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.*
 import org.nypl.simplified.notifications.NotificationResourcesType
 import org.nypl.simplified.notifications.NotificationsService
+import org.nypl.simplified.notifications.NotificationsWrapper
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableSubscriptionType
@@ -43,20 +39,42 @@ abstract class NotificationsServiceContract {
     private val logger =
             LoggerFactory.getLogger(BookDatabaseContract::class.java)
 
-    private lateinit var context: Context
+    private lateinit var mockContext: Context
     private lateinit var profileEvents: ObservableType<ProfileEvent>
     private lateinit var bookRegistry: BookRegistryType
     private lateinit var notificationsService: NotificationsService
     private lateinit var threadFactory: ThreadFactory
     private lateinit var notificationResources: NotificationResources
     private lateinit var mockNotificationManager: NotificationManager
-    private var notificationCounter = 0
+    private lateinit var mockNotificationsWrapper: NotificationsWrapper
+
+    /**
+     * Books we'll use to update the registry and trigger events
+     */
+
     private lateinit var bookWithStatusHeld: BookWithStatus
     private lateinit var bookWithStatusHeldReady: BookWithStatus
+    private lateinit var bookWithStatusHeldReady2: BookWithStatus
+
+    /**
+     * Counter we'll increment when mocking notification calls.
+     */
+
+    private var notificationCounter = 0
 
     @Before
     fun setUp() {
-        this.bookRegistry = BookRegistry.create()
+        logger.debug("setup")
+        mockContext = Mockito.mock(Context::class.java)
+
+        threadFactory = ThreadFactory { Thread(it) }
+        bookRegistry = BookRegistry.create()
+        profileEvents = Observable.create<ProfileEvent>()
+        notificationResources = NotificationResources()
+
+        /**
+         * Build books for testing
+         */
 
         val acquisition =
                 OPDSAcquisition(
@@ -73,8 +91,19 @@ abstract class NotificationsServiceContract {
                         OPDSAvailabilityLoanable.get())
         opdsEntryBuilder.addAcquisition(acquisition)
 
+        val opdsEntryBuilder2 =
+                OPDSAcquisitionFeedEntry.newBuilder(
+                        "b",
+                        "Title B",
+                        DateTime.now(),
+                        OPDSAvailabilityLoanable.get())
+        opdsEntryBuilder2.addAcquisition(acquisition)
+
         val opdsEntry =
                 opdsEntryBuilder.build()
+
+        val opdsEntry2 =
+                opdsEntryBuilder2.build()
 
         val bookId =
                 BookID.create("a")
@@ -88,11 +117,26 @@ abstract class NotificationsServiceContract {
                         entry = opdsEntry,
                         formats = listOf())
 
+        val bookId2 =
+                BookID.create("b")
+
+        val book2 =
+                Book(
+                        id = bookId2,
+                        account = AccountID.generate(),
+                        cover = null,
+                        thumbnail = null,
+                        entry = opdsEntry2,
+                        formats = listOf())
+
         val bookStatusHeld = Mockito.mock(BookStatusHeld::class.java)
         Mockito.`when`(bookStatusHeld.id).thenReturn(bookId)
 
         val bookStatusHeldReady = Mockito.mock(BookStatusHeldReady::class.java)
         Mockito.`when`(bookStatusHeldReady.id).thenReturn(bookId)
+
+        val bookStatusHeldReady2 = Mockito.mock(BookStatusHeldReady::class.java)
+        Mockito.`when`(bookStatusHeldReady.id).thenReturn(bookId2)
 
         // Populate book registry
         bookWithStatusHeld = BookWithStatus.create(
@@ -105,30 +149,50 @@ abstract class NotificationsServiceContract {
                 bookStatusHeldReady
         )
 
+        bookWithStatusHeldReady2 = BookWithStatus.create(
+                book2,
+                bookStatusHeldReady2
+        )
+
+        /**
+         * Populate registry with initial record(s)
+         */
+
         bookRegistry.update(bookWithStatusHeld)
 
-        this.profileEvents = Observable.create<ProfileEvent>()
-        this.context = Mockito.mock(Context::class.java)
-        this.threadFactory = ThreadFactory { Thread(it) }
-        this.notificationResources = NotificationResources()
+
+        /**
+         * Reset notification counter for each test
+         */
 
         notificationCounter = 0
 
-        this.mockNotificationManager = Mockito.mock(NotificationManager::class.java)
-        val mockNotification = Mockito.mock(Notification::class.java)
-        Mockito.`when`(mockNotificationManager.notify(0, mockNotification))
+        /**
+         * Setup notification mocks
+         */
+
+        mockNotificationManager = Mockito.mock(NotificationManager::class.java)
+        mockNotificationsWrapper = Mockito.mock(NotificationsWrapper::class.java)
+        Mockito.`when`(mockNotificationsWrapper.postDefaultNotification(notificationResources))
                 .then {
                     notificationCounter++
                 }
 
-        // Mock NotificationManager
-        Mockito.`when`(context.getSystemService(NOTIFICATION_SERVICE))
+        Mockito.`when`(mockContext.getSystemService(NOTIFICATION_SERVICE))
                 .thenReturn(mockNotificationManager)
 
-        this.notificationsService = NotificationsService(context, threadFactory, profileEvents, bookRegistry, notificationResources)
+        /**
+         * Initialize [NotificationsService]
+         */
+
+        notificationsService = NotificationsService(mockContext, threadFactory, profileEvents, bookRegistry, mockNotificationsWrapper, notificationResources)
     }
 
     class NotificationResources : NotificationResourcesType {
+        override val notificationChannelName: String
+            get() = "notification channel name"
+        override val notificationChannelDescription: String
+            get() = "notification channel description"
         override val intentClass: Class<*>
             get() = String::class.java
         override val titleReadyNotificationContent: String
@@ -146,7 +210,7 @@ abstract class NotificationsServiceContract {
 
         Assert.assertEquals(profileEvents, notificationsService.profileEvents)
         Assert.assertEquals(bookRegistry, notificationsService.bookRegistry)
-        Assert.assertEquals(context, notificationsService.context)
+        Assert.assertEquals(mockContext, notificationsService.context)
 
         // No book subscription on initialization
         Assert.assertNull(notificationsService.bookRegistrySubscription)
@@ -155,14 +219,14 @@ abstract class NotificationsServiceContract {
     @Test(timeout = 3_000L)
     fun testProfileEventSubscriptionAndUnsubscription() {
 
-        /*
+        /**
          * Create a countdown latch that only accepts one count down.
          */
 
         val subscriptionLatch = CountDownLatch(1)
         val unsubscriptionLatch = CountDownLatch(1)
 
-        /*
+        /**
          * Create a fake observable that counts down the above latch each time someone
          * subscribes to it.
          */
@@ -190,12 +254,16 @@ abstract class NotificationsServiceContract {
         Mockito.`when`(mockRegistry.bookEvents())
                 .thenReturn(mockObservable)
 
-        this.notificationsService =
-                NotificationsService(context, this.threadFactory, profileEvents, mockRegistry, this.notificationResources)
+        /**
+         * Re-initialize the [NotificationsService] with our mockRegistry for testing
+         */
 
-        this.profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+        notificationsService =
+                NotificationsService(mockContext, threadFactory, profileEvents, mockRegistry, mockNotificationsWrapper, notificationResources)
 
-        /*
+        profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+
+        /**
          * Wait for the subscription latch to count down.
          * If we don't hit the await before we timeout, the subscription wasn't received.
          */
@@ -206,7 +274,7 @@ abstract class NotificationsServiceContract {
          * Test that we can unsubscribe.
          */
 
-        this.profileEvents.send(ProfileSelection.ProfileSelectionInProgress(ProfileID(UUID.randomUUID())))
+        profileEvents.send(ProfileSelection.ProfileSelectionInProgress(ProfileID(UUID.randomUUID())))
 
         unsubscriptionLatch.await()
     }
@@ -214,7 +282,23 @@ abstract class NotificationsServiceContract {
     @Test
     fun testNoNotificationOnHeldReadyToHeldReadyStatus() {
         // If the book in the registry is already HeldReady we don't need to show the notification
-        Assert.fail()
+
+        /**
+         * Register profile event completed so we subscribe to the events from books
+         */
+        profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+
+        Thread.sleep(300)
+
+        /**
+         * Send a book update that should not trigger the notification
+         */
+
+        bookRegistry.update(bookWithStatusHeld)
+
+
+        Thread.sleep(300)
+        Assert.assertEquals(0, notificationCounter)
     }
 
     @Test
@@ -224,9 +308,9 @@ abstract class NotificationsServiceContract {
         /**
          * Register profile event completed so we subscribe to the events from books
          */
-        this.profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+        profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
 
-        Thread.sleep(5000)
+        Thread.sleep(300)
 
         /**
          * Send a book update that should trigger the notification
@@ -235,7 +319,29 @@ abstract class NotificationsServiceContract {
         bookRegistry.update(bookWithStatusHeldReady)
 
 
-        Thread.sleep(5000)
+        Thread.sleep(300)
         Assert.assertEquals(1, notificationCounter)
+    }
+
+    @Test
+    fun testNoNotificationOnHeldReadyStatusChangeForOtherBook() {
+        // Do not show a notification if a book in HeldReady status was not already in the registry
+
+        /**
+         * Register profile event completed so we subscribe to the events from books
+         */
+        profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+
+        Thread.sleep(300)
+
+        /**
+         * Send a book update for HeldReady that was not in directory
+         */
+
+        bookRegistry.update(bookWithStatusHeldReady2)
+
+
+        Thread.sleep(300)
+        Assert.assertEquals(0, notificationCounter)
     }
 }

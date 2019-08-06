@@ -80,6 +80,7 @@ import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.notifications.NotificationResourcesType
 import org.nypl.simplified.notifications.NotificationsService
+import org.nypl.simplified.notifications.NotificationsWrapper
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
@@ -415,6 +416,10 @@ class SimplifiedServices private constructor(
       publishEvent(strings.bootingNotificationsService)
 
       val notificationResourcesType = object : NotificationResourcesType {
+        override val notificationChannelName: String
+          get() = context.getString(R.string.notification_channel_name)
+        override val notificationChannelDescription: String
+          get() = context.getString(R.string.notification_channel_description)
         override val intentClass: Class<*>
           get() = SplashActivity::class.java
         override val titleReadyNotificationContent: String
@@ -433,6 +438,7 @@ class SimplifiedServices private constructor(
         threadFactory = notificationsThreads,
         profileEvents = profileEvents,
         bookRegistry = bookRegistry,
+        notificationsWrapper = NotificationsWrapper(context),
         notificationResourcesType = notificationResourcesType)
 
       publishEvent(strings.bootingNetworkConnectivity)
