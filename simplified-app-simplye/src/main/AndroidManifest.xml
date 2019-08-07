@@ -53,7 +53,7 @@
       android:exported="false"
       android:label="@string/holds" />
 
-    <activity android:name="org.nypl.simplified.app.CardCreatorActivity"
+    <activity android:name="org.nypl.simplified.app.signup.CardCreatorActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="Card Creator"
       android:exported="false"

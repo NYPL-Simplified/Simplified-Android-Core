@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+  <string name="CARD_TYPE_DATA_KEY">card_type_explanation</string>
+  <string name="MESSAGE_DATA_KEY">message</string>
+  <string name="BARCODE_DATA_KEY">barcode</string>
+  <string name="USERNAME_DATA_KEY">username</string>
+  <string name="PIN_DATA_KEY">pin</string>
+
+  <string name="FIRST_NAME_DATA_KEY">firstname</string>
+  <string name="MIDDLE_NAME_DATA_KEY">middlename</string>
+  <string name="LAST_NAME_DATA_KEY">lastname</string>
+  <string name="EMAIL_DATA_KEY">email</string>
+
+  <string name="LIVE_IN_NY_DATA_KEY">live_in_ny</string>
+  <string name="WORK_IN_NY_DATA_KEY">work_in_ny</string>
+  <string name="SCHOOL_IN_NY_DATA_KEY">school_in_ny</string>
+
+  <string name="STREET1_H_DATA_KEY">street1_h</string>
+  <string name="STREET2_H_DATA_KEY">street2_h</string>
+  <string name="CITY_H_DATA_KEY">city_h</string>
+  <string name="STATE_H_DATA_KEY">state_h</string>
+  <string name="ZIP_H_DATA_KEY">zip_h</string>
+
+  <string name="STREET1_W_DATA_KEY">street1_w</string>
+  <string name="STREET2_W_DATA_KEY">street2_w</string>
+  <string name="CITY_W_DATA_KEY">city_w</string>
+  <string name="STATE_W_DATA_KEY">state_w</string>
+  <string name="ZIP_W_DATA_KEY">zip_w</string>
+
+  <string name="ADDRESS_IN_NY">address_in_NY</string>
+  <string name="ADDRESS_STATUS">address_status</string>
+  <string name="ADDRESS_OUTPUT">address_output</string>
+  <string name="SELECTED_ADDRESS">selected_address</string>
+  <string name="SELECTED_WORK_ADDRESS">selected_work_address</string>
+
+  <string name="SHOW_PREV_BUTTON">prev</string>
+  <string name="SHOW_NEXT_BUTTON">next</string>
+  <string name="UNDER_13">under13</string>
+  <string name="EULA_ACCEPTED">eulaAccepted</string>
+  <string name="EQUAL_OR_OLDER_13">equalOrOlder</string>
+
+
+</resources>
