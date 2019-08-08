@@ -53,6 +53,7 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync
 import org.nypl.simplified.app.reader.ReaderHTTPServerType
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType
+import org.nypl.simplified.app.splash.SplashActivity
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -77,6 +78,9 @@ import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.notifications.NotificationResourcesType
+import org.nypl.simplified.notifications.NotificationsService
+import org.nypl.simplified.notifications.NotificationsWrapper
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
@@ -126,7 +130,8 @@ class SimplifiedServices private constructor(
   override val readerBookmarkService: ReaderBookmarkServiceUsableType,
   override val readerEPUBLoader: ReaderReadiumEPUBLoaderType,
   override val readerHTTPServer: ReaderHTTPServerType,
-  override val screenSize: ScreenSizeInformationType
+  override val screenSize: ScreenSizeInformationType,
+  override val notificationsService: NotificationsService
 ) : SimplifiedServicesType {
 
   override val currentTheme: ThemeValue
@@ -408,6 +413,34 @@ class SimplifiedServices private constructor(
       bookController.profileIdleTimer().setWarningIdleSecondsRemaining(60)
       bookController.profileIdleTimer().setMaximumIdleSeconds(10 * 60)
 
+      publishEvent(strings.bootingNotificationsService)
+
+      val notificationResourcesType = object : NotificationResourcesType {
+        override val notificationChannelName: String
+          get() = context.getString(R.string.notification_channel_name)
+        override val notificationChannelDescription: String
+          get() = context.getString(R.string.notification_channel_description)
+        override val intentClass: Class<*>
+          get() = SplashActivity::class.java
+        override val titleReadyNotificationContent: String
+          get() = context.getString(R.string.notification_title_ready_content)
+        override val titleReadyNotificationTitle: String
+          get() = context.getString(R.string.notification_title_ready_title)
+        override val smallIcon: Int
+          get() = R.mipmap.ic_launcher
+      }
+
+      val notificationsThreads =
+        NamedThreadPools.namedThreadPoolFactory("notifications", 19)
+
+      val notificationsService = NotificationsService(
+        context = context,
+        threadFactory = notificationsThreads,
+        profileEvents = profileEvents,
+        bookRegistry = bookRegistry,
+        notificationsWrapper = NotificationsWrapper(context),
+        notificationResourcesType = notificationResourcesType)
+
       publishEvent(strings.bootingNetworkConnectivity)
       val networkConnectivity = SimplifiedNetworkConnectivity(context)
 
@@ -461,7 +494,8 @@ class SimplifiedServices private constructor(
         readerBookmarkService = readerBookmarksService,
         readerEPUBLoader = epubLoader,
         readerHTTPServer = httpd,
-        screenSize = screenSize
+        screenSize = screenSize,
+        notificationsService = notificationsService
       )
     }
 

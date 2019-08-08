@@ -71,6 +71,7 @@ dependencies {
   api project(":simplified-futures")
   api project(":simplified-http-core")
   api project(":simplified-json-core")
+  api project(":simplified-notifications")
   api project(":simplified-observable")
   api project(":simplified-opds-auth-document")
   api project(":simplified-opds-auth-document-api")
@@ -154,5 +155,5 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
   implementation "org.nypl.pdf:api:0.0.4"
-  implementation("org.nypl.pdf:pdfviewer:0.0.4")
+  implementation "org.nypl.pdf:pdfviewer:0.0.4"
 }
