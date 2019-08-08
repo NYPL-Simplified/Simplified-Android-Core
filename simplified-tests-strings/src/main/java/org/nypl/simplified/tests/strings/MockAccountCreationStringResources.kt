@@ -1,8 +1,29 @@
-package org.nypl.simplified.tests
+package org.nypl.simplified.tests.strings
 
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 
 class MockAccountCreationStringResources : ProfileAccountCreationStringResourcesType {
+
+  override val creatingAnAccountProviderDescription: String
+    get() = "creatingAnAccountProviderDescription"
+
+  override val searchingFeedForAuthenticationDocument: String
+    get() = "searchingFeedForAuthenticationDocument"
+
+  override val fetchingOPDSFeedFailed: String
+    get() = "fetchingOPDSFeedFailed"
+
+  override val parsingOPDSFeedFailed: String
+    get() = "parsingOPDSFeedFailed"
+
+  override val parsingOPDSFeed: String
+    get() = "parsingOPDSFeed"
+
+  override val fetchingOPDSFeed: String
+    get() = "fetchingOPDSFeed"
+
+  override val findingAuthDocumentURI: String
+    get() = "findingAuthDocumentURI"
 
   override val creatingAccountSucceeded: String
     get() = "creatingAccountSucceeded"

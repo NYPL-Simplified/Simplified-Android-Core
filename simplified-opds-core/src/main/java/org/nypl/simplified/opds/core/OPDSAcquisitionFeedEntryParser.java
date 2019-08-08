@@ -259,7 +259,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
         if (rel_text.equals(uri_text)) {
           final URI href;
           try {
-            href = scrubURI(link.getAttribute("href"));
+            href = scrubURI(source, link.getAttribute("href"));
           } catch (URISyntaxException e) {
             entry_builder.addParseError(
               this.invalidURI(source, "'href' attribute of element with relation " + v, e));
@@ -335,7 +335,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     if (rel_text.equals(IMAGE_URI_TEXT)) {
       if (e_link.hasAttribute("href")) {
         try {
-          final URI u = scrubURI(e_link.getAttribute("href"));
+          final URI u = scrubURI(source, e_link.getAttribute("href"));
           entry_builder.setCoverOption(Option.some(u));
         } catch (URISyntaxException e) {
           entry_builder.addParseError(
@@ -347,8 +347,15 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     return false;
   }
 
-  private static URI scrubURI(final String text) throws URISyntaxException {
-    return new URI(text.trim());
+  private static URI scrubURI(
+    final URI base,
+    final String text) throws URISyntaxException {
+
+    final URI unresolvedURI = new URI(text.trim());
+    if (unresolvedURI.isAbsolute()) {
+      return unresolvedURI;
+    }
+    return base.resolve(unresolvedURI);
   }
 
   /**
@@ -364,7 +371,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     if (rel_text.equals(THUMBNAIL_URI_TEXT)) {
       if (e_link.hasAttribute("href")) {
         try {
-          final URI u = scrubURI(e_link.getAttribute("href"));
+          final URI u = scrubURI(source, e_link.getAttribute("href"));
           entry_builder.setThumbnailOption(Option.some(u));
         } catch (URISyntaxException e) {
           entry_builder.addParseError(
@@ -390,7 +397,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     if (rel_text.equals(ANNOTATION_URI_TEXT)) {
       if (e_link.hasAttribute("href")) {
         try {
-          final URI u = scrubURI(e_link.getAttribute("href"));
+          final URI u = scrubURI(source, e_link.getAttribute("href"));
           entry_builder.setAnnotationsOption(Option.some(u));
         } catch (URISyntaxException e) {
           entry_builder.addParseError(
@@ -416,7 +423,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     if (rel_text.equals(RELATED_REL_TEXT)) {
       if (e_link.hasAttribute("href")) {
         try {
-          final URI u = scrubURI(e_link.getAttribute("href"));
+          final URI u = scrubURI(source, e_link.getAttribute("href"));
           entry_builder.setRelatedOption(Option.some(u));
         } catch (URISyntaxException e) {
           entry_builder.addParseError(
@@ -442,7 +449,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     if (rel_text.equals(ALTERNATE_REL_TEXT)) {
       try {
         final String uri_text = Objects.requireNonNull(e_link.getAttribute("href"));
-        final URI uri = scrubURI(uri_text);
+        final URI uri = scrubURI(source, uri_text);
         entry_builder.setAlternateOption(Option.some(uri));
       } catch (URISyntaxException e) {
         entry_builder.addParseError(
@@ -467,7 +474,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     if (rel_text.equals(CIRCULATION_ANALYTICS_OPEN_BOOK_REL_TEXT)) {
       try {
         final String uri_text = Objects.requireNonNull(e_link.getAttribute("href"));
-        final URI uri = scrubURI(uri_text);
+        final URI uri = scrubURI(source, uri_text);
         entry_builder.setAnalyticsOption(Option.some(uri));
       } catch (URISyntaxException e) {
         entry_builder.addParseError(
@@ -492,7 +499,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     if (rel_text.equals(ISSUES_REL_TEXT)) {
       try {
         final String uri_text = Objects.requireNonNull(e_link.getAttribute("href"));
-        final URI uri = scrubURI(uri_text);
+        final URI uri = scrubURI(source, uri_text);
         entry_builder.setIssuesOption(Option.some(uri));
       } catch (URISyntaxException e) {
         entry_builder.addParseError(
@@ -517,7 +524,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
       try {
         final String uri_text = Objects.requireNonNull(e_link.getAttribute("href"));
         final String link_title = Objects.requireNonNull(e_link.getAttribute("title"));
-        final URI uri = scrubURI(uri_text);
+        final URI uri = scrubURI(source, uri_text);
         entry_builder.addGroup(uri, link_title);
       } catch (URISyntaxException e) {
         entry_builder.addParseError(
@@ -561,7 +568,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
         if (rel_text.equals(REVOKE_URI_TEXT)) {
           if (e_link.hasAttribute("href")) {
             try {
-              final URI u = scrubURI(e_link.getAttribute("href"));
+              final URI u = scrubURI(source, e_link.getAttribute("href"));
               return Option.some(u);
             } catch (URISyntaxException e) {
               entry_builder.addParseError(

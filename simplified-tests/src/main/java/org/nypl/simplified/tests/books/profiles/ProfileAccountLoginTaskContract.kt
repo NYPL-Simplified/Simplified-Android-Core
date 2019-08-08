@@ -50,7 +50,7 @@ import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockAccountLoginStringResources
+import org.nypl.simplified.tests.strings.MockAccountLoginStringResources
 import org.nypl.simplified.tests.books.controller.TaskDumps
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger

@@ -83,6 +83,11 @@
       android:contentDescription="@string/versions_version"
       android:label="@string/versions_version"
       android:exported="false" />
+    <activity
+      android:name="org.nypl.simplified.app.settings.SettingsCustomOPDSActivity"
+      android:configChanges="orientation|screenSize"
+      android:exported="true"
+      android:label="@string/settingsCustomOPDS" />
 
     <activity android:name="org.nypl.simplified.app.helpstack.HelpActivity"
       android:configChanges="orientation|screenSize"

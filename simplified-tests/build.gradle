@@ -29,9 +29,9 @@ dependencies {
   api project(":simplified-accounts-json")
   api project(":simplified-accounts-registry")
   api project(":simplified-accounts-registry-api")
-  api project(':simplified-accounts-source-spi')
   api project(":simplified-accounts-source-filebased")
   api project(":simplified-accounts-source-nyplregistry")
+  api project(":simplified-accounts-source-resolution")
   api project(":simplified-analytics-api")
   api project(":simplified-analytics-circulation")
   api project(":simplified-analytics-lfa")
@@ -45,6 +45,7 @@ dependencies {
   api project(":simplified-books-registry-api")
   api project(":simplified-boot-api")
   api project(":simplified-branding")
+  api project(':simplified-accounts-source-spi')
 
   api(project(":simplified-bugsnag")) {
     exclude group: 'com.github.tony19', module: 'logback-android-core'
@@ -77,6 +78,7 @@ dependencies {
   api project(":simplified-splash")
   api project(":simplified-stack")
   api project(":simplified-tenprint")
+  api project(":simplified-tests-strings")
   api project(":simplified-theme")
   api project(":simplified-threads")
 

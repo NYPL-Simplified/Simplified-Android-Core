@@ -1,4 +1,4 @@
-package org.nypl.simplified.accounts.source.nyplregistry
+package org.nypl.simplified.accounts.source.resolution
 
 import android.content.res.Resources
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
@@ -7,7 +7,7 @@ import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
  * The resolution strings.
  */
 
-class AccountProviderSourceNYPLResolutionStrings(
+class AccountProviderSourceResolutionStrings(
   private val resources: Resources) : AccountProviderResolutionStringsType {
 
   override val resolvingUnexpectedException: String

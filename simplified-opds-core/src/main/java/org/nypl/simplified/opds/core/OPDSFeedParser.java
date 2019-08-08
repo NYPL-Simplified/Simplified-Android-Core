@@ -30,6 +30,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.ATOM_URI;
+import static org.nypl.simplified.opds.core.OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.DRM_URI;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.FACET_URI_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.OPDS_URI_TEXT;
@@ -95,7 +96,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
         final OptionType<String> group_type = parseFacetGroupType(e);
         final boolean active = parseFacetIsActive(e);
         try {
-          return Option.some(new OPDSFacet(active, scrubURI(href), group, title, group_type));
+          return Option.some(new OPDSFacet(active, scrubURI(source,href), group, title, group_type));
         } catch (URISyntaxException ex) {
           builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel(FACET_URI_TEXT), ex));
           return Option.none();
@@ -136,7 +137,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     if ("next".equals(rel)) {
       if (e.hasAttribute("href")) {
         try {
-          final URI uri = scrubURI(e.getAttribute("href"));
+          final URI uri = scrubURI(source,e.getAttribute("href"));
           return Option.some(uri);
         } catch (URISyntaxException ex) {
           builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("next"), ex));
@@ -148,8 +149,15 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     return Option.none();
   }
 
-  private static URI scrubURI(String text) throws URISyntaxException {
-    return new URI(text.trim());
+  private static URI scrubURI(
+    final URI base,
+    final String text) throws URISyntaxException {
+
+    final URI unresolvedURI = new URI(text.trim());
+    if (unresolvedURI.isAbsolute()) {
+      return unresolvedURI;
+    }
+    return base.resolve(unresolvedURI);
   }
 
   private static OptionType<OPDSSearchLink> parseSearchLink(
@@ -171,7 +179,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
 
       if ("search".equals(r)) {
         try {
-          final URI u = Objects.requireNonNull(scrubURI(h));
+          final URI u = Objects.requireNonNull(scrubURI(source,h));
           final OPDSSearchLink sl = new OPDSSearchLink(t, u);
           return Option.some(sl);
         } catch (URISyntaxException ex) {
@@ -213,7 +221,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
 
       if ("terms-of-service".equals(r)) {
         try {
-          return Option.some(scrubURI(h));
+          return Option.some(scrubURI(source,h));
         } catch (URISyntaxException ex) {
           builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("terms-of-service"), ex));
           return Option.none();
@@ -244,7 +252,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
 
       if ("about".equals(r)) {
         try {
-          return Option.some(scrubURI(h));
+          return Option.some(scrubURI(source,h));
         } catch (URISyntaxException ex) {
           builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("about"), ex));
           return Option.none();
@@ -275,9 +283,40 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
 
       if ("privacy-policy".equals(r)) {
         try {
-          return Option.some(scrubURI(h));
+          return Option.some(scrubURI(source,h));
         } catch (URISyntaxException ex) {
           builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("privacy-policy"), ex));
+          return Option.none();
+        }
+      }
+    }
+
+    return Option.none();
+  }
+
+  private static OptionType<URI> parseAuthenticationDocumentLink(
+    final URI source,
+    final OPDSAcquisitionFeedBuilderType builder,
+    final Element e) {
+    Objects.requireNonNull(e);
+
+    final boolean has_name = OPDSXML.nodeHasName(
+      Objects.requireNonNull(e), ATOM_URI, "link");
+
+    Preconditions.checkArgument(has_name, "Node has name 'link'");
+
+    final boolean has_everything =
+      e.hasAttribute("rel") && e.hasAttribute("href");
+
+    if (has_everything) {
+      final String r = Objects.requireNonNull(e.getAttribute("rel"));
+      final String h = Objects.requireNonNull(e.getAttribute("href"));
+
+      if (AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT.equals(r)) {
+        try {
+          return Option.some(scrubURI(source,h));
+        } catch (URISyntaxException ex) {
+          builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel(AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT), ex));
           return Option.none();
         }
       }
@@ -491,6 +530,19 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
               OPDSFeedParser.parsePrivacyPolicy(uri, builder, e);
             if (pp_opt.isSome()) {
               builder.setPrivacyPolicyOption(pp_opt);
+              continue;
+            }
+          }
+
+          /*
+           * Authentication document links.
+           */
+
+          {
+            final OptionType<URI> pp_opt =
+              OPDSFeedParser.parseAuthenticationDocumentLink(uri, builder, e);
+            if (pp_opt.isSome()) {
+              builder.setAuthenticationDocumentLink(pp_opt);
               continue;
             }
           }

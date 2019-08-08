@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
+import org.nypl.simplified.opds.core.OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
 import java.net.URI
 
 /**
@@ -106,7 +107,10 @@ data class AccountProviderDescriptionMetadata(
    */
 
   val authenticationDocumentURI: URI?
-    get() = this.links.find { link -> link.type == "application/vnd.opds.authentication.v1.0+json" }?.href
+    get() = this.links.find { link ->
+      link.type == "application/vnd.opds.authentication.v1.0+json"
+        || link.relation == AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
+    }?.href
 
   /**
    * The catalog URI, if one is available.

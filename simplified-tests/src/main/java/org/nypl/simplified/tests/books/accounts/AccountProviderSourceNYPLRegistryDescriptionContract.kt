@@ -12,7 +12,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
-import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryDescription
+import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceStandardDescription
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
@@ -25,8 +25,7 @@ import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLFeatur
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLInput
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution
-import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
+import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
@@ -53,7 +52,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   }
 
   /**
-   * Resolution fails if there is no authentication document URI.
+   * Resolution fails if there is no authentication document URI and no starting URI.
    */
 
   @Test
@@ -68,7 +67,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -80,7 +79,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
     this.logger.debug("result: {}", result)
     result as TaskResult.Failure
-    Assert.assertEquals("resolvingAuthDocumentMissingURI", result.steps.last().resolution.message)
+    Assert.assertEquals("resolvingAuthDocumentNoStartURI", result.steps.last().resolution.message)
   }
 
   /**
@@ -105,7 +104,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -154,7 +153,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -198,7 +197,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -255,7 +254,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -414,7 +413,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -563,7 +562,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -695,7 +694,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -809,7 +808,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,
@@ -922,7 +921,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceNYPLRegistryDescription(
+    val description = AccountProviderSourceStandardDescription(
       stringResources = this.stringResources,
       authDocumentParsers = this.authDocumentParsers,
       http = this.mockHTTP,

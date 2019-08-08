@@ -82,9 +82,7 @@ public final class OPDSSearchParser implements OPDSSearchParserType
       final Element e_url = OPDSXML.getFirstChildElementWithName(
         e_search, OPDSSearchParser.OPEN_SEARCH_URI, "Url");
 
-      return new OPDSOpenSearch1_1(
-        NullCheck.notNull(
-          e_url.getAttribute("template")));
+      return new OPDSOpenSearch1_1(NullCheck.notNull(e_url.getAttribute("template")));
 
     } catch (final ParserConfigurationException e) {
       throw new OPDSParseException(e);

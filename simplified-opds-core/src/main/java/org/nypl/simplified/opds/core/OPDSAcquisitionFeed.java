@@ -42,6 +42,7 @@ public final class OPDSAcquisitionFeed implements Serializable {
   private final OptionType<DRMLicensor> licensor;
   private final OptionType<URI> privacy_policy;
   private final List<ParseError> errors;
+  private final OptionType<URI> auth_document;
 
   private OPDSAcquisitionFeed(
     final URI in_uri,
@@ -60,7 +61,8 @@ public final class OPDSAcquisitionFeed implements Serializable {
     final OptionType<URI> in_privacy_policy,
     final OptionType<URI> in_licenses,
     final OptionType<DRMLicensor> in_licensor,
-    final List<ParseError> in_errors) {
+    final List<ParseError> in_errors,
+    final OptionType<URI> in_auth_document) {
     this.uri =
       Objects.requireNonNull(in_uri);
     this.entries =
@@ -94,6 +96,8 @@ public final class OPDSAcquisitionFeed implements Serializable {
     this.licensor = in_licensor;
     this.errors =
       Objects.requireNonNull(in_errors, "in_errors");
+    this.auth_document =
+      Objects.requireNonNull(in_auth_document, "in_auth_document");
   }
 
   /**
@@ -263,6 +267,14 @@ public final class OPDSAcquisitionFeed implements Serializable {
   }
 
   /**
+   * @return The link to the authentication document, if any
+   */
+
+  public OptionType<URI> getAuthDocument() {
+    return this.auth_document;
+  }
+
+  /**
    * @return The feed URI
    */
 
@@ -319,6 +331,7 @@ public final class OPDSAcquisitionFeed implements Serializable {
     private OptionType<URI> licenses;
     private OptionType<DRMLicensor> licensor;
     private final List<ParseError> errors;
+    private OptionType<URI> auth_document;
 
     private Builder(
       final URI in_uri,
@@ -340,6 +353,7 @@ public final class OPDSAcquisitionFeed implements Serializable {
       this.terms_of_service = Option.none();
       this.privacy_policy = Option.none();
       this.about = Option.none();
+      this.auth_document = Option.none();
       this.licenses = Option.none();
       this.licensor = Option.none();
       this.errors = new ArrayList<>();
@@ -420,6 +434,12 @@ public final class OPDSAcquisitionFeed implements Serializable {
     }
 
     @Override
+    public OPDSAcquisitionFeedBuilderType setAuthenticationDocumentLink(OptionType<URI> u) {
+      this.auth_document = Objects.requireNonNull(u);
+      return this;
+    }
+
+    @Override
     public OPDSAcquisitionFeedBuilderType setPrivacyPolicyOption(final OptionType<URI> u) {
       this.privacy_policy = Objects.requireNonNull(u);
       return this;
@@ -455,7 +475,8 @@ public final class OPDSAcquisitionFeed implements Serializable {
         this.privacy_policy,
         this.licenses,
         this.licensor,
-        this.errors);
+        this.errors,
+        this.auth_document);
     }
 
     @Override

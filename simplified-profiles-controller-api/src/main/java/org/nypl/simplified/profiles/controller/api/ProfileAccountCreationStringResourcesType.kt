@@ -6,6 +6,24 @@ package org.nypl.simplified.profiles.controller.api
 
 interface ProfileAccountCreationStringResourcesType {
 
+  val creatingAnAccountProviderDescription: String
+
+  val searchingFeedForAuthenticationDocument: String
+
+  val fetchingOPDSFeedFailed: String
+
+  val parsingOPDSFeedFailed: String
+
+  val parsingOPDSFeed: String
+
+  val fetchingOPDSFeed: String
+
+  /**
+   * Locating the authentication document URI...
+   */
+
+  val findingAuthDocumentURI: String
+
   /**
    * Creating an account succeeded.
    */

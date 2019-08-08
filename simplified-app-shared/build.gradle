@@ -51,6 +51,7 @@ dependencies {
   api project(":simplified-accounts-json")
   api project(":simplified-accounts-registry")
   api project(":simplified-accounts-registry-api")
+  api project(":simplified-accounts-source-resolution")
   api project(":simplified-analytics-api")
   api project(":simplified-books-api")
   api project(":simplified-books-bundled-api")
