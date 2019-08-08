@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              style="@style/WizardPageContainer">
+
+  <TextView style="@style/WizardPageTitle"/>
+
+
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:scrollbarStyle="outsideOverlay"
+    android:fadeScrollbars="false">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+
+      <TextView style="@style/WizardPageDescription"/>
+
+
+      <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal">
+
+        <RadioButton
+          android:id="@+id/under13"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:layout_marginTop="20dp"
+          android:layout_marginBottom="20dp"
+          android:layout_marginLeft="25dp"
+          android:layout_marginRight="25dp"
+          android:onClick="onRadioButtonClicked"
+          android:text="Under 13"/>
+
+        <RadioButton
+          android:id="@+id/equalOrOlder"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:layout_marginTop="20dp"
+          android:layout_marginBottom="20dp"
+          android:layout_marginLeft="25dp"
+          android:layout_marginRight="25dp"
+          android:onClick="onRadioButtonClicked"
+          android:text="13 or Older"/>
+      </RadioGroup>
+
+      <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="5dp"
+        android:textSize="12sp"
+        android:text="@string/eula_checkbox"
+        android:id="@+id/eula_checkbox"
+        android:checked="false"
+        android:layout_span="2"
+        android:onClick="onEulaCheckBoxClicked"
+        android:layout_weight="1"/>
+
+    </LinearLayout>
+  </ScrollView>
+
+  <TextView
+    style="@style/WizardPageError"
+    android:id="@+id/error"/>
+
+</LinearLayout>

@@ -69,4 +69,6 @@ include ':simplified-tests-sandbox'
 include ':simplified-tests-strings'
 include ':simplified-theme'
 include ':simplified-threads'
+include ':simplifiedcardcreator'
+include ':simplifiedprefs'
 

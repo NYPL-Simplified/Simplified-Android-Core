@@ -1,0 +1,53 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/WizardPageContainer">
+
+    <TextView style="@style/WizardPageTitle" />
+
+    <TextView style="@style/WizardPageDescription" />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp"
+        android:scrollbarStyle="outsideOverlay">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/WizardFormLabel"
+                android:text="@string/label_username" />
+
+            <TextView
+                android:id="@+id/username"
+                style="@style/WizardFormTextView" />
+
+            <TextView
+                style="@style/WizardFormLabel"
+                android:text="@string/label_barcode" />
+
+            <TextView
+                android:id="@+id/barcode"
+                style="@style/WizardFormTextView" />
+
+            <TextView
+                style="@style/WizardFormLabel"
+                android:text="@string/label_pin" />
+
+            <TextView
+                android:id="@+id/pin"
+                style="@style/WizardFormTextView" />
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView style="@style/WizardPageFooter" />
+
+</LinearLayout>

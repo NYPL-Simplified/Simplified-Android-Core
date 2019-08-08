@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical">
+
+  <Toolbar
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/black">
+
+    <TextView
+      style="@style/WizardPageTitle"
+      android:id="@+id/tv_toolbar_title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:textColor="@android:color/white" />
+  </Toolbar>
+
+
+  <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_container"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"></FrameLayout>
+
+  <LinearLayout
+    android:id="@+id/main_frame"
+    style="?android:attr/buttonBarStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <Button
+      android:id="@+id/prev_button"
+      style="?android:attr/buttonBarButtonStyle"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:enabled="false"
+      android:onClick="prev"
+      android:text="prev" />
+
+    <RelativeLayout
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1">
+
+      <Button
+        android:id="@+id/next_button"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:onClick="next"
+        android:text="next" />
+
+      <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="true" />
+    </RelativeLayout>
+
+  </LinearLayout>
+</LinearLayout>
