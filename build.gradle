@@ -71,3 +71,11 @@ subprojects {
     }
   }
 }
+
+task installGitHook(type: Copy) {
+  from new File(rootProject.rootDir, 'pre-commit')
+  into { new File(rootProject.rootDir, '.git/hooks') }
+  fileMode 0777
+}
+
+tasks.getByPath(':simplified-app-simplye:preBuild').dependsOn installGitHook

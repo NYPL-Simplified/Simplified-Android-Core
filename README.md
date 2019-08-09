@@ -83,3 +83,32 @@ for documentation on how to customize branding of the application.
 **NOTE:** Due to an unknown issue, you must execute `./gradlew assembleDebug` one time before opening the project in Android Studio. This will pull in all dependencies that, for whatever reason, are not fetched if Gradle is executed via Android Studio.
 
 After setup is complete, the project can be opened in Android Studio and built as normal.
+
+# Ktlint
+
+SimplyE now has Ktlint enabled. 
+
+**What does this mean?**
+
+This means you no longer get away with committing less than stellar styled code anymore. Anytime you try to commit, your code will be checked for coolness (good style). If your code is cool then nothing different happens, its committed like always. If it is not cool (bad style), then you get an angry *commit failed* message that forces you to correct your style issues before the commit is accepted. Ktlint will provide you with the exact line and directions on exactly how to fix your style issue. Example:
+
+**ktlint**
+```
+simplified-app-simplye/src/main/java/org/nypl/simplified/simplye/SimplyEAccountFallback.kt:20:1: Unexpected indentation (6) (it should be 8) (cannot be auto-corrected)
+```
+
+ **I'll feel bad if my git yells at me for bad style**
+ 
+ Luckily you can always check your own style before committing attempting to commit your code. Simple run the following command from project root:
+
+```
+./gradlew ktlint
+```
+```
+./gradlew ktlintFormat // Runs ktlint and attempts to automatically fix things
+```
+
+ **What if I want to customize what ktlint checks?**
+
+ You can do that too. Just edit `.editorconfig` file. Currently the only custom property that has been added is `indent_size=2`. The projects used only 2 spaces for indentation, so we are checking that you follow that as well. If you'd like to add more properties to the `.editorconfig` file, read more here: [https://github.com/pinterest/ktlint](https://github.com/pinterest/ktlint)
+ 

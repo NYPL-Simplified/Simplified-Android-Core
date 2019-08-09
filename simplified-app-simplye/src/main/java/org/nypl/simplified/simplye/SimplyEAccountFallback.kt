@@ -1,11 +1,11 @@
 package org.nypl.simplified.simplye
 
+import java.net.URI
 import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderFallbackType
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderType
-import java.net.URI
 
 /**
  * The fallback account for SimplyE: The classics collection.
@@ -39,5 +39,4 @@ class SimplyEAccountFallback : AccountProviderFallbackType {
       supportsSimplyESynchronization = false,
       updated = DateTime.parse("2019-07-08T16:32:52+00:00"))
   }
-
 }

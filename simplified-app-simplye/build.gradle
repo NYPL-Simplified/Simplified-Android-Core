@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply from: '../ktlint.gradle'
 
 def versionValues() {
   def propsFile = file('version.properties')
@@ -69,6 +70,8 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 }
+
+check.dependsOn ktlint
 
 description = 'simplified-app-simplye'
 
