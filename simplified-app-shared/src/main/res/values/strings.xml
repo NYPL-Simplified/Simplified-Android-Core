@@ -473,6 +473,7 @@
 
   <!-- Services strings -->
   <string name="bootFailedGeneric">We found a problem. Please check your connection or close and reopen the app to retry.</string>
+  <string name="bootStarted">Starting application…</string>
   <string name="bootingAccountProviders">Initializing account providers…</string>
   <string name="bootingAdobeDRM">Starting Adobe DRM…</string>
   <string name="bootingAnalytics">Starting analytics…</string>
@@ -493,16 +494,16 @@
   <string name="bootingDownloadService">Starting download service…</string>
   <string name="bootingEPUBLoader">Starting EPUB loader…</string>
   <string name="bootingFeedLoader">Starting OPDS feed loader…</string>
-  <string name="bootingHelpstack">Initializing HelpStack…</string>
   <string name="bootingHTTP">Starting HTTP client…</string>
+  <string name="bootingHelpstack">Initializing HelpStack…</string>
   <string name="bootingLocalImageLoader">Starting local image loader…</string>
   <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
+  <string name="bootingNotificationsService">Initializing Notifications Service...</string>
   <string name="bootingPatronProfileParsers">Initializing patron profile parsers…</string>
   <string name="bootingProfilesDatabase">Initializing profiles database…</string>
   <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
   <string name="bootingScreenSize">Starting screen size…</string>
   <string name="bootingTenPrint">Booting TenPrint…</string>
-  <string name="bootStarted">Starting application…</string>
 
   <!-- PDF Reader -->
   <string name="table_of_contents_title">Table of Contents</string>
@@ -511,5 +512,11 @@
   <!-- General error strings -->
   <string name="unexpectedException">An unexpected exception occurred.</string>
   <string name="settingsCustomOPDSInvalidURI">Not a valid URI</string>
+
+  <!-- Notification strings -->
+  <string name="notification_title_ready_title">Your book is ready</string>
+  <string name="notification_title_ready_content">The title you reserved is available.</string>
+  <string name="notification_channel_description">Notifications related to items becoming available for checkout.</string>
+  <string name="notification_channel_name">Item Available</string>
 
 </resources>
