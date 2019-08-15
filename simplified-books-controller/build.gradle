@@ -25,7 +25,7 @@ dependencies {
 
   implementation project(":simplified-accounts-api")
   implementation project(":simplified-accounts-database-api")
-  implementation project(':simplified-accounts-source-spi')
+  implementation project(":simplified-accounts-source-resolution")
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-registry-api")
   implementation project(":simplified-downloader-core")
@@ -35,11 +35,13 @@ dependencies {
   implementation project(":simplified-http-core")
   implementation project(":simplified-json-core")
   implementation project(":simplified-observable")
+  implementation project(":simplified-opds-auth-document-api")
   implementation project(":simplified-opds-core")
   implementation project(":simplified-patron-api")
   implementation project(":simplified-profiles-api")
   implementation project(":simplified-reader-bookmarks-api")
   implementation project(":simplified-taskrecorder-api")
+  implementation project(':simplified-accounts-source-spi')
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

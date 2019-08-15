@@ -95,4 +95,13 @@ public interface OPDSAcquisitionFeedBuilderType
 
   OPDSAcquisitionFeedBuilderType setLisensor(
     OptionType<DRMLicensor> licensor);
+
+  /**
+   * Set the URI of the authentication document for the feed, if any
+   *
+   * @param u The authentication document URI, if any
+   */
+
+  OPDSAcquisitionFeedBuilderType setAuthenticationDocumentLink(
+    OptionType<URI> u);
 }

@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.settings
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -32,6 +33,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
   private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
   private var buildClicks = 1
+
+  private lateinit var customOPDS: Button
   private lateinit var cacheButton: Button
   private lateinit var crashButton: Button
   private lateinit var sendReportButton: Button
@@ -78,6 +81,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       this.findViewById(R.id.settings_version_dev_production_libraries_switch)
     this.failNextBoot =
       this.findViewById(R.id.settings_version_dev_fail_next_boot_switch)
+    this.customOPDS =
+      this.findViewById(R.id.settings_version_dev_custom_opds)
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -173,6 +178,16 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
     this.failNextBoot.isChecked = BootTesting.isBootFailureEnabled(this)
     this.failNextBoot.setOnClickListener {
       BootTesting.enableBootFailures(this, !BootTesting.isBootFailureEnabled(this))
+    }
+
+    /*
+     * Configure the custom OPDS button.
+     */
+
+    this.customOPDS.setOnClickListener {
+      val intent = Intent()
+      intent.setClass(this, SettingsCustomOPDSActivity::class.java)
+      this.startActivity(intent)
     }
 
     /*

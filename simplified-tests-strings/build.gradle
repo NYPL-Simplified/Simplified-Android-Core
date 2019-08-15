@@ -1,0 +1,28 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 28
+  buildToolsVersion "28.0.2"
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+  defaultConfig {
+    minSdkVersion androidMinimumSDK
+  }
+}
+
+description = 'simplified-tests-strings'
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  api project(":simplified-books-controller-api")
+  api project(":simplified-profiles-controller-api")
+
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}

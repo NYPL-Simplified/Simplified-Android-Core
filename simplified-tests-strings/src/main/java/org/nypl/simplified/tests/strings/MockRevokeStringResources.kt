@@ -1,4 +1,4 @@
-package org.nypl.simplified.tests.sandbox
+package org.nypl.simplified.tests.strings
 
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import java.net.URI

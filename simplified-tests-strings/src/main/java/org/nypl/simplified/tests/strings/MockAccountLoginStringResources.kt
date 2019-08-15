@@ -1,4 +1,4 @@
-package org.nypl.simplified.tests
+package org.nypl.simplified.tests.strings
 
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 

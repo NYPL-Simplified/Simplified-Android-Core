@@ -448,4 +448,21 @@ public abstract class OPDSFeedParserContract {
         analyticsURI.toString().contains("open_book"));
     }
   }
+
+  @Test
+  public void testFeedBooks20190509()
+    throws Exception {
+    final URI uri = URI.create("http://www.example.com/");
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
+        BookFormats.Companion.supportedBookMimeTypes()));
+    final InputStream d =
+      OPDSFeedParserContract.getResource("feedbooks-20190808.xml");
+    final OPDSAcquisitionFeed f = p.parse(uri, d);
+    d.close();
+
+    Assert.assertEquals(
+      Option.some(URI.create("http://www.example.com/opensearch.xml")),
+      f.getFeedSearchURI().map(OPDSSearchLink::getURI));
+  }
 }

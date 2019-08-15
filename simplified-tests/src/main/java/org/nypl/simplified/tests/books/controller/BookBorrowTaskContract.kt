@@ -6,7 +6,6 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import org.joda.time.DateTime
 import org.joda.time.Instant
@@ -65,7 +64,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockBorrowStringResources
+import org.nypl.simplified.tests.strings.MockBorrowStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream

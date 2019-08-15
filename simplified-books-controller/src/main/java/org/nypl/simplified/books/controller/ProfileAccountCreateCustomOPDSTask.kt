@@ -1,0 +1,297 @@
+package org.nypl.simplified.books.controller
+
+import com.io7m.jfunctional.Option
+import com.io7m.jfunctional.OptionType
+import com.io7m.jfunctional.Some
+import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.DateTime
+import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationInProgress
+import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
+import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
+import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceStandardDescription
+import org.nypl.simplified.http.core.HTTPProblemReportLogging
+import org.nypl.simplified.http.core.HTTPResultError
+import org.nypl.simplified.http.core.HTTPResultException
+import org.nypl.simplified.http.core.HTTPResultOK
+import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
+import org.nypl.simplified.opds.core.OPDSFeedConstants
+import org.nypl.simplified.opds.core.OPDSFeedParserType
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.net.URI
+import java.util.UUID
+import java.util.concurrent.Callable
+
+/**
+ * A task that creates an account based on a custom OPDS feed.
+ */
+
+class ProfileAccountCreateCustomOPDSTask(
+  private val accountEvents: ObservableType<AccountEvent>,
+  private val accountProviderRegistry: AccountProviderRegistryType,
+  private val authDocumentParsers: AuthenticationDocumentParsersType,
+  private val http: HTTPType,
+  private val opdsURI: URI,
+  private val opdsFeedParser: OPDSFeedParserType,
+  private val profiles: ProfilesDatabaseType,
+  private val resolutionStrings: AccountProviderResolutionStringsType,
+  private val strings: ProfileAccountCreationStringResourcesType
+) : Callable<TaskResult<AccountCreateErrorDetails, AccountType>> {
+
+  private var title: String = ""
+  private val logger = LoggerFactory.getLogger(ProfileAccountCreateCustomOPDSTask::class.java)
+  private val taskRecorder = TaskRecorder.create<AccountCreateErrorDetails>()
+
+  override fun call(): TaskResult<AccountCreateErrorDetails, AccountType> {
+    this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.creatingAccount))
+    this.logger.debug("creating a custom OPDS account")
+
+    return try {
+      val accountProviderDescription =
+        this.createAccountProviderDescription()
+
+      val resolutionResult =
+        accountProviderDescription.resolve { _, message ->
+          this.publishProgressEvent(this.taskRecorder.beginNewStep(message))
+        }
+
+      when (resolutionResult) {
+        is TaskResult.Success ->
+          this.createAccount(accountProviderDescription)
+        is TaskResult.Failure ->
+          this.accountResolutionFailed(resolutionResult)
+      }
+    } catch (e: Throwable) {
+      this.logger.error("account creation failed: ", e)
+
+      this.taskRecorder.currentStepFailedAppending(
+        this.strings.unexpectedException,
+        AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
+        e)
+
+      this.publishFailureEvent(this.taskRecorder.currentStep()!!)
+      this.taskRecorder.finishFailure()
+    }
+  }
+
+  private fun accountResolutionFailed(
+    resolutionResult: TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType>)
+    : TaskResult.Failure<AccountCreateErrorDetails, AccountType> {
+    this.logger.error("could not resolve an account provider description")
+    this.taskRecorder.currentStepFailed(
+      this.strings.resolvingAccountProviderFailed,
+      AccountCreateErrorDetails.AccountProviderResolutionFailed(resolutionResult.errors()))
+    return this.taskRecorder.finishFailure()
+  }
+
+  private fun createAccount(
+    accountProviderDescription: AccountProviderSourceStandardDescription)
+    : TaskResult<AccountCreateErrorDetails, AccountType> {
+
+    val createResult =
+      ProfileAccountCreateTask(
+        accountEvents = this.accountEvents,
+        accountProviderID = accountProviderDescription.metadata.id,
+        accountProviders = this.accountProviderRegistry,
+        profiles = this.profiles,
+        strings = this.strings)
+        .call()
+
+    return when (createResult) {
+      is TaskResult.Success -> {
+        this.taskRecorder.addAll(createResult.steps)
+        this.publishProgressEvent(this.taskRecorder.currentStepSucceeded(this.strings.creatingAccountSucceeded))
+        this.taskRecorder.finishSuccess(createResult.result)
+      }
+      is TaskResult.Failure -> {
+        this.taskRecorder.addAll(createResult.steps)
+        this.taskRecorder.finishFailure()
+      }
+    }
+  }
+
+  /**
+   * Create a custom account provider description.
+   */
+
+  private fun createAccountProviderDescription(): AccountProviderSourceStandardDescription {
+    this.logger.debug("creating an account provider description")
+    this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.creatingAnAccountProviderDescription))
+
+    val authDocumentURI: URI? = this.findAuthenticationDocumentURI()
+    val id = URI.create("urn:custom:" + UUID.randomUUID().toString())
+    this.logger.debug("account id will be {}", id)
+
+    val links =
+      mutableListOf<AccountProviderDescriptionMetadata.Link>()
+
+    links.add(AccountProviderDescriptionMetadata.Link(
+      href = this.opdsURI,
+      type = null,
+      templated = false,
+      relation = "http://opds-spec.org/catalog"))
+
+    if (authDocumentURI != null) {
+      links.add(AccountProviderDescriptionMetadata.Link(
+        href = authDocumentURI,
+        type = "application/vnd.opds.authentication.v1.0+json",
+        templated = false,
+        relation = OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT))
+    }
+
+    val metadata =
+      AccountProviderDescriptionMetadata(
+        id = id,
+        title = this.title,
+        updated = DateTime.now(),
+        links = links,
+        images = listOf(),
+        isProduction = true,
+        isAutomatic = false)
+
+    val description =
+      AccountProviderSourceStandardDescription(
+        stringResources = this.resolutionStrings,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.http,
+        metadata = metadata)
+
+    /*
+     * Publish the description to the account provider registry. It is now possible
+     * to create an account using the description; the account creation task will ask
+     * the registry to resolve the account provider description.
+     */
+
+    this.accountProviderRegistry.updateDescription(description)
+    return description
+  }
+
+  private fun findAuthenticationDocumentURI(): URI? {
+    this.logger.debug("creating an account provider description")
+
+    this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.findingAuthDocumentURI))
+    this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.fetchingOPDSFeed))
+
+    val result =
+      this.http.get(Option.none(), this.opdsURI, 0L)
+
+    return when (result) {
+      is HTTPResultOK -> {
+        this.logger.debug("fetched opds feed")
+
+        /*
+         * Parse the result as an OPDS feed and then try to find the authentication document
+         * link inside it.
+         */
+
+        try {
+          this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.parsingOPDSFeed))
+          val feed = this.opdsFeedParser.parse(this.opdsURI, result.value)
+          this.title = feed.feedTitle
+          this.findAuthenticationDocumentLink(feed)
+        } catch (e: Exception) {
+          this.publishFailureEvent(this.taskRecorder.currentStepFailed(
+            message = this.strings.parsingOPDSFeedFailed,
+            errorValue = AccountCreateErrorDetails.UnexpectedException(e.message ?: "", e),
+            exception = e))
+          throw e
+        }
+      }
+
+      is HTTPResultError -> {
+        this.logger.debug("failed to fetch opds feed")
+
+        HTTPProblemReportLogging.logError(
+          logger = this.logger,
+          uri = this.opdsURI,
+          message = result.message,
+          statusCode = result.status,
+          reportOption = result.problemReport)
+
+        /*
+         * If the server returns an error but delivers an authentication document as a result,
+         * well... We've found the authentication document.
+         */
+
+        val contentTypes = result.responseHeaders["content-type"]
+        if (contentTypes != null) {
+          if (contentTypes.contains("application/vnd.opds.authentication.v1.0+json")) {
+            this.logger.debug("delivered authentication document instead of error")
+            return this.opdsURI
+          }
+        }
+
+        /*
+         * Any other error is fatal.
+         */
+
+        this.publishFailureEvent(this.taskRecorder.currentStepFailed(
+          message = this.strings.fetchingOPDSFeedFailed,
+          errorValue = AccountCreateErrorDetails.HTTPRequestFailed(
+            message = this.strings.fetchingOPDSFeedFailed,
+            opdsURI = this.opdsURI,
+            status = result.status,
+            problemReport = result.problemReport)))
+        throw IOException()
+      }
+
+      is HTTPResultException -> {
+        this.logger.debug("failed to fetch opds feed: ", result.error)
+
+        /*
+         * An exception is fatal.
+         */
+
+        this.publishFailureEvent(this.taskRecorder.currentStepFailed(
+          message = this.strings.fetchingOPDSFeedFailed,
+          errorValue = AccountCreateErrorDetails.HTTPRequestFailed(
+            this.strings.fetchingOPDSFeedFailed,
+            this.opdsURI,
+            -1,
+            Option.none()
+          ),
+          exception = result.error))
+
+        throw result.error
+      }
+
+      // XXX: Seal the HTTPResultType
+      else -> throw UnreachableCodeException()
+    }
+  }
+
+  private fun findAuthenticationDocumentLink(feed: OPDSAcquisitionFeed): URI? {
+    this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.searchingFeedForAuthenticationDocument))
+    return this.someOrNull(feed.authDocument)
+  }
+
+  private fun someOrNull(authDocument: OptionType<URI>?): URI? {
+    return if (authDocument is Some<URI>) {
+      authDocument.get()
+    } else {
+      null
+    }
+  }
+
+  private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
+    this.accountEvents.send(AccountEventCreationFailed(step.resolution.message))
+
+  private fun publishProgressEvent(step: TaskStep<AccountCreateErrorDetails>) =
+    this.accountEvents.send(AccountEventCreationInProgress(step.description))
+
+}
