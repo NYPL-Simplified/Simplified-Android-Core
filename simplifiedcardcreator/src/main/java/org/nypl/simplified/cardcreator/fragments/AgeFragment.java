@@ -1,8 +1,6 @@
 package org.nypl.simplified.cardcreator.fragments;
 
-
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +8,10 @@ import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
 import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.R;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -20,7 +19,6 @@ import org.nypl.simplified.cardcreator.R;
  * create an instance of this fragment.
  */
 public class AgeFragment extends Fragment {
-
 
   private Prefs prefs;
 
@@ -69,6 +67,5 @@ public class AgeFragment extends Fragment {
 
     return root_view;
   }
-
 
 }

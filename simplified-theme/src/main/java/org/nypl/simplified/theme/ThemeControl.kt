@@ -1,11 +1,11 @@
 package org.nypl.simplified.theme
 
 import android.content.res.Resources
-import android.support.annotation.AttrRes
-import android.support.annotation.ColorInt
-import android.support.annotation.ColorRes
-import android.support.annotation.StyleRes
 import android.util.TypedValue
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.annotation.StyleRes
 
 class ThemeControl {
 

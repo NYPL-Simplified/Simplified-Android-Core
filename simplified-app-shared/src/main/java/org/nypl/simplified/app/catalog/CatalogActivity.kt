@@ -2,8 +2,8 @@ package org.nypl.simplified.app.catalog
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.ActionBar
 import android.view.MenuItem
+import androidx.appcompat.app.ActionBar
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.utilities.FadeUtilities
 import org.nypl.simplified.feeds.api.FeedBooksSelection

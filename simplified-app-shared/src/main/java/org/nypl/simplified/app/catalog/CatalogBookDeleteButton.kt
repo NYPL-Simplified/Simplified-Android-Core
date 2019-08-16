@@ -1,9 +1,9 @@
 package org.nypl.simplified.app.catalog
 
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.AppCompatButton
 import android.text.TextUtils
 import android.util.TypedValue
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.books.api.BookID
@@ -15,10 +15,10 @@ import java.util.Objects
  */
 
 class CatalogBookDeleteButton(
-  activity: AppCompatActivity,
-  booksController: BooksControllerType,
-  account: AccountType,
-  bookID: BookID)
+    activity: AppCompatActivity,
+    booksController: BooksControllerType,
+    account: AccountType,
+    bookID: BookID)
   : AppCompatButton(activity), CatalogBookButtonType {
 
   init {

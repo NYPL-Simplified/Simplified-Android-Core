@@ -15,9 +15,6 @@ class SimplifiedServicesStrings(private val resources: Resources): BootStringRes
   override val bootCompleted: String =
     this.resources.getString(R.string.bootingCompleted)
 
-  val bootingHelpstack: String =
-    this.resources.getString(R.string.bootingHelpstack)
-
   val bootingNetworkConnectivity: String =
     this.resources.getString(R.string.bootingNetworkConnectivity)
 

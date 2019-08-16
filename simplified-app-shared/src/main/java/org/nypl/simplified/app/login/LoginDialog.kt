@@ -2,7 +2,6 @@ package org.nypl.simplified.app.login
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v7.app.AppCompatDialogFragment
 import android.text.InputFilter
 import android.text.InputType
 import android.view.LayoutInflater
@@ -14,6 +13,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatDialogFragment
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent

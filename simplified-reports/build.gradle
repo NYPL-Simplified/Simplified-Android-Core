@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 28
-  buildToolsVersion "28.0.2"
+  buildToolsVersion "28.0.3"
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -21,7 +21,7 @@ description = 'simplified-reports'
 dependencies {
   api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   api "org.slf4j:slf4j-api:1.7.25"
-  api "com.android.support:support-v4:28.0.0"
+  api 'androidx.legacy:legacy-support-v4:1.0.0'
 }
 
 repositories {

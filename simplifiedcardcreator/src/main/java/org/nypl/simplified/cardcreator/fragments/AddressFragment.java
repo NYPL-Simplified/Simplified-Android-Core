@@ -1,17 +1,16 @@
 package org.nypl.simplified.cardcreator.fragments;
 
-
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
 import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.R;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,7 +18,6 @@ import org.nypl.simplified.cardcreator.R;
  * create an instance of this fragment.
  */
 public class AddressFragment extends Fragment {
-
 
     private Prefs prefs;
 
@@ -67,9 +65,7 @@ public class AddressFragment extends Fragment {
         ((RadioButton) root_view.findViewById(R.id.workInNYC)).setChecked(this.prefs.getBoolean(getResources().getString(R.string.WORK_IN_NY_DATA_KEY)));
         ((RadioButton) root_view.findViewById(R.id.goToSchoolInNYC)).setChecked(this.prefs.getBoolean(getResources().getString(R.string.SCHOOL_IN_NY_DATA_KEY)));
 
-
         return root_view;
     }
-
 
 }

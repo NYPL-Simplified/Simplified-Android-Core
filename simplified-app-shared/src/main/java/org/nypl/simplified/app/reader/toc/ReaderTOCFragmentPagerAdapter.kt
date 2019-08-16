@@ -1,12 +1,12 @@
 package org.nypl.simplified.app.reader.toc
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 
 class ReaderTOCFragmentPagerAdapter(
-  fragmentManager: FragmentManager,
-  val tocParameters: ReaderTOCParameters) : FragmentPagerAdapter(fragmentManager) {
+    fragmentManager: FragmentManager,
+    val tocParameters: ReaderTOCParameters) : FragmentPagerAdapter(fragmentManager) {
 
   override fun getCount(): Int {
     return 2

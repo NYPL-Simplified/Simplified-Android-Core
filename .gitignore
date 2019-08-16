@@ -18,8 +18,7 @@
 # Certificates and API Keys
 #
 ReaderClientCert.sig 
-bugsnag.conf 
-helpstack.conf 
+bugsnag.conf
 *.jks
 
 # backup files

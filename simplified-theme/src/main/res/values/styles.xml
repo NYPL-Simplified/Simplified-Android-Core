@@ -312,4 +312,11 @@
     <item name="simplifiedColorPrimaryDark">@color/simplified_material_blue_grey_primary_dark</item>
   </style>
 
+  <!-- Edit text default Style -->
+  <style name="hs_editText_defaultStyle">
+    <item name="android:inputType">textCapSentences</item>
+  </style>
+  <!-- Edit text Style in new user and new issue screen -->
+  <style name="hs_editTextStyle" parent="@style/hs_editText_defaultStyle"></style>
+
 </resources>

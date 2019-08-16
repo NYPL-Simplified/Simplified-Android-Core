@@ -3,7 +3,6 @@ package org.nypl.simplified.app.catalog;
 import android.app.Dialog;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatDialogFragment;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +10,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;

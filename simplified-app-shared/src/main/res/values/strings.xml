@@ -490,7 +490,6 @@
   <string name="bootingBookController">Initializing book controller…</string>
   <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
   <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
-  <string name="bootingHelpstack">Initializing HelpStack…</string>
   <string name="bootingCompleted">Startup completed!</string>
   <string name="bootingNotificationsService">Initializing Notifications Service...</string>
 
@@ -506,5 +505,8 @@
   <string name="notification_title_ready_content">The title you reserved is available.</string>
   <string name="notification_channel_description">Notifications related to items becoming available for checkout.</string>
   <string name="notification_channel_name">Item Available</string>
+  <string name="hs_issuebutton_title">Report An Issue</string>
+  <string name="hs_message_hint">Message</string>
+  <string name="hs_subject_hint">Subject</string>
 
 </resources>

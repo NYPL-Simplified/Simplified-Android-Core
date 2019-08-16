@@ -2,7 +2,7 @@ package org.nypl.simplified.app
 
 import android.app.Activity
 import android.content.Context
-import android.support.multidex.MultiDexApplication
+import androidx.multidex.MultiDexApplication
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.rolling.RollingFileAppender
 import com.google.common.util.concurrent.ListenableFuture

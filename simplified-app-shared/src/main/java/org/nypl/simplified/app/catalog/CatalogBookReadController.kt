@@ -1,8 +1,8 @@
 package org.nypl.simplified.app.catalog
 
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.View.OnClickListener
+import androidx.appcompat.app.AppCompatActivity
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jnull.Nullable
@@ -31,12 +31,12 @@ import org.slf4j.LoggerFactory
  */
 
 class CatalogBookReadController(
-        val activity: AppCompatActivity,
-        val analytics: AnalyticsType,
-        val profile: ProfileReadableType,
-        val account: AccountType,
-        val id: BookID,
-        val entry: FeedEntryOPDS) : OnClickListener {
+    val activity: AppCompatActivity,
+    val analytics: AnalyticsType,
+    val profile: ProfileReadableType,
+    val account: AccountType,
+    val id: BookID,
+    val entry: FeedEntryOPDS) : OnClickListener {
 
     companion object {
         private val LOG = LoggerFactory.getLogger(CatalogBookReadController::class.java)

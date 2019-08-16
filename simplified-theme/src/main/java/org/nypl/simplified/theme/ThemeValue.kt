@@ -1,7 +1,7 @@
 package org.nypl.simplified.theme
 
-import android.support.annotation.ColorRes
-import android.support.annotation.StyleRes
+import androidx.annotation.ColorRes
+import androidx.annotation.StyleRes
 
 /**
  * A loaded theme.

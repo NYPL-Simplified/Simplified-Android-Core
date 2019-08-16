@@ -13,7 +13,7 @@
     android:textSize="24sp"
     android:text="@string/migrationFailure"/>
 
-  <android.support.v7.widget.RecyclerView
+  <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/splashMigrationReportList"
     android:layout_above="@id/splashMigrationReportOK"
     android:layout_below="@id/splashMigrationReportTitle"

@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 28
-  buildToolsVersion "28.0.2"
+  buildToolsVersion "28.0.3"
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -28,7 +28,7 @@ dependencies {
   implementation "org.slf4j:slf4j-api:1.7.25"
 
   compileOnly 'com.google.auto.value:auto-value:1.5'
-  annotationProcessor 'com.google.auto.value:auto-value:1.5'
+  annotationProcessor "com.google.auto.value:auto-value:1.5"
 }
 
 repositories {

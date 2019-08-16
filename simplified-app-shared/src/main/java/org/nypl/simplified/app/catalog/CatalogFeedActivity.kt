@@ -4,8 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.core.content.ContextCompat
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.Menu
@@ -24,6 +23,7 @@ import android.widget.RadioGroup
 import android.widget.SearchView
 import android.widget.SearchView.OnQueryTextListener
 import android.widget.TextView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.FutureCallback

@@ -10,7 +10,7 @@ interface BrandingSplashServiceType {
    * Provide a splash image resource for the application.
    */
 
-  @android.support.annotation.DrawableRes
+  @androidx.annotation.DrawableRes
   fun splashImageResource(): Int
 
 }

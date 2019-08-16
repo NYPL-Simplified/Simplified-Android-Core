@@ -1,8 +1,7 @@
 package org.nypl.simplified.cardcreator.fragments;
 
-
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +10,12 @@ import android.widget.TextView;
 import org.nypl.simplified.cardcreator.R;
 import org.nypl.simplified.prefs.Prefs;
 
-
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link ConfirmationFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class ConfirmationFragment extends Fragment {
-
 
     private TextView barcode;
     private TextView username;

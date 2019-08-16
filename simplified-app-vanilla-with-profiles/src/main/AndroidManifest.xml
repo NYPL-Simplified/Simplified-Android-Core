@@ -94,12 +94,6 @@
       android:label="@string/versions_version"
       android:exported="false" />
 
-    <activity android:name="org.nypl.simplified.app.helpstack.HelpActivity"
-      android:configChanges="orientation|screenSize"
-      android:contentDescription="@string/help"
-      android:exported="false"
-      android:label="@string/help" />
-
     <!-- General components -->
     <activity android:name="org.nypl.simplified.app.WebViewActivity"
       android:configChanges="orientation|screenSize"
@@ -134,48 +128,13 @@
       android:exported="false"
       android:label="@string/audio_book_player" />
 
-    <!-- HelpStack -->
-    <activity
-      android:name="com.tenmiles.helpstack.activities.HomeActivity"
-      android:exported="false"
-      android:label="@string/hs_help_title"
-      tools:replace="android:label">
-      <intent-filter>
-        <action android:name="com.tenmiles.helpstack.ShowHelp" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </activity>
-    <activity android:name="com.tenmiles.helpstack.activities.NewIssueActivity"
-      android:contentDescription="@string/hs_issuebutton_title"
-      android:label="@string/hs_issuebutton_title"
-      android:windowSoftInputMode="adjustResize" />
-    <activity android:name="com.tenmiles.helpstack.activities.NewUserActivity"
-      android:windowSoftInputMode="adjustResize" />
-    <activity android:name="com.tenmiles.helpstack.activities.IssueDetailActivity"
-      android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
-    <activity android:name="com.tenmiles.helpstack.activities.ArticleActivity" />
-    <activity android:name="com.tenmiles.helpstack.activities.SectionActivity" />
-    <activity android:name="com.tenmiles.helpstack.activities.ImageAttachmentDisplayActivity" />
-    <activity android:name="com.tenmiles.helpstack.activities.EditAttachmentActivity"
-      android:screenOrientation="portrait" />
-
     <activity android:name="org.nypl.simplified.app.ReportIssueActivity"
       android:contentDescription="@string/hs_issuebutton_title"
       android:label="@string/hs_issuebutton_title"
       android:windowSoftInputMode="adjustResize" />
 
-    <receiver
-      android:name="com.tenmiles.helpstack.service.AttachmentDownloadReceiver"
-      android:enabled="true">
-      <intent-filter>
-        <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
-        <action android:name="android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </receiver>
-
     <provider
-      android:name="android.support.v4.content.FileProvider"
+      android:name="androidx.core.content.FileProvider"
       android:authorities="${applicationId}.fileProvider"
       android:exported="false"
       android:grantUriPermissions="true">

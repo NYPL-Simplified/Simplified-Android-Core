@@ -7,7 +7,6 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.ScreenSizeInformationType
-import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.app.reader.ReaderHTTPServerType
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -104,12 +103,6 @@ interface SimplifiedServicesType {
    */
 
   val feedLoader: FeedLoaderType
-
-  /**
-   * @return The HelpStack instance, or `null` if HelpStack is not supported
-   */
-
-  val helpStack: HelpstackType?
 
   /**
    * @return The EPUB loader

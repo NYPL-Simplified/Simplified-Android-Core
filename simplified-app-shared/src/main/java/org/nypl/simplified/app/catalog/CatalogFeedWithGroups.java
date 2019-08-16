@@ -1,13 +1,14 @@
 package org.nypl.simplified.app.catalog;
 
 import android.database.DataSetObserver;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -17,7 +18,6 @@ import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.feeds.api.Feed.FeedWithGroups;
 import org.nypl.simplified.feeds.api.FeedGroup;
-
 
 /**
  * A view that displays a catalog feed that contains groups.

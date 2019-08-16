@@ -1,7 +1,6 @@
 package org.nypl.simplified.app.settings
 
 import com.io7m.jfunctional.OptionType
-import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.documents.store.DocumentStoreType
 
 /**
@@ -15,12 +14,6 @@ interface SettingsFragmentListenerType {
    */
 
   fun documents(): DocumentStoreType
-
-  /**
-   * Return the Helpstack instance, if one exists.
-   */
-
-  fun helpstack(): OptionType<HelpstackType>
 
   /**
    * Open the accounts activity.

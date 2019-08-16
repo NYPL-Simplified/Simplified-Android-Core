@@ -7,10 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.DrawerLayout.DrawerListener;
-import android.support.v7.app.ActionBar;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -66,7 +67,7 @@ import static org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousPro
  */
 
 public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
-  implements DrawerListener, OnItemClickListener {
+  implements DrawerLayout.DrawerListener, OnItemClickListener {
 
   private static final Logger LOG;
   private static final String NAVIGATION_DRAWER_OPEN_ID;

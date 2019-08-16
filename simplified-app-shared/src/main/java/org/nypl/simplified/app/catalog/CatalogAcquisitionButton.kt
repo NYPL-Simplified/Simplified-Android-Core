@@ -2,10 +2,10 @@ package org.nypl.simplified.app.catalog
 
 import android.content.Context
 import android.content.res.Resources
-import android.support.v7.widget.AppCompatButton
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.ViewGroup
+import androidx.appcompat.widget.AppCompatButton
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Some
 import org.nypl.simplified.accounts.api.AccountEvent
