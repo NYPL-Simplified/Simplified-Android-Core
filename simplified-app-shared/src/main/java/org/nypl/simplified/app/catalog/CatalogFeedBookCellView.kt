@@ -56,6 +56,7 @@ import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
@@ -318,14 +319,14 @@ class CatalogFeedBookCellView(
      */
 
     val acquisitionOpt =
-      BookAcquisitionSelection.preferredAcquisition(feedEntry.feedEntry.acquisitions)
+      BookAcquisitionSelection.preferredAcquisition(feedEntry.feedEntry.acquisitionPaths)
 
     /*
      * Theoretically, if the book has ever been downloaded, then the
      * acquisition list must have contained one usable acquisition relation...
      */
 
-    if (!(acquisitionOpt is Some<OPDSAcquisition>)) {
+    if (!(acquisitionOpt is Some<OPDSAcquisitionPath>)) {
       throw UnreachableCodeException()
     }
 

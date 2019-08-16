@@ -21,6 +21,7 @@ dependencies {
   api project(":simplified-opds-auth-document-api")
   api project(":simplified-mime")
 
+  implementation "org.slf4j:slf4j-api:1.7.25"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation "com.fasterxml.jackson.core:jackson-databind:2.9.5"
 

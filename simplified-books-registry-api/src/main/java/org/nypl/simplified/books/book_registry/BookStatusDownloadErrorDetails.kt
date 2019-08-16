@@ -1,7 +1,9 @@
 package org.nypl.simplified.books.book_registry
 
 import org.nypl.simplified.http.core.HTTPProblemReport
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 
 /**
  * Data related to errors during book borrowing.
@@ -54,7 +56,7 @@ sealed class BookStatusDownloadErrorDetails {
    */
 
   data class UnsupportedAcquisition(
-    val type: OPDSAcquisition.Relation)
+    val type: OPDSAcquisitionRelation)
     : BookStatusDownloadErrorDetails()
 
   /**
@@ -92,7 +94,7 @@ sealed class BookStatusDownloadErrorDetails {
 
     data class DRMUnsupportedContentType(
       override val system: String,
-      val contentType: String)
+      val contentType: MIMEType)
       : DRMError()
 
     /**

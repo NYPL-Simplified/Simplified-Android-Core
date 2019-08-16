@@ -53,9 +53,11 @@ import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
@@ -161,6 +163,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
       bundledContent = this.bundledContent)
   }
 
+  private val MIME_TYPE_EPUB =
+    MIMEParser.parseRaisingException("application/epub+zip")
+
   /**
    * Attempting to revoke a loan that requires DRM, but is not returnable, succeeds trivially.
    */
@@ -195,9 +200,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -286,9 +291,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -378,9 +383,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -505,9 +510,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -628,9 +633,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -750,9 +755,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -878,9 +883,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -984,9 +989,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1080,9 +1085,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     val acquisition =
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =

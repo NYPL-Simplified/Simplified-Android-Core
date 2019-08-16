@@ -24,4 +24,12 @@ data class MIMEType(
   override fun toString(): String {
     return this.fullType
   }
+
+  /**
+   * @return `true` if this type is the same as the given type, ignoring parameters
+   */
+
+  fun isSameType(other: MIMEType) : Boolean {
+    return this.fullType == other.fullType
+  }
 }

@@ -5,7 +5,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 
 import org.joda.time.DateTime;
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
+import org.nypl.simplified.mime.MIMEParser;
+import org.nypl.simplified.mime.MIMEType;
 import org.nypl.simplified.parser.api.ParseError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,10 +56,10 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
 
   private static final Logger LOG = LoggerFactory.getLogger(OPDSAcquisitionFeedEntryParser.class);
 
-  private final Set<String> supported_book_formats;
+  private final Set<MIMEType> supported_book_formats;
 
   private OPDSAcquisitionFeedEntryParser(
-    final Set<String> supported_book_formats) {
+    final Set<MIMEType> supported_book_formats) {
     this.supported_book_formats =
       Collections.unmodifiableSet(new HashSet<>(
         Objects.requireNonNull(supported_book_formats, "Supported book formats")));
@@ -93,7 +94,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
    */
 
   public static OPDSAcquisitionFeedEntryParserType newParser(
-    final Set<String> supported_book_formats) {
+    final Set<MIMEType> supported_book_formats) {
     return new OPDSAcquisitionFeedEntryParser(supported_book_formats);
   }
 
@@ -226,14 +227,17 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
   }
 
   private OPDSIndirectAcquisition parseIndirectAcquisition(
-    final Element acquisition) {
-    final String type = acquisition.getAttribute("type");
+    final Element acquisition)
+    throws Exception {
+    final MIMEType type =
+      MIMEParser.Companion.parseRaisingException(acquisition.getAttribute("type"));
     final List<OPDSIndirectAcquisition> next_acquisitions = parseIndirectAcquisitions(acquisition);
     return new OPDSIndirectAcquisition(type, next_acquisitions);
   }
 
   private List<OPDSIndirectAcquisition> parseIndirectAcquisitions(
-    final Element element) {
+    final Element element)
+    throws Exception {
     final List<Element> indirect_elements =
       OPDSXML.getChildElementsWithName(element, OPDS_URI, "indirectAcquisition");
     final List<OPDSIndirectAcquisition> indirects =
@@ -254,7 +258,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     throws OPDSParseException {
 
     if (rel_text.startsWith(ACQUISITION_URI_PREFIX_TEXT)) {
-      for (final Relation v : Relation.values()) {
+      for (final OPDSAcquisitionRelation v : OPDSAcquisitionRelation.values()) {
         final String uri_text = v.getUri().toString();
         if (rel_text.equals(uri_text)) {
           final URI href;
@@ -266,19 +270,26 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
             continue;
           }
 
-          final List<OPDSIndirectAcquisition> indirects = parseIndirectAcquisitions(link);
-          final OptionType<String> type = typeAttributeWithSupportedValue(link);
+          final List<OPDSIndirectAcquisition> indirects;
+          final OptionType<MIMEType> type;
+          try {
+            indirects = parseIndirectAcquisitions(link);
+            type = typeAttribute(link);
+          } catch (Exception e) {
+            entry_builder.addParseError(
+              this.invalidMimeType(source, "Unparseable mime type", e));
+            continue;
+          }
 
-          if (type.isSome() || hasSupportedIndirectAcquisition(indirects)) {
+          if (type.isSome() || !indirects.isEmpty()) {
             final OPDSAcquisition acquisition = new OPDSAcquisition(v, href, type, indirects);
             entry_builder.addAcquisition(acquisition);
 
-            if (v == Relation.ACQUISITION_OPEN_ACCESS) {
+            if (v == OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS) {
               entry_builder.setAvailability(OPDSAvailabilityOpenAccess.get(revoke));
             } else {
               tryAvailability(entry_builder, link, revoke);
             }
-            break;
           }
         }
       }
@@ -287,16 +298,14 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     }
   }
 
-  private boolean hasSupportedIndirectAcquisition(
-    final List<OPDSIndirectAcquisition> indirects) {
-    for (final OPDSIndirectAcquisition indirect : indirects) {
-      for (final String supported : supported_book_formats) {
-        if (indirect.findTypeOptional(supported).isSome()) {
-          return true;
-        }
-      }
+  private OptionType<MIMEType> typeAttribute(
+    final Element acquisition)
+    throws Exception {
+    final String type = acquisition.getAttribute("type");
+    if (type != null && !type.isEmpty()) {
+      return Option.some(MIMEParser.Companion.parseRaisingException(type));
     }
-    return false;
+    return Option.none();
   }
 
   private void parseCategories(
@@ -539,6 +548,23 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     return "'href' attribute of 'link' with 'rel' " + relValue;
   }
 
+  private ParseError invalidMimeType(
+    final URI source,
+    final String message,
+    final Exception e) {
+    final StringBuilder builder = new StringBuilder(128);
+    builder.append(message);
+    builder.append(": ");
+    builder.append(e.getMessage());
+
+    return new ParseError(
+      source,
+      builder.toString(),
+      -1,
+      0,
+      e);
+  }
+
   private ParseError invalidURI(
     final URI source,
     final String sourceLocation,
@@ -580,22 +606,6 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
       }
     }
     return Option.none();
-  }
-
-  private OptionType<String> typeAttributeWithSupportedValue(final Element acquisition) {
-    for (String format : this.supported_book_formats) {
-      if (hasTypeAttributeWithValue(acquisition, format)) {
-        return Option.some(format);
-      }
-    }
-    return Option.none();
-  }
-
-  private boolean hasTypeAttributeWithValue(
-    final Element acquisition,
-    final String type) {
-    final String element_type = acquisition.getAttribute("type");
-    return type.equals(element_type);
   }
 
   private void tryAvailability(
@@ -652,9 +662,9 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
         final OptionType<DateTime> start_date =
           OPDSXML.getAttributeRFC3339Optional(available, "since");
         final String rel = Objects.requireNonNull(element.getAttribute("rel"));
-        if (Relation.ACQUISITION_BORROW.getUri().toString().equals(rel)) {
+        if (OPDSAcquisitionRelation.ACQUISITION_BORROW.getUri().toString().equals(rel)) {
           return OPDSAvailabilityLoanable.get();
-        } else if (Relation.ACQUISITION_GENERIC.getUri().toString().equals(rel)) {
+        } else if (OPDSAcquisitionRelation.ACQUISITION_GENERIC.getUri().toString().equals(rel)) {
           return OPDSAvailabilityLoaned.get(start_date, end_date, revoke);
         }
       }

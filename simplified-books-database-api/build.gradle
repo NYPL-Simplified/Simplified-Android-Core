@@ -21,6 +21,7 @@ description = 'simplified-books-database-api'
 dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-books-api")
+  api project(":simplified-mime")
   api project(":simplified-opds-core")
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

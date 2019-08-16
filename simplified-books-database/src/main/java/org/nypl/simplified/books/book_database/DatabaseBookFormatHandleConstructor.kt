@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.book_database
 
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
+import org.nypl.simplified.mime.MIMEType
 
 /**
  * A format handle constructor for a particular book format.
@@ -19,7 +20,7 @@ internal data class DatabaseBookFormatHandleConstructor(
    * The set of content types that will trigger the creation of a format.
    */
 
-  val supportedContentTypes: Set<String>,
+  val supportedContentTypes: Set<MIMEType>,
 
   /**
    * A function to construct a format given an existing database entry.

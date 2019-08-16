@@ -7,12 +7,13 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import net.jodah.expiringmap.ExpiringMap
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener
+import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
 import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
-import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.*
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
@@ -117,8 +118,13 @@ class FeedLoader private constructor(
         this.transport.getStream(auth, uri, method).use { stream -> this.parser.parse(uri, stream) }
       val search =
         fetchSearchLink(opdsFeed, auth, method, uri)
+      val feed =
+        Feed.fromAcquisitionFeed(opdsFeed, search)
 
-      val feed = Feed.fromAcquisitionFeed(opdsFeed, search)
+      val sizeThen = feed.size
+      filterFeedEntries(feed)
+      val sizeNow = feed.size
+      this.log.debug("filtered feed: {} -> {}", sizeThen, sizeNow)
 
       /*
        * Replace entries in the feed with those from the book registry, if requested.
@@ -132,11 +138,32 @@ class FeedLoader private constructor(
       return FeedLoaderSuccess(feed)
     } catch (e: FeedHTTPTransportException) {
       if (e.code == 401) {
-        return FeedLoaderFailure.FeedLoaderFailedAuthentication(someOrNull(e.problemReport), e)
+        return FeedLoaderFailedAuthentication(someOrNull(e.problemReport), e)
       }
-      return FeedLoaderFailure.FeedLoaderFailedGeneral(someOrNull(e.problemReport), e)
+      return FeedLoaderFailedGeneral(someOrNull(e.problemReport), e)
     } catch (e: Exception) {
-      return FeedLoaderFailure.FeedLoaderFailedGeneral(null, e)
+      return FeedLoaderFailedGeneral(null, e)
+    }
+  }
+
+  private fun filterFeedEntries(feed: Feed) {
+    return when (feed) {
+      is FeedWithoutGroups -> {
+        feed.entriesInOrder.removeAll { entry -> this.feedEntryIsUnsuppported(entry) }
+        Unit
+      }
+      is FeedWithGroups -> {
+        feed.feedGroupsInOrder.forEach { group ->
+          group.groupEntries.removeAll { entry -> this.feedEntryIsUnsuppported(entry) }
+        }
+      }
+    }
+  }
+
+  private fun feedEntryIsUnsuppported(entry: FeedEntry): Boolean {
+    return when (entry) {
+      is FeedEntry.FeedEntryCorrupt -> false
+      is FeedEntry.FeedEntryOPDS -> BookAcquisitionSelection.preferredAcquisition(entry.feedEntry.acquisitionPaths).isNone
     }
   }
 

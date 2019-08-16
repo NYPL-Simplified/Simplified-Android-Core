@@ -3,7 +3,9 @@ package org.nypl.simplified.app.catalog
 import android.content.res.Resources
 import org.nypl.simplified.app.R
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityType
 import java.io.File
 
@@ -21,7 +23,7 @@ class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResou
   override val borrowBookUnexpectedException: String
     get() = this.resources.getString(R.string.unexpectedException)
 
-  override fun borrowBookUnsupportedAcquisition(type: OPDSAcquisition.Relation): String {
+  override fun borrowBookUnsupportedAcquisition(type: OPDSAcquisitionRelation): String {
     return this.resources.getString(R.string.borrowBookUnsupportedAcquisition, type)
   }
 
@@ -64,20 +66,20 @@ class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResou
     return this.resources.getString(R.string.borrowBookBorrowForAvailability, availability)
   }
 
-  override fun borrowBookFulfillDownloaded(file: File, contentType: String): String {
-    return this.resources.getString(R.string.borrowBookFulfillDownloaded, contentType)
+  override fun borrowBookFulfillDownloaded(file: File, contentType: MIMEType): String {
+    return this.resources.getString(R.string.borrowBookFulfillDownloaded, contentType.fullType)
   }
 
-  override fun borrowBookFulfillACSMCheckContentTypeOK(contentType: String): String {
-    return this.resources.getString(R.string.borrowBookFulfillACSMCheckContentTypeOK, contentType)
+  override fun borrowBookFulfillACSMCheckContentTypeOK(contentType: MIMEType): String {
+    return this.resources.getString(R.string.borrowBookFulfillACSMCheckContentTypeOK, contentType.fullType)
   }
 
-  override fun borrowBookSaving(receivedContentType: String, expectedContentTypes: Set<String>): String {
-    return this.resources.getString(R.string.borrowBookSaving, receivedContentType)
+  override fun borrowBookSaving(receivedContentType: MIMEType, expectedContentTypes: Set<MIMEType>): String {
+    return this.resources.getString(R.string.borrowBookSaving, receivedContentType.fullType)
   }
 
-  override fun borrowBookSavingCheckingContentType(receivedContentType: String, expectedContentTypes: Set<String>): String {
-    return this.resources.getString(R.string.borrowBookSavingCheckingContentType, receivedContentType)
+  override fun borrowBookSavingCheckingContentType(receivedContentType: MIMEType, expectedContentTypes: Set<MIMEType>): String {
+    return this.resources.getString(R.string.borrowBookSavingCheckingContentType, receivedContentType.fullType)
   }
 
   override val borrowBookSavingCheckingContentTypeUnacceptable: String

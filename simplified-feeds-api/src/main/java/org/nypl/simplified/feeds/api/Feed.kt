@@ -2,24 +2,23 @@ package org.nypl.simplified.feeds.api
 
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.jnull.NullCheck
 import org.joda.time.DateTime
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.FeedSearch.FeedSearchOpen1_1
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_GENERIC
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BUY
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_GENERIC
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_SAMPLE
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_SUBSCRIBE
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import java.net.URI
 import java.util.ArrayList
-import java.util.Calendar
 import java.util.Collections
 import java.util.HashMap
+import java.util.Objects
 
 /**
  * The type of mutable feeds.
@@ -377,7 +376,7 @@ sealed class Feed {
     private fun constructFacetsOrdered(f: OPDSAcquisitionFeed): MutableList<FeedFacet> {
       val facetsOrder = ArrayList<FeedFacet>(4)
       for (ff in f.feedFacetsOrder) {
-        facetsOrder.add(FeedFacet.FeedFacetOPDS(NullCheck.notNull(ff)))
+        facetsOrder.add(FeedFacet.FeedFacetOPDS(Objects.requireNonNull(ff, "ff")))
       }
       return facetsOrder
     }
@@ -389,7 +388,7 @@ sealed class Feed {
         val fs = fMap[k]!!
         val rs = ArrayList<FeedFacet>(4)
         for (ff in fs) {
-          rs.add(FeedFacet.FeedFacetOPDS(NullCheck.notNull(ff)))
+          rs.add(FeedFacet.FeedFacetOPDS(Objects.requireNonNull(ff, "ff")))
         }
         facetsByGroup[k] = rs
       }
@@ -397,16 +396,14 @@ sealed class Feed {
     }
 
     private fun priority(acquisition: OPDSAcquisition): Int {
-      when (acquisition.relation) {
-        ACQUISITION_BORROW -> return 6
-        ACQUISITION_OPEN_ACCESS -> return 5
-        ACQUISITION_GENERIC -> return 4
-        ACQUISITION_SAMPLE -> return 3
-        ACQUISITION_BUY -> return 2
-        ACQUISITION_SUBSCRIBE -> return 1
+      return when (acquisition.relation) {
+        ACQUISITION_BORROW -> 6
+        ACQUISITION_OPEN_ACCESS -> 5
+        ACQUISITION_GENERIC -> 4
+        ACQUISITION_SAMPLE -> 3
+        ACQUISITION_BUY -> 2
+        ACQUISITION_SUBSCRIBE -> 1
       }
-
-      return 0
     }
   }
 }

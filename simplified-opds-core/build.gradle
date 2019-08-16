@@ -24,6 +24,7 @@ dependencies {
   api project(':simplified-parser-api')
 
   implementation project(':simplified-json-core')
+  implementation project(':simplified-mime')
   implementation project(':simplified-rfc3339-core')
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

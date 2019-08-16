@@ -21,12 +21,8 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_GENERIC
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
@@ -42,7 +38,7 @@ class CatalogAcquisitionButton(
   private val account: AccountType,
   bookRegistry: BookRegistryReadableType,
   private val entry: FeedEntryOPDS,
-  private val acquisition: OPDSAcquisition,
+  private val acquisition: OPDSAcquisitionPath,
   private val onWantOpenLoginDialog: () -> Unit)
   : AppCompatButton(context), CatalogBookButtonType {
 
@@ -103,8 +99,8 @@ class CatalogAcquisitionButton(
 
   private fun tryBorrow() {
     this.unsubscribe()
-    LOG.debug("[{}]: trying borrow of type {}", this.entry.bookID.brief(), this.acquisition.type)
-    this.books.bookBorrow(account, this.entry.bookID, this.acquisition, this.entry.feedEntry)
+    LOG.debug("[{}]: trying borrow of type {}", this.entry.bookID.brief(), this.acquisition.next.type)
+    this.books.bookBorrow(account, this.entry.bookID, this.entry.feedEntry)
   }
 
   private fun unsubscribe() {
@@ -179,7 +175,7 @@ class CatalogAcquisitionButton(
       account: AccountType,
       bookRegistry: BookRegistryReadableType,
       entry: FeedEntryOPDS,
-      acquisition: OPDSAcquisition,
+      acquisition: OPDSAcquisitionPath,
       onWantOpenLoginDialog: () -> Unit): CatalogAcquisitionButton {
       val button =
         CatalogAcquisitionButton(
@@ -219,20 +215,18 @@ class CatalogAcquisitionButton(
       val opdsEntry = entry.feedEntry
 
       val acquisitionOpt =
-        BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitions)
+        BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitionPaths)
 
-      if (acquisitionOpt is Some<OPDSAcquisition>) {
-        val acquisition = acquisitionOpt.get()
-
+      if (acquisitionOpt is Some<OPDSAcquisitionPath>) {
         val button =
           CatalogAcquisitionButton(
+            acquisition = acquisitionOpt.get(),
             context = context,
             profiles = profiles,
             books = books,
             account = account,
             bookRegistry = bookRegistry,
             entry = entry,
-            acquisition = acquisition,
             onWantOpenLoginDialog = onWantOpenLoginDialog)
 
         viewGroup.addView(button)
@@ -249,7 +243,7 @@ class CatalogAcquisitionButton(
       resources: Resources,
       bookRegistry: BookRegistryReadableType,
       entry: FeedEntryOPDS,
-      acquisition: OPDSAcquisition): ButtonTexts {
+      acquisition: OPDSAcquisitionPath): ButtonTexts {
 
       val availability = entry.feedEntry.availability
       return if (bookRegistry.book(entry.bookID).isSome) {
@@ -257,13 +251,13 @@ class CatalogAcquisitionButton(
           text = resources.getString(R.string.catalog_book_download),
           contentDescription = resources.getString(R.string.catalog_accessibility_book_download))
       } else {
-        when (acquisition.relation) {
-          ACQUISITION_OPEN_ACCESS -> {
+        when (acquisition.next.relation) {
+          OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS -> {
             ButtonTexts(
               text = resources.getString(R.string.catalog_book_download),
               contentDescription = resources.getString(R.string.catalog_accessibility_book_download))
           }
-          ACQUISITION_BORROW -> {
+          OPDSAcquisitionRelation.ACQUISITION_BORROW -> {
             if (availability is OPDSAvailabilityHoldable) {
               ButtonTexts(
                 text = resources.getString(R.string.catalog_book_reserve),
@@ -274,10 +268,10 @@ class CatalogAcquisitionButton(
                 contentDescription = resources.getString(R.string.catalog_accessibility_book_borrow))
             }
           }
-          ACQUISITION_BUY,
-          ACQUISITION_GENERIC,
-          ACQUISITION_SAMPLE,
-          ACQUISITION_SUBSCRIBE -> {
+          OPDSAcquisitionRelation.ACQUISITION_BUY,
+          OPDSAcquisitionRelation.ACQUISITION_GENERIC,
+          OPDSAcquisitionRelation.ACQUISITION_SAMPLE,
+          OPDSAcquisitionRelation.ACQUISITION_SUBSCRIBE -> {
             ButtonTexts(
               text = resources.getString(R.string.catalog_book_download),
               contentDescription = resources.getString(R.string.catalog_accessibility_book_download))

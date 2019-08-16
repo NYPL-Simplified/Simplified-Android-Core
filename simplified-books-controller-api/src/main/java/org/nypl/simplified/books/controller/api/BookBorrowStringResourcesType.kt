@@ -1,6 +1,8 @@
 package org.nypl.simplified.books.controller.api
 
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityType
 import java.io.File
 
@@ -20,29 +22,29 @@ interface BookBorrowStringResourcesType {
    * Downloaded something successfully.
    */
 
-  fun borrowBookFulfillDownloaded(file: File, contentType: String): String
+  fun borrowBookFulfillDownloaded(file: File, contentType: MIMEType): String
 
   /**
    * The given content type is supported for ACSM files.
    */
 
-  fun borrowBookFulfillACSMCheckContentTypeOK(contentType: String): String
+  fun borrowBookFulfillACSMCheckContentTypeOK(contentType: MIMEType): String
 
   /**
    * Saving a downloaded book.
    */
 
   fun borrowBookSaving(
-    receivedContentType: String,
-    expectedContentTypes: Set<String>): String
+    receivedContentType: MIMEType,
+    expectedContentTypes: Set<MIMEType>): String
 
   /**
    * Checking that the content type of the downloaded book is correct.
    */
 
   fun borrowBookSavingCheckingContentType(
-    receivedContentType: String,
-    expectedContentTypes: Set<String>): String
+    receivedContentType: MIMEType,
+    expectedContentTypes: Set<MIMEType>): String
 
   /**
    * A book had the wrong availability type to borrow.
@@ -54,7 +56,7 @@ interface BookBorrowStringResourcesType {
    * The specified acquisition is not supported.
    */
 
-  fun borrowBookUnsupportedAcquisition(type: OPDSAcquisition.Relation): String
+  fun borrowBookUnsupportedAcquisition(type: OPDSAcquisitionRelation): String
 
   /**
    * The Adobe DRM connector failed with an error code.

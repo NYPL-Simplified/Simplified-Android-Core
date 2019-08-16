@@ -12,6 +12,7 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONSerializerType
 import org.slf4j.Logger
@@ -90,7 +91,7 @@ internal class BookDatabaseEntry internal constructor(
     }
 
     synchronized(this.bookLock) {
-      this.bookRef.entry.acquisitions.forEach { acquisition ->
+      this.bookRef.entry.acquisitionPaths.forEach { acquisitionPath ->
         createFormatHandleIfRequired(
           context = this.context,
           logger = LOG,
@@ -99,7 +100,7 @@ internal class BookDatabaseEntry internal constructor(
           ownerDirectory = this.bookDir,
           onUpdate = { format -> this.onFormatUpdated(format) },
           existingFormats = this.formatHandlesRef,
-          contentTypes = acquisition.availableFinalContentTypes())
+          contentTypes = setOf(acquisitionPath.finalContentType()))
       }
 
       this.bookRef =
@@ -230,7 +231,7 @@ internal class BookDatabaseEntry internal constructor(
       owner: BookDatabaseEntryType,
       onUpdate: (BookFormat) -> Unit,
       existingFormats: MutableMap<Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle>,
-      contentTypes: Set<String>) {
+      contentTypes: Set<MIMEType>) {
 
       val params =
         DatabaseFormatHandleParameters(
@@ -243,7 +244,7 @@ internal class BookDatabaseEntry internal constructor(
       for (contentType in contentTypes) {
         for (formatDefinition in constructors.keys) {
           val formatConstructor = constructors[formatDefinition]!!
-          if (formatDefinition.supportedContentTypes().contains(contentType)) {
+          if (formatDefinition.supportedContentTypes().any { supported -> supported.isSameType(contentType) }) {
             if (!existingFormats.containsKey(formatConstructor.classType)) {
               val bookID = owner.book.id
               logger.debug("[{}]: instantiating format {} for content type {}",

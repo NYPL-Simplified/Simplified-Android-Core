@@ -22,6 +22,7 @@ import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.http.core.HTTPProblemReport
+import org.nypl.simplified.mime.MIMEParser
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -166,7 +167,7 @@ class AudioBookLoadingFragment : Fragment() {
   }
 
   private fun onManifestDownloaded(
-    contentType: String,
+    contentTypeText: String,
     file: File) {
 
     UIThread.runOnUIThread {
@@ -187,7 +188,8 @@ class AudioBookLoadingFragment : Fragment() {
         .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
     if (handle != null) {
-      if (handle.formatDefinition.supportedContentTypes().contains(contentType)) {
+      val contentType = MIMEParser.parseRaisingException(contentTypeText)
+      if (handle.formatDefinition.supportedContentTypes().any { supported -> supported.isSameType(contentType) }) {
         handle.copyInManifestAndURI(file, this.playerParameters.manifestURI)
         FileUtilities.fileDelete(file)
       } else {

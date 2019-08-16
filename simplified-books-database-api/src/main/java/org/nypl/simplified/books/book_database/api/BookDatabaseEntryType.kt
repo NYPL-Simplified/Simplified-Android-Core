@@ -10,6 +10,7 @@ import org.nypl.simplified.books.api.BookFormat.BookFormatPDF
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
 import java.io.IOException
@@ -89,9 +90,11 @@ interface BookDatabaseEntryType {
    * @return A reference to a format handle that has content of the given type, if any
    */
 
-  fun findFormatHandleForContentType(contentType: String): BookDatabaseEntryFormatHandle? {
+  fun findFormatHandleForContentType(contentType: MIMEType): BookDatabaseEntryFormatHandle? {
     return this.formatHandles
-      .find { handle -> handle.formatDefinition.supportedContentTypes().contains(contentType) }
+      .find { handle ->
+        handle.formatDefinition.supportedContentTypes()
+          .any { supportedType -> supportedType.isSameType(contentType) } }
   }
 
   /**

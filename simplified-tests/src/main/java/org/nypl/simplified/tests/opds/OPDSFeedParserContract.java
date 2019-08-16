@@ -65,7 +65,7 @@ public abstract class OPDSFeedParserContract {
         "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-          BookFormats.Companion.supportedBookMimeTypes()));
+          BookFormats.supportedBookMimeTypes()));
     final InputStream d =
         OPDSFeedParserContract.getResource("acquisition-fiction-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -139,7 +139,7 @@ public abstract class OPDSFeedParserContract {
         URI.create("http://circulation.alpha.librarysimplified.org/groups/");
     final OPDSFeedParserType p =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-          BookFormats.Companion.supportedBookMimeTypes()));
+          BookFormats.supportedBookMimeTypes()));
     final InputStream d =
         OPDSFeedParserContract.getResource("acquisition-groups-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -170,7 +170,7 @@ public abstract class OPDSFeedParserContract {
             + ".com/feed/Biography%20%26%20Memoir?order=author");
     final OPDSFeedParserType p =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-          BookFormats.Companion.supportedBookMimeTypes()));
+          BookFormats.supportedBookMimeTypes()));
     final InputStream d =
         OPDSFeedParserContract.getResource("acquisition-paginated-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -200,7 +200,7 @@ public abstract class OPDSFeedParserContract {
     expected.expect(OPDSParseException.class);
 
     final OPDSAcquisitionFeedEntryParserType ep =
-        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes());
+        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
     final OPDSFeedParserType p = OPDSFeedParser.newParser(ep);
     final InputStream d =
         new InputStream() {
@@ -220,7 +220,7 @@ public abstract class OPDSFeedParserContract {
         URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
     final OPDSFeedParserType p =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-          BookFormats.Companion.supportedBookMimeTypes()));
+          BookFormats.supportedBookMimeTypes()));
     final InputStream d = OPDSFeedParserContract.getResource("empty-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     NullCheck.notNull(f);
@@ -234,7 +234,7 @@ public abstract class OPDSFeedParserContract {
         URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
     final OPDSFeedParserType p =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-          BookFormats.Companion.supportedBookMimeTypes()));
+          BookFormats.supportedBookMimeTypes()));
     final InputStream d = OPDSFeedParserContract.getResource("entry-0.xml");
     final OPDSAcquisitionFeed f = NullCheck.notNull(p.parse(uri, d));
 
@@ -252,7 +252,7 @@ public abstract class OPDSFeedParserContract {
     expected.expect(OPDSParseException.class);
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(
-        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes()));
+        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()));
     final InputStream d =
         OPDSFeedParserContract.getResource("bad-not-xml.xml");
     p.parse(uri, d);
@@ -265,7 +265,7 @@ public abstract class OPDSFeedParserContract {
         URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(
-        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes()));
+        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()));
     final InputStream d =
         OPDSFeedParserContract.getResource("bad-uri-syntax.xml");
     final OPDSAcquisitionFeed result =
@@ -286,7 +286,7 @@ public abstract class OPDSFeedParserContract {
     expected.expect(OPDSParseException.class);
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(
-        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes()));
+        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()));
     final InputStream d = new InputStream() {
       @Override
       public int read()
@@ -304,7 +304,7 @@ public abstract class OPDSFeedParserContract {
         "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-          BookFormats.Companion.supportedBookMimeTypes()));
+          BookFormats.supportedBookMimeTypes()));
     final InputStream d =
         OPDSFeedParserContract.getResource("acquisition-categories-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -337,7 +337,7 @@ public abstract class OPDSFeedParserContract {
         "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-          BookFormats.Companion.supportedBookMimeTypes()));
+          BookFormats.supportedBookMimeTypes()));
     final InputStream d =
         OPDSFeedParserContract.getResource("acquisition-facets-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -383,7 +383,7 @@ public abstract class OPDSFeedParserContract {
       "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-        BookFormats.Companion.supportedBookMimeTypes()));
+        BookFormats.supportedBookMimeTypes()));
     final InputStream d =
       OPDSFeedParserContract.getResource("acquisition-facets-1.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -430,7 +430,7 @@ public abstract class OPDSFeedParserContract {
     final URI uri = URI.create("urn:example");
     final OPDSFeedParserType p =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-        BookFormats.Companion.supportedBookMimeTypes()));
+        BookFormats.supportedBookMimeTypes()));
     final InputStream d =
       OPDSFeedParserContract.getResource("analytics-20190509.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -455,7 +455,7 @@ public abstract class OPDSFeedParserContract {
     final URI uri = URI.create("http://www.example.com/");
     final OPDSFeedParserType p =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-        BookFormats.Companion.supportedBookMimeTypes()));
+        BookFormats.supportedBookMimeTypes()));
     final InputStream d =
       OPDSFeedParserContract.getResource("feedbooks-20190808.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);

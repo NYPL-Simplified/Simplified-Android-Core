@@ -384,12 +384,10 @@ class Controller private constructor(
   override fun bookBorrow(
     account: AccountType,
     id: BookID,
-    acquisition: OPDSAcquisition,
     entry: OPDSAcquisitionFeedEntry): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, kotlin.Unit>> {
 
     return FluentFuture.from(this.taskExecutor.submit(BookBorrowTask(
       account = account,
-      acquisition = acquisition,
       adobeDRM = this.adobeDrm,
       bookId = id,
       bookRegistry = this.bookRegistry,
@@ -401,7 +399,7 @@ class Controller private constructor(
       downloads = this.downloads,
       feedLoader = this.feedLoader,
       http = this.http,
-      entry = entry)))
+      feedEntry = entry)))
   }
 
   override fun bookBorrowFailedDismiss(

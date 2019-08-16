@@ -23,6 +23,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
@@ -76,14 +77,17 @@ import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPOAuthToken
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.mime.MIMEParser
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_GENERIC
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BUY
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_GENERIC
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_SAMPLE
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_SUBSCRIBE
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
@@ -112,7 +116,6 @@ import java.util.concurrent.TimeoutException
 
 class BookBorrowTask(
   private val account: AccountType,
-  private val acquisition: OPDSAcquisition,
   private val adobeDRM: AdobeAdeptExecutorType?,
   private val bookId: BookID,
   private val bookRegistry: BookRegistryType,
@@ -124,19 +127,18 @@ class BookBorrowTask(
   private val downloader: DownloaderType,
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
-  private val entry: OPDSAcquisitionFeedEntry,
+  private val feedEntry: OPDSAcquisitionFeedEntry,
   private val feedLoader: FeedLoaderType,
   private val http: HTTPType) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
 
   private val contentTypeACSM =
-    "application/vnd.adobe.adept+xml"
+    MIMEType("application", "vnd.adobe.adept+xml", mapOf())
   private val contentTypeSimplifiedBearerToken =
-    "application/vnd.librarysimplified.bearer-token+json"
+    MIMEType("application", "vnd.librarysimplified.bearer-token+json", mapOf())
   private val contentTypeEPUB =
-    "application/epub+zip"
+    MIMEType("application", "epub+zip", mapOf())
   private val contentTypeOctetStream =
-    "application/octet-stream"
-
+    MIMEType("application", "octet-stream", mapOf())
   private val adobeACS =
     "Adobe ACS"
 
@@ -161,6 +163,9 @@ class BookBorrowTask(
   @Volatile
   private lateinit var fulfillURI: URI
 
+  @Volatile
+  private lateinit var acquisitionPath: OPDSAcquisitionPath
+
   /**
    * The initial book value. Note that this is a synthesized value because we need to be
    * able to open the book database to get a real book value, and that database call might
@@ -175,7 +180,7 @@ class BookBorrowTask(
       account = this.account.id,
       cover = null,
       thumbnail = null,
-      entry = this.entry,
+      entry = this.feedEntry,
       formats = listOf())
 
   private fun debug(message: String, vararg arguments: Any?) =
@@ -204,10 +209,29 @@ class BookBorrowTask(
       this.createBookDatabaseEntry()
 
       /*
+       * Now, pick the "best" acquisition out of all of the available acquisitions
+       * in the feed.
+       */
+
+      val preferredAcquisitionPathOpt =
+        BookAcquisitionSelection.preferredAcquisition(this.feedEntry.acquisitionPaths)
+      if (preferredAcquisitionPathOpt is Some<OPDSAcquisitionPath>) {
+        this.acquisitionPath = preferredAcquisitionPathOpt.get()
+      } else {
+        val exception = BookBorrowExceptionNoUsableAcquisition()
+        val message = this.borrowStrings.borrowBookFulfillNoUsableAcquisitions
+        this.steps.currentStepFailed(
+          message = message,
+          errorValue = UnusableAcquisitions(message),
+          exception = exception)
+        throw exception
+      }
+
+      /*
        * If the requested URI appears to refer to bundled content, serve the book from there.
        */
 
-      if (BundledURIs.isBundledURI(this.acquisition.uri)) {
+      if (BundledURIs.isBundledURI(this.acquisitionPath.next.uri)) {
         this.runAcquisitionBundled()
         return this.steps.finishSuccess(Unit)
       }
@@ -216,7 +240,7 @@ class BookBorrowTask(
        * Otherwise, do whatever is required for the acquisition.
        */
 
-      when (val type = this.acquisition.relation) {
+      when (val type = this.acquisitionPath.next.relation) {
         ACQUISITION_BORROW -> {
           this.debug("acquisition type is {}, performing borrow", type)
           this.runAcquisitionBorrow()
@@ -224,12 +248,12 @@ class BookBorrowTask(
         }
         ACQUISITION_GENERIC -> {
           this.debug("acquisition type is {}, performing generic procedure", type)
-          this.runAcquisitionFulfill(this.entry)
+          this.runAcquisitionFulfill(this.feedEntry)
           return this.steps.finishSuccess(Unit)
         }
         ACQUISITION_OPEN_ACCESS -> {
           this.debug("acquisition type is {}, performing fulfillment", type)
-          this.runAcquisitionFulfill(this.entry)
+          this.runAcquisitionFulfill(this.feedEntry)
           return this.steps.finishSuccess(Unit)
         }
 
@@ -262,22 +286,22 @@ class BookBorrowTask(
   }
 
   /*
-   * Create a new book database entry and publish the status of the book.
+   * Create a new book database feedEntry and publish the status of the book.
    */
 
   private fun createBookDatabaseEntry() {
     this.steps.beginNewStep(this.borrowStrings.borrowBookDatabaseCreateOrUpdate)
 
     try {
-      this.debug("setting up book database entry")
+      this.debug("setting up book database feedEntry")
       val database = this.account.bookDatabase
-      this.databaseEntry = database.createOrUpdate(this.bookId, this.entry)
+      this.databaseEntry = database.createOrUpdate(this.bookId, this.feedEntry)
       this.databaseEntryInitialized = true
       this.publishBookStatus(BookStatusRequestingLoan(
         this.bookId, this.borrowStrings.borrowBookDatabaseCreateOrUpdate))
       this.steps.currentStepSucceeded(this.borrowStrings.borrowBookDatabaseUpdated)
     } catch (e: Exception) {
-      this.error("failed to set up book database entry: ", e)
+      this.error("failed to set up book database feedEntry: ", e)
       this.steps.currentStepFailed(this.borrowStrings.borrowBookDatabaseFailed, BookDatabaseFailed, e)
       throw e
     }
@@ -303,12 +327,12 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.borrowStrings.borrowBookGetFeedEntry)
 
     val httpAuth = this.createHttpAuthIfRequired()
-    this.debug("fetching item feed: {}", this.acquisition.uri)
+    this.debug("fetching item feed: {}", this.acquisitionPath.next.uri)
     this.publishBookStatus(BookStatusRequestingLoan(this.bookId, this.borrowStrings.borrowBookGetFeedEntry))
 
     val feedResult =
       try {
-        this.feedLoader.fetchURIRefreshing(this.acquisition.uri, httpAuth, "PUT")
+        this.feedLoader.fetchURIRefreshing(this.acquisitionPath.next.uri, httpAuth, "PUT")
           .get(this.borrowTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
       } catch (e: Exception) {
         this.error("feed loader raised exception: ", e)
@@ -324,11 +348,11 @@ class BookBorrowTask(
         when (val resultFeed = feedResult.feed) {
           is Feed.FeedWithoutGroups -> {
             val entries =
-              this.checkFeedHasEntries(this.acquisition.uri, resultFeed.entriesInOrder)
+              this.checkFeedHasEntries(this.acquisitionPath.next.uri, resultFeed.entriesInOrder)
 
             when (val feedEntry = entries[0]) {
               is FeedEntryCorrupt -> {
-                this.error("unexpectedly received corrupt feed entry")
+                this.error("unexpectedly received corrupt feed feedEntry")
                 this.steps.currentStepFailed(
                   message = this.borrowStrings.borrowBookBadBorrowFeed,
                   errorValue = FeedCorrupted(feedEntry.error),
@@ -341,13 +365,13 @@ class BookBorrowTask(
 
           is Feed.FeedWithGroups -> {
             val groups =
-              this.checkFeedHasGroups(this.acquisition.uri, resultFeed.feedGroupsInOrder)
+              this.checkFeedHasGroups(this.acquisitionPath.next.uri, resultFeed.feedGroupsInOrder)
             val entries =
-              this.checkFeedHasEntries(this.acquisition.uri, groups[0].groupEntries)
+              this.checkFeedHasEntries(this.acquisitionPath.next.uri, groups[0].groupEntries)
 
             when (val feedEntry = entries[0]) {
               is FeedEntryCorrupt -> {
-                this.error("unexpectedly received corrupt feed entry")
+                this.error("unexpectedly received corrupt feed feedEntry")
                 this.steps.currentStepFailed(
                   message = this.borrowStrings.borrowBookBadBorrowFeed,
                   errorValue = FeedCorrupted(feedEntry.error),
@@ -399,7 +423,7 @@ class BookBorrowTask(
   }
 
   /**
-   * Check that a feed has at least one entry.
+   * Check that a feed has at least one feedEntry.
    */
 
   private fun checkFeedHasEntries(
@@ -418,14 +442,14 @@ class BookBorrowTask(
   }
 
   /**
-   * Complete borrowing given an OPDS feed entry.
+   * Complete borrowing given an OPDS feed feedEntry.
    */
 
   private fun runAcquisitionBorrowForOPDSEntry(feedEntry: FeedEntryOPDS) {
     val availability = feedEntry.feedEntry.availability
     this.steps.beginNewStep(this.borrowStrings.borrowBookBorrowForAvailability(availability))
 
-    this.debug("received OPDS feed entry")
+    this.debug("received OPDS feed feedEntry")
     this.debug("book availability is {}", availability)
 
     /*
@@ -738,21 +762,21 @@ class BookBorrowTask(
 
     val file = this.fileFromDownloadResult(result)
     this.debug("download {} completed for {}", download, file)
-    val contentType = download.contentType
+    val contentType = MIMEParser.parseRaisingException(download.contentType)
     this.debug("content type is {}", contentType)
 
     this.steps.currentStepSucceeded(
       this.borrowStrings.borrowBookFulfillDownloaded(file, contentType))
 
-    return when (contentType) {
-      this.contentTypeACSM ->
+    return when {
+      contentType.isSameType(contentTypeACSM) ->
         this.runFulfillACSM(file)
-      this.contentTypeSimplifiedBearerToken ->
+      contentType.isSameType(this.contentTypeSimplifiedBearerToken) ->
         this.runFulfillSimplifiedBearerToken(acquisition, file)
       else ->
         this.saveFinalContent(
           file = file,
-          expectedContentTypes = acquisition.availableFinalContentTypes(),
+          expectedContentTypes = setOf(acquisitionPath.finalContentType()),
           receivedContentType = contentType)
     }
   }
@@ -793,8 +817,8 @@ class BookBorrowTask(
 
   private fun saveFinalContent(
     file: File,
-    expectedContentTypes: Set<String>,
-    receivedContentType: String) {
+    expectedContentTypes: Set<MIMEType>,
+    receivedContentType: MIMEType) {
 
     this.steps.beginNewStep(
       this.borrowStrings.borrowBookSaving(receivedContentType, expectedContentTypes))
@@ -834,7 +858,7 @@ class BookBorrowTask(
         }
       }
     } else {
-      this.error("database entry does not have a format handle for {}", handleContentType)
+      this.error("database feedEntry does not have a format handle for {}", handleContentType)
       val exception = BookUnsupportedTypeException(handleContentType)
       val message = this.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable
       this.steps.currentStepFailed(
@@ -852,19 +876,20 @@ class BookBorrowTask(
    */
 
   private fun checkExpectedContentType(
-    expectedContentTypes: Set<String>,
-    receivedContentType: String): String {
+    expectedContentTypes: Set<MIMEType>,
+    receivedContentType: MIMEType): MIMEType {
 
     this.steps.beginNewStep(
       this.borrowStrings.borrowBookSavingCheckingContentType(
-        receivedContentType, expectedContentTypes))
+        receivedContentType,
+        expectedContentTypes))
 
     Preconditions.checkArgument(
       !expectedContentTypes.isEmpty(),
       "At least one expected content type")
 
-    return when (receivedContentType) {
-      this.contentTypeOctetStream -> {
+    return when (receivedContentType.fullType) {
+      this.contentTypeOctetStream.fullType -> {
         this.debug("expected one of {} but received {} (acceptable)",
           expectedContentTypes,
           receivedContentType)
@@ -874,7 +899,7 @@ class BookBorrowTask(
       }
 
       else -> {
-        if (expectedContentTypes.contains(receivedContentType)) {
+        if (expectedContentTypes.any { expectedType -> expectedType.isSameType(receivedContentType) }) {
           return receivedContentType
         }
 
@@ -1125,7 +1150,7 @@ class BookBorrowTask(
       }
 
       override fun getContentType(): String {
-        return this@BookBorrowTask.contentTypeOctetStream
+        return this@BookBorrowTask.contentTypeOctetStream.fullType
       }
     }
   }
@@ -1137,18 +1162,18 @@ class BookBorrowTask(
   private fun runFulfillACSMWithConnectorCheckContentType(parsed: AdobeAdeptFulfillmentToken) {
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillACSMCheckContentType)
 
-    val contentType = parsed.format
-    if (this.contentTypeEPUB != contentType) {
-      val exception = BookUnsupportedTypeException(contentType)
+    val receivedContentType = MIMEParser.parseRaisingException(parsed.format)
+    if (!this.contentTypeEPUB.isSameType(receivedContentType)) {
+      val exception = BookUnsupportedTypeException(receivedContentType)
       this.steps.currentStepFailed(
         message = this.borrowStrings.borrowBookFulfillACSMUnsupportedContentType,
-        errorValue = DRMUnsupportedContentType(this.adobeACS, contentType),
+        errorValue = DRMUnsupportedContentType(this.adobeACS, receivedContentType),
         exception = exception)
       throw exception
     }
 
     this.steps.currentStepSucceeded(
-      this.borrowStrings.borrowBookFulfillACSMCheckContentTypeOK(contentType))
+      this.borrowStrings.borrowBookFulfillACSMCheckContentTypeOK(receivedContentType))
   }
 
   /**
@@ -1252,13 +1277,13 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.borrowStrings.borrowBookBundledCopy)
     this.publishBookStatus(BookStatusRequestingLoan(this.bookId, this.borrowStrings.borrowBookBundledCopy))
 
-    this.fulfillURI = this.acquisition.uri
+    this.fulfillURI = this.acquisitionPath.next.uri
     val file = this.databaseEntry.temporaryFile()
     val buffer = ByteArray(2048)
 
     try {
       return FileOutputStream(file).use { output ->
-        this.bundledContent.resolve(this.acquisition.uri).use { stream ->
+        this.bundledContent.resolve(this.acquisitionPath.next.uri).use { stream ->
           val size = stream.available().toLong()
           var consumed = 0L
           this.downloadDataReceived(

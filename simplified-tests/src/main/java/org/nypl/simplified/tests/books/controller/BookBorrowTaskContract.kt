@@ -30,12 +30,14 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.HTTPRequestFailed
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
+import org.nypl.simplified.books.controller.api.BookBorrowExceptionBadBorrowFeed
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
 import org.nypl.simplified.books.controller.api.BookUnexpectedTypeException
 import org.nypl.simplified.downloader.core.DownloadListenerType
@@ -52,11 +54,12 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultOK
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_GENERIC
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BUY
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_GENERIC
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
@@ -86,6 +89,13 @@ import java.util.concurrent.Executors
  */
 
 abstract class BookBorrowTaskContract {
+
+  private val MIME_TYPE_PDF =
+    MIMEParser.parseRaisingException("application/pdf")
+  private val MIME_TYPE_EPUB =
+    MIMEParser.parseRaisingException("application/epub+zip")
+  private val MIME_TYPE_AUDIOBOOK =
+    MIMEParser.parseRaisingException("application/audiobook+json")
 
   @JvmField
   @Rule
@@ -162,6 +172,7 @@ abstract class BookBorrowTaskContract {
       bundledContent = this.bundledContent)
   }
 
+
   /**
    * Borrowing an open access epub directly, works.
    */
@@ -196,7 +207,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -230,13 +241,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -248,7 +258,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -297,7 +307,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.pdf"),
-        Option.some("application/pdf"),
+        Option.some(MIME_TYPE_PDF),
         listOf())
 
     val opdsEntryBuilder =
@@ -331,13 +341,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/pdf"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_PDF))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -349,7 +358,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -396,7 +405,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.json"),
-        Option.some("application/audiobook+json"),
+        Option.some(MIME_TYPE_AUDIOBOOK),
         listOf())
 
     val opdsEntryBuilder =
@@ -430,13 +439,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/audiobook+json"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_AUDIOBOOK))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -448,7 +456,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -491,7 +499,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("simplified-bundled:0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -529,13 +537,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -546,7 +553,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader, http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -589,7 +596,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("simplified-bundled:0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -633,7 +640,6 @@ abstract class BookBorrowTaskContract {
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -644,7 +650,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader, http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -699,7 +705,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -733,13 +739,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -751,7 +756,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -798,7 +803,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_GENERIC,
         URI.create("http://example.com/fulfill/0"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -832,13 +837,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -850,7 +854,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -894,7 +898,7 @@ abstract class BookBorrowTaskContract {
         0L))
 
     val headers = HashMap<String, MutableList<String>>()
-    headers["Content-Type"] = mutableListOf("application/epub+zip")
+    headers["Content-Type"] = mutableListOf(MIME_TYPE_EPUB.fullType)
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -910,7 +914,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -944,13 +948,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -962,7 +965,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -1009,7 +1012,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1043,13 +1046,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1061,7 +1063,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1115,7 +1117,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1149,13 +1151,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1166,7 +1167,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader, http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1246,7 +1247,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1280,13 +1281,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1297,7 +1297,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader, http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1348,7 +1348,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1382,13 +1382,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1399,7 +1398,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader, http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1479,7 +1478,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1513,13 +1512,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1530,7 +1528,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader, http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1571,7 +1569,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1605,13 +1603,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1622,7 +1619,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader, http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1667,7 +1664,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1701,13 +1698,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1719,7 +1715,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1778,7 +1774,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1812,13 +1808,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1830,7 +1825,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1890,7 +1885,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -1928,13 +1923,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1946,7 +1940,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -2008,7 +2002,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2042,13 +2036,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2060,7 +2053,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -2119,7 +2112,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2153,13 +2146,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2171,7 +2163,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -2185,7 +2177,7 @@ abstract class BookBorrowTaskContract {
         as BookStatusDownloadFailed
 
     val exception =
-      bookStatus.result.steps.last().resolution.exception as IllegalStateException
+      bookStatus.result.steps.last().resolution.exception as BookBorrowExceptionBadBorrowFeed
   }
 
   /**
@@ -2234,7 +2226,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2268,13 +2260,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2285,7 +2276,7 @@ abstract class BookBorrowTaskContract {
         downloader = this.downloader,
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader, http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -2346,7 +2337,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2380,13 +2371,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2398,7 +2388,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -2466,7 +2456,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2500,13 +2490,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2518,7 +2507,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -2594,7 +2583,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2628,13 +2617,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2646,7 +2634,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -2687,7 +2675,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BUY,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2721,13 +2709,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2739,15 +2726,13 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
 
     val errorData =
-      results.errors().last() as UnsupportedAcquisition
-
-    Assert.assertEquals(ACQUISITION_BUY, errorData.type)
+      results.errors().last() as BookStatusDownloadErrorDetails.UnusableAcquisitions
 
     /*
      * Check that the download failed.
@@ -2778,7 +2763,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BUY,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2803,7 +2788,6 @@ abstract class BookBorrowTaskContract {
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2815,7 +2799,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -2872,7 +2856,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -2912,13 +2896,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempCoverFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -2930,7 +2913,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -2992,7 +2975,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         listOf())
 
     val opdsEntryBuilder =
@@ -3032,13 +3015,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempCoverFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -3050,7 +3032,7 @@ abstract class BookBorrowTaskContract {
         downloads = ConcurrentHashMap(),
         feedLoader = feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success

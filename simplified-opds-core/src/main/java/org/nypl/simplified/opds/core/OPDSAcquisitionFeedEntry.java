@@ -46,6 +46,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
   private final OptionType<URI> analytics;
   private final OptionType<DRMLicensor> licensor;
   private final ArrayList<ParseError> errors;
+  private final List<OPDSAcquisitionPath> linearized;
 
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
@@ -90,6 +91,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
     this.analytics = NullCheck.notNull(in_analytics);
     this.licensor = NullCheck.notNull(in_licensor);
     this.errors = NullCheck.notNull(in_errors);
+    this.linearized = OPDSAcquisitionPath.Companion.linearizeAcquisitions(acquisitions);
   }
 
   /**
@@ -362,6 +364,15 @@ public final class OPDSAcquisitionFeedEntry implements Serializable {
 
   public List<ParseError> getErrors() {
     return this.errors;
+  }
+
+  /**
+   * @return The linearized acquisition paths
+   */
+
+  public List<OPDSAcquisitionPath> getAcquisitionPaths()
+  {
+    return this.linearized;
   }
 
   /**

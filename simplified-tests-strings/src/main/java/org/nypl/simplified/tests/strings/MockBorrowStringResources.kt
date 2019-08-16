@@ -1,7 +1,9 @@
 package org.nypl.simplified.tests.strings
 
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityType
 import java.io.File
 
@@ -44,7 +46,7 @@ class MockBorrowStringResources : BookBorrowStringResourcesType {
   override val borrowBookFulfillACSMRead: String
     get() = "borrowBookFulfillACSMRead"
 
-  override fun borrowBookUnsupportedAcquisition(type: OPDSAcquisition.Relation): String {
+  override fun borrowBookUnsupportedAcquisition(type: OPDSAcquisitionRelation): String {
     return "borrowBookUnsupportedAcquisition"
   }
 
@@ -62,19 +64,19 @@ class MockBorrowStringResources : BookBorrowStringResourcesType {
     return "borrowBookBorrowForAvailability"
   }
 
-  override fun borrowBookFulfillDownloaded(file: File, contentType: String): String {
+  override fun borrowBookFulfillDownloaded(file: File, contentType: MIMEType): String {
     return "borrowBookFulfillDownloaded"
   }
 
-  override fun borrowBookFulfillACSMCheckContentTypeOK(contentType: String): String {
+  override fun borrowBookFulfillACSMCheckContentTypeOK(contentType: MIMEType): String {
     return "borrowBookFulfillACSMCheckContentTypeOK"
   }
 
-  override fun borrowBookSaving(receivedContentType: String, expectedContentTypes: Set<String>): String {
+  override fun borrowBookSaving(receivedContentType: MIMEType, expectedContentTypes: Set<MIMEType>): String {
     return "borrowBookSaving"
   }
 
-  override fun borrowBookSavingCheckingContentType(receivedContentType: String, expectedContentTypes: Set<String>): String {
+  override fun borrowBookSavingCheckingContentType(receivedContentType: MIMEType, expectedContentTypes: Set<MIMEType>): String {
     return "borrowBookSavingCheckingContentType"
   }
 

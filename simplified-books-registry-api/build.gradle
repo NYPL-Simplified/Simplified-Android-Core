@@ -21,6 +21,7 @@ description = 'simplified-books-registry-api'
 dependencies {
   api project(":simplified-books-api")
   api project(":simplified-http-core")
+  api project(":simplified-mime")
   api project(":simplified-observable")
   api project(":simplified-taskrecorder-api")
 

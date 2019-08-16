@@ -6,14 +6,17 @@ import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.files.DirectoryUtilities
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
@@ -26,9 +29,10 @@ abstract class BookDatabaseEPUBContract {
 
   private val logger = 
     LoggerFactory.getLogger(BookDatabaseEPUBContract::class.java)
-
+  private val MIME_TYPE_EPUB =
+    MIMEParser.parseRaisingException("application/epub+zip")
   private val accountID =
-    org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
   
   protected abstract fun context(): Context
 
@@ -182,9 +186,9 @@ abstract class BookDatabaseEPUBContract {
 
     eb.addAcquisition(
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         emptyList()))
     return eb.build()
   }

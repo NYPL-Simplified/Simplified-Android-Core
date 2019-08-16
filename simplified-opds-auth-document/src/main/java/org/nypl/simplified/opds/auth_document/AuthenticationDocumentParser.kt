@@ -14,6 +14,7 @@ import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLInput
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.parser.api.ParseWarning
+import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.URI
 
@@ -23,6 +24,8 @@ internal class AuthenticationDocumentParser(
   private val stream: InputStream,
   private val warningsAsErrors: Boolean
 ) : AuthenticationDocumentParserType {
+
+  private val logger = LoggerFactory.getLogger(AuthenticationDocumentParser::class.java)
 
   override fun close() {
     this.stream.close()
@@ -83,7 +86,7 @@ internal class AuthenticationDocumentParser(
         JSONParserUtilities.getStringOrNull(root, "color_scheme") ?: "red"
       val features =
         JSONParserUtilities.getObjectOrNull(root, "features")
-          ?.let { obj -> parseFeatures(obj) }
+          ?.let { obj -> this.parseFeatures(obj) }
           ?: AuthenticationObjectNYPLFeatures(setOf(), setOf())
 
       val authentication =
@@ -104,11 +107,25 @@ internal class AuthenticationDocumentParser(
             title = title
           ))
       } else {
+        this.logErrors()
         ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
       }
     } catch (e: Exception) {
+      this.logErrors()
       this.publishErrorForException(e)
       ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
+    }
+  }
+
+  private fun logErrors() {
+    this.errors.forEach { error ->
+      this.logger.error(
+        "{}: {}:{}: {}: ",
+        error.source,
+        error.line,
+        error.column,
+        error.message,
+        error.exception)
     }
   }
 

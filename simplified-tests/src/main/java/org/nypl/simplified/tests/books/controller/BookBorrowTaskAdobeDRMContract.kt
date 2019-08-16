@@ -54,12 +54,14 @@ import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPResultOK
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BORROW
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.opds.core.OPDSFeedParser
+import org.nypl.simplified.opds.core.OPDSIndirectAcquisition
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.strings.MockBorrowStringResources
@@ -83,6 +85,13 @@ import java.util.concurrent.Executors
  */
 
 abstract class BookBorrowTaskAdobeDRMContract {
+
+  private val MIME_TYPE_ADOBE =
+    MIMEParser.parseRaisingException("application/vnd.adobe.adept+xml")
+  private val MIME_TYPE_EPUB =
+    MIMEParser.parseRaisingException("application/epub+zip")
+  private val MIME_TYPE_PDF =
+    MIMEParser.parseRaisingException("application/pdf")
 
   @JvmField
   @Rule
@@ -248,7 +257,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       }
 
     val headers =
-      mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
+      mapOf(Pair("Content-Type", listOf(MIME_TYPE_ADOBE.fullType)))
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -274,8 +283,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
-        listOf())
+        Option.none(),
+        listOf(OPDSIndirectAcquisition(MIME_TYPE_ADOBE,
+          listOf(OPDSIndirectAcquisition(MIME_TYPE_EPUB, listOf())))))
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -308,13 +318,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = this.adeptExecutor,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -326,7 +335,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -360,7 +369,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val headers =
-      mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
+      mapOf(Pair("Content-Type", listOf(MIME_TYPE_ADOBE.fullType)))
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -386,8 +395,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
-        listOf())
+        Option.none(),
+        listOf(OPDSIndirectAcquisition(MIME_TYPE_ADOBE,
+          listOf(OPDSIndirectAcquisition(MIME_TYPE_EPUB, listOf())))))
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -418,13 +428,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = null,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -436,7 +445,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -521,7 +530,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       }
 
     val headers =
-      mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
+      mapOf(Pair("Content-Type", listOf(MIME_TYPE_ADOBE.fullType)))
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -547,8 +556,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
-        listOf())
+        Option.none(),
+        listOf(OPDSIndirectAcquisition(MIME_TYPE_ADOBE,
+          listOf(OPDSIndirectAcquisition(MIME_TYPE_PDF, listOf())))))
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -581,13 +591,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = this.adeptExecutor,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -599,7 +608,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -608,7 +617,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       results.errors().last() as DRMUnsupportedContentType
 
     Assert.assertEquals("Adobe ACS", error.system)
-    Assert.assertEquals("application/pdf", error.contentType)
+    Assert.assertEquals("application/pdf", error.contentType.fullType)
 
     /*
      * Check that the download failed.
@@ -653,7 +662,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(AccountLoginState.AccountLoggedIn(credentials))
 
     val headers =
-      mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
+      mapOf(Pair("Content-Type", listOf(MIME_TYPE_ADOBE.fullType)))
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -679,8 +688,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
-        listOf())
+        Option.none(),
+        listOf(OPDSIndirectAcquisition(MIME_TYPE_ADOBE,
+          listOf(OPDSIndirectAcquisition(MIME_TYPE_EPUB, listOf())))))
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -713,13 +723,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = this.adeptExecutor,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -731,7 +740,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -771,7 +780,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(AccountLoginState.AccountLoggedIn(accountCredentialsValid))
 
     val headers =
-      mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
+      mapOf(Pair("Content-Type", listOf(MIME_TYPE_ADOBE.fullType)))
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -797,8 +806,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
-        listOf())
+        Option.none(),
+        listOf(OPDSIndirectAcquisition(MIME_TYPE_ADOBE,
+          listOf(OPDSIndirectAcquisition(MIME_TYPE_EPUB, listOf())))))
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -831,13 +841,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = this.adeptExecutor,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -849,7 +858,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -909,7 +918,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       }
 
     val headers =
-      mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
+      mapOf(Pair("Content-Type", listOf(MIME_TYPE_ADOBE.fullType)))
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -935,7 +944,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
+        Option.some(MIME_TYPE_ADOBE),
         listOf())
 
     val opdsEntryBuilder =
@@ -969,13 +978,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = this.adeptExecutor,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -987,7 +995,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1042,7 +1050,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       }
 
     val headers =
-      mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
+      mapOf(Pair("Content-Type", listOf(MIME_TYPE_ADOBE.fullType)))
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -1068,8 +1076,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
-        listOf())
+        Option.none(),
+        listOf(OPDSIndirectAcquisition(MIME_TYPE_ADOBE,
+          listOf(OPDSIndirectAcquisition(MIME_TYPE_EPUB, listOf())))))
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -1102,13 +1111,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(MIME_TYPE_EPUB))
       .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
         account = account,
-        acquisition = acquisition,
         adobeDRM = this.adeptExecutor,
         bookId = bookId,
         bookRegistry = this.bookRegistry,
@@ -1120,7 +1128,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         downloads = ConcurrentHashMap(),
         feedLoader = this.feedLoader,
         http = this.http,
-        entry = opdsEntry)
+        feedEntry = opdsEntry)
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure

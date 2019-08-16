@@ -7,12 +7,15 @@ import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.nypl.simplified.feeds.api.Feed
+import org.nypl.simplified.feeds.api.FeedLoaderResult.*
+import org.nypl.simplified.feeds.api.FeedLoaderType
 import java.net.URI
 import java.util.concurrent.Executors
 
 abstract class FeedLoaderContract {
 
-  abstract fun createFeedLoader(exec: ListeningExecutorService) : org.nypl.simplified.feeds.api.FeedLoaderType
+  abstract fun createFeedLoader(exec: ListeningExecutorService) : FeedLoaderType
 
   abstract fun resource(name: String): URI
 
@@ -44,8 +47,8 @@ abstract class FeedLoaderContract {
     val result =
       future.get()
 
-    Assert.assertTrue(result is org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess)
-    val feed = (result as org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess).feed
+    Assert.assertTrue(result is FeedLoaderSuccess)
+    val feed = (result as FeedLoaderSuccess).feed as Feed.FeedWithoutGroups
     Assert.assertEquals(0, feed.size)
   }
 }

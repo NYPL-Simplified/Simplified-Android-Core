@@ -14,6 +14,7 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.*
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.notifications.NotificationResourcesType
 import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.notifications.NotificationsWrapper
@@ -23,6 +24,7 @@ import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
@@ -38,6 +40,9 @@ import java.util.concurrent.ThreadFactory
 abstract class NotificationsServiceContract {
     private val logger =
             LoggerFactory.getLogger(BookDatabaseContract::class.java)
+
+    private val MIME_TYPE_ADOBE =
+      MIMEParser.parseRaisingException("application/vnd.adobe.adept+xml")
 
     private lateinit var mockContext: Context
     private lateinit var profileEvents: ObservableType<ProfileEvent>
@@ -78,9 +83,9 @@ abstract class NotificationsServiceContract {
 
         val acquisition =
                 OPDSAcquisition(
-                        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+                        OPDSAcquisitionRelation.ACQUISITION_BORROW,
                         URI.create("http://www.example.com/0.feed"),
-                        Option.some("application/vnd.adobe.adept+xml"),
+                        Option.some(MIME_TYPE_ADOBE),
                         listOf())
 
         val opdsEntryBuilder =

@@ -6,15 +6,19 @@ import org.joda.time.DateTime
 import org.junit.Assert
 import org.junit.Test
 import org.nypl.audiobook.android.api.PlayerPosition
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
 import org.nypl.simplified.books.api.BookFormat.BookFormatPDF
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.files.DirectoryUtilities
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
@@ -30,7 +34,16 @@ abstract class BookDatabaseContract {
   private val logger =
     LoggerFactory.getLogger(BookDatabaseContract::class.java)
   private val accountID =
-    org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+  
+  private val MIME_TYPE_EPUB = 
+    MIMEParser.parseRaisingException("application/epub+zip")
+  private val MIME_TYPE_UNSUPPORTED = 
+    MIMEParser.parseRaisingException("application/not-a-supported-format")
+  private val MIME_TYPE_PDF = 
+    MIMEParser.parseRaisingException("application/pdf")
+  private val MIME_TYPE_AUDIOBOOK =
+    MIMEParser.parseRaisingException("application/audiobook+json")
   
   protected abstract fun context(): Context
 
@@ -85,11 +98,11 @@ abstract class BookDatabaseContract {
         OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
         .build()
 
-    val id0 = org.nypl.simplified.books.api.BookID.create("a")
+    val id0 = BookID.create("a")
     database0.createOrUpdate(id0, entry0)
-    val id1 = org.nypl.simplified.books.api.BookID.create("b")
+    val id1 = BookID.create("b")
     database0.createOrUpdate(id1, entry1)
-    val id2 = org.nypl.simplified.books.api.BookID.create("c")
+    val id2 = BookID.create("c")
     database0.createOrUpdate(id2, entry2)
 
     val database1 =
@@ -126,7 +139,7 @@ abstract class BookDatabaseContract {
         OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
         .build()
 
-    val id0 = org.nypl.simplified.books.api.BookID.create("a")
+    val id0 = BookID.create("a")
     val dbEntry = db0.createOrUpdate(id0, entry0)
     Assert.assertEquals(1, db0.books().size.toLong())
     dbEntry.delete()
@@ -146,7 +159,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val book0 = databaseEntry0.book
@@ -174,7 +187,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val book0: org.nypl.simplified.books.api.Book = this.run {
@@ -197,10 +210,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType("application/epub+zip"))
+        databaseEntry0.findFormatHandleForContentType(MIME_TYPE_EPUB))
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry0.findFormatHandleForContentType(MIME_TYPE_UNSUPPORTED))
 
       databaseEntry0.book
     }
@@ -229,10 +242,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType("application/epub+zip"))
+        databaseEntry1.findFormatHandleForContentType(MIME_TYPE_EPUB))
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry1.findFormatHandleForContentType(MIME_TYPE_UNSUPPORTED))
 
       databaseEntry1.book
     }
@@ -256,7 +269,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val book0: org.nypl.simplified.books.api.Book = this.run {
@@ -278,10 +291,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType("application/pdf"))
+        databaseEntry0.findFormatHandleForContentType(MIME_TYPE_PDF))
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry0.findFormatHandleForContentType(MIME_TYPE_UNSUPPORTED))
 
       databaseEntry0.book
     }
@@ -309,10 +322,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType("application/pdf"))
+        databaseEntry1.findFormatHandleForContentType(MIME_TYPE_PDF))
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry1.findFormatHandleForContentType(MIME_TYPE_UNSUPPORTED))
 
       databaseEntry1.book
     }
@@ -336,7 +349,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val book0: org.nypl.simplified.books.api.Book = this.run {
@@ -358,10 +371,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType("application/audiobook+json"))
+        databaseEntry0.findFormatHandleForContentType(MIME_TYPE_AUDIOBOOK))
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry0.findFormatHandleForContentType(MIME_TYPE_UNSUPPORTED))
 
       databaseEntry0.book
     }
@@ -389,10 +402,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType("application/audiobook+json"))
+        databaseEntry1.findFormatHandleForContentType(MIME_TYPE_AUDIOBOOK))
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry1.findFormatHandleForContentType(MIME_TYPE_UNSUPPORTED))
 
       databaseEntry1.book
     }
@@ -416,7 +429,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry = database0.createOrUpdate(bookID, feedEntry)
 
     for (index in 0..2) {
@@ -449,7 +462,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry = database0.createOrUpdate(bookID, feedEntry)
 
     val format = databaseEntry.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
@@ -476,7 +489,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry = database0.createOrUpdate(bookID, feedEntry)
 
     for (index in 0..2) {
@@ -509,7 +522,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry = database0.createOrUpdate(bookID, feedEntry)
 
     val format = databaseEntry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
@@ -536,7 +549,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry = database0.createOrUpdate(bookID, feedEntry)
 
     for (index in 0..2) {
@@ -569,7 +582,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry = database0.createOrUpdate(bookID, feedEntry)
 
     val format = databaseEntry.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)
@@ -596,7 +609,7 @@ abstract class BookDatabaseContract {
       org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
-    val bookID = org.nypl.simplified.books.api.BookID.create("abcd")
+    val bookID = BookID.create("abcd")
     val databaseEntry = database0.createOrUpdate(bookID, feedEntry)
 
     val format = databaseEntry.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
@@ -665,9 +678,9 @@ abstract class BookDatabaseContract {
       OPDSAvailabilityOpenAccess.get(revoke))
     eb.addAcquisition(
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some("application/pdf"),
+        Option.some(MIME_TYPE_PDF),
         emptyList()))
     return eb.build()
   }
@@ -681,9 +694,9 @@ abstract class BookDatabaseContract {
       OPDSAvailabilityOpenAccess.get(revoke))
     eb.addAcquisition(
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some("application/audiobook+json"),
+        Option.some(MIME_TYPE_AUDIOBOOK),
         emptyList()))
     return eb.build()
   }
@@ -698,9 +711,9 @@ abstract class BookDatabaseContract {
 
     eb.addAcquisition(
       OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some("application/epub+zip"),
+        Option.some(MIME_TYPE_EPUB),
         emptyList()))
     return eb.build()
   }

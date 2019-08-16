@@ -14,7 +14,8 @@ import com.io7m.jnull.NullCheck;
 import org.joda.time.DateTime;
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
+import org.nypl.simplified.mime.MIMEParser;
+import org.nypl.simplified.mime.MIMEType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,8 +61,8 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
        * versions of the on-disk data.
        */
 
-      final Relation relation =
-        Relation.valueOf(JSONParserUtilities.getString(o, "type"));
+      final OPDSAcquisitionRelation relation =
+        OPDSAcquisitionRelation.valueOf(JSONParserUtilities.getString(o, "type"));
 
       final URI uri =
         JSONParserUtilities.getURI(o, "uri");
@@ -79,19 +80,21 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
        * book database. Luckily, old book databases can only contain epub files.
        */
 
-      OptionType<String> type;
+      OptionType<MIMEType> type;
       if (o.has(CONTENT_TYPE_FIELD)) {
-        type = Option.some(JSONParserUtilities.getString(o, CONTENT_TYPE_FIELD));
+        type = Option.some(
+          MIMEParser.Companion.parseRaisingException(
+            JSONParserUtilities.getString(o, CONTENT_TYPE_FIELD)));
       } else {
         if (indirects.isEmpty()) {
-          type = Option.of("application/epub+zip");
+          type = Option.of(MIMEParser.Companion.parseRaisingException("application/epub+zip"));
         } else {
           type = Option.none();
         }
       }
 
       return new OPDSAcquisition(relation, uri, type, indirects);
-    } catch (final JSONParseException e) {
+    } catch (final Exception e) {
       throw new OPDSParseException(e);
     }
   }
@@ -103,10 +106,11 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
 
     try {
       final ObjectNode obj = JSONParserUtilities.checkObject(null, jnode);
-      final String type = JSONParserUtilities.getString(obj, "type");
+      final MIMEType type =
+        MIMEParser.Companion.parseRaisingException(JSONParserUtilities.getString(obj, "type"));
       final ArrayNode indirects = JSONParserUtilities.getArray(obj, INDIRECT_ACQUISITIONS_FIELD);
       return new OPDSIndirectAcquisition(type, parseIndirectAcquisitions(indirects));
-    } catch (final JSONParseException e) {
+    } catch (final Exception e) {
       throw new OPDSParseException(e);
     }
   }

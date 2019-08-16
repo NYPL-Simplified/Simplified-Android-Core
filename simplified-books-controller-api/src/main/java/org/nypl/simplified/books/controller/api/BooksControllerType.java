@@ -8,7 +8,6 @@ import org.nypl.simplified.books.api.BookID;
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails;
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails;
 import org.nypl.simplified.feeds.api.FeedEntry;
-import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.taskrecorder.api.TaskResult;
 
@@ -21,16 +20,14 @@ public interface BooksControllerType {
   /**
    * Attempt to borrow the given book.
    *
-   * @param account     The account that will receive the book
-   * @param id          The ID of the book
-   * @param acquisition The acquisition entry for the book
-   * @param entry       The OPDS feed entry for the book
+   * @param account The account that will receive the book
+   * @param id      The ID of the book
+   * @param entry   The OPDS feed entry for the book
    */
 
   FluentFuture<TaskResult<BookStatusDownloadErrorDetails, kotlin.Unit>> bookBorrow(
     AccountType account,
     BookID id,
-    OPDSAcquisition acquisition,
     OPDSAcquisitionFeedEntry entry);
 
   /**
@@ -58,7 +55,7 @@ public interface BooksControllerType {
   /**
    * Submit a problem report for a book
    *
-   * @param account The account that owns the book
+   * @param account     The account that owns the book
    * @param feed_entry  Feed entry, used to get the URI to submit to
    * @param report_type Type of report to submit
    */
