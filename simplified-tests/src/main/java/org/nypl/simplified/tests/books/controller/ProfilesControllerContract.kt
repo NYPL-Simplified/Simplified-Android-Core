@@ -28,6 +28,7 @@ import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
@@ -48,16 +49,17 @@ import org.nypl.simplified.reader.api.ReaderFontSelection
 import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
-import org.nypl.simplified.tests.MockAccountCreationStringResources
-import org.nypl.simplified.tests.MockAccountDeletionStringResources
-import org.nypl.simplified.tests.MockAccountLoginStringResources
-import org.nypl.simplified.tests.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.strings.MockAccountCreationStringResources
+import org.nypl.simplified.tests.strings.MockAccountDeletionStringResources
+import org.nypl.simplified.tests.strings.MockAccountLoginStringResources
+import org.nypl.simplified.tests.strings.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockAnalytics
-import org.nypl.simplified.tests.MockBorrowStringResources
-import org.nypl.simplified.tests.MockRevokeStringResources
+import org.nypl.simplified.tests.strings.MockBorrowStringResources
+import org.nypl.simplified.tests.strings.MockRevokeStringResources
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
+import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -73,28 +75,31 @@ abstract class ProfilesControllerContract {
   @Rule
   var expected = ExpectedException.none()
 
+  private lateinit var accountEvents: ObservableType<AccountEvent>
+  private lateinit var accountEventsReceived: MutableList<AccountEvent>
+  private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
+  private lateinit var bookRegistry: BookRegistryType
+  private lateinit var cacheDirectory: File
   private lateinit var credentialsStore: FakeAccountCredentialStorage
-  private lateinit var executorFeeds: ListeningExecutorService
-  private lateinit var executorDownloads: ExecutorService
-  private lateinit var executorBooks: ExecutorService
-  private lateinit var executorTimer: ExecutorService
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
+  private lateinit var downloader: DownloaderType
+  private lateinit var executorBooks: ExecutorService
+  private lateinit var executorDownloads: ExecutorService
+  private lateinit var executorFeeds: ListeningExecutorService
+  private lateinit var executorTimer: ExecutorService
   private lateinit var http: MockingHTTP
+  private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
   private lateinit var profileEvents: ObservableType<ProfileEvent>
   private lateinit var profileEventsReceived: MutableList<ProfileEvent>
-  private lateinit var accountEventsReceived: MutableList<AccountEvent>
-  private lateinit var accountEvents: ObservableType<AccountEvent>
   private lateinit var readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>
-  private lateinit var downloader: DownloaderType
-  private lateinit var bookRegistry: BookRegistryType
-  private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
-  private lateinit var cacheDirectory: File
 
   protected abstract val logger: Logger
 
   protected abstract fun context(): Context
 
+  private val accountProviderResolutionStrings =
+    MockAccountProviderResolutionStrings()
   private val accountLoginStringResources =
     MockAccountLoginStringResources()
   private val accountLogoutStringResources =
@@ -138,9 +143,11 @@ abstract class ProfilesControllerContract {
       accountEvents = this.accountEvents,
       accountLoginStringResources = this.accountLoginStringResources,
       accountLogoutStringResources = this.accountLogoutStringResources,
+      accountProviderResolutionStrings = this.accountProviderResolutionStrings,
       accountProviders = accountProviders,
       adobeDrm = null,
       analytics = analyticsLogger,
+      authDocumentParsers = this.authDocumentParsers,
       bookBorrowStrings = this.bookBorrowStringResources,
       bookRegistry = this.bookRegistry,
       bundledContent = bundledContent,
@@ -166,6 +173,7 @@ abstract class ProfilesControllerContract {
   fun setUp() {
     this.credentialsStore = FakeAccountCredentialStorage()
     this.http = MockingHTTP()
+    this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
     this.executorDownloads = Executors.newCachedThreadPool()
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorBooks = Executors.newCachedThreadPool()

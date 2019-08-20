@@ -19,6 +19,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
+import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
@@ -46,6 +47,7 @@ import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
@@ -59,7 +61,6 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled
@@ -88,9 +89,11 @@ class Controller private constructor(
   private val accountEvents: ObservableType<AccountEvent>,
   private val accountLoginStringResources: AccountLoginStringResourcesType,
   private val accountLogoutStringResources: AccountLogoutStringResourcesType,
+  private val accountProviderResolutionStrings: AccountProviderResolutionStringsType,
   private val accountProviders: AccountProviderRegistryType,
   private val adobeDrm: AdobeAdeptExecutorType?,
   private val analytics: AnalyticsType,
+  private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val bookRegistry: BookRegistryType,
   private val borrowStrings: BookBorrowStringResourcesType,
   private val bundledContent: BundledContentResolverType,
@@ -264,6 +267,20 @@ class Controller private constructor(
         this.accountProviders,
         this.profiles,
         this.profileAccountCreationStringResources)))
+  }
+
+  override fun profileAccountCreateCustomOPDS(opdsFeed: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+    return FluentFuture.from(this.taskExecutor.submit(
+      ProfileAccountCreateCustomOPDSTask(
+        accountEvents = this.accountEvents,
+        accountProviderRegistry = this.accountProviders,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.http,
+        opdsURI = opdsFeed,
+        opdsFeedParser = this.feedParser,
+        profiles = this.profiles,
+        resolutionStrings = this.accountProviderResolutionStrings,
+        strings = this.profileAccountCreationStringResources)))
   }
 
   override fun profileAccountCreate(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
@@ -477,9 +494,11 @@ class Controller private constructor(
       accountEvents: ObservableType<AccountEvent>,
       accountLoginStringResources: AccountLoginStringResourcesType,
       accountLogoutStringResources: AccountLogoutStringResourcesType,
+      accountProviderResolutionStrings: AccountProviderResolutionStringsType,
       accountProviders: AccountProviderRegistryType,
       adobeDrm: AdobeAdeptExecutorType?,
       analytics: AnalyticsType,
+      authDocumentParsers: AuthenticationDocumentParsersType,
       bookBorrowStrings: BookBorrowStringResourcesType,
       bookRegistry: BookRegistryType,
       bundledContent: BundledContentResolverType,
@@ -502,9 +521,11 @@ class Controller private constructor(
         accountEvents = accountEvents,
         accountLoginStringResources = accountLoginStringResources,
         accountLogoutStringResources = accountLogoutStringResources,
+        accountProviderResolutionStrings = accountProviderResolutionStrings,
         accountProviders = accountProviders,
         adobeDrm = adobeDrm,
         analytics = analytics,
+        authDocumentParsers = authDocumentParsers,
         bookRegistry = bookRegistry,
         borrowStrings = bookBorrowStrings,
         bundledContent = bundledContent,

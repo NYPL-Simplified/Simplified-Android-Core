@@ -1,7 +1,10 @@
 package org.nypl.simplified.accounts.api
 
 import com.google.common.base.Preconditions
+import com.io7m.jfunctional.OptionType
+import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import java.net.URI
 
 /**
  * An error value that indicates why creating an account failed.
@@ -36,6 +39,17 @@ sealed class AccountCreateErrorDetails : PresentableErrorType {
   data class UnexpectedException(
     override val message: String,
     override val exception: Throwable)
+    : AccountCreateErrorDetails()
+
+  /**
+   * An HTTP request could not be made.
+   */
+
+  data class HTTPRequestFailed(
+    override val message: String,
+    val opdsURI: URI,
+    val status: Int,
+    val problemReport: OptionType<HTTPProblemReport>)
     : AccountCreateErrorDetails()
 
 }

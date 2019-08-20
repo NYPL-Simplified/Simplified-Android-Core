@@ -15,6 +15,8 @@ import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionPar
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerConnectionFailure
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerReturnedError
+import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceResolutionStrings
+import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceStandardDescription
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.files.FileUtilities
@@ -87,7 +89,7 @@ class AccountProviderSourceNYPLRegistry(
 
   override fun load(context: Context): SourceResult {
     if (this.stringResources == null) {
-      this.stringResources = AccountProviderSourceNYPLResolutionStrings(context.resources)
+      this.stringResources = AccountProviderSourceResolutionStrings(context.resources)
     }
 
     val files = this.cacheFiles(context)
@@ -197,7 +199,7 @@ class AccountProviderSourceNYPLRegistry(
               .map { provider ->
                 Pair(
                   provider.id,
-                  AccountProviderSourceNYPLRegistryDescription(
+                  AccountProviderSourceStandardDescription(
                     stringResources = this.stringResources!!,
                     authDocumentParsers = this.authDocumentParsers,
                     http = this.http,
@@ -246,7 +248,7 @@ class AccountProviderSourceNYPLRegistry(
         !results.containsKey(id),
         "ID $id must not already be present in the results")
 
-      results[id] = AccountProviderSourceNYPLRegistryDescription(
+      results[id] = AccountProviderSourceStandardDescription(
         stringResources = this.stringResources!!,
         authDocumentParsers = this.authDocumentParsers,
         http = this.http,

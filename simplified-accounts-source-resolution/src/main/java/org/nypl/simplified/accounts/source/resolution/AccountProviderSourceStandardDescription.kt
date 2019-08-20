@@ -1,4 +1,4 @@
-package org.nypl.simplified.accounts.source.nyplregistry
+package org.nypl.simplified.accounts.source.resolution
 
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
@@ -13,7 +13,10 @@ import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.*
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.AuthDocumentParseFailed
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.AuthDocumentUnusable
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.HTTPRequestFailed
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.UnexpectedException
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.api.AccountProviderType
@@ -30,7 +33,6 @@ import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
@@ -38,17 +40,17 @@ import java.net.URI
 
 /**
  * An account provider description augmented with the logic needed to resolve the description
- * into a full provider.
+ * into a full provider using standard NYPL logic.
  */
 
-class AccountProviderSourceNYPLRegistryDescription(
+class AccountProviderSourceStandardDescription(
   private val stringResources: AccountProviderResolutionStringsType,
   private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val http: HTTPType,
   override val metadata: AccountProviderDescriptionMetadata) : AccountProviderDescriptionType {
 
   private val logger =
-    LoggerFactory.getLogger(AccountProviderSourceNYPLRegistryDescription::class.java)
+    LoggerFactory.getLogger(AccountProviderSourceStandardDescription::class.java)
 
   override fun resolve(onProgress: AccountProviderResolutionListenerType)
     : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
@@ -56,31 +58,46 @@ class AccountProviderSourceNYPLRegistryDescription(
       TaskRecorder.create<AccountProviderResolutionErrorDetails>()
 
     return try {
+      this.logger.debug("starting resolution")
       taskRecorder.beginNewStep(this.stringResources.resolving)
       onProgress.invoke(this.metadata.id, this.stringResources.resolving)
 
       val authDocument =
         this.fetchAuthDocument(taskRecorder, onProgress)
+
+      val supportsReservations =
+        if (authDocument != null) {
+          this.supportsReservations(authDocument)
+        } else {
+          false
+        }
+
+      val authenticationDescription =
+        if (authDocument != null) {
+          this.extractAuthenticationDescription(taskRecorder, authDocument)
+        } else {
+          null
+        }
+
       val updated =
         DateTime.now()
-      val authenticationDescription =
-        this.extractAuthenticationDescription(taskRecorder, authDocument)
 
       /*
        * The catalog URI is required to be present, but we obviously have no guarantee that it
        * actually will be.
        */
 
-      val catalogURI = authDocument.startURI
-        ?: this.metadata.catalogURI
-        ?: run {
-          val message = this.stringResources.resolvingAuthDocumentNoStartURI
-          taskRecorder.currentStepFailed(
-            message = message,
-            errorValue = AuthDocumentUnusable(message))
-          onProgress.invoke(this.metadata.id, message)
-          throw IOException()
-        }
+      val catalogURI =
+        authDocument?.startURI
+          ?: this.metadata.catalogURI
+          ?: run {
+            val message = this.stringResources.resolvingAuthDocumentNoStartURI
+            taskRecorder.currentStepFailed(
+              message = message,
+              errorValue = AuthDocumentUnusable(message))
+            onProgress.invoke(this.metadata.id, message)
+            throw IOException()
+          }
 
       /*
        * The annotations URI can only be located by an authenticated user. We'll update
@@ -89,36 +106,33 @@ class AccountProviderSourceNYPLRegistryDescription(
 
       val annotationsURI = null
 
-      val supportsReservations =
-        this.supportsReservations(authDocument)
-
       val accountProvider =
         AccountProviderImmutable(
           addAutomatically = this.metadata.isAutomatic,
           annotationsURI = annotationsURI,
           authentication = authenticationDescription,
-          authenticationDocumentURI = this.metadata.authenticationDocumentURI!!,
-          cardCreatorURI = authDocument.cardCreatorURI,
+          authenticationDocumentURI = this.metadata.authenticationDocumentURI,
+          cardCreatorURI = authDocument?.cardCreatorURI,
           catalogURI = catalogURI,
           displayName = this.metadata.title,
-          eula = authDocument.eulaURI,
+          eula = authDocument?.eulaURI,
           id = this.metadata.id,
           isProduction = this.metadata.isProduction,
-          license = authDocument.licenseURI,
-          loansURI = authDocument.loansURI,
-          logo = authDocument.logoURI ?: this.metadata.logoURI,
-          mainColor = authDocument.mainColor,
-          patronSettingsURI = authDocument.patronSettingsURI,
-          privacyPolicy = authDocument.privacyPolicyURI,
-          subtitle = authDocument.description,
-          supportEmail = authDocument.supportURI?.toString(),
+          license = authDocument?.licenseURI,
+          loansURI = authDocument?.loansURI,
+          logo = authDocument?.logoURI ?: this.metadata.logoURI,
+          mainColor = authDocument?.mainColor ?: "red",
+          patronSettingsURI = authDocument?.patronSettingsURI,
+          privacyPolicy = authDocument?.privacyPolicyURI,
+          subtitle = authDocument?.description,
+          supportEmail = authDocument?.supportURI?.toString(),
           supportsReservations = supportsReservations,
           supportsSimplyESynchronization = false,
-          updated = updated
-        )
+          updated = updated)
 
       taskRecorder.finishSuccess(accountProvider)
     } catch (e: Exception) {
+      this.logger.error("failed to resolve account provider: ", e)
       taskRecorder.currentStepFailedAppending(
         this.stringResources.resolvingUnexpectedException,
         UnexpectedException(this.stringResources.resolvingUnexpectedException, e),
@@ -167,7 +181,7 @@ class AccountProviderSourceNYPLRegistryDescription(
       authObject.inputs[LABEL_PASSWORD]
 
     return AccountProviderAuthenticationDescription.Basic(
-      barcodeFormat = loginRestrictions ?.barcodeFormat,
+      barcodeFormat = loginRestrictions?.barcodeFormat,
       keyboard = loginRestrictions?.keyboardType,
       passwordMaximumLength = passwordRestrictions?.maximumLength ?: 0,
       passwordKeyboard = passwordRestrictions?.keyboardType,
@@ -197,33 +211,16 @@ class AccountProviderSourceNYPLRegistryDescription(
     }
   }
 
-  private fun pickUsableMessage(message: String, e: Exception): String {
-    val exMessage = e.message
-    return if (message.isEmpty()) {
-      if (exMessage != null) {
-        exMessage
-      } else {
-        e.javaClass.simpleName
-      }
-    } else {
-      message
-    }
-  }
-
   private fun fetchAuthDocument(
     taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>,
     onProgress: AccountProviderResolutionListenerType
-  ): AuthenticationDocument {
+  ): AuthenticationDocument? {
+    this.logger.debug("fetching authentication document")
     taskRecorder.beginNewStep(this.stringResources.resolvingAuthDocument)
     onProgress.invoke(this.metadata.id, this.stringResources.resolvingAuthDocument)
 
-    val targetURI = this.metadata.authenticationDocumentURI
-    if (targetURI == null) {
-      val message = this.stringResources.resolvingAuthDocumentMissingURI
-      taskRecorder.currentStepFailed(message, AuthDocumentUnusable(message))
-      onProgress.invoke(this.metadata.id, message)
-      throw NoSuchElementException()
-    }
+    val targetURI =
+      this.metadata.authenticationDocumentURI ?: return null
 
     return when (val result = this.http.get(Option.none(), targetURI, 0L)) {
       is HTTPResultError -> {
@@ -251,6 +248,7 @@ class AccountProviderSourceNYPLRegistryDescription(
     stream: InputStream,
     taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>
   ): AuthenticationDocument {
+    this.logger.debug("parsing authentication document")
     return this.authDocumentParsers.createParser(targetURI, stream).use { parser ->
       when (val parseResult = parser.parse()) {
         is ParseResult.Success -> {

@@ -191,6 +191,9 @@
   <string name="settings_account_delete_button">Delete</string>
   <string name="settings_accounts_select_library">Please choose a library.</string>
   <string name="settings_account_refresh">Refresh</string>
+  <string name="settingsCustomOPDS">Custom OPDS Feed</string>
+  <string name="settingsCustomOPDSURL">Custom feed URL…</string>
+  <string name="settingsCustomOPDSCreate">Create</string>
 
   <string name="login_needed">You need to login to access the collection.</string>
   <string name="login_with_barcode">Login with Barcode</string>
@@ -454,6 +457,13 @@
   <string name="profileAccountCreationResolvingAccountProviderFailed">Resolving an account provider failed.</string>
   <string name="profileAccountCreationResolvingAccountProvider">Resolving account provider…</string>
   <string name="profileAccountCreationSucceeded">Creating the account succeeded.</string>
+  <string name="profileAccountCreatingAnAccountProviderDescription">Creating an account provider description…</string>
+  <string name="profileAccountSearchingFeedForAuthenticationDocument">Searching feed for authentication document…</string>
+  <string name="profileAccountFetchingOPDSFeedFailed">Fetching an OPDS feed failed!</string>
+  <string name="profileAccountParsingOPDSFeedFailed">Parsing an OPDS feed failed!</string>
+  <string name="profileAccountParsingOPDSFeed">Parsing an OPDS feed…</string>
+  <string name="profileAccountFetchingOPDSFeed">Fetching an OPDS feed…</string>
+  <string name="profileAccountFindingAuthDocumentURI">Finding an authentication document URI…</string>
 
   <!-- Profile account deletion -->
   <string name="profileAccountDeletionFailed">Deleting an account failed.</string>
@@ -464,26 +474,25 @@
   <!-- Services strings -->
   <string name="bootFailedGeneric">We found a problem. Please check your connection or close and reopen the app to retry.</string>
   <string name="bootStarted">Starting application…</string>
-  <string name="bootingBugSnag">Starting BugSnag…</string>
+  <string name="bootingAccountProviders">Initializing account providers…</string>
   <string name="bootingAdobeDRM">Starting Adobe DRM…</string>
-  <string name="bootingScreenSize">Starting screen size…</string>
-  <string name="bootingHTTP">Starting HTTP client…</string>
-  <string name="bootingDirectories">Initializing directories…</string>
-  <string name="bootingDownloadService">Starting download service…</string>
+  <string name="bootingAnalytics">Starting analytics…</string>
+  <string name="bootingAuthenticationDocumentParsers">Initializing authentication document parsers…</string>
+  <string name="bootingBookController">Initializing book controller…</string>
   <string name="bootingBookRegistry">Starting book registry…</string>
   <string name="bootingBrandingServices">Initializing branding services…</string>
-  <string name="bootingTenPrint">Booting TenPrint…</string>
-  <string name="bootingCoverGenerator">Starting cover generator…</string>
-  <string name="bootingCoverBadgeProvider">Starting cover badge provider…</string>
-  <string name="bootingCoverProvider">Starting cover provider…</string>
-  <string name="bootingLocalImageLoader">Starting local image loader…</string>
-  <string name="bootingEPUBLoader">Starting EPUB loader…</string>
-  <string name="bootingDocumentStore">Initializing document store…</string>
-  <string name="bootingAccountProviders">Initializing account providers…</string>
-  <string name="bootingBundledCredentials">Initializing bundled credentials…</string>
-  <string name="bootingCredentialStore">Initializing credential store…</string>
-  <string name="bootingProfilesDatabase">Initializing profiles database…</string>
+  <string name="bootingBugSnag">Starting BugSnag…</string>
   <string name="bootingBundledContent">Initializing bundled content…</string>
+  <string name="bootingBundledCredentials">Initializing bundled credentials…</string>
+  <string name="bootingCompleted">Startup completed!</string>
+  <string name="bootingCoverBadgeProvider">Starting cover badge provider…</string>
+  <string name="bootingCoverGenerator">Starting cover generator…</string>
+  <string name="bootingCoverProvider">Starting cover provider…</string>
+  <string name="bootingCredentialStore">Initializing credential store…</string>
+  <string name="bootingDirectories">Initializing directories…</string>
+  <string name="bootingDocumentStore">Initializing document store…</string>
+  <string name="bootingDownloadService">Starting download service…</string>
+  <string name="bootingEPUBLoader">Starting EPUB loader…</string>
   <string name="bootingFeedLoader">Starting OPDS feed loader…</string>
   <string name="bootingAnalytics">Starting analytics…</string>
   <string name="bootingPatronProfileParsers">Initializing patron profile parsers…</string>
@@ -491,7 +500,14 @@
   <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
   <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
   <string name="bootingCompleted">Startup completed!</string>
+  <string name="bootingHTTP">Starting HTTP client…</string>
+  <string name="bootingLocalImageLoader">Starting local image loader…</string>
   <string name="bootingNotificationsService">Initializing Notifications Service...</string>
+  <string name="bootingPatronProfileParsers">Initializing patron profile parsers…</string>
+  <string name="bootingProfilesDatabase">Initializing profiles database…</string>
+  <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
+  <string name="bootingScreenSize">Starting screen size…</string>
+  <string name="bootingTenPrint">Booting TenPrint…</string>
 
   <!-- PDF Reader -->
   <string name="table_of_contents_title">Table of Contents</string>
@@ -499,6 +515,7 @@
 
   <!-- General error strings -->
   <string name="unexpectedException">An unexpected exception occurred.</string>
+  <string name="settingsCustomOPDSInvalidURI">Not a valid URI</string>
 
   <!-- Notification strings -->
   <string name="notification_title_ready_title">Your book is ready</string>

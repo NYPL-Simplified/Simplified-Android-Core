@@ -24,6 +24,9 @@ class SimplifiedServicesStrings(private val resources: Resources): BootStringRes
   val bootingBookController: String =
     this.resources.getString(R.string.bootingBookController)
 
+  val bootingAuthenticationDocumentParsers: String =
+    this.resources.getString(R.string.bootingAuthenticationDocumentParsers)
+
   val bootingPatronProfileParsers: String =
     this.resources.getString(R.string.bootingPatronProfileParsers)
 

@@ -5,7 +5,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
-import org.nypl.drm.core.AdobeAdeptActivationReceiverType
 import org.nypl.drm.core.AdobeAdeptConnectorType
 import org.nypl.drm.core.AdobeAdeptDeactivationReceiverType
 import org.nypl.drm.core.AdobeAdeptExecutorType
@@ -34,7 +33,7 @@ import org.nypl.simplified.http.core.HTTPResultType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.tests.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.strings.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream

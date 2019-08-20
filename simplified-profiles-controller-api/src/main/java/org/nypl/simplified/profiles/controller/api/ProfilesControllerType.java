@@ -136,6 +136,17 @@ public interface ProfilesControllerType {
     URI provider);
 
   /**
+   * Create an account using the URI of an OPDS feed. The given feed is parsed in order to
+   * infer enough information to create an account provider description.
+   *
+   * @param opdsFeed The OPDS feed URI
+   * @return A future that returns the result of creating the account
+   */
+
+  FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> profileAccountCreateCustomOPDS(
+    URI opdsFeed);
+
+  /**
    * Create an account using the given account provider, or return an existing account
    * with that provider.
    *

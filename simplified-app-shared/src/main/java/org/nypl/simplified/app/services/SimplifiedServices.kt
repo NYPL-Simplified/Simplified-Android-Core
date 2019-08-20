@@ -27,6 +27,7 @@ import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON
 import org.nypl.simplified.accounts.registry.AccountProviderRegistry
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceResolutionStrings
 import org.nypl.simplified.analytics.api.Analytics
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
@@ -56,6 +57,7 @@ import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.controller.Controller
+import org.nypl.simplified.books.controller.Controller.Companion.create
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverGenerator
 import org.nypl.simplified.books.covers.BookCoverProvider
@@ -81,6 +83,8 @@ import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.notifications.NotificationsWrapper
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.opds.auth_document.AuthenticationDocumentParsers
+import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSFeedParserType
@@ -341,6 +345,12 @@ class SimplifiedServices private constructor(
           .iterator()
           .next()
 
+      publishEvent(strings.bootingAuthenticationDocumentParsers)
+      val authDocumentParsers =
+        ServiceLoader.load(AuthenticationDocumentParsersType::class.java)
+          .iterator()
+          .next()
+
       publishEvent(strings.bootingBookController)
       val execBooks =
         NamedThreadPools.namedThreadPool(1, "books", 19)
@@ -348,13 +358,15 @@ class SimplifiedServices private constructor(
         NamedThreadPools.namedThreadPool(1, "profile-timer", 19)
 
       val bookController =
-        Controller.create(
+        create(
           accountEvents = accountEvents,
           accountLoginStringResources = LoginStringResources(context.resources),
           accountLogoutStringResources = LogoutStringResources(context.resources),
+          accountProviderResolutionStrings = AccountProviderSourceResolutionStrings(context.resources),
           accountProviders = accountProviders,
           adobeDrm = adobeDRM,
           analytics = analytics,
+          authDocumentParsers = authDocumentParsers,
           bookBorrowStrings = CatalogBookBorrowStrings(context.resources),
           bookRegistry = bookRegistry,
           bundledContent = bundledContentResolver,
