@@ -494,8 +494,6 @@
   <string name="bootingDownloadService">Starting download service…</string>
   <string name="bootingEPUBLoader">Starting EPUB loader…</string>
   <string name="bootingFeedLoader">Starting OPDS feed loader…</string>
-  <string name="bootingPatronProfileParsers">Initializing patron profile parsers…</string>
-  <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
   <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
   <string name="bootingHTTP">Starting HTTP client…</string>
   <string name="bootingLocalImageLoader">Starting local image loader…</string>
