@@ -497,7 +497,6 @@
   <string name="bootingPatronProfileParsers">Initializing patron profile parsers…</string>
   <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
   <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
-  <string name="bootingCompleted">Startup completed!</string>
   <string name="bootingHTTP">Starting HTTP client…</string>
   <string name="bootingLocalImageLoader">Starting local image loader…</string>
   <string name="bootingNotificationsService">Initializing Notifications Service...</string>
