@@ -1,7 +1,8 @@
 package org.nypl.simplified.app.catalog;
 
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;

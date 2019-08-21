@@ -2,14 +2,11 @@ package org.nypl.simplified.app.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceFragmentCompat
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import com.io7m.jfunctional.Some
-import com.tenmiles.helpstack.HSHelpStack
-import com.tenmiles.helpstack.gears.HSDeskGear
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.WebViewActivity
-import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.documents.synced.SyncedDocumentType
 
 /**
@@ -79,23 +76,8 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureFAQ(faq: Preference) {
-    val helpStackOpt = this.listener.helpstack()
-    if (helpStackOpt is Some<HelpstackType>) {
-      val helpStack = helpStackOpt.get()
-      faq.intent = null
-      faq.setOnPreferenceClickListener {
-        val stack = HSHelpStack.getInstance(this.activity)
-
-        // XXX: Why is this token hardcoded?
-        val gear = HSDeskGear("https://nypl.desk.com/", "4GBRmMv8ZKG8fGehhA", "12060")
-        stack.gear = gear
-        stack.showHelp(this.activity)
-        false
-      }
-    } else {
       faq.isVisible = false
       faq.isEnabled = false
-    }
   }
 
   private fun configureEULA(eula: Preference) {

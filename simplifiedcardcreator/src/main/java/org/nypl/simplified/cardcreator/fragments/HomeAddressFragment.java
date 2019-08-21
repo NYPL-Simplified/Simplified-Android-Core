@@ -2,7 +2,6 @@ package org.nypl.simplified.cardcreator.fragments;
 
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -11,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
 
 import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.R;

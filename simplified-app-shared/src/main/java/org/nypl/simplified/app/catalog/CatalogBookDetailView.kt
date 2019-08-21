@@ -3,7 +3,6 @@ package org.nypl.simplified.app.catalog
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -17,6 +16,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
@@ -81,17 +81,17 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 class CatalogBookDetailView(
-  private val activity: AppCompatActivity,
-  private val inflater: LayoutInflater,
-  private val account: AccountType,
-  private val coverProvider: BookCoverProviderType,
-  private val booksRegistry: BookRegistryReadableType,
-  private val analytics: AnalyticsType,
-  private val profilesController: ProfilesControllerType,
-  private val booksController: BooksControllerType,
-  private val screenSizeInformation: ScreenSizeInformationType,
-  private val networkConnectivity: NetworkConnectivityType,
-  entryInitial: FeedEntryOPDS)
+    private val activity: AppCompatActivity,
+    private val inflater: LayoutInflater,
+    private val account: AccountType,
+    private val coverProvider: BookCoverProviderType,
+    private val booksRegistry: BookRegistryReadableType,
+    private val analytics: AnalyticsType,
+    private val profilesController: ProfilesControllerType,
+    private val booksController: BooksControllerType,
+    private val screenSizeInformation: ScreenSizeInformationType,
+    private val networkConnectivity: NetworkConnectivityType,
+    entryInitial: FeedEntryOPDS)
   : BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
   BookStatusDownloadingMatcherType<Unit, UnreachableCodeException> {

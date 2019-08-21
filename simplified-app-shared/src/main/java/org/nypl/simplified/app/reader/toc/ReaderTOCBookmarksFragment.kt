@@ -3,7 +3,6 @@ package org.nypl.simplified.app.reader.toc
 import android.content.Context
 import android.database.DataSetObserver
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +10,7 @@ import android.widget.ArrayAdapter
 import android.widget.ListAdapter
 import android.widget.ListView
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import org.joda.time.format.DateTimeFormat
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified

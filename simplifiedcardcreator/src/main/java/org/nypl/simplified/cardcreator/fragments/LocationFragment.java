@@ -1,17 +1,16 @@
 package org.nypl.simplified.cardcreator.fragments;
 
-
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
 import org.nypl.simplified.cardcreator.R;
 import org.nypl.simplified.cardcreator.listener.LocationListenerType;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,7 +18,6 @@ import org.nypl.simplified.cardcreator.listener.LocationListenerType;
  * create an instance of this fragment.
  */
 public class LocationFragment extends Fragment {
-
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM2 = "region";

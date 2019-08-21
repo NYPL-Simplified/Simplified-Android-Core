@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.catalog
 
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -9,6 +8,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
@@ -67,14 +67,14 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 class CatalogFeedBookCellView(
-  private val activity: AppCompatActivity,
-  private val analytics: AnalyticsType,
-  private val coverProvider: BookCoverProviderType,
-  private val booksController: BooksControllerType,
-  private val profilesController: ProfilesControllerType,
-  private val booksRegistry: BookRegistryReadableType,
-  private val networkConnectivity: NetworkConnectivityType,
-  private val screenSizeInformation: ScreenSizeInformationType) :
+    private val activity: AppCompatActivity,
+    private val analytics: AnalyticsType,
+    private val coverProvider: BookCoverProviderType,
+    private val booksController: BooksControllerType,
+    private val profilesController: ProfilesControllerType,
+    private val booksRegistry: BookRegistryReadableType,
+    private val networkConnectivity: NetworkConnectivityType,
+    private val screenSizeInformation: ScreenSizeInformationType) :
   FrameLayout(activity),
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,

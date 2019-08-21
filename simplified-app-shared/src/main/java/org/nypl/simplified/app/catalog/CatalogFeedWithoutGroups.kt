@@ -1,13 +1,13 @@
 package org.nypl.simplified.app.catalog
 
 import android.database.DataSetObserver
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.AbsListView.OnScrollListener
 import android.widget.ArrayAdapter
 import android.widget.ListAdapter
+import androidx.appcompat.app.AppCompatActivity
 import com.google.common.base.Function
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -49,19 +49,19 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 class CatalogFeedWithoutGroups(
-  private val activity: AppCompatActivity,
-  private val analytics: AnalyticsType,
-  private val account: AccountType,
-  private val bookCoverProvider: BookCoverProviderType,
-  private val bookSelectionListener: CatalogBookSelectionListenerType,
-  private val bookRegistry: BookRegistryReadableType,
-  private val bookController: BooksControllerType,
-  private val profilesController: ProfilesControllerType,
-  private val feedLoader: FeedLoaderType,
-  private val feed: FeedWithoutGroups,
-  private val networkConnectivity: NetworkConnectivityType,
-  private val executor: ListeningExecutorService,
-  private val screenSizeInformation: ScreenSizeInformationType) : ListAdapter, OnScrollListener {
+    private val activity: AppCompatActivity,
+    private val analytics: AnalyticsType,
+    private val account: AccountType,
+    private val bookCoverProvider: BookCoverProviderType,
+    private val bookSelectionListener: CatalogBookSelectionListenerType,
+    private val bookRegistry: BookRegistryReadableType,
+    private val bookController: BooksControllerType,
+    private val profilesController: ProfilesControllerType,
+    private val feedLoader: FeedLoaderType,
+    private val feed: FeedWithoutGroups,
+    private val networkConnectivity: NetworkConnectivityType,
+    private val executor: ListeningExecutorService,
+    private val screenSizeInformation: ScreenSizeInformationType) : ListAdapter, OnScrollListener {
 
   private val adapter: ArrayAdapter<FeedEntry> =
     ArrayAdapter(this.activity, 0, this.feed.entriesInOrder)

@@ -1,7 +1,7 @@
 package org.nypl.simplified.app.catalog
 
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.AppCompatButton
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import com.google.common.base.Preconditions
 import org.nypl.simplified.feeds.api.FeedFacet
 import java.util.ArrayList
@@ -12,10 +12,10 @@ import java.util.Objects
  */
 
 class CatalogFacetButton(
-  val activity: AppCompatActivity,
-  private val groupName: String,
-  val group: ArrayList<FeedFacet>,
-  val listener: CatalogFacetSelectionListenerType) 
+    val activity: AppCompatActivity,
+    private val groupName: String,
+    val group: ArrayList<FeedFacet>,
+    val listener: CatalogFacetSelectionListenerType)
   : AppCompatButton(activity) {
 
   init {

@@ -4,12 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.support.annotation.UiThread
-import android.support.v4.app.Fragment
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +16,12 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.UiThread
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import org.joda.time.format.DateTimeFormat
@@ -88,11 +88,11 @@ class SplashFragment : Fragment() {
     val progress: ProgressBar)
 
   private class ViewsMigrationReport(
-    val container: View,
-    val text: TextView,
-    val list: RecyclerView,
-    val sendButton: Button,
-    val okButton: Button)
+      val container: View,
+      val text: TextView,
+      val list: RecyclerView,
+      val sendButton: Button,
+      val okButton: Button)
 
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
@@ -268,7 +268,7 @@ class SplashFragment : Fragment() {
     this.viewsForMigrationReport.list.setHasFixedSize(false)
     this.viewsForMigrationReport.list.layoutManager = LinearLayoutManager(this.context);
     (this.viewsForMigrationReport.list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-    this.viewsForMigrationReport.list.adapter.notifyDataSetChanged()
+    this.viewsForMigrationReport.list.adapter!!.notifyDataSetChanged()
 
     if (errors) {
       this.viewsForMigrationReport.text.setText(R.string.migrationFailure)

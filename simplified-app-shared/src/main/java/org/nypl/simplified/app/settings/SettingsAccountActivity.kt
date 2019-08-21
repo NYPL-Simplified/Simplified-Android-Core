@@ -1,12 +1,12 @@
 package org.nypl.simplified.app.settings
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.view.Menu

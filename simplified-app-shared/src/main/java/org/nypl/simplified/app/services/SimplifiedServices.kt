@@ -5,7 +5,7 @@ import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.os.Environment
-import android.support.v4.content.ContextCompat
+import androidx.core.content.ContextCompat
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
@@ -42,8 +42,6 @@ import org.nypl.simplified.app.SimplifiedNetworkConnectivity
 import org.nypl.simplified.app.catalog.CatalogBookBorrowStrings
 import org.nypl.simplified.app.catalog.CatalogBookRevokeStrings
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages
-import org.nypl.simplified.app.helpstack.Helpstack
-import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.app.images.ImageAccountIconRequestHandler
 import org.nypl.simplified.app.login.LoginStringResources
 import org.nypl.simplified.app.login.LogoutStringResources
@@ -126,7 +124,6 @@ class SimplifiedServices private constructor(
   override val documentStore: DocumentStoreType,
   override val feedLoader: FeedLoaderType,
   override val imageLoader: Picasso,
-  override val helpStack: HelpstackType?,
   override val http: HTTPType,
   override val networkConnectivity: NetworkConnectivityType,
   override val profilesController: ProfilesControllerType,
@@ -456,15 +453,6 @@ class SimplifiedServices private constructor(
       publishEvent(strings.bootingNetworkConnectivity)
       val networkConnectivity = SimplifiedNetworkConnectivity(context)
 
-      publishEvent(strings.bootingHelpstack)
-      val helpstackOpt = Helpstack.get(context, context.assets)
-      val helpstack =
-        if (helpstackOpt is Some<HelpstackType>) {
-          helpstackOpt.get()
-        } else {
-          null
-        }
-
       try {
         val packageInfo =
           context.getPackageManager().getPackageInfo(context.getPackageName(), 0)
@@ -497,7 +485,6 @@ class SimplifiedServices private constructor(
         booksController = bookController,
         documentStore = documents,
         feedLoader = feedLoader,
-        helpStack = helpstack,
         http = http,
         imageLoader = localImageLoader,
         networkConnectivity = networkConnectivity,

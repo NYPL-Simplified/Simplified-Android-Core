@@ -24,7 +24,7 @@ dependencies {
   implementation project(':simplifiedprefs')
 
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  implementation "com.android.support:support-v4:28.0.0"
+  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
   implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'

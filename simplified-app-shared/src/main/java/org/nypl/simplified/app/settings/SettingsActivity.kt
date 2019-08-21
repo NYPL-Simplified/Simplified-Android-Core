@@ -8,7 +8,6 @@ import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.documents.store.DocumentStoreType
 
 /**
@@ -22,9 +21,6 @@ class SettingsActivity : NavigationDrawerActivity(), SettingsFragmentListenerTyp
     intent.setClass(this, SettingsVersionActivity::class.java)
     this.startActivity(intent)
   }
-
-  override fun helpstack(): OptionType<HelpstackType> =
-    Option.of(Simplified.application.services().helpStack)
 
   override fun documents(): DocumentStoreType =
     Simplified.application.services()

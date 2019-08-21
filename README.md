@@ -34,30 +34,9 @@ org.librarysimplified.nexus.password=PASSWORD
 
 The correct certificate file must be placed at `simplified-app-simplye/src/main/assets/ReaderClientCert.sig` in order for Adobe DRM to work. The app will function correctly without this file so long as only non-DRM-protected books are opened.
 
-## HelpStack Setup
-
-**NOTE:** Care should always be taken to ensure HelpStack is functioning correctly after making any configuration changes. Configuration errors or a lack of configuration may result in errors that only appear at runtime.
-
-If HelpStack is to be used, a configuration file must be placed at `simplified-app-simplye/src/main/assets/helpstack.conf`.
-
 For Zendesk, you should use the following configuration:
 
-```
-helpstack.gear = zendesk
-helpstack.zendesk.instance_url = ...
-helpstack.zendesk.staff_email = ...
-helpstack.zendesk.api_token = ...
-```
-
 For Salesforce Desk, use the following instead:
-
-```
-helpstack.gear = desk
-helpstack.desk.instance_url = ...
-helpstack.desk.to_help_email = ...
-helpstack.desk.staff_login_email = ...
-helpstack.desk.staff_login_password =  ...
-```
 
 ## Generating Signed APKs
 

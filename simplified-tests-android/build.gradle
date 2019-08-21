@@ -3,10 +3,10 @@ apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 28
-  buildToolsVersion "28.0.2"
+  buildToolsVersion "28.0.3"
 
   defaultConfig {
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     multiDexEnabled true
     minSdkVersion androidMinimumSDK
   }
@@ -17,7 +17,7 @@ android {
   }
 
   testOptions {
-    execution 'ANDROID_TEST_ORCHESTRATOR'
+    execution 'ANDROIDX_TEST_ORCHESTRATOR'
     animationsDisabled = true
   }
 }
@@ -40,18 +40,18 @@ dependencies {
     exclude group: 'com.google.android', module: 'android'
   }
 
-  implementation "com.android.support:appcompat-v7:27.1.1"
-  implementation "com.android.support:support-v4:27.1.1"
-  implementation "com.android.support.test:rules:1.0.2"
-  implementation "com.android.support.test:runner:1.0.2"
-  implementation "com.android.support.test.espresso:espresso-core:3.0.2"
+  implementation 'androidx.appcompat:appcompat:1.0.0'
+  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+  implementation 'androidx.test:rules:1.1.0'
+  implementation 'androidx.test:runner:1.1.0'
+  implementation 'androidx.test.espresso:espresso-core:3.1.0'
   implementation "org.mockito:mockito-android:2.22.0"
 
   androidTestImplementation "org.mockito:mockito-android:2.22.0"
-  androidTestImplementation "com.android.support:appcompat-v7:27.1.1"
-  androidTestImplementation "com.android.support:support-v4:27.1.1"
-  androidTestImplementation "com.android.support.test:rules:1.0.2"
-  androidTestImplementation "com.android.support.test:runner:1.0.2"
-  androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
-  androidTestUtil "com.android.support.test:orchestrator:1.0.2"
+  androidTestImplementation 'androidx.appcompat:appcompat:1.0.0'
+  androidTestImplementation 'androidx.legacy:legacy-support-v4:1.0.0'
+  androidTestImplementation 'androidx.test:rules:1.1.0'
+  androidTestImplementation 'androidx.test:runner:1.1.0'
+  androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+  androidTestUtil 'androidx.test:orchestrator:1.1.0'
 }

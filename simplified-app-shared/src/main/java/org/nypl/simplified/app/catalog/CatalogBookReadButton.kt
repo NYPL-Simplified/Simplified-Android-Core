@@ -1,9 +1,9 @@
 package org.nypl.simplified.app.catalog
 
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.AppCompatButton
 import android.text.TextUtils
 import android.util.TypedValue
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.R
@@ -16,12 +16,12 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
  */
 
 class CatalogBookReadButton(
-  val activity: AppCompatActivity,
-  val analytics: AnalyticsType,
-  val profile: ProfileReadableType,
-  val account: AccountType,
-  val bookID: BookID,
-  val entry: FeedEntryOPDS)
+    val activity: AppCompatActivity,
+    val analytics: AnalyticsType,
+    val profile: ProfileReadableType,
+    val account: AccountType,
+    val bookID: BookID,
+    val entry: FeedEntryOPDS)
   : AppCompatButton(activity), CatalogBookButtonType {
 
   init {
