@@ -24,7 +24,6 @@ dependencies {
   implementation 'org.slf4j:slf4j-api:1.7.25'
 
   api 'joda-time:joda-time:2.9.9'
-  api "org.nypl.drm:nypl-drm-core:1.0.0"
   api "com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)"
   api "com.google.guava:guava:23.6.1-android"
 

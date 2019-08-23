@@ -11,9 +11,6 @@
 /captures
 /local.properties
 
-# Ignore .so files
-**/jniLibs
-
 #
 # Certificates and API Keys
 #
