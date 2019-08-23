@@ -74,7 +74,6 @@ dependencies {
   api project(":simplified-reader-api")
   api project(":simplified-reader-bookmarks")
   api project(":simplified-reader-bookmarks-api")
-  api project(":simplified-rfc3339-core")
   api project(":simplified-splash")
   api project(":simplified-stack")
   api project(":simplified-tenprint")
