@@ -1,21 +1,3 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.2"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-accounts-source-resolution'
-
 dependencies {
   api project(':simplified-accounts-api')
   api project(':simplified-observable')
@@ -34,9 +16,4 @@ dependencies {
 
   compileOnly "com.google.auto.value:auto-value:1.5"
   annotationProcessor "com.google.auto.value:auto-value:1.5"
-}
-
-repositories {
-  mavenCentral()
-  jcenter()
 }

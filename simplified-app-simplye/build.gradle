@@ -1,6 +1,3 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-
 def versionValues() {
   def propsFile = file('version.properties')
   def Properties props = new Properties()
@@ -22,9 +19,6 @@ def versionValues() {
 }
 
 android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
   def version = versionValues()
 
   packagingOptions {
@@ -57,20 +51,12 @@ android {
     versionName = version.get(0)
     versionCode = version.get(1)
     setProperty("archivesBaseName", "simplye-${versionName}-${versionCode}")
-    minSdkVersion androidMinimumSDK
   }
 
   lintOptions {
     checkReleaseBuilds false
   }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
 }
-
-description = 'simplified-app-simplye'
 
 dependencies {
   implementation project(":simplified-accounts-source-nyplregistry")
@@ -108,6 +94,10 @@ preBuild.doFirst {
       throw new IllegalStateException("""
 You are attempting to build with Adobe DRM but have not added the required
 certificate file at ${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig
+
+If you do not want to use Adobe DRM, define the following in ${project.rootDir}/gradle.properties:
+
+org.librarysimplified.with_drm_adobe = false
 """)
     }
   } else {
@@ -116,6 +106,10 @@ certificate file at ${project.rootDir}/simplified-app-simplye/src/main/assets/Re
 You are attempting to build without Adobe DRM but have accidentally left the
 certificate file at ${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig.
 Remove this file!
+
+If you *do* want to use Adobe DRM, define the following in ${project.rootDir}/gradle.properties:
+
+org.librarysimplified.with_drm_adobe = true
 """)
     }
   }
@@ -129,6 +123,10 @@ Remove this file!
       throw new IllegalStateException("""
 You are attempting to build with Bugsnag but have not added the required
 configuration file at ${project.rootDir}/simplified-app-simplye/src/main/assets/bugsnag.conf
+
+If you do not want to use Bugsnag, define the following in ${project.rootDir}/gradle.properties:
+
+org.librarysimplified.with_bugsnag = false
 """)
     }
   } else {
@@ -137,6 +135,10 @@ configuration file at ${project.rootDir}/simplified-app-simplye/src/main/assets/
 You are attempting to build without Bugsnag but have accidentally left the
 configuration file at ${project.rootDir}/simplified-app-simplye/src/main/assets/bugsnag.conf.
 Remove this file!
+
+If you *do* want to use Bugsnag, define the following in ${project.rootDir}/gradle.properties:
+
+org.librarysimplified.with_bugsnag = true
 """)
     }
   }
@@ -151,12 +153,12 @@ if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
     apply plugin: 'android-native-dependencies'
 
     native_dependencies {
-      artifact (group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0', classifier: 'armeabi-v7a') {
-        addLibPrefixToArtifact=false
+      artifact(group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0', classifier: 'armeabi-v7a') {
+        addLibPrefixToArtifact = false
       }
 
-      artifact (group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0', classifier: 'armeabi-v7a') {
-        addLibPrefixToArtifact=false
+      artifact(group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0', classifier: 'armeabi-v7a') {
+        addLibPrefixToArtifact = false
       }
     }
   }

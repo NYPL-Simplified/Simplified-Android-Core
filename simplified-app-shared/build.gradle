@@ -1,8 +1,3 @@
-description = 'simplified-app-shared'
-
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
 def getGitHash = { ->
   def stdout = new ByteArrayOutputStream()
   exec {
@@ -13,18 +8,8 @@ def getGitHash = { ->
 }
 
 android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-  useLibrary 'org.apache.http.legacy'
-
   defaultConfig {
     buildConfigField "String", "GIT_COMMIT", "\"${getGitHash()}\""
-    minSdkVersion androidMinimumSDK
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
   }
 
   packagingOptions {
@@ -36,10 +21,6 @@ android {
     pickFirst 'lib/armeabi-v7a/libc++_shared.so'
     pickFirst 'lib/x86/libc++_shared.so'
   }
-}
-
-repositories {
-  jcenter()
 }
 
 dependencies {
@@ -138,15 +119,15 @@ dependencies {
     exclude group: 'com.google.android', module: 'android'
   }
 
-  implementation "org.nypl.audiobook:org.nypl.audiobook.android.manifest.nypl:${nypl_audiobook_api_version}"
-  implementation "org.nypl.audiobook:org.nypl.audiobook.android.api:${nypl_audiobook_api_version}"
-  implementation "org.nypl.audiobook:org.nypl.audiobook.android.open_access:${nypl_audiobook_api_version}"
-  implementation "org.nypl.audiobook:org.nypl.audiobook.android.views:${nypl_audiobook_api_version}"
-  implementation "org.nypl.audiobook:org.nypl.audiobook.android.downloads:${nypl_audiobook_api_version}"
+  implementation libraries.nyplAudioBookManifestNYPL
+  implementation libraries.nyplAudioBookAPI
+  implementation libraries.nyplAudioBookOpenAccess
+  implementation libraries.nyplAudioBookViews
+  implementation libraries.nyplAudioBookDownloads
 
   if (project.hasProperty("org.librarysimplified.with_findaway")) {
     if (project.property("org.librarysimplified.with_findaway") == "true") {
-      implementation "org.nypl.audiobook:org.nypl.audiobook.android.audioengine.core:${nypl_audiobook_findaway_version}"
+      implementation libraries.nyplFindaway
     }
   }
 

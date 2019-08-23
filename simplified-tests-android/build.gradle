@@ -1,33 +1,3 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  defaultConfig {
-    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    multiDexEnabled true
-    minSdkVersion androidMinimumSDK
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  testOptions {
-    execution 'ANDROIDX_TEST_ORCHESTRATOR'
-    animationsDisabled = true
-  }
-}
-
-description = 'simplified-tests-android'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
   implementation project(':simplified-tests')
   implementation project(':simplified-splash')

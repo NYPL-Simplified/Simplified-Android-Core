@@ -1,17 +1,6 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-
 android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
   defaultConfig {
     multiDexEnabled true
-    minSdkVersion androidMinimumSDK
-  }
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
   }
 
   packagingOptions {
@@ -24,8 +13,6 @@ android {
     pickFirst 'lib/x86/libc++_shared.so'
   }
 }
-
-description = 'simplified-app-vanilla-with-profiles'
 
 dependencies {
   implementation project(':simplified-app-shared')

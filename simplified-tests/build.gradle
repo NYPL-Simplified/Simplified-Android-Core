@@ -1,25 +1,3 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-tests'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
 
   api project(":simplified-accounts-api")
@@ -95,8 +73,8 @@ dependencies {
   testImplementation 'ch.qos.logback:logback-classic:1.2.3'
   testImplementation 'junit:junit:4.12'
 
-  api "org.nypl.audiobook:org.nypl.audiobook.android.api:${nypl_audiobook_api_version}"
-  api "org.nypl.audiobook:org.nypl.audiobook.android.manifest.nypl:${nypl_audiobook_api_version}"
-  api "org.nypl.audiobook:org.nypl.audiobook.android.mocking:${nypl_audiobook_api_version}"
-  api "org.nypl.audiobook:org.nypl.audiobook.android.open_access:${nypl_audiobook_api_version}"
+  api libraries.nyplAudioBookAPI
+  api libraries.nyplAudioBookManifestNYPL
+  api libraries.nyplAudioBookOpenAccess
+  api libraries.nyplAudioBookMocking
 }

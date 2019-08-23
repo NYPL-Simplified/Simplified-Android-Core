@@ -1,24 +1,3 @@
-apply plugin: 'com.android.library'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-files'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'

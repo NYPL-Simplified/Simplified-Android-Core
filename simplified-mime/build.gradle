@@ -1,24 +1,3 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-    targetSdkVersion 28
-  }
-}
-
-description = 'simplified-mime'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
