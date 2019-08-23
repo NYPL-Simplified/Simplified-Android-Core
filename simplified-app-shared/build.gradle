@@ -64,6 +64,7 @@ dependencies {
   api project(":simplified-boot-api")
   api project(":simplified-branding")
   api project(":simplified-bugsnag")
+  api project(":simplified-cardcreator")
   api project(":simplified-datepicker")
   api project(":simplified-documents")
   api project(":simplified-downloader-core")
@@ -80,6 +81,7 @@ dependencies {
   api project(":simplified-parser-api")
   api project(":simplified-patron")
   api project(":simplified-patron-api")
+  api project(":simplified-prefs")
   api project(":simplified-profiles")
   api project(":simplified-profiles-api")
   api project(":simplified-profiles-controller-api")
@@ -93,8 +95,6 @@ dependencies {
   api project(":simplified-tenprint")
   api project(":simplified-theme")
   api project(":simplified-threads")
-  api project(":simplifiedprefs")
-  api project(":simplifiedcardcreator")
 
   annotationProcessor "com.google.auto.value:auto-value:1.3"
 
