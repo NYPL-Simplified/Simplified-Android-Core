@@ -49,6 +49,7 @@ ext {
 }
 
 ext.libraries = [
+  jacksonDatabind          : "com.fasterxml.jackson.core:jackson-databind:2.9.5",
   nyplAudioBookAPI         : "org.nypl.audiobook:org.nypl.audiobook.android.api:${nyplAudioBookAPIVersion}",
   nyplAudioBookDownloads   : "org.nypl.audiobook:org.nypl.audiobook.android.downloads:${nyplAudioBookAPIVersion}",
   nyplAudioBookManifestNYPL: "org.nypl.audiobook:org.nypl.audiobook.android.manifest.nypl:${nyplAudioBookAPIVersion}",

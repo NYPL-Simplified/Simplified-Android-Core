@@ -8,7 +8,7 @@ dependencies {
   api "com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)"
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation "com.fasterxml.jackson.core:jackson-databind:2.9.5"
+  implementation libraries.jacksonDatabind
   implementation "org.slf4j:slf4j-api:1.7.25"
   implementation "com.github.stephenc.jcip:jcip-annotations:1.0-1"
 

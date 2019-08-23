@@ -9,7 +9,7 @@ dependencies {
   api "org.nypl.drm:nypl-drm-core:1.0.0"
   api "com.google.guava:guava:23.6.1-android"
 
-  implementation "com.fasterxml.jackson.core:jackson-databind:2.9.5"
+  implementation libraries.jacksonDatabind
 
   compileOnly "com.google.auto.value:auto-value:1.5"
   annotationProcessor "com.google.auto.value:auto-value:1.5"
