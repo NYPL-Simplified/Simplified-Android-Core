@@ -1,6 +1,6 @@
 buildscript {
   if ("$gradle.gradleVersion" != "5.4.1") {
-    throw new GradleException("Gradle version 5.2.1 is required (received $gradle.gradleVersion)")
+    throw new GradleException("Gradle version 5.4.1 is required (received $gradle.gradleVersion)")
   }
 
   ext.kotlin_version = "1.3.50"
