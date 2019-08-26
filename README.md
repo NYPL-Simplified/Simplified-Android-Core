@@ -1,4 +1,77 @@
-# Build Setup
+### Project Structure
+
+|Module|Description|
+|------|-----------|
+|[org.librarysimplified.accounts.api](simplified-accounts-api)|Accounts API|
+|[org.librarysimplified.accounts.database](simplified-accounts-database)|Accounts database implementation|
+|[org.librarysimplified.accounts.database.api](simplified-accounts-database-api)|Accounts database API|
+|[org.librarysimplified.accounts.json](simplified-accounts-json)|Shared JSON classes|
+|[org.librarysimplified.accounts.registry](simplified-accounts-registry)|Account provider registry implementation|
+|[org.librarysimplified.accounts.registry.api](simplified-accounts-registry-api)|Account provider registry API|
+|[org.librarysimplified.accounts.source.filebased](simplified-accounts-source-filebased)|File/asset based registry source implementation|
+|[org.librarysimplified.accounts.source.nyplregistry](simplified-accounts-source-nyplregistry)|NYPL registry client implementation|
+|[org.librarysimplified.accounts.source.resolution](simplified-accounts-source-resolution)|Standard account provider resolution logic|
+|[org.librarysimplified.accounts.source.spi](simplified-accounts-source-spi)|Account provider source SPI|
+|[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
+|[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
+|[org.librarysimplified.analytics.lfa](simplified-analytics-lfa)|LibraryForAll analytics implementation|
+|[org.librarysimplified.app.shared](simplified-app-shared)|Shared application module|
+|[org.librarysimplified.app.simplye](simplified-app-simplye)|SimplyE Application|
+|[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
+|[org.librarysimplified.app.vanilla.with_profiles](simplified-app-vanilla-with-profiles)|Vanilla application [with profiles enabled]|
+|[org.librarysimplified.books.api](simplified-books-api)|Book types|
+|[org.librarysimplified.books.bundled.api](simplified-books-bundled-api)|Bundled books API|
+|[org.librarysimplified.books.controller](simplified-books-controller)|Books/Profiles controller implementation|
+|[org.librarysimplified.books.controller.api](simplified-books-controller-api)|Books controller API|
+|[org.librarysimplified.books.covers](simplified-books-covers)|Book cover loading and generation|
+|[org.librarysimplified.books.database](simplified-books-database)|Book database implementation|
+|[org.librarysimplified.books.database.api](simplified-books-database-api)|Book database API|
+|[org.librarysimplified.books.registry.api](simplified-books-registry-api)|Book registry API|
+|[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
+|[org.librarysimplified.branding](simplified-branding)|Branding functionality|
+|[org.librarysimplified.bugsnag](simplified-bugsnag)|Bugsnag functionality|
+|[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
+|[org.librarysimplified.datepicker](simplified-datepicker)|Date picker UI component|
+|[org.librarysimplified.datepicker.demo](simplified-datepicker-demo)|Date picker UI component demo|
+|[org.librarysimplified.documents](simplified-documents)|Documents API|
+|[org.librarysimplified.downloader.core](simplified-downloader-core)|Downloader|
+|[org.librarysimplified.feeds.api](simplified-feeds-api)|Feed API|
+|[org.librarysimplified.files](simplified-files)|File utilities|
+|[org.librarysimplified.futures](simplified-futures)|Guava Future extensions|
+|[org.librarysimplified.http.core](simplified-http-core)|HTTP API|
+|[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
+|[org.librarysimplified.migration.api](simplified-migration-api)|Data migration API|
+|[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
+|[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
+|[org.librarysimplified.migration.spi](simplified-migration-spi)|Data migration SPI|
+|[org.librarysimplified.mime](simplified-mime)|MIME type handling|
+|[org.librarysimplified.notifications](simplified-notifications)|Notification service|
+|[org.librarysimplified.observable](simplified-observable)|Lightweight, type-safe Observable implementation|
+|[org.librarysimplified.opds.auth_document](simplified-opds-auth-document)|OPDS authentication document parser implementation|
+|[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
+|[org.librarysimplified.opds.core](simplified-opds-core)|OPDS feed parser|
+|[org.librarysimplified.parser.api](simplified-parser-api)|Parser API|
+|[org.librarysimplified.patron](simplified-patron)|Patron user profile parser implementation|
+|[org.librarysimplified.patron.api](simplified-patron-api)|Patron user profile parser API|
+|[org.librarysimplified.prefs](simplified-prefs)|Legacy preferences handler|
+|[org.librarysimplified.presentableerror.api](simplified-presentableerror-api)|Presentable error API|
+|[org.librarysimplified.profiles](simplified-profiles)|Profile database implementation|
+|[org.librarysimplified.profiles.api](simplified-profiles-api)|Profile database API|
+|[org.librarysimplified.profiles.controller.api](simplified-profiles-controller-api)|Profile controller API|
+|[org.librarysimplified.reader.api](simplified-reader-api)|Reader API types|
+|[org.librarysimplified.reader.bookmarks](simplified-reader-bookmarks)|Reader bookmark service implementation|
+|[org.librarysimplified.reader.bookmarks.api](simplified-reader-bookmarks-api)|Reader bookmark service API|
+|[org.librarysimplified.reports](simplified-reports)|Error reporting|
+|[org.librarysimplified.splash](simplified-splash)|Splash screen|
+|[org.librarysimplified.stack](simplified-stack)|Immutable stack data structure|
+|[org.librarysimplified.taskrecorder.api](simplified-taskrecorder-api)|Task recorder API|
+|[org.librarysimplified.tenprint](simplified-tenprint)|10PRINT implementation|
+|[org.librarysimplified.tests](simplified-tests)|Test suite|
+|[org.librarysimplified.tests.android](simplified-tests-android)|On-device test suite|
+|[org.librarysimplified.tests.sandbox](simplified-tests-sandbox)|Sandbox for informal testing|
+|[org.librarysimplified.tests.strings](simplified-tests-strings)|Mock strings for test suites|
+|[org.librarysimplified.theme](simplified-theme)|Application theme functionality|
+|[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 
 ## Java Prerequisites
 
