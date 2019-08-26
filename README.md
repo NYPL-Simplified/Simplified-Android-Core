@@ -24,7 +24,8 @@ Please read the list of instructions below for specific details on configuration
 
 #### Android SDK
 
-Install the Android SDK and Android Studio.
+Install the [Android SDK and Android Studio](https://developer.android.com/studio/). We don't
+support the use of any other IDE at the moment.
 
 #### JDK
 
