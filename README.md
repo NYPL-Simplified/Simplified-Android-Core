@@ -124,6 +124,55 @@ $ ./gradlew clean assemble test
 
 ### Project Structure
 
+#### API vs SPI
+
+The project makes various references to _APIs_ and _SPIs_. _API_ stands for _application
+programming interface_ and _SPI_ stands for _service provider interface_.
+
+An _API_ module defines a user-visible contract (or _specification_) for a module; it defines the
+data types and abstract interfaces via which the user is expected to make calls in order to make use of a
+module. An API module is typically paired with an _implementation_ module that provides concrete
+implementations of the API interface types. A good example of this is the accounts database: The
+[Accounts database API](simplified-accounts-database-api) declares a set of data types and
+interfaces that describe how an accounts database should behave. The [Accounts database](simplified-accounts-database)
+_implementation_ module provides an implementation of the described API. Keeping the API
+_specification_ strictly separated from the _implementation_ in this manner has a number of benefits:
+
+* Substitutability: When an _API_ has a sufficiently detailed specification, it's possible to
+  replace an implementation module with a superior implementation without having to modify
+  code that makes calls to the API.
+
+* Testability: Keeping API types strictly separated from implementation types tends to lead to
+  interfaces that are easy to mock.
+
+* Understandability: Users of modules can go straight to the _API_ specifications to find out
+  how to use them. This cuts down on the amount of archaeological work necessary to learn how
+  to use the application's internal interfaces.
+
+An _SPI_ module is similar to an API in that it provides a specification, however the defined
+interfaces are expected to be _implemented_ by users rather than _called_ by users directly. An
+implementor of an SPI is known as a _service provider_.
+
+A good example of an SPI is the [Account provider source SPI](simplified-accounts-source-spi); the SPI
+defines an interface that is expected to be implemented by account provider sources. The
+[file-based source](simplified-accounts-source-filebased) module is capable of delivering account
+provider descriptions from a bundled asset file. The [registry source](simplified-accounts-source-nyplregistry)
+implementation is capable of fetching account provider descriptions from the NYPL's registry
+server. Neither the _SPI_ or the implementation modules are expected to be used by application
+programmers directly: Instead, implementation modules are loaded using [ServiceLoader](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/ServiceLoader.html)
+by the [Account provider registry](simplified-accounts-registry), and users interact with the
+registry via a [published registry API](simplified-accounts-registry-api). This same design
+pattern is used by the [NYPL AudioBook API](https://github.com/NYPL-Simplified/audiobook-android)
+to provide a common API into which new audio book players and parsers can be introduced _without
+needing to modify application code at all_.
+
+Most of the modularity concepts described here were pioneered by the [OSGi module system](https://www.osgi.org/developer/modularity/)
+and so, although the Library Simplified application is not an OSGi application, much of the
+design and architecture conforms to conventions followed by OSGi applications. Further reading
+can be found on the OSGi web site.
+
+#### Modules
+
 The project is heavily modularized in order to keep the separate application components as loosely
 coupled as possible. New features should typically be implemented as new modules.
 
