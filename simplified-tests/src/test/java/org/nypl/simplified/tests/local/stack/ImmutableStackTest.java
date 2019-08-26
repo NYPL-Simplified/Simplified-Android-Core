@@ -1,4 +1,4 @@
-package org.nypl.simplified.tests.stack;
+package org.nypl.simplified.tests.local.stack;
 
 import org.junit.Assert;
 import org.junit.Test;

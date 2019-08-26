@@ -1,6 +1,6 @@
 dependencies {
-  implementation libraries.kotlinStdlib
-
-  implementation libraries.slf4j
   api libraries.googleGuava
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

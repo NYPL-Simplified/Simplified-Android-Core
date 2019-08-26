@@ -7,8 +7,8 @@ dependencies {
 
   implementation libraries.kotlinStdlib
 
-  api libraries.nyplDRMCore
   api libraries.io7mJFunctional
+  api libraries.nyplDRMCore
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

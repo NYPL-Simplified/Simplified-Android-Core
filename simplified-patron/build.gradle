@@ -3,7 +3,7 @@ dependencies {
 
   implementation project(":simplified-json-core")
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.jodaTime
   implementation libraries.jacksonDatabind
+  implementation libraries.jodaTime
+  implementation libraries.kotlinStdlib
 }

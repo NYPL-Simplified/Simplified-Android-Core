@@ -1,10 +1,9 @@
 dependencies {
-  implementation libraries.kotlinStdlib
-
   api project(":simplified-accounts-api")
   api project(":simplified-http-core")
 
   api libraries.jodaTime
 
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 }

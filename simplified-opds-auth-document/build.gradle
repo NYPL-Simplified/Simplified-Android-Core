@@ -1,10 +1,10 @@
 dependencies {
   api project(":simplified-json-core")
-  api project(":simplified-opds-auth-document-api")
   api project(":simplified-mime")
+  api project(":simplified-opds-auth-document-api")
 
-  implementation libraries.kotlinStdlib
   implementation libraries.jacksonDatabind
+  implementation libraries.kotlinStdlib
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

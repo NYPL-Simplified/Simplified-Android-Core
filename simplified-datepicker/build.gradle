@@ -1,4 +1,5 @@
 dependencies {
-  implementation libraries.io7mJNull
   api libraries.jodaTime
+
+  implementation libraries.io7mJNull
 }

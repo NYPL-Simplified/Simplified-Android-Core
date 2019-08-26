@@ -1,15 +1,14 @@
 dependencies {
   implementation project(':simplified-json-core')
 
-  implementation libraries.googleGuava
+  api libraries.io7mJFunctional
 
-  implementation libraries.kotlinStdlib
+  implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
+  implementation libraries.googleGuava
   implementation libraries.io7mJNull
   implementation libraries.io7mJUnreachable
-  api libraries.io7mJFunctional
-  implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
-
   implementation libraries.jacksonDatabind
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 
   compileOnly libraries.googleAutoValue

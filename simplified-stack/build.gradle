@@ -1,5 +1,4 @@
 dependencies {
-  implementation libraries.io7mJNull
   implementation libraries.io7mJFunctional
-  testImplementation group: 'junit', name: 'junit', version: '4.12'
+  implementation libraries.io7mJNull
 }

@@ -13,11 +13,11 @@ dependencies {
   api libraries.nyplDRMCore
   api libraries.io7mJFunctional
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.jacksonDatabind
-  implementation libraries.slf4j
-  implementation libraries.jcipAnnotations
   implementation libraries.googleGuava
+  implementation libraries.jacksonDatabind
+  implementation libraries.jcipAnnotations
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

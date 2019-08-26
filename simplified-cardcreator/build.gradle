@@ -3,10 +3,9 @@ dependencies {
   implementation project(':simplified-json-core')
   implementation project(':simplified-prefs')
 
-  implementation libraries.io7mJNull
   implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation libraries.slf4j
-
-  implementation libraries.jacksonDatabind
   implementation libraries.io7mJFunctional
+  implementation libraries.io7mJNull
+  implementation libraries.jacksonDatabind
+  implementation libraries.slf4j
 }

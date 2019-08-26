@@ -1,5 +1,4 @@
 dependencies {
-
   implementation libraries.io7mJNull
   implementation 'com.bugsnag:bugsnag-android:4.3.3'
 

@@ -1,11 +1,10 @@
 dependencies {
-  implementation libraries.kotlinStdlib
-  implementation libraries.slf4j
-
-  implementation 'androidx.core:core:1.0.0'
-
   api project(":simplified-books-registry-api")
   api project(":simplified-observable")
   api project(":simplified-profiles-api")
   api project(":simplified-threads")
+
+  implementation 'androidx.core:core:1.0.0'
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

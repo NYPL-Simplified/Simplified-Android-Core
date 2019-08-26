@@ -1,7 +1,7 @@
 dependencies {
+  implementation libraries.io7mJFunctional
   implementation libraries.io7mJNull
   implementation libraries.io7mJUnreachable
-  implementation libraries.io7mJFunctional
   implementation libraries.jacksonDatabind
   implementation libraries.jodaTime
 }

@@ -1,7 +1,7 @@
 dependencies {
-  implementation libraries.kotlinStdlib
-  implementation libraries.slf4j
-
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-threads")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

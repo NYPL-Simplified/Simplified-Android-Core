@@ -6,7 +6,7 @@ dependencies {
   implementation project(':simplified-http-core')
   implementation project(':simplified-json-core')
 
-  implementation libraries.kotlinStdlib
   implementation libraries.jacksonDatabind
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 }

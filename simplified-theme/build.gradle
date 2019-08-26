@@ -2,6 +2,6 @@ dependencies {
   implementation libraries.kotlinStdlib
 
   implementation 'androidx.appcompat:appcompat:1.0.0'
-  implementation 'com.google.android.material:material:1.0.0'
   implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
+  implementation 'com.google.android.material:material:1.0.0'
 }

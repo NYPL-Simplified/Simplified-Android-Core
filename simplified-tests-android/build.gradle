@@ -10,12 +10,12 @@ dependencies {
     exclude group: 'com.google.android', module: 'android'
   }
 
+  implementation "org.mockito:mockito-android:2.22.0"
   implementation 'androidx.appcompat:appcompat:1.0.0'
   implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+  implementation 'androidx.test.espresso:espresso-core:3.1.0'
   implementation 'androidx.test:rules:1.1.0'
   implementation 'androidx.test:runner:1.1.0'
-  implementation 'androidx.test.espresso:espresso-core:3.1.0'
-  implementation "org.mockito:mockito-android:2.22.0"
 
   androidTestImplementation "org.mockito:mockito-android:2.22.0"
   androidTestImplementation 'androidx.appcompat:appcompat:1.0.0'

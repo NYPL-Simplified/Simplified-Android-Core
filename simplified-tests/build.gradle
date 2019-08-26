@@ -62,13 +62,13 @@ dependencies {
   implementation 'junit:junit:4.12'
   implementation 'org.mockito:mockito-android:2.22.0'
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.jacksonDatabind
-  implementation libraries.io7mJNull
+  implementation group: 'net.jodah', name: 'expiringmap', version: '0.4.3'
   implementation libraries.io7mJFunctional
+  implementation libraries.io7mJNull
+  implementation libraries.jacksonDatabind
+  implementation libraries.kotlinStdlib
   implementation libraries.nyplDRMCore
   implementation libraries.slf4j
-  implementation group: 'net.jodah', name: 'expiringmap', version: '0.4.3'
 
   testImplementation 'ch.qos.logback:logback-classic:1.2.3'
   testImplementation 'junit:junit:4.12'

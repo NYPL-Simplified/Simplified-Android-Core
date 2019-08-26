@@ -1,4 +1,4 @@
 dependencies {
-  implementation libraries.io7mJNull
   implementation libraries.googleGuava
+  implementation libraries.io7mJNull
 }

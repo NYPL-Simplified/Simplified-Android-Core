@@ -7,12 +7,11 @@ dependencies {
   api project(':simplified-profiles-controller-api')
   api project(':simplified-reports')
 
-  implementation libraries.io7mJUnreachable
+  implementation 'androidx.appcompat:appcompat:1.0.0'
+  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+  implementation 'com.google.android.material:material:1.0.0'
   implementation libraries.io7mJFunctional
+  implementation libraries.io7mJUnreachable
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
-
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation 'androidx.appcompat:appcompat:1.0.0'
-  implementation 'com.google.android.material:material:1.0.0'
 }

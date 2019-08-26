@@ -1,9 +1,9 @@
 dependencies {
   api project(":simplified-json-core")
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.jacksonDatabind
   implementation libraries.io7mJUnreachable
+  implementation libraries.jacksonDatabind
+  implementation libraries.kotlinStdlib
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue
