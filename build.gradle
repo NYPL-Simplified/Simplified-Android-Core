@@ -23,10 +23,11 @@ buildscript {
 }
 
 plugins {
-  id "ru.vyarus.animalsniffer" version "1.5.0"
-  id "io.codearte.nexus-staging" version "0.20.0"
+  id "com.github.ben-manes.versions" version "0.22.0"
   id "com.vanniktech.android.junit.jacoco" version "0.13.0"
   id "digital.wup.android-maven-publish" version "3.6.2"
+  id "io.codearte.nexus-staging" version "0.20.0"
+  id "ru.vyarus.animalsniffer" version "1.5.0"
 }
 
 ext {
