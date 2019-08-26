@@ -1,6 +1,4 @@
 dependencies {
-  implementation libraries.kotlinStdlib
-
   implementation project(":simplified-accounts-registry")
   implementation project(":simplified-accounts-registry-api")
   implementation project(":simplified-accounts-source-filebased")
@@ -15,11 +13,12 @@ dependencies {
   implementation libraries.androidXConstraintLayout
   implementation libraries.androidXLegacySupport
   implementation libraries.androidXMultidex
-  implementation libraries.logbackAndroidCore
   implementation libraries.googleAndroidMaterial
-  implementation libraries.mockitoAndroid
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJUnreachable
+  implementation libraries.kotlinStdlib
+  implementation libraries.logbackAndroidCore
+  implementation libraries.mockitoAndroid
   implementation libraries.slf4j
   implementation(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73

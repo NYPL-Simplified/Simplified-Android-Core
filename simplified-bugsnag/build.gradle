@@ -1,8 +1,8 @@
 dependencies {
-  implementation libraries.io7mJNull
   implementation libraries.bugsnag
-  implementation libraries.slf4j
+  implementation libraries.io7mJNull
   implementation libraries.logbackAndroidCore
+  implementation libraries.slf4j
   implementation(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73
     exclude group: "com.google.android", module: "android"

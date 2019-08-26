@@ -5,13 +5,13 @@ dependencies {
   api project(':simplified-books-database-api')
   api project(':simplified-observable')
 
+  api libraries.nyplDRMCore
+  api libraries.io7mJFunctional
+
   implementation project(':simplified-http-core')
   implementation project(':simplified-files')
   implementation project(':simplified-json-core')
   implementation project(':simplified-accounts-json')
-
-  api libraries.nyplDRMCore
-  api libraries.io7mJFunctional
 
   implementation libraries.googleGuava
   implementation libraries.jacksonDatabind

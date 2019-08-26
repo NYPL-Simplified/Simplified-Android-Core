@@ -5,10 +5,10 @@ dependencies {
   api project(':simplified-books-database')
   api project(':simplified-observable')
 
-  implementation libraries.kotlinStdlib
-
   api libraries.io7mJFunctional
   api libraries.nyplDRMCore
+
+  implementation libraries.kotlinStdlib
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

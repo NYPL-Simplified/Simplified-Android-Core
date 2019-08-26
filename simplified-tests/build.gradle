@@ -59,21 +59,21 @@ dependencies {
   api project(":simplified-theme")
   api project(":simplified-threads")
 
-  implementation libraries.junit
-  implementation libraries.jodahExpiringMap
-  implementation libraries.mockitoAndroid
+  api libraries.nyplAudioBookAPI
+  api libraries.nyplAudioBookManifestNYPL
+  api libraries.nyplAudioBookOpenAccess
+  api libraries.nyplAudioBookMocking
+
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJNull
   implementation libraries.jacksonDatabind
+  implementation libraries.jodahExpiringMap
+  implementation libraries.junit
   implementation libraries.kotlinStdlib
+  implementation libraries.mockitoAndroid
   implementation libraries.nyplDRMCore
   implementation libraries.slf4j
 
   testImplementation libraries.logbackClassic
   testImplementation libraries.junit
-
-  api libraries.nyplAudioBookAPI
-  api libraries.nyplAudioBookManifestNYPL
-  api libraries.nyplAudioBookOpenAccess
-  api libraries.nyplAudioBookMocking
 }

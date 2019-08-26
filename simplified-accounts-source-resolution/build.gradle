@@ -2,17 +2,17 @@ dependencies {
   api project(':simplified-accounts-api')
   api project(':simplified-observable')
 
+  api libraries.googleGuava
+  api libraries.io7mJFunctional
+  api libraries.jodaTime
+  api libraries.nyplDRMCore
+
   implementation project(":simplified-accounts-json")
   implementation project(":simplified-http-core")
   implementation project(":simplified-opds-auth-document-api")
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
-
-  api libraries.googleGuava
-  api libraries.io7mJFunctional
-  api libraries.jodaTime
-  api libraries.nyplDRMCore
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

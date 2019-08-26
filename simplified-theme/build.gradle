@@ -1,6 +1,6 @@
 dependencies {
-  implementation libraries.kotlinStdlib
   implementation libraries.androidXAppCompat
   implementation libraries.androidXLegacyPreferenceV14
   implementation libraries.googleAndroidMaterial
+  implementation libraries.kotlinStdlib
 }

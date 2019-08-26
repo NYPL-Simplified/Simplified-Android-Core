@@ -3,15 +3,15 @@ dependencies {
 
   implementation project(":simplified-json-core")
 
-  implementation libraries.jacksonCore
-  implementation libraries.googleGSON
   implementation libraries.commonsLang
-  implementation libraries.javaxAnnotationAPI
+  implementation libraries.googleGSON
   implementation libraries.googleGuava
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJNull
   implementation libraries.io7mJUnreachable
+  implementation libraries.jacksonCore
   implementation libraries.jacksonDatabind
+  implementation libraries.javaxAnnotationAPI
   implementation libraries.jodaTime
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
