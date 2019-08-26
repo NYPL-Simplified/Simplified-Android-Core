@@ -87,9 +87,9 @@ dependencies {
   implementation libraries.jacksonKotlin
   implementation "com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4"
   implementation "com.google.android.material:material:1.0.0"
-  implementation "com.google.code.gson:gson:2.8.1"
-  implementation "com.google.zxing:core:3.2.1"
-  implementation "com.journeyapps:zxing-android-embedded:3.2.0@aar"
+  implementation libraries.googleGSON
+  implementation libraries.googleZXing
+  implementation libraries.journeyappsZXing
   implementation libraries.androidAsync
   implementation libraries.nanoHTTPD
   implementation libraries.picasso

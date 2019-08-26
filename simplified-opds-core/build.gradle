@@ -4,7 +4,7 @@ dependencies {
   implementation project(":simplified-json-core")
 
   implementation libraries.jacksonCore
-  implementation "com.google.code.gson:gson:2.8.1"
+  implementation libraries.googleGSON
   implementation libraries.commonsLang
   implementation libraries.javaxAnnotationAPI
   implementation libraries.googleGuava
