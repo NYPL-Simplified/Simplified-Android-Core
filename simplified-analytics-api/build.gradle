@@ -4,7 +4,7 @@ dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-http-core")
 
-  api 'joda-time:joda-time:2.9.9'
+  api libraries.jodaTime
 
-  implementation 'org.slf4j:slf4j-api:1.7.25'
+  implementation libraries.slf4j
 }

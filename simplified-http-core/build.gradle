@@ -10,7 +10,7 @@ dependencies {
   implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
 
   implementation libraries.jacksonDatabind
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  implementation libraries.slf4j
 
   compileOnly 'com.google.auto.value:auto-value:1.5'
   annotationProcessor 'com.google.auto.value:auto-value:1.5'

@@ -9,8 +9,7 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
   api libraries.jacksonDatabind
-
-  api 'joda-time:joda-time:2.9.9'
+  api libraries.jodaTime
   api "org.nypl.drm:nypl-drm-core:1.0.0"
   api "com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)"
   api libraries.googleGuava

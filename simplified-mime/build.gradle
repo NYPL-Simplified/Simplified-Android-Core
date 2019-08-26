@@ -1,6 +1,6 @@
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  implementation libraries.slf4j
   api libraries.googleGuava
 }

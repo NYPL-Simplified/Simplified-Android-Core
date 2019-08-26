@@ -12,9 +12,9 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
   implementation libraries.jacksonDatabind
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  implementation libraries.slf4j
   implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
   implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
   implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
-  implementation 'joda-time:joda-time:2.9.9'
+  implementation libraries.jodaTime
 }

@@ -4,6 +4,6 @@ dependencies {
   implementation project(":simplified-json-core")
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation "joda-time:joda-time:2.9.9"
+  implementation libraries.jodaTime
   implementation libraries.jacksonDatabind
 }
