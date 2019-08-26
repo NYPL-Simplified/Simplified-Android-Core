@@ -4,6 +4,6 @@ dependencies {
   api project(":simplified-observable")
   api project(":simplified-taskrecorder-api")
 
-  compileOnly 'com.google.auto.value:auto-value:1.5'
-  annotationProcessor "com.google.auto.value:auto-value:1.5"
+  compileOnly libraries.googleAutoValue
+  annotationProcessor libraries.googleAutoValue
 }

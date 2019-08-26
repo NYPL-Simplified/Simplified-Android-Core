@@ -49,6 +49,7 @@ ext {
 }
 
 ext.libraries = [
+  googleAutoValue          : "com.google.auto.value:auto-value:1.5",
   googleGuava              : "com.google.guava:guava:23.6.1-android",
   jacksonDatabind          : "com.fasterxml.jackson.core:jackson-databind:2.9.5",
   jodaTime                 : "joda-time:joda-time:2.9.9",

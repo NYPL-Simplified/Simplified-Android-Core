@@ -12,6 +12,6 @@ dependencies {
   implementation libraries.slf4j
   implementation "com.github.stephenc.jcip:jcip-annotations:1.0-1"
 
-  compileOnly "com.google.auto.value:auto-value:1.5"
-  annotationProcessor "com.google.auto.value:auto-value:1.5"
+  compileOnly libraries.googleAutoValue
+  annotationProcessor libraries.googleAutoValue
 }
