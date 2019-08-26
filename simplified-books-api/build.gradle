@@ -10,7 +10,7 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation libraries.jacksonDatabind
   implementation libraries.slf4j
-  implementation "com.github.stephenc.jcip:jcip-annotations:1.0-1"
+  implementation libraries.jcipAnnotations
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

@@ -1,4 +1,4 @@
 dependencies {
-  api "com.github.stephenc.jcip:jcip-annotations:1.0-1"
+  api libraries.jcipAnnotations
   api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
