@@ -7,7 +7,7 @@ dependencies {
   api project(":simplified-profiles-controller-api")
   api project(":simplified-reports")
 
-  implementation "androidx.appcompat:appcompat:1.0.0"
+  implementation libraries.androidXAppCompat
   implementation "androidx.legacy:legacy-support-v4:1.0.0"
   implementation "com.google.android.material:material:1.0.0"
   implementation libraries.io7mJFunctional

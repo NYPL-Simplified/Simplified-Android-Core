@@ -2,7 +2,7 @@ dependencies {
   implementation project(":simplified-tests")
   implementation project(":simplified-splash")
 
-  implementation "androidx.appcompat:appcompat:1.0.0"
+  implementation libraries.androidXAppCompat
   implementation "androidx.legacy:legacy-support-v4:1.0.0"
   implementation "androidx.test.espresso:espresso-core:3.1.0"
   implementation "androidx.test:rules:1.1.0"
@@ -17,7 +17,7 @@ dependencies {
   }
 
   androidTestImplementation libraries.mockitoAndroid
-  androidTestImplementation "androidx.appcompat:appcompat:1.0.0"
+  androidTestImplementation libraries.androidXAppCompat
   androidTestImplementation "androidx.legacy:legacy-support-v4:1.0.0"
   androidTestImplementation "androidx.test:rules:1.1.0"
   androidTestImplementation "androidx.test:runner:1.1.0"
