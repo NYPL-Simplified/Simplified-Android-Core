@@ -1,6 +1,6 @@
 dependencies {
   implementation libraries.io7mJNull
-  implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
+  implementation libraries.io7mJUnreachable
   implementation libraries.io7mJFunctional
   implementation libraries.slf4j
 }

@@ -11,7 +11,7 @@ dependencies {
   implementation project(':simplified-tests-strings')
   implementation project(':simplified-theme')
 
-  implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
+  implementation libraries.io7mJUnreachable
   implementation libraries.io7mJFunctional
 
   implementation 'androidx.legacy:legacy-support-v4:1.0.0'

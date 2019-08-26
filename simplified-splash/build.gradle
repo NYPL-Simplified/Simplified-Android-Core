@@ -7,7 +7,7 @@ dependencies {
   api project(':simplified-profiles-controller-api')
   api project(':simplified-reports')
 
-  implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
+  implementation libraries.io7mJUnreachable
   implementation libraries.io7mJFunctional
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation libraries.slf4j

@@ -7,7 +7,7 @@ dependencies {
   implementation libraries.googleGuava
 
   implementation libraries.io7mJNull
-  implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
+  implementation libraries.io7mJUnreachable
   implementation libraries.io7mJFunctional
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'

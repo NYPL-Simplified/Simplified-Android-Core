@@ -3,7 +3,7 @@ dependencies {
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation libraries.jacksonDatabind
-  implementation "com.io7m.junreachable:io7m-junreachable-core:[1.0.0, 2.0.0)"
+  implementation libraries.io7mJUnreachable
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue
