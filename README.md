@@ -259,6 +259,12 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.theme](simplified-theme)|Application theme functionality|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 
+### Binaries
+
+Binaries for every commit are built and published in the [binaries](https://github.com/NYPL-Simplified/android-binaries)
+repository. Note that these binaries are _not_ to be considered production ready and may have
+undergone little or no testing. Use at your own risk!
+
 ### License
 
 ~~~
