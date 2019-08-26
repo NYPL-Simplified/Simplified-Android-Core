@@ -1,4 +1,4 @@
 dependencies {
   api libraries.jcipAnnotations
-  api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  api libraries.kotlinStdlib
 }

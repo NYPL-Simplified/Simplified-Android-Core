@@ -5,7 +5,7 @@ dependencies {
   implementation project(":simplified-json-core")
   implementation project(':simplified-accounts-source-spi')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   api libraries.nyplDRMCore
   api libraries.io7mJFunctional

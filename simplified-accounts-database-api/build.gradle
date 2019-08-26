@@ -5,7 +5,7 @@ dependencies {
   api project(':simplified-books-database')
   api project(':simplified-observable')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   api libraries.nyplDRMCore
   api libraries.io7mJFunctional

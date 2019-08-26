@@ -6,7 +6,7 @@ dependencies {
   implementation project(":simplified-http-core")
   implementation project(":simplified-opds-auth-document-api")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 
   api libraries.jodaTime

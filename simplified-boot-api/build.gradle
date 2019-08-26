@@ -4,7 +4,7 @@ dependencies {
 
   api libraries.googleGuava
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 
   compileOnly libraries.googleAutoValue

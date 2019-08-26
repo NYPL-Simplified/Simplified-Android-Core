@@ -4,7 +4,7 @@ dependencies {
   api project(':simplified-opds-core')
   api project(':simplified-tenprint')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
   implementation libraries.io7mJFunctional
 

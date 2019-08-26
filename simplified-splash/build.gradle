@@ -9,7 +9,7 @@ dependencies {
 
   implementation libraries.io7mJUnreachable
   implementation libraries.io7mJFunctional
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 
   implementation 'androidx.legacy:legacy-support-v4:1.0.0'

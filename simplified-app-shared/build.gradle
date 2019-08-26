@@ -130,7 +130,7 @@ dependencies {
     }
   }
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   implementation "org.nypl.pdf:api:0.0.4"
   implementation "org.nypl.pdf:pdfviewer:0.0.4"

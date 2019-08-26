@@ -1,7 +1,7 @@
 dependencies {
   api project(":simplified-profiles-api")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

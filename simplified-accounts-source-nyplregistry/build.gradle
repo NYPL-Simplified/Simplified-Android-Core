@@ -9,7 +9,7 @@ dependencies {
   implementation project(":simplified-opds-auth-document-api")
 
   implementation libraries.slf4j
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   api libraries.jodaTime
   api libraries.nyplDRMCore

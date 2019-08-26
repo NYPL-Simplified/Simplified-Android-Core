@@ -3,7 +3,7 @@ dependencies {
 
   implementation project(':simplified-json-core')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.googleGuava
 
   implementation libraries.io7mJNull

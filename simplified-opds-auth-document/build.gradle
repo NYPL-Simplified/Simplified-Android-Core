@@ -3,7 +3,7 @@ dependencies {
   api project(":simplified-opds-auth-document-api")
   api project(":simplified-mime")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.jacksonDatabind
 
   compileOnly libraries.googleAutoValue

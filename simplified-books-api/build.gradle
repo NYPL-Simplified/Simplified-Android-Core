@@ -7,7 +7,7 @@ dependencies {
 
   api libraries.io7mJFunctional
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.jacksonDatabind
   implementation libraries.slf4j
   implementation libraries.jcipAnnotations

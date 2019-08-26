@@ -22,7 +22,7 @@ dependencies {
   implementation project(":simplified-taskrecorder-api")
   implementation project(':simplified-accounts-source-spi')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

@@ -57,6 +57,7 @@ ext.libraries = [
   jacksonDatabind          : "com.fasterxml.jackson.core:jackson-databind:2.9.5",
   jcipAnnotations          : "com.github.stephenc.jcip:jcip-annotations:1.0-1",
   jodaTime                 : "joda-time:joda-time:2.9.9",
+  kotlinStdlib             : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
   nyplAudioBookAPI         : "org.nypl.audiobook:org.nypl.audiobook.android.api:${nyplAudioBookAPIVersion}",
   nyplAudioBookDownloads   : "org.nypl.audiobook:org.nypl.audiobook.android.downloads:${nyplAudioBookAPIVersion}",
   nyplAudioBookManifestNYPL: "org.nypl.audiobook:org.nypl.audiobook.android.manifest.nypl:${nyplAudioBookAPIVersion}",

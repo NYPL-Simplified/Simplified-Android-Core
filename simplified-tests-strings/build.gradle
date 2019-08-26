@@ -2,5 +2,5 @@ dependencies {
   api project(":simplified-books-controller-api")
   api project(":simplified-profiles-controller-api")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 }

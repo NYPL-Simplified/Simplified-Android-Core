@@ -1,6 +1,6 @@
 dependencies {
   api project(":simplified-parser-api")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.jodaTime
 }

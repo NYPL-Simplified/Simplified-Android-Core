@@ -6,7 +6,7 @@ dependencies {
   api project(":simplified-http-core")
   api project(":simplified-json-core")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation "net.jodah:expiringmap:0.4.3"
 
   api libraries.io7mJFunctional

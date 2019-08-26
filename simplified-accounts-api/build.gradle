@@ -6,7 +6,7 @@ dependencies {
   implementation project(':simplified-http-core')
   implementation project(':simplified-opds-core')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   api libraries.jacksonDatabind
   api libraries.jodaTime

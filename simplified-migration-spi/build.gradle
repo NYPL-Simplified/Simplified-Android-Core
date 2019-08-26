@@ -5,7 +5,7 @@ dependencies {
   api project(':simplified-presentableerror-api')
   api project(':simplified-taskrecorder-api')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 
   api libraries.jodaTime

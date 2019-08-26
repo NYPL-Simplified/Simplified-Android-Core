@@ -1,7 +1,7 @@
 dependencies {
   api project(':simplified-migration-spi')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 
   api libraries.jodaTime

@@ -3,7 +3,7 @@ dependencies {
 
   implementation project(":simplified-accounts-database-api")
   
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

@@ -2,7 +2,7 @@ dependencies {
   api project(":simplified-mime")
   api project(":simplified-parser-api")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   api libraries.nyplDRMCore
   api libraries.io7mJFunctional

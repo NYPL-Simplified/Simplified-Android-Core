@@ -2,7 +2,7 @@ dependencies {
   api project(':simplified-accounts-api')
   api project(':simplified-observable')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 
   api libraries.jodaTime

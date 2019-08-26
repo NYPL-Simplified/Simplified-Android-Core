@@ -1,5 +1,5 @@
 dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
   implementation 'androidx.appcompat:appcompat:1.0.0'
   implementation project(":simplified-theme")
