@@ -7,16 +7,16 @@ dependencies {
   implementation "androidx.test.espresso:espresso-core:3.1.0"
   implementation "androidx.test:rules:1.1.0"
   implementation "androidx.test:runner:1.1.0"
-  implementation "com.github.tony19:logback-android-core:1.1.1-6"
-  implementation "org.mockito:mockito-android:2.22.0"
+  implementation libraries.logbackAndroidCore
+  implementation libraries.mockitoAndroid
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
-  implementation("com.github.tony19:logback-android-classic:1.1.1-6") {
+  implementation(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73
     exclude group: "com.google.android", module: "android"
   }
 
-  androidTestImplementation "org.mockito:mockito-android:2.22.0"
+  androidTestImplementation libraries.mockitoAndroid
   androidTestImplementation "androidx.appcompat:appcompat:1.0.0"
   androidTestImplementation "androidx.legacy:legacy-support-v4:1.0.0"
   androidTestImplementation "androidx.test:rules:1.1.0"

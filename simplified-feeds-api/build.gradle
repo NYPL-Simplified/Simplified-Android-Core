@@ -8,7 +8,7 @@ dependencies {
 
   api libraries.io7mJFunctional
 
-  implementation "net.jodah:expiringmap:0.4.3"
+  implementation libraries.jodahExpiringMap
   implementation libraries.kotlinStdlib
 
   compileOnly libraries.googleAutoValue

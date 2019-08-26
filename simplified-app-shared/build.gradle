@@ -82,20 +82,20 @@ dependencies {
   implementation "androidx.legacy:legacy-preference-v14:1.0.0"
   implementation "androidx.legacy:legacy-support-v4:1.0.0"
   implementation "androidx.multidex:multidex:2.0.0"
-  implementation "com.bugsnag:bugsnag-android:4.3.3"
-  implementation "com.fasterxml.jackson.core:jackson-core:2.9.5"
-  implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
+  implementation libraries.bugsnag
+  implementation libraries.jacksonCore
+  implementation libraries.jacksonKotlin
   implementation "com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4"
   implementation "com.google.android.material:material:1.0.0"
   implementation "com.google.code.gson:gson:2.8.1"
   implementation "com.google.zxing:core:3.2.1"
   implementation "com.journeyapps:zxing-android-embedded:3.2.0@aar"
-  implementation "com.koushikdutta.async:androidasync:2.2.1"
-  implementation "com.nanohttpd:nanohttpd:2.2.0"
-  implementation "com.squareup.picasso:picasso:2.5.2"
-  implementation "commons-lang:commons-lang:2.6"
-  implementation "javax.annotation:javax.annotation-api:1.2-b01"
-  implementation "net.jodah:expiringmap:0.4.3"
+  implementation libraries.androidAsync
+  implementation libraries.nanoHTTPD
+  implementation libraries.picasso
+  implementation libraries.commonsLang
+  implementation libraries.javaxAnnotationAPI
+  implementation libraries.jodahExpiringMap
   implementation "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0"
   implementation "org.librarysimplified:org.librarysimplified.readium:0.30.0"
   implementation "org.nypl.pdf:api:0.0.4"
@@ -114,8 +114,8 @@ dependencies {
   implementation libraries.nyplDRMCore
   implementation libraries.slf4j
 
-  implementation "com.github.tony19:logback-android-core:1.1.1-6"
-  implementation("com.github.tony19:logback-android-classic:1.1.1-6") {
+  implementation libraries.logbackAndroidCore
+  implementation(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73
     exclude group: "com.google.android", module: "android"
   }

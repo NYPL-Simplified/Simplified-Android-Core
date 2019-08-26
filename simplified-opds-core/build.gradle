@@ -3,10 +3,10 @@ dependencies {
 
   implementation project(":simplified-json-core")
 
-  implementation "com.fasterxml.jackson.core:jackson-core:2.9.5"
+  implementation libraries.jacksonCore
   implementation "com.google.code.gson:gson:2.8.1"
-  implementation "commons-lang:commons-lang:2.6"
-  implementation "javax.annotation:javax.annotation-api:1.2-b01"
+  implementation libraries.commonsLang
+  implementation libraries.javaxAnnotationAPI
   implementation libraries.googleGuava
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJNull

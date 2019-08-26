@@ -3,7 +3,7 @@ dependencies {
 
   api libraries.io7mJFunctional
 
-  implementation "net.iharder:base64:2.3.9"
+  implementation libraries.iharderBase64
   implementation libraries.googleGuava
   implementation libraries.io7mJNull
   implementation libraries.io7mJUnreachable
