@@ -2,7 +2,7 @@ dependencies {
   api project(":simplified-observable")
   api project(":simplified-presentableerror-api")
 
-  api "com.google.guava:guava:23.6-android"
+  api libraries.googleGuava
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation "org.slf4j:slf4j-api:1.7.25"

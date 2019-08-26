@@ -4,7 +4,7 @@ dependencies {
   implementation project(':simplified-json-core')
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation "com.google.guava:guava:23.6.1-android"
+  implementation libraries.googleGuava
 
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'

@@ -17,7 +17,7 @@ dependencies {
   implementation libraries.jacksonDatabind
   implementation "org.slf4j:slf4j-api:1.7.25"
   implementation "com.github.stephenc.jcip:jcip-annotations:1.0-1"
-  implementation "com.google.guava:guava:23.6.1-android"
+  implementation libraries.googleGuava
 
   compileOnly "com.google.auto.value:auto-value:1.5"
   annotationProcessor "com.google.auto.value:auto-value:1.5"

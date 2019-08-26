@@ -1,4 +1,4 @@
 dependencies {
-  api "com.google.guava:guava:23.6.1-android"
+  api libraries.googleGuava
   api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
