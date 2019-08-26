@@ -4,7 +4,7 @@ dependencies {
   implementation libraries.googleGuava
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation libraries.io7mJNull
   implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
   api libraries.io7mJFunctional
   implementation group: 'net.iharder', name: 'base64', version: '2.3.9'

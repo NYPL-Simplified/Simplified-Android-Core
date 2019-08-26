@@ -1,5 +1,5 @@
 dependencies {
-  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation libraries.io7mJNull
   implementation libraries.io7mJFunctional
   testImplementation group: 'junit', name: 'junit', version: '4.12'
 }

@@ -80,7 +80,7 @@ dependencies {
   implementation libraries.googleAutoValue
 
   implementation group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
-  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation libraries.io7mJNull
 
   implementation 'org.librarysimplified:org.librarysimplified.readium:0.30.0'
   implementation 'org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0'

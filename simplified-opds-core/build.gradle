@@ -6,7 +6,7 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation libraries.googleGuava
 
-  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation libraries.io7mJNull
   implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
   implementation libraries.io7mJFunctional
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
