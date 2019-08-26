@@ -6,7 +6,7 @@ dependencies {
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation libraries.slf4j
-  implementation "com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)"
+  implementation libraries.io7mJFunctional
 
   api "com.squareup.picasso:picasso:2.5.2"
 }
