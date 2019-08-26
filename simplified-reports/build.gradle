@@ -1,5 +1,5 @@
 dependencies {
   api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  api "org.slf4j:slf4j-api:1.7.25"
+  api libraries.slf4j
   api 'androidx.legacy:legacy-support-v4:1.0.0'
 }

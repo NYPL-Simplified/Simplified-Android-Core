@@ -58,6 +58,7 @@ ext.libraries = [
   nyplAudioBookOpenAccess  : "org.nypl.audiobook:org.nypl.audiobook.android.open_access:${nyplAudioBookAPIVersion}",
   nyplAudioBookViews       : "org.nypl.audiobook:org.nypl.audiobook.android.views:${nyplAudioBookAPIVersion}",
   nyplFindaway             : "org.nypl.audiobook:org.nypl.audiobook.android.audioengine.core:${nyplFindawayVersion}",
+  slf4j                    : "org.slf4j:slf4j-api:1.7.25",
 ]
 
 apply plugin: "io.codearte.nexus-staging"

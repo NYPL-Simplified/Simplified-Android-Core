@@ -8,5 +8,5 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation "com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)"
   implementation libraries.jacksonDatabind
-  implementation "org.slf4j:slf4j-api:1.7.25"
+  implementation libraries.slf4j
 }
