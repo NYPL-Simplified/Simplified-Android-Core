@@ -11,6 +11,17 @@ _Image by [Predrag Kezic](https://pixabay.com/users/PredragKezic-582203/?utm_sou
 
 ### Building
 
+#### Build!
+
+The short version: Install an [Android SDK](#android-sdk), configure [credentials for Nexus](#credentials),
+and run:
+
+~~~
+$ ./gradlew clean assemble test
+~~~
+
+Please read the list of instructions below for specific details on configurations.
+
 #### Android SDK
 
 Install the Android SDK and Android Studio.
@@ -48,7 +59,7 @@ OpenJDK 64-Bit Server VM (build 25.222-b05, mixed mode)
 Our application currently needs packages that are only available from our Nexus server in order
 to build correctly. (This will be changed in the future when non-DRM-enabled variants of the app
 are officially supported.) Nexus credentials can be obtained by emailing `malcolmwoods@nypl.org`
-or by asking in the `#mobile-development` channel of 
+or by asking in the `#mobile-development` channel of
 [librarysimplified.slack.com](https://librarysimplified.slack.com).
 
 Once you have your credentials, the following lines must be added to `$HOME/.gradle/gradle.properties`:
@@ -115,12 +126,6 @@ a keystore to `simplified-app-simplye/keystore.jks` and set the following values
 org.librarysimplified.simplye.keyAlias=
 org.librarysimplified.simplye.keyPassword=
 org.librarysimplified.simplye.storePassword=
-~~~
-
-#### Build!
-
-~~~
-$ ./gradlew clean assemble test
 ~~~
 
 ### Project Structure
