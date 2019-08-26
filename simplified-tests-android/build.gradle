@@ -4,23 +4,23 @@ dependencies {
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXLegacySupport
-  implementation "androidx.test.espresso:espresso-core:3.1.0"
-  implementation "androidx.test:rules:1.1.0"
-  implementation "androidx.test:runner:1.1.0"
+  implementation libraries.androidXTestEspressoCore
+  implementation libraries.androidXTestRules
+  implementation libraries.androidXTestRunner
+  implementation libraries.kotlinStdlib
   implementation libraries.logbackAndroidCore
   implementation libraries.mockitoAndroid
-  implementation libraries.kotlinStdlib
   implementation libraries.slf4j
   implementation(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73
     exclude group: "com.google.android", module: "android"
   }
 
-  androidTestImplementation libraries.mockitoAndroid
   androidTestImplementation libraries.androidXAppCompat
   androidTestImplementation libraries.androidXLegacySupport
-  androidTestImplementation "androidx.test:rules:1.1.0"
-  androidTestImplementation "androidx.test:runner:1.1.0"
-  androidTestImplementation "androidx.test.espresso:espresso-core:3.1.0"
-  androidTestUtil "androidx.test:orchestrator:1.1.0"
+  androidTestImplementation libraries.androidXTestEspressoCore
+  androidTestImplementation libraries.androidXTestRules
+  androidTestImplementation libraries.androidXTestRunner
+  androidTestImplementation libraries.mockitoAndroid
+  androidTestUtil libraries.androidXTestOrchestrator
 }

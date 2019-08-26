@@ -70,13 +70,12 @@ dependencies {
 
   if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
     if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
-      implementation "org.nypl.drm:libnypl_adobe:1.0.0"
-      implementation "org.nypl.drm:libnypl_adobe_filter:1.0.0"
-      implementation "org.nypl.drm:nypl-drm-adobe-provider:1.0.0"
+      implementation libraries.nyplDRMAdobeProvider
+      implementation libraries.nyplDRMLibNYPLAdobe
+      implementation libraries.nyplDRMLibNYPLAdobeFilter
     }
   }
 
-  implementation libraries.androidXLegacySupport
   implementation libraries.androidXLegacySupport
 }
 
