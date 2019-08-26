@@ -48,7 +48,8 @@ OpenJDK 64-Bit Server VM (build 25.222-b05, mixed mode)
 Our application currently needs packages that are only available from our Nexus server in order
 to build correctly. (This will be changed in the future when non-DRM-enabled variants of the app
 are officially supported.) Nexus credentials can be obtained by emailing `malcolmwoods@nypl.org`
-by asking in the `#mobile-development` channel of [librarysimplified.slack.com](https://librarysimplified.slack.com).
+or by asking in the `#mobile-development` channel of 
+[librarysimplified.slack.com](https://librarysimplified.slack.com).
 
 Once you have your credentials, the following lines must be added to `$HOME/.gradle/gradle.properties`:
 
