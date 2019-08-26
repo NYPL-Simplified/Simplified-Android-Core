@@ -77,41 +77,41 @@ dependencies {
 
   annotationProcessor libraries.googleAutoValue
 
+  implementation "com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4"
+  implementation libraries.googleAndroidMaterial
+  implementation libraries.androidAsync
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout
   implementation libraries.androidXLegacyPreferenceV14
   implementation libraries.androidXLegacySupport
   implementation libraries.androidXMultidex
   implementation libraries.bugsnag
-  implementation libraries.jacksonCore
-  implementation libraries.jacksonKotlin
-  implementation "com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4"
-  implementation "com.google.android.material:material:1.0.0"
+  implementation libraries.commonsLang
+  implementation libraries.googleAutoValue
   implementation libraries.googleGSON
   implementation libraries.googleZXing
-  implementation libraries.journeyappsZXing
-  implementation libraries.androidAsync
-  implementation libraries.nanoHTTPD
-  implementation libraries.picasso
-  implementation libraries.commonsLang
-  implementation libraries.javaxAnnotationAPI
-  implementation libraries.jodahExpiringMap
-  implementation "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0"
-  implementation "org.librarysimplified:org.librarysimplified.readium:0.30.0"
-  implementation "org.nypl.pdf:api:0.0.4"
-  implementation "org.nypl.pdf:pdfviewer:0.0.4"
-  implementation libraries.googleAutoValue
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJNull
+  implementation libraries.jacksonCore
   implementation libraries.jacksonDatabind
+  implementation libraries.jacksonKotlin
+  implementation libraries.javaxAnnotationAPI
+  implementation libraries.jodahExpiringMap
   implementation libraries.jodaTime
+  implementation libraries.journeyappsZXing
   implementation libraries.kotlinStdlib
+  implementation libraries.nanoHTTPD
   implementation libraries.nyplAudioBookAPI
   implementation libraries.nyplAudioBookDownloads
   implementation libraries.nyplAudioBookManifestNYPL
   implementation libraries.nyplAudioBookOpenAccess
   implementation libraries.nyplAudioBookViews
   implementation libraries.nyplDRMCore
+  implementation libraries.nyplPDFAPI
+  implementation libraries.nyplPDFViewer
+  implementation libraries.picasso
+  implementation libraries.readium
+  implementation libraries.readiumSharedJS
   implementation libraries.slf4j
 
   implementation libraries.logbackAndroidCore

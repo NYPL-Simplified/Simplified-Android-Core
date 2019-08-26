@@ -9,7 +9,7 @@ dependencies {
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXLegacySupport
-  implementation "com.google.android.material:material:1.0.0"
+  implementation libraries.googleAndroidMaterial
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJUnreachable
   implementation libraries.kotlinStdlib

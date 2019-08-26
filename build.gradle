@@ -58,6 +58,7 @@ ext.libraries = [
   androidXMultidex           : "androidx.multidex:multidex:2.0.0",
   bugsnag                    : "com.bugsnag:bugsnag-android:4.3.3",
   commonsLang                : "commons-lang:commons-lang:2.6",
+  googleAndroidMaterial      : "com.google.android.material:material:1.0.0",
   googleAutoValue            : "com.google.auto.value:auto-value:1.5",
   googleGSON                 : "com.google.code.gson:gson:2.8.1",
   googleGuava                : "com.google.guava:guava:23.6.1-android",
@@ -89,7 +90,11 @@ ext.libraries = [
   nyplAudioBookViews         : "org.nypl.audiobook:org.nypl.audiobook.android.views:${nyplAudioBookAPIVersion}",
   nyplDRMCore                : "org.nypl.drm:nypl-drm-core:1.0.0",
   nyplFindaway               : "org.nypl.audiobook:org.nypl.audiobook.android.audioengine.core:${nyplFindawayVersion}",
+  nyplPDFAPI                 : "org.nypl.pdf:api:0.0.4",
+  nyplPDFViewer              : "org.nypl.pdf:pdfviewer:0.0.4",
   picasso                    : "com.squareup.picasso:picasso:2.5.2",
+  readium                    : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
+  readiumSharedJS            : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",
   slf4j                      : "org.slf4j:slf4j-api:1.7.25",
 ]
 
