@@ -62,6 +62,7 @@ ext.libraries = [
   nyplAudioBookMocking     : "org.nypl.audiobook:org.nypl.audiobook.android.mocking:${nyplAudioBookAPIVersion}",
   nyplAudioBookOpenAccess  : "org.nypl.audiobook:org.nypl.audiobook.android.open_access:${nyplAudioBookAPIVersion}",
   nyplAudioBookViews       : "org.nypl.audiobook:org.nypl.audiobook.android.views:${nyplAudioBookAPIVersion}",
+  nyplDRMCore              : "org.nypl.drm:nypl-drm-core:1.0.0",
   nyplFindaway             : "org.nypl.audiobook:org.nypl.audiobook.android.audioengine.core:${nyplFindawayVersion}",
   slf4j                    : "org.slf4j:slf4j-api:1.7.25",
 ]

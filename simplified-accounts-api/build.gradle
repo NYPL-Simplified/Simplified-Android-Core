@@ -10,7 +10,7 @@ dependencies {
 
   api libraries.jacksonDatabind
   api libraries.jodaTime
-  api "org.nypl.drm:nypl-drm-core:1.0.0"
+  api libraries.nyplDRMCore
   api libraries.io7mJFunctional
   api libraries.googleGuava
 

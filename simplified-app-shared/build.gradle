@@ -78,8 +78,7 @@ dependencies {
   annotationProcessor libraries.googleAutoValue
 
   implementation libraries.googleAutoValue
-
-  implementation group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
+  implementation libraries.nyplDRMCore
   implementation libraries.io7mJNull
 
   implementation 'org.librarysimplified:org.librarysimplified.readium:0.30.0'

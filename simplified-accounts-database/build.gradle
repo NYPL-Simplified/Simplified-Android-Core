@@ -10,7 +10,7 @@ dependencies {
   implementation project(':simplified-json-core')
   implementation project(':simplified-accounts-json')
 
-  api "org.nypl.drm:nypl-drm-core:1.0.0"
+  api libraries.nyplDRMCore
   api libraries.io7mJFunctional
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
