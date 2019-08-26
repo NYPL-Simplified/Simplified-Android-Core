@@ -57,9 +57,12 @@ OpenJDK 64-Bit Server VM (build 25.222-b05, mixed mode)
 
 #### Credentials
 
-Our application currently needs packages that are only available from our Nexus server in order
-to build correctly. (This will be changed in the future when non-DRM-enabled variants of the app
-are officially supported.) Nexus credentials can be obtained by emailing `malcolmwoods@nypl.org`
+Our application currently needs packages that are only available from
+our Nexus server in order to build correctly. This will be changed
+in the future when the application dependencies are pushed to [Maven
+Central](https://search.maven.org/).
+
+Nexus credentials can be obtained by emailing `malcolmwoods@nypl.org`
 or by asking in the `#mobile-development` channel of
 [librarysimplified.slack.com](https://librarysimplified.slack.com).
 
