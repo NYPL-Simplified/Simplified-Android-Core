@@ -3,7 +3,7 @@ Library Simplified
 
 [![Build Status](https://img.shields.io/travis/com/NYPL-Simplified/android?style=flat-square)](https://www.travis-ci.com/NYPL-Simplified/android)
 
-The NYPL's Library Simplified Android client.
+The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android client.
 
 ![simplified](./src/site/resources/simplified.jpg?raw=true)
 
