@@ -1,7 +1,7 @@
 def getGitHash = { ->
   def stdout = new ByteArrayOutputStream()
   exec {
-    commandLine 'git', 'rev-parse', 'HEAD'
+    commandLine "git", "rev-parse", "HEAD"
     standardOutput = stdout
   }
   return stdout.toString().trim()
@@ -13,13 +13,13 @@ android {
   }
 
   packagingOptions {
-    exclude 'META-INF/LICENSE'
+    exclude "META-INF/LICENSE"
 
     // The PDF library and Readium both provide this shared library. This will
-    // cause the build to fail because Gradle doesn't know which one to pick.
-    pickFirst 'lib/arm64-v8a/libc++_shared.so'
-    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-    pickFirst 'lib/x86/libc++_shared.so'
+    // cause the build to fail because Gradle doesn"t know which one to pick.
+    pickFirst "lib/arm64-v8a/libc++_shared.so"
+    pickFirst "lib/armeabi-v7a/libc++_shared.so"
+    pickFirst "lib/x86/libc++_shared.so"
   }
 }
 
@@ -77,61 +77,52 @@ dependencies {
 
   annotationProcessor libraries.googleAutoValue
 
+  implementation "androidx.appcompat:appcompat:1.0.0"
+  implementation "androidx.constraintlayout:constraintlayout:1.1.3"
+  implementation "androidx.legacy:legacy-preference-v14:1.0.0"
+  implementation "androidx.legacy:legacy-support-v4:1.0.0"
+  implementation "androidx.multidex:multidex:2.0.0"
+  implementation "com.bugsnag:bugsnag-android:4.3.3"
+  implementation "com.fasterxml.jackson.core:jackson-core:2.9.5"
+  implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
+  implementation "com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4"
+  implementation "com.google.android.material:material:1.0.0"
+  implementation "com.google.code.gson:gson:2.8.1"
+  implementation "com.google.zxing:core:3.2.1"
+  implementation "com.journeyapps:zxing-android-embedded:3.2.0@aar"
+  implementation "com.koushikdutta.async:androidasync:2.2.1"
+  implementation "com.nanohttpd:nanohttpd:2.2.0"
+  implementation "com.squareup.picasso:picasso:2.5.2"
+  implementation "commons-lang:commons-lang:2.6"
+  implementation "javax.annotation:javax.annotation-api:1.2-b01"
+  implementation "net.jodah:expiringmap:0.4.3"
+  implementation "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0"
+  implementation "org.librarysimplified:org.librarysimplified.readium:0.30.0"
+  implementation "org.nypl.pdf:api:0.0.4"
+  implementation "org.nypl.pdf:pdfviewer:0.0.4"
   implementation libraries.googleAutoValue
-  implementation libraries.nyplDRMCore
-  implementation libraries.io7mJNull
-
-  implementation 'org.librarysimplified:org.librarysimplified.readium:0.30.0'
-  implementation 'org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0'
-
-  implementation 'com.koushikdutta.async:androidasync:2.2.1'
-  implementation group: 'com.squareup.picasso', name: 'picasso', version: '2.5.2'
-  implementation 'com.nanohttpd:nanohttpd:2.2.0'
-  implementation libraries.slf4j
-  implementation 'com.bugsnag:bugsnag-android:4.3.3'
-  implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
-  implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
-  implementation libraries.jodaTime
-  implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
-  implementation 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
-
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
-  implementation libraries.jacksonDatabind
   implementation libraries.io7mJFunctional
-  implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+'
-
-  implementation group: 'net.jodah', name: 'expiringmap', version: '0.4.3'
-
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation 'androidx.appcompat:appcompat:1.0.0'
-  implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-  implementation 'com.google.android.material:material:1.0.0'
-  implementation 'androidx.multidex:multidex:2.0.0'
-  implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
-
-  implementation 'com.google.zxing:core:3.2.1'
-  implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
-
-  implementation 'com.github.tony19:logback-android-core:1.1.1-6'
-  implementation('com.github.tony19:logback-android-classic:1.1.1-6') {
-    // https://github.com/tony19/logback-android/issues/73
-    exclude group: 'com.google.android', module: 'android'
-  }
-
-  implementation libraries.nyplAudioBookManifestNYPL
+  implementation libraries.io7mJNull
+  implementation libraries.jacksonDatabind
+  implementation libraries.jodaTime
+  implementation libraries.kotlinStdlib
   implementation libraries.nyplAudioBookAPI
+  implementation libraries.nyplAudioBookDownloads
+  implementation libraries.nyplAudioBookManifestNYPL
   implementation libraries.nyplAudioBookOpenAccess
   implementation libraries.nyplAudioBookViews
-  implementation libraries.nyplAudioBookDownloads
+  implementation libraries.nyplDRMCore
+  implementation libraries.slf4j
+
+  implementation "com.github.tony19:logback-android-core:1.1.1-6"
+  implementation("com.github.tony19:logback-android-classic:1.1.1-6") {
+    // https://github.com/tony19/logback-android/issues/73
+    exclude group: "com.google.android", module: "android"
+  }
 
   if (project.hasProperty("org.librarysimplified.with_findaway")) {
     if (project.property("org.librarysimplified.with_findaway") == "true") {
       implementation libraries.nyplFindaway
     }
   }
-
-  implementation libraries.kotlinStdlib
-
-  implementation "org.nypl.pdf:api:0.0.4"
-  implementation "org.nypl.pdf:pdfviewer:0.0.4"
 }

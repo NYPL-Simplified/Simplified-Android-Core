@@ -1,15 +1,15 @@
 dependencies {
-  api project(':simplified-boot-api')
-  api project(':simplified-documents')
-  api project(':simplified-migration-api')
-  api project(':simplified-observable')
-  api project(':simplified-presentableerror-api')
-  api project(':simplified-profiles-controller-api')
-  api project(':simplified-reports')
+  api project(":simplified-boot-api")
+  api project(":simplified-documents")
+  api project(":simplified-migration-api")
+  api project(":simplified-observable")
+  api project(":simplified-presentableerror-api")
+  api project(":simplified-profiles-controller-api")
+  api project(":simplified-reports")
 
-  implementation 'androidx.appcompat:appcompat:1.0.0'
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation 'com.google.android.material:material:1.0.0'
+  implementation "androidx.appcompat:appcompat:1.0.0"
+  implementation "androidx.legacy:legacy-support-v4:1.0.0"
+  implementation "com.google.android.material:material:1.0.0"
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJUnreachable
   implementation libraries.kotlinStdlib

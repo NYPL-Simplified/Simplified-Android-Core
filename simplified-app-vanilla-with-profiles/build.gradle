@@ -4,20 +4,20 @@ android {
   }
 
   packagingOptions {
-    exclude 'META-INF/LICENSE'
+    exclude "META-INF/LICENSE"
 
     // The PDF library and Readium both provide this shared library. This will
-    // cause the build to fail because Gradle doesn't know which one to pick.
-    pickFirst 'lib/arm64-v8a/libc++_shared.so'
-    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-    pickFirst 'lib/x86/libc++_shared.so'
+    // cause the build to fail because Gradle doesn"t know which one to pick.
+    pickFirst "lib/arm64-v8a/libc++_shared.so"
+    pickFirst "lib/armeabi-v7a/libc++_shared.so"
+    pickFirst "lib/x86/libc++_shared.so"
   }
 }
 
 dependencies {
-  implementation project(':simplified-app-shared')
+  implementation project(":simplified-app-shared")
   implementation project(":simplified-accounts-source-nyplregistry")
 
-  implementation 'androidx.appcompat:appcompat:1.0.0'
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+  implementation "androidx.appcompat:appcompat:1.0.0"
+  implementation "androidx.legacy:legacy-support-v4:1.0.0"
 }

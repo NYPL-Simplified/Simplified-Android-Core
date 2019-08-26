@@ -1,5 +1,5 @@
 dependencies {
-  api project(':simplified-migration-spi')
+  api project(":simplified-migration-spi")
 
   api libraries.googleGuava
   api libraries.jodaTime

@@ -4,9 +4,9 @@ dependencies {
   api project(':simplified-opds-core')
   api project(':simplified-tenprint')
 
+  api "com.squareup.picasso:picasso:2.5.2"
+
   implementation libraries.io7mJFunctional
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
-
-  api "com.squareup.picasso:picasso:2.5.2"
 }

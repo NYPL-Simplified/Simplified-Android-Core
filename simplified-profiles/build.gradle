@@ -6,7 +6,7 @@ dependencies {
 
   implementation project(":simplified-files")
   implementation project(":simplified-json-core")
-  implementation project(':simplified-accounts-source-spi')
+  implementation project(":simplified-accounts-source-spi")
 
   implementation libraries.kotlinStdlib
 

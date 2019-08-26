@@ -1,9 +1,9 @@
 dependencies {
-  implementation project(':simplified-json-core')
+  implementation project(":simplified-json-core")
 
   api libraries.io7mJFunctional
 
-  implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
+  implementation "net.iharder:base64:2.3.9"
   implementation libraries.googleGuava
   implementation libraries.io7mJNull
   implementation libraries.io7mJUnreachable

@@ -1,17 +1,17 @@
 def versionValues() {
-  def propsFile = file('version.properties')
+  def propsFile = file("version.properties")
   def Properties props = new Properties()
   def name
   def code
   if (propsFile.canRead()) {
     props.load(new FileInputStream(propsFile))
-    name = props['versionName']
-    code = props['versionCode'].toInteger()
+    name = props["versionName"]
+    code = props["versionCode"].toInteger()
   } else {
     throw new FileNotFoundException("Could not read version.properties!")
   }
 
-  props['versionCode'] = (code + 1).toString()
+  props["versionCode"] = (code + 1).toString()
   props.save(new FileOutputStream(propsFile), "")
 
   logger.info("incrementing build version ${code} -> ${code + 1}")
@@ -22,13 +22,13 @@ android {
   def version = versionValues()
 
   packagingOptions {
-    exclude 'META-INF/LICENSE'
+    exclude "META-INF/LICENSE"
 
     // The PDF library and Readium both provide this shared library. This will
-    // cause the build to fail because Gradle doesn't know which one to pick.
-    pickFirst 'lib/arm64-v8a/libc++_shared.so'
-    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-    pickFirst 'lib/x86/libc++_shared.so'
+    // cause the build to fail because Gradle doesn"t know which one to pick.
+    pickFirst "lib/arm64-v8a/libc++_shared.so"
+    pickFirst "lib/armeabi-v7a/libc++_shared.so"
+    pickFirst "lib/x86/libc++_shared.so"
   }
 
   signingConfigs {
@@ -60,9 +60,9 @@ android {
 
 dependencies {
   implementation project(":simplified-accounts-source-nyplregistry")
-  implementation project(':simplified-analytics-circulation')
-  implementation project(':simplified-app-shared')
-  implementation project(':simplified-migration-from3master')
+  implementation project(":simplified-analytics-circulation")
+  implementation project(":simplified-app-shared")
+  implementation project(":simplified-migration-from3master")
 
   /*
    * If building with Adobe DRM, add the required native dependencies.
@@ -70,14 +70,14 @@ dependencies {
 
   if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
     if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
-      implementation group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
-      implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
-      implementation group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
+      implementation "org.nypl.drm:libnypl_adobe:1.0.0"
+      implementation "org.nypl.drm:libnypl_adobe_filter:1.0.0"
+      implementation "org.nypl.drm:nypl-drm-adobe-provider:1.0.0"
     }
   }
 
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+  implementation "androidx.legacy:legacy-support-v4:1.0.0"
+  implementation "androidx.legacy:legacy-support-v4:1.0.0"
 }
 
 /*
@@ -150,14 +150,14 @@ org.librarysimplified.with_bugsnag = true
 
 if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
   if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
-    apply plugin: 'android-native-dependencies'
+    apply plugin: "android-native-dependencies"
 
     native_dependencies {
-      artifact(group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0', classifier: 'armeabi-v7a') {
+      artifact(group: "org.nypl.drm", name: "libnypl_adobe", version: "1.0.0", classifier: "armeabi-v7a") {
         addLibPrefixToArtifact = false
       }
 
-      artifact(group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0', classifier: 'armeabi-v7a') {
+      artifact(group: "org.nypl.drm", name: "libnypl_adobe_filter", version: "1.0.0", classifier: "armeabi-v7a") {
         addLibPrefixToArtifact = false
       }
     }

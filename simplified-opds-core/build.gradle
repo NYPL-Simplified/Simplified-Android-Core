@@ -1,12 +1,12 @@
 dependencies {
-  api project(':simplified-parser-api')
+  api project(":simplified-parser-api")
 
-  implementation project(':simplified-json-core')
+  implementation project(":simplified-json-core")
 
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
-  implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
-  implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
-  implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
+  implementation "com.fasterxml.jackson.core:jackson-core:2.9.5"
+  implementation "com.google.code.gson:gson:2.8.1"
+  implementation "commons-lang:commons-lang:2.6"
+  implementation "javax.annotation:javax.annotation-api:1.2-b01"
   implementation libraries.googleGuava
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJNull

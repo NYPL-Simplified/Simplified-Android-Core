@@ -1,9 +1,9 @@
 dependencies {
-  api project(':simplified-accounts-api')
-  api project(':simplified-accounts-database-api')
-  api project(':simplified-observable')
-  api project(':simplified-presentableerror-api')
-  api project(':simplified-taskrecorder-api')
+  api project(":simplified-accounts-api")
+  api project(":simplified-accounts-database-api")
+  api project(":simplified-observable")
+  api project(":simplified-presentableerror-api")
+  api project(":simplified-taskrecorder-api")
 
   api libraries.googleGuava
   api libraries.jodaTime

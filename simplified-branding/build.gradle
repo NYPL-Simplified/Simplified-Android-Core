@@ -2,5 +2,5 @@ dependencies {
   implementation project(":simplified-theme")
 
   implementation libraries.kotlinStdlib
-  implementation 'androidx.appcompat:appcompat:1.0.0'
+  implementation "androidx.appcompat:appcompat:1.0.0"
 }

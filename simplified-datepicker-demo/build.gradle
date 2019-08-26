@@ -1,3 +1,3 @@
 dependencies {
-  implementation project(':simplified-datepicker')
+  implementation project(":simplified-datepicker")
 }
