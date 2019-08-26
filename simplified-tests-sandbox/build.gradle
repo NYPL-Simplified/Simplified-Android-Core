@@ -13,7 +13,7 @@ dependencies {
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout
-  implementation "androidx.legacy:legacy-support-v4:1.0.0"
+  implementation libraries.androidXLegacySupport
   implementation libraries.androidXMultidex
   implementation libraries.logbackAndroidCore
   implementation "com.google.android.material:material:1.0.0"

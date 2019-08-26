@@ -79,8 +79,8 @@ dependencies {
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout
-  implementation "androidx.legacy:legacy-preference-v14:1.0.0"
-  implementation "androidx.legacy:legacy-support-v4:1.0.0"
+  implementation libraries.androidXLegacyPreferenceV14
+  implementation libraries.androidXLegacySupport
   implementation libraries.androidXMultidex
   implementation libraries.bugsnag
   implementation libraries.jacksonCore

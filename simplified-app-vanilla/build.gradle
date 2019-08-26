@@ -19,5 +19,5 @@ dependencies {
   implementation project(":simplified-accounts-source-nyplregistry")
 
   implementation libraries.androidXAppCompat
-  implementation "androidx.legacy:legacy-support-v4:1.0.0"
+  implementation libraries.androidXLegacySupport
 }
