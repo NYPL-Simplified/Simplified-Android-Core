@@ -1,20 +1,17 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-
 def versionValues() {
-  def propsFile = file('version.properties')
+  def propsFile = file("version.properties")
   def Properties props = new Properties()
   def name
   def code
   if (propsFile.canRead()) {
     props.load(new FileInputStream(propsFile))
-    name = props['versionName']
-    code = props['versionCode'].toInteger()
+    name = props["versionName"]
+    code = props["versionCode"].toInteger()
   } else {
     throw new FileNotFoundException("Could not read version.properties!")
   }
 
-  props['versionCode'] = (code + 1).toString()
+  props["versionCode"] = (code + 1).toString()
   props.save(new FileOutputStream(propsFile), "")
 
   logger.info("incrementing build version ${code} -> ${code + 1}")
@@ -22,19 +19,16 @@ def versionValues() {
 }
 
 android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
   def version = versionValues()
 
   packagingOptions {
-    exclude 'META-INF/LICENSE'
+    exclude "META-INF/LICENSE"
 
     // The PDF library and Readium both provide this shared library. This will
-    // cause the build to fail because Gradle doesn't know which one to pick.
-    pickFirst 'lib/arm64-v8a/libc++_shared.so'
-    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-    pickFirst 'lib/x86/libc++_shared.so'
+    // cause the build to fail because Gradle doesn"t know which one to pick.
+    pickFirst "lib/arm64-v8a/libc++_shared.so"
+    pickFirst "lib/armeabi-v7a/libc++_shared.so"
+    pickFirst "lib/x86/libc++_shared.so"
   }
 
   signingConfigs {
@@ -57,26 +51,18 @@ android {
     versionName = version.get(0)
     versionCode = version.get(1)
     setProperty("archivesBaseName", "simplye-${versionName}-${versionCode}")
-    minSdkVersion androidMinimumSDK
   }
 
   lintOptions {
     checkReleaseBuilds false
   }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
 }
-
-description = 'simplified-app-simplye'
 
 dependencies {
   implementation project(":simplified-accounts-source-nyplregistry")
-  implementation project(':simplified-analytics-circulation')
-  implementation project(':simplified-app-shared')
-  implementation project(':simplified-migration-from3master')
+  implementation project(":simplified-analytics-circulation")
+  implementation project(":simplified-app-shared")
+  implementation project(":simplified-migration-from3master")
 
   /*
    * If building with Adobe DRM, add the required native dependencies.
@@ -84,14 +70,13 @@ dependencies {
 
   if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
     if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
-      implementation group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
-      implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
-      implementation group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
+      implementation libraries.nyplDRMAdobeProvider
+      implementation libraries.nyplDRMLibNYPLAdobe
+      implementation libraries.nyplDRMLibNYPLAdobeFilter
     }
   }
 
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+  implementation libraries.androidXLegacySupport
 }
 
 /*
@@ -108,6 +93,10 @@ preBuild.doFirst {
       throw new IllegalStateException("""
 You are attempting to build with Adobe DRM but have not added the required
 certificate file at ${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig
+
+If you do not want to use Adobe DRM, define the following in ${project.rootDir}/gradle.properties:
+
+org.librarysimplified.with_drm_adobe = false
 """)
     }
   } else {
@@ -116,6 +105,10 @@ certificate file at ${project.rootDir}/simplified-app-simplye/src/main/assets/Re
 You are attempting to build without Adobe DRM but have accidentally left the
 certificate file at ${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig.
 Remove this file!
+
+If you *do* want to use Adobe DRM, define the following in ${project.rootDir}/gradle.properties:
+
+org.librarysimplified.with_drm_adobe = true
 """)
     }
   }
@@ -129,6 +122,10 @@ Remove this file!
       throw new IllegalStateException("""
 You are attempting to build with Bugsnag but have not added the required
 configuration file at ${project.rootDir}/simplified-app-simplye/src/main/assets/bugsnag.conf
+
+If you do not want to use Bugsnag, define the following in ${project.rootDir}/gradle.properties:
+
+org.librarysimplified.with_bugsnag = false
 """)
     }
   } else {
@@ -137,6 +134,10 @@ configuration file at ${project.rootDir}/simplified-app-simplye/src/main/assets/
 You are attempting to build without Bugsnag but have accidentally left the
 configuration file at ${project.rootDir}/simplified-app-simplye/src/main/assets/bugsnag.conf.
 Remove this file!
+
+If you *do* want to use Bugsnag, define the following in ${project.rootDir}/gradle.properties:
+
+org.librarysimplified.with_bugsnag = true
 """)
     }
   }
@@ -148,15 +149,15 @@ Remove this file!
 
 if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
   if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
-    apply plugin: 'android-native-dependencies'
+    apply plugin: "android-native-dependencies"
 
     native_dependencies {
-      artifact (group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0', classifier: 'armeabi-v7a') {
-        addLibPrefixToArtifact=false
+      artifact(group: "org.nypl.drm", name: "libnypl_adobe", version: "1.0.0", classifier: "armeabi-v7a") {
+        addLibPrefixToArtifact = false
       }
 
-      artifact (group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0', classifier: 'armeabi-v7a') {
-        addLibPrefixToArtifact=false
+      artifact(group: "org.nypl.drm", name: "libnypl_adobe_filter", version: "1.0.0", classifier: "armeabi-v7a") {
+        addLibPrefixToArtifact = false
       }
     }
   }

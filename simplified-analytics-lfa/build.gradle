@@ -1,32 +1,9 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-analytics-lfa'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-files")
   implementation project(":simplified-http-core")
   implementation project(":simplified-threads")
 
-  implementation 'org.slf4j:slf4j-api:1.7.25'
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

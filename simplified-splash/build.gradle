@@ -1,43 +1,17 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  useLibrary 'org.apache.http.legacy'
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-splash'
-
 dependencies {
-  api project(':simplified-boot-api')
-  api project(':simplified-documents')
-  api project(':simplified-migration-api')
-  api project(':simplified-observable')
-  api project(':simplified-presentableerror-api')
-  api project(':simplified-profiles-controller-api')
-  api project(':simplified-reports')
+  api project(":simplified-boot-api")
+  api project(":simplified-documents")
+  api project(":simplified-migration-api")
+  api project(":simplified-observable")
+  api project(":simplified-presentableerror-api")
+  api project(":simplified-profiles-controller-api")
+  api project(":simplified-reports")
 
-  implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
-  implementation group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation "org.slf4j:slf4j-api:1.7.25"
-
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation 'androidx.appcompat:appcompat:1.0.0'
-  implementation 'com.google.android.material:material:1.0.0'
-}
-
-repositories {
-  mavenCentral()
-  jcenter()
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXLegacySupport
+  implementation libraries.googleAndroidMaterial
+  implementation libraries.io7mJFunctional
+  implementation libraries.io7mJUnreachable
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

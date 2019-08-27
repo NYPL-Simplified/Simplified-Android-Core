@@ -1,28 +1,5 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-tests'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
 
-  api project(":simplified-accessibility")
   api project(":simplified-accounts-api")
   api project(":simplified-accounts-database")
   api project(":simplified-accounts-database-api")
@@ -45,11 +22,11 @@ dependencies {
   api project(":simplified-books-registry-api")
   api project(":simplified-boot-api")
   api project(":simplified-branding")
-  api project(':simplified-accounts-source-spi')
+  api project(":simplified-accounts-source-spi")
 
   api(project(":simplified-bugsnag")) {
-    exclude group: 'com.github.tony19', module: 'logback-android-core'
-    exclude group: 'com.github.tony19', module: 'logback-android-classic'
+    exclude group: "com.github.tony19", module: "logback-android-core"
+    exclude group: "com.github.tony19", module: "logback-android-classic"
   }
 
   api project(":simplified-datepicker")
@@ -75,7 +52,6 @@ dependencies {
   api project(":simplified-reader-api")
   api project(":simplified-reader-bookmarks")
   api project(":simplified-reader-bookmarks-api")
-  api project(":simplified-rfc3339-core")
   api project(":simplified-splash")
   api project(":simplified-stack")
   api project(":simplified-tenprint")
@@ -83,22 +59,21 @@ dependencies {
   api project(":simplified-theme")
   api project(":simplified-threads")
 
-  implementation 'junit:junit:4.12'
-  implementation 'org.mockito:mockito-android:2.22.0'
+  api libraries.nyplAudioBookAPI
+  api libraries.nyplAudioBookManifestNYPL
+  api libraries.nyplAudioBookOpenAccess
+  api libraries.nyplAudioBookMocking
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
-  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  implementation group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
-  implementation group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-  implementation group: 'net.jodah', name: 'expiringmap', version: '0.4.3'
+  implementation libraries.io7mJFunctional
+  implementation libraries.io7mJNull
+  implementation libraries.jacksonDatabind
+  implementation libraries.jodahExpiringMap
+  implementation libraries.junit
+  implementation libraries.kotlinStdlib
+  implementation libraries.mockitoAndroid
+  implementation libraries.nyplDRMCore
+  implementation libraries.slf4j
 
-  testImplementation 'ch.qos.logback:logback-classic:1.2.3'
-  testImplementation 'junit:junit:4.12'
-
-  api "org.nypl.audiobook:org.nypl.audiobook.android.api:${nypl_audiobook_api_version}"
-  api "org.nypl.audiobook:org.nypl.audiobook.android.manifest.nypl:${nypl_audiobook_api_version}"
-  api "org.nypl.audiobook:org.nypl.audiobook.android.mocking:${nypl_audiobook_api_version}"
-  api "org.nypl.audiobook:org.nypl.audiobook.android.open_access:${nypl_audiobook_api_version}"
+  testImplementation libraries.logbackClassic
+  testImplementation libraries.junit
 }

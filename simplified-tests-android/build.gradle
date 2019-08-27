@@ -1,57 +1,26 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  defaultConfig {
-    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    multiDexEnabled true
-    minSdkVersion androidMinimumSDK
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  testOptions {
-    execution 'ANDROIDX_TEST_ORCHESTRATOR'
-    animationsDisabled = true
-  }
-}
-
-description = 'simplified-tests-android'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
-  implementation project(':simplified-tests')
-  implementation project(':simplified-splash')
+  implementation project(":simplified-tests")
+  implementation project(":simplified-splash")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation 'org.slf4j:slf4j-api:1.7.25'
-  implementation 'com.github.tony19:logback-android-core:1.1.1-6'
-  implementation('com.github.tony19:logback-android-classic:1.1.1-6') {
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXLegacySupport
+  implementation libraries.androidXTestEspressoCore
+  implementation libraries.androidXTestRules
+  implementation libraries.androidXTestRunner
+  implementation libraries.kotlinStdlib
+  implementation libraries.logbackAndroidCore
+  implementation libraries.mockitoAndroid
+  implementation libraries.slf4j
+  implementation(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73
-    exclude group: 'com.google.android', module: 'android'
+    exclude group: "com.google.android", module: "android"
   }
 
-  implementation 'androidx.appcompat:appcompat:1.0.0'
-  implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  implementation 'androidx.test:rules:1.1.0'
-  implementation 'androidx.test:runner:1.1.0'
-  implementation 'androidx.test.espresso:espresso-core:3.1.0'
-  implementation "org.mockito:mockito-android:2.22.0"
-
-  androidTestImplementation "org.mockito:mockito-android:2.22.0"
-  androidTestImplementation 'androidx.appcompat:appcompat:1.0.0'
-  androidTestImplementation 'androidx.legacy:legacy-support-v4:1.0.0'
-  androidTestImplementation 'androidx.test:rules:1.1.0'
-  androidTestImplementation 'androidx.test:runner:1.1.0'
-  androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-  androidTestUtil 'androidx.test:orchestrator:1.1.0'
+  androidTestImplementation libraries.androidXAppCompat
+  androidTestImplementation libraries.androidXLegacySupport
+  androidTestImplementation libraries.androidXTestEspressoCore
+  androidTestImplementation libraries.androidXTestRules
+  androidTestImplementation libraries.androidXTestRunner
+  androidTestImplementation libraries.mockitoAndroid
+  androidTestUtil libraries.androidXTestOrchestrator
 }

@@ -1,37 +1,12 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  useLibrary 'org.apache.http.legacy'
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-books-covers'
-
 dependencies {
   api project(':simplified-feeds-api')
   api project(':simplified-http-core')
   api project(':simplified-opds-core')
   api project(':simplified-tenprint')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation "org.slf4j:slf4j-api:1.7.25"
-  implementation "com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)"
+  api libraries.picasso
 
-  api "com.squareup.picasso:picasso:2.5.2"
-}
-
-repositories {
-  mavenCentral()
-  jcenter()
+  implementation libraries.io7mJFunctional
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

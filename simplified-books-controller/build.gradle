@@ -1,24 +1,3 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  useLibrary 'org.apache.http.legacy'
-
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-books-controller'
-
 dependencies {
   api project(":simplified-books-controller-api")
   api project(":simplified-profiles-controller-api")
@@ -43,13 +22,8 @@ dependencies {
   implementation project(":simplified-taskrecorder-api")
   implementation project(':simplified-accounts-source-spi')
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation libraries.kotlinStdlib
 
-  compileOnly "com.google.auto.value:auto-value:1.5"
-  annotationProcessor "com.google.auto.value:auto-value:1.5"
-}
-
-repositories {
-  mavenCentral()
-  jcenter()
+  compileOnly libraries.googleAutoValue
+  annotationProcessor libraries.googleAutoValue
 }

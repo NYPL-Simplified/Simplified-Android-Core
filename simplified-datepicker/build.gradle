@@ -1,21 +1,5 @@
-apply plugin: 'com.android.library'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-datepicker'
-
 dependencies {
-  implementation 'com.io7m.jnull:io7m-jnull-core:[1.0.0, 2.0.0)'
-  api 'joda-time:joda-time:2.9.9'
+  api libraries.jodaTime
+
+  implementation libraries.io7mJNull
 }

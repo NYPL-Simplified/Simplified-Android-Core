@@ -1,29 +1,6 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-theme'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-  implementation 'androidx.appcompat:appcompat:1.0.0'
-  implementation 'com.google.android.material:material:1.0.0'
-  implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXLegacyPreferenceV14
+  implementation libraries.googleAndroidMaterial
+  implementation libraries.kotlinStdlib
 }

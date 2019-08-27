@@ -1,25 +1,4 @@
-apply plugin: 'com.android.library'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-tenprint'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
-  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  implementation "com.google.guava:guava:23.6.1-android"
+  implementation libraries.googleGuava
+  implementation libraries.io7mJNull
 }

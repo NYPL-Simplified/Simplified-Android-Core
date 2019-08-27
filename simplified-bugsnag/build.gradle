@@ -1,33 +1,10 @@
-apply plugin: 'com.android.library'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-bugsnag'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
-
-  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  implementation 'com.bugsnag:bugsnag-android:4.3.3'
-
-  implementation 'org.slf4j:slf4j-api:1.7.25'
-  implementation 'com.github.tony19:logback-android-core:1.1.1-6'
-  implementation('com.github.tony19:logback-android-classic:1.1.1-6') {
+  implementation libraries.bugsnag
+  implementation libraries.io7mJNull
+  implementation libraries.logbackAndroidCore
+  implementation libraries.slf4j
+  implementation(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73
-    exclude group: 'com.google.android', module: 'android'
+    exclude group: "com.google.android", module: "android"
   }
 }

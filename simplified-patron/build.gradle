@@ -1,31 +1,9 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-patron'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
   api project(":simplified-patron-api")
 
   implementation project(":simplified-json-core")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation "joda-time:joda-time:2.9.9"
-  implementation "com.fasterxml.jackson.core:jackson-databind:2.9.5"
+  implementation libraries.jacksonDatabind
+  implementation libraries.jodaTime
+  implementation libraries.kotlinStdlib
 }

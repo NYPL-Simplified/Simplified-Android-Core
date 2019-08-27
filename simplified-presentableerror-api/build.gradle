@@ -1,22 +1,4 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-presentableerror-api'
-
 dependencies {
-  api "com.github.stephenc.jcip:jcip-annotations:1.0-1"
-  api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  api libraries.jcipAnnotations
+  api libraries.kotlinStdlib
 }

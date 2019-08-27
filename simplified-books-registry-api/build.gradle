@@ -1,34 +1,9 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  useLibrary 'org.apache.http.legacy'
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-books-registry-api'
-
 dependencies {
   api project(":simplified-books-api")
   api project(":simplified-http-core")
   api project(":simplified-observable")
   api project(":simplified-taskrecorder-api")
 
-  compileOnly 'com.google.auto.value:auto-value:1.5'
-  annotationProcessor "com.google.auto.value:auto-value:1.5"
-}
-
-repositories {
-  mavenCentral()
-  jcenter()
+  compileOnly libraries.googleAutoValue
+  annotationProcessor libraries.googleAutoValue
 }

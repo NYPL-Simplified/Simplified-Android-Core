@@ -1,42 +1,18 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-android {
-  compileSdkVersion 28
-  buildToolsVersion "28.0.3"
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  defaultConfig {
-    minSdkVersion androidMinimumSDK
-  }
-}
-
-description = 'simplified-opds-core'
-
-repositories {
-  jcenter()
-}
-
 dependencies {
-  api project(':simplified-parser-api')
+  api project(":simplified-parser-api")
 
-  implementation project(':simplified-json-core')
-  implementation project(':simplified-rfc3339-core')
+  implementation project(":simplified-json-core")
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation "com.google.guava:guava:23.6.1-android"
-
-  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
-  implementation group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-  implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
-  implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
-  implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
-  implementation 'joda-time:joda-time:2.9.9'
+  implementation libraries.commonsLang
+  implementation libraries.googleGSON
+  implementation libraries.googleGuava
+  implementation libraries.io7mJFunctional
+  implementation libraries.io7mJNull
+  implementation libraries.io7mJUnreachable
+  implementation libraries.jacksonCore
+  implementation libraries.jacksonDatabind
+  implementation libraries.javaxAnnotationAPI
+  implementation libraries.jodaTime
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

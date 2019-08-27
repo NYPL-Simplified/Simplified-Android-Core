@@ -1,0 +1,11 @@
+dependencies {
+  implementation project(":simplified-http-core")
+  implementation project(":simplified-json-core")
+  implementation project(":simplified-prefs")
+
+  implementation libraries.androidXLegacySupport
+  implementation libraries.io7mJFunctional
+  implementation libraries.io7mJNull
+  implementation libraries.jacksonDatabind
+  implementation libraries.slf4j
+}
