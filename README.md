@@ -132,7 +132,18 @@ org.librarysimplified.simplye.keyPassword=
 org.librarysimplified.simplye.storePassword=
 ~~~
 
-### Project Structure
+### Project Structure / Architecture
+
+#### MVC
+
+The project, as a whole, roughly follows an [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)
+architecture distributed over the application modules. The _controller_ in the application is
+task-based and executes all tasks on a background thread to avoid any possibility of blocking
+the Android UI thread.
+
+The following diagram provides a rough diagram of the application components:
+
+![outline](./src/site/resources/outline.png?raw=true)
 
 #### API vs SPI
 
@@ -180,6 +191,16 @@ Most of the modularity concepts described here were pioneered by the [OSGi modul
 and so, although the Library Simplified application is not an OSGi application, much of the
 design and architecture conforms to conventions followed by OSGi applications. Further reading
 can be found on the OSGi web site.
+
+#### Build System
+
+The build is driven by the [build.gradle](build.gradle) file in the root of the project,
+with the `build.gradle` files in each module typically only listing dependencies (the actual
+dependency definitions are defined in the root `build.gradle` file to avoid duplicating version
+numbers over the whole project). Metadata used to publish builds (such as Maven group IDs, version
+numbers, etc) is defined in the `gradle.properties` file in each module. The [gradle.properties](gradle.properties)
+file in the root of the project defines default values that are overridden as necessary by each
+module.
 
 #### Modules
 
