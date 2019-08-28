@@ -64,6 +64,8 @@ dependencies {
   implementation project(":simplified-app-shared")
   implementation project(":simplified-migration-from3master")
 
+  annotationProcessor libraries.googleAutoValue
+
   /*
    * If building with Adobe DRM, add the required native dependencies.
    */

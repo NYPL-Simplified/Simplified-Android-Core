@@ -20,4 +20,6 @@ dependencies {
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXLegacySupport
+
+  annotationProcessor libraries.googleAutoValue
 }

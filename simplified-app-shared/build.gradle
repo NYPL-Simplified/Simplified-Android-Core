@@ -77,52 +77,52 @@ dependencies {
 
   annotationProcessor libraries.googleAutoValue
 
-  implementation libraries.androidAsync
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXConstraintLayout
-  implementation libraries.androidXLegacyPreferenceV14
-  implementation libraries.androidXLegacySupport
-  implementation libraries.androidXMultidex
-  implementation libraries.bugsnag
-  implementation libraries.commonsLang
-  implementation libraries.googleAndroidMaterial
-  implementation libraries.googleAutoValue
-  implementation libraries.googleGSON
-  implementation libraries.googleZXing
-  implementation libraries.io7mJFunctional
-  implementation libraries.io7mJNull
-  implementation libraries.jacksonCore
-  implementation libraries.jacksonDatabind
-  implementation libraries.jacksonKotlin
-  implementation libraries.javaxAnnotationAPI
-  implementation libraries.jodahExpiringMap
-  implementation libraries.jodaTime
-  implementation libraries.journeyappsZXing
-  implementation libraries.kotlinStdlib
-  implementation libraries.nanoHTTPD
-  implementation libraries.nyplAudioBookAPI
-  implementation libraries.nyplAudioBookDownloads
-  implementation libraries.nyplAudioBookManifestNYPL
-  implementation libraries.nyplAudioBookOpenAccess
-  implementation libraries.nyplAudioBookViews
-  implementation libraries.nyplDRMCore
-  implementation libraries.nyplPDFAPI
-  implementation libraries.nyplPDFViewer
-  implementation libraries.picasso
-  implementation libraries.readium
-  implementation libraries.readiumSharedJS
-  implementation libraries.slf4j
-  implementation libraries.viewPagerIndicator
+  api libraries.androidAsync
+  api libraries.androidXAppCompat
+  api libraries.androidXConstraintLayout
+  api libraries.androidXLegacyPreferenceV14
+  api libraries.androidXLegacySupport
+  api libraries.androidXMultidex
+  api libraries.bugsnag
+  api libraries.commonsLang
+  api libraries.googleAndroidMaterial
+  api libraries.googleAutoValue
+  api libraries.googleGSON
+  api libraries.googleZXing
+  api libraries.io7mJFunctional
+  api libraries.io7mJNull
+  api libraries.jacksonCore
+  api libraries.jacksonDatabind
+  api libraries.jacksonKotlin
+  api libraries.javaxAnnotationAPI
+  api libraries.jodahExpiringMap
+  api libraries.jodaTime
+  api libraries.journeyappsZXing
+  api libraries.kotlinStdlib
+  api libraries.nanoHTTPD
+  api libraries.nyplAudioBookAPI
+  api libraries.nyplAudioBookDownloads
+  api libraries.nyplAudioBookManifestNYPL
+  api libraries.nyplAudioBookOpenAccess
+  api libraries.nyplAudioBookViews
+  api libraries.nyplDRMCore
+  api libraries.nyplPDFAPI
+  api libraries.nyplPDFViewer
+  api libraries.picasso
+  api libraries.readium
+  api libraries.readiumSharedJS
+  api libraries.slf4j
+  api libraries.viewPagerIndicator
 
-  implementation libraries.logbackAndroidCore
-  implementation(libraries.logbackAndroidClassic) {
+  api libraries.logbackAndroidCore
+  api(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73
     exclude group: "com.google.android", module: "android"
   }
 
   if (project.hasProperty("org.librarysimplified.with_findaway")) {
     if (project.property("org.librarysimplified.with_findaway") == "true") {
-      implementation libraries.nyplFindaway
+      api libraries.nyplFindaway
     }
   }
 }
