@@ -187,6 +187,14 @@ pattern is used by the [NYPL AudioBook API](https://github.com/NYPL-Simplified/a
 to provide a common API into which new audio book players and parsers can be introduced _without
 needing to modify application code at all_.
 
+Modules should make every attempt not to specify explicit dependencies on _implementation_ modules.
+API and implementation modules should typically only depend on other API modules, leaving the choice
+of implementation modules to the final application assembly. In other words, a module should say
+"I can work with any module that provides this API" rather than "I depend on implementation `M`
+of a particular API". Following this convention allows us to replace module implementation without
+having to modify lots of different parts of the application; it allows us to avoid
+_strong coupling_ between modules.
+
 Most of the modularity concepts described here were pioneered by the [OSGi module system](https://www.osgi.org/developer/modularity/)
 and so, although the Library Simplified application is not an OSGi application, much of the
 design and architecture conforms to conventions followed by OSGi applications. Further reading
