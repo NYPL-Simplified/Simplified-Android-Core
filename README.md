@@ -145,6 +145,11 @@ The following diagram provides a rough diagram of the application components:
 
 ![outline](./src/site/resources/outline.png?raw=true)
 
+At the top of the diagram, the `app-shared` module contains all of the _view_ aspects of the
+architecture and typically has strong dependencies on the Android APIs. The _controller_ and
+_model_ sections are pure platform-independent Java/Kotlin code and try to avoid having any
+dependencies on the Android APIs, allowing for easy unit testing.
+
 #### API vs SPI
 
 The project makes various references to _APIs_ and _SPIs_. _API_ stands for _application
