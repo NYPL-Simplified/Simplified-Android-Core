@@ -6,6 +6,8 @@ import androidx.multidex.MultiDexApplication
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.rolling.RollingFileAppender
 import com.google.common.util.concurrent.ListenableFuture
+import com.instabug.library.Instabug
+import com.instabug.library.invocation.InstabugInvocationEvent
 import org.nypl.simplified.app.services.SimplifiedServices
 import org.nypl.simplified.app.services.SimplifiedServicesStrings
 import org.nypl.simplified.app.services.SimplifiedServicesType
@@ -17,6 +19,8 @@ import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.prefs.Prefs
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.IOException
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -27,6 +31,7 @@ class Simplified : MultiDexApplication() {
 
   companion object {
     private lateinit var INSTANCE: Simplified
+    private val simplyeApp = "org.nypl.simplified.simplye"
 
     @JvmStatic
     val application: Simplified
@@ -88,6 +93,7 @@ class Simplified : MultiDexApplication() {
     this.configureLogging()
     this.logger.debug("starting app: pid {}", android.os.Process.myPid())
     this.bootFuture = this.boot.start(this)
+    this.configureInstabug()
     INSTANCE = this
   }
 
@@ -113,6 +119,33 @@ class Simplified : MultiDexApplication() {
       this.logger.debug("logging is configured")
     } catch (e: Exception) {
       this.logger.error("could not configure logging: ", e)
+    }
+  }
+
+  /**
+   * Currently Instabug is available for SimplyE debug builds only
+   */
+  private fun configureInstabug() {
+    if (BuildConfig.DEBUG) {
+      if (Simplified.application.packageName.equals(simplyeApp)) {
+
+        try {
+          val inputStream = this.assets.open("instabug.conf")
+          val p = Properties()
+          p.load(inputStream)
+          val instabugToken = p.getProperty("instabug.token")
+
+          if (instabugToken.isNullOrBlank()) {
+            throw IOException("instabug token not found!")
+          }
+          Instabug.Builder(this, instabugToken)
+                  .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.SCREENSHOT)
+                  .build()
+        } catch (e: java.lang.Exception) {
+          this.logger.debug("Error intializing Instabug", android.os.Process.myPid())
+          e.printStackTrace()
+        }
+      }
     }
   }
 
