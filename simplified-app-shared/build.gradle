@@ -113,6 +113,7 @@ dependencies {
   api libraries.readiumSharedJS
   api libraries.slf4j
   api libraries.viewPagerIndicator
+  api libraries.instabug
 
   api libraries.logbackAndroidCore
   api(libraries.logbackAndroidClassic) {

@@ -19,6 +19,7 @@
 #
 ReaderClientCert.sig 
 bugsnag.conf
+instabug.conf
 *.jks
 
 # backup files
