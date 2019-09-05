@@ -29,7 +29,7 @@ fi
 
 mkdir -p .travis || exit 1
 
-(cat <<EOF
+(cat gradle.properties <<EOF
 org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
 org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 
@@ -46,5 +46,7 @@ EOF
 ) > gradle.properties.tmp || exit 1
 
 mv gradle.properties.tmp gradle.properties || exit 1
+
+cat gradle.properties
 
 exec ./gradlew clean assemble test
