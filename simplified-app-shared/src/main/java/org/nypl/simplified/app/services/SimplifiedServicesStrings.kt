@@ -99,4 +99,6 @@ class SimplifiedServicesStrings(private val resources: Resources): BootStringRes
   val bootingNotificationsService =
     this.resources.getString(R.string.bootingNotificationsService)
 
+  val initializingInstabug =
+          this.resources.getString(R.string.initializingInstabug)
 }
