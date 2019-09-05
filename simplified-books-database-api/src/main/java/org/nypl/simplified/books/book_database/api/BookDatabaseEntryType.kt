@@ -1,6 +1,6 @@
 package org.nypl.simplified.books.book_database.api
 
-import org.nypl.audiobook.android.api.PlayerPosition
+import org.librarysimplified.audiobook.api.PlayerPosition
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat

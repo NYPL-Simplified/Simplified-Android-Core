@@ -10,6 +10,7 @@ dependencies {
 
   implementation libraries.jodahExpiringMap
   implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

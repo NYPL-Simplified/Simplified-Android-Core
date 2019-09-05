@@ -1,12 +1,12 @@
 package org.nypl.simplified.books.book_database
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.nypl.audiobook.android.api.PlayerAudioEngineRequest
-import org.nypl.audiobook.android.api.PlayerAudioEngines
-import org.nypl.audiobook.android.api.PlayerManifests
-import org.nypl.audiobook.android.api.PlayerPosition
-import org.nypl.audiobook.android.api.PlayerPositions
-import org.nypl.audiobook.android.api.PlayerResult
+import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
+import org.librarysimplified.audiobook.api.PlayerAudioEngines
+import org.librarysimplified.audiobook.api.PlayerManifests
+import org.librarysimplified.audiobook.api.PlayerPosition
+import org.librarysimplified.audiobook.api.PlayerPositions
+import org.librarysimplified.audiobook.api.PlayerResult
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookFormats

@@ -1,9 +1,9 @@
 package org.nypl.simplified.tests.books
 
-import org.nypl.audiobook.android.api.PlayerAudioBookProviderType
-import org.nypl.audiobook.android.api.PlayerAudioEngineProviderType
-import org.nypl.audiobook.android.api.PlayerAudioEngineRequest
-import org.nypl.audiobook.android.api.PlayerAudioEngineVersion
+import org.librarysimplified.audiobook.api.PlayerAudioBookProviderType
+import org.librarysimplified.audiobook.api.PlayerAudioEngineProviderType
+import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
+import org.librarysimplified.audiobook.api.PlayerAudioEngineVersion
 import org.slf4j.LoggerFactory
 
 /**
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
  * running in unit tests. Note that this class is registered via ServiceLoader and will be
  * picked up as an implementation by the player API.
  *
- * See: simplified-tests/src/main/resources/META-INF/services/org.nypl.audiobook.android.api.PlayerAudioEngineProviderType
+ * See: simplified-tests/src/main/resources/META-INF/services/org.librarysimplified.audiobook.api.PlayerAudioEngineProviderType
  */
 
 class MockedAudioEngineProvider : PlayerAudioEngineProviderType {

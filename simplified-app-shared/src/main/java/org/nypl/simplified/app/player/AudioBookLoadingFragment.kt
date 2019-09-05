@@ -9,9 +9,9 @@ import androidx.fragment.app.Fragment
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import org.nypl.audiobook.android.api.PlayerManifest
-import org.nypl.audiobook.android.api.PlayerManifests
-import org.nypl.audiobook.android.api.PlayerResult
+import org.librarysimplified.audiobook.api.PlayerManifest
+import org.librarysimplified.audiobook.api.PlayerManifests
+import org.librarysimplified.audiobook.api.PlayerResult
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.app.R

@@ -8,9 +8,9 @@ import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import org.joda.time.LocalDateTime
 import org.joda.time.format.ISODateTimeFormat
-import org.nypl.audiobook.android.api.PlayerPosition
-import org.nypl.audiobook.android.api.PlayerPositions
-import org.nypl.audiobook.android.api.PlayerResult
+import org.librarysimplified.audiobook.api.PlayerPosition
+import org.librarysimplified.audiobook.api.PlayerPositions
+import org.librarysimplified.audiobook.api.PlayerResult
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials

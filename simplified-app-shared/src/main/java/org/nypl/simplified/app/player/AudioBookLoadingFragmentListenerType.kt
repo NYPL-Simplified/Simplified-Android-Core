@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.player
 
-import org.nypl.audiobook.android.api.PlayerManifest
+import org.librarysimplified.audiobook.api.PlayerManifest
 import org.nypl.simplified.downloader.core.DownloaderType
 
 /**

@@ -113,7 +113,7 @@ class BookCoverProvider private constructor(
       request.into(imageView, callbackFinal)
     }
 
-    return future
+    return FluentFuture.from(future)
   }
 
   private fun coverURIOf(entry: FeedEntry.FeedEntryOPDS): URI? {

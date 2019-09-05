@@ -8,6 +8,7 @@ dependencies {
   api libraries.nyplDRMCore
 
   implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 
   compileOnly libraries.googleAutoValue
   annotationProcessor libraries.googleAutoValue

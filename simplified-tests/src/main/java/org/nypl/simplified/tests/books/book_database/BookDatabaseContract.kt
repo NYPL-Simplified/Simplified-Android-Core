@@ -5,7 +5,7 @@ import com.io7m.jfunctional.Option
 import org.joda.time.DateTime
 import org.junit.Assert
 import org.junit.Test
-import org.nypl.audiobook.android.api.PlayerPosition
+import org.librarysimplified.audiobook.api.PlayerPosition
 import org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
 import org.nypl.simplified.books.api.BookFormat.BookFormatPDF
