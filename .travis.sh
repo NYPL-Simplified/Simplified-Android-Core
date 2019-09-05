@@ -30,8 +30,6 @@ fi
 mkdir -p .travis || exit 1
 
 (cat <<EOF
-
-# Extra Travis CI properties
 org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
 org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 org.librarysimplified.simplye.keyAlias=nypl
@@ -39,9 +37,13 @@ org.librarysimplified.simplye.keyPassword=${NYPL_SIGNING_KEY_PASSWORD}
 org.librarysimplified.simplye.storePassword=${NYPL_SIGNING_STORE_PASSWORD}
 org.gradle.parallel=false
 
+EOF
 ) > gradle.properties.extra || exit 1
 
 cat gradle.properties gradle.properties.extra > gradle.properties.tmp || exit 1
+
 mv gradle.properties.tmp gradle.properties || exit 1
+
 cat gradle.properties
+
 exec ./gradlew clean assemble test
