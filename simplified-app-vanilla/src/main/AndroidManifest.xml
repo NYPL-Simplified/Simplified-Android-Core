@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.nypl.simplified.vanilla"
-  android:versionCode="4"
-  android:versionName="1.0.3">
+  package="org.nypl.simplified.vanilla">
 
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
