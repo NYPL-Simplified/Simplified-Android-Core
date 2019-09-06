@@ -9,6 +9,8 @@ import androidx.core.content.ContextCompat
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
+import com.instabug.library.Instabug
+import com.instabug.library.invocation.InstabugInvocationEvent
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
@@ -36,8 +38,10 @@ import org.nypl.simplified.app.AdobeDRMServices
 import org.nypl.simplified.app.Bugsnag
 import org.nypl.simplified.app.BundledContentResolver
 import org.nypl.simplified.app.NetworkConnectivityType
-import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
+import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.BuildConfig
+import org.nypl.simplified.app.R
 import org.nypl.simplified.app.SimplifiedNetworkConnectivity
 import org.nypl.simplified.app.catalog.CatalogBookBorrowStrings
 import org.nypl.simplified.app.catalog.CatalogBookRevokeStrings
@@ -53,6 +57,7 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerType
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType
 import org.nypl.simplified.app.splash.SplashActivity
+import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -109,6 +114,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.ServerSocket
+import java.util.Properties
 import java.util.ServiceLoader
 import java.util.concurrent.ExecutorService
 
@@ -173,6 +179,7 @@ class SimplifiedServices private constructor(
      */
 
     const val CURRENT_DATA_VERSION = "v4.0"
+    const val SIMPLYE = "org.nypl.simplified.simplye"
 
     private data class Directories(
       val directoryPrivateBaseVersioned: File,
@@ -201,6 +208,9 @@ class SimplifiedServices private constructor(
 
       publishEvent(strings.bootingBugsnag)
       this.initBugsnag(context, Bugsnag.getApiToken(assets))
+
+      publishEvent(strings.initializingInstabug)
+      this.configureInstabug(context)
 
       publishEvent(strings.bootingAdobeDRM)
       val adobeDRM =
@@ -779,6 +789,35 @@ class SimplifiedServices private constructor(
       }
 
       return documentsBuilder.build()
+    }
+
+    /**
+     * Currently Instabug is available for SimplyE debug builds only
+     */
+    private fun configureInstabug(context: Context) {
+      if (BuildConfig.DEBUG) {
+        if (Simplified.application.packageName == SIMPLYE) {
+
+          try {
+            val inputStream = context.assets.open("instabug.conf")
+            val p = Properties()
+            p.load(inputStream)
+            val instabugToken = p.getProperty("instabug.token")
+
+            if (instabugToken.isNullOrBlank()) {
+              throw IOException("instabug token not found!")
+            }
+            UIThread.runOnUIThread {
+              Instabug.Builder(Simplified.application, instabugToken)
+                      .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.SCREENSHOT)
+                      .build()
+            }
+          } catch (e: java.lang.Exception) {
+            this.logger.debug("Error intializing Instabug", android.os.Process.myPid())
+            e.printStackTrace()
+          }
+        }
+      }
     }
   }
 

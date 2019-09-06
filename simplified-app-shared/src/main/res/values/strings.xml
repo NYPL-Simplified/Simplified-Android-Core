@@ -503,6 +503,7 @@
   <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
   <string name="bootingScreenSize">Starting screen size…</string>
   <string name="bootingTenPrint">Booting TenPrint…</string>
+  <string name="initializingInstabug">Initializing Instabug…</string>
 
   <!-- PDF Reader -->
   <string name="table_of_contents_title">Table of Contents</string>
