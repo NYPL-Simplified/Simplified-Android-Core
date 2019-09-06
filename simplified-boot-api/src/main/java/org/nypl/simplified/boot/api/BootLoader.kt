@@ -86,6 +86,6 @@ class BootLoader<T>(
         future.setException(event.exception)
       }
     }
-    return future
+    return FluentFuture.from(future)
   }
 }

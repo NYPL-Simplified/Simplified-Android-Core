@@ -57,6 +57,7 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerType
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType
 import org.nypl.simplified.app.splash.SplashActivity
+import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -806,9 +807,11 @@ class SimplifiedServices private constructor(
             if (instabugToken.isNullOrBlank()) {
               throw IOException("instabug token not found!")
             }
-            Instabug.Builder(Simplified.application, instabugToken)
-                    .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.SCREENSHOT)
-                    .build()
+            UIThread.runOnUIThread {
+              Instabug.Builder(Simplified.application, instabugToken)
+                      .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.SCREENSHOT)
+                      .build()
+            }
           } catch (e: java.lang.Exception) {
             this.logger.debug("Error intializing Instabug", android.os.Process.myPid())
             e.printStackTrace()
