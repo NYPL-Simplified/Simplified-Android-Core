@@ -34,7 +34,14 @@ import org.nypl.simplified.analytics.api.Analytics
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
-import org.nypl.simplified.app.*
+import org.nypl.simplified.app.AdobeDRMServices
+import org.nypl.simplified.app.Bugsnag
+import org.nypl.simplified.app.BundledContentResolver
+import org.nypl.simplified.app.NetworkConnectivityType
+import org.nypl.simplified.app.ScreenSizeInformationType
+import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.BuildConfig
+import org.nypl.simplified.app.R
 import org.nypl.simplified.app.SimplifiedNetworkConnectivity
 import org.nypl.simplified.app.catalog.CatalogBookBorrowStrings
 import org.nypl.simplified.app.catalog.CatalogBookRevokeStrings
