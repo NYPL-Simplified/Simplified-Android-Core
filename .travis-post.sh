@@ -25,8 +25,6 @@ git rm -f build.properties
 cd "${WORKING_DIRECTORY}" ||
   fatal "could not restore working directory"
 
-cp -v ./simplified-app-simplye/build/outputs/apk/debug/*.apk   "${BINARIES_DIRECTORY}"
-cp -v ./simplified-app-simplye/build/outputs/apk/release/*.apk "${BINARIES_DIRECTORY}"
 cp -v ./simplified-app-vanilla/build/outputs/apk/debug/*.apk   "${BINARIES_DIRECTORY}"
 cp -v ./simplified-app-vanilla/build/outputs/apk/release/*.apk "${BINARIES_DIRECTORY}"
 

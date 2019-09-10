@@ -120,10 +120,4 @@ dependencies {
     // https://github.com/tony19/logback-android/issues/73
     exclude group: "com.google.android", module: "android"
   }
-
-  if (project.hasProperty("org.librarysimplified.with_findaway")) {
-    if (project.property("org.librarysimplified.with_findaway") == "true") {
-      api libraries.nyplFindaway
-    }
-  }
 }

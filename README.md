@@ -75,36 +75,6 @@ org.librarysimplified.nexus.username=USERNAME
 org.librarysimplified.nexus.password=PASSWORD
 ~~~
 
-#### Adobe Certificate
-
-The project currently builds, amongst other things, a version of the SimplyE application that
-supports Adobe DRM. In order to use the DRM,  the correct certificate file must be placed at
-`simplified-app-simplye/src/main/assets/ReaderClientCert.sig` in order for Adobe DRM to work.
-If you fail to place the certificate at this location, the application will refuse to build
-with the following error:
-
-~~~
-You are attempting to build with Adobe DRM but have not added the required
-certificate file at ./simplified-app-simplye/src/main/assets/ReaderClientCert.sig
-
-If you do not want to use Adobe DRM, define the following in ./gradle.properties:
-
-org.librarysimplified.with_drm_adobe = false
-~~~
-
-As explained by the error message, if you want to build the applications _without_ Adobe DRM
-support, it is necessary to set the `org.librarysimplified.with_drm_adobe` property to `false`
-in the `gradle.properties` file at the root of the project.
-
-#### Findaway Support
-
-The project currently builds, amongst other things, a version of the SimplyE application that
-supports Findaway audio books. This requires a Findaway license.
-
-If you want to build the applications _without_ support for Findaway audio book support, it is
-necessary to set the `org.librarysimplified.with_findaway` property to `false` in the
-`gradle.properties` file at the root of the project.
-
 #### Bugsnag Support
 
 The project currently builds, amongst other things, a version of the SimplyE application that
@@ -236,7 +206,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
 |[org.librarysimplified.analytics.lfa](simplified-analytics-lfa)|LibraryForAll analytics implementation|
 |[org.librarysimplified.app.shared](simplified-app-shared)|Shared application module|
-|[org.librarysimplified.app.simplye](simplified-app-simplye)|SimplyE Application|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.app.vanilla.with_profiles](simplified-app-vanilla-with-profiles)|Vanilla application [with profiles enabled]|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|

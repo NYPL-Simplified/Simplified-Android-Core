@@ -46,7 +46,6 @@ ext {
   }
 
   nyplAudioBookAPIVersion = "3.0.0-beta001"
-  nyplFindawayVersion = "3.0.0-beta001"
 }
 
 ext.libraries = [
@@ -93,11 +92,7 @@ ext.libraries = [
   nyplAudioBookMocking       : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.mocking:${nyplAudioBookAPIVersion}",
   nyplAudioBookOpenAccess    : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access:${nyplAudioBookAPIVersion}",
   nyplAudioBookViews         : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.views:${nyplAudioBookAPIVersion}",
-  nyplDRMAdobeProvider       : "org.nypl.drm:nypl-drm-adobe-provider:1.0.0",
   nyplDRMCore                : "org.nypl.drm:nypl-drm-core:1.0.0",
-  nyplDRMLibNYPLAdobe        : "org.nypl.drm:libnypl_adobe:1.0.0",
-  nyplDRMLibNYPLAdobeFilter  : "org.nypl.drm:libnypl_adobe_filter:1.0.0",
-  nyplFindaway               : "org.librarysimplified.audiobook.audioengine:org.librarysimplified.audiobook.audioengine.core:${nyplFindawayVersion}",
   nyplPDFAPI                 : "org.nypl.pdf:api:0.0.4",
   nyplPDFViewer              : "org.nypl.pdf:pdfviewer:0.0.4",
   picasso                    : "com.squareup.picasso:picasso:2.5.2",
@@ -330,14 +325,6 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     maven { url "https://jitpack.io" }
     jcenter()
     google()
-
-    if (project.hasProperty("org.librarysimplified.with_findaway")) {
-      if (project.property("org.librarysimplified.with_findaway") == "true") {
-        maven {
-          url "http://maven.findawayworld.com/artifactory/libs-release/"
-        }
-      }
-    }
   }
 }
 
