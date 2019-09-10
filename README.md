@@ -108,9 +108,11 @@ a keystore to `simplified-app-vanilla/keystore.jks` and set the following values
 `$HOME/.gradle/gradle.properties`:
 
 ~~~
-org.librarysimplified.keyAlias=
-org.librarysimplified.keyPassword=
-org.librarysimplified.storePassword=
+# Replace KEYALIAS, KEYPASSWORD, and STOREPASSWORD appropriately.
+# Do NOT use quotes around values.
+org.librarysimplified.keyAlias=KEYALIAS
+org.librarysimplified.keyPassword=KEYPASSWORD
+org.librarysimplified.storePassword=STOREPASSWORD
 ~~~
 
 ### Project Structure / Architecture
