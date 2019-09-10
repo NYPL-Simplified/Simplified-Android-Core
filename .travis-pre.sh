@@ -64,6 +64,10 @@ info "installing keystore"
 
 cp -v ".travis/credentials/APK Signing/nypl-keystore.jks" \
   simplified-app-simplye/keystore.jks
+cp -v ".travis/credentials/APK Signing/nypl-keystore.jks" \
+  simplified-app-vanilla/keystore.jks
+cp -v ".travis/credentials/APK Signing/nypl-keystore.jks" \
+  simplified-app-vanilla-with-profiles/keystore.jks
 
 #------------------------------------------------------------------------
 # Clone binaries repos
