@@ -51,7 +51,6 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.theme.ThemeControl
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
 
@@ -600,12 +599,14 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
         .profileCurrentlyUsedAccountProviders()
         .map { p -> p.toDescription() }
 
+    this.logger.debug("should show testing providers: {}", preferences.showTestingLibraries())
+
     val availableAccountProviders =
       ArrayList(Simplified.application.services()
         .accountProviderRegistry
         .accountProviderDescriptions()
         .values
-        .filter { provider -> showShowProvider(provider, preferences) })
+        .filter { provider -> shouldShowProvider(provider, preferences) })
 
     availableAccountProviders.removeAll(usedAccountProviders)
     availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
@@ -618,7 +619,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     return availableAccountProviders
   }
 
-  private fun showShowProvider(provider: AccountProviderDescriptionType, preferences: ProfilePreferences) =
+  private fun shouldShowProvider(provider: AccountProviderDescriptionType, preferences: ProfilePreferences) =
     provider.metadata.isProduction || preferences.showTestingLibraries()
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
