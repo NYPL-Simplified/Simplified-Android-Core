@@ -32,9 +32,9 @@ mkdir -p .travis || exit 1
 (cat <<EOF
 org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
 org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
-org.librarysimplified.simplye.keyAlias=nypl
-org.librarysimplified.simplye.keyPassword=${NYPL_SIGNING_KEY_PASSWORD}
-org.librarysimplified.simplye.storePassword=${NYPL_SIGNING_STORE_PASSWORD}
+org.librarysimplified.keyAlias=nypl
+org.librarysimplified.keyPassword=${NYPL_SIGNING_KEY_PASSWORD}
+org.librarysimplified.storePassword=${NYPL_SIGNING_STORE_PASSWORD}
 org.gradle.parallel=false
 
 EOF

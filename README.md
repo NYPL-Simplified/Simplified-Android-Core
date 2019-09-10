@@ -9,6 +9,20 @@ The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android clien
 
 _Image by [Predrag Kezic](https://pixabay.com/users/PredragKezic-582203/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=581229) from [Pixabay](https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=581229)_
 
+### What Is This?
+
+The contents of this repository provide the framework of an application used to build,
+amongst others, the NYPL's official [SimplyE](https://www.nypl.org/books-music-movies/ebookcentral/simplye)
+application. The framework provides a base application with numerous configuration
+switches, and configurable _branding_. The expectation is that third parties will
+produce final builds of applications by defining _application frontends_ that specify
+dependencies on the framework, custom color schemes, and logos. The repository contains
+an example frontend, [Vanilla](simplified-app-vanilla), that shows how this is achieved.
+
+The application frontend for the NYPL
+SimplyE application can be found in its [own
+repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
+
 ### Building
 
 #### Build!
@@ -77,29 +91,26 @@ org.librarysimplified.nexus.password=PASSWORD
 
 #### Bugsnag Support
 
-The project currently builds, amongst other things, a version of the SimplyE application that
-supports error reporting via [Bugsnag](https://www.bugsnag.com/). This requires that a configuration
-file be placed at `simplified-app-simplye/src/main/assets/bugsnag.conf` containing your Bugsnag
-API token:
+The core application provides support for error reporting via [Bugsnag](https://www.bugsnag.com/).
+This requires that a configuration file be placed at `src/main/assets/bugsnag.conf` containing
+your Bugsnag API token:
 
 ~~~
 bugsnag.api_token = 1234123412341234
 ~~~
 
-If you want to build the applications _without_ support for Bugsnag, it is
-necessary to set the `org.librarysimplified.with_bugsnag` property to `false` in the
-`gradle.properties` file at the root of the project.
+If you do not provide this configuration file, Bugsnag support will be disabled at run-time.
 
 #### APK signing
 
-If you wish to generate a signed APK for publishing the application, you will need to copy
-a keystore to `simplified-app-simplye/keystore.jks` and set the following values correctly in
+If you wish to generate a signed APK for publishing the Vanilla application, you will need to copy
+a keystore to `simplified-app-vanilla/keystore.jks` and set the following values correctly in
 `$HOME/.gradle/gradle.properties`:
 
 ~~~
-org.librarysimplified.simplye.keyAlias=
-org.librarysimplified.simplye.keyPassword=
-org.librarysimplified.simplye.storePassword=
+org.librarysimplified.keyAlias=
+org.librarysimplified.keyPassword=
+org.librarysimplified.storePassword=
 ~~~
 
 ### Project Structure / Architecture

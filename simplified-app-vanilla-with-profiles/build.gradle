@@ -30,10 +30,10 @@ android {
 
   signingConfigs {
     release {
-      keyAlias findProperty("org.librarysimplified.simplye.keyAlias")
-      keyPassword findProperty("org.librarysimplified.simplye.keyPassword")
+      keyAlias findProperty("org.librarysimplified.keyAlias")
+      keyPassword findProperty("org.librarysimplified.keyPassword")
       storeFile file("keystore.jks")
-      storePassword findProperty("org.librarysimplified.simplye.storePassword")
+      storePassword findProperty("org.librarysimplified.storePassword")
     }
   }
 
