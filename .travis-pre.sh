@@ -73,7 +73,7 @@ info "cloning binaries"
 git clone \
   --depth 1 \
   --single-branch \
-  --branch lfa \
+  --branch develop \
   "https://${NYPL_GITHUB_ACCESS_TOKEN}@github.com/NYPL-Simplified/android-binaries" \
   ".travis/binaries" \
   >> .travis/pre.txt 2>&1 \
