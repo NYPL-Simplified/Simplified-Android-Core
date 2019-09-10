@@ -273,6 +273,27 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.theme](simplified-theme)|Application theme functionality|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 
+#### Adobe DRM Support
+
+The project currently makes calls to the NYPL's [Adobe DRM
+API](https://github.com/NYPL-Simplified/DRM-Android-Core). The API
+is structured in a manner that means that enabling actual support
+for Adobe DRM simply entails adding a dependency on the NYPL's Adobe
+DRM _implementation_. This implementation is only available to DRM
+licensees. Please get in touch with us if you have a DRM license and
+want to produce a DRM-enabled build!
+
+### Findaway Audiobook DRM support
+
+The project currently uses the NYPL's [AudioBook API](https://github.com/NYPL-Simplified/audiobook-android)
+to provide support for playing audio books. The API is structured such
+that adding support for new types of audiobooks and playback engines
+only involves adding those modules to the classpath. By default, the
+application framework only specifies a dependency on the NYPL's DRM-free
+audiobook player module, but there is also an NYPL-developed Findaway
+module for Findaway licensees. Please get in touch with us if you have
+a Findaway license and want to produce a Findaway-enabled build.
+
 ### Binaries
 
 Binaries for every commit are built and published in the [binaries](https://github.com/NYPL-Simplified/android-binaries)
