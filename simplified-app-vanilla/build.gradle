@@ -28,6 +28,15 @@ android {
     setProperty("archivesBaseName", "vanilla-${versionName}-${versionCode}")
   }
 
+  signingConfigs {
+    release {
+      keyAlias findProperty("org.librarysimplified.simplye.keyAlias")
+      keyPassword findProperty("org.librarysimplified.simplye.keyPassword")
+      storeFile file("keystore.jks")
+      storePassword findProperty("org.librarysimplified.simplye.storePassword")
+    }
+  }
+
   packagingOptions {
     exclude "META-INF/LICENSE"
 
