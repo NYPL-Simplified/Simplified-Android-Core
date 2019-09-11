@@ -85,12 +85,13 @@ class ReaderTOCActivity : AppCompatActivity(), ReaderTOCSelectionListenerType {
      * will be reported using the request code [.TOC_SELECTION_REQUEST_CODE].
      *
      * @param from The parent activity
-     * @param toc  The table of contents
+     * @param toc The table of contents
      */
 
     fun startActivityForResult(
       from: Activity,
-      parameters: ReaderTOCParameters) {
+      parameters: ReaderTOCParameters
+    ) {
 
       val i = Intent(Intent.ACTION_PICK)
       i.setClass(from, ReaderTOCActivity::class.java)

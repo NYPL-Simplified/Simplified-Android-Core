@@ -1,7 +1,6 @@
 package org.nypl.simplified.app.login
 
 import android.content.res.Resources
-import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.app.R
 
@@ -16,7 +15,8 @@ class LogoutStringResources(val resources: Resources) : AccountLogoutStringResou
 
   override fun logoutDeactivatingDeviceAdobeFailed(
     errorCode: String,
-    e: Throwable): String {
+    e: Throwable
+  ): String {
     return this.resources.getString(R.string.logoutDeactivatingDeviceAdobeFailed, errorCode, e.javaClass.simpleName)
   }
 
@@ -55,5 +55,4 @@ class LogoutStringResources(val resources: Resources) : AccountLogoutStringResou
 
   override val logoutStarted: String
     get() = this.resources.getString(R.string.logoutStarted)
-
 }

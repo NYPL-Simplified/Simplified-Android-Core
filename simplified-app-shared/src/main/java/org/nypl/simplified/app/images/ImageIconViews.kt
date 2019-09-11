@@ -29,15 +29,16 @@ object ImageIconViews {
   /**
    * Load the image at the given URI into the given icon view.
    *
-   * @param assets    The current asset manager
+   * @param assets The current asset manager
    * @param iconView The icon view
-   * @param image     The image URI
+   * @param image The image URI
    */
 
   fun configureIconViewFromURI(
     assets: AssetManager,
     iconView: ImageView,
-    image: URI) {
+    image: URI
+  ) {
 
     return if ("simplified-asset" == image.scheme) {
       configureFromAsset(image, assets, iconView)
@@ -69,7 +70,8 @@ object ImageIconViews {
   private fun configureFromAsset(
     image: URI,
     assets: AssetManager,
-    iconView: ImageView) {
+    iconView: ImageView
+  ) {
     val path = image.schemeSpecificPart
     LOG.debug("opening image asset: {}", path)
     try {

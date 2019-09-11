@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.reader
 
-
 import android.app.DialogFragment
 import android.graphics.Typeface
 import android.os.Bundle
@@ -53,7 +52,8 @@ class ReaderSettingsDialog : DialogFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    state: Bundle?): View {
+    state: Bundle?
+  ): View {
 
     this.profiles =
       (this.activity as ReaderSettingsListenerType).onReaderSettingsDialogWantsProfilesController()
@@ -164,13 +164,13 @@ class ReaderSettingsDialog : DialogFragment() {
         override fun onProgressChanged(
           @Nullable bar: SeekBar,
           progress: Int,
-          from_user: Boolean) {
+          from_user: Boolean
+        ) {
 
           this.bright = progress / 100.0
         }
 
         override fun onStartTrackingTouch(@Nullable bar: SeekBar) {
-
         }
 
         override fun onStopTrackingTouch(@Nullable bar: SeekBar) {

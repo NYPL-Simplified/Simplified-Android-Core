@@ -4,7 +4,7 @@ import android.content.res.Resources
 import org.nypl.simplified.app.R
 import org.nypl.simplified.boot.api.BootStringResourcesType
 
-class SimplifiedServicesStrings(private val resources: Resources): BootStringResourcesType {
+class SimplifiedServicesStrings(private val resources: Resources) : BootStringResourcesType {
 
   override val bootStarted: String =
     this.resources.getString(R.string.bootStarted)

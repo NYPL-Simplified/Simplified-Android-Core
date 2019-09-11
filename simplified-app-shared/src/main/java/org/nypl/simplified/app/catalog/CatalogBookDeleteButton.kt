@@ -15,11 +15,11 @@ import java.util.Objects
  */
 
 class CatalogBookDeleteButton(
-    activity: AppCompatActivity,
-    booksController: BooksControllerType,
-    account: AccountType,
-    bookID: BookID)
-  : AppCompatButton(activity), CatalogBookButtonType {
+  activity: AppCompatActivity,
+  booksController: BooksControllerType,
+  account: AccountType,
+  bookID: BookID
+) : AppCompatButton(activity), CatalogBookButtonType {
 
   init {
     val resources =

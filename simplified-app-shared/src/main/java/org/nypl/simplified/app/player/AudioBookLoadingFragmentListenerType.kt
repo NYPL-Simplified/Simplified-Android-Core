@@ -38,5 +38,4 @@ interface AudioBookLoadingFragmentListenerType {
    */
 
   fun onLoadingFragmentLoadingFailed(exception: Exception)
-
 }

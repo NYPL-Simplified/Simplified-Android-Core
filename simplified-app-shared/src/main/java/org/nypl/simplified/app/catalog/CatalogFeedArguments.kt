@@ -19,7 +19,7 @@ sealed class CatalogFeedArguments : Serializable {
    * connectivity.
    */
 
-  abstract val requiresNetworkConnectivity : Boolean
+  abstract val requiresNetworkConnectivity: Boolean
 
   /**
    * The title to be displayed in the action bar for the feed.
@@ -48,8 +48,8 @@ sealed class CatalogFeedArguments : Serializable {
     override val upStack: ImmutableStack<CatalogFeedArguments>,
     val drawerShouldOpen: Boolean,
     val feedURI: URI,
-    override val isSearchResults: Boolean)
-    : CatalogFeedArguments() {
+    override val isSearchResults: Boolean
+  ) : CatalogFeedArguments() {
     override val requiresNetworkConnectivity = true
   }
 
@@ -62,10 +62,9 @@ sealed class CatalogFeedArguments : Serializable {
     override val upStack: ImmutableStack<CatalogFeedArguments>,
     val facetType: FeedFacetPseudo.FacetType,
     val searchTerms: OptionType<String>,
-    val selection: FeedBooksSelection)
-    : CatalogFeedArguments() {
+    val selection: FeedBooksSelection
+  ) : CatalogFeedArguments() {
     override val requiresNetworkConnectivity = false
     override val isSearchResults: Boolean = false
   }
-
 }

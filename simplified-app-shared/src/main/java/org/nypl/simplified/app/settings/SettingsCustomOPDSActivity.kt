@@ -146,4 +146,3 @@ class SettingsCustomOPDSActivity : NavigationDrawerActivity() {
     this.accountSubscription?.unsubscribe()
   }
 }
-

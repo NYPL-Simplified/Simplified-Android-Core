@@ -140,7 +140,6 @@ class Simplified : MultiDexApplication() {
   fun services(): SimplifiedServicesType =
           this.bootFuture.get(30L, TimeUnit.SECONDS)
 
-
   @Synchronized
   private fun getActualCardCreator(context: Context): CardCreator {
       return CardCreator(context.assets, "prod", context.resources)

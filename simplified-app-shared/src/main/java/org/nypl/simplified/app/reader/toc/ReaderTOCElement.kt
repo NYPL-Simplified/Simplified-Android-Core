@@ -30,4 +30,5 @@ data class ReaderTOCElement(
    * @return The title of the element
    */
 
-  val title: String): Serializable
+  val title: String
+) : Serializable

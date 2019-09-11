@@ -20,7 +20,8 @@ object CatalogBookFormats {
   @JvmStatic
   fun contentDescriptionOfEntry(
     resources: Resources,
-    entry: FeedEntryOPDS): String {
+    entry: FeedEntryOPDS
+  ): String {
     return when (entry.probableFormat) {
       BOOK_FORMAT_EPUB -> {
         resources.getString(

@@ -14,8 +14,8 @@ import java.io.Serializable
  * @property id The BookID for the PDF Book
  */
 data class PdfReaderParameters(
-        val accountId: AccountID,
-        val documentTile: String,
-        val pdfFile: File,
-        val id: BookID
+  val accountId: AccountID,
+  val documentTile: String,
+  val pdfFile: File,
+  val id: BookID
 ) : Serializable

@@ -61,7 +61,8 @@ class AudioBookLoadingFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    state: Bundle?): View? {
+    state: Bundle?
+  ): View? {
     return inflater.inflate(R.layout.audio_book_player_loading, container, false)
   }
 
@@ -120,7 +121,8 @@ class AudioBookLoadingFragment : Fragment() {
   private fun tryFetchNewManifest(
     credentials: AccountAuthenticationCredentials,
     manifestURI: URI,
-    listener: AudioBookLoadingFragmentListenerType) {
+    listener: AudioBookLoadingFragmentListenerType
+  ) {
 
     val downloader = listener.onLoadingFragmentWantsDownloader()
     val fragment = this
@@ -132,20 +134,21 @@ class AudioBookLoadingFragment : Fragment() {
         object : DownloadListenerType {
           override fun onDownloadStarted(
             download: DownloadType,
-            expectedTotal: Long) {
+            expectedTotal: Long
+          ) {
             fragment.onManifestDownloadStarted()
           }
 
           override fun onDownloadDataReceived(
             download: DownloadType,
             runningTotal: Long,
-            expectedTotal: Long) {
+            expectedTotal: Long
+          ) {
             fragment.onManifestDownloadDataReceived(
               runningTotal, expectedTotal)
           }
 
           override fun onDownloadCancelled(download: DownloadType) {
-
           }
 
           override fun onDownloadFailed(
@@ -153,13 +156,15 @@ class AudioBookLoadingFragment : Fragment() {
             status: Int,
             runningTotal: Long,
             problemReport: OptionType<HTTPProblemReport>,
-            exception: OptionType<Throwable>) {
+            exception: OptionType<Throwable>
+          ) {
             fragment.onManifestDownloadFailed(status, exception)
           }
 
           override fun onDownloadCompleted(
             download: DownloadType,
-            file: File) {
+            file: File
+          ) {
             fragment.onManifestDownloaded(download.contentType, file)
           }
         })
@@ -167,7 +172,8 @@ class AudioBookLoadingFragment : Fragment() {
 
   private fun onManifestDownloaded(
     contentType: String,
-    file: File) {
+    file: File
+  ) {
 
     UIThread.runOnUIThread {
       this.progress.isIndeterminate = false
@@ -218,7 +224,8 @@ class AudioBookLoadingFragment : Fragment() {
 
   private fun onManifestDownloadFailed(
     status: Int,
-    exception: OptionType<Throwable>) {
+    exception: OptionType<Throwable>
+  ) {
 
     if (exception is Some<Throwable>) {
       this.log.error("manifest download failed: status {}: ", status, exception.get())
@@ -240,7 +247,8 @@ class AudioBookLoadingFragment : Fragment() {
 
   private fun onManifestDownloadDataReceived(
     runningTotal: Long,
-    expectedTotal: Long) {
+    expectedTotal: Long
+  ) {
 
     val progress = (runningTotal.toDouble() / expectedTotal.toDouble()) * 100.0
     UIThread.runOnUIThread {

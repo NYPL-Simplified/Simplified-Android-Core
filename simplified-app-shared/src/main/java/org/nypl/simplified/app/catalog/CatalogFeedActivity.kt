@@ -128,14 +128,15 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    * Configure the "entry point" facet layout. This causes the "entry point" buttons to appear
    * (or not) at the top of the screen based on the available facets.
    *
-   * @param feed        The feed
-   * @param layout      The view group that will contain facet elements
-   * @param resources   The app resources
+   * @param feed The feed
+   * @param layout The view group that will contain facet elements
+   * @param resources The app resources
    */
 
   private fun configureFacetEntryPointButtons(
     feed: Feed?,
-    layout: ViewGroup) {
+    layout: ViewGroup
+  ) {
 
     UIThread.checkIsUIThread()
 
@@ -236,21 +237,21 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     return ColorStateList(states, colors)
   }
 
-
   /**
    * Configure the facets layout. This is what causes facets to be shown or not
    * shown at the top of the screen when rendering a feed.
    *
-   * @param screen    A provider of screen size information
-   * @param feed      The feed
-   * @param layout    The view group that will contain facet elements
+   * @param screen A provider of screen size information
+   * @param feed The feed
+   * @param layout The view group that will contain facet elements
    * @param resources The app resources
    */
 
   private fun configureFacets(
     screen: ScreenSizeInformationType,
     feed: FeedWithoutGroups,
-    layout: ViewGroup) {
+    layout: ViewGroup
+  ) {
 
     UIThread.checkIsUIThread()
 
@@ -331,7 +332,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun configureUpButton(
     upStack: ImmutableStack<CatalogFeedArguments>,
-    title: String) {
+    title: String
+  ) {
     val bar = this.supportActionBar
     if (!upStack.isEmpty) {
       bar!!.title = title
@@ -340,7 +342,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun loadFeed(
     feedLoader: FeedLoaderType,
-    feedURI: URI) {
+    feedURI: URI
+  ) {
     this.logger.debug("loading feed: {}", feedURI)
 
     val loginState = this.account.loginState
@@ -405,7 +408,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun onFeedResultFailedAuthentication(
     feedURI: URI,
-    exception: java.lang.Exception) {
+    exception: java.lang.Exception
+  ) {
 
     // XXX: ?
   }
@@ -1093,14 +1097,16 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   private fun onSelectedBook(
     newUpStack: ImmutableStack<CatalogFeedArguments>,
-    e: FeedEntryOPDS) {
+    e: FeedEntryOPDS
+  ) {
     this.logger.debug("onSelectedBook: {}", this)
     CatalogBookDetailActivity.startNewActivity(this, newUpStack, e)
   }
 
   private fun onSelectedFeedGroup(
     newUpStack: ImmutableStack<CatalogFeedArguments>,
-    f: FeedGroup) {
+    f: FeedGroup
+  ) {
     this.logger.debug("onSelectFeed: {}", this)
 
     this.catalogActivityForkNew(CatalogFeedArgumentsRemote(
@@ -1147,7 +1153,11 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     val booksUri =
       URI.create("Books")
     val searchTerms =
-      if (c.searchTerms is Some<String>) { c.searchTerms.get() } else { null }
+      if (c.searchTerms is Some<String>) {
+        c.searchTerms.get()
+      } else {
+        null
+      }
 
     val showAllCollections =
       try {
@@ -1196,7 +1206,6 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }
-
   }
 
   /**
@@ -1215,7 +1224,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private inner class BooksLocalSearchQueryHandler internal constructor(
     private val resources: Resources,
     private val feedArguments: CatalogFeedArguments,
-    private val facetActive: FacetType) : OnQueryTextListener {
+    private val facetActive: FacetType
+  ) : OnQueryTextListener {
 
     override fun onQueryTextChange(@Nullable s: String): Boolean = true
 
@@ -1245,7 +1255,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private inner class OpenSearchQueryHandler internal constructor(
     private val resources: Resources,
     private val feedArguments: CatalogFeedArguments,
-    private val search: OPDSOpenSearch1_1) : OnQueryTextListener {
+    private val search: OPDSOpenSearch1_1
+  ) : OnQueryTextListener {
 
     override fun onQueryTextChange(text: String): Boolean = true
 
@@ -1294,7 +1305,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     feed: Feed,
     feedSelection: FeedBooksSelection,
     upStack: ImmutableStack<CatalogFeedArguments>,
-    searchTerms: OptionType<String>) =
+    searchTerms: OptionType<String>
+  ) =
     when (facet) {
       is FeedFacet.FeedFacetOPDS ->
         this.openActivityForFeedFacetOPDS(feed, upStack, facet)
@@ -1307,7 +1319,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     upStack: ImmutableStack<CatalogFeedArguments>,
     facet: FeedFacet.FeedFacetPseudo,
     searchTerms: OptionType<String>,
-    feedSelection: FeedBooksSelection) =
+    feedSelection: FeedBooksSelection
+  ) =
     this.catalogActivityForkNewReplacing(
       CatalogFeedArgumentsLocalBooks(
         title = feed.feedTitle,
@@ -1319,7 +1332,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private fun openActivityForFeedFacetOPDS(
     feed: Feed,
     upStack: ImmutableStack<CatalogFeedArguments>,
-    facet: FeedFacet.FeedFacetOPDS) =
+    facet: FeedFacet.FeedFacetOPDS
+  ) =
     this.catalogActivityForkNewReplacing(
       CatalogFeedArgumentsRemote(
         title = feed.feedTitle,
@@ -1340,13 +1354,14 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      * Modifies Bundle based on attributes and type (from local or remote)
      * before being given to Intent in the calling method.
      *
-     * @param b    The argument bundle
+     * @param b The argument bundle
      * @param args The feed arguments
      */
 
     fun setActivityArguments(
       b: Bundle,
-      args: CatalogFeedArguments) {
+      args: CatalogFeedArguments
+    ) {
 
       b.putSerializable(this.CATALOG_ARGS, args)
 

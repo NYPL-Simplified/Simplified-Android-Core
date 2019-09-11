@@ -32,5 +32,4 @@ class ImageAccountIconRequestHandler : RequestHandler() {
 
   private fun failQuietly() =
     Result(ByteArrayInputStream(ByteArray(0)), DISK)
-
 }

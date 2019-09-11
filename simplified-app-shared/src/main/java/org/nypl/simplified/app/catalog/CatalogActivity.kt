@@ -140,13 +140,14 @@ abstract class CatalogActivity : NavigationDrawerActivity() {
     /**
      * Set the arguments for the activity that will be created.
      *
-     * @param b        The argument bundle
+     * @param b The argument bundle
      * @param upStack The up stack for the created activity
      */
 
     fun setActivityArguments(
       b: Bundle,
-      upStack: ImmutableStack<CatalogFeedArguments>) {
+      upStack: ImmutableStack<CatalogFeedArguments>
+    ) {
       b.putSerializable(CATALOG_UP_STACK_ID, upStack)
     }
   }
