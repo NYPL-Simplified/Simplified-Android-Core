@@ -81,18 +81,18 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 class CatalogBookDetailView(
-    private val activity: AppCompatActivity,
-    private val inflater: LayoutInflater,
-    private val account: AccountType,
-    private val coverProvider: BookCoverProviderType,
-    private val booksRegistry: BookRegistryReadableType,
-    private val analytics: AnalyticsType,
-    private val profilesController: ProfilesControllerType,
-    private val booksController: BooksControllerType,
-    private val screenSizeInformation: ScreenSizeInformationType,
-    private val networkConnectivity: NetworkConnectivityType,
-    entryInitial: FeedEntryOPDS)
-  : BookStatusMatcherType<Unit, UnreachableCodeException>,
+  private val activity: AppCompatActivity,
+  private val inflater: LayoutInflater,
+  private val account: AccountType,
+  private val coverProvider: BookCoverProviderType,
+  private val booksRegistry: BookRegistryReadableType,
+  private val analytics: AnalyticsType,
+  private val profilesController: ProfilesControllerType,
+  private val booksController: BooksControllerType,
+  private val screenSizeInformation: ScreenSizeInformationType,
+  private val networkConnectivity: NetworkConnectivityType,
+  entryInitial: FeedEntryOPDS
+) : BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
   BookStatusDownloadingMatcherType<Unit, UnreachableCodeException> {
 
@@ -235,7 +235,6 @@ class CatalogBookDetailView(
 
     Futures.addCallback(future, object : FutureCallback<kotlin.Unit?> {
       override fun onSuccess(result: kotlin.Unit?) {
-
       }
 
       override fun onFailure(exception: Throwable) {
@@ -726,7 +725,8 @@ class CatalogBookDetailView(
 
   private fun onStatus(
     entry: FeedEntryOPDS,
-    status_opt: OptionType<BookStatusType>) {
+    status_opt: OptionType<BookStatusType>
+  ) {
     if (status_opt is Some<BookStatusType>) {
       UIThread.runOnUIThread { status_opt.get().matchBookStatus(this) }
     } else {
@@ -811,7 +811,8 @@ class CatalogBookDetailView(
 
     private fun configureSummaryWebView(
       entry: OPDSAcquisitionFeedEntry,
-      summaryText: WebView) {
+      summaryText: WebView
+    ) {
       val text = StringBuilder()
       text.append("<html>")
       text.append("<head>")
@@ -855,7 +856,8 @@ class CatalogBookDetailView(
 
     private fun configureViewTextAuthor(
       entry: OPDSAcquisitionFeedEntry,
-      authors: TextView) {
+      authors: TextView
+    ) {
       val buffer = StringBuilder()
       val `as` = entry.authors
       for (index in `as`.indices) {
@@ -871,7 +873,8 @@ class CatalogBookDetailView(
     private fun configureViewTextMeta(
       resources: Resources,
       entry: OPDSAcquisitionFeedEntry,
-      meta: TextView) {
+      meta: TextView
+    ) {
       val buffer = StringBuilder()
       this.createViewTextPublicationDate(resources, entry, buffer)
       this.createViewTextPublisher(resources, entry, buffer)
@@ -883,7 +886,8 @@ class CatalogBookDetailView(
     private fun createViewTextCategories(
       resources: Resources,
       entry: OPDSAcquisitionFeedEntry,
-      buffer: StringBuilder) {
+      buffer: StringBuilder
+    ) {
 
       val cats = entry.categories
       var hasGenres = false
@@ -917,7 +921,8 @@ class CatalogBookDetailView(
     private fun createViewTextPublicationDate(
       resources: Resources,
       entry: OPDSAcquisitionFeedEntry,
-      buffer: StringBuilder): String {
+      buffer: StringBuilder
+    ): String {
       if (buffer.length > 0) {
         buffer.append("\n")
       }
@@ -945,7 +950,8 @@ class CatalogBookDetailView(
     private fun createViewTextPublisher(
       resources: Resources,
       entry: OPDSAcquisitionFeedEntry,
-      buffer: StringBuilder) {
+      buffer: StringBuilder
+    ) {
       val publisher = entry.publisher
       if (publisher is Some<String>) {
         if (buffer.length > 0) {
@@ -961,8 +967,10 @@ class CatalogBookDetailView(
     private fun createViewTextDistributor(
       resources: Resources,
       entry: OPDSAcquisitionFeedEntry,
-      buffer: StringBuilder) {
-      if (buffer.length > 0) {
+      buffer: StringBuilder
+    ) {
+      if (buffer.length > 0
+      ) {
         buffer.append("\n")
       }
 
@@ -971,7 +979,8 @@ class CatalogBookDetailView(
 
     fun configureButtonMargins(
       screenSizeInformation: ScreenSizeInformationType,
-      viewGroup: ViewGroup) {
+      viewGroup: ViewGroup
+    ) {
 
       val marginRight = screenSizeInformation.screenDPToPixels(8).toInt()
       for (i in 0 until viewGroup.childCount) {
@@ -985,7 +994,8 @@ class CatalogBookDetailView(
     fun configureViewTextFormat(
       resources: Resources,
       entry: FeedEntryOPDS,
-      bookHeaderFormat: TextView) {
+      bookHeaderFormat: TextView
+    ) {
       when (entry.probableFormat) {
         BOOK_FORMAT_EPUB -> {
           // Not showing the text for epub format books is deliberate!

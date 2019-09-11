@@ -124,5 +124,4 @@ class CatalogBookRevokeStrings(private val resources: Resources) : BookRevokeStr
 
   override val revokeStarted: String
     get() = this.resources.getString(R.string.revokeStarted)
-
 }

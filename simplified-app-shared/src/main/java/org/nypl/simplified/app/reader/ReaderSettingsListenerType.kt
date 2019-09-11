@@ -20,5 +20,4 @@ interface ReaderSettingsListenerType {
    */
 
   fun onReaderSettingsDialogWantsScreenSize(): ScreenSizeInformationType
-
 }

@@ -31,7 +31,8 @@ class CatalogFeedLane(
   context: Context,
   private val covers: BookCoverProviderType,
   private val screen: ScreenSizeInformationType,
-  private val listener: CatalogFeedLaneListenerType) : LinearLayout(context) {
+  private val listener: CatalogFeedLaneListenerType
+) : LinearLayout(context) {
 
   private val imageHeight: Int
   private val progress: ProgressBar
@@ -128,10 +129,10 @@ class CatalogFeedLane(
 
       val future =
         this.covers.loadThumbnailInto(
-        feedEntry as org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS,
-        imageView,
-        imageWidth,
-        this.imageHeight)
+          feedEntry as org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS,
+          imageView,
+          imageWidth,
+          this.imageHeight)
 
       Futures.addCallback(future, coverCallback, directExecutor())
     }
@@ -139,7 +140,8 @@ class CatalogFeedLane(
 
   private fun addViewForFeedEntryOPDS(
     entry: org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS,
-    coverViews: ArrayList<ImageView?>): Unit {
+    coverViews: ArrayList<ImageView?>
+  ): Unit {
 
     /*
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
@@ -152,7 +154,7 @@ class CatalogFeedLane(
     layoutParams.setMargins(0, 0, this.screen.screenDPToPixels(8).toInt(), 0)
 
     imageView.layoutParams = layoutParams
-    imageView.contentDescription = 
+    imageView.contentDescription =
       CatalogBookFormats.contentDescriptionOfEntry(this.resources, entry)
     imageView.setOnClickListener { this.listener.onSelectBook(entry) }
     coverViews.add(imageView)
@@ -160,9 +162,10 @@ class CatalogFeedLane(
     this.scrollerContents.addView(imageView)
     return Unit.unit()
   }
-  
+
   private fun addViewForFeedEntryCorrupt(
-    coverViewCollections: ArrayList<ImageView?>): Unit {
+    coverViewCollections: ArrayList<ImageView?>
+  ): Unit {
     coverViewCollections.add(null)
     return Unit.unit()
   }

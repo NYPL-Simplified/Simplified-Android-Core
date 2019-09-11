@@ -16,12 +16,12 @@ import java.util.Objects
  */
 
 class CatalogBookRevokeButton(
-    activity: AppCompatActivity,
-    booksController: BooksControllerType,
-    account: AccountType,
-    bookID: BookID,
-    revokeType: CatalogBookRevokeType)
-  : AppCompatButton(activity), CatalogBookButtonType {
+  activity: AppCompatActivity,
+  booksController: BooksControllerType,
+  account: AccountType,
+  bookID: BookID,
+  revokeType: CatalogBookRevokeType
+) : AppCompatButton(activity), CatalogBookButtonType {
 
   init {
     val resources =

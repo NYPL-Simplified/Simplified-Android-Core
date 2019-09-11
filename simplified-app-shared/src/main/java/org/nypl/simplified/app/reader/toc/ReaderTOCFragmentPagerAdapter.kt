@@ -5,8 +5,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 
 class ReaderTOCFragmentPagerAdapter(
-    fragmentManager: FragmentManager,
-    val tocParameters: ReaderTOCParameters) : FragmentPagerAdapter(fragmentManager) {
+  fragmentManager: FragmentManager,
+  val tocParameters: ReaderTOCParameters
+) : FragmentPagerAdapter(fragmentManager) {
 
   override fun getCount(): Int {
     return 2

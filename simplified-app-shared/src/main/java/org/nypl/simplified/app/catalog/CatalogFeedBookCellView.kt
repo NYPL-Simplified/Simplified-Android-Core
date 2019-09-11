@@ -59,7 +59,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
-import java.util.Calendar
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -67,14 +66,15 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 class CatalogFeedBookCellView(
-    private val activity: AppCompatActivity,
-    private val analytics: AnalyticsType,
-    private val coverProvider: BookCoverProviderType,
-    private val booksController: BooksControllerType,
-    private val profilesController: ProfilesControllerType,
-    private val booksRegistry: BookRegistryReadableType,
-    private val networkConnectivity: NetworkConnectivityType,
-    private val screenSizeInformation: ScreenSizeInformationType) :
+  private val activity: AppCompatActivity,
+  private val analytics: AnalyticsType,
+  private val coverProvider: BookCoverProviderType,
+  private val booksController: BooksControllerType,
+  private val profilesController: ProfilesControllerType,
+  private val booksRegistry: BookRegistryReadableType,
+  private val networkConnectivity: NetworkConnectivityType,
+  private val screenSizeInformation: ScreenSizeInformationType
+) :
   FrameLayout(activity),
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -218,10 +218,10 @@ class CatalogFeedBookCellView(
 
     val future =
       this.coverProvider.loadThumbnailInto(
-      inE,
-      this.cellCoverImage,
-      (inImageHeight.toDouble() * 0.75).toInt(),
-      inImageHeight)
+        inE,
+        this.cellCoverImage,
+        (inImageHeight.toDouble() * 0.75).toInt(),
+        inImageHeight)
 
     Futures.addCallback<kotlin.Unit>(future, callback, directExecutor())
   }
@@ -583,7 +583,8 @@ class CatalogFeedBookCellView(
 
   private fun onBookStatusNone(
     newEntry: FeedEntryOPDS,
-    id: BookID) {
+    id: BookID
+  ) {
     LOG.debug("{}: none", id)
     this.cellBook.visibility = View.VISIBLE
     this.cellCorrupt.visibility = View.INVISIBLE
@@ -713,7 +714,8 @@ class CatalogFeedBookCellView(
   private fun onStatus(
     inEntry: FeedEntryOPDS,
     id: BookID,
-    statusOpt: OptionType<BookStatusType>) {
+    statusOpt: OptionType<BookStatusType>
+  ) {
     if (statusOpt.isSome) {
       val some = statusOpt as Some<BookStatusType>
       UIThread.runOnUIThread { some.get().matchBookStatus(this@CatalogFeedBookCellView) }
@@ -723,7 +725,8 @@ class CatalogFeedBookCellView(
   }
 
   private fun setDebugCellText(
-    text: String) {
+    text: String
+  ) {
     if (this.debugCellState) {
       this.cellDebug.text = text
     }
@@ -734,13 +737,14 @@ class CatalogFeedBookCellView(
    * different layouts depending on whether the current book is loaned, fully
    * downloaded, currently downloading, not loaned, etc.
    *
-   * @param entry        The new feed entry
+   * @param entry The new feed entry
    * @param listener A selection listener
    */
 
   fun viewConfigure(
     entry: FeedEntry,
-    listener: CatalogBookSelectionListenerType) {
+    listener: CatalogBookSelectionListenerType
+  ) {
     UIThread.checkIsUIThread()
     this.bookSelectionListener = listener
 

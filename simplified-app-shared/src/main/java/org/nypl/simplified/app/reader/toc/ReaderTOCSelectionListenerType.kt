@@ -9,5 +9,4 @@ interface ReaderTOCSelectionListenerType {
    */
 
   fun onTOCItemSelected(selection: ReaderTOCSelection)
-
 }

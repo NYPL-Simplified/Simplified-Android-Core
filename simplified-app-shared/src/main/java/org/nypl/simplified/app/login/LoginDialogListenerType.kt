@@ -13,5 +13,4 @@ interface LoginDialogListenerType {
    */
 
   fun onLoginDialogWantsProfilesController(): ProfilesControllerType
-
 }

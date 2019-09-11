@@ -49,19 +49,20 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 class CatalogFeedWithoutGroups(
-    private val activity: AppCompatActivity,
-    private val analytics: AnalyticsType,
-    private val account: AccountType,
-    private val bookCoverProvider: BookCoverProviderType,
-    private val bookSelectionListener: CatalogBookSelectionListenerType,
-    private val bookRegistry: BookRegistryReadableType,
-    private val bookController: BooksControllerType,
-    private val profilesController: ProfilesControllerType,
-    private val feedLoader: FeedLoaderType,
-    private val feed: FeedWithoutGroups,
-    private val networkConnectivity: NetworkConnectivityType,
-    private val executor: ListeningExecutorService,
-    private val screenSizeInformation: ScreenSizeInformationType) : ListAdapter, OnScrollListener {
+  private val activity: AppCompatActivity,
+  private val analytics: AnalyticsType,
+  private val account: AccountType,
+  private val bookCoverProvider: BookCoverProviderType,
+  private val bookSelectionListener: CatalogBookSelectionListenerType,
+  private val bookRegistry: BookRegistryReadableType,
+  private val bookController: BooksControllerType,
+  private val profilesController: ProfilesControllerType,
+  private val feedLoader: FeedLoaderType,
+  private val feed: FeedWithoutGroups,
+  private val networkConnectivity: NetworkConnectivityType,
+  private val executor: ListeningExecutorService,
+  private val screenSizeInformation: ScreenSizeInformationType
+) : ListAdapter, OnScrollListener {
 
   private val adapter: ArrayAdapter<FeedEntry> =
     ArrayAdapter(this.activity, 0, this.feed.entriesInOrder)
@@ -73,7 +74,8 @@ class CatalogFeedWithoutGroups(
     createHttpAuth(this.account.loginState.credentials)
 
   private fun createHttpAuth(
-    credentials: org.nypl.simplified.accounts.api.AccountAuthenticationCredentials?): OptionType<HTTPAuthType> {
+    credentials: org.nypl.simplified.accounts.api.AccountAuthenticationCredentials?
+  ): OptionType<HTTPAuthType> {
     return if (credentials != null) {
       Option.some(org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials))
     } else {
@@ -117,7 +119,8 @@ class CatalogFeedWithoutGroups(
   override fun getView(
     position: Int,
     @Nullable reused: View?,
-    @Nullable parent: ViewGroup): View {
+    @Nullable parent: ViewGroup
+  ): View {
 
     val e = NullCheck.notNull(this.adapter.getItem(position)!!)
     val cv: CatalogFeedBookCellView
@@ -243,7 +246,8 @@ class CatalogFeedWithoutGroups(
     @Nullable view: AbsListView,
     firstVisibleItem: Int,
     visibleCount: Int,
-    totalCount: Int) {
+    totalCount: Int
+  ) {
 
     /*
      * If the user is close enough to the end of the list, load the next feed.
@@ -256,7 +260,8 @@ class CatalogFeedWithoutGroups(
 
   override fun onScrollStateChanged(
     @Nullable view: AbsListView,
-    state: Int) {
+    state: Int
+  ) {
     when (state) {
       OnScrollListener.SCROLL_STATE_FLING, OnScrollListener.SCROLL_STATE_TOUCH_SCROLL -> {
         this.bookCoverProvider.loadingThumbailsPause()
@@ -282,7 +287,8 @@ class CatalogFeedWithoutGroups(
 
     private fun shouldLoadNext(
       firstVisibleItem: Int,
-      totalCount: Int): Boolean {
+      totalCount: Int
+    ): Boolean {
 
       LOG.debug("shouldLoadNext: {} - {} = {}",
         totalCount, firstVisibleItem, totalCount - firstVisibleItem)

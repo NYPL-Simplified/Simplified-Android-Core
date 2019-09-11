@@ -79,7 +79,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
     fun startActivity(
       from: Activity,
-      parameters: AudioBookPlayerParameters) {
+      parameters: AudioBookPlayerParameters
+    ) {
 
       val b = Bundle()
       b.putSerializable(this.PARAMETER_ID, parameters)
@@ -332,7 +333,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.playerInitialized = true
 
     this.restoreSavedPlayerPosition()
-    this.startAllPartsDownloading();
+    this.startAllPartsDownloading()
 
     /*
      * Create and load the main player fragment into the holder view declared in the activity.
@@ -585,6 +586,5 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerAccessibilityEvent(event: PlayerAccessibilityEvent) {
-
   }
 }

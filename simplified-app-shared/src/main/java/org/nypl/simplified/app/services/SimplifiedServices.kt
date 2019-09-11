@@ -61,7 +61,6 @@ import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.Controller.Companion.create
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverGenerator
@@ -88,7 +87,6 @@ import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.notifications.NotificationsWrapper
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
-import org.nypl.simplified.opds.auth_document.AuthenticationDocumentParsers
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -186,11 +184,13 @@ class SimplifiedServices private constructor(
       val directoryStorageBaseVersioned: File,
       val directoryStorageDownloads: File,
       val directoryStorageDocuments: File,
-      val directoryStorageProfiles: File)
+      val directoryStorageProfiles: File
+    )
 
     fun create(
       context: Context,
-      onProgress: (BootEvent) -> Unit): SimplifiedServicesType {
+      onProgress: (BootEvent) -> Unit
+    ): SimplifiedServicesType {
 
       fun publishEvent(message: String) {
         this.logger.debug("boot: {}", message)
@@ -538,7 +538,8 @@ class SimplifiedServices private constructor(
       accountProviders: AccountProviderRegistryType,
       accountBundledCredentials: AccountBundledCredentialsType,
       accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
-      directory: File): ProfilesDatabaseType {
+      directory: File
+    ): ProfilesDatabaseType {
 
       /*
        * If profiles are enabled, then disable the anonymous profile.
@@ -667,10 +668,10 @@ class SimplifiedServices private constructor(
         directoryStorageProfiles = directoryStorageProfiles)
     }
 
-
     private class ScreenSizeInformation(
       private val logger: Logger,
-      private val resources: Resources) : ScreenSizeInformationType {
+      private val resources: Resources
+    ) : ScreenSizeInformationType {
 
       init {
         val dm = this.resources.displayMetrics
@@ -681,7 +682,8 @@ class SimplifiedServices private constructor(
       }
 
       override fun screenDPToPixels(
-        dp: Int): Double {
+        dp: Int
+      ): Double {
         val scale = this.resources.displayMetrics.density
         return (dp * scale).toDouble() + 0.5
       }
@@ -706,7 +708,8 @@ class SimplifiedServices private constructor(
 
     private fun initBugsnag(
       context: Context,
-      apiTokenOpt: OptionType<String>) {
+      apiTokenOpt: OptionType<String>
+    ) {
       if (apiTokenOpt.isSome) {
         val apiToken = (apiTokenOpt as Some<String>).get()
         this.logger.debug("IfBugsnag: init live interface")
@@ -769,7 +772,8 @@ class SimplifiedServices private constructor(
       clock: ClockType,
       http: HTTPType,
       exec: ExecutorService,
-      directory: File): DocumentStoreType {
+      directory: File
+    ): DocumentStoreType {
 
       val documentsBuilder =
         DocumentStore.newBuilder(clock, http, exec, directory)
@@ -809,8 +813,8 @@ class SimplifiedServices private constructor(
             }
             UIThread.runOnUIThread {
               Instabug.Builder(Simplified.application, instabugToken)
-                      .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.SCREENSHOT)
-                      .build()
+                .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.SCREENSHOT)
+                .build()
             }
           } catch (e: java.lang.Exception) {
             this.logger.debug("Error intializing Instabug", android.os.Process.myPid())
@@ -820,5 +824,4 @@ class SimplifiedServices private constructor(
       }
     }
   }
-
 }
