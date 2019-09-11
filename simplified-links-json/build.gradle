@@ -1,3 +1,5 @@
+apply from: '../ktlint.gradle'
+
 dependencies {
   api project(":simplified-links")
   api project(":simplified-mime")

@@ -24,7 +24,8 @@ object LinkParsing {
 
   fun parseLink(
     source: URI,
-    element: JsonNode): ParseResult<Link> {
+    element: JsonNode
+  ): ParseResult<Link> {
     return try {
       val objectNode = JSONParserUtilities.checkObject("", element)
 
@@ -71,24 +72,34 @@ object LinkParsing {
             width = width,
             height = height,
             duration = duration,
-            bitrate = bitrate)
-        })
+            bitrate = bitrate
+          )
+        }
+      )
     } catch (e: JSONParseException) {
       this.logger.error("error parsing link object: ", e)
       ParseResult.Failure(
         warnings = listOf(),
-        errors = listOf(ParseError(
-          source = source,
-          message = "Could not parse 'link' object: " + e.message,
-          exception = e)))
+        errors = listOf(
+          ParseError(
+            source = source,
+            message = "Could not parse 'link' object: " + e.message,
+            exception = e
+          )
+        )
+      )
     } catch (e: Exception) {
       this.logger.error("error parsing link object: ", e)
       ParseResult.Failure(
         warnings = listOf(),
-        errors = listOf(ParseError(
-          source = source,
-          message = "Could not parse 'link' object: " + e.message,
-          exception = e)))
+        errors = listOf(
+          ParseError(
+            source = source,
+            message = "Could not parse 'link' object: " + e.message,
+            exception = e
+          )
+        )
+      )
     }
   }
 }

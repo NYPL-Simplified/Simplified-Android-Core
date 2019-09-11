@@ -69,8 +69,8 @@ sealed class Link {
     override val height: Int? = null,
     override val width: Int? = null,
     override val duration: Double? = null,
-    override val bitrate: Double? = null)
-    : Link() {
+    override val bitrate: Double? = null
+  ) : Link() {
     override val hrefURI: URI?
       get() = this.href
   }
@@ -87,10 +87,9 @@ sealed class Link {
     override val height: Int? = null,
     override val width: Int? = null,
     override val duration: Double? = null,
-    override val bitrate: Double? = null)
-    : Link() {
+    override val bitrate: Double? = null
+  ) : Link() {
     override val hrefURI: URI?
       get() = null
   }
-
 }
