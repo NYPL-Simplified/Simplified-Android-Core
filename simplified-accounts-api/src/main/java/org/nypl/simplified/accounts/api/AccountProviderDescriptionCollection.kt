@@ -1,7 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import org.nypl.drm.core.AdobeVendorID
-import java.net.URI
+import org.nypl.simplified.links.Link
 
 /**
  * An account provider description collection.
@@ -26,36 +26,6 @@ data class AccountProviderDescriptionCollection(
    */
 
   val metadata: Metadata) {
-
-  /**
-   * A link.
-   */
-
-  data class Link(
-
-    /**
-     * The target of the link.
-     */
-
-    val href: URI,
-
-    /**
-     * The type of the link content.
-     */
-
-    val type: String?,
-
-    /**
-     * The relation of the link.
-     */
-
-    val relation: String?,
-
-    /**
-     * `true` if the link is templated.
-     */
-
-    val templated: Boolean = false)
 
   /**
    * The metadata associated with the collection.

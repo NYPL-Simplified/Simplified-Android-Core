@@ -179,6 +179,7 @@ class AccountProviderSourceNYPLRegistry(
       cacheFiles.file.inputStream().use { stream ->
         val parser =
           this.parsers.createParser(cacheFiles.file.toURI(), stream)
+
         when (val result = parser.parse()) {
           is ParseResult.Failure -> {
             this.logParseFailure("cache", result)
@@ -192,9 +193,19 @@ class AccountProviderSourceNYPLRegistry(
             mapOf()
           }
           is ParseResult.Success -> {
-            this.logger.debug("loaded {} cached providers ({} warnings)",
+            this.logger.debug(
+              "loaded {} cached providers ({} warnings)",
               result.result.providers.size,
               result.warnings.size)
+
+            val countProduction =
+              result.result.providers.count { p -> p.isProduction }
+            val countTesting =
+              result.result.providers.count { p -> !p.isProduction }
+
+            this.logger.debug("{} cached production providers", countProduction)
+            this.logger.debug("{} cached testing providers", countTesting)
+
             result.result.providers
               .map { provider ->
                 Pair(

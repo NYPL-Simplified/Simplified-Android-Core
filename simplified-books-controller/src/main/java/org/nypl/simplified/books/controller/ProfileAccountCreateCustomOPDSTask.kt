@@ -21,6 +21,8 @@ import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.links.Link
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
@@ -138,19 +140,16 @@ class ProfileAccountCreateCustomOPDSTask(
     this.logger.debug("account id will be {}", id)
 
     val links =
-      mutableListOf<AccountProviderDescriptionMetadata.Link>()
+      mutableListOf<Link>()
 
-    links.add(AccountProviderDescriptionMetadata.Link(
+    links.add(Link.LinkBasic(
       href = this.opdsURI,
-      type = null,
-      templated = false,
       relation = "http://opds-spec.org/catalog"))
 
     if (authDocumentURI != null) {
-      links.add(AccountProviderDescriptionMetadata.Link(
+      links.add(Link.LinkBasic(
         href = authDocumentURI,
-        type = "application/vnd.opds.authentication.v1.0+json",
-        templated = false,
+        type = MIMEType("application", "vnd.opds.authentication.v1.0+json", mapOf()),
         relation = OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT))
     }
 

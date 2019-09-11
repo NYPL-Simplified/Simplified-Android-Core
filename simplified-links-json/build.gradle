@@ -2,12 +2,11 @@ dependencies {
   api project(":simplified-links")
   api project(":simplified-mime")
   api project(":simplified-parser-api")
+  
+  api libraries.jacksonDatabind
 
-  api libraries.io7mJFunctional
-  api libraries.nyplDRMCore
+  implementation project(":simplified-json-core")
 
   implementation libraries.kotlinStdlib
-
-  compileOnly libraries.googleAutoValue
-  annotationProcessor libraries.googleAutoValue
+  implementation libraries.slf4j
 }

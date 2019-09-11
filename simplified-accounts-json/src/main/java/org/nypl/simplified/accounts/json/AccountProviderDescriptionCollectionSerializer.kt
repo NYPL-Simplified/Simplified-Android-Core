@@ -30,26 +30,10 @@ class AccountProviderDescriptionCollectionSerializer internal constructor(
     this.mapper.writerWithDefaultPrettyPrinter().writeValue(this.stream, objectNode)
   }
 
-  private fun linkNode(
-    href: URI,
-    type: String?,
-    relation: String?,
-    templated: Boolean
-  ): ObjectNode {
-    val node = this.mapper.createObjectNode()
-    node.put("href", href.toString())
-    type?.let { node.put("type", it) }
-    relation?.let { node.put("rel", it) }
-    if (templated) {
-      node.put("templated", templated)
-    }
-    return node
-  }
-
   private fun serializeLinksNode(): ArrayNode {
     val arrayNode = this.mapper.createArrayNode()
     this.document.links.forEach { link ->
-      arrayNode.add(linkNode(link.href, link.type, link.relation, link.templated))
+      arrayNode.add(LinkSerialization.serializeLink(link))
     }
     return arrayNode
   }

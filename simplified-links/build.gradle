@@ -1,0 +1,6 @@
+dependencies {
+  api project(":simplified-mime")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

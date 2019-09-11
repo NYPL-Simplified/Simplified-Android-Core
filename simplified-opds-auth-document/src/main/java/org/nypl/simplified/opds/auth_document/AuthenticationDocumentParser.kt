@@ -2,13 +2,14 @@ package org.nypl.simplified.opds.auth_document
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.nypl.simplified.accounts.json.LinkParsing
 import org.nypl.simplified.json.core.JSONParserUtilities
-import org.nypl.simplified.mime.MIMEParser
+import org.nypl.simplified.links.Link
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParserType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObject
-import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectLink
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLFeatures
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLInput
 import org.nypl.simplified.parser.api.ParseError
@@ -133,7 +134,7 @@ internal class AuthenticationDocumentParser(
     }
   }
 
-  private fun parseLinks(tree: ObjectNode): List<AuthenticationObjectLink> {
+  private fun parseLinks(tree: ObjectNode): List<Link> {
     if (!tree.has("links")) {
       return listOf()
     }
@@ -145,47 +146,28 @@ internal class AuthenticationDocumentParser(
       this.mapper.createArrayNode()
     }
 
-    return linksNodes.mapNotNull { node -> this.parseLink(node) }
+    return parseLinksArray(linksNodes)
   }
 
-  private fun parseLink(node: JsonNode): AuthenticationObjectLink? {
-    return try {
-      val root =
-        JSONParserUtilities.checkObject(null, node)
-      val href =
-        JSONParserUtilities.getURI(root, "href")
-      val templated =
-        JSONParserUtilities.getBooleanDefault(root, "templated", false)
-      val mime =
-        JSONParserUtilities.getStringOrNull(root, "type")
-          ?.let { type -> MIMEParser.parseRaisingException(type) }
-      val title =
-        JSONParserUtilities.getStringOrNull(root, "title")
-      val rel =
-        JSONParserUtilities.getStringOrNull(root, "rel")
-      val width =
-        JSONParserUtilities.getIntegerOrNull(root, "width")
-      val height =
-        JSONParserUtilities.getIntegerOrNull(root, "height")
-      val duration =
-        JSONParserUtilities.getStringOrNull(root, "duration")?.toDouble()
-      val bitrate =
-        JSONParserUtilities.getStringOrNull(root, "bitrate")?.toDouble()
-
-      AuthenticationObjectLink(
-        href = href,
-        templated = templated,
-        type = mime,
-        title = title,
-        rel = rel,
-        width = width,
-        height = height,
-        duration = duration,
-        bitrate = bitrate)
-    } catch (e: Exception) {
-      this.publishErrorForException(e)
-      null
+  private fun parseLinksArray(linksNodes: ArrayNode?): List<Link> {
+    if (linksNodes == null) {
+      return listOf()
     }
+
+    return linksNodes.mapNotNull { node -> LinkParsing.parseLink(this.uri, node) }
+      .mapNotNull { result ->
+        when (result) {
+          is ParseResult.Success -> {
+            result.warnings.forEach { warn -> this.publishWarning(warn) }
+            result.result
+          }
+          is ParseResult.Failure -> {
+            result.warnings.forEach { warn -> this.publishWarning(warn) }
+            result.errors.forEach { error -> this.publishWarning(error.toWarning()) }
+            null
+          }
+        }
+      }
   }
 
   private fun parseAuthentications(tree: ObjectNode): List<AuthenticationObject> {
@@ -209,9 +191,7 @@ internal class AuthenticationDocumentParser(
         JSONParserUtilities.getStringOrNull(root, "description") ?: ""
 
       val links =
-        JSONParserUtilities.getArrayOrNull(root, "links")
-          ?.mapNotNull(this::parseLink)
-          ?: listOf()
+        parseLinksArray(JSONParserUtilities.getArrayOrNull(root, "links"))
 
       val labels =
         JSONParserUtilities.getObjectOrNull(root, "labels")

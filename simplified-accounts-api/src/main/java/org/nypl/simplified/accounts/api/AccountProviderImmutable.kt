@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
+import org.nypl.simplified.links.Link
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 
@@ -38,17 +39,16 @@ data class AccountProviderImmutable(
 ) : AccountProviderType {
 
   override fun toDescription(): AccountProviderDescriptionType {
-    val imageLinks = mutableListOf<AccountProviderDescriptionMetadata.Link>()
+    val imageLinks = mutableListOf<Link>()
     this.logo?.let { uri ->
-      imageLinks.add(AccountProviderDescriptionMetadata.Link(
+      imageLinks.add(Link.LinkBasic(
         href = uri,
         type = null,
-        templated = false,
         relation = "http://opds-spec.org/image/thumbnail"))
     }
 
     val links =
-      mutableListOf<AccountProviderDescriptionMetadata.Link>()
+      mutableListOf<Link>()
 
     this.annotationsURI?.let { uri ->
       addLink(links, uri, "http://www.w3.org/ns/oa#annotationService")
@@ -98,11 +98,10 @@ data class AccountProviderImmutable(
     }
   }
 
-  private fun addLink(links: MutableList<AccountProviderDescriptionMetadata.Link>, uri: URI, relation: String): Boolean {
-    return links.add(AccountProviderDescriptionMetadata.Link(
+  private fun addLink(links: MutableList<Link>, uri: URI, relation: String): Boolean {
+    return links.add(Link.LinkBasic(
       href = uri,
       type = null,
-      templated = false,
       relation = relation
     ))
   }

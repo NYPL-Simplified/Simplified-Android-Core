@@ -5,6 +5,7 @@ dependencies {
   implementation project(':simplified-files')
   implementation project(':simplified-http-core')
   implementation project(':simplified-json-core')
+  implementation project(':simplified-links-json')
 
   implementation libraries.jacksonDatabind
   implementation libraries.kotlinStdlib

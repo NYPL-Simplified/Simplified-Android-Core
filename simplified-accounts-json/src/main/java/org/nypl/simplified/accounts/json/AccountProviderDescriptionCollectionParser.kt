@@ -7,14 +7,14 @@ import org.nypl.drm.core.AdobeVendorID
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParserType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
-import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
+import org.nypl.simplified.links.Link
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.parser.api.ParseWarning
+import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.URI
-import java.net.URISyntaxException
 
 /**
  * A parser of provider description collections.
@@ -26,6 +26,9 @@ class AccountProviderDescriptionCollectionParser internal constructor(
   private val warningsAsErrors: Boolean
 ) : AccountProviderDescriptionCollectionParserType {
 
+  private val logger =
+    LoggerFactory.getLogger(AccountProviderDescriptionCollectionParser::class.java)
+
   private val mapper = ObjectMapper()
   private val metaParsers = AccountProviderDescriptionParsers()
   private val errors = mutableListOf<ParseError>()
@@ -33,6 +36,14 @@ class AccountProviderDescriptionCollectionParser internal constructor(
 
   private fun publishWarning(warning: ParseWarning) {
     if (this.warningsAsErrors) {
+      this.logger.error(
+        "{}:{}:{}: {}: ",
+        warning.source,
+        warning.line,
+        warning.column,
+        warning.message,
+        warning.exception)
+
       this.errors.add(ParseError(
         source = this.uri,
         message = warning.message,
@@ -41,11 +52,19 @@ class AccountProviderDescriptionCollectionParser internal constructor(
         exception = warning.exception
       ))
     } else {
+      this.logger.warn(
+        "{}:{}:{}: {}: ",
+        warning.source,
+        warning.line,
+        warning.column,
+        warning.message,
+        warning.exception)
       this.warnings.add(warning)
     }
   }
 
   private fun publishErrorForException(e: Exception) {
+    this.logger.error("{}: ", this.uri, e)
     this.errors.add(ParseError(
       source = this.uri,
       message = e.message ?: "",
@@ -54,6 +73,7 @@ class AccountProviderDescriptionCollectionParser internal constructor(
   }
 
   private fun publishErrorForString(message: String) {
+    this.logger.error("{}: {}", this.uri, message)
     this.errors.add(ParseError(
       source = this.uri,
       message = message,
@@ -132,48 +152,21 @@ class AccountProviderDescriptionCollectionParser internal constructor(
     }
   }
 
-  private fun parseLink(element: JsonNode): AccountProviderDescriptionCollection.Link? {
+  private fun parseLinks(root: ObjectNode): List<Link> {
     return try {
-      val objectNode = JSONParserUtilities.checkObject("", element)
-      return AccountProviderDescriptionCollection.Link(
-        href = JSONParserUtilities.getURI(objectNode, "href"),
-        type = JSONParserUtilities.getStringOrNull(objectNode, "type"),
-        templated = JSONParserUtilities.getBooleanDefault(objectNode, "templated", false),
-        relation = JSONParserUtilities.getStringOrNull(objectNode, "rel"))
-    } catch (e: JSONParseException) {
-      when (e.cause) {
-        is URISyntaxException -> {
-          this.publishWarning(ParseWarning(
-            source = this.uri,
-            message = "Could not parse 'link' object: Encountered an invalid URI in the feed",
-            exception = e))
-          null
-        }
-        else -> {
-          this.errors.add(ParseError(
-            source = this.uri,
-            message = "Could not parse 'link' object",
-            exception = e))
-          null
-        }
-      }
-    } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'link' object",
-        exception = e))
-      null
-    }
-  }
-
-  private fun parseLinks(root: ObjectNode): List<AccountProviderDescriptionCollection.Link> {
-    return try {
-      val results =
-        mutableListOf<AccountProviderDescriptionCollection.Link>()
-      val arrayNode =
-        JSONParserUtilities.getArray(root, "links") ?: return listOf()
+      val results = mutableListOf<Link>()
+      val arrayNode = JSONParserUtilities.getArray(root, "links") ?: return listOf()
       for (arrayElement in arrayNode) {
-        parseLink(arrayElement)?.let { node -> results.add(node) }
+        when (val result = LinkParsing.parseLink(this.uri, arrayElement)) {
+          is ParseResult.Success -> {
+            result.warnings.forEach { warning -> this.publishWarning(warning) }
+            results.add(result.result)
+          }
+          is ParseResult.Failure -> {
+            result.warnings.forEach { warning -> this.publishWarning(warning) }
+            result.errors.forEach { error -> this.publishWarning(error.toWarning()) }
+          }
+        }
       }
       results
     } catch (e: Exception) {

@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.auth_document.api
 
+import org.nypl.simplified.links.Link
 import java.net.URI
 
 /**
@@ -56,32 +57,32 @@ data class AuthenticationDocument(
    * @see "https://drafts.opds.io/authentication-for-opds-1.0.html#232-links"
    */
 
-  val links: List<AuthenticationObjectLink>) {
+  val links: List<Link>) {
 
   val loansURI: URI? =
-    this.links.find { link -> link.rel == "http://opds-spec.org/shelf" }?.href
+    this.links.find { link -> link.relation == "http://opds-spec.org/shelf" }?.hrefURI
 
   val cardCreatorURI: URI? =
-    this.links.find { link -> link.rel == "register" }?.href
+    this.links.find { link -> link.relation == "register" }?.hrefURI
 
   val startURI: URI? =
-    this.links.find { link -> link.rel == "start" }?.href
+    this.links.find { link -> link.relation == "start" }?.hrefURI
 
   val logoURI : URI? =
-    this.links.find { link -> link.rel == "logo" }?.href
+    this.links.find { link -> link.relation == "logo" }?.hrefURI
 
   val patronSettingsURI: URI? =
-    this.links.find { link -> link.rel == "http://librarysimplified.org/terms/rel/user-profile" }?.href
+    this.links.find { link -> link.relation == "http://librarysimplified.org/terms/rel/user-profile" }?.hrefURI
 
   val eulaURI : URI? =
-    this.links.find { link -> link.rel == "terms-of-service" }?.href
+    this.links.find { link -> link.relation == "terms-of-service" }?.hrefURI
 
   val privacyPolicyURI : URI? =
-    this.links.find { link -> link.rel == "privacy-policy" }?.href
+    this.links.find { link -> link.relation == "privacy-policy" }?.hrefURI
 
   val licenseURI : URI? =
-    this.links.find { link -> link.rel == "license" }?.href
+    this.links.find { link -> link.relation == "license" }?.hrefURI
 
   val supportURI : URI? =
-    this.links.find { link -> link.rel == "help" }?.href
+    this.links.find { link -> link.relation == "help" }?.hrefURI
 }

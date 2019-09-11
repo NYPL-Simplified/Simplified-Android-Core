@@ -49,6 +49,12 @@ interface AccountProviderResolutionStringsType {
   val resolvingAuthDocumentMissingURI: String
 
   /**
+   * We couldn't understand the authentication document link.
+   */
+
+  val resolvingAuthDocumentUnusableLink: String
+
+  /**
    * Resolving the account provider...
    */
 
