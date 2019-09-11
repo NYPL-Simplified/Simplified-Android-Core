@@ -43,8 +43,8 @@ class CatalogAcquisitionButton(
   bookRegistry: BookRegistryReadableType,
   private val entry: FeedEntryOPDS,
   private val acquisition: OPDSAcquisition,
-  private val onWantOpenLoginDialog: () -> Unit)
-  : AppCompatButton(context), CatalogBookButtonType {
+  private val onWantOpenLoginDialog: () -> Unit
+) : AppCompatButton(context), CatalogBookButtonType {
 
   private var accountEventSubscription: ObservableSubscriptionType<AccountEvent>? = null
 
@@ -87,7 +87,7 @@ class CatalogAcquisitionButton(
     val loginState = this.account.loginState
     return when (this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate,
-        null -> {
+      null -> {
         this.tryBorrow()
       }
 
@@ -139,7 +139,6 @@ class CatalogAcquisitionButton(
            * These events can occur multiple times while the user tries and fails to log in. The
            * user may eventually succeed, so we keep listening for events here.
            */
-
         }
 
         is AccountLoginState.AccountLogoutFailed,
@@ -161,7 +160,8 @@ class CatalogAcquisitionButton(
 
   data class ButtonTexts(
     val text: String,
-    val contentDescription: String)
+    val contentDescription: String
+  )
 
   companion object {
 
@@ -180,17 +180,18 @@ class CatalogAcquisitionButton(
       bookRegistry: BookRegistryReadableType,
       entry: FeedEntryOPDS,
       acquisition: OPDSAcquisition,
-      onWantOpenLoginDialog: () -> Unit): CatalogAcquisitionButton {
+      onWantOpenLoginDialog: () -> Unit
+    ): CatalogAcquisitionButton {
       val button =
         CatalogAcquisitionButton(
-        context = context,
-        profiles = profiles,
-        books = books,
-        account = account,
-        bookRegistry = bookRegistry,
-        entry = entry,
-        acquisition = acquisition,
-        onWantOpenLoginDialog = onWantOpenLoginDialog)
+          context = context,
+          profiles = profiles,
+          books = books,
+          account = account,
+          bookRegistry = bookRegistry,
+          entry = entry,
+          acquisition = acquisition,
+          onWantOpenLoginDialog = onWantOpenLoginDialog)
 
       button.text = context.resources.getString(R.string.catalog_book_error_retry)
       return button
@@ -209,7 +210,8 @@ class CatalogAcquisitionButton(
       bookRegistry: BookRegistryReadableType,
       account: AccountType,
       entry: FeedEntryOPDS,
-      onWantOpenLoginDialog: () -> Unit) {
+      onWantOpenLoginDialog: () -> Unit
+    ) {
 
       Preconditions.checkArgument(
         viewGroup.childCount == 0,
@@ -249,7 +251,8 @@ class CatalogAcquisitionButton(
       resources: Resources,
       bookRegistry: BookRegistryReadableType,
       entry: FeedEntryOPDS,
-      acquisition: OPDSAcquisition): ButtonTexts {
+      acquisition: OPDSAcquisition
+    ): ButtonTexts {
 
       val availability = entry.feedEntry.availability
       return if (bookRegistry.book(entry.bookID).isSome) {

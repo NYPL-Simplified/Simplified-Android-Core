@@ -102,7 +102,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   override fun onActivityResult(
     requestCode: Int,
     resultCode: Int,
-    data: Intent?) {
+    data: Intent?
+  ) {
 
     /*
      * Retrieve the PIN from the activity that was launched to collect it.
@@ -248,7 +249,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.signup.setOnClickListener {
         val intent = Intent(this, CardCreatorActivity::class.java)
         intent.putExtra("extras", this.intent.extras)
-        this.startActivity(intent)      }
+        this.startActivity(intent)
+      }
       this.signup.setText(R.string.need_card_button)
     } else {
       this.tableSignup.visibility = View.GONE
@@ -496,10 +498,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
     val ageGateAuth =
       when (val auth = account.provider.authentication) {
-      is AccountProviderAuthenticationDescription.COPPAAgeGate -> auth
-      is AccountProviderAuthenticationDescription.Basic -> null
-      null -> null
-    }
+        is AccountProviderAuthenticationDescription.COPPAAgeGate -> auth
+        is AccountProviderAuthenticationDescription.Basic -> null
+        null -> null
+      }
 
     this.ageCheckbox.visibility =
       if (ageGateAuth != null) {
@@ -702,7 +704,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   private fun handlePinReveal(
     pinText: TextView,
-    pinReveal: CheckBox) {
+    pinReveal: CheckBox
+  ) {
 
     /*
      * Add a listener that reveals/hides the password field.

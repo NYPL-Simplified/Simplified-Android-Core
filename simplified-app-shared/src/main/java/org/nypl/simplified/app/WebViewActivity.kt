@@ -91,15 +91,16 @@ class WebViewActivity : NavigationDrawerActivity() {
     /**
      * Configure the given argument bundle for use in instantiating a [ ].
      *
-     * @param arguments     The argument bundle
+     * @param arguments The argument bundle
      * @param title The title that will be displayed
-     * @param uri   The URI that will be loaded
+     * @param uri The URI that will be loaded
      */
 
     fun setActivityArguments(
       arguments: Bundle,
       uri: String,
-      title: String) {
+      title: String
+    ) {
       arguments.putString(URI_KEY, uri)
       arguments.putString(TITLE_KEY, title)
     }

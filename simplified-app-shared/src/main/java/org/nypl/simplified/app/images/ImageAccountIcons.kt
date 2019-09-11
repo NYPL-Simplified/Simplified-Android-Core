@@ -6,7 +6,6 @@ import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
-import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.app.R
 import org.slf4j.LoggerFactory
 
@@ -28,7 +27,8 @@ object ImageAccountIcons {
   fun loadAccountLogoIntoView(
     loader: Picasso,
     account: AccountProviderDescriptionType,
-    iconView: ImageView) {
+    iconView: ImageView
+  ) {
 
     val request: RequestCreator
     val logoURI = account.metadata.logoURI

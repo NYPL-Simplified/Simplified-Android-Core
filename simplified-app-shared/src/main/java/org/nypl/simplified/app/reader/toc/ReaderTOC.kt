@@ -23,7 +23,8 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
       elements: MutableList<ReaderTOCElement>,
       indent: Int,
       parent: NavigationTable,
-      currentElement: NavigationElement) {
+      currentElement: NavigationElement
+    ) {
       this.logger.debug("accumulate: {}", currentElement)
 
       if (currentElement is NavigationPoint) {

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+git stash -q --keep-index
+
+echo "Running git pre-commit hook"
+
+./gradlew ktlint
+
+RESULT=$?
+
+git stash pop -q
+
+exit $RESULT

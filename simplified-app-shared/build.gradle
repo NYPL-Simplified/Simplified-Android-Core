@@ -1,3 +1,5 @@
+apply from: '../ktlint.gradle'
+
 def getGitHash = { ->
   def stdout = new ByteArrayOutputStream()
   exec {
@@ -22,6 +24,8 @@ android {
     pickFirst "lib/x86/libc++_shared.so"
   }
 }
+
+check.dependsOn ktlint
 
 dependencies {
 
@@ -121,3 +125,12 @@ dependencies {
     exclude group: "com.google.android", module: "android"
   }
 }
+
+task installGitHook(type: Copy) {
+  from new File(rootProject.rootDir, 'pre-commit')
+  into { new File(rootProject.rootDir, '.git/hooks') }
+  fileMode 0700
+}
+
+tasks.getByPath(':simplified-app-shared:preBuild').dependsOn installGitHook
+

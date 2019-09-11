@@ -12,4 +12,5 @@ data class AudioBookLoadingFragmentParameters(
    * Reserved for future use.
    */
 
-  val unused: Float? = null) : Serializable
+  val unused: Float? = null
+) : Serializable

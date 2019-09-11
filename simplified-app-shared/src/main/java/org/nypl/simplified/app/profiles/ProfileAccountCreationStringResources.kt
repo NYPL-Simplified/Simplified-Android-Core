@@ -5,7 +5,8 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 
 class ProfileAccountCreationStringResources(
-  val resources: Resources) : ProfileAccountCreationStringResourcesType {
+  val resources: Resources
+) : ProfileAccountCreationStringResourcesType {
 
   override val creatingAnAccountProviderDescription: String
     get() = this.resources.getString(R.string.profileAccountCreatingAnAccountProviderDescription)
@@ -45,5 +46,4 @@ class ProfileAccountCreationStringResources(
 
   override val resolvingAccountProvider: String
     get() = resources.getString(R.string.profileAccountCreationResolvingAccountProvider)
-
 }

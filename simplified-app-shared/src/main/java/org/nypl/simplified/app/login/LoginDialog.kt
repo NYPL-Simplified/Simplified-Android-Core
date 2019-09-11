@@ -79,7 +79,8 @@ class LoginDialog : AppCompatDialogFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?): View {
+    savedInstanceState: Bundle?
+  ): View {
 
     val layout =
       inflater.inflate(R.layout.login_dialog, container, false) as ViewGroup
@@ -120,16 +121,16 @@ class LoginDialog : AppCompatDialogFragment() {
 
     val authentication =
       when (authenticationDescription) {
-      is AccountProviderAuthenticationDescription.COPPAAgeGate,
-      null -> {
-        this.logger.error("Login dialog created for account that does not require authentication!")
-        this.dismissAllowingStateLoss()
-        return layout
+        is AccountProviderAuthenticationDescription.COPPAAgeGate,
+        null -> {
+          this.logger.error("Login dialog created for account that does not require authentication!")
+          this.dismissAllowingStateLoss()
+          return layout
+        }
+        is AccountProviderAuthenticationDescription.Basic -> {
+          authenticationDescription
+        }
       }
-      is AccountProviderAuthenticationDescription.Basic -> {
-        authenticationDescription
-      }
-    }
 
     /*
      * If the passcode is not allowed to contain letters, then don't let users enter them.
@@ -137,7 +138,6 @@ class LoginDialog : AppCompatDialogFragment() {
 
     when (authentication.passwordKeyboard) {
       "DEFAULT" -> {
-
       }
       "NO INPUT" -> {
         this.pinLabel.visibility = View.INVISIBLE
