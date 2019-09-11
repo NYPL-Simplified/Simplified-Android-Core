@@ -23,7 +23,6 @@ import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.controller.AdobeDRMExtensions
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.nypl.simplified.reports.Reports
 import org.slf4j.LoggerFactory

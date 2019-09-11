@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.settings
 
-import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.documents.store.DocumentStoreType
 
 /**
@@ -28,5 +27,4 @@ interface SettingsFragmentListenerType {
    */
 
   fun openVersion(developerOptions: Boolean)
-
 }

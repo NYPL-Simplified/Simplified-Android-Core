@@ -12,11 +12,11 @@ import java.util.Objects
  */
 
 class CatalogFacetButton(
-    val activity: AppCompatActivity,
-    private val groupName: String,
-    val group: ArrayList<FeedFacet>,
-    val listener: CatalogFacetSelectionListenerType)
-  : AppCompatButton(activity) {
+  val activity: AppCompatActivity,
+  private val groupName: String,
+  val group: ArrayList<FeedFacet>,
+  val listener: CatalogFacetSelectionListenerType
+) : AppCompatButton(activity) {
 
   init {
     Preconditions.checkArgument(

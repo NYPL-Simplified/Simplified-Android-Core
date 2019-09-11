@@ -57,5 +57,4 @@ class LoginStringResources(val resources: Resources) : AccountLoginStringResourc
 
   override fun loginPatronSettingsRequestParseFailed(errors: List<String>): String =
     this.resources.getString(R.string.loginErrorPatronSettingsParseError)
-
 }

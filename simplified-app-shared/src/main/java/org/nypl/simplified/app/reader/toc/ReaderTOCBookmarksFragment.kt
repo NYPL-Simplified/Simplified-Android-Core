@@ -45,7 +45,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
       fragment.arguments = args
       return fragment
     }
-
   }
 
   override fun onCreate(state: Bundle?) {
@@ -58,7 +57,8 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?): View? {
+    savedInstanceState: Bundle?
+  ): View? {
 
     this.inflater = inflater
     this.bookmarksTOCLayout =
@@ -188,4 +188,3 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     return shortDateText + chapterProgressText
   }
 }
-

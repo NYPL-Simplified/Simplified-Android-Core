@@ -154,5 +154,4 @@ class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResou
 
   override val borrowBookDatabaseUpdated: String
     get() = this.resources.getString(R.string.borrowBookDatabaseUpdated)
-
 }

@@ -5,4 +5,5 @@ import java.io.Serializable
 
 data class ReaderTOCParameters(
   val bookmarks: ReaderBookmarks,
-  val tocElements: List<ReaderTOCElement>): Serializable
+  val tocElements: List<ReaderTOCElement>
+) : Serializable

@@ -109,13 +109,14 @@ class CatalogBookReportActivity : CatalogActivity() {
     /**
      * Start a new reader for the given book.
      *
-     * @param from       The parent activity
+     * @param from The parent activity
      * @param feedEntry Feed entry of the book to report a problem with
      */
 
     fun startActivity(
       from: Activity,
-      feedEntry: FeedEntryOPDS) {
+      feedEntry: FeedEntryOPDS
+    ) {
       val b = Bundle()
       b.putSerializable(this.FEED_ENTRY, feedEntry)
       val i = Intent(from, CatalogBookReportActivity::class.java)

@@ -49,7 +49,6 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
       fragment.arguments = args
       return fragment
     }
-
   }
 
   override fun onCreate(state: Bundle?) {
@@ -62,7 +61,8 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?): View? {
+    savedInstanceState: Bundle?
+  ): View? {
 
     this.readerTOCLayout =
       inflater.inflate(R.layout.reader_toc, null)

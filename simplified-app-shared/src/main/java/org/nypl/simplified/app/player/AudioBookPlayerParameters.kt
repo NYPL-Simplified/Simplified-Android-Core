@@ -42,4 +42,5 @@ data class AudioBookPlayerParameters(
    */
 
   @StyleRes
-  val theme: Int) : Serializable
+  val theme: Int
+) : Serializable

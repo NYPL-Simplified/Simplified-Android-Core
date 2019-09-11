@@ -16,13 +16,13 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
  */
 
 class CatalogBookReadButton(
-    val activity: AppCompatActivity,
-    val analytics: AnalyticsType,
-    val profile: ProfileReadableType,
-    val account: AccountType,
-    val bookID: BookID,
-    val entry: FeedEntryOPDS)
-  : AppCompatButton(activity), CatalogBookButtonType {
+  val activity: AppCompatActivity,
+  val analytics: AnalyticsType,
+  val profile: ProfileReadableType,
+  val account: AccountType,
+  val bookID: BookID,
+  val entry: FeedEntryOPDS
+) : AppCompatButton(activity), CatalogBookButtonType {
 
   init {
     this.text = resources.getString(R.string.catalog_book_read)

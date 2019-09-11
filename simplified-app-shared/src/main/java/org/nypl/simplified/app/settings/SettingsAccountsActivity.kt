@@ -76,7 +76,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       picasso: Picasso,
       accountProvider: AccountProviderDescriptionType,
       itemTitleView: TextView,
-      iconView: ImageView): Unit {
+      iconView: ImageView
+    ): Unit {
 
       itemTitleView.text = accountProvider.metadata.title
 
@@ -165,7 +166,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun onWantShowAccount(
     position: Int,
-    profiles: ProfilesControllerType) {
+    profiles: ProfilesControllerType
+  ) {
     try {
       val selectedProvider = this.adapterAccounts.getItem(position)
       this.openAccountSettings(profiles.profileAccountFindByProvider(selectedProvider.metadata.id).id)
@@ -178,7 +180,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun onWantDeleteAccountByProvider(
     position: Int,
-    profiles: ProfilesControllerType) {
+    profiles: ProfilesControllerType
+  ) {
     this.showAccountDeletionDialog(this.adapterAccounts.getItem(position), profiles)
   }
 
@@ -189,7 +192,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun showAccountDeletionDialog(
     accountProvider: AccountProviderDescriptionType,
-    profiles: ProfilesControllerType) {
+    profiles: ProfilesControllerType
+  ) {
 
     val builder = AlertDialog.Builder(this)
     builder.setMessage(
@@ -205,13 +209,14 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     targetContext: Context,
     private val picasso: Picasso,
     private val adapterAccountsArray: ArrayList<AccountProviderDescriptionType>,
-    private val inflater: LayoutInflater)
-    : ArrayAdapter<AccountProviderDescriptionType>(targetContext, R.layout.account_list_item, adapterAccountsArray) {
+    private val inflater: LayoutInflater
+  ) : ArrayAdapter<AccountProviderDescriptionType>(targetContext, R.layout.account_list_item, adapterAccountsArray) {
 
     override fun getView(
       position: Int,
       reuse: View?,
-      parent: ViewGroup): View {
+      parent: ViewGroup
+    ): View {
 
       val containerView: View
       if (reuse != null) {
@@ -244,7 +249,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun updateCurrentAccountView(
     currentAccountView: LinearLayout,
-    account: AccountID) {
+    account: AccountID
+  ) {
 
     try {
       UIThread.checkIsUIThread()
@@ -431,7 +437,6 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       this.adapterAccountsArray.addAll(providers.map(AccountProviderType::toDescription))
       this.adapterAccountsArray.sort()
       this.adapterAccounts.notifyDataSetChanged()
-
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     } catch (e: ProfileNonexistentAccountProviderException) {
@@ -519,7 +524,6 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
           AccountProviderRegistryEvent.StatusChanged -> reconfigureUI()
           is AccountProviderRegistryEvent.Updated,
           is AccountProviderRegistryEvent.SourceFailed -> {
-
           }
         }
       }
@@ -680,4 +684,3 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     }
   }
 }
-
