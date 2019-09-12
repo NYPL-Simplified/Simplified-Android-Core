@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +18,7 @@ import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.api.BookLocation;
 import org.nypl.simplified.books.api.BookLocationJSON;
 import org.nypl.simplified.reader.api.ReaderColorScheme;
+import org.nypl.simplified.reader.api.ReaderFontSelection;
 import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,39 +154,34 @@ public final class ReaderReadiumJavaScriptAPI implements ReaderReadiumJavaScript
     this.evaluate("ReadiumSDK.reader.openPageLeft();");
   }
 
+  private static String fontFamilyName(
+    final ReaderFontSelection selection) {
+    switch (selection) {
+      case READER_FONT_SANS_SERIF:
+        return "sans-serif";
+      case READER_FONT_OPEN_DYSLEXIC:
+        return "OpenDyslexic3";
+      case READER_FONT_SERIF:
+        return "serif";
+    }
+    throw new UnreachableCodeException();
+  }
+
   @Override
   public void setPageStyleSettings(
     final ReaderPreferences preferences) {
     try {
       final ReaderColorScheme cs = preferences.colorScheme();
 
-      final String color = NullCheck.notNull(
-        String.format("#%06x", ReaderColorSchemes.foreground(cs)));
-      final String background = NullCheck.notNull(
-        String.format("#%06x", ReaderColorSchemes.background(cs)));
+      final String foreground = ReaderColorSchemes.foregroundAsBrowserHex(cs);
+      final String background = ReaderColorSchemes.backgroundAsBrowserHex(cs);
+      final String fontFamily = fontFamilyName(preferences.fontFamily());
 
       final JSONObject decls = new JSONObject();
-      decls.put("color", color);
+      decls.put("color", foreground);
       decls.put("backgroundColor", background);
-      String fontSelected = "";
+      decls.put("font-family", fontFamily);
 
-      switch (preferences.fontFamily()) {
-        case READER_FONT_SANS_SERIF: {
-          decls.put("font-family", "sans-serif");
-          fontSelected = "sans-serif";
-          break;
-        }
-        case READER_FONT_OPEN_DYSLEXIC: {
-          decls.put("font-family", "OpenDyslexic3");
-          fontSelected = "OpenDyslexic3";
-          break;
-        }
-        case READER_FONT_SERIF: {
-          decls.put("font-family", "serif");
-          fontSelected = "serif";
-          break;
-        }
-      }
       final JSONObject o = new JSONObject();
       o.put("selector", "*");
       o.put("declarations", decls);
@@ -199,25 +196,23 @@ public final class ReaderReadiumJavaScriptAPI implements ReaderReadiumJavaScript
       script.append("document.body.style.backgroundColor = \"");
       script.append(background);
       script.append("\";");
+      script.append("document.body.style.color = \"");
+      script.append(foreground);
+      script.append("\";");
       this.evaluate(script.toString());
 
-      final ReaderReadiumViewerSettings vs = new ReaderReadiumViewerSettings(
-        ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE,
-        ScrollMode.AUTO,
-        (int) preferences.fontScale(),
-        20);
+      final ReaderReadiumViewerSettings vs =
+        new ReaderReadiumViewerSettings(
+          ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE,
+          ScrollMode.AUTO,
+          (int) preferences.fontScale(),
+          20);
 
       this.evaluate(
-        NullCheck.notNull(
-          String.format("ReadiumSDK.reader.updateSettings(%s);", vs.toJSON())));
+        String.format("ReadiumSDK.reader.updateSettings(%s);", vs.toJSON()));
 
-      // Update the selected user font through the custom Simplified JS script.
-      this.evaluate(
-        NullCheck.notNull(
-          String.format("simplified.updateBookStyles({ 'font-family': '%1s', color: '%2s'});", fontSelected, color)));
     } catch (final JSONException e) {
-      ReaderReadiumJavaScriptAPI.LOG.error(
-        "error constructing json: {}", e.getMessage(), e);
+      LOG.error("error constructing json: {}", e.getMessage(), e);
     }
   }
 

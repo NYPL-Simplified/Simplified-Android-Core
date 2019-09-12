@@ -133,7 +133,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     detailTextView.text = this.detailTextFrom(bookmark)
 
     textView.setTextColor(
-      ReaderColorSchemes.foreground(
+      ReaderColorSchemes.foregroundAsAndroidColor(
         Simplified.application.services()
           .profilesController
           .profileCurrent()

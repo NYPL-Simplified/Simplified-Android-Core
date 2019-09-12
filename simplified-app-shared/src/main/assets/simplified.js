@@ -161,52 +161,7 @@ function Simplified() {
         font-weight: normal; \
       }";
     innerDocument.head.appendChild(styleElement);
-
-    // If there's a user selected font, update the style.
-    var currentStyles = {};
-    if (this.currentTextColor) {
-      currentStyles["color"] = this.currentTextColor;
-    }
-    if (this.currentFont) {
-      currentStyles["font-family"] = this.currentFont;
-    }
-    if (this.currentTextColor || this.currentFont) {
-      this.updateBookStyles(currentStyles);
-    }
   }
-
-  /**
-   * updateBookStyles
-   * If there is an existing style element in the iframe for the webreader,
-   * remove it and add an updated style element with the newly selected
-   * font family. Updating the current font selection in the object's
-   * instance as well to update the font when moving from chapter to chapter.
-   */
-  this.updateBookStyles = function(obj) {
-    var id = 'simplified-bookStyles';
-    var innerDocument = window.frames["epubContentIframe"].contentDocument;
-    if(!innerDocument) {
-      innerDocument = window.frames["epubContentIframe"].document;
-    }
-
-    var style = innerDocument.getElementById(id);
-    if (style) {
-     innerDocument.head.removeChild(style);
-    }
-    this.currentFont = obj["font-family"];
-    this.currentTextColor = obj["color"];
-
-    var styleElement = document.createElement('style');
-    styleElement.id = id;
-    styleElement.textContent =
-      "body { \
-        font-family: " + obj["font-family"] + "; \
-        color: " + obj["color"] + "; \
-      }";
-
-    innerDocument.head.appendChild(styleElement);
-  }
-
 }
 
 simplified = new Simplified();

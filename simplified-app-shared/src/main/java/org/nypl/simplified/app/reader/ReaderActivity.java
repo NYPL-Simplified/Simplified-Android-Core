@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -214,7 +215,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     final View in_root = Objects.requireNonNull(this.view_root);
     UIThread.runOnUIThread(() -> {
-      in_root.setBackgroundColor(ReaderColorSchemes.background(cs));
+      in_root.setBackgroundColor(ReaderColorSchemes.backgroundAsAndroidColor(cs));
       this.applyViewerColorFilters();
     });
   }
@@ -413,11 +414,21 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
         super.onShowCustomView(view, callback);
         LOG.debug("web-chrome: {}", view);
       }
+
+      @Override
+      public boolean onConsoleMessage(final ConsoleMessage consoleMessage) {
+        LOG.debug("web-chrome: console: {}:{}: {}: {}",
+          consoleMessage.sourceId(),
+          consoleMessage.lineNumber(),
+          consoleMessage.messageLevel(),
+          consoleMessage.message());
+        return true;
+      }
     };
 
     final WebViewClient wv_client =
       new ReaderWebViewClient(this, sd, this, rd, this);
-    in_webview.setBackgroundColor(0x00000000);
+
     in_webview.setWebChromeClient(wc_client);
     in_webview.setWebViewClient(wv_client);
     in_webview.setOnLongClickListener(view -> {
