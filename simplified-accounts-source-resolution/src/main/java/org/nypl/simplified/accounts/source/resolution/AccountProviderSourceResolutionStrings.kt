@@ -10,6 +10,9 @@ import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 class AccountProviderSourceResolutionStrings(
   private val resources: Resources) : AccountProviderResolutionStringsType {
 
+  override val resolvingAuthDocumentUnusableLink: String
+    get() = this.resources.getString(R.string.resolvingAuthDocumentUnusableLink)
+
   override val resolvingUnexpectedException: String
     get() = this.resources.getString(R.string.resolvingUnexpectedException)
 

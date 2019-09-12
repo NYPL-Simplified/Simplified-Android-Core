@@ -242,6 +242,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.futures](simplified-futures)|Guava Future extensions|
 |[org.librarysimplified.http.core](simplified-http-core)|HTTP API|
 |[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
+|[org.librarysimplified.links](simplified-links)|Link types|
+|[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|
 |[org.librarysimplified.migration.api](simplified-migration-api)|Data migration API|
 |[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
 |[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|

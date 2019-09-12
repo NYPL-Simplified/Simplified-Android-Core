@@ -10,4 +10,5 @@
   <string name="resolvingAuthDocument">Resolving the authentication document…</string>
   <string name="resolvingAuthDocumentRetrievalFailed">The authentication document could not be retrieved from the server.</string>
   <string name="resolvingUnexpectedException">Received an unexpected exception during resolution!</string>
+  <string name="resolvingAuthDocumentUnusableLink">We couldn\'t understand the authentication document link.</string>
 </resources>

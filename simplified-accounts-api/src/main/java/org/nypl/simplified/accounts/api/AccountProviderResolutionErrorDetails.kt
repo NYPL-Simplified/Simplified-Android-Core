@@ -14,6 +14,14 @@ import org.nypl.simplified.presentableerror.api.PresentableErrorType
 sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
 
   /**
+   * The authentication document link was unusable.
+   */
+
+  data class AuthDocumentUnusableLink(
+    override val message: String)
+    : AccountProviderResolutionErrorDetails()
+
+  /**
    * An HTTP request failed.
    */
 

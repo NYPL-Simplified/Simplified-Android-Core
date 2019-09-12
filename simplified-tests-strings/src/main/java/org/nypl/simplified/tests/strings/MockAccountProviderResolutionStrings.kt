@@ -4,6 +4,9 @@ import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 
 class MockAccountProviderResolutionStrings : AccountProviderResolutionStringsType {
 
+  override val resolvingAuthDocumentUnusableLink: String
+    get() = "resolvingAuthDocumentUnusableLink"
+
   override val resolvingUnexpectedException: String
     get() = "resolvingUnexpectedException"
 

@@ -122,7 +122,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
   private fun applyColorScheme(cs: ReaderColorScheme) {
     UIThread.checkIsUIThread()
-    this.readerTOCListView.rootView?.setBackgroundColor(ReaderColorSchemes.background(cs))
+    this.readerTOCListView.rootView?.setBackgroundColor(ReaderColorSchemes.backgroundAsAndroidColor(cs))
   }
 
   /**
@@ -184,7 +184,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
     layoutParams.setMargins(leftIndent.toInt(), 0, 0, 0)
     textView.layoutParams = layoutParams
     textView.setTextColor(
-      ReaderColorSchemes.foreground(
+      ReaderColorSchemes.foregroundAsAndroidColor(
         Simplified.application.services()
           .profilesController
           .profileCurrent()

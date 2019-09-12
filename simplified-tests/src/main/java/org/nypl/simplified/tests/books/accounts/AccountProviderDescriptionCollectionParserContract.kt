@@ -41,7 +41,7 @@ abstract class AccountProviderDescriptionCollectionParserContract {
       Assert.assertEquals(182, collection.providers.size)
       Assert.assertTrue(collection.providers.any { p -> p.links.isNotEmpty() })
       Assert.assertTrue(collection.providers.any { p -> p.images.isNotEmpty() })
-      Assert.assertEquals(3, collection.links.size)
+      Assert.assertEquals(4, collection.links.size)
       Assert.assertEquals("NYPL", collection.metadata.adobeVendorID!!.value)
       Assert.assertEquals("Libraries", collection.metadata.title)
     }
