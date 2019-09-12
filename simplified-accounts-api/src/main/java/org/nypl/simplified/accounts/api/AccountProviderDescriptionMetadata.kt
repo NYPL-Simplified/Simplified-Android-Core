@@ -1,6 +1,8 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
+import org.nypl.simplified.links.Link
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
 import java.net.URI
 
@@ -62,35 +64,8 @@ data class AccountProviderDescriptionMetadata(
 
 ) : Comparable<AccountProviderDescriptionMetadata> {
 
-  /**
-   * A link in a description.
-   */
-
-  data class Link(
-
-    /**
-     * The target of the link.
-     */
-
-    val href: URI,
-
-    /**
-     * The MIME type of the link content.
-     */
-
-    val type: String?,
-
-    /**
-     * `true` if the link target is templated
-     */
-
-    val templated: Boolean,
-
-    /**
-     * The relation of the link.
-     */
-
-    val relation: String?)
+  private val authenticationDocumentType =
+    MIMEType("application", "vnd.opds.authentication.v1.0+json", mapOf())
 
   override fun compareTo(other: AccountProviderDescriptionMetadata): Int =
     this.title.compareTo(other.title)
@@ -99,23 +74,27 @@ data class AccountProviderDescriptionMetadata(
    * The logo URI, if one is available
    */
 
-  val logoURI: URI?
-    get() = this.images.find { link -> link.relation == "http://opds-spec.org/image/thumbnail" }?.href
+  val logoURI: Link?
+    get() = this.images.find { link -> link.relation == "http://opds-spec.org/image/thumbnail" }
 
   /**
    * The authentication document URI, if one is available
    */
 
-  val authenticationDocumentURI: URI?
+  val authenticationDocumentURI: Link?
     get() = this.links.find { link ->
-      link.type == "application/vnd.opds.authentication.v1.0+json"
-        || link.relation == AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
-    }?.href
+      when (link) {
+        is Link.LinkBasic ->
+          link.type == this.authenticationDocumentType
+            || link.relation == AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
+        is Link.LinkTemplated -> false
+      }
+    }
 
   /**
    * The catalog URI, if one is available.
    */
 
-  val catalogURI: URI?
-    get() = this.links.find { link -> link.relation == "http://opds-spec.org/catalog" }?.href
+  val catalogURI: Link?
+    get() = this.links.find { link -> link.relation == "http://opds-spec.org/catalog" }
 }

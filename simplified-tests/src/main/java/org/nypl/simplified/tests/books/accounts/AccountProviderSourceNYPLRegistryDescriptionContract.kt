@@ -16,17 +16,18 @@ import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceStand
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
+import org.nypl.simplified.links.Link
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParserType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObject
-import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectLink
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLFeatures
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLInput
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.http.MockingHTTP
+import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.IOException
@@ -82,6 +83,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
     Assert.assertEquals("resolvingAuthDocumentNoStartURI", result.steps.last().resolution.message)
   }
 
+  private val AUTH_DOCUMENT_TYPE =
+    MIMEType("application", "vnd.opds.authentication.v1.0+json", mapOf())
+
   /**
    * Resolution fails the authentication document can't be retrieved.
    */
@@ -94,11 +98,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -143,11 +145,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -187,11 +187,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -244,11 +242,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -307,41 +303,41 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
             )))
         )),
         links = listOf(
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
-            rel = "start"
+            relation = "start"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/card.xml"),
-            rel = "register"
+            relation = "register"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/license.xml"),
-            rel = "license"
+            relation = "license"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/eula.xml"),
-            rel = "terms-of-service"
+            relation = "terms-of-service"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/settings.xml"),
-            rel = "http://librarysimplified.org/terms/rel/user-profile"
+            relation = "http://librarysimplified.org/terms/rel/user-profile"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/privacy.xml"),
-            rel = "privacy-policy"
+            relation = "privacy-policy"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/shelf.xml"),
-            rel = "http://opds-spec.org/shelf"
+            relation = "http://opds-spec.org/shelf"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("mailto:someone@example.com"),
-            rel = "help"
+            relation = "help"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/logo.png"),
-            rel = "logo"
+            relation = "logo"
           )
         ))
 
@@ -403,11 +399,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -451,51 +445,51 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           labels = mapOf(),
           inputs = mapOf(),
           links = listOf(
-            AuthenticationObjectLink(
+            Link.LinkBasic(
               href = URI("http://www.example.com/feed-13.xml"),
-              rel = "http://librarysimplified.org/terms/rel/authentication/restriction-met"
+              relation = "http://librarysimplified.org/terms/rel/authentication/restriction-met"
             ),
-            AuthenticationObjectLink(
+            Link.LinkBasic(
               href = URI("http://www.example.com/feed-under-13.xml"),
-              rel = "http://librarysimplified.org/terms/rel/authentication/restriction-not-met"
+              relation = "http://librarysimplified.org/terms/rel/authentication/restriction-not-met"
             ))
         )),
         links = listOf(
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
-            rel = "start"
+            relation = "start"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/card.xml"),
-            rel = "register"
+            relation = "register"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/license.xml"),
-            rel = "license"
+            relation = "license"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/eula.xml"),
-            rel = "terms-of-service"
+            relation = "terms-of-service"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/settings.xml"),
-            rel = "http://librarysimplified.org/terms/rel/user-profile"
+            relation = "http://librarysimplified.org/terms/rel/user-profile"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/privacy.xml"),
-            rel = "privacy-policy"
+            relation = "privacy-policy"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/shelf.xml"),
-            rel = "http://opds-spec.org/shelf"
+            relation = "http://opds-spec.org/shelf"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("mailto:someone@example.com"),
-            rel = "help"
+            relation = "help"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/logo.png"),
-            rel = "logo"
+            relation = "logo"
           )
         ))
 
@@ -552,11 +546,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -596,41 +588,41 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         ),
         authentication = listOf(),
         links = listOf(
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
-            rel = "start"
+            relation = "start"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/card.xml"),
-            rel = "register"
+            relation = "register"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/license.xml"),
-            rel = "license"
+            relation = "license"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/eula.xml"),
-            rel = "terms-of-service"
+            relation = "terms-of-service"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/settings.xml"),
-            rel = "http://librarysimplified.org/terms/rel/user-profile"
+            relation = "http://librarysimplified.org/terms/rel/user-profile"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/privacy.xml"),
-            rel = "privacy-policy"
+            relation = "privacy-policy"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/shelf.xml"),
-            rel = "http://opds-spec.org/shelf"
+            relation = "http://opds-spec.org/shelf"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("mailto:someone@example.com"),
-            rel = "help"
+            relation = "help"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/logo.png"),
-            rel = "logo"
+            relation = "logo"
           )
         ))
 
@@ -684,11 +676,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -734,41 +724,41 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           links = listOf()
         )),
         links = listOf(
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
-            rel = "start"
+            relation = "start"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/card.xml"),
-            rel = "register"
+            relation = "register"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/license.xml"),
-            rel = "license"
+            relation = "license"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/eula.xml"),
-            rel = "terms-of-service"
+            relation = "terms-of-service"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/settings.xml"),
-            rel = "http://librarysimplified.org/terms/rel/user-profile"
+            relation = "http://librarysimplified.org/terms/rel/user-profile"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/privacy.xml"),
-            rel = "privacy-policy"
+            relation = "privacy-policy"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/shelf.xml"),
-            rel = "http://opds-spec.org/shelf"
+            relation = "http://opds-spec.org/shelf"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("mailto:someone@example.com"),
-            rel = "help"
+            relation = "help"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/logo.png"),
-            rel = "logo"
+            relation = "logo"
           )
         ))
 
@@ -798,11 +788,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -848,41 +836,41 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           links = listOf()
         )),
         links = listOf(
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
-            rel = "start"
+            relation = "start"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/card.xml"),
-            rel = "register"
+            relation = "register"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/license.xml"),
-            rel = "license"
+            relation = "license"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/eula.xml"),
-            rel = "terms-of-service"
+            relation = "terms-of-service"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/settings.xml"),
-            rel = "http://librarysimplified.org/terms/rel/user-profile"
+            relation = "http://librarysimplified.org/terms/rel/user-profile"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/privacy.xml"),
-            rel = "privacy-policy"
+            relation = "privacy-policy"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/shelf.xml"),
-            rel = "http://opds-spec.org/shelf"
+            relation = "http://opds-spec.org/shelf"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("mailto:someone@example.com"),
-            rel = "help"
+            relation = "help"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/logo.png"),
-            rel = "logo"
+            relation = "logo"
           )
         ))
 
@@ -911,11 +899,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
         links = listOf(
-          AccountProviderDescriptionMetadata.Link(
+          Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            "application/vnd.opds.authentication.v1.0+json",
-            false,
-            null)
+            AUTH_DOCUMENT_TYPE)
         ),
         images = listOf(),
         isProduction = true,
@@ -955,37 +941,37 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           disabled = setOf()
         ),
         links = listOf(
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/card.xml"),
-            rel = "register"
+            relation = "register"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/license.xml"),
-            rel = "license"
+            relation = "license"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/eula.xml"),
-            rel = "terms-of-service"
+            relation = "terms-of-service"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/settings.xml"),
-            rel = "http://librarysimplified.org/terms/rel/user-profile"
+            relation = "http://librarysimplified.org/terms/rel/user-profile"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/privacy.xml"),
-            rel = "privacy-policy"
+            relation = "privacy-policy"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/shelf.xml"),
-            rel = "http://opds-spec.org/shelf"
+            relation = "http://opds-spec.org/shelf"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("mailto:someone@example.com"),
-            rel = "help"
+            relation = "help"
           ),
-          AuthenticationObjectLink(
+          Link.LinkBasic(
             href = URI("http://www.example.com/logo.png"),
-            rel = "logo"
+            relation = "logo"
           )
         ))
 

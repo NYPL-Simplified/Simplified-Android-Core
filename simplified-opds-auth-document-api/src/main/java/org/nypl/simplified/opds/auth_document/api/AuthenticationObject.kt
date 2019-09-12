@@ -1,6 +1,7 @@
 package org.nypl.simplified.opds.auth_document.api
 
 import com.google.common.base.Preconditions
+import org.nypl.simplified.links.Link
 import java.net.URI
 
 /**
@@ -37,7 +38,7 @@ data class AuthenticationObject(
    * Links for the object.
    */
 
-  val links: List<AuthenticationObjectLink> = listOf()) {
+  val links: List<Link> = listOf()) {
 
   init {
     Preconditions.checkArgument(

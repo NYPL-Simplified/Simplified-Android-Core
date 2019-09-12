@@ -24,6 +24,7 @@ import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.links.Link
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObject
@@ -90,6 +91,7 @@ class AccountProviderSourceStandardDescription(
       val catalogURI =
         authDocument?.startURI
           ?: this.metadata.catalogURI
+            ?.hrefURI
           ?: run {
             val message = this.stringResources.resolvingAuthDocumentNoStartURI
             taskRecorder.currentStepFailed(
@@ -111,7 +113,7 @@ class AccountProviderSourceStandardDescription(
           addAutomatically = this.metadata.isAutomatic,
           annotationsURI = annotationsURI,
           authentication = authenticationDescription,
-          authenticationDocumentURI = this.metadata.authenticationDocumentURI,
+          authenticationDocumentURI = this.metadata.authenticationDocumentURI?.hrefURI,
           cardCreatorURI = authDocument?.cardCreatorURI,
           catalogURI = catalogURI,
           displayName = this.metadata.title,
@@ -120,7 +122,7 @@ class AccountProviderSourceStandardDescription(
           isProduction = this.metadata.isProduction,
           license = authDocument?.licenseURI,
           loansURI = authDocument?.loansURI,
-          logo = authDocument?.logoURI ?: this.metadata.logoURI,
+          logo = authDocument?.logoURI ?: this.metadata.logoURI?.hrefURI,
           mainColor = authDocument?.mainColor ?: "red",
           patronSettingsURI = authDocument?.patronSettingsURI,
           privacyPolicy = authDocument?.privacyPolicyURI,
@@ -193,11 +195,11 @@ class AccountProviderSourceStandardDescription(
     taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>,
     authObject: AuthenticationObject): AccountProviderAuthenticationDescription.COPPAAgeGate {
     val under13 = authObject.links.find { link ->
-      link.rel == "http://librarysimplified.org/terms/rel/authentication/restriction-not-met"
-    }?.href
+      link.relation == "http://librarysimplified.org/terms/rel/authentication/restriction-not-met"
+    }?.hrefURI
     val over13 = authObject.links.find { link ->
-      link.rel == "http://librarysimplified.org/terms/rel/authentication/restriction-met"
-    }?.href
+      link.relation == "http://librarysimplified.org/terms/rel/authentication/restriction-met"
+    }?.hrefURI
 
     return if (under13 != null && over13 != null) {
       AccountProviderAuthenticationDescription.COPPAAgeGate(
@@ -219,27 +221,39 @@ class AccountProviderSourceStandardDescription(
     taskRecorder.beginNewStep(this.stringResources.resolvingAuthDocument)
     onProgress.invoke(this.metadata.id, this.stringResources.resolvingAuthDocument)
 
-    val targetURI =
+    val targetLink =
       this.metadata.authenticationDocumentURI ?: return null
 
-    return when (val result = this.http.get(Option.none(), targetURI, 0L)) {
-      is HTTPResultError -> {
-        taskRecorder.currentStepFailed(
-          message = this.stringResources.resolvingAuthDocumentRetrievalFailed,
-          errorValue = HTTPRequestFailed(
-            message = result.message,
-            errorCode = result.status,
-            problemReport = this.someOrNull(result.problemReport)))
-        throw IOException(result.message)
+    return when (targetLink) {
+      is Link.LinkBasic -> {
+        when (val result = this.http.get(Option.none(), targetLink.href, 0L)) {
+          is HTTPResultError -> {
+            taskRecorder.currentStepFailed(
+              message = this.stringResources.resolvingAuthDocumentRetrievalFailed,
+              errorValue = HTTPRequestFailed(
+                message = result.message,
+                errorCode = result.status,
+                problemReport = this.someOrNull(result.problemReport)))
+            throw IOException(result.message)
+          }
+
+          is HTTPResultException ->
+            throw result.error
+
+          is HTTPResultOK ->
+            this.parseAuthenticationDocument(targetLink.href, result.value, taskRecorder)
+
+          else -> throw UnreachableCodeException()
+        }
       }
 
-      is HTTPResultException ->
-        throw result.error
-
-      is HTTPResultOK ->
-        this.parseAuthenticationDocument(targetURI, result.value, taskRecorder)
-
-      else -> throw UnreachableCodeException()
+      is Link.LinkTemplated -> {
+        val message = this.stringResources.resolvingAuthDocumentUnusableLink
+        taskRecorder.currentStepFailed(
+          message = message,
+          errorValue = AccountProviderResolutionErrorDetails.AuthDocumentUnusableLink(message))
+        throw IOException(message)
+      }
     }
   }
 

@@ -603,12 +603,14 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
         .profileCurrentlyUsedAccountProviders()
         .map { p -> p.toDescription() }
 
+    this.logger.debug("should show testing providers: {}", preferences.showTestingLibraries())
+
     val availableAccountProviders =
       ArrayList(Simplified.application.services()
         .accountProviderRegistry
         .accountProviderDescriptions()
         .values
-        .filter { provider -> showShowProvider(provider, preferences) })
+        .filter { provider -> shouldShowProvider(provider, preferences) })
 
     availableAccountProviders.removeAll(usedAccountProviders)
     availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
@@ -621,7 +623,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     return availableAccountProviders
   }
 
-  private fun showShowProvider(provider: AccountProviderDescriptionType, preferences: ProfilePreferences) =
+  private fun shouldShowProvider(provider: AccountProviderDescriptionType, preferences: ProfilePreferences) =
     provider.metadata.isProduction || preferences.showTestingLibraries()
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {

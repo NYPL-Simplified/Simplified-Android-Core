@@ -25,12 +25,12 @@ class AccountProviderDescriptionSerializer internal constructor(
 
     val imagesNode = this.mapper.createArrayNode()
     this.document.images.forEach { link ->
-      imagesNode.add(linkNode(link.href, link.type, link.relation, link.templated))
+      imagesNode.add(LinkSerialization.serializeLink(link))
     }
 
     val linksNode = this.mapper.createArrayNode()
     this.document.links.forEach { link ->
-      linksNode.add(linkNode(link.href, link.type, link.relation, link.templated))
+      linksNode.add(LinkSerialization.serializeLink(link))
     }
 
     val objectNode = this.mapper.createObjectNode()
@@ -38,22 +38,6 @@ class AccountProviderDescriptionSerializer internal constructor(
     objectNode.set("links", linksNode)
     objectNode.set("images", imagesNode)
     return objectNode
-  }
-
-  private fun linkNode(
-    href: URI,
-    type: String?,
-    relation: String?,
-    templated: Boolean
-  ): ObjectNode {
-    val node = this.mapper.createObjectNode()
-    node.put("href", href.toString())
-    type?.let { node.put("type", it) }
-    relation?.let { node.put("rel", it) }
-    if (templated) {
-      node.put("templated", templated)
-    }
-    return node
   }
 
   override fun serialize() {
