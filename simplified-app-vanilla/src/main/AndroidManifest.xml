@@ -141,6 +141,14 @@
       android:exported="false"
       android:label="@string/audio_book_player" />
 
+    <!-- PDF Reader -->
+    <activity
+        android:name="org.nypl.simplified.app.pdf.PdfReaderActivity"
+        android:configChanges="orientation|screenSize"
+        android:contentDescription="@string/reader"
+        android:exported="true"
+        android:label="@string/reader" />
+
     <activity
       android:name="org.nypl.simplified.app.ReportIssueActivity"
       android:contentDescription="@string/hs_issuebutton_title"
