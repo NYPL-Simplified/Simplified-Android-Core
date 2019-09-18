@@ -118,11 +118,11 @@ org.librarysimplified.storePassword=STOREPASSWORD
 Note that APK files are only signed if the code is built in _release_ mode. In other words, you
 need to use either of these commands to produce signed APK files:
 
-~~
+~~~
 $ ./gradlew clean assembleRelease test
 
 $ ./gradlew clean assemble test
-~~
+~~~
 
 ### Project Structure / Architecture
 
