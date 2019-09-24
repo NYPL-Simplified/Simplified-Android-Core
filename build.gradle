@@ -92,7 +92,7 @@ ext.libraries = [
   nyplAudioBookMocking       : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.mocking:${nyplAudioBookAPIVersion}",
   nyplAudioBookOpenAccess    : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access:${nyplAudioBookAPIVersion}",
   nyplAudioBookViews         : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.views:${nyplAudioBookAPIVersion}",
-  nyplDRMCore                : "org.nypl.drm:nypl-drm-core:1.0.0",
+  nyplDRMCore                : "org.librarysimplified.drm:org.librarysimplified.drm.core:1.1.1",
   nyplPDFAPI                 : "org.nypl.pdf:api:0.0.4",
   nyplPDFViewer              : "org.nypl.pdf:pdfviewer:0.0.4",
   picasso                    : "com.squareup.picasso:picasso:2.5.2",
