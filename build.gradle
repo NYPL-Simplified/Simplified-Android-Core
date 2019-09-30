@@ -44,12 +44,21 @@ ext {
     logger.warn("No nexusPassword property specified: Using an empty value")
     nexusPassword = ""
   }
+
   if (!project.hasProperty("org.librarysimplified.nexus.publish")) {
     logger.warn("org.librarysimplified.nexus.publish is not set: We will publish artifacts to Maven Central")
-    useNYPLNexus = false
+    useNYPLNexusPublish = false
   } else {
     logger.warn("org.librarysimplified.nexus.publish is set: We will publish artifacts to the NYPL Nexus")
-    useNYPLNexus = true
+    useNYPLNexusPublish = true
+  }
+
+  if (!project.hasProperty("org.librarysimplified.nexus.depend")) {
+    logger.warn("org.librarysimplified.nexus.depend is not set: We will not depend on artifacts the NYPL Nexus")
+    useNYPLNexusDepend = false
+  } else {
+    logger.warn("org.librarysimplified.nexus.depend is set: We will depend artifacts on the NYPL Nexus")
+    useNYPLNexusDepend = true
   }
 
   nyplAudioBookAPIVersion = "3.0.0-beta001"
@@ -299,7 +308,7 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     }
 
     repositories {
-      if (useNYPLNexus) {
+      if (useNYPLNexusPublish) {
         logger.info("using NYPL Nexus repository for publication")
 
         maven {
@@ -336,12 +345,14 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     mavenLocal()
     mavenCentral()
 
-    maven {
-      credentials {
-        username findProperty("org.librarysimplified.nexus.username")
-        password findProperty("org.librarysimplified.nexus.password")
+    if (useNYPLNexusDepend) {
+      maven {
+        credentials {
+          username findProperty("org.librarysimplified.nexus.username")
+          password findProperty("org.librarysimplified.nexus.password")
+        }
+        url "https://nexus.librarysimplified.org:8443/nexus/content/groups/external/"
       }
-      url "https://nexus.librarysimplified.org:8443/nexus/content/groups/external/"
     }
 
     maven { url "https://jitpack.io" }

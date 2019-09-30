@@ -27,8 +27,7 @@ repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
 
 #### Build!
 
-The short version: Install an [Android SDK](#android-sdk), configure [credentials for Nexus](#credentials),
-and run:
+The short version: Install an [Android SDK](#android-sdk) and run:
 
 ~~~
 $ ./gradlew clean assembleDebug test
@@ -69,12 +68,11 @@ OpenJDK Runtime Environment (build 1.8.0_222-b05)
 OpenJDK 64-Bit Server VM (build 25.222-b05, mixed mode)
 ~~~
 
-#### Credentials
+#### Nexus Credentials
 
-Our application currently needs packages that are only available from
-our Nexus server in order to build correctly. This will be changed
-in the future when the application dependencies are pushed to [Maven
-Central](https://search.maven.org/).
+Our application can use packages that are only available from our
+Nexus server. If you wish to use these packages, you need to obtain
+Nexus credentials and then tell Gradle to use them.
 
 Nexus credentials can be obtained by emailing `malcolmwoods@nypl.org`
 or by asking in the `#mobile-development` channel of
@@ -87,6 +85,7 @@ Once you have your credentials, the following lines must be added to `$HOME/.gra
 # Do NOT use quotes around either value.
 org.librarysimplified.nexus.username=USERNAME
 org.librarysimplified.nexus.password=PASSWORD
+org.librarysimplified.nexus.depend=true
 ~~~
 
 #### Bugsnag Support
