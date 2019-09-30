@@ -44,6 +44,13 @@ ext {
     logger.warn("No nexusPassword property specified: Using an empty value")
     nexusPassword = ""
   }
+  if (!project.hasProperty("org.librarysimplified.nexus.publish")) {
+    logger.warn("org.librarysimplified.nexus.publish is not set: We will publish artifacts to Maven Central")
+    useNYPLNexus = false
+  } else {
+    logger.warn("org.librarysimplified.nexus.publish is set: We will publish artifacts to the NYPL Nexus")
+    useNYPLNexus = true
+  }
 
   nyplAudioBookAPIVersion = "3.0.0-beta001"
 }
@@ -93,8 +100,8 @@ ext.libraries = [
   nyplAudioBookOpenAccess    : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access:${nyplAudioBookAPIVersion}",
   nyplAudioBookViews         : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.views:${nyplAudioBookAPIVersion}",
   nyplDRMCore                : "org.librarysimplified.drm:org.librarysimplified.drm.core:1.1.1",
-  nyplPDFAPI                 : "org.nypl.pdf:api:0.0.4",
-  nyplPDFViewer              : "org.nypl.pdf:pdfviewer:0.0.4",
+  nyplPDFAPI                 : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.api:0.1.0",
+  nyplPDFViewer              : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer:0.1.0",
   picasso                    : "com.squareup.picasso:picasso:2.5.2",
   readium                    : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
   readiumSharedJS            : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",
@@ -292,14 +299,29 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     }
 
     repositories {
-      maven {
-        def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-        def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-        url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
+      if (useNYPLNexus) {
+        logger.info("using NYPL Nexus repository for publication")
 
-        credentials(PasswordCredentials) {
-          username nexusUsername
-          password nexusPassword
+        maven {
+          def releasesRepoUrl = "https://nexus.librarysimplified.org:8443/nexus/content/repositories/releases-no-drm/"
+          def snapshotsRepoUrl = "https://nexus.librarysimplified.org:8443/nexus/content/repositories/snapshots-no-drm/"
+          url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
+          credentials(PasswordCredentials) {
+            username findProperty("org.librarysimplified.nexus.username")
+            password findProperty("org.librarysimplified.nexus.password")
+          }
+        }
+      } else {
+        logger.info("using Maven Central repository for publication")
+
+        maven {
+          def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+          def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+          url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
+          credentials(PasswordCredentials) {
+            username nexusUsername
+            password nexusPassword
+          }
         }
       }
     }
