@@ -3,11 +3,11 @@ package org.nypl.simplified.app.pdf
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import org.nypl.pdf.android.api.PdfFragmentListenerType
-import org.nypl.pdf.android.api.TableOfContentsFragmentListenerType
-import org.nypl.pdf.android.api.TableOfContentsItem
-import org.nypl.pdf.android.pdfviewer.PdfViewerFragment
-import org.nypl.pdf.android.pdfviewer.TableOfContentsFragment
+import edu.umn.minitex.pdf.android.api.PdfFragmentListenerType
+import edu.umn.minitex.pdf.android.api.TableOfContentsFragmentListenerType
+import edu.umn.minitex.pdf.android.api.TableOfContentsItem
+import edu.umn.minitex.pdf.android.pdfviewer.PdfViewerFragment
+import edu.umn.minitex.pdf.android.pdfviewer.TableOfContentsFragment
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
@@ -28,7 +28,7 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
   companion object {
     const val TABLE_OF_CONTENTS = "table_of_contents"
 
-    private const val PARAMS_ID = "org.nypl.pdf.android.pdfreader.PdfReaderActivity.params"
+    private const val PARAMS_ID = "edu.umn.minitex.pdf.android.pdfreader.PdfReaderActivity.params"
 
     /**
      * Factory method to start a [PdfReaderActivity]
