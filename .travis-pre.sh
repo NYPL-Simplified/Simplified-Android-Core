@@ -15,16 +15,6 @@ info()
   echo "info: $1" 1>&2
 }
 
-if [ -z "${NYPL_NEXUS_USER}" ]
-then
-  fatal "NYPL_NEXUS_USER is not defined"
-fi
-
-if [ -z "${NYPL_NEXUS_PASSWORD}" ]
-then
-  fatal "NYPL_NEXUS_PASSWORD is not defined"
-fi
-
 if [ -z "${NYPL_GITHUB_ACCESS_TOKEN}" ]
 then
   fatal "NYPL_GITHUB_ACCESS_TOKEN is not defined"
