@@ -1,6 +1,7 @@
 package org.nypl.simplified.tests.books.accounts
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -73,7 +74,7 @@ abstract class AccountAuthenticationCredentialsStoreContract {
   fun testLoadNoVersion() {
     val mapper = ObjectMapper()
     val obj = mapper.createObjectNode()
-    obj.set("credentials", mapper.createObjectNode())
+    obj.set<ObjectNode>("credentials", mapper.createObjectNode())
 
     FileOutputStream(this.file)
       .use { stream ->
@@ -92,7 +93,7 @@ abstract class AccountAuthenticationCredentialsStoreContract {
     val mapper = ObjectMapper()
     val obj = mapper.createObjectNode()
     obj.put("@version", 20000101)
-    obj.set("credentials", mapper.createObjectNode())
+    obj.set<ObjectNode>("credentials", mapper.createObjectNode())
 
     FileOutputStream(this.file)
       .use { stream ->
@@ -109,14 +110,14 @@ abstract class AccountAuthenticationCredentialsStoreContract {
     val mapper = ObjectMapper()
     val obj = mapper.createObjectNode()
     val creds = mapper.createObjectNode()
-    obj.set("credentials", creds)
+    obj.set<ObjectNode>("credentials", creds)
 
     /*
      * Invalid credential value.
      */
 
     val cred0 = mapper.createObjectNode()
-    creds.set("347ae11b-cb5c-4084-8954-8629fd971bda", cred0)
+    creds.set<ObjectNode>("347ae11b-cb5c-4084-8954-8629fd971bda", cred0)
 
     /*
      * Invalid credential value.
@@ -129,7 +130,7 @@ abstract class AccountAuthenticationCredentialsStoreContract {
           AccountBarcode.create("1234"))
           .build())
     cred1.remove("username")
-    creds.set("8e058c17-6c59-490c-92c5-d950463c8632", cred1)
+    creds.set<ObjectNode>("8e058c17-6c59-490c-92c5-d950463c8632", cred1)
 
     /*
      * Valid credential value but invalid UUID.
@@ -141,7 +142,7 @@ abstract class AccountAuthenticationCredentialsStoreContract {
           AccountPIN.create("abcd"),
           AccountBarcode.create("1234"))
           .build())
-    creds.set("not a uuid", cred2)
+    creds.set<ObjectNode>("not a uuid", cred2)
 
     /*
      * Valid credential values.
@@ -153,7 +154,7 @@ abstract class AccountAuthenticationCredentialsStoreContract {
           AccountPIN.create("abcd"),
           AccountBarcode.create("1234"))
           .build())
-    creds.set("37452e48-2235-4098-ad67-e72bce45ccb6", cred3)
+    creds.set<ObjectNode>("37452e48-2235-4098-ad67-e72bce45ccb6", cred3)
 
     FileOutputStream(this.file)
       .use { stream ->

@@ -122,7 +122,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     val i = this.intent!!
     val a = i.extras
 
-    this.parameters = a.getSerializable(PARAMETER_ID) as AudioBookPlayerParameters
+    this.parameters = a.getSerializable(org.nypl.simplified.app.player.AudioBookPlayerActivity.Companion.PARAMETER_ID) as AudioBookPlayerParameters
 
     this.log.debug("manifest file: {}", this.parameters.manifestFile)
     this.log.debug("manifest uri:  {}", this.parameters.manifestURI)
@@ -206,7 +206,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      */
 
     this.supportFragmentManager.addOnBackStackChangedListener {
-      if (supportFragmentManager.backStackEntryCount == 0) {
+      if (this.supportFragmentManager.backStackEntryCount == 0) {
         this.restoreActionBarTitle()
       }
     }
@@ -241,14 +241,26 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     }
 
     /*
-     * Cancel downloads and shut down the player.
+     * Cancel downloads, shut down the player, and close the book.
      */
 
     if (this.playerInitialized) {
       this.savePlayerPosition()
       this.cancelAllDownloads()
-      this.player.close()
+
+      try {
+        this.player.close()
+      } catch (e: Exception) {
+        this.log.error("error closing player: ", e)
+      }
+
       this.playerSubscription.unsubscribe()
+
+      try {
+        this.book.close()
+      } catch (e: Exception) {
+        this.log.error("error closing book: ", e)
+      }
     }
 
     this.downloadExecutor.shutdown()
@@ -405,7 +417,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       is PlayerEventChapterWaiting -> Unit
       is PlayerEventPlaybackRateChanged -> Unit
       is PlayerEventError ->
-        onLogPlayerError(event)
+        this.onLogPlayerError(event)
     }
   }
 

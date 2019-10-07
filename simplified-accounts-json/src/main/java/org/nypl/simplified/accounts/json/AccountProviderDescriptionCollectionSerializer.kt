@@ -24,9 +24,9 @@ class AccountProviderDescriptionCollectionSerializer internal constructor(
 
   override fun serialize() {
     val objectNode = this.mapper.createObjectNode()
-    objectNode.set("catalogs", this.serializeCatalogs())
-    objectNode.set("metadata", this.serializeMetadata())
-    objectNode.set("links", this.serializeLinksNode())
+    objectNode.set<ArrayNode>("catalogs", this.serializeCatalogs())
+    objectNode.set<ObjectNode>("metadata", this.serializeMetadata())
+    objectNode.set<ArrayNode>("links", this.serializeLinksNode())
     this.mapper.writerWithDefaultPrettyPrinter().writeValue(this.stream, objectNode)
   }
 

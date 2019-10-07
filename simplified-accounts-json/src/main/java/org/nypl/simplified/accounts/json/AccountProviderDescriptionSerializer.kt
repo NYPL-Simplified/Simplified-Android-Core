@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.json
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionSerializerType
@@ -34,9 +35,9 @@ class AccountProviderDescriptionSerializer internal constructor(
     }
 
     val objectNode = this.mapper.createObjectNode()
-    objectNode.set("metadata", metaNode)
-    objectNode.set("links", linksNode)
-    objectNode.set("images", imagesNode)
+    objectNode.set<ObjectNode>("metadata", metaNode)
+    objectNode.set<ArrayNode>("links", linksNode)
+    objectNode.set<ArrayNode>("images", imagesNode)
     return objectNode
   }
 

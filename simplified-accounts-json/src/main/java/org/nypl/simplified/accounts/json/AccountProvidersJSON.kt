@@ -69,7 +69,7 @@ object AccountProvidersJSON {
         authObject.put("type", AccountProviderAuthenticationDescription.COPPA_TYPE)
         authObject.put("greaterEqual13", auth.greaterEqual13.toString())
         authObject.put("under13", auth.under13.toString())
-        node.set("authentication", authObject)
+        node.set<ObjectNode>("authentication", authObject)
       }
       is AccountProviderAuthenticationDescription.Basic -> {
         val authObject = mapper.createObjectNode()
@@ -79,8 +79,8 @@ object AccountProvidersJSON {
         this.putConditionally(authObject, "keyboard", auth.keyboard?.toUpperCase())
         this.putConditionally(authObject, "passwordKeyboard", auth.passwordKeyboard?.toUpperCase())
         authObject.put("passwordMaximumLength", auth.passwordMaximumLength)
-        authObject.set("labels", mapToObject(mapper, auth.labels))
-        node.set("authentication", authObject)
+        authObject.set<ObjectNode>("labels", mapToObject(mapper, auth.labels))
+        node.set<ObjectNode>("authentication", authObject)
       }
       null -> {
 
