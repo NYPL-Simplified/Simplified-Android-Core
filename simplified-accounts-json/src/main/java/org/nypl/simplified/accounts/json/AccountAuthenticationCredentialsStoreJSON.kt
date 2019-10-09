@@ -68,10 +68,11 @@ object AccountAuthenticationCredentialsStoreJSON {
     val credsObject = jom.createObjectNode()
     for (key in credentials.keys) {
       val item = credentials[key]
-      credsObject.set(key.uuid.toString(), AccountAuthenticationCredentialsJSON.serializeToJSON(item))
+      val credsObj = AccountAuthenticationCredentialsJSON.serializeToJSON(item)
+      credsObject.set<ObjectNode>(key.uuid.toString(), credsObj)
     }
 
-    obj.set("credentials", credsObject)
+    obj.set<ObjectNode>("credentials", credsObject)
     return obj
   }
 

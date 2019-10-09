@@ -1,17 +1,5 @@
 #!/bin/sh
 
-if [ -z "${NYPL_NEXUS_USER}" ]
-then
-  echo "error: NYPL_NEXUS_USER is not defined" 1>&2
-  exit 1
-fi
-
-if [ -z "${NYPL_NEXUS_PASSWORD}" ]
-then
-  echo "error: NYPL_NEXUS_PASSWORD is not defined" 1>&2
-  exit 1
-fi
-
 if [ -z "${NYPL_SIGNING_KEY_PASSWORD}" ]
 then
   echo "error: NYPL_SIGNING_KEY_PASSWORD is not defined" 1>&2

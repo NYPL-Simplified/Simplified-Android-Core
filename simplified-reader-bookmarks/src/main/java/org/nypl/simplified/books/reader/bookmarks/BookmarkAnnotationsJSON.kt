@@ -40,7 +40,7 @@ object BookmarkAnnotationsJSON {
 
     val node = mapper.createObjectNode()
     node.put("source", target.source)
-    node.set("selector", serializeSelectorNodeToJSON(mapper, target.selector))
+    node.set<ObjectNode>("selector", serializeSelectorNodeToJSON(mapper, target.selector))
     return node
   }
 
@@ -108,8 +108,8 @@ object BookmarkAnnotationsJSON {
     if (annotation.id != null) { node.put("id", annotation.id) }
     node.put("motivation", annotation.motivation)
     node.put("type", annotation.type)
-    node.set("target", serializeTargetNodeToJSON(mapper, annotation.target))
-    node.set("body", serializeBodyNodeToJSON(mapper, annotation.body))
+    node.set<ObjectNode>("target", serializeTargetNodeToJSON(mapper, annotation.target))
+    node.set<ObjectNode>("body", serializeBodyNodeToJSON(mapper, annotation.body))
     return node
   }
 
@@ -146,7 +146,7 @@ object BookmarkAnnotationsJSON {
     val node = mapper.createObjectNode()
     node.put("id", annotation.id)
     node.put("type", annotation.type)
-    node.set("items", nodes)
+    node.set<ArrayNode>("items", nodes)
     return node
   }
 
@@ -167,9 +167,9 @@ object BookmarkAnnotationsJSON {
     val node = mapper.createObjectNode()
     node.put("total", annotation.total)
     node.put("id", annotation.id)
-    node.set("@context", serializeStringArray(mapper, annotation.context))
-    node.set("type", serializeStringArray(mapper, annotation.type))
-    node.set("first", serializeBookmarkAnnotationFirstNodeToJSON(mapper, annotation.first))
+    node.set<ArrayNode>("@context", serializeStringArray(mapper, annotation.context))
+    node.set<ArrayNode>("type", serializeStringArray(mapper, annotation.type))
+    node.set<ObjectNode>("first", serializeBookmarkAnnotationFirstNodeToJSON(mapper, annotation.first))
     return node
   }
 

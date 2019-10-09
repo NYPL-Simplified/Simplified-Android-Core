@@ -92,7 +92,8 @@ object BookmarkJSON {
 
     val node = objectMapper.createObjectNode()
     node.put("opdsId", description.opdsId)
-    node.set("location", BookLocationJSON.serializeToJSON(objectMapper, description.location))
+    val location = BookLocationJSON.serializeToJSON(objectMapper, description.location)
+    node.set<ObjectNode>("location", location)
     node.put("time", description.time.toString())
     node.put("chapterTitle", description.chapterTitle)
     node.put("chapterProgress", description.chapterProgress)
