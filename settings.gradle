@@ -69,6 +69,6 @@ include ':simplified-threads'
 include ':simplified-ui-branding'
 include ':simplified-ui-datepicker'
 include ':simplified-ui-datepicker-demo'
+include ':simplified-ui-errorpage'
 include ':simplified-ui-splash'
 include ':simplified-ui-theme'
-

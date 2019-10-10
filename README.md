@@ -282,8 +282,11 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
 |[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
 |[org.librarysimplified.ui.datepicker.demo](simplified-ui-datepicker-demo)|Date picker UI component demo|
+|[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
 |[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
+
+_The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
 
 #### Adobe DRM Support
 
