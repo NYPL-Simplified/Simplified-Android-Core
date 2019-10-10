@@ -1,6 +1,6 @@
 package org.nypl.simplified.vanilla.with_profiles
 
-import org.nypl.simplified.branding.BrandingThemeOverrideServiceType
+import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.theme.ThemeValue
 
 class BrandingThemeService : BrandingThemeOverrideServiceType {

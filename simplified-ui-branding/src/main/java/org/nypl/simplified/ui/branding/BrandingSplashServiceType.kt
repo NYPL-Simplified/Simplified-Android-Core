@@ -1,4 +1,4 @@
-package org.nypl.simplified.branding
+package org.nypl.simplified.ui.branding
 
 /**
  * A service that provides a splash screen image.

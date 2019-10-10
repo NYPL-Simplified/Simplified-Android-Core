@@ -69,7 +69,7 @@ import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
-import org.nypl.simplified.branding.BrandingThemeOverrideServiceType
+import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.bugsnag.IfBugsnag
 import org.nypl.simplified.documents.clock.Clock
 import org.nypl.simplified.documents.clock.ClockType

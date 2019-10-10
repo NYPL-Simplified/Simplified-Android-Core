@@ -46,7 +46,6 @@ dependencies {
   api project(":simplified-books-database-api")
   api project(":simplified-books-registry-api")
   api project(":simplified-boot-api")
-  api project(":simplified-branding")
   api project(":simplified-bugsnag")
   api project(":simplified-cardcreator")
   api project(":simplified-datepicker")
@@ -78,6 +77,7 @@ dependencies {
   api project(":simplified-tenprint")
   api project(":simplified-theme")
   api project(":simplified-threads")
+  api project(":simplified-ui-branding")
 
   annotationProcessor libraries.googleAutoValue
 

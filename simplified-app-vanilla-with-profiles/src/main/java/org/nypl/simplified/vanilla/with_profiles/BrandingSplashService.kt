@@ -1,6 +1,6 @@
 package org.nypl.simplified.vanilla.with_profiles
 
-import org.nypl.simplified.branding.BrandingSplashServiceType
+import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 
 /**
  * A splash service for the vanilla app.

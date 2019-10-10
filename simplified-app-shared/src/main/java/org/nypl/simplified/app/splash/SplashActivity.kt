@@ -17,7 +17,7 @@ import org.nypl.simplified.app.SimplifiedActivity
 import org.nypl.simplified.app.catalog.MainCatalogActivity
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity
 import org.nypl.simplified.boot.api.BootEvent
-import org.nypl.simplified.branding.BrandingSplashServiceType
+import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.migration.api.Migrations
 import org.nypl.simplified.migration.api.MigrationsType

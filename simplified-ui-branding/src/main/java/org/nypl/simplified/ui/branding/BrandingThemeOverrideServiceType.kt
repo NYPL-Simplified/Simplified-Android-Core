@@ -1,4 +1,4 @@
-package org.nypl.simplified.branding
+package org.nypl.simplified.ui.branding
 
 import org.nypl.simplified.theme.ThemeValue
 
