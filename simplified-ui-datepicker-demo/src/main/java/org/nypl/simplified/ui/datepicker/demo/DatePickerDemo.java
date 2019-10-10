@@ -1,9 +1,10 @@
-package org.nypl.simplified.datepicker.demo;
+package org.nypl.simplified.ui.datepicker.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
 
-import org.nypl.simplified.datepicker.DatePicker;
+import org.nypl.simplified.ui.datepicker.demo.R;
+import org.nypl.simplified.ui.datepicker.DatePicker;
 
 import java.util.Objects;
 

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-  <org.nypl.simplified.datepicker.DatePicker
+  <org.nypl.simplified.ui.datepicker.DatePicker
       android:id="@+id/date_picker"
       android:layout_centerInParent="true"
       android:layout_width="wrap_content"

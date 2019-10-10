@@ -1,4 +1,4 @@
-package org.nypl.simplified.datepicker;
+package org.nypl.simplified.ui.datepicker;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.nypl.simplified.ui.datepicker.R;
 
 /**
  * A trivial three-part date picker.
