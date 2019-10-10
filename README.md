@@ -238,11 +238,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.books.database.api](simplified-books-database-api)|Book database API|
 |[org.librarysimplified.books.registry.api](simplified-books-registry-api)|Book registry API|
 |[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
-|[org.librarysimplified.branding](simplified-branding)|Branding functionality|
 |[org.librarysimplified.bugsnag](simplified-bugsnag)|Bugsnag functionality|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
-|[org.librarysimplified.datepicker](simplified-datepicker)|Date picker UI component|
-|[org.librarysimplified.datepicker.demo](simplified-datepicker-demo)|Date picker UI component demo|
 |[org.librarysimplified.documents](simplified-documents)|Documents API|
 |[org.librarysimplified.downloader.core](simplified-downloader-core)|Downloader|
 |[org.librarysimplified.feeds.api](simplified-feeds-api)|Feed API|
@@ -274,7 +271,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.reader.bookmarks](simplified-reader-bookmarks)|Reader bookmark service implementation|
 |[org.librarysimplified.reader.bookmarks.api](simplified-reader-bookmarks-api)|Reader bookmark service API|
 |[org.librarysimplified.reports](simplified-reports)|Error reporting|
-|[org.librarysimplified.splash](simplified-splash)|Splash screen|
 |[org.librarysimplified.stack](simplified-stack)|Immutable stack data structure|
 |[org.librarysimplified.taskrecorder.api](simplified-taskrecorder-api)|Task recorder API|
 |[org.librarysimplified.tenprint](simplified-tenprint)|10PRINT implementation|
@@ -282,8 +278,12 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.tests.android](simplified-tests-android)|On-device test suite|
 |[org.librarysimplified.tests.sandbox](simplified-tests-sandbox)|Sandbox for informal testing|
 |[org.librarysimplified.tests.strings](simplified-tests-strings)|Mock strings for test suites|
-|[org.librarysimplified.theme](simplified-theme)|Application theme functionality|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
+|[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
+|[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
+|[org.librarysimplified.ui.datepicker.demo](simplified-ui-datepicker-demo)|Date picker UI component demo|
+|[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
+|[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
 
 #### Adobe DRM Support
 
