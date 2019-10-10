@@ -1,4 +1,4 @@
-package org.nypl.simplified.splash
+package org.nypl.simplified.ui.splash
 
 import android.content.Context
 import android.os.Bundle
@@ -34,6 +34,7 @@ import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.reports.Reports
+import org.nypl.simplified.ui.splash.R
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
@@ -51,7 +52,7 @@ class SplashFragment : Fragment() {
 
     fun newInstance(parameters: SplashParameters): SplashFragment {
       val args = Bundle()
-      args.putSerializable(this.parametersKey, parameters)
+      args.putSerializable(parametersKey, parameters)
       val fragment = SplashFragment()
       fragment.arguments = args
       return fragment

@@ -17,9 +17,9 @@ import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
-import org.nypl.simplified.splash.SplashFragment
-import org.nypl.simplified.splash.SplashListenerType
-import org.nypl.simplified.splash.SplashParameters
+import org.nypl.simplified.ui.splash.SplashFragment
+import org.nypl.simplified.ui.splash.SplashListenerType
+import org.nypl.simplified.ui.splash.SplashParameters
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.ui.theme.ThemeControl
 import java.net.URL

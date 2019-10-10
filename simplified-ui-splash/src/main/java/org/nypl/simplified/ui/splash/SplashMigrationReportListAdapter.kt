@@ -1,4 +1,4 @@
-package org.nypl.simplified.splash
+package org.nypl.simplified.ui.splash
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.migration.spi.MigrationEvent
+import org.nypl.simplified.ui.splash.R
 
 /**
  * A recycler view adapter for migration reports.

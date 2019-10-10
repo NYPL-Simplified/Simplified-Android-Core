@@ -1,4 +1,4 @@
-package org.nypl.simplified.splash
+package org.nypl.simplified.ui.splash
 
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes

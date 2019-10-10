@@ -1,4 +1,4 @@
-package org.nypl.simplified.splash
+package org.nypl.simplified.ui.splash
 
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService

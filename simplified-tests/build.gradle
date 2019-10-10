@@ -51,13 +51,13 @@ dependencies {
   api project(":simplified-reader-api")
   api project(":simplified-reader-bookmarks")
   api project(":simplified-reader-bookmarks-api")
-  api project(":simplified-splash")
   api project(":simplified-stack")
   api project(":simplified-tenprint")
   api project(":simplified-tests-strings")
-  api project(":simplified-ui-theme")
   api project(":simplified-threads")
   api project(":simplified-ui-branding")
+  api project(":simplified-ui-splash")
+  api project(":simplified-ui-theme")
 
   api libraries.nyplAudioBookAPI
   api libraries.nyplAudioBookManifestNYPL

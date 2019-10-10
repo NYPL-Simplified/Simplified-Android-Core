@@ -5,8 +5,8 @@ dependencies {
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-controller-api")
   implementation project(":simplified-migration-fake")
-  implementation project(":simplified-splash")
   implementation project(":simplified-tests-strings")
+  implementation project(":simplified-ui-splash")
   implementation project(":simplified-ui-theme")
 
   implementation libraries.androidXAppCompat
