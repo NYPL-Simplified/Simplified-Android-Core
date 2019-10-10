@@ -21,7 +21,7 @@ import org.nypl.simplified.splash.SplashFragment
 import org.nypl.simplified.splash.SplashListenerType
 import org.nypl.simplified.splash.SplashParameters
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
-import org.nypl.simplified.theme.ThemeControl
+import org.nypl.simplified.ui.theme.ThemeControl
 import java.net.URL
 import java.util.concurrent.Executors
 

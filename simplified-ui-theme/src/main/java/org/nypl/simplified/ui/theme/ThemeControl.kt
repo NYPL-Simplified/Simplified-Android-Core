@@ -1,4 +1,4 @@
-package org.nypl.simplified.theme
+package org.nypl.simplified.ui.theme
 
 import android.content.res.Resources
 import android.util.TypedValue
@@ -6,6 +6,7 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.StyleRes
+import org.nypl.simplified.ui.theme.R
 
 class ThemeControl {
 
@@ -141,23 +142,23 @@ class ThemeControl {
 
     @JvmStatic
     val themesByName =
-      this.themeValues.map { value -> Pair(value.name, value) }
+      themeValues.map { value -> Pair(value.name, value) }
         .toMap()
 
     @JvmStatic
     @StyleRes
     fun actionBarStyle(colorSwatch: String): Int =
-      (this.themesByName[colorSwatch.toLowerCase()] ?: this.themeFallback).themeWithActionBar
+      (themesByName[colorSwatch.toLowerCase()] ?: themeFallback).themeWithActionBar
 
     @JvmStatic
     @StyleRes
     fun noActionBarStyle(colorSwatch: String): Int =
-      (this.themesByName[colorSwatch.toLowerCase()] ?: this.themeFallback).themeWithNoActionBar
+      (themesByName[colorSwatch.toLowerCase()] ?: themeFallback).themeWithNoActionBar
 
     @JvmStatic
     @ColorRes
     fun color(colorSwatch: String): Int =
-      (this.themesByName[colorSwatch.toLowerCase()] ?: this.themeFallback).colorDark
+      (themesByName[colorSwatch.toLowerCase()] ?: themeFallback).colorDark
 
     @JvmStatic
     @ColorInt

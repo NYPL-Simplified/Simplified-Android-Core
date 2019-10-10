@@ -68,7 +68,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.reader.api.ReaderColorScheme;
 import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks;
-import org.nypl.simplified.theme.ThemeControl;
+import org.nypl.simplified.ui.theme.ThemeControl;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;

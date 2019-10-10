@@ -18,7 +18,7 @@ import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
-import org.nypl.simplified.theme.ThemeValue
+import org.nypl.simplified.ui.theme.ThemeValue
 
 /**
  * The application services.

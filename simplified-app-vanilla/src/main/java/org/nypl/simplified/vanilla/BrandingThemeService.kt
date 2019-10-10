@@ -1,7 +1,7 @@
 package org.nypl.simplified.vanilla
 
 import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
-import org.nypl.simplified.theme.ThemeValue
+import org.nypl.simplified.ui.theme.ThemeValue
 
 class BrandingThemeService : BrandingThemeOverrideServiceType {
   override fun overrideTheme(): ThemeValue {

@@ -1,4 +1,4 @@
-package org.nypl.simplified.theme
+package org.nypl.simplified.ui.theme
 
 import androidx.annotation.ColorRes
 import androidx.annotation.StyleRes

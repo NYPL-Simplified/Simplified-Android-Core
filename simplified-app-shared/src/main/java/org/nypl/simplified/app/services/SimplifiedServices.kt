@@ -103,8 +103,8 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
 import org.nypl.simplified.tenprint.TenPrintGenerator
-import org.nypl.simplified.theme.ThemeControl
-import org.nypl.simplified.theme.ThemeValue
+import org.nypl.simplified.ui.theme.ThemeControl
+import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.threads.NamedThreadPools
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

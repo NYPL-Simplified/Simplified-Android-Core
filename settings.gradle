@@ -68,7 +68,7 @@ include ':simplified-tests'
 include ':simplified-tests-android'
 include ':simplified-tests-sandbox'
 include ':simplified-tests-strings'
-include ':simplified-theme'
 include ':simplified-threads'
 include ':simplified-ui-branding'
+include ':simplified-ui-theme'
 

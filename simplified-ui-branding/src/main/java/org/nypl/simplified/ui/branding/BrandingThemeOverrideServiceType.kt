@@ -1,6 +1,6 @@
 package org.nypl.simplified.ui.branding
 
-import org.nypl.simplified.theme.ThemeValue
+import org.nypl.simplified.ui.theme.ThemeValue
 
 /**
  * A service that provides overrides for the application theme.
