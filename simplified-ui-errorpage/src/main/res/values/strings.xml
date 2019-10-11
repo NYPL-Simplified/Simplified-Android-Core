@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+  <string name="errorTitle">Here is the error log created by your issue:</string>
+  <string name="errorDetailsTitle">Error Details</string>
+  <string name="errorStepsTitle">Steps</string>
+  <string name="errorSendReport">Send To Support</string>
+
+  <!-- TODO: Remove or change this placeholder text -->
+  <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

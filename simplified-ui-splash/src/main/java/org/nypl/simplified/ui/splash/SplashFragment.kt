@@ -101,7 +101,7 @@ class SplashFragment : Fragment() {
     this.parameters = this.arguments!!.getSerializable(parametersKey) as SplashParameters
   }
 
-  override fun onAttach(context: Context?) {
+  override fun onAttach(context: Context) {
     super.onAttach(context)
     this.listener = this.activity as SplashListenerType
     this.bootFuture = this.listener.onSplashWantBootFuture()
