@@ -134,6 +134,12 @@
       android:label="@string/hs_issuebutton_title"
       android:windowSoftInputMode="adjustResize" />
 
+    <activity
+      android:name="org.nypl.simplified.app.errors.ErrorActivity"
+      android:contentDescription="@string/errorDetailsTitle"
+      android:exported="false"
+      android:label="@string/errorDetailsTitle" />
+
     <provider
       android:name="androidx.core.content.FileProvider"
       android:authorities="${applicationId}.fileProvider"

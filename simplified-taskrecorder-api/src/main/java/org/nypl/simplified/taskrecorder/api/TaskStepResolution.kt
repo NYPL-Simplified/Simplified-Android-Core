@@ -1,10 +1,12 @@
 package org.nypl.simplified.taskrecorder.api
 
+import java.io.Serializable
+
 /**
  * The resolution of a task step.
  */
 
-sealed class TaskStepResolution<E> {
+sealed class TaskStepResolution<E : Serializable> : Serializable {
 
   abstract val message: String
 
@@ -14,7 +16,7 @@ sealed class TaskStepResolution<E> {
    * The task succeeded.
    */
 
-  data class TaskStepSucceeded<E>(
+  data class TaskStepSucceeded<E : Serializable>(
     override val message: String)
     : TaskStepResolution<E>() {
     override val exception: Throwable? = null
@@ -24,7 +26,7 @@ sealed class TaskStepResolution<E> {
    * The task failed.
    */
 
-  data class TaskStepFailed<E>(
+  data class TaskStepFailed<E : Serializable>(
     override val message: String,
     val errorValue: E,
     override val exception: Throwable?)

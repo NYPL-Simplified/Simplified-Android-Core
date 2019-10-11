@@ -76,6 +76,7 @@ dependencies {
   api project(":simplified-threads")
   api project(":simplified-ui-branding")
   api project(":simplified-ui-datepicker")
+  api project(":simplified-ui-errorpage")
   api project(":simplified-ui-splash")
   api project(":simplified-ui-theme")
 

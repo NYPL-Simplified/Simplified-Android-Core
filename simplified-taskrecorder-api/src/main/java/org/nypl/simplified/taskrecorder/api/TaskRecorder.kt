@@ -1,6 +1,7 @@
 package org.nypl.simplified.taskrecorder.api
 
 import com.google.common.base.Preconditions
+import java.io.Serializable
 
 /**
  * A task step recorder.
@@ -8,7 +9,7 @@ import com.google.common.base.Preconditions
  * @param <E> The precise type of associated error values
  */
 
-class TaskRecorder<E> private constructor() : TaskRecorderType<E> {
+class TaskRecorder<E : Serializable> private constructor() : TaskRecorderType<E> {
 
   companion object {
 
@@ -16,7 +17,7 @@ class TaskRecorder<E> private constructor() : TaskRecorderType<E> {
      * Create a new task recorder.
      */
 
-    fun <E> create(): TaskRecorderType<E> =
+    fun <E : Serializable> create(): TaskRecorderType<E> =
       TaskRecorder()
   }
 

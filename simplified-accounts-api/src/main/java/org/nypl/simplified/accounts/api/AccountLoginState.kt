@@ -6,6 +6,7 @@ import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
+import java.io.Serializable
 import java.net.URI
 
 /**
@@ -190,7 +191,7 @@ sealed class AccountLoginState {
    * Data associated with failed logout attempts.
    */
 
-  sealed class AccountLogoutErrorData {
+  sealed class AccountLogoutErrorData : Serializable {
 
     /**
      * A DRM system failed with an (opaque) error code.

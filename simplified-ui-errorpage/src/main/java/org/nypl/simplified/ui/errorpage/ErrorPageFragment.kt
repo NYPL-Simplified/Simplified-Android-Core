@@ -43,6 +43,7 @@ class ErrorPageFragment : Fragment() {
     }
   }
 
+  private lateinit var parameters: ErrorPageParameters<PresentableErrorType>
   private lateinit var errorAttributesTable: TableLayout
   private lateinit var errorAttributesTitle: TextView
   private lateinit var errorStepsList: RecyclerView
@@ -84,7 +85,7 @@ class ErrorPageFragment : Fragment() {
     this.sendButton =
       viewRoot.findViewById(R.id.errorSendButton)
 
-    val parameters =
+    this.parameters =
       this.arguments!!.getSerializable(PARAMETERS_ID)
         as ErrorPageParameters<PresentableErrorType>
 
@@ -126,7 +127,7 @@ class ErrorPageFragment : Fragment() {
     this.sendButton.isEnabled = true
     this.sendButton.setOnClickListener {
       this.sendButton.isEnabled = false
-      this.listener.onErrorPageSendReport()
+      this.listener.onErrorPageSendReport(this.parameters)
     }
   }
 

@@ -12,6 +12,24 @@ import java.util.SortedMap
 data class ErrorPageParameters<E : PresentableErrorType>(
 
   /**
+   * The email address of the technical support provider.
+   */
+
+  val emailAddress: String,
+
+  /**
+   * The body of the message sent to technical support.
+   */
+
+  val body: String,
+
+  /**
+   * The subject used for any emails send to technical support.
+   */
+
+  val subject: String,
+
+  /**
    * The attributes that will be displayed in the "Error Details" section. If no attributes are
    * provided, the entire section will be hidden.
    */

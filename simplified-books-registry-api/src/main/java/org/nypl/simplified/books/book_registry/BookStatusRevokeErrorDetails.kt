@@ -1,12 +1,13 @@
 package org.nypl.simplified.books.book_registry
 
 import org.nypl.simplified.http.core.HTTPProblemReport
+import java.io.Serializable
 
 /**
  * Data related to errors during book loan revocation.
  */
 
-sealed class BookStatusRevokeErrorDetails {
+sealed class BookStatusRevokeErrorDetails : Serializable {
 
   /**
    * The loan is not revocable.

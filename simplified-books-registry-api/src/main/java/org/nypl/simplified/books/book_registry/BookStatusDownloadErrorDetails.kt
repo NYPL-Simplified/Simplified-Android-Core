@@ -2,12 +2,13 @@ package org.nypl.simplified.books.book_registry
 
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAcquisition
+import java.io.Serializable
 
 /**
  * Data related to errors during book borrowing.
  */
 
-sealed class BookStatusDownloadErrorDetails {
+sealed class BookStatusDownloadErrorDetails : Serializable {
 
   /**
    * An HTTP request failed.

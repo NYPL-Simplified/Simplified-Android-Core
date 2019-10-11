@@ -10,6 +10,7 @@ interface ErrorPageListenerType {
    * The user wants to send an error report.
    */
 
-  fun onErrorPageSendReport()
+  fun onErrorPageSendReport(
+    parameters: ErrorPageParameters<*>)
 
 }

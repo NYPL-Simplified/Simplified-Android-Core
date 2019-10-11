@@ -12,7 +12,7 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
 class ErrorPageActivity : AppCompatActivity(), ErrorPageListenerType {
 
-  override fun onErrorPageSendReport() {
+  override fun onErrorPageSendReport(parameters: ErrorPageParameters<*>) {
 
   }
 
@@ -54,7 +54,15 @@ class ErrorPageActivity : AppCompatActivity(), ErrorPageListenerType {
       )
 
     this.errorFragment =
-      ErrorPageFragment.create(ErrorPageParameters(attributes, taskSteps))
+      ErrorPageFragment.create(
+        ErrorPageParameters(
+          emailAddress = "someone@example.com",
+          body = "An error occurred.",
+          subject = "[simplified] Error",
+          attributes = attributes,
+          taskSteps = taskSteps
+        )
+      )
 
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.errorHolder, this.errorFragment, "ERROR_MAIN")

@@ -1,5 +1,6 @@
 dependencies {
   api project(":simplified-presentableerror-api")
+  api project(":simplified-reports")
   api project(":simplified-taskrecorder-api")
 
   implementation libraries.androidXAppCompat

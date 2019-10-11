@@ -24,12 +24,13 @@ import org.nypl.simplified.json.core.JSONParserUtilities;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
 /**
  * An HTTP problem report.
  */
 
-public final class HTTPProblemReport
+public final class HTTPProblemReport implements Serializable
 {
   private final ObjectNode raw;
 
@@ -143,7 +144,7 @@ public final class HTTPProblemReport
   /**
    * Problem type enum.
    */
-  public enum ProblemType
+  public enum ProblemType implements Serializable
   {
     /**
      * Loan limit reached problem.
@@ -159,7 +160,7 @@ public final class HTTPProblemReport
   /**
    *
    */
-  public enum ProblemStatus
+  public enum ProblemStatus implements Serializable
   {
 
     /**
