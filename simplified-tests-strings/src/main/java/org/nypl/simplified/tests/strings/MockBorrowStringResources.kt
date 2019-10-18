@@ -7,6 +7,14 @@ import java.io.File
 
 class MockBorrowStringResources : BookBorrowStringResourcesType {
 
+  override fun borrowBookFeedLoadingFailed(cause: String): String {
+    return "borrowBookFeedLoadingFailed"
+  }
+
+  override fun borrowBookFulfillDownloadFailed(cause: String): String {
+    return "borrowBookFulfillDownloadFailed"
+  }
+
   override val borrowBookCoverUnexpectedException: String
     get() = "borrowBookCoverUnexpectedException"
 
@@ -51,9 +59,6 @@ class MockBorrowStringResources : BookBorrowStringResourcesType {
   override fun borrowBookBorrowAvailabilityInappropriate(availability: OPDSAvailabilityType): String {
     return "borrowBookBorrowAvailabilityInappropriate"
   }
-
-  override val borrowBookFulfillDownloadFailed: String
-    get() = "borrowBookFulfillDownloadFailed"
 
   override val borrowBookFulfillCancelled: String
     get() = "borrowBookFulfillCancelled"
@@ -131,9 +136,6 @@ class MockBorrowStringResources : BookBorrowStringResourcesType {
 
   override val borrowBookBundledCopy: String
     get() = "borrowBookBundledCopy"
-
-  override val borrowBookFeedLoadingFailed: String
-    get() = "borrowBookFeedLoadingFailed"
 
   override val borrowBookBadBorrowFeed: String
     get() = "borrowBookBadBorrowFeed"

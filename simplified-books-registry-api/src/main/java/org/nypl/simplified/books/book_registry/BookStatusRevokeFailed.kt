@@ -1,6 +1,8 @@
 package org.nypl.simplified.books.book_registry
 
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskResult
 
 /**
@@ -19,7 +21,14 @@ data class BookStatusRevokeFailed(
    * The list of steps that lead to the failure.
    */
 
-  val result: TaskResult.Failure<BookStatusRevokeErrorDetails, Unit>) : BookStatusType {
+  val result: TaskResult.Failure<BookStatusRevokeErrorDetails, Unit>)
+  : PresentableErrorType, BookStatusType {
+
+  override val attributes: Map<String, String>
+    get() = Presentables.collectAttributes(this.result.errors())
+
+  override val message: String
+    get() = this.result.steps.last().resolution.message
 
   override fun getID(): BookID =
     this.id

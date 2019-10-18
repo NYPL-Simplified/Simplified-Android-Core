@@ -132,7 +132,7 @@ interface BookBorrowStringResourcesType {
    * Downloading failed.
    */
 
-  val borrowBookFulfillDownloadFailed: String
+  fun borrowBookFulfillDownloadFailed(cause: String): String
 
   /**
    * Fulfilling a book was cancelled.
@@ -252,7 +252,7 @@ interface BookBorrowStringResourcesType {
    * Attempting to load a feed failed.
    */
 
-  val borrowBookFeedLoadingFailed: String
+  fun borrowBookFeedLoadingFailed(cause: String): String
 
   /**
    * Received an unusable OPDS feed as the result of a borrow link.

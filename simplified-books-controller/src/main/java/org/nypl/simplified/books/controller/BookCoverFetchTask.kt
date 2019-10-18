@@ -50,7 +50,12 @@ class BookCoverFetchTask(
           is HTTPResultError -> {
             this.taskRecorder.currentStepFailed(
               this.borrowStrings.borrowBookCoverUnexpectedException,
-              BookStatusDownloadErrorDetails.HTTPRequestFailed(result.status, this.someOrNull(result.problemReport)))
+              BookStatusDownloadErrorDetails.HTTPRequestFailed(
+                status = result.status,
+                problemReport = this.someOrNull(result.problemReport),
+                message = result.message,
+                attributesInitial = mapOf()
+              ))
             this.taskRecorder.finishFailure()
           }
           is HTTPResultException -> {

@@ -839,7 +839,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     result as TaskResult.Failure
 
     Assert.assertEquals(
-      DRMFailure("Adobe ACS", "E_DEFECTIVE"),
+      DRMFailure(system =  "Adobe ACS", errorCode =  "E_DEFECTIVE", message = "revokeBookACSConnectorFailed"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
@@ -945,7 +945,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     result as TaskResult.Failure
 
     Assert.assertEquals(
-      DRMDeviceNotActive("Adobe ACS"),
+      DRMDeviceNotActive("Adobe ACS", "revokeACSGettingDeviceCredentialsNotActivated"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
@@ -1041,7 +1041,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     result as TaskResult.Failure
 
     Assert.assertEquals(
-      NoCredentialsAvailable,
+      NoCredentialsAvailable("revokeCredentialsRequired"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()

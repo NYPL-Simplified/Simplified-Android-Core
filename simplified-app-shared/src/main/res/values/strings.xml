@@ -53,6 +53,7 @@
   <string name="catalog_detail_related">Related Books</string>
   <string name="catalog_revoke_failed">The operation could not be completed.</string>
   <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_download_details">[Details]</string>
   <string name="catalog_download_failed_too_many_activations">The download could not be completed. Adobe device activations reached.</string>
   <string name="catalog_download_failed_account_not_active">This device has not been activated. Go to account settings to activate.</string>
   <string name="catalog_download_failed_loan_limit_reached">Book loan limit reached.</string>
@@ -384,7 +385,7 @@
   <string name="borrowBookDatabaseFailed">Failed to update book database.</string>
   <string name="borrowBookGetFeedEntry">Asking server for loan…</string>
   <string name="borrowBookBadBorrowFeed">Failed to parse the feed delivered by the server.</string>
-  <string name="borrowBookFeedLoadingFailed">Could not load a feed from the server.</string>
+  <string name="borrowBookFeedLoadingFailed">Failed to load a feed from the server (%1$s).</string>
   <string name="borrowBookBundledCopy">Copying book from bundled collection…</string>
   <string name="borrowBookBundledCopyFailed">Failed to copy the book from the bundled collection</string>
   <string name="borrowBookFulfill">Fulfilling loan…</string>
@@ -404,7 +405,7 @@
   <string name="borrowBookSavingCheckingContentTypeOK">Received book is of a supported content type.</string>
   <string name="borrowBookSavingCheckingContentTypeUnacceptable">Received book is of an unsupported content type.</string>
   <string name="borrowBookFulfillCancelled">Cancelled fulfillment of book.</string>
-  <string name="borrowBookFulfillDownloadFailed">Downloading failed.</string>
+  <string name="borrowBookFulfillDownloadFailed">Downloading failed (%1$s)</string>
   <string name="borrowBookFulfillACSMRead">Reading ACSM file…</string>
   <string name="borrowBookFulfillACSMReadFailed">Failed to read ACSM file.</string>
   <string name="borrowBookFulfillACSMGettingDeviceCredentials">Retrieving Adobe ACS device credentials…</string>

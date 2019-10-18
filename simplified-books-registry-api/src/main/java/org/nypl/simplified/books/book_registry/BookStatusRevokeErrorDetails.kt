@@ -2,60 +2,78 @@ package org.nypl.simplified.books.book_registry
 
 import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
 import java.io.Serializable
 
 /**
  * Data related to errors during book loan revocation.
  */
 
-sealed class BookStatusRevokeErrorDetails : Serializable {
+sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
 
   /**
    * The loan is not revocable.
    */
 
-  object NotRevocable : BookStatusRevokeErrorDetails()
+  data class NotRevocable(
+    override val message: String)
+    : BookStatusRevokeErrorDetails()
 
   /**
    * Credentials are required, but none are available.
    */
 
-  object NoCredentialsAvailable : BookStatusRevokeErrorDetails()
+  data class NoCredentialsAvailable(
+    override val message: String)
+    : BookStatusRevokeErrorDetails()
 
   /**
    * Timed out waiting for an operation to complete.
    */
 
-  object TimedOut : BookStatusRevokeErrorDetails()
+  data class TimedOut(
+    override val message: String)
+    : BookStatusRevokeErrorDetails()
 
   /**
    * An operation was cancelled.
    */
 
-  object Cancelled : BookStatusRevokeErrorDetails()
+  data class Cancelled(
+    override val message: String)
+    : BookStatusRevokeErrorDetails()
 
   /**
    * Attempting to load the feed for a revoke URI failed.
    */
 
   data class FeedLoaderFailed(
+    override val message: String,
     override val problemReport: HTTPProblemReport?,
-    val exception: Throwable?)
-    : BookStatusRevokeErrorDetails(), HTTPHasProblemReportType
+    override val exception: Throwable?)
+    : BookStatusRevokeErrorDetails(), HTTPHasProblemReportType {
+    override val attributes: Map<String, String>
+      get() = Presentables.mergeProblemReportOptional(super.attributes, this.problemReport)
+  }
 
   /**
    * An OPDS feed contained a corrupted entry.
    */
 
   data class FeedCorrupted(
-    val exception: Throwable)
-    : BookStatusRevokeErrorDetails()
+    override val exception: Throwable)
+    : BookStatusRevokeErrorDetails() {
+    override val message: String
+      get() = this.exception.localizedMessage
+  }
 
   /**
    * An OPDS feed was unusable for an unspecified reason.
    */
 
-  object FeedUnusable
+  data class FeedUnusable(
+    override val message: String)
     : BookStatusRevokeErrorDetails()
 
   /**
@@ -71,20 +89,13 @@ sealed class BookStatusRevokeErrorDetails : Serializable {
     abstract val system: String
 
     /**
-     * A specific DRM system is not supported.
-     */
-
-    data class DRMUnsupportedSystem(
-      override val system: String)
-      : DRMError()
-
-    /**
      * A DRM system failed with an opaque error code.
      */
 
     data class DRMFailure(
       override val system: String,
-      val errorCode: String)
+      val errorCode: String,
+      override val message: String)
       : DRMError()
 
     /**
@@ -93,7 +104,8 @@ sealed class BookStatusRevokeErrorDetails : Serializable {
 
     data class DRMUnsupportedContentType(
       override val system: String,
-      val contentType: String)
+      val contentType: String,
+      override val message: String)
       : DRMError()
 
     /**
@@ -101,23 +113,8 @@ sealed class BookStatusRevokeErrorDetails : Serializable {
      */
 
     data class DRMDeviceNotActive(
-      override val system: String)
-      : DRMError()
-
-    /**
-     * An ACSM file was unparseable.
-     */
-
-    data class DRMUnparseableACSM(
-      override val system: String)
-      : DRMError()
-
-    /**
-     * An ACSM file was unreadable.
-     */
-
-    data class DRMUnreadableACSM(
-      override val system: String)
+      override val system: String,
+      override val message: String)
       : DRMError()
   }
 
@@ -126,7 +123,10 @@ sealed class BookStatusRevokeErrorDetails : Serializable {
    */
 
   data class UnexpectedException(
-    val exception: Throwable)
-    : BookStatusRevokeErrorDetails()
+    override val exception: Throwable)
+    : BookStatusRevokeErrorDetails() {
+    override val message: String
+      get() = this.exception.localizedMessage
+  }
 
 }

@@ -2546,6 +2546,9 @@ abstract class BookBorrowTaskContract {
     val download =
       Mockito.mock(DownloadType::class.java)
 
+    Mockito.`when`(download.uri())
+      .thenReturn(URI.create("urn:somewhere"))
+
     val reportNode =
       ObjectMapper().createObjectNode()
     val report =

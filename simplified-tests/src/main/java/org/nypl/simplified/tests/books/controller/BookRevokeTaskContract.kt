@@ -1677,7 +1677,7 @@ abstract class BookRevokeTaskContract {
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
     Assert.assertEquals(
-      BookStatusRevokeErrorDetails.NotRevocable,
+      BookStatusRevokeErrorDetails.NotRevocable("revokeServerNotifyNotRevocable"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
@@ -1760,7 +1760,7 @@ abstract class BookRevokeTaskContract {
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
     Assert.assertEquals(
-      BookStatusRevokeErrorDetails.NotRevocable,
+      BookStatusRevokeErrorDetails.NotRevocable("revokeServerNotifyNotRevocable"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()

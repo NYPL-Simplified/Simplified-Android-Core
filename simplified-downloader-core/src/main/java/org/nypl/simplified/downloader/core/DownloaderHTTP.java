@@ -244,6 +244,11 @@ public final class DownloaderHTTP implements DownloaderType
       this.file.delete();
     }
 
+    @Override
+    public URI uri() {
+      return this.uri;
+    }
+
     @Override public void cancel()
     {
       this.log.debug("cancelling download");
