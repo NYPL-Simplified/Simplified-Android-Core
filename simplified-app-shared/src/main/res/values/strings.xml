@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
   <!-- Action/Navigation Strings -->
   <string name="nav_confirm">Confirm</string>
   <string name="nav_done">Done</string>
   <string name="nav_next">Next</string>
+
+  <string name="generic_ok">OK</string>
+  <string name="generic_details">Details</string>
+
 
   <!-- EULA strings -->
   <string name="eula_disagree">Disagree</string>
@@ -63,6 +68,7 @@
   <string name="catalog_publisher">Publisher</string>
   <string name="catalog_refresh">Refresh Feed</string>
   <string name="catalog_unknown_feed">Unknown</string>
+  <string name="catalog_feed_loading">Loading feed…</string>
   <string name="catalog_more_feed">More&#8230;</string>
   <string name="catalog_requesting_loan">Requesting</string>
   <string name="catalog_requesting_revoke">Requesting</string>
@@ -160,6 +166,7 @@
   <string name="settings_logout_succeeded">Logged out successfully</string>
   <string name="settings_logout_in_progress">Logging out…</string>
   <string name="settings_login_failed">Login Failed</string>
+  <string name="settings_login_failed_message">Attempting to log in to the account failed.</string>
   <string name="settings_login_failed_credentials">Your barcode and pin combination was not valid. Please try again.</string>
   <string name="settings_login_failed_unknown">An unknown error occurred. Please check your connection or try again later.</string>
   <string name="settings_logout_failed_unknown">An unknown error occurred. Please check your connection or try again later.</string>
@@ -324,8 +331,10 @@
   <string name="profiles_selection_error_general">An error occurred whilst trying to select your profile.</string>
   <string name="profiles_creation_error_name_already_used">That name has already been used. Please pick another.</string>
   <string name="profiles_creation_error_general">An error occurred whilst trying to create your profile.</string>
+  <string name="profiles_account_deletion_failed">Account deletion failed</string>
   <string name="profiles_account_selection_error_general">An error occurred whilst trying to select an account.</string>
   <string name="profiles_account_creation_error_general">An error occurred whilst trying to create the account.</string>
+  <string name="profiles_account_creation_failed">Account creation failed</string>
   <string name="profiles_account_deletion_error_general">An error occurred whilst trying to delete the account.</string>
   <string name="profiles_switch">Switch Profile</string>
   <string name="profiles_switch_confirm">Are you sure you want to switch profiles?</string>
@@ -337,6 +346,7 @@
   <!-- Login strings -->
   <string name="loginDeviceActivated">Device activated</string>
   <string name="loginDeviceActivating">Attempting to activate device…</string>
+  <string name="loginAuthRequired">Authentication is required. Continuing…</string>
   <string name="loginCheckingAuthenticationRequirement">Checking authentication requirement…</string>
   <string name="loginPatronSettingsRequesting">Requesting patron settings…</string>
   <string name="loginPatronSettingsOK">Received patron settings</string>

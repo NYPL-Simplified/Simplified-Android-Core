@@ -23,6 +23,7 @@ import org.nypl.simplified.opds.core.OPDSSearchLink
 import org.nypl.simplified.opds.core.OPDSSearchParserType
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.SortedMap
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
 
@@ -60,14 +61,14 @@ class FeedLoader private constructor(
     }
 
     return FluentFuture.from(this.exec.submit(Callable {
-      fetchSynchronously(uri, auth, "GET", updateFromRegistry = updateFromRegistry)
+      this.fetchSynchronously(uri, auth, "GET", updateFromRegistry = updateFromRegistry)
     }))
   }
 
   override fun fetchURI(
     uri: URI,
     auth: OptionType<HTTPAuthType>): FluentFuture<FeedLoaderResult> {
-    return fetchURICore(uri, auth, updateFromRegistry = false)
+    return this.fetchURICore(uri, auth, updateFromRegistry = false)
   }
 
   override fun fetchURIRefreshing(
@@ -75,13 +76,13 @@ class FeedLoader private constructor(
     auth: OptionType<HTTPAuthType>,
     method: String): FluentFuture<FeedLoaderResult> {
     this.invalidate(uri)
-    return fetchURICore(uri, auth, updateFromRegistry = false)
+    return this.fetchURICore(uri, auth, updateFromRegistry = false)
   }
 
   override fun fetchURIWithBookRegistryEntries(
     uri: URI,
     auth: OptionType<HTTPAuthType>): FluentFuture<FeedLoaderResult> {
-    return fetchURICore(uri, auth, updateFromRegistry = true)
+    return this.fetchURICore(uri, auth, updateFromRegistry = true)
   }
 
   override fun invalidate(uri: URI) {
@@ -106,7 +107,7 @@ class FeedLoader private constructor(
        */
 
       if (BundledURIs.isBundledURI(uri)) {
-        return parseFromBundledContent(uri)
+        return this.parseFromBundledContent(uri)
       }
 
       /*
@@ -116,7 +117,7 @@ class FeedLoader private constructor(
       val opdsFeed =
         this.transport.getStream(auth, uri, method).use { stream -> this.parser.parse(uri, stream) }
       val search =
-        fetchSearchLink(opdsFeed, auth, method, uri)
+        this.fetchSearchLink(opdsFeed, auth, method, uri)
 
       val feed = Feed.fromAcquisitionFeed(opdsFeed, search)
 
@@ -131,13 +132,38 @@ class FeedLoader private constructor(
       this.cache[uri] = feed
       return FeedLoaderSuccess(feed)
     } catch (e: FeedHTTPTransportException) {
+      this.log.error("feed transport exception: ", e)
+
       if (e.code == 401) {
-        return FeedLoaderFailure.FeedLoaderFailedAuthentication(someOrNull(e.problemReport), e)
+        return FeedLoaderFailure.FeedLoaderFailedAuthentication(
+          problemReport = this.someOrNull(e.problemReport),
+          exception = e,
+          attributes = this.errorAttributesOf(uri, method),
+          message = e.localizedMessage)
       }
-      return FeedLoaderFailure.FeedLoaderFailedGeneral(someOrNull(e.problemReport), e)
+      return FeedLoaderFailure.FeedLoaderFailedGeneral(
+        problemReport = this.someOrNull(e.problemReport),
+        exception = e,
+        attributes = this.errorAttributesOf(uri, method),
+        message = e.localizedMessage
+      )
     } catch (e: Exception) {
-      return FeedLoaderFailure.FeedLoaderFailedGeneral(null, e)
+      this.log.error("feed exception: ", e)
+
+      return FeedLoaderFailure.FeedLoaderFailedGeneral(
+        problemReport = null,
+        exception = e,
+        attributes = this.errorAttributesOf(uri, method),
+        message = e.localizedMessage
+      )
     }
+  }
+
+  private fun errorAttributesOf(uri: URI, method: String): SortedMap<String, String> {
+    return sortedMapOf(
+      Pair("Feed", uri.toString()),
+      Pair("Method", method)
+    )
   }
 
   private fun <T> someOrNull(x: OptionType<T>): T? {
@@ -179,7 +205,7 @@ class FeedLoader private constructor(
           val id = e.bookID
           val bookWithStatus = this.bookRegistry.books().get(id)
           if (bookWithStatus != null) {
-            log.debug("updating entry {} from book registry", id)
+            this.log.debug("updating entry {} from book registry", id)
             val en = FeedEntry.FeedEntryOPDS(bookWithStatus.book().entry)
             feed.entriesInOrder.set(index, en)
           }
@@ -225,13 +251,14 @@ class FeedLoader private constructor(
           .build<URI, Feed>()
 
       return FeedLoader(
-        cache,
-        exec,
-        parser,
-        searchParser,
-        transport,
-        bookRegistry,
-        bundledContent)
+        cache = cache,
+        exec = exec,
+        parser = parser,
+        searchParser = searchParser,
+        transport = transport,
+        bookRegistry = bookRegistry,
+        bundledContent = bundledContent
+      )
     }
   }
 }

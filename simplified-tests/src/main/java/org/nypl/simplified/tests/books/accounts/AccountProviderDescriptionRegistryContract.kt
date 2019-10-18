@@ -411,7 +411,12 @@ abstract class AccountProviderDescriptionRegistryContract {
       val exception = Exception()
       taskRecorder.currentStepFailed(
         message = "x",
-        errorValue = AccountProviderResolutionErrorDetails.UnexpectedException("Unexpected exception", exception),
+        errorValue = AccountProviderResolutionErrorDetails.UnexpectedException(
+          message = "Unexpected exception",
+          exception = exception,
+          accountProviderID = "accountProviderID",
+          accountProviderTitle = "accountProviderTitle"
+        ),
         exception = exception)
       return taskRecorder.finishFailure()
     }

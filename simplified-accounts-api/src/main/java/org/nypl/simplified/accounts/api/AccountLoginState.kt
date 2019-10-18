@@ -1,5 +1,6 @@
 package org.nypl.simplified.accounts.api
 
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseWarning
@@ -105,8 +106,8 @@ sealed class AccountLoginState {
       val uri: URI,
       val statusCode: Int,
       val errorMessage: String,
-      val errorReport: HTTPProblemReport?)
-      : AccountLoginErrorData()
+      override val problemReport: HTTPProblemReport?)
+      : AccountLoginErrorData(), HTTPHasProblemReportType
 
     /**
      * A required DRM system is not supported by the application.
@@ -159,6 +160,7 @@ sealed class AccountLoginState {
   data class AccountLoginFailed(
     val taskResult: TaskResult.Failure<AccountLoginErrorData, *>)
     : AccountLoginState() {
+
     override val credentials: AccountAuthenticationCredentials?
       get() = null
   }

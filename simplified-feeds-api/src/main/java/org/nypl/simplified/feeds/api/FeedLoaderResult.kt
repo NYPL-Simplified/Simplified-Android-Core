@@ -1,7 +1,9 @@
 package org.nypl.simplified.feeds.api
 
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
-import java.lang.Exception
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import java.net.URI
 
 /**
  * The result of loading a feed.
@@ -21,15 +23,17 @@ sealed class FeedLoaderResult {
    * The feed failed to load.
    */
 
-  sealed class FeedLoaderFailure : FeedLoaderResult() {
+  sealed class FeedLoaderFailure : FeedLoaderResult(), HTTPHasProblemReportType, PresentableErrorType {
 
     /**
      * The feed failed to load due to the given exception.
      */
 
     data class FeedLoaderFailedGeneral(
-      val problemReport: HTTPProblemReport?,
-      val exception: Exception)
+      override val problemReport: HTTPProblemReport?,
+      override val exception: Exception,
+      override val message: String,
+      override val attributes: Map<String, String>)
       : FeedLoaderFailure()
 
     /**
@@ -37,10 +41,32 @@ sealed class FeedLoaderResult {
      */
 
     data class FeedLoaderFailedAuthentication(
-      val problemReport: HTTPProblemReport?,
-      val exception: Exception)
+      override val problemReport: HTTPProblemReport?,
+      override val exception: Exception,
+      override val message: String,
+      override val attributes: Map<String, String>)
       : FeedLoaderFailure()
 
   }
 
+  companion object {
+
+    /**
+     * Wrap an exception, producing a general feed loading error.
+     */
+
+    fun wrapException(
+      uri: URI,
+      exception: Throwable
+    ): FeedLoaderFailure {
+      return FeedLoaderFailure.FeedLoaderFailedGeneral(
+        problemReport = null,
+        exception =
+        if (exception is java.lang.Exception) exception
+        else java.lang.Exception(exception),
+        message = exception.localizedMessage,
+        attributes = sortedMapOf(Pair("Feed URI", uri.toASCIIString())))
+    }
+
+  }
 }

@@ -1,5 +1,6 @@
 package org.nypl.simplified.accounts.api
 
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseWarning
@@ -14,11 +15,30 @@ import org.nypl.simplified.presentableerror.api.PresentableErrorType
 sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
 
   /**
+   * The ID of the account provider.
+   */
+
+  abstract val accountProviderID: String
+
+  /**
+   * The title (or "display name") of the account provider.
+   */
+
+  abstract val accountProviderTitle: String
+
+  override val attributes: Map<String, String>
+    get() = mapOf(
+      Pair("Account ID", accountProviderID),
+      Pair("Account", accountProviderTitle))
+
+  /**
    * The authentication document link was unusable.
    */
 
   data class AuthDocumentUnusableLink(
-    override val message: String)
+    override val message: String,
+    override val accountProviderID: String,
+    override val accountProviderTitle: String)
     : AccountProviderResolutionErrorDetails()
 
   /**
@@ -28,19 +48,21 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
   data class HTTPRequestFailed(
     override val message: String,
     val errorCode: Int,
-    val problemReport: HTTPProblemReport?)
-    : AccountProviderResolutionErrorDetails() {
+    override val problemReport: HTTPProblemReport?,
+    override val accountProviderID: String,
+    override val accountProviderTitle: String)
+    : AccountProviderResolutionErrorDetails(), HTTPHasProblemReportType {
 
     override val attributes: Map<String, String>
 
     init {
-      val attrs = mutableMapOf<String, String>()
-      attrs["errorCode"] = this.errorCode.toString()
+      val attrs = super.attributes.toMutableMap()
+      attrs["HTTP status"] = this.errorCode.toString()
       this.problemReport?.let { report ->
-        attrs["problemReport.detail"] = report.problemDetail
-        attrs["problemReport.status"] = report.problemStatus.toString()
-        attrs["problemReport.title"] = report.problemTitle
-        attrs["problemReport.type"] = report.problemType.toString()
+        attrs["HTTP problem detail"] = report.problemDetail
+        attrs["HTTP problem status"] = report.problemStatus.toString()
+        attrs["HTTP problem title"] = report.problemTitle
+        attrs["HTTP problem type"] = report.problemType.toString()
       }
       this.attributes = attrs.toMap()
     }
@@ -52,7 +74,9 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
 
   data class UnexpectedException(
     override val message: String,
-    override val exception: Throwable)
+    override val exception: Throwable,
+    override val accountProviderID: String,
+    override val accountProviderTitle: String)
     : AccountProviderResolutionErrorDetails()
 
   /**
@@ -60,7 +84,9 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
    */
 
   data class AuthDocumentUnusable(
-    override val message: String)
+    override val message: String,
+    override val accountProviderID: String,
+    override val accountProviderTitle: String)
     : AccountProviderResolutionErrorDetails()
 
   /**
@@ -70,7 +96,9 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
   data class AuthDocumentParseFailed(
     val warnings: List<ParseWarning>,
     val errors: List<ParseError>,
-    override val message: String)
+    override val message: String,
+    override val accountProviderID: String,
+    override val accountProviderTitle: String)
     : AccountProviderResolutionErrorDetails()
 
 }

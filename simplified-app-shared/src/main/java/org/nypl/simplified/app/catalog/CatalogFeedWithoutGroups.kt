@@ -195,7 +195,7 @@ class CatalogFeedWithoutGroups(
       this.feedLoader.fetchURIWithBookRegistryEntries(next, this.httpAuth)
         .catching(
           Exception::class.java,
-          Function<Exception, FeedLoaderResult> { ex -> FeedLoaderFailedGeneral(null, ex!!) },
+          Function<Exception, FeedLoaderResult>(this@CatalogFeedWithoutGroups::wrapFeedLoaderException),
           this.executor)
         .transform(
           Function<FeedLoaderResult, Unit> { result -> this.onFeedResult(result!!) },
@@ -204,6 +204,9 @@ class CatalogFeedWithoutGroups(
     this.loading.set(Pair.pair<ListenableFuture<Unit>, URI>(future, next))
     return future
   }
+
+  private fun wrapFeedLoaderException(ex: Exception?) =
+    FeedLoaderFailedGeneral(null, ex!!, ex.localizedMessage, sortedMapOf())
 
   private fun onFeedResult(feedResult: FeedLoaderResult): Unit {
     return when (feedResult) {

@@ -82,6 +82,8 @@
     <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
 
+    <item name="android:alertDialogTheme">@style/SimplifiedAlertDialog</item>
+    <item name="android:alertDialogStyle">@style/SimplifiedAlertDialog</item>
     <item name="android:actionBarStyle">@style/SimplifiedActionBar</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     <item name="android:buttonStyle">@style/SimplifiedButton</item>
@@ -97,6 +99,12 @@
     <item name="android:background">@drawable/simplified_button</item>
     <item name="android:textColor">@drawable/simplified_button_text</item>
     <item name="android:textSize">12sp</item>
+  </style>
+
+  <style name="SimplifiedAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
+    <item name="android:colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
+    <item name="android:colorAccent">?attr/simplifiedColorPrimaryLight</item>
   </style>
 
   <!-- Material Design Color Palette -->

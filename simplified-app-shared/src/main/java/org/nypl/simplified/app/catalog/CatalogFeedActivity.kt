@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.os.Bundle
-import androidx.core.content.ContextCompat
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.Menu
@@ -23,6 +22,7 @@ import android.widget.RadioGroup
 import android.widget.SearchView
 import android.widget.SearchView.OnQueryTextListener
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
@@ -44,6 +44,7 @@ import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
 import org.nypl.simplified.app.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
+import org.nypl.simplified.app.errors.ErrorActivity
 import org.nypl.simplified.app.login.LoginDialogListenerType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_registry.BookStatusEvent
@@ -57,8 +58,8 @@ import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
 import org.nypl.simplified.feeds.api.FeedFacets
 import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
-import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
-import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
+import org.nypl.simplified.feeds.api.FeedLoaderResult.Companion.wrapException
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
@@ -73,6 +74,9 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.stack.ImmutableStack
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -364,54 +368,74 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
       override fun onFailure(ex: Throwable) {
         this@CatalogFeedActivity.logger.error("error in feed result handler: ", ex)
-        this@CatalogFeedActivity.onFeedResultFailedException(feedURI, ex)
+        this@CatalogFeedActivity.onFeedResultFailed(feedURI, wrapException(feedURI, ex))
       }
     }, MoreExecutors.directExecutor())
 
     this.loading = future
   }
 
-  private fun onFeedResultFailedException(feedURI: URI, ex: Throwable) {
-    UIThread.runOnUIThread { this.onFeedResultFailedExceptionUI(feedURI, ex) }
+  private fun onFeedResultFailed(
+    feedURI: URI,
+    failure: FeedLoaderFailure
+  ) {
+    UIThread.runOnUIThread { this.onFeedResultFailedUI(feedURI, failure) }
   }
 
-  private fun onFeedResultFailedExceptionUI(feedURI: URI, e: Throwable) {
+  private fun onFeedResultFailedUI(
+    feedURI: URI,
+    failure: FeedLoaderFailure
+  ) {
     UIThread.checkIsUIThread()
 
-    this.logger.info("Failed to get feed: ", e)
+    this.logger.error("Failed to get feed: ", failure.exception)
     this.invalidateOptionsMenu()
 
     this.contentFrame.removeAllViews()
 
     val error =
       this.layoutInflater.inflate(
-        R.layout.catalog_loading_error,
-        this.contentFrame,
-        false) as ViewGroup
+        R.layout.catalog_loading_error, this.contentFrame, false) as ViewGroup
     this.contentFrame.addView(error)
     this.contentFrame.requestLayout()
 
     val retry = error.findViewById<Button>(R.id.catalog_error_retry)
     retry.setOnClickListener { v -> this.retryFeed() }
+
+    val details = error.findViewById<Button>(R.id.catalog_error_details)
+    details.setOnClickListener {
+      ErrorActivity.startActivity(this, this.onFeedResultFailureErrorPageParameters(failure))
+    }
+  }
+
+  private fun onFeedResultFailureErrorPageParameters(
+    failure: FeedLoaderFailure
+  ): ErrorPageParameters<FeedLoaderFailure> {
+    val step =
+      TaskStep(
+        description = this.resources.getString(R.string.catalog_feed_loading),
+        resolution =
+        TaskStepResolution.TaskStepFailed(
+          message = failure.message,
+          errorValue = failure,
+          exception = failure.exception
+        ))
+
+    return ErrorPageParameters(
+      emailAddress = this.resources.getString(R.string.feature_migration_report_email),
+      body = "",
+      subject = "Feed retrieval failed",
+      attributes = failure.attributes.toSortedMap(),
+      taskSteps = listOf(step))
   }
 
   private fun onFeedResult(feedURI: URI, result: FeedLoaderResult) {
     return when (result) {
       is FeedLoaderSuccess ->
         this.onFeedResultSuccess(feedURI, result.feed)
-      is FeedLoaderFailedGeneral ->
-        this.onFeedResultFailedException(feedURI, result.exception)
-      is FeedLoaderFailedAuthentication ->
-        this.onFeedResultFailedAuthentication(feedURI, result.exception)
+      is FeedLoaderFailure ->
+        this.onFeedResultFailed(feedURI, result)
     }
-  }
-
-  private fun onFeedResultFailedAuthentication(
-    feedURI: URI,
-    exception: java.lang.Exception
-  ) {
-
-    // XXX: ?
   }
 
   private fun onFeedResultSuccess(uri: URI, feed: Feed) {
@@ -1200,7 +1224,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
         override fun onFailure(ex: Throwable) {
           this@CatalogFeedActivity.logger.error("error in feed result handler: ", ex)
-          this@CatalogFeedActivity.onFeedResultFailedException(booksUri, ex)
+          this@CatalogFeedActivity.onFeedResultFailed(booksUri, wrapException(booksUri, ex))
         }
       }, MoreExecutors.directExecutor())
     } catch (e: ProfileNoneCurrentException) {

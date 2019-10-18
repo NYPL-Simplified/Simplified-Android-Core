@@ -96,7 +96,11 @@ class AccountProviderSourceStandardDescription(
             val message = this.stringResources.resolvingAuthDocumentNoStartURI
             taskRecorder.currentStepFailed(
               message = message,
-              errorValue = AuthDocumentUnusable(message))
+              errorValue = AuthDocumentUnusable(
+                message = message,
+                accountProviderID = this.metadata.id.toASCIIString(),
+                accountProviderTitle = this.metadata.title
+              ))
             onProgress.invoke(this.metadata.id, message)
             throw IOException()
           }
@@ -137,8 +141,13 @@ class AccountProviderSourceStandardDescription(
       this.logger.error("failed to resolve account provider: ", e)
       taskRecorder.currentStepFailedAppending(
         this.stringResources.resolvingUnexpectedException,
-        UnexpectedException(this.stringResources.resolvingUnexpectedException, e),
-        e)
+        errorValue = UnexpectedException(
+          message = this.stringResources.resolvingUnexpectedException,
+          exception = e,
+          accountProviderID = this.metadata.id.toASCIIString(),
+          accountProviderTitle = this.metadata.title
+        ),
+        exception = e)
       taskRecorder.finishFailure()
     }
   }
@@ -170,7 +179,11 @@ class AccountProviderSourceStandardDescription(
     }
 
     val message = this.stringResources.resolvingAuthDocumentNoUsableAuthenticationTypes
-    taskRecorder.currentStepFailed(message, AuthDocumentUnusable(message))
+    taskRecorder.currentStepFailed(message, AuthDocumentUnusable(
+      message = message,
+      accountProviderTitle = this.metadata.title,
+      accountProviderID = this.metadata.id.toASCIIString()
+    ))
     throw IOException(message)
   }
 
@@ -208,7 +221,11 @@ class AccountProviderSourceStandardDescription(
       )
     } else {
       val message = this.stringResources.resolvingAuthDocumentCOPPAAgeGateMalformed
-      taskRecorder.currentStepFailed(message, AuthDocumentUnusable(message))
+      taskRecorder.currentStepFailed(message, AuthDocumentUnusable(
+        message = message,
+        accountProviderID = this.metadata.id.toASCIIString(),
+        accountProviderTitle = this.metadata.title
+      ))
       throw IOException(message)
     }
   }
@@ -233,6 +250,8 @@ class AccountProviderSourceStandardDescription(
               errorValue = HTTPRequestFailed(
                 message = result.message,
                 errorCode = result.status,
+                accountProviderID = this.metadata.id.toASCIIString(),
+                accountProviderTitle = this.metadata.title,
                 problemReport = this.someOrNull(result.problemReport)))
             throw IOException(result.message)
           }
@@ -251,7 +270,10 @@ class AccountProviderSourceStandardDescription(
         val message = this.stringResources.resolvingAuthDocumentUnusableLink
         taskRecorder.currentStepFailed(
           message = message,
-          errorValue = AccountProviderResolutionErrorDetails.AuthDocumentUnusableLink(message))
+          errorValue = AccountProviderResolutionErrorDetails.AuthDocumentUnusableLink(
+            message = message,
+            accountProviderID = this.metadata.id.toASCIIString(),
+            accountProviderTitle = this.metadata.title))
         throw IOException(message)
       }
     }
@@ -274,6 +296,8 @@ class AccountProviderSourceStandardDescription(
             message = this.stringResources.resolvingAuthDocumentParseFailed,
             errorValue = AuthDocumentParseFailed(
               message = this.stringResources.resolvingAuthDocumentParseFailed,
+              accountProviderTitle = this.metadata.title,
+              accountProviderID = this.metadata.id.toASCIIString(),
               warnings = parseResult.warnings,
               errors = parseResult.errors))
           throw IOException(this.stringResources.resolvingAuthDocumentParseFailed)

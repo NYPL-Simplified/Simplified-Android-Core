@@ -100,6 +100,7 @@ class ProfileAccountLoginTask(
         return this.steps.finishFailure()
       }
 
+      this.steps.currentStepSucceeded(this.loginStrings.loginAuthRequired)
       this.runPatronProfileRequest()
       this.runDeviceActivation()
       this.account.setLoginState(AccountLoggedIn(this.credentials))
@@ -414,7 +415,7 @@ class ProfileAccountLoginTask(
             uri = patronSettingsURI,
             statusCode = result.status,
             errorMessage = result.message,
-            errorReport = this.someOrNull(result.problemReport)))
+            problemReport = this.someOrNull(result.problemReport)))
         throw Exception()
       }
     }

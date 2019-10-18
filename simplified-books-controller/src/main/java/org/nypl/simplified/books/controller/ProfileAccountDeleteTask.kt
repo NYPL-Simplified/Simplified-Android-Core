@@ -30,7 +30,8 @@ class ProfileAccountDeleteTask(
   private val taskRecorder = TaskRecorder.create<AccountDeleteErrorDetails>()
 
   private fun publishFailureEvent(step: TaskStep<AccountDeleteErrorDetails>) =
-    this.accountEvents.send(AccountEventDeletion.AccountEventDeletionFailed(step.resolution.message))
+    this.accountEvents.send(AccountEventDeletion.AccountEventDeletionFailed(
+      step.resolution.message, this.taskRecorder.finishFailure<Unit>()))
 
   private fun publishProgressEvent(step: TaskStep<AccountDeleteErrorDetails>) =
     this.accountEvents.send(AccountEventDeletion.AccountEventDeletionInProgress(step.description))

@@ -245,7 +245,7 @@ class ProfileAccountCreateCustomOPDSTask(
             message = this.strings.fetchingOPDSFeedFailed,
             opdsURI = this.opdsURI,
             status = result.status,
-            problemReport = result.problemReport)))
+            problemReport = someOrNull(result.problemReport))))
         throw IOException()
       }
 
@@ -259,10 +259,10 @@ class ProfileAccountCreateCustomOPDSTask(
         this.publishFailureEvent(this.taskRecorder.currentStepFailed(
           message = this.strings.fetchingOPDSFeedFailed,
           errorValue = AccountCreateErrorDetails.HTTPRequestFailed(
-            this.strings.fetchingOPDSFeedFailed,
-            this.opdsURI,
-            -1,
-            Option.none()
+            message = this.strings.fetchingOPDSFeedFailed,
+            opdsURI = this.opdsURI,
+            status = -1,
+            problemReport = null
           ),
           exception = result.error))
 
@@ -279,16 +279,17 @@ class ProfileAccountCreateCustomOPDSTask(
     return this.someOrNull(feed.authDocument)
   }
 
-  private fun someOrNull(authDocument: OptionType<URI>?): URI? {
-    return if (authDocument is Some<URI>) {
-      authDocument.get()
+  private fun <T> someOrNull(opt: OptionType<T>?): T? {
+    return if (opt is Some<T>) {
+      opt.get()
     } else {
       null
     }
   }
 
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.send(AccountEventCreationFailed(step.resolution.message))
+    this.accountEvents.send(AccountEventCreationFailed(
+      step.resolution.message, this.taskRecorder.finishFailure<AccountType>()))
 
   private fun publishProgressEvent(step: TaskStep<AccountCreateErrorDetails>) =
     this.accountEvents.send(AccountEventCreationInProgress(step.description))

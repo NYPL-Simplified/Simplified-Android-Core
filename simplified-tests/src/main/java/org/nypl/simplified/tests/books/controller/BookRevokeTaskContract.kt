@@ -1291,7 +1291,12 @@ abstract class BookRevokeTaskContract {
       Mockito.mock(FeedLoaderType::class.java)
 
     val feedResult =
-      FeedLoaderFailedAuthentication(null, IOException())
+      FeedLoaderFailedAuthentication(
+        problemReport = null,
+        exception = IOException(),
+        message = "Failed",
+        attributes = mapOf()
+      )
 
     Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
       .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
