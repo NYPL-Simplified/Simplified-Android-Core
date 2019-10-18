@@ -53,6 +53,9 @@ sealed class AccountCreateErrorDetails : PresentableErrorType {
     val opdsURI: URI,
     val status: Int,
     override val problemReport: HTTPProblemReport?)
-    : AccountCreateErrorDetails(), HTTPHasProblemReportType
+    : AccountCreateErrorDetails(), HTTPHasProblemReportType {
 
+    override val attributes: Map<String, String>
+      get() = Presentables.mergeProblemReportOptional(super.attributes, this.problemReport)
+  }
 }

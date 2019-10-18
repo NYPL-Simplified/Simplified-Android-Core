@@ -5,6 +5,7 @@ import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import java.io.Serializable
@@ -107,7 +108,11 @@ sealed class AccountLoginState {
       val statusCode: Int,
       val errorMessage: String,
       override val problemReport: HTTPProblemReport?)
-      : AccountLoginErrorData(), HTTPHasProblemReportType
+      : AccountLoginErrorData(), HTTPHasProblemReportType {
+
+      override val attributes: Map<String, String>
+        get() = Presentables.mergeProblemReportOptional(super.attributes, this.problemReport)
+    }
 
     /**
      * A required DRM system is not supported by the application.

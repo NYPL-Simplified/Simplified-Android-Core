@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.book_registry
 
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import java.io.Serializable
@@ -16,17 +17,17 @@ sealed class BookStatusDownloadErrorDetails : Serializable {
 
   data class HTTPRequestFailed(
     val status: Int,
-    val errorReport: HTTPProblemReport?)
-    : BookStatusDownloadErrorDetails()
+    override val problemReport: HTTPProblemReport?)
+    : BookStatusDownloadErrorDetails(), HTTPHasProblemReportType
 
   /**
    * Attempting to load the feed for a borrow URI failed.
    */
 
   data class FeedLoaderFailed(
-    val errorReport: HTTPProblemReport?,
+    override val problemReport: HTTPProblemReport?,
     val exception: Throwable?)
-    : BookStatusDownloadErrorDetails()
+    : BookStatusDownloadErrorDetails(), HTTPHasProblemReportType
 
   /**
    * An OPDS feed contained a corrupted entry.

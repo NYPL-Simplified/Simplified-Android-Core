@@ -1295,7 +1295,7 @@ abstract class BookRevokeTaskContract {
         problemReport = null,
         exception = IOException(),
         message = "Failed",
-        attributes = mapOf()
+        attributesInitial = mapOf()
       )
 
     Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))

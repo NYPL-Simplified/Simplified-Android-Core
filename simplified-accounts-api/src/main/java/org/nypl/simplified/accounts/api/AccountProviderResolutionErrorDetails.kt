@@ -5,6 +5,7 @@ import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
 
 /**
  * The details of a specific resolution error.
@@ -54,18 +55,10 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
     : AccountProviderResolutionErrorDetails(), HTTPHasProblemReportType {
 
     override val attributes: Map<String, String>
-
-    init {
-      val attrs = super.attributes.toMutableMap()
-      attrs["HTTP status"] = this.errorCode.toString()
-      this.problemReport?.let { report ->
-        attrs["HTTP problem detail"] = report.problemDetail
-        attrs["HTTP problem status"] = report.problemStatus.toString()
-        attrs["HTTP problem title"] = report.problemTitle
-        attrs["HTTP problem type"] = report.problemType.toString()
-      }
-      this.attributes = attrs.toMap()
-    }
+      get() = Presentables.mergeProblemReportOptional(super.attributes.toMutableMap().apply {
+        this["HTTP status code"] = errorCode.toString()
+        this.toMap()
+      }, this.problemReport)
   }
 
   /**

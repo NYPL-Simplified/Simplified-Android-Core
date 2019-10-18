@@ -138,13 +138,13 @@ class FeedLoader private constructor(
         return FeedLoaderFailure.FeedLoaderFailedAuthentication(
           problemReport = this.someOrNull(e.problemReport),
           exception = e,
-          attributes = this.errorAttributesOf(uri, method),
+          attributesInitial = this.errorAttributesOf(uri, method),
           message = e.localizedMessage)
       }
       return FeedLoaderFailure.FeedLoaderFailedGeneral(
         problemReport = this.someOrNull(e.problemReport),
         exception = e,
-        attributes = this.errorAttributesOf(uri, method),
+        attributesInitial = this.errorAttributesOf(uri, method),
         message = e.localizedMessage
       )
     } catch (e: Exception) {
@@ -153,7 +153,7 @@ class FeedLoader private constructor(
       return FeedLoaderFailure.FeedLoaderFailedGeneral(
         problemReport = null,
         exception = e,
-        attributes = this.errorAttributesOf(uri, method),
+        attributesInitial = this.errorAttributesOf(uri, method),
         message = e.localizedMessage
       )
     }

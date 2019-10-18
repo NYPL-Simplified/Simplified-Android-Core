@@ -1,8 +1,10 @@
 package org.nypl.simplified.accounts.source.nyplregistry
 
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseWarning
+import org.nypl.simplified.presentableerror.api.Presentables
 import java.net.URI
 
 /**
@@ -31,8 +33,8 @@ sealed class AccountProviderSourceNYPLRegistryException(
     val uri: URI,
     val errorCode: Int,
     message: String,
-    val problemReport: HTTPProblemReport?)
-    : AccountProviderSourceNYPLRegistryException(message)
+    override val problemReport: HTTPProblemReport?)
+    : AccountProviderSourceNYPLRegistryException(message), HTTPHasProblemReportType
 
   /**
    * The server returned data that could not be parsed.

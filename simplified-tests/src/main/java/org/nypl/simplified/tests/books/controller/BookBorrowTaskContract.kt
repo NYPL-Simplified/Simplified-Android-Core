@@ -2655,7 +2655,7 @@ abstract class BookBorrowTaskContract {
       results.errors().last() as HTTPRequestFailed
 
     Assert.assertEquals(404, errorData.status)
-    Assert.assertEquals(report, errorData.errorReport)
+    Assert.assertEquals(report, errorData.problemReport)
 
     /*
      * Check that the download failed.

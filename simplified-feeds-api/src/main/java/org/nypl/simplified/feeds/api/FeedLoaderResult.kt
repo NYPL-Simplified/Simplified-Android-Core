@@ -3,6 +3,7 @@ package org.nypl.simplified.feeds.api
 import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
 import java.net.URI
 
 /**
@@ -33,8 +34,11 @@ sealed class FeedLoaderResult {
       override val problemReport: HTTPProblemReport?,
       override val exception: Exception,
       override val message: String,
-      override val attributes: Map<String, String>)
-      : FeedLoaderFailure()
+      private val attributesInitial: Map<String, String>)
+      : FeedLoaderFailure() {
+      override val attributes: Map<String, String>
+        get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
+    }
 
     /**
      * The feed failed to load due to an authentication error.
@@ -44,8 +48,11 @@ sealed class FeedLoaderResult {
       override val problemReport: HTTPProblemReport?,
       override val exception: Exception,
       override val message: String,
-      override val attributes: Map<String, String>)
-      : FeedLoaderFailure()
+      private val attributesInitial: Map<String, String>)
+      : FeedLoaderFailure() {
+      override val attributes: Map<String, String>
+        get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
+    }
 
   }
 
@@ -65,7 +72,7 @@ sealed class FeedLoaderResult {
         if (exception is java.lang.Exception) exception
         else java.lang.Exception(exception),
         message = exception.localizedMessage,
-        attributes = sortedMapOf(Pair("Feed URI", uri.toASCIIString())))
+        attributesInitial = sortedMapOf(Pair("Feed URI", uri.toASCIIString())))
     }
 
   }

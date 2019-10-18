@@ -768,7 +768,7 @@ class BookBorrowTask(
           message = this.borrowStrings.borrowBookFulfillDownloadFailed,
           errorValue = HTTPRequestFailed(
             status = result.status,
-            errorReport = this.someOrNull(result.problemReport)
+            problemReport = this.someOrNull(result.problemReport)
           ),
           exception = exception)
         throw exception

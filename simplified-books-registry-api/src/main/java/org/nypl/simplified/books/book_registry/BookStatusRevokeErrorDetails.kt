@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.book_registry
 
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import java.io.Serializable
 
@@ -38,9 +39,9 @@ sealed class BookStatusRevokeErrorDetails : Serializable {
    */
 
   data class FeedLoaderFailed(
-    val errorReport: HTTPProblemReport?,
+    override val problemReport: HTTPProblemReport?,
     val exception: Throwable?)
-    : BookStatusRevokeErrorDetails()
+    : BookStatusRevokeErrorDetails(), HTTPHasProblemReportType
 
   /**
    * An OPDS feed contained a corrupted entry.
