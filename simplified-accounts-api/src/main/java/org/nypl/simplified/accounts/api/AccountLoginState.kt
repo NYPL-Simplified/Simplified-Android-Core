@@ -198,7 +198,7 @@ sealed class AccountLoginState {
    * Data associated with failed logout attempts.
    */
 
-  sealed class AccountLogoutErrorData : Serializable {
+  sealed class AccountLogoutErrorData : Serializable, PresentableErrorType {
 
     /**
      * A DRM system failed with an (opaque) error code.
@@ -206,16 +206,22 @@ sealed class AccountLoginState {
 
     data class AccountLogoutDRMFailure(
       val errorCode: String)
-      : AccountLogoutErrorData()
+      : AccountLogoutErrorData() {
+
+      override val message: String
+        get() = this.errorCode
+    }
 
     /**
      * An unexpected exception occurred.
      */
 
     data class AccountLogoutUnexpectedException(
-      val exception: Throwable)
-      : AccountLogoutErrorData()
-
+      override val exception: Throwable)
+      : AccountLogoutErrorData() {
+      override val message: String
+        get() = this.exception.localizedMessage
+    }
   }
 
   /**

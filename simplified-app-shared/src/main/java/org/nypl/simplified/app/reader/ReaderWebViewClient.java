@@ -1,8 +1,6 @@
 package org.nypl.simplified.app.reader;
 
 import android.app.Activity;
-import android.webkit.ConsoleMessage;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;

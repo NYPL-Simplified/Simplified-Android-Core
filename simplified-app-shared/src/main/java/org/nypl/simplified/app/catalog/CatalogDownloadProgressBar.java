@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.catalog;
 
-import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 

@@ -17,7 +17,6 @@ import org.nypl.simplified.app.SimplifiedActivity
 import org.nypl.simplified.app.catalog.MainCatalogActivity
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity
 import org.nypl.simplified.boot.api.BootEvent
-import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.migration.api.Migrations
 import org.nypl.simplified.migration.api.MigrationsType
@@ -28,12 +27,13 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.threads.NamedThreadPools
+import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashParameters
-import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.theme.ThemeControl
-import org.nypl.simplified.threads.NamedThreadPools
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URI

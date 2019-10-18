@@ -45,9 +45,8 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ReportIssueActivity
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.WebViewActivity
-import org.nypl.simplified.app.errors.ErrorActivity
+import org.nypl.simplified.app.errors.ErrorDialogs
 import org.nypl.simplified.app.signup.CardCreatorActivity
-import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
@@ -55,7 +54,6 @@ import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.LoggerFactory
 
 /**
@@ -431,32 +429,9 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private fun onAccountEventLoginFailed(failed: AccountLoginFailed): Unit {
     this.logger.debug("onAccountEventLoginFailed: {}", failed)
 
-    val errorParameters =
-      ErrorPageParameters(
-        emailAddress = this.resources.getString(R.string.feature_migration_report_email),
-        body = "",
-        subject = "Login failed",
-        attributes = sortedMapOf(
-          Pair("Account Provider", this.account.provider.id.toASCIIString()),
-          Pair("Account", this.account.provider.displayName)
-        ),
-        taskSteps = failed.taskResult.steps)
-
     UIThread.runOnUIThread {
+      ErrorDialogs.showAccountLoginError(this, this.account, failed)
       this.login.isEnabled = true
-
-      AlertDialog.Builder(this)
-        .setTitle(R.string.settings_login_failed)
-        .setMessage(R.string.settings_login_failed_message)
-        .setPositiveButton(R.string.generic_ok, { dialog, which ->
-          dialog.dismiss()
-        })
-        .setNeutralButton(R.string.generic_details, { dialog, which ->
-          ErrorActivity.startActivity(this, errorParameters)
-          dialog.dismiss()
-        })
-        .create()
-        .show()
     }
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
@@ -480,11 +455,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private fun onAccountEventLogoutFailed(failed: AccountLogoutFailed): Unit {
     this.logger.debug("onAccountEventLogoutFailed: {}", failed)
 
-    ErrorDialogUtilities.showErrorWithRunnable(
-      this,
-      this.logger,
-      failed.taskResult.steps.last().resolution.message,
-      failed.taskResult.steps.last().resolution.exception) {
+    UIThread.runOnUIThread {
+      ErrorDialogs.showLogoutError(this, this.account, failed)
       this.login.isEnabled = true
     }
 

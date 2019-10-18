@@ -36,12 +36,12 @@ import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.AdobeDRMServices
 import org.nypl.simplified.app.Bugsnag
+import org.nypl.simplified.app.BuildConfig
 import org.nypl.simplified.app.BundledContentResolver
 import org.nypl.simplified.app.NetworkConnectivityType
+import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.BuildConfig
-import org.nypl.simplified.app.R
 import org.nypl.simplified.app.SimplifiedNetworkConnectivity
 import org.nypl.simplified.app.catalog.CatalogBookBorrowStrings
 import org.nypl.simplified.app.catalog.CatalogBookRevokeStrings
@@ -69,7 +69,6 @@ import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
-import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.bugsnag.IfBugsnag
 import org.nypl.simplified.documents.clock.Clock
 import org.nypl.simplified.documents.clock.ClockType
@@ -103,9 +102,10 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
 import org.nypl.simplified.tenprint.TenPrintGenerator
+import org.nypl.simplified.threads.NamedThreadPools
+import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeValue
-import org.nypl.simplified.threads.NamedThreadPools
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File

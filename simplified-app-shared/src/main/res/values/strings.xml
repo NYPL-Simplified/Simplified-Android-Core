@@ -167,6 +167,7 @@
   <string name="settings_logout_in_progress">Logging out…</string>
   <string name="settings_login_failed">Login Failed</string>
   <string name="settings_login_failed_message">Attempting to log in to the account failed.</string>
+  <string name="settings_logout_failed_message">Attempting to log out of the account failed.</string>
   <string name="settings_login_failed_credentials">Your barcode and pin combination was not valid. Please try again.</string>
   <string name="settings_login_failed_unknown">An unknown error occurred. Please check your connection or try again later.</string>
   <string name="settings_logout_failed_unknown">An unknown error occurred. Please check your connection or try again later.</string>

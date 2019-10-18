@@ -39,7 +39,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.errors.ErrorActivity
+import org.nypl.simplified.app.errors.ErrorDialogs
 import org.nypl.simplified.app.images.ImageAccountIcons
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
@@ -52,7 +52,6 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
 
@@ -351,29 +350,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   private fun onAccountDeletionFailed(event: AccountEventDeletionFailed): Unit {
     this.logger.debug("onAccountDeletionFailed: {}", event)
 
-    val errorParameters =
-      ErrorPageParameters(
-        emailAddress = this.resources.getString(R.string.feature_migration_report_email),
-        body = "",
-        subject = "Account deletion failed",
-        attributes = event.attributes.toSortedMap(),
-        taskSteps = event.taskResult.steps)
-
-    UIThread.runOnUIThread {
-      AlertDialog.Builder(this)
-        .setTitle(R.string.profiles_account_deletion_failed)
-        .setMessage(R.string.profiles_account_deletion_error_general)
-        .setPositiveButton(R.string.generic_ok, { dialog, which ->
-          dialog.dismiss()
-        })
-        .setNeutralButton(R.string.generic_details, { dialog, which ->
-          ErrorActivity.startActivity(this, errorParameters)
-          dialog.dismiss()
-        })
-        .create()
-        .show()
-    }
-
+    ErrorDialogs.showAccountDeletionError(this, event)
     return Unit.unit()
   }
 
@@ -390,29 +367,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   private fun onAccountCreationFailed(event: AccountEventCreationFailed): Unit {
     this.logger.debug("onAccountCreationFailed: {}", event)
 
-    val errorParameters =
-      ErrorPageParameters(
-        emailAddress = this.resources.getString(R.string.feature_migration_report_email),
-        body = "",
-        subject = "Account creation failed",
-        attributes = event.attributes.toSortedMap(),
-        taskSteps = event.taskResult.steps)
-
     UIThread.runOnUIThread {
-      AlertDialog.Builder(this)
-        .setTitle(R.string.profiles_account_creation_failed)
-        .setMessage(R.string.profiles_account_creation_error_general)
-        .setPositiveButton(R.string.generic_ok, { dialog, which ->
-          dialog.dismiss()
-        })
-        .setNeutralButton(R.string.generic_details, { dialog, which ->
-          ErrorActivity.startActivity(this, errorParameters)
-          dialog.dismiss()
-        })
-        .create()
-        .show()
+      ErrorDialogs.showAccountCreationError(this, event)
     }
-
     return Unit.unit()
   }
 

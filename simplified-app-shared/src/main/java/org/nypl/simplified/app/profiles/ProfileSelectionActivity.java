@@ -18,7 +18,6 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
 import org.joda.time.LocalDateTime;

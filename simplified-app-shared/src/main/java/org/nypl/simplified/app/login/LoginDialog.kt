@@ -23,7 +23,7 @@ import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
-import org.nypl.simplified.app.utilities.ErrorDialogUtilities
+import org.nypl.simplified.app.errors.ErrorDialogs
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.observable.ObservableSubscriptionType
@@ -227,11 +227,13 @@ class LoginDialog : AppCompatDialogFragment() {
 
         is AccountLoginState.AccountLoginFailed -> {
           if (!this.shownAlert) {
-            ErrorDialogUtilities.showError(
-              this.activity,
-              this.logger,
-              state.taskResult.steps.last().resolution.message,
-              state.taskResult.steps.last().resolution.exception)
+            UIThread.runOnUIThread {
+              ErrorDialogs.showAccountLoginError(
+                activity = this.requireActivity(),
+                account = this.account,
+                state = state
+              )
+            }
             this.shownAlert = true
           }
 
@@ -257,11 +259,13 @@ class LoginDialog : AppCompatDialogFragment() {
 
         is AccountLoginState.AccountLogoutFailed -> {
           if (!this.shownAlert) {
-            ErrorDialogUtilities.showError(
-              this.activity,
-              this.logger,
-              state.taskResult.steps.last().resolution.message,
-              state.taskResult.steps.last().resolution.exception)
+            UIThread.runOnUIThread {
+              ErrorDialogs.showLogoutError(
+                activity = this.requireActivity(),
+                account = this.account,
+                state = state
+              )
+            }
             this.shownAlert = true
           }
 
