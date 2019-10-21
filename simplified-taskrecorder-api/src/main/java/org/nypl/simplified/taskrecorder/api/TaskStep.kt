@@ -1,12 +1,14 @@
 package org.nypl.simplified.taskrecorder.api
 
+import java.io.Serializable
+
 /**
  * A step in a task.
  *
  * @param <E> The precise type of associated error values
  */
 
-data class TaskStep<E>(
+data class TaskStep<E : Serializable>(
 
   /**
    * A humanly-readable, localized description of the task step.
@@ -19,4 +21,5 @@ data class TaskStep<E>(
    */
 
   var resolution: TaskStepResolution<E> = TaskStepResolution.TaskStepSucceeded(""))
+  : Serializable
 

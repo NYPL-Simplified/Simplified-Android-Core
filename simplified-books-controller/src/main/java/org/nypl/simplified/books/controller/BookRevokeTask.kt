@@ -21,7 +21,15 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.*
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.Cancelled
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.FeedCorrupted
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.FeedLoaderFailed
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.FeedUnusable
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NoCredentialsAvailable
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NotRevocable
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.TimedOut
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.UnexpectedException
 import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
 import org.nypl.simplified.books.book_registry.BookStatusRevoked
 import org.nypl.simplified.books.book_registry.BookStatusType
@@ -39,6 +47,7 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.http.core.HTTPAuthType
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
@@ -187,9 +196,11 @@ class BookRevokeTask(
 
       is OPDSAvailabilityHoldable -> {
         val exception = BookRevokeExceptionNotRevocable()
+        val message =
+          this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName)
         this.steps.currentStepFailed(
-          this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName),
-          NotRevocable,
+          message,
+          NotRevocable(message),
           exception)
         throw exception
       }
@@ -207,9 +218,11 @@ class BookRevokeTask(
 
       is OPDSAvailabilityLoanable -> {
         val exception = BookRevokeExceptionNotRevocable()
+        val message =
+          this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName)
         this.steps.currentStepFailed(
-          this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName),
-          NotRevocable,
+          message,
+          NotRevocable(message),
           exception)
         throw exception
       }
@@ -289,15 +302,24 @@ class BookRevokeTask(
       this.feedLoader.fetchURIRefreshing(targetURI, httpAuth, "PUT")
         .get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
+      val message = this.revokeStrings.revokeServerNotifyFeedTimedOut
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeServerNotifyFeedTimedOut, TimedOut, e)
+        message = message,
+        errorValue = TimedOut(message),
+        exception = e
+      )
       throw e
     } catch (e: ExecutionException) {
       val ex = e.cause!!
-      this.steps.currentStepFailed(
-        this.revokeStrings.revokeServerNotifyFeedTimedOut,
-        FeedLoaderFailed(null, ex),
-        ex)
+      val problemReport =
+        if (e is HTTPHasProblemReportType) {
+          e.problemReport
+        } else {
+          null
+        }
+
+      val message = this.revokeStrings.revokeServerNotifyFeedTimedOut
+      this.steps.currentStepFailed(message, FeedLoaderFailed(message, problemReport, ex), ex)
       throw ex
     }
 
@@ -308,16 +330,26 @@ class BookRevokeTask(
       }
 
       is FeedLoaderFailedGeneral -> {
+        val message = this.revokeStrings.revokeServerNotifyFeedFailed
         this.steps.currentStepFailed(
-          this.revokeStrings.revokeServerNotifyFeedFailed,
-          FeedLoaderFailed(feedResult.problemReport, feedResult.exception))
+          message,
+          FeedLoaderFailed(
+            message = message,
+            problemReport = feedResult.problemReport,
+            exception = feedResult.exception
+          ))
         throw feedResult.exception
       }
 
       is FeedLoaderFailedAuthentication -> {
+        val message = this.revokeStrings.revokeServerNotifyFeedFailed
         this.steps.currentStepFailed(
-          this.revokeStrings.revokeServerNotifyFeedFailed,
-          FeedLoaderFailed(feedResult.problemReport, feedResult.exception))
+          message,
+          FeedLoaderFailed(
+            message = message,
+            problemReport = feedResult.problemReport,
+            exception = feedResult.exception
+          ))
         throw feedResult.exception
       }
     }
@@ -330,7 +362,8 @@ class BookRevokeTask(
 
     if (feed.size == 0) {
       val exception = BookRevokeExceptionBadFeed()
-      this.steps.currentStepFailed(this.revokeStrings.revokeServerNotifyFeedEmpty, FeedUnusable, exception)
+      val message = this.revokeStrings.revokeServerNotifyFeedEmpty
+      this.steps.currentStepFailed(message, FeedUnusable(message), exception)
       throw exception
     }
 
@@ -340,9 +373,9 @@ class BookRevokeTask(
           is FeedEntryCorrupt -> {
             val exception = BookRevokeExceptionBadFeed()
             this.steps.currentStepFailed(
-              this.revokeStrings.revokeServerNotifyFeedCorrupt,
-              FeedCorrupted(feedEntry.error),
-              exception)
+              message = this.revokeStrings.revokeServerNotifyFeedCorrupt,
+              errorValue = FeedCorrupted(feedEntry.error),
+              exception = exception)
             throw exception
           }
           is FeedEntryOPDS ->
@@ -351,10 +384,11 @@ class BookRevokeTask(
       }
       is Feed.FeedWithGroups -> {
         val exception = BookRevokeExceptionBadFeed()
+        val message = this.revokeStrings.revokeServerNotifyFeedWithGroups
         this.steps.currentStepFailed(
-          this.revokeStrings.revokeServerNotifyFeedWithGroups,
-          FeedUnusable,
-          exception)
+          message = message,
+          errorValue = FeedUnusable(message),
+          exception = exception)
         throw exception
       }
     }
@@ -448,25 +482,32 @@ class BookRevokeTask(
 
     try {
       adeptFuture.get(this.revokeACSTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
-    } catch (e : TimeoutException) {
+    } catch (e: TimeoutException) {
+      val message = this.revokeStrings.revokeACSTimedOut
       this.steps.currentStepFailed(
-        message = this.revokeStrings.revokeACSTimedOut,
-        errorValue = TimedOut,
+        message = message,
+        errorValue = TimedOut(message),
         exception = e)
       throw e
     } catch (e: ExecutionException) {
       throw when (val cause = e.cause!!) {
         is CancellationException -> {
+          val message = this.revokeStrings.revokeBookCancelled
           this.steps.currentStepFailed(
-            message = this.revokeStrings.revokeBookCancelled,
-            errorValue = Cancelled,
+            message = message,
+            errorValue = Cancelled(message),
             exception = cause)
           cause
         }
         is AdobeDRMExtensions.AdobeDRMRevokeException -> {
+          val message = this.revokeStrings.revokeBookACSConnectorFailed(cause.errorCode)
           this.steps.currentStepFailed(
-            message = this.revokeStrings.revokeBookACSConnectorFailed(cause.errorCode),
-            errorValue = DRMError.DRMFailure(this.adobeACS, cause.errorCode),
+            message = message,
+            errorValue = DRMError.DRMFailure(
+              system = this.adobeACS,
+              errorCode = cause.errorCode,
+              message = message
+            ),
             exception = cause)
           cause
         }
@@ -504,9 +545,13 @@ class BookRevokeTask(
 
     if (credentials == null) {
       val exception = BookRevokeExceptionDeviceNotActivated()
+      val message = this.revokeStrings.revokeACSGettingDeviceCredentialsNotActivated
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeACSGettingDeviceCredentialsNotActivated,
-        errorValue = DRMError.DRMDeviceNotActive(this.adobeACS),
+        message,
+        errorValue = DRMError.DRMDeviceNotActive(
+          system = this.adobeACS,
+          message = message
+        ),
         exception = exception)
       throw exception
     }
@@ -597,10 +642,11 @@ class BookRevokeTask(
     } else {
       this.error("revocation requires credentials, but none are available")
       val exception = BookRevokeExceptionNoCredentials()
+      val message = this.revokeStrings.revokeCredentialsRequired
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeCredentialsRequired,
-        NoCredentialsAvailable,
-        exception)
+        message = message,
+        errorValue = NoCredentialsAvailable(message),
+        exception = exception)
       throw exception
     }
   }

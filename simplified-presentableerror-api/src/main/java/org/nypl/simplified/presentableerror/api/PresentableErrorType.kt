@@ -1,6 +1,7 @@
 package org.nypl.simplified.presentableerror.api
 
 import net.jcip.annotations.ThreadSafe
+import java.io.Serializable
 
 /**
  * A presentable error.
@@ -14,7 +15,7 @@ import net.jcip.annotations.ThreadSafe
  */
 
 @ThreadSafe
-interface PresentableErrorType : PresentableType {
+interface PresentableErrorType : PresentableType, Serializable {
 
   /**
    * An exception associated with the error, if any. This is primarily useful for providing

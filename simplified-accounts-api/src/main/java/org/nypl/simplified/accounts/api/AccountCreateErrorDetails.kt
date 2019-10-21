@@ -1,9 +1,10 @@
 package org.nypl.simplified.accounts.api
 
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.OptionType
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
 import java.net.URI
 
 /**
@@ -26,6 +27,8 @@ sealed class AccountCreateErrorDetails : PresentableErrorType {
         "Must have logged at least one error")
     }
 
+    override val attributes: Map<String, String>
+      get() = Presentables.collectAttributes(this.errorValues)
     override val message: String
       get() = this.errorValues[0].message
     override val causes: List<PresentableErrorType>
@@ -49,7 +52,10 @@ sealed class AccountCreateErrorDetails : PresentableErrorType {
     override val message: String,
     val opdsURI: URI,
     val status: Int,
-    val problemReport: OptionType<HTTPProblemReport>)
-    : AccountCreateErrorDetails()
+    override val problemReport: HTTPProblemReport?)
+    : AccountCreateErrorDetails(), HTTPHasProblemReportType {
 
+    override val attributes: Map<String, String>
+      get() = Presentables.mergeProblemReportOptional(super.attributes, this.problemReport)
+  }
 }

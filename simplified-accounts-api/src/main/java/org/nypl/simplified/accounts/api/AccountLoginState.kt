@@ -1,11 +1,14 @@
 package org.nypl.simplified.accounts.api
 
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
+import java.io.Serializable
 import java.net.URI
 
 /**
@@ -104,8 +107,12 @@ sealed class AccountLoginState {
       val uri: URI,
       val statusCode: Int,
       val errorMessage: String,
-      val errorReport: HTTPProblemReport?)
-      : AccountLoginErrorData()
+      override val problemReport: HTTPProblemReport?)
+      : AccountLoginErrorData(), HTTPHasProblemReportType {
+
+      override val attributes: Map<String, String>
+        get() = Presentables.mergeProblemReportOptional(super.attributes, this.problemReport)
+    }
 
     /**
      * A required DRM system is not supported by the application.
@@ -158,6 +165,7 @@ sealed class AccountLoginState {
   data class AccountLoginFailed(
     val taskResult: TaskResult.Failure<AccountLoginErrorData, *>)
     : AccountLoginState() {
+
     override val credentials: AccountAuthenticationCredentials?
       get() = null
   }
@@ -190,7 +198,7 @@ sealed class AccountLoginState {
    * Data associated with failed logout attempts.
    */
 
-  sealed class AccountLogoutErrorData {
+  sealed class AccountLogoutErrorData : Serializable, PresentableErrorType {
 
     /**
      * A DRM system failed with an (opaque) error code.
@@ -198,16 +206,22 @@ sealed class AccountLoginState {
 
     data class AccountLogoutDRMFailure(
       val errorCode: String)
-      : AccountLogoutErrorData()
+      : AccountLogoutErrorData() {
+
+      override val message: String
+        get() = this.errorCode
+    }
 
     /**
      * An unexpected exception occurred.
      */
 
     data class AccountLogoutUnexpectedException(
-      val exception: Throwable)
-      : AccountLogoutErrorData()
-
+      override val exception: Throwable)
+      : AccountLogoutErrorData() {
+      override val message: String
+        get() = this.exception.localizedMessage
+    }
   }
 
   /**

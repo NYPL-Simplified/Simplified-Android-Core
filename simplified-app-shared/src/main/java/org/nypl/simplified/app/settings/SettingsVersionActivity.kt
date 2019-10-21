@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.core.content.ContextCompat
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -13,39 +12,45 @@ import android.widget.Switch
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.google.common.util.concurrent.MoreExecutors
 import org.nypl.simplified.app.BuildConfig
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.errors.ErrorActivity
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
 import org.nypl.simplified.app.services.BootTesting
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.controller.AdobeDRMExtensions
 import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.nypl.simplified.reports.Reports
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.LoggerFactory
-import java.lang.StringBuilder
 
 class SettingsVersionActivity : ProfileTimeOutActivity() {
 
   private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
   private var buildClicks = 1
 
-  private lateinit var customOPDS: Button
+  private lateinit var adobeDRMActivationTable: TableLayout
+  private lateinit var buildText: TextView
+  private lateinit var buildTitle: TextView
   private lateinit var cacheButton: Button
   private lateinit var crashButton: Button
-  private lateinit var sendReportButton: Button
+  private lateinit var customOPDS: Button
+  private lateinit var developerOptions: ViewGroup
   private lateinit var drmTable: TableLayout
+  private lateinit var failNextBoot: Switch
+  private lateinit var sendReportButton: Button
+  private lateinit var showErrorButton: Button
+  private lateinit var showTesting: Switch
   private lateinit var versionText: TextView
   private lateinit var versionTitle: TextView
-  private lateinit var buildTitle: TextView
-  private lateinit var buildText: TextView
-  private lateinit var developerOptions: ViewGroup
-  private lateinit var adobeDRMActivationTable: TableLayout
-  private lateinit var showTesting: Switch
-  private lateinit var failNextBoot: Switch
 
   private val logger = LoggerFactory.getLogger(SettingsVersionActivity::class.java)
 
@@ -63,6 +68,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       this.developerOptions.findViewById(R.id.settings_version_dev_show_cache_dir)
     this.sendReportButton =
       this.developerOptions.findViewById(R.id.settings_version_dev_send_reports)
+    this.showErrorButton =
+      this.developerOptions.findViewById(R.id.settings_version_dev_show_error)
 
     this.buildTitle =
       this.findViewById(R.id.settings_version_build_title)
@@ -94,6 +101,10 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
         super.onOptionsItemSelected(item)
     }
   }
+
+  data class ExampleError(
+    override val message: String
+  ) : PresentableErrorType
 
   override fun onStart() {
     super.onStart()
@@ -134,7 +145,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
     try {
       val pkgManager = this.getPackageManager()
-      val pkgInfo = pkgManager.getPackageInfo(packageName, 0)
+      val pkgInfo = pkgManager.getPackageInfo(this.packageName, 0)
       this.versionText.text = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
     } catch (e: PackageManager.NameNotFoundException) {
       this.versionText.text = "Unavailable"
@@ -149,11 +160,15 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
         body = "")
     }
 
+    this.showErrorButton.setOnClickListener {
+      this.showErrorPage()
+    }
+
     this.developerOptions.visibility = View.GONE
     this.buildText.text = BuildConfig.GIT_COMMIT
 
     this.drmTable.removeAllViews()
-    this.drmTable.addView(drmACSSupportRow())
+    this.drmTable.addView(this.drmACSSupportRow())
     this.adobeDRMActivationTable.removeAllViews()
 
     val profilesController =
@@ -202,6 +217,28 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
             .setShowTestingLibraries(this.showTesting.isChecked)
             .build())
     }
+  }
+
+  private fun showErrorPage() {
+    val attributes = sortedMapOf(
+      Pair("Version", "${this.versionText.text}")
+    )
+
+    val taskSteps =
+      mutableListOf<TaskStep<ExampleError>>()
+    taskSteps.add(
+      TaskStep(
+        "Opening error page.",
+        TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")))
+
+    val parameters = ErrorPageParameters(
+      emailAddress = "",
+      body = "",
+      subject = "[simplye-error-report] ${this.versionText.text}",
+      attributes = attributes,
+      taskSteps = taskSteps)
+
+    ErrorActivity.startActivity(this, parameters)
   }
 
   override fun onStop() {
@@ -277,7 +314,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   private fun onAdobeDRMReceivedActivations(activations: List<AdobeDRMExtensions.Activation>) {
     this.adobeDRMActivationTable.removeAllViews()
 
-    run {
+    this.run {
       val row =
         this.layoutInflater.inflate(
           R.layout.settings_drm_activation_table_item, this.adobeDRMActivationTable, false) as TableRow

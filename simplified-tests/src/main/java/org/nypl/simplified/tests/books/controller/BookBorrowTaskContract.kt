@@ -2546,6 +2546,9 @@ abstract class BookBorrowTaskContract {
     val download =
       Mockito.mock(DownloadType::class.java)
 
+    Mockito.`when`(download.uri())
+      .thenReturn(URI.create("urn:somewhere"))
+
     val reportNode =
       ObjectMapper().createObjectNode()
     val report =
@@ -2655,7 +2658,7 @@ abstract class BookBorrowTaskContract {
       results.errors().last() as HTTPRequestFailed
 
     Assert.assertEquals(404, errorData.status)
-    Assert.assertEquals(report, errorData.errorReport)
+    Assert.assertEquals(report, errorData.problemReport)
 
     /*
      * Check that the download failed.

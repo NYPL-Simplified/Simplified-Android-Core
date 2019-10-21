@@ -1,6 +1,7 @@
 package org.nypl.simplified.presentableerror.api
 
 import net.jcip.annotations.ThreadSafe
+import java.io.Serializable
 
 /**
  * A presentable value.
@@ -11,10 +12,14 @@ import net.jcip.annotations.ThreadSafe
  * often just contain a filename and no other information.
  *
  * Instances of this interface are required to be thread-safe, and encouraged to be immutable.
+ *
+ * Note: Instances of this interface are required to be [Serializable] in order to facilitate
+ * passing values between Android fragments and activities. No guarantees are required with regards
+ * to forward or backwards compatibility of serialized values.
  */
 
 @ThreadSafe
-interface PresentableType {
+interface PresentableType : Serializable {
 
   /**
    * The complete error message, fit for presentation to the screen.

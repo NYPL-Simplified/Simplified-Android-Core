@@ -9,6 +9,9 @@ import java.io.File
 
 class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResourcesType {
 
+  override fun borrowBookFeedLoadingFailed(cause: String): String =
+    this.resources.getString(R.string.borrowBookFeedLoadingFailed, cause)
+
   override val borrowBookCoverUnexpectedException: String
     get() = this.resources.getString(R.string.unexpectedException)
 
@@ -51,11 +54,11 @@ class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResou
     get() = this.resources.getString(R.string.borrowBookFulfillACSMRead)
 
   override fun borrowBookBorrowAvailabilityInappropriate(availability: OPDSAvailabilityType): String {
-    return this.resources.getString(R.string.borrowBookBorrowAvailabilityInappropriate, availability)
+    return this.resources.getString(R.string.borrowBookBorrowAvailabilityInappropriate, availability.javaClass.simpleName)
   }
 
-  override val borrowBookFulfillDownloadFailed: String
-    get() = this.resources.getString(R.string.borrowBookFulfillDownloadFailed)
+  override fun borrowBookFulfillDownloadFailed(cause: String): String =
+    this.resources.getString(R.string.borrowBookFulfillDownloadFailed, cause)
 
   override val borrowBookFulfillCancelled: String
     get() = this.resources.getString(R.string.borrowBookFulfillCancelled)
@@ -133,9 +136,6 @@ class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResou
 
   override val borrowBookBundledCopy: String
     get() = this.resources.getString(R.string.borrowBookBundledCopy)
-
-  override val borrowBookFeedLoadingFailed: String
-    get() = this.resources.getString(R.string.borrowBookFeedLoadingFailed)
 
   override val borrowBookBadBorrowFeed: String
     get() = this.resources.getString(R.string.borrowBookBadBorrowFeed)

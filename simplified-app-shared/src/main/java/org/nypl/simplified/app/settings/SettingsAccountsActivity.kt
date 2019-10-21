@@ -39,6 +39,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.errors.ErrorDialogs
 import org.nypl.simplified.app.images.ImageAccountIcons
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
@@ -349,11 +350,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   private fun onAccountDeletionFailed(event: AccountEventDeletionFailed): Unit {
     this.logger.debug("onAccountDeletionFailed: {}", event)
 
-    ErrorDialogUtilities.showError(
-      this,
-      this.logger,
-      this.resources.getString(R.string.profiles_account_deletion_error_general), null)
-
+    ErrorDialogs.showAccountDeletionError(this, event)
     return Unit.unit()
   }
 
@@ -370,11 +367,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   private fun onAccountCreationFailed(event: AccountEventCreationFailed): Unit {
     this.logger.debug("onAccountCreationFailed: {}", event)
 
-    ErrorDialogUtilities.showError(
-      this,
-      this.logger,
-      this.resources.getString(R.string.profiles_account_creation_error_general), null)
-
+    UIThread.runOnUIThread {
+      ErrorDialogs.showAccountCreationError(this, event)
+    }
     return Unit.unit()
   }
 

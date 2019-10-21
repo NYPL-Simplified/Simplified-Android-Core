@@ -2,6 +2,8 @@ package org.nypl.simplified.accounts.api
 
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.presentableerror.api.PresentableType
+import org.nypl.simplified.presentableerror.api.Presentables
+import org.nypl.simplified.taskrecorder.api.TaskResult
 
 /**
  * The type of events regarding account creation.
@@ -31,7 +33,12 @@ sealed class AccountEventCreation : AccountEvent(), PresentableType {
    */
 
   data class AccountEventCreationFailed(
-    override val message: String)
-    : AccountEventCreation(), PresentableErrorType
+    override val message: String,
+    val taskResult: TaskResult.Failure<AccountCreateErrorDetails, *>)
+    : AccountEventCreation(), PresentableErrorType {
+
+    override val attributes: Map<String, String>
+      get() = Presentables.collectAttributes(this.taskResult.errors())
+  }
 
 }

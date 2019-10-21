@@ -15,15 +15,32 @@
       android:text="@string/catalog_load_error_text"
       android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <Button android:id="@+id/catalog_error_retry"
+    <LinearLayout
+      android:layout_marginTop="32dp"
+      android:layout_gravity="center_horizontal"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal"
-      android:layout_marginTop="16dp"
-      android:background="@drawable/simplified_button"
-      android:text="@string/catalog_book_error_retry"
-      android:textColor="@drawable/simplified_button_text"
-      android:textSize="12sp" />
+      android:orientation="horizontal">
+
+      <Button android:id="@+id/catalog_error_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:background="@drawable/simplified_button"
+        android:text="@string/generic_details"
+        android:textColor="@drawable/simplified_button_text"
+        android:textSize="12sp" />
+
+      <Button android:id="@+id/catalog_error_retry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/simplified_button"
+        android:text="@string/catalog_book_error_retry"
+        android:textColor="@drawable/simplified_button_text"
+        android:textSize="12sp" />
+
+    </LinearLayout>
+
   </LinearLayout>
 
 </RelativeLayout>

@@ -45,8 +45,8 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ReportIssueActivity
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.WebViewActivity
+import org.nypl.simplified.app.errors.ErrorDialogs
 import org.nypl.simplified.app.signup.CardCreatorActivity
-import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
@@ -429,11 +429,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private fun onAccountEventLoginFailed(failed: AccountLoginFailed): Unit {
     this.logger.debug("onAccountEventLoginFailed: {}", failed)
 
-    ErrorDialogUtilities.showErrorWithRunnable(
-      this,
-      this.logger,
-      failed.taskResult.steps.last().resolution.message,
-      failed.taskResult.steps.last().resolution.exception) {
+    UIThread.runOnUIThread {
+      ErrorDialogs.showAccountLoginError(this, this.account, failed)
       this.login.isEnabled = true
     }
 
@@ -458,11 +455,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private fun onAccountEventLogoutFailed(failed: AccountLogoutFailed): Unit {
     this.logger.debug("onAccountEventLogoutFailed: {}", failed)
 
-    ErrorDialogUtilities.showErrorWithRunnable(
-      this,
-      this.logger,
-      failed.taskResult.steps.last().resolution.message,
-      failed.taskResult.steps.last().resolution.exception) {
+    UIThread.runOnUIThread {
+      ErrorDialogs.showLogoutError(this, this.account, failed)
       this.login.isEnabled = true
     }
 

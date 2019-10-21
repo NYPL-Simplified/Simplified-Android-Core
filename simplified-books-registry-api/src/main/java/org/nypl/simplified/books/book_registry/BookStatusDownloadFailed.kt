@@ -3,6 +3,8 @@ package org.nypl.simplified.books.book_registry
 import com.io7m.jfunctional.OptionType
 import org.joda.time.DateTime
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskResult
 
 /**
@@ -27,9 +29,12 @@ data class BookStatusDownloadFailed(
    * The expiry date of the loan, if any
    */
 
-  val loanEndDate: OptionType<DateTime>) : BookStatusDownloadingType {
+  val loanEndDate: OptionType<DateTime>) : BookStatusDownloadingType, PresentableErrorType {
 
-  val detailMessage: String
+  override val attributes: Map<String, String>
+    get() = Presentables.collectAttributes(this.result.errors())
+
+  override val message: String
     get() = this.result.steps.last().resolution.message
 
   override fun getID(): BookID =

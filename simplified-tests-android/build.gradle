@@ -1,6 +1,6 @@
 dependencies {
   implementation project(":simplified-tests")
-  implementation project(":simplified-splash")
+  implementation project(":simplified-ui-splash")
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXLegacySupport

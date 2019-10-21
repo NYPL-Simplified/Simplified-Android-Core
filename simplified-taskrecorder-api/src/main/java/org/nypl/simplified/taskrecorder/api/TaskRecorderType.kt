@@ -1,12 +1,14 @@
 package org.nypl.simplified.taskrecorder.api
 
+import java.io.Serializable
+
 /**
  * A task recorder. Record the steps of complex tasks to explain how and why errors occurred.
  *
  * @param <E> The precise type of associated error values
  */
 
-interface TaskRecorderType<E> {
+interface TaskRecorderType<E : Serializable> {
 
   /**
    * Start a new controller task step.

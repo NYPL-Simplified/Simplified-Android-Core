@@ -32,7 +32,7 @@ class ProfileAccountCreateOrReturnExistingTask(
       this.taskRecorder.beginNewStep(this.strings.creatingAccount)
 
       val profile = this.profiles.currentProfileUnsafe()
-      val existingAccount = profile.accountsByProvider().get(accountProviderID)
+      val existingAccount = profile.accountsByProvider().get(this.accountProviderID)
       if (existingAccount != null) {
         this.taskRecorder.currentStepSucceeded(this.strings.creatingAccountSucceeded)
         this.publishSuccessEvent(existingAccount)
@@ -40,11 +40,11 @@ class ProfileAccountCreateOrReturnExistingTask(
       }
 
       ProfileAccountCreateTask(
-        accountEvents = accountEvents,
-        accountProviderID = accountProviderID,
-        accountProviders = accountProviders,
-        profiles = profiles,
-        strings = strings
+        accountEvents = this.accountEvents,
+        accountProviderID = this.accountProviderID,
+        accountProviders = this.accountProviders,
+        profiles = this.profiles,
+        strings = this.strings
       ).call()
     } catch (e: Throwable) {
       this.logger.error("account creation failed: ", e)
@@ -65,5 +65,6 @@ class ProfileAccountCreateOrReturnExistingTask(
     this.accountEvents.send(AccountEventCreationSucceeded(this.strings.creatingAccountSucceeded, account.id))
 
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.send(AccountEventCreationFailed(step.resolution.message))
+    this.accountEvents.send(AccountEventCreationFailed(
+      step.resolution.message, this.taskRecorder.finishFailure<AccountType>()))
 }

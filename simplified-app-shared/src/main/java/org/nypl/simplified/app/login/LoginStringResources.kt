@@ -10,6 +10,9 @@ import org.nypl.simplified.app.R
 
 class LoginStringResources(val resources: Resources) : AccountLoginStringResourcesType {
 
+  override val loginAuthRequired: String
+    get() = this.resources.getString(R.string.loginAuthRequired)
+
   override val loginUnexpectedException: String
     get() = this.resources.getString(R.string.unexpectedException)
 

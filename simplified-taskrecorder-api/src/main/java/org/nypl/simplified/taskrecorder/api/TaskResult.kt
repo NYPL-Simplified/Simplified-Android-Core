@@ -1,12 +1,13 @@
 package org.nypl.simplified.taskrecorder.api
 
 import com.google.common.base.Preconditions
+import java.io.Serializable
 
 /**
  * The result of executing a task.
  */
 
-sealed class TaskResult<E, A> {
+sealed class TaskResult<E : Serializable, A> {
 
   abstract val steps: List<TaskStep<E>>
 
@@ -14,7 +15,7 @@ sealed class TaskResult<E, A> {
    * A task succeeded.
    */
 
-  data class Success<E, A>(
+  data class Success<E : Serializable, A>(
     val result: A,
     override val steps: List<TaskStep<E>>)
     : TaskResult<E, A>() {
@@ -29,7 +30,7 @@ sealed class TaskResult<E, A> {
    * A task failed.
    */
 
-  data class Failure<E, A>(
+  data class Failure<E : Serializable, A>(
     override val steps: List<TaskStep<E>>)
     : TaskResult<E, A>() {
     init {

@@ -21,7 +21,6 @@ dependencies {
   api project(":simplified-books-database-api")
   api project(":simplified-books-registry-api")
   api project(":simplified-boot-api")
-  api project(":simplified-branding")
   api project(":simplified-accounts-source-spi")
 
   api(project(":simplified-bugsnag")) {
@@ -29,7 +28,6 @@ dependencies {
     exclude group: "com.github.tony19", module: "logback-android-classic"
   }
 
-  api project(":simplified-datepicker")
   api project(":simplified-documents")
   api project(":simplified-downloader-core")
   api project(":simplified-feeds-api")
@@ -52,12 +50,14 @@ dependencies {
   api project(":simplified-reader-api")
   api project(":simplified-reader-bookmarks")
   api project(":simplified-reader-bookmarks-api")
-  api project(":simplified-splash")
   api project(":simplified-stack")
   api project(":simplified-tenprint")
   api project(":simplified-tests-strings")
-  api project(":simplified-theme")
   api project(":simplified-threads")
+  api project(":simplified-ui-branding")
+  api project(":simplified-ui-datepicker")
+  api project(":simplified-ui-splash")
+  api project(":simplified-ui-theme")
 
   api libraries.nyplAudioBookAPI
   api libraries.nyplAudioBookManifestNYPL

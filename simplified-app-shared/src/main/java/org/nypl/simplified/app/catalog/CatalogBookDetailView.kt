@@ -34,6 +34,7 @@ import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
+import org.nypl.simplified.app.errors.ErrorActivity
 import org.nypl.simplified.app.login.LoginDialog
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
@@ -71,6 +72,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.stack.ImmutableStack
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -96,34 +98,35 @@ class CatalogBookDetailView(
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
   BookStatusDownloadingMatcherType<Unit, UnreachableCodeException> {
 
+  private val entry: AtomicReference<FeedEntryOPDS> = AtomicReference(entryInitial)
+
+  private val bookDebugStatus: TextView
   private val bookDownload: ViewGroup
   private val bookDownloadButtons: LinearLayout
-  private val bookDownloadReportButton: Button
-  private val relatedLayout: ViewGroup
-  private val relatedBooksButton: Button
-  private val bookDownloadText: TextView
   private val bookDownloading: ViewGroup
   private val bookDownloadingCancel: Button
   private val bookDownloadingFailed: ViewGroup
   private val bookDownloadingFailedButtons: LinearLayout
+  private val bookDownloadingFailedText: TextView
   private val bookDownloadingPercentText: TextView
   private val bookDownloadingProgress: ProgressBar
-  private val entry: AtomicReference<FeedEntryOPDS> = AtomicReference(entryInitial)
+  private val bookDownloadReportButton: Button
+  private val bookDownloadText: TextView
+  private val bookHeader: ViewGroup
+  private val bookHeaderAuthors: TextView
+  private val bookHeaderCover: ImageView
+  private val bookHeaderFormat: TextView
+  private val bookHeaderLeft: ViewGroup
+  private val bookHeaderTitle: TextView
+  private val relatedBooksButton: Button
+  private val relatedLayout: ViewGroup
+  private var bookDownloadingFailedDetails: TextView
 
   /**
    * @return The scrolling view containing the book details
    */
 
   val scrollView: ScrollView
-
-  private val bookDownloadingFailedText: TextView
-  private val bookDebugStatus: TextView
-  private val bookHeader: ViewGroup
-  private val bookHeaderLeft: ViewGroup
-  private val bookHeaderTitle: TextView
-  private val bookHeaderFormat: TextView
-  private val bookHeaderCover: ImageView
-  private val bookHeaderAuthors: TextView
 
   init {
     val sv = ScrollView(this.activity)
@@ -177,6 +180,8 @@ class CatalogBookDetailView(
       layout.findViewById<View>(R.id.book_dialog_downloading_failed) as ViewGroup
     this.bookDownloadingFailedText =
       this.bookDownloadingFailed.findViewById<View>(R.id.book_dialog_downloading_failed_text) as TextView
+    this.bookDownloadingFailedDetails =
+      this.bookDownloadingFailed.findViewById<View>(R.id.book_dialog_downloading_failed_details) as TextView
 
     this.bookDownload =
       layout.findViewById<View>(R.id.book_dialog_download) as ViewGroup
@@ -314,7 +319,24 @@ class CatalogBookDetailView(
     val currentEntry = this.entry.get()
 
     val failed = this.bookDownloadingFailedText
-    failed.text = status.detailMessage
+    failed.setText(R.string.catalog_revoke_failed)
+
+    /*
+     * Configure the [Details] link.
+     */
+
+    val errorPageParameters =
+      ErrorPageParameters(
+        emailAddress = this.activity.resources.getString(R.string.feature_migration_report_email),
+        body = "",
+        subject = "Book borrowing failed",
+        attributes = status.attributes.toSortedMap(),
+        taskSteps = status.result.steps
+      )
+
+    this.bookDownloadingFailedDetails.setOnClickListener {
+      ErrorActivity.startActivity(this.activity, errorPageParameters)
+    }
 
     /*
      * Manually construct a dismiss button.
@@ -517,6 +539,23 @@ class CatalogBookDetailView(
 
     val failed = this.bookDownloadingFailedText
     failed.setText(R.string.catalog_revoke_failed)
+
+    /*
+     * Configure the [Details] link.
+     */
+
+    val errorPageParameters =
+      ErrorPageParameters(
+        emailAddress = this.activity.resources.getString(R.string.feature_migration_report_email),
+        body = "",
+        subject = "Book borrowing failed",
+        attributes = status.attributes.toSortedMap(),
+        taskSteps = status.result.steps
+      )
+
+    this.bookDownloadingFailedDetails.setOnClickListener {
+      ErrorActivity.startActivity(this.activity, errorPageParameters)
+    }
 
     val dismiss = Button(this.activity)
     dismiss.text =

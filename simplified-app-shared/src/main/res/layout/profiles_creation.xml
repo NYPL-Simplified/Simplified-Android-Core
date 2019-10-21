@@ -59,7 +59,8 @@
       android:maxLength="32" />
   </LinearLayout>
 
-  <org.nypl.simplified.datepicker.DatePicker android:id="@+id/profileCreationDateSelection"
+  <org.nypl.simplified.ui.datepicker.DatePicker
+    android:id="@+id/profileCreationDateSelection"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true" />

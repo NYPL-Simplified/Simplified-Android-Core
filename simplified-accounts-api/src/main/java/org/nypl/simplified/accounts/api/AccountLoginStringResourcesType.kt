@@ -13,6 +13,12 @@ interface AccountLoginStringResourcesType {
   fun loginDeviceActivationFailed(e: Throwable): String
 
   /**
+   * Authentication *is* required.
+   */
+
+  val loginAuthRequired: String
+
+  /**
    * An unexpected exception occurred.
    */
 

@@ -29,10 +29,10 @@ import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.services.SimplifiedServicesType;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.datepicker.DatePicker;
 import org.nypl.simplified.profiles.api.ProfileCreationEvent;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
+import org.nypl.simplified.ui.datepicker.DatePicker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

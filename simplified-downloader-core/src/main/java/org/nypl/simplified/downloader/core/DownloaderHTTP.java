@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -133,10 +134,18 @@ public final class DownloaderHTTP implements DownloaderType
     private static String getContentType(
       final Map<String, List<String>> headers)
     {
-      if (headers.containsKey("Content-Type")) {
-        final List<String> values = headers.get("Content-Type");
-        if (values.isEmpty() == false) {
-          return NullCheck.notNull(values.get(0));
+      for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+        final String keyLower = entry.getKey();
+        if (keyLower == null) {
+          continue;
+        }
+
+        final String key = keyLower.toUpperCase();
+        if (Objects.equals(key, "CONTENT-TYPE")) {
+          List<String> values = entry.getValue();
+          if (!values.isEmpty()) {
+            return NullCheck.notNull(values.get(0));
+          }
         }
       }
 
@@ -190,8 +199,7 @@ public final class DownloaderHTTP implements DownloaderType
       this.log.debug("http ok: ", Integer.valueOf(e.getStatus()));
       final long expected = e.getContentLength();
       this.content_type = Download.getContentType(e.getResponseHeaders());
-      this.log.debug(
-        "expecting {} bytes of {}", Long.valueOf(expected), this.content_type);
+      this.log.debug("expecting {} bytes of {}", Long.valueOf(expected), this.content_type);
       this.listener.onDownloadStarted(this, expected);
 
       final OutputStream out = new FileOutputStream(this.file);
@@ -242,6 +250,11 @@ public final class DownloaderHTTP implements DownloaderType
     private void failed()
     {
       this.file.delete();
+    }
+
+    @Override
+    public URI uri() {
+      return this.uri;
     }
 
     @Override public void cancel()

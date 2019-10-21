@@ -1,0 +1,6 @@
+dependencies {
+  implementation project(":simplified-ui-theme")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.androidXAppCompat
+}

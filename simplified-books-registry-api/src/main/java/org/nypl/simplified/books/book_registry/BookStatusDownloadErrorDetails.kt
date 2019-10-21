@@ -1,13 +1,17 @@
 package org.nypl.simplified.books.book_registry
 
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.Presentables
+import java.io.Serializable
 
 /**
  * Data related to errors during book borrowing.
  */
 
-sealed class BookStatusDownloadErrorDetails {
+sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable {
 
   /**
    * An HTTP request failed.
@@ -15,38 +19,56 @@ sealed class BookStatusDownloadErrorDetails {
 
   data class HTTPRequestFailed(
     val status: Int,
-    val errorReport: HTTPProblemReport?)
-    : BookStatusDownloadErrorDetails()
+    override val problemReport: HTTPProblemReport?,
+    override val message: String,
+    val attributesInitial: Map<String, String>)
+    : BookStatusDownloadErrorDetails(), HTTPHasProblemReportType {
+    override val attributes: Map<String, String>
+      get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
+  }
 
   /**
    * Attempting to load the feed for a borrow URI failed.
    */
 
   data class FeedLoaderFailed(
-    val errorReport: HTTPProblemReport?,
-    val exception: Throwable?)
-    : BookStatusDownloadErrorDetails()
+    override val message: String,
+    override val problemReport: HTTPProblemReport?,
+    override val exception: Throwable?,
+    val attributesInitial: Map<String, String>)
+    : BookStatusDownloadErrorDetails(), HTTPHasProblemReportType {
+    override val attributes: Map<String, String>
+      get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
+  }
 
   /**
    * An OPDS feed contained a corrupted entry.
    */
 
   data class FeedCorrupted(
-    val exception: Throwable)
-    : BookStatusDownloadErrorDetails()
+    override val exception: Throwable,
+    override val attributes: Map<String, String>)
+    : BookStatusDownloadErrorDetails() {
+    override val message: String
+      get() = this.exception.localizedMessage
+  }
 
   /**
    * An OPDS feed was unusable for an unspecified reason.
    */
 
-  object FeedUnusable
+  data class FeedUnusable(
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   /**
    * A problem occurred with the book database.
    */
 
-  object BookDatabaseFailed
+  data class BookDatabaseFailed(
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   /**
@@ -54,7 +76,9 @@ sealed class BookStatusDownloadErrorDetails {
    */
 
   data class UnsupportedAcquisition(
-    val type: OPDSAcquisition.Relation)
+    override val message: String,
+    val type: OPDSAcquisition.Relation,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   /**
@@ -74,7 +98,8 @@ sealed class BookStatusDownloadErrorDetails {
      */
 
     data class DRMUnsupportedSystem(
-      override val system: String)
+      override val system: String,
+      override val message: String)
       : DRMError()
 
     /**
@@ -83,7 +108,8 @@ sealed class BookStatusDownloadErrorDetails {
 
     data class DRMFailure(
       override val system: String,
-      val errorCode: String)
+      val errorCode: String,
+      override val message: String)
       : DRMError()
 
     /**
@@ -92,7 +118,8 @@ sealed class BookStatusDownloadErrorDetails {
 
     data class DRMUnsupportedContentType(
       override val system: String,
-      val contentType: String)
+      val contentType: String,
+      override val message: String)
       : DRMError()
 
     /**
@@ -100,7 +127,8 @@ sealed class BookStatusDownloadErrorDetails {
      */
 
     data class DRMDeviceNotActive(
-      override val system: String)
+      override val system: String,
+      override val message: String)
       : DRMError()
 
     /**
@@ -108,7 +136,8 @@ sealed class BookStatusDownloadErrorDetails {
      */
 
     data class DRMUnparseableACSM(
-      override val system: String)
+      override val system: String,
+      override val message: String)
       : DRMError()
 
     /**
@@ -116,39 +145,51 @@ sealed class BookStatusDownloadErrorDetails {
      */
 
     data class DRMUnreadableACSM(
-      override val system: String)
+      override val system: String,
+      override val message: String)
       : DRMError()
   }
 
   data class UnusableAcquisitions(
-    val message: String)
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   data class WrongAvailability(
-    val message: String)
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   data class TimedOut(
-    val message: String)
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   data class UnsupportedType(
-    val message: String)
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   data class UnparseableBearerToken(
-    val message: String)
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   data class BundledCopyFailed(
-    val message: String)
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   data class DownloadCancelled(
-    val message: String)
+    override val message: String,
+    override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
   data class UnexpectedException(
-    val exception: Throwable)
-    : BookStatusDownloadErrorDetails()
+    override val exception: Throwable,
+    override val attributes: Map<String, String> = mapOf())
+    : BookStatusDownloadErrorDetails() {
+    override val message: String
+      get() = this.exception.localizedMessage
+  }
 }

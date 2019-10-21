@@ -1291,7 +1291,12 @@ abstract class BookRevokeTaskContract {
       Mockito.mock(FeedLoaderType::class.java)
 
     val feedResult =
-      FeedLoaderFailedAuthentication(null, IOException())
+      FeedLoaderFailedAuthentication(
+        problemReport = null,
+        exception = IOException(),
+        message = "Failed",
+        attributesInitial = mapOf()
+      )
 
     Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
       .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
@@ -1672,7 +1677,7 @@ abstract class BookRevokeTaskContract {
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
     Assert.assertEquals(
-      BookStatusRevokeErrorDetails.NotRevocable,
+      BookStatusRevokeErrorDetails.NotRevocable("revokeServerNotifyNotRevocable"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
@@ -1755,7 +1760,7 @@ abstract class BookRevokeTaskContract {
       BookStatusRevokeFailed::class.java,
       this.bookRegistry.bookOrException(bookId).status().javaClass)
     Assert.assertEquals(
-      BookStatusRevokeErrorDetails.NotRevocable,
+      BookStatusRevokeErrorDetails.NotRevocable("revokeServerNotifyNotRevocable"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()

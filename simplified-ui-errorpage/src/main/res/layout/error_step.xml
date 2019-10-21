@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content">
+
+  <ImageView
+    android:id="@+id/errorItemIcon"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:src="@drawable/error_small"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/error_small" />
+
+  <TextView
+    android:id="@+id/errorItemStepNumber"
+    android:layout_width="24dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="16dp"
+    android:text="99."
+    android:fontFamily="monospace"
+    app:layout_constraintStart_toEndOf="@id/errorItemIcon"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/errorItemDescription"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="16dp"
+    android:text="Placeholder"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/errorItemStepNumber"
+    app:layout_constraintTop_toTopOf="@id/errorItemStepNumber" />
+
+  <TextView
+    android:id="@+id/errorItemResolution"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="16dp"
+    android:text="Placeholder"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/errorItemStepNumber"
+    app:layout_constraintTop_toBottomOf="@id/errorItemDescription" />
+
+  <View
+    android:id="@+id/errorItemDivider"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:layout_marginTop="16dp"
+    android:background="?android:attr/listDivider"
+    app:layout_constraintTop_toBottomOf="@id/errorItemResolution"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
