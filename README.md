@@ -2,6 +2,7 @@ Library Simplified
 ===
 
 [![Build Status](https://img.shields.io/travis/com/NYPL-Simplified/android?style=flat-square)](https://www.travis-ci.com/NYPL-Simplified/android)
+![Maven Central](https://img.shields.io/maven-central/v/org.librarysimplified/org.librarysimplified.app.vanilla?style=flat-square)
 
 The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android client.
 
