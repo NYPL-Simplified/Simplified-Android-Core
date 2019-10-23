@@ -589,9 +589,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   protected void onPause() {
     super.onPause();
 
-    Simplified.getServices()
-      .getReaderBookmarkService()
-      .bookmarkCreate(this.current_account.getId(), this.current_location);
+    final Bookmark location = this.current_location;
+    if (location != null) {
+      Simplified.getServices()
+        .getReaderBookmarkService()
+        .bookmarkCreate(this.current_account.getId(), location);
+    }
   }
 
   @Override
