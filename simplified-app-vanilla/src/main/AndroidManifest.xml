@@ -13,9 +13,9 @@
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:contentDescription="@string/feature_app_name"
+    android:contentDescription="Simplified Vanilla"
     android:icon="@drawable/vanilla_icon"
-    android:label="@string/feature_app_name"
+    android:label="Simplified Vanilla"
     android:largeHeap="true"
     android:theme="@style/SimplifiedBlank"
     android:usesCleartextTraffic="true">

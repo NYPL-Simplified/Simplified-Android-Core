@@ -15,9 +15,9 @@
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:contentDescription="VanillaProfiles"
+    android:contentDescription="Simplified Vanilla (Profiles)"
     android:icon="@drawable/vanilla_icon"
-    android:label="VanillaProfiles"
+    android:label="Simplified Vanilla (Profiles)"
     android:largeHeap="true"
     android:theme="@style/SimplifiedBlank"
     android:usesCleartextTraffic="true">
@@ -27,8 +27,8 @@
       android:name="org.nypl.simplified.app.splash.SplashActivity"
       android:configChanges="orientation|screenSize"
       android:exported="true"
-      android:contentDescription="Simplified Vanilla"
-      android:label="Simplified Vanilla">
+      android:contentDescription="Simplified Vanilla (Profiles)"
+      android:label="Simplified Vanilla (Profiles)">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
