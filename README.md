@@ -69,52 +69,6 @@ OpenJDK Runtime Environment (build 1.8.0_222-b05)
 OpenJDK 64-Bit Server VM (build 25.222-b05, mixed mode)
 ~~~
 
-#### Nexus Credentials
-
-Our application can use packages that are only available from our
-Nexus server. If you wish to use these packages, you need to obtain
-Nexus credentials and then tell Gradle to use them.
-
-Nexus credentials can be obtained by emailing `malcolmwoods@nypl.org`
-or by asking in the `#mobile-development` channel of
-[librarysimplified.slack.com](https://librarysimplified.slack.com).
-
-Once you have your credentials, the following lines must be added to `$HOME/.gradle/gradle.properties`:
-
-~~~
-# Replace USERNAME and PASSWORD appropriately.
-# Do NOT use quotes around either value.
-org.librarysimplified.nexus.username=USERNAME
-org.librarysimplified.nexus.password=PASSWORD
-org.librarysimplified.nexus.depend=true
-~~~
-
-#### Bugsnag Support
-
-The core application provides support for error reporting via [Bugsnag](https://www.bugsnag.com/).
-This requires that a configuration file be placed at `src/main/assets/bugsnag.conf` containing
-your Bugsnag API token:
-
-~~~
-bugsnag.api_token = 1234123412341234
-~~~
-
-If you do not provide this configuration file, Bugsnag support will be disabled at run-time.
-
-#### APK signing
-
-If you wish to generate a signed APK for publishing the Vanilla application, you will need to copy
-a keystore to `simplified-app-vanilla/keystore.jks` and set the following values correctly in
-`$HOME/.gradle/gradle.properties`:
-
-~~~
-# Replace KEYALIAS, KEYPASSWORD, and STOREPASSWORD appropriately.
-# Do NOT use quotes around values.
-org.librarysimplified.keyAlias=KEYALIAS
-org.librarysimplified.keyPassword=KEYPASSWORD
-org.librarysimplified.storePassword=STOREPASSWORD
-~~~
-
 Note that APK files are only signed if the code is built in _release_ mode. In other words, you
 need to use either of these commands to produce signed APK files:
 
