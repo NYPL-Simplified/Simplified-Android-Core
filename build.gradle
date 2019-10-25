@@ -61,7 +61,7 @@ ext {
     useNYPLNexusDepend = true
   }
 
-  nyplAudioBookAPIVersion = "3.0.0-beta003"
+  nyplAudioBookAPIVersion = "3.0.0-beta004"
 }
 
 ext.libraries = [
