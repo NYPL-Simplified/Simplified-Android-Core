@@ -64,7 +64,9 @@ class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResou
     get() = this.resources.getString(R.string.borrowBookFulfillCancelled)
 
   override fun borrowBookBorrowForAvailability(availability: OPDSAvailabilityType): String {
-    return this.resources.getString(R.string.borrowBookBorrowForAvailability, availability)
+    return this.resources.getString(
+      R.string.borrowBookBorrowForAvailability,
+      availability.javaClass.simpleName)
   }
 
   override fun borrowBookFulfillDownloaded(file: File, contentType: String): String {
