@@ -273,6 +273,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.reader.bookmarks](simplified-reader-bookmarks)|Reader bookmark service implementation|
 |[org.librarysimplified.reader.bookmarks.api](simplified-reader-bookmarks-api)|Reader bookmark service API|
 |[org.librarysimplified.reports](simplified-reports)|Error reporting|
+|[org.librarysimplified.services.api](simplified-services-api)|Application services API|
 |[org.librarysimplified.stack](simplified-stack)|Immutable stack data structure|
 |[org.librarysimplified.taskrecorder.api](simplified-taskrecorder-api)|Task recorder API|
 |[org.librarysimplified.tenprint](simplified-tenprint)|10PRINT implementation|
