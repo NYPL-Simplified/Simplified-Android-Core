@@ -24,6 +24,7 @@ import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.nypl.simplified.profiles.api.ProfileReadableType;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public class ReportIssueActivity extends AppCompatActivity {
     try {
       final ProfileReadableType profile =
         Simplified.getServices()
-          .getProfilesController()
+          .requireService(ProfilesControllerType.class)
           .profileCurrent();
 
       final Bundle extras = getIntent().getExtras();

@@ -36,12 +36,15 @@ import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.errors.ErrorDialogs
 import org.nypl.simplified.app.images.ImageAccountIcons
+import org.nypl.simplified.app.images.ImageLoaderType
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
+import org.nypl.simplified.app.utilities.UIBackgroundExecutorType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
@@ -52,6 +55,7 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
 
@@ -115,22 +119,21 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
       this.findViewById(R.id.current_account)
 
     val services = Simplified.application.services()
-    services
-      .backgroundExecutor
+    services.requireService(UIBackgroundExecutorType::class.java)
       .execute {
         this.logger.debug("refreshing account registry")
-        services.accountProviderRegistry.refresh()
+        services.requireService(AccountProviderRegistryType::class.java).refresh()
       }
 
     this.adapterAccountsArray = ArrayList()
     this.adapterAccounts =
       AccountsArrayAdapter(
         targetContext = this,
-        picasso = services.imageLoader,
+        picasso = services.requireService(ImageLoaderType::class.java).loader,
         adapterAccountsArray = this.adapterAccountsArray,
         inflater = inflater)
 
-    val profiles = services.profilesController
+    val profiles = services.requireService(ProfilesControllerType::class.java)
     this.accountListView.adapter = this.adapterAccounts
     this.accountListView.setOnItemClickListener { adapterView, view, position, id ->
       this.onWantShowAccount(position, profiles)
@@ -258,7 +261,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
       val accountProvider =
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileCurrent()
           .account(account)
           .provider
@@ -272,7 +275,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
         currentAccountView.findViewById<ImageView>(R.id.cellIcon)
       val localImageLoader =
         Simplified.application.services()
-          .imageLoader
+          .requireService(ImageLoaderType::class.java)
+          .loader
 
       subtitleText.visibility = View.INVISIBLE
 
@@ -425,7 +429,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
       val providers =
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileCurrentlyUsedAccountProviders()
 
       this.adapterAccountsArray.clear()
@@ -447,17 +451,28 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   private fun openAccountCreationDialog() {
     // XXX: This is not really the correct theme to use for dialogs, but we will be
     //      replacing this dialog with a full-screen fragment later anyway.
-    val dialog = Dialog(this, Simplified.application.services().currentTheme.themeWithNoActionBar)
+    val theme =
+      Simplified.application.services()
+        .requireService(ThemeServiceType::class.java)
+        .findCurrentTheme()
+        .themeWithNoActionBar
+
+    val dialog = Dialog(this, theme)
     dialog.setTitle(R.string.settings_accounts_select_library)
     dialog.setContentView(R.layout.accounts_picker)
 
     val availableAccountProviders =
       ArrayList<AccountProviderDescriptionType>()
 
+    val imageLoader =
+      Simplified.application.services()
+        .requireService(ImageLoaderType::class.java)
+        .loader
+
     val adapter =
       AccountsArrayAdapter(
         targetContext = this,
-        picasso = Simplified.application.services().imageLoader,
+        picasso = imageLoader,
         adapterAccountsArray = availableAccountProviders,
         inflater = this.layoutInflater)
 
@@ -482,7 +497,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     }
 
     val accountProviderRegistry =
-      Simplified.application.services().accountProviderRegistry
+      Simplified.application.services()
+        .requireService(AccountProviderRegistryType::class.java)
 
     fun reconfigureUI() {
       this.logger.debug("reconfiguring dialog UI")
@@ -525,7 +541,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
     refresh.setOnClickListener {
       Simplified.application.services()
-        .backgroundExecutor
+        .requireService(UIBackgroundExecutorType::class.java)
         .execute {
           accountProviderRegistry.refresh()
         }
@@ -556,7 +572,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
     val subscription =
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .accountEvents()
         .subscribe { event ->
           when (event) {
@@ -587,7 +603,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun determineAvailableAccountProviderDescriptions(): ArrayList<AccountProviderDescriptionType> {
     val profilesController =
-      Simplified.application.services().profilesController
+      Simplified.application.services()
+        .requireService(ProfilesControllerType::class.java)
+
     val profileCurrent =
       profilesController.profileCurrent()
     val preferences =
@@ -602,7 +620,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
     val availableAccountProviders =
       ArrayList(Simplified.application.services()
-        .accountProviderRegistry
+        .requireService(AccountProviderRegistryType::class.java)
         .accountProviderDescriptions()
         .values
         .filter { provider -> shouldShowProvider(provider, preferences) })
@@ -643,7 +661,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   private fun tryCreateAccount(accountProvider: AccountProviderDescriptionType): Unit {
     Simplified.application.services()
-      .profilesController
+      .requireService(ProfilesControllerType::class.java)
       .profileAccountCreate(accountProvider.metadata.id)
     return Unit.unit()
   }
@@ -657,13 +675,13 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     try {
       val usedAccountProviders =
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileCurrentlyUsedAccountProviders()
 
       val availableAccountProviders =
         ImmutableList.sortedCopyOf(
           Simplified.application.services()
-            .accountProviderRegistry
+            .requireService(AccountProviderRegistryType::class.java)
             .accountProviderDescriptions().values)
 
       if (usedAccountProviders.size != availableAccountProviders.size) {

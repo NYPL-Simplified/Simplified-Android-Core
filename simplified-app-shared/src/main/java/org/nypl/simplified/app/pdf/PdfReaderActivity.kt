@@ -18,6 +18,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -75,7 +76,7 @@ class PdfReaderActivity : ProfileTimeOutActivity(), PdfFragmentListenerType, Tab
     this.id = intentParams.id
 
     this.profile = Simplified.getServices()
-      .profilesController
+      .requireService(ProfilesControllerType::class.java)
       .profileCurrent()
 
     this.account = profile.account(accountId)

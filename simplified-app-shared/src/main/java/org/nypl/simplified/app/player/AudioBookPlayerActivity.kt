@@ -37,17 +37,23 @@ import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
 import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
+import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
+import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.files.DirectoryUtilities
+import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
@@ -147,7 +153,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
     val formatHandleOpt =
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .profileAccountForBook(this.parameters.bookID)
         .bookDatabase
         .entry(this.parameters.bookID)
@@ -180,7 +186,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       DownloaderHTTP.newDownloader(
         this.downloadExecutor,
         this.downloaderDir,
-        Simplified.application.services().http)
+        Simplified.application.services().requireService(HTTPType::class.java))
     this.downloadProvider =
       DownloadProvider.create(this.downloadExecutor)
 
@@ -283,7 +289,9 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onLoadingFragmentIsNetworkConnectivityAvailable(): Boolean {
-    return Simplified.application.services().networkConnectivity.isNetworkAvailable
+    return Simplified.application.services()
+      .requireService(NetworkConnectivityType::class.java)
+      .isNetworkAvailable
   }
 
   override fun onLoadingFragmentWantsAudioBookParameters(): AudioBookPlayerParameters {
@@ -384,7 +392,9 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   private fun startAllPartsDownloading() {
-    if (Simplified.application.services().networkConnectivity.isNetworkAvailable) {
+    val networkConnectivity =
+      Simplified.application.services().requireService(NetworkConnectivityType::class.java)
+    if (networkConnectivity.isNetworkAvailable) {
       this.book.wholeBookDownloadTask.fetch()
     }
   }
@@ -460,13 +470,14 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      * book list, if necessary.
      */
 
+    val accountCurrent =
+      Simplified.application.services()
+        .requireService(ProfilesControllerType::class.java)
+        .profileAccountCurrent()
+
     Simplified.application.services()
-      .booksController
-      .bookRevoke(
-        Simplified.application.services()
-          .profilesController
-          .profileAccountCurrent(),
-        this.parameters.bookID)
+      .requireService(BooksControllerType::class.java)
+      .bookRevoke(accountCurrent, this.parameters.bookID)
   }
 
   private fun onLogPlayerError(event: PlayerEventError) {
@@ -571,9 +582,12 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      * reasonably close to the expected 3:4 cover image size ratio.
      */
 
-    val screen = Simplified.application.services().screenSize
+    val screen =
+      Simplified.application.services()
+        .requireService(ScreenSizeInformationType::class.java)
+
     Simplified.application.services()
-      .bookCovers
+      .requireService(BookCoverProviderType::class.java)
       .loadCoverInto(
         FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
         view,

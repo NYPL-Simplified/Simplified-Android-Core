@@ -29,6 +29,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.librarysimplified.services.api.ServiceDirectoryType;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
 import org.nypl.simplified.accounts.api.AccountBarcode;
 import org.nypl.simplified.accounts.api.AccountID;
@@ -38,8 +39,8 @@ import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
-import org.nypl.simplified.app.services.SimplifiedServicesType;
 import org.nypl.simplified.app.settings.SettingsAccountActivity;
+import org.nypl.simplified.app.utilities.UIBackgroundExecutorType;
 import org.nypl.simplified.cardcreator.fragments.AddressFragment;
 import org.nypl.simplified.cardcreator.fragments.AgeFragment;
 import org.nypl.simplified.cardcreator.fragments.ConfirmationFragment;
@@ -66,6 +67,7 @@ import org.nypl.simplified.cardcreator.validation.UsernameValidationTask;
 import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.nypl.simplified.profiles.api.ProfileReadableType;
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.taskrecorder.api.TaskResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -751,9 +753,9 @@ public class CardCreatorActivity extends FragmentActivity implements
             AccountBarcode.create(response.getBarcode())
     ).build();
 
-    final SimplifiedServicesType services = Simplified.getServices();
+    final ServiceDirectoryType services = Simplified.getServices();
 
-    Simplified.getApplication().services().getProfilesController().profileAccountLogin(
+    Simplified.getApplication().services().requireService(ProfilesControllerType.class).profileAccountLogin(
             getAccount().getId(),
             credentials)
             .addCallback(new FutureCallback<TaskResult<AccountLoginState.AccountLoginErrorData, kotlin.Unit>>() {
@@ -769,7 +771,7 @@ public class CardCreatorActivity extends FragmentActivity implements
                 logger.error("error during login: ", e);
                 showProgress(false);
               }
-            }, services.getBackgroundExecutor());
+            }, services.requireService(UIBackgroundExecutorType.class));
   }
 
   /**
@@ -815,7 +817,7 @@ public class CardCreatorActivity extends FragmentActivity implements
   private AccountType getAccount() {
     try {
       ProfileReadableType profile =
-              Simplified.getApplication().services().getProfilesController().profileCurrent();
+              Simplified.getApplication().services().requireService(ProfilesControllerType.class).profileCurrent();
 
       if (extras != null && extras.containsKey(SettingsAccountActivity.ACCOUNT_ID)) {
         AccountID accountID = (AccountID) extras.getSerializable(SettingsAccountActivity.ACCOUNT_ID);

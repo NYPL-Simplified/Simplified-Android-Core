@@ -17,6 +17,7 @@ import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.reader.ReaderColorSchemes
 import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.ReaderSelectedBookmark
 import org.nypl.simplified.books.api.Bookmark
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
 /**
@@ -135,7 +136,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     textView.setTextColor(
       ReaderColorSchemes.foregroundAsAndroidColor(
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileCurrent()
           .preferences()
           .readerPreferences()

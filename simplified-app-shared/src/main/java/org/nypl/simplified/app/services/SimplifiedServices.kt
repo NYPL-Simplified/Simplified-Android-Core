@@ -14,14 +14,17 @@ import com.instabug.library.invocation.InstabugInvocationEvent
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.jnull.NullCheck
 import com.squareup.picasso.Picasso
 import org.joda.time.LocalDateTime
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
+import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderFallbackType
+import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
@@ -47,8 +50,10 @@ import org.nypl.simplified.app.catalog.CatalogBookBorrowStrings
 import org.nypl.simplified.app.catalog.CatalogBookRevokeStrings
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages
 import org.nypl.simplified.app.images.ImageAccountIconRequestHandler
+import org.nypl.simplified.app.images.ImageLoaderType
 import org.nypl.simplified.app.login.LoginStringResources
 import org.nypl.simplified.app.login.LogoutStringResources
+import org.nypl.simplified.app.notifications.NotificationResources
 import org.nypl.simplified.app.profiles.ProfileAccountCreationStringResources
 import org.nypl.simplified.app.profiles.ProfileAccountDeletionStringResources
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap
@@ -56,14 +61,22 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync
 import org.nypl.simplified.app.reader.ReaderHTTPServerType
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType
-import org.nypl.simplified.app.splash.SplashActivity
+import org.nypl.simplified.app.screen.ScreenSizeInformation
+import org.nypl.simplified.app.utilities.UIBackgroundExecutor
+import org.nypl.simplified.app.utilities.UIBackgroundExecutorType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.controller.Controller.Companion.create
+import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.books.controller.Controller
+import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
 import org.nypl.simplified.books.covers.BookCoverGenerator
+import org.nypl.simplified.books.covers.BookCoverGeneratorType
 import org.nypl.simplified.books.covers.BookCoverProvider
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
@@ -75,16 +88,17 @@ import org.nypl.simplified.documents.clock.ClockType
 import org.nypl.simplified.documents.store.DocumentStore
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
+import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.http.core.HTTPType
-import org.nypl.simplified.notifications.NotificationResourcesType
 import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.notifications.NotificationsWrapper
 import org.nypl.simplified.observable.Observable
+import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
@@ -97,16 +111,21 @@ import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
 import org.nypl.simplified.tenprint.TenPrintGenerator
+import org.nypl.simplified.tenprint.TenPrintGeneratorType
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.ui.theme.ThemeControl
+import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
@@ -117,36 +136,41 @@ import java.util.ServiceLoader
 import java.util.concurrent.ExecutorService
 
 class SimplifiedServices private constructor(
-  override val accountProviderRegistry: AccountProviderRegistryType,
-  override val analytics: AnalyticsType,
-  override val adobeExecutor: AdobeAdeptExecutorType?,
-  override val backgroundExecutor: ListeningScheduledExecutorService,
-  override val booksController: BooksControllerType,
-  override val bookCovers: BookCoverProviderType,
-  override val bookRegistry: BookRegistryReadableType,
-  private val brandingThemeOverride: OptionType<ThemeValue>,
-  override val documentStore: DocumentStoreType,
-  override val feedLoader: FeedLoaderType,
-  override val imageLoader: Picasso,
-  override val http: HTTPType,
-  override val networkConnectivity: NetworkConnectivityType,
-  override val profilesController: ProfilesControllerType,
-  private val profilesDatabase: ProfilesDatabaseType,
-  override val readerBookmarkService: ReaderBookmarkServiceUsableType,
-  override val readerEPUBLoader: ReaderReadiumEPUBLoaderType,
-  override val readerHTTPServer: ReaderHTTPServerType,
-  override val screenSize: ScreenSizeInformationType,
-  override val notificationsService: NotificationsService
-) : SimplifiedServicesType {
+  private val serviceDirectory: ServiceDirectoryType
+) : ServiceDirectoryType by serviceDirectory {
 
-  override val currentTheme: ThemeValue
-    get() = this.findCurrentTheme()
+  private class MutableServiceDirectory : ServiceDirectoryType {
 
-  private fun findCurrentTheme(): ThemeValue {
-    if (this.brandingThemeOverride.isSome) {
-      return (this.brandingThemeOverride as Some<ThemeValue>).get()
+    private val servicesLock = Object()
+    private val services = HashMap<Class<*>, List<Any>>()
+
+    override fun <T : Any> optionalServices(serviceClass: Class<T>): List<T> {
+      return synchronized(this.servicesLock) {
+        this.services[serviceClass] as List<T>? ?: listOf()
+      }
     }
-    return themeForProfile(this.profilesDatabase.currentProfile())
+
+    internal fun <T : Any> publishService(
+      interfaces: List<Class<T>>,
+      service: T
+    ) {
+      Preconditions.checkArgument(
+        interfaces.isNotEmpty(),
+        "Must supply at least one interface type")
+
+      logger.debug("registering service {}", service.javaClass.canonicalName)
+      synchronized(this.servicesLock) {
+        for (inter in interfaces) {
+          val existing: List<Any> = this.services[inter] ?: listOf()
+          this.services[inter] = existing.plus(service)
+        }
+      }
+    }
+
+    internal fun <T : Any> publishService(
+      interfaceType: Class<T>,
+      service: T
+    ) = this.publishService(listOf(interfaceType), service)
   }
 
   companion object {
@@ -163,6 +187,18 @@ class SimplifiedServices private constructor(
         }
       }
       return ThemeControl.themeFallback
+    }
+
+    private class ThemeService(
+      private val profilesDatabase: ProfilesDatabaseType,
+      private val brandingThemeOverride: OptionType<ThemeValue>
+    ) : ThemeServiceType {
+      override fun findCurrentTheme(): ThemeValue {
+        if (this.brandingThemeOverride.isSome) {
+          return (this.brandingThemeOverride as Some<ThemeValue>).get()
+        }
+        return themeForProfile(this.profilesDatabase.currentProfile())
+      }
     }
 
     /**
@@ -190,7 +226,7 @@ class SimplifiedServices private constructor(
     fun create(
       context: Context,
       onProgress: (BootEvent) -> Unit
-    ): SimplifiedServicesType {
+    ): ServiceDirectoryType {
 
       fun publishEvent(message: String) {
         this.logger.debug("boot: {}", message)
@@ -202,6 +238,74 @@ class SimplifiedServices private constructor(
 
       val assets = context.assets
       val strings = SimplifiedServicesStrings(context.resources)
+      val services = MutableServiceDirectory()
+
+      fun <T : Any> publishMandatoryService(
+        message: String,
+        interfaceType: Class<T>,
+        serviceConstructor: () -> T
+      ) {
+        publishEvent(message)
+        services.publishService(interfaceType, serviceConstructor.invoke())
+      }
+
+      fun <T : Any> publishOptionalService(
+        message: String,
+        interfaceType: Class<T>,
+        serviceConstructor: () -> T?
+      ) {
+        publishEvent(message)
+        val service = serviceConstructor.invoke()
+        if (service != null) {
+          services.publishService(interfaceType, service)
+        }
+      }
+
+      publishMandatoryService(
+        message = strings.bootingStrings("login"),
+        interfaceType = AccountLoginStringResourcesType::class.java,
+        serviceConstructor = { LoginStringResources(context.resources) })
+
+      publishMandatoryService(
+        message = strings.bootingStrings("logout"),
+        interfaceType = AccountLogoutStringResourcesType::class.java,
+        serviceConstructor = { LogoutStringResources(context.resources) })
+
+      publishMandatoryService(
+        message = strings.bootingStrings("resolution"),
+        interfaceType = AccountProviderResolutionStringsType::class.java,
+        serviceConstructor = { AccountProviderSourceResolutionStrings(context.resources) })
+
+      publishMandatoryService(
+        message = strings.bootingStrings("borrow"),
+        interfaceType = BookBorrowStringResourcesType::class.java,
+        serviceConstructor = { CatalogBookBorrowStrings(context.resources) })
+
+      publishMandatoryService(
+        message = strings.bootingStrings("account creation"),
+        interfaceType = ProfileAccountCreationStringResourcesType::class.java,
+        serviceConstructor = { ProfileAccountCreationStringResources(context.resources) })
+
+      publishMandatoryService(
+        message = strings.bootingStrings("account deletion"),
+        interfaceType = ProfileAccountDeletionStringResourcesType::class.java,
+        serviceConstructor = { ProfileAccountDeletionStringResources(context.resources) })
+
+      publishMandatoryService(
+        message = strings.bootingStrings("book revocation"),
+        interfaceType = BookRevokeStringResourcesType::class.java,
+        serviceConstructor = { CatalogBookRevokeStrings(context.resources) })
+
+      publishMandatoryService(
+        message = strings.bootingUIBackgroundExecutor,
+        interfaceType = UIBackgroundExecutorType::class.java,
+        serviceConstructor = { UIBackgroundExecutor(NamedThreadPools.namedThreadPool(1, "ui_background", 19)) }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingClock,
+        interfaceType = ClockType::class.java,
+        serviceConstructor = { Clock.get() })
 
       publishEvent(strings.bootingDirectories)
       val directories = this.initializeDirectories(context)
@@ -212,84 +316,411 @@ class SimplifiedServices private constructor(
       publishEvent(strings.initializingInstabug)
       this.configureInstabug(context)
 
-      publishEvent(strings.bootingAdobeDRM)
-      val adobeDRM =
-        AdobeDRMServices.newAdobeDRMOrNull(
-          context, AdobeDRMServices.getPackageOverride(context.resources))
+      publishOptionalService(
+        message = strings.bootingAdobeDRM,
+        interfaceType = AdobeAdeptExecutorType::class.java,
+        serviceConstructor = {
+          AdobeDRMServices.newAdobeDRMOrNull(
+            context,
+            AdobeDRMServices.getPackageOverride(context.resources))
+        }
+      )
 
-      publishEvent(strings.bootingScreenSize)
-      val screenSize = ScreenSizeInformation(this.logger, context.resources)
+      publishMandatoryService(
+        message = strings.bootingScreenSize,
+        interfaceType = ScreenSizeInformationType::class.java,
+        serviceConstructor = { ScreenSizeInformation(context.resources) })
 
-      publishEvent(strings.bootingHTTP)
-      val http = HTTP.newHTTP()
+      publishMandatoryService(
+        message = strings.bootingHTTP,
+        interfaceType = HTTPType::class.java,
+        serviceConstructor = { HTTP.newHTTP() })
 
-      publishEvent(strings.bootingDownloadService)
       val execDownloader =
         NamedThreadPools.namedThreadPool(4, "downloader", 19)
-      val downloader =
-        DownloaderHTTP.newDownloader(execDownloader, directories.directoryStorageDownloads, http)
 
-      publishEvent(strings.bootingBookRegistry)
+      publishMandatoryService(
+        message = strings.bootingDownloadService,
+        interfaceType = DownloaderType::class.java,
+        serviceConstructor = {
+          this.createDownloader(execDownloader, directories, services)
+        }
+      )
+
       val bookRegistry = BookRegistry.create()
+      publishMandatoryService(
+        message = strings.bootingBookRegistry,
+        interfaceType = BookRegistryType::class.java,
+        serviceConstructor = { bookRegistry }
+      )
+      publishMandatoryService(
+        message = strings.bootingBookRegistry,
+        interfaceType = BookRegistryReadableType::class.java,
+        serviceConstructor = { bookRegistry }
+      )
 
       publishEvent(strings.bootingBrandingServices)
-      val brandingThemeOverride = this.loadOptionalBrandingThemeOverride()
+      val brandingThemeOverride =
+        this.loadOptionalBrandingThemeOverride()
 
-      publishEvent(strings.bootingTenPrint)
-      val tenPrint = TenPrintGenerator.newGenerator()
+      publishMandatoryService(
+        message = strings.bootingTenPrint,
+        interfaceType = TenPrintGeneratorType::class.java,
+        serviceConstructor = {
+          TenPrintGenerator.newGenerator()
+        }
+      )
 
-      publishEvent(strings.bootingCoverGenerator)
-      val coverGenerator = BookCoverGenerator(tenPrint)
+      publishMandatoryService(
+        message = strings.bootingCoverGenerator,
+        interfaceType = BookCoverGeneratorType::class.java,
+        serviceConstructor = {
+          BookCoverGenerator(services.requireService(TenPrintGeneratorType::class.java))
+        }
+      )
 
-      publishEvent(strings.bootingLocalImageLoader)
-      val localImageLoader =
-        Picasso.Builder(context)
-          .indicatorsEnabled(false)
-          .loggingEnabled(false)
-          .addRequestHandler(ImageAccountIconRequestHandler())
-          .build()
+      publishMandatoryService(
+        message = strings.bootingLocalImageLoader,
+        interfaceType = ImageLoaderType::class.java,
+        serviceConstructor = {
+          this.createLocalImageLoader(context)
+        }
+      )
 
-      publishEvent(strings.bootingEPUBLoader)
-      val execEPUB =
-        NamedThreadPools.namedThreadPool(1, "epub", 19)
-      val mime =
-        ReaderHTTPMimeMap.newMap("application/octet-stream")
-      val httpd =
-        ReaderHTTPServerAAsync.newServer(assets, mime, this.fetchUnusedHTTPPort())
-      val epubLoader =
-        ReaderReadiumEPUBLoader.newLoader(context, execEPUB)
-      val clock = Clock.get()
+      publishMandatoryService(
+        message = strings.bootingHTTPServer,
+        interfaceType = ReaderHTTPServerType::class.java,
+        serviceConstructor = {
+          this.createHTTPServer(assets)
+        }
+      )
 
-      publishEvent(strings.bootingDocumentStore)
-      val documents = this.createDocumentStore(
-        assets,
-        clock,
-        http,
+      publishMandatoryService(
+        message = strings.bootingEPUBLoader,
+        interfaceType = ReaderReadiumEPUBLoaderType::class.java,
+        serviceConstructor = {
+          this.createEPUBLoader(context)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingDocumentStore,
+        interfaceType = DocumentStoreType::class.java,
+        serviceConstructor = {
+          this.createDocumentStore(
+            assets = assets,
+            clock = services.requireService(ClockType::class.java),
+            http = services.requireService(HTTPType::class.java),
+            exec = execDownloader,
+            directory = directories.directoryStorageDocuments)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingAccountProviders,
+        interfaceType = AccountProviderRegistryType::class.java,
+        serviceConstructor = {
+          this.createAccountProviderRegistry(context)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingBundledCredentials,
+        interfaceType = AccountBundledCredentialsType::class.java,
+        serviceConstructor = {
+          this.createAccountBundledCredentials(context)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingCredentialStore,
+        interfaceType = AccountAuthenticationCredentialsStoreType::class.java,
+        serviceConstructor = {
+          this.createAccountAuthenticationCredentialsStore(directories)
+        }
+      )
+
+      val accountEvents = Observable.create<AccountEvent>()
+      publishMandatoryService(
+        message = strings.bootingProfilesDatabase,
+        interfaceType = ProfilesDatabaseType::class.java,
+        serviceConstructor = {
+          this.createProfileDatabase(
+            context,
+            context.resources,
+            accountEvents,
+            services.requireService(AccountProviderRegistryType::class.java),
+            services.requireService(AccountBundledCredentialsType::class.java),
+            services.requireService(AccountAuthenticationCredentialsStoreType::class.java),
+            directories.directoryStorageProfiles)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingThemeService,
+        interfaceType = ThemeServiceType::class.java,
+        serviceConstructor = {
+          ThemeService(
+            profilesDatabase = services.requireService(ProfilesDatabaseType::class.java),
+            brandingThemeOverride = brandingThemeOverride
+          )
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingBundledContent,
+        interfaceType = BundledContentResolverType::class.java,
+        serviceConstructor = {
+          BundledContentResolver.create(context.assets)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingFeedParser,
+        interfaceType = OPDSFeedParserType::class.java,
+        serviceConstructor = {
+          this.createFeedParser()
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingFeedLoader,
+        interfaceType = FeedLoaderType::class.java,
+        serviceConstructor = {
+          this.createFeedLoader(services)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingAnalytics,
+        interfaceType = AnalyticsType::class.java,
+        serviceConstructor = {
+          Analytics.create(AnalyticsConfiguration(
+            context = context,
+            http = services.requireService(HTTPType::class.java)))
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingPatronProfileParsers,
+        interfaceType = PatronUserProfileParsersType::class.java,
+        serviceConstructor = {
+          this.oneFromServiceLoader(PatronUserProfileParsersType::class.java)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingAuthenticationDocumentParsers,
+        interfaceType = AuthenticationDocumentParsersType::class.java,
+        serviceConstructor = {
+          this.oneFromServiceLoader(AuthenticationDocumentParsersType::class.java)
+        }
+      )
+
+      val profileEvents = Observable.create<ProfileEvent>()
+      publishMandatoryService(
+        message = strings.bootingProfileTimer,
+        interfaceType = ProfileIdleTimerType::class.java,
+        serviceConstructor = {
+          this.createProfileIdleTimer(profileEvents)
+        }
+      )
+
+      publishEvent(strings.bootingBookController)
+      val execBooks =
+        NamedThreadPools.namedThreadPool(1, "books", 19)
+      val bookController =
+        Controller.createFromServiceDirectory(
+          services = services,
+          cacheDirectory = context.cacheDir,
+          profileEvents = profileEvents,
+          accountEvents = accountEvents,
+          executorService = execBooks
+        )
+
+      publishMandatoryService(
+        message = strings.bootingBookController,
+        interfaceType = ProfilesControllerType::class.java,
+        serviceConstructor = { bookController }
+      )
+      publishMandatoryService(
+        message = strings.bootingBookController,
+        interfaceType = BooksControllerType::class.java,
+        serviceConstructor = { bookController }
+      )
+
+      publishEvent(strings.bootingReaderBookmarkService)
+      val readerBookmarksService =
+        this.createReaderBookmarksService(services, bookController)
+
+      publishMandatoryService(
+        message = strings.bootingReaderBookmarkService,
+        interfaceType = ReaderBookmarkServiceType::class.java,
+        serviceConstructor = { readerBookmarksService }
+      )
+      publishMandatoryService(
+        message = strings.bootingReaderBookmarkService,
+        interfaceType = ReaderBookmarkServiceUsableType::class.java,
+        serviceConstructor = { readerBookmarksService }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingCoverBadgeProvider,
+        interfaceType = BookCoverBadgeLookupType::class.java,
+        serviceConstructor = {
+          this.createBookCoverBadgeLookup(context, bookController, services)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingCoverProvider,
+        interfaceType = BookCoverProviderType::class.java,
+        serviceConstructor = {
+          this.createCoverProvider(context, services)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingScreenSize,
+        interfaceType = ScreenSizeInformationType::class.java,
+        serviceConstructor = {
+          ScreenSizeInformation(context.resources)
+        }
+      )
+
+      /*
+       * Log out the current profile after ten minutes, warning one minute before this happens.
+       */
+
+      bookController.profileIdleTimer().setWarningIdleSecondsRemaining(60)
+      bookController.profileIdleTimer().setMaximumIdleSeconds(10 * 60)
+
+      publishMandatoryService(
+        message = strings.bootingNotificationsService,
+        interfaceType = NotificationsService::class.java,
+        serviceConstructor = {
+          this.createNotificationsService(context, profileEvents, bookRegistry)
+        }
+      )
+
+      publishMandatoryService(
+        message = strings.bootingNetworkConnectivity,
+        interfaceType = NetworkConnectivityType::class.java,
+        serviceConstructor = {
+          SimplifiedNetworkConnectivity(context)
+        }
+      )
+
+      this.publishApplicationStartupEvent(context, services)
+
+      val execBackground =
+        NamedThreadPools.namedThreadPool(1, "background", 19)
+
+      this.logger.debug("boot completed")
+      onProgress.invoke(BootEvent.BootCompleted(strings.bootCompleted))
+      return SimplifiedServices(services)
+    }
+
+    private fun createNotificationsService(
+      context: Context,
+      profileEvents: ObservableReadableType<ProfileEvent>,
+      bookRegistry: BookRegistryReadableType
+    ): NotificationsService {
+      val notificationsThreads =
+        NamedThreadPools.namedThreadPoolFactory("notifications", 19)
+
+      return NotificationsService(
+        context = context,
+        threadFactory = notificationsThreads,
+        profileEvents = profileEvents,
+        bookRegistry = bookRegistry,
+        notificationsWrapper = NotificationsWrapper(context),
+        notificationResourcesType = NotificationResources(context))
+    }
+
+    private fun createProfileIdleTimer(profileEvents: ObservableType<ProfileEvent>): ProfileIdleTimerType {
+      val execProfileTimer =
+        NamedThreadPools.namedThreadPool(1, "profile-timer", 19)
+      return ProfileIdleTimer.create(execProfileTimer, profileEvents)
+    }
+
+    private fun createReaderBookmarksService(
+      services: ServiceDirectoryType,
+      bookController: ProfilesControllerType
+    ): ReaderBookmarkServiceType {
+      val threadFactory: (Runnable) -> Thread = { runnable ->
+        NamedThreadPools.namedThreadPoolFactory("reader-bookmarks", 19).newThread(runnable)
+      }
+
+      val httpCalls =
+        ReaderBookmarkHTTPCalls(ObjectMapper(), services.requireService(HTTPType::class.java))
+
+      return ReaderBookmarkService.createService(
+        ReaderBookmarkServiceProviderType.Requirements(
+          threads = threadFactory,
+          events = Observable.create(),
+          httpCalls = httpCalls,
+          profilesController = bookController
+        ))
+    }
+
+    private fun publishApplicationStartupEvent(context: Context, services: ServiceDirectoryType) {
+      try {
+        val packageInfo =
+          context.packageManager.getPackageInfo(context.packageName, 0)
+
+        val event =
+          AnalyticsEvent.ApplicationOpened(
+            LocalDateTime.now(),
+            null,
+            packageInfo.packageName,
+            packageInfo.versionName,
+            packageInfo.versionCode)
+
+        services.requireService(AnalyticsType::class.java).publishEvent(event)
+      } catch (e: PackageManager.NameNotFoundException) {
+        this.logger.debug("could not get package info for analytics: ", e)
+      }
+    }
+
+    private fun createCoverProvider(
+      context: Context,
+      services: ServiceDirectoryType
+    ): BookCoverProviderType {
+      val execCovers = NamedThreadPools.namedThreadPool(1, "cover", 19)
+      return BookCoverProvider.newCoverProvider(
+        context = context,
+        bookRegistry = services.requireService(BookRegistryReadableType::class.java),
+        coverGenerator = services.requireService(BookCoverGeneratorType::class.java),
+        badgeLookup = services.requireService(BookCoverBadgeLookupType::class.java),
+        executor = execCovers,
+        debugCacheIndicators = false,
+        debugLogging = true)
+    }
+
+    private fun createDownloader(
+      execDownloader: ListeningScheduledExecutorService,
+      directories: Directories,
+      services: ServiceDirectoryType
+    ): DownloaderType {
+      return DownloaderHTTP.newDownloader(
         execDownloader,
-        directories.directoryStorageDocuments)
+        directories.directoryStorageDownloads,
+        services.requireService(HTTPType::class.java))
+    }
 
-      publishEvent(strings.bootingAccountProviders)
-      val defaultAccountProvider =
-        this.loadDefaultAccountProvider()
-      val accountProviders =
-        AccountProviderRegistry.createFromServiceLoader(context, defaultAccountProvider)
+    private fun createBookCoverBadgeLookup(
+      context: Context,
+      bookController: Controller,
+      services: ServiceDirectoryType
+    ): BookCoverBadgeLookupType {
+      return CatalogCoverBadgeImages.create(
+        context.resources,
+        { this.currentThemeColor(context, bookController) },
+        services.requireService(ScreenSizeInformationType::class.java))
+    }
 
-      for (id in accountProviders.accountProviderDescriptions().keys) {
-        this.logger.debug("loaded account provider: {}", id)
-      }
-
-      publishEvent(strings.bootingBundledCredentials)
-      val bundledCredentials = try {
-        this.createBundledCredentials(context.assets)
-      } catch (e: FileNotFoundException) {
-        this.logger.debug("could not initialize bundled credentials: ", e)
-        AccountBundledCredentialsEmpty.getInstance()
-      } catch (e: IOException) {
-        this.logger.debug("could not initialize bundled credentials: ", e)
-        throw IllegalStateException("could not initialize bundled credentials", e)
-      }
-
-      publishEvent(strings.bootingCredentialStore)
+    private fun createAccountAuthenticationCredentialsStore(directories: Directories): AccountAuthenticationCredentialsStoreType {
       val accountCredentialsStore = try {
         val credentials =
           File(directories.directoryPrivateBaseVersioned, "credentials.json")
@@ -303,212 +734,84 @@ class SimplifiedServices private constructor(
         throw IllegalStateException("could not initialize credentials store", e)
       }
       this.logger.debug("credentials loaded: {}", accountCredentialsStore.size())
+      return accountCredentialsStore
+    }
 
-      val accountEvents =
-        Observable.create<AccountEvent>()
-      val profileEvents =
-        Observable.create<ProfileEvent>()
-      val readerBookmarkEvents =
-        Observable.create<ReaderBookmarkEvent>()
-
-      publishEvent(strings.bootingProfilesDatabase)
-      val profilesDatabase = try {
-        this.createProfileDatabase(
-          context,
-          context.resources,
-          accountEvents,
-          accountProviders,
-          bundledCredentials,
-          accountCredentialsStore,
-          directories.directoryStorageProfiles)
-      } catch (e: ProfileDatabaseException) {
-        throw IllegalStateException("Could not initialize profile database", e)
+    private fun createAccountBundledCredentials(context: Context): AccountBundledCredentialsType {
+      return try {
+        this.createBundledCredentials(context.assets)
+      } catch (e: FileNotFoundException) {
+        this.logger.debug("could not initialize bundled credentials: ", e)
+        AccountBundledCredentialsEmpty.getInstance()
+      } catch (e: IOException) {
+        this.logger.debug("could not initialize bundled credentials: ", e)
+        throw IllegalStateException("could not initialize bundled credentials", e)
       }
+    }
 
-      publishEvent(strings.bootingBundledContent)
-      val bundledContentResolver = BundledContentResolver.create(context.assets)
+    private fun createAccountProviderRegistry(context: Context): AccountProviderRegistryType {
+      val defaultAccountProvider =
+        this.loadDefaultAccountProvider()
+      val accountProviders =
+        AccountProviderRegistry.createFromServiceLoader(context, defaultAccountProvider)
+      for (id in accountProviders.accountProviderDescriptions().keys) {
+        this.logger.debug("loaded account provider: {}", id)
+      }
+      return accountProviders
+    }
 
-      publishEvent(strings.bootingFeedLoader)
+    private fun createEPUBLoader(context: Context): ReaderReadiumEPUBLoaderType {
+      val execEPUB =
+        NamedThreadPools.namedThreadPool(1, "epub", 19)
+      return ReaderReadiumEPUBLoader.newLoader(context, execEPUB)
+    }
+
+    private fun createHTTPServer(assets: AssetManager): ReaderHTTPServerType {
+      val mime =
+        ReaderHTTPMimeMap.newMap("application/octet-stream")
+      return ReaderHTTPServerAAsync.newServer(assets, mime, this.fetchUnusedHTTPPort())
+    }
+
+    private fun createLocalImageLoader(context: Context): ImageLoaderType {
+      val localImageLoader =
+        Picasso.Builder(context)
+          .indicatorsEnabled(false)
+          .loggingEnabled(true)
+          .addRequestHandler(ImageAccountIconRequestHandler())
+          .build()
+
+      return object : ImageLoaderType {
+        override val loader: Picasso
+          get() = localImageLoader
+      }
+    }
+
+    private fun <T : Any> oneFromServiceLoader(interfaceType: Class<T>): T {
+      return ServiceLoader.load(interfaceType)
+        .iterator()
+        .next()
+    }
+
+    private fun createFeedLoader(services: ServiceDirectoryType): FeedLoaderType {
       val execCatalogFeeds =
         NamedThreadPools.namedThreadPool(1, "catalog-feed", 19)
-      val feedParser =
-        this.createFeedParser()
       val feedSearchParser =
         OPDSSearchParser.newParser()
       val feedTransport =
-        FeedHTTPTransport.newTransport(http)
-      val feedLoader =
-        FeedLoader.create(
-          execCatalogFeeds,
-          feedParser,
-          feedSearchParser,
-          feedTransport,
-          bookRegistry,
-          bundledContentResolver)
-
-      publishEvent(strings.bootingAnalytics)
-      val analytics = Analytics.create(AnalyticsConfiguration(context, http))
-
-      publishEvent(strings.bootingPatronProfileParsers)
-      val patronProfileParsers =
-        ServiceLoader.load(PatronUserProfileParsersType::class.java)
-          .iterator()
-          .next()
-
-      publishEvent(strings.bootingAuthenticationDocumentParsers)
-      val authDocumentParsers =
-        ServiceLoader.load(AuthenticationDocumentParsersType::class.java)
-          .iterator()
-          .next()
-
-      publishEvent(strings.bootingBookController)
-      val execBooks =
-        NamedThreadPools.namedThreadPool(1, "books", 19)
-      val execProfileTimer =
-        NamedThreadPools.namedThreadPool(1, "profile-timer", 19)
-
-      val bookController =
-        create(
-          accountEvents = accountEvents,
-          accountLoginStringResources = LoginStringResources(context.resources),
-          accountLogoutStringResources = LogoutStringResources(context.resources),
-          accountProviderResolutionStrings = AccountProviderSourceResolutionStrings(context.resources),
-          accountProviders = accountProviders,
-          adobeDrm = adobeDRM,
-          analytics = analytics,
-          authDocumentParsers = authDocumentParsers,
-          bookBorrowStrings = CatalogBookBorrowStrings(context.resources),
-          bookRegistry = bookRegistry,
-          bundledContent = bundledContentResolver,
-          cacheDirectory = context.cacheDir,
-          downloader = downloader,
-          exec = execBooks,
-          feedLoader = feedLoader,
-          feedParser = feedParser,
-          http = http,
-          patronUserProfileParsers = patronProfileParsers,
-          profileAccountCreationStringResources = ProfileAccountCreationStringResources(context.resources),
-          profileAccountDeletionStringResources = ProfileAccountDeletionStringResources(context.resources),
-          profileEvents = profileEvents,
-          profiles = profilesDatabase,
-          readerBookmarkEvents = readerBookmarkEvents,
-          revokeStrings = CatalogBookRevokeStrings(context.resources),
-          timerExecutor = execProfileTimer)
-
-      publishEvent(strings.bootingReaderBookmarkService)
-      val readerBookmarksService =
-        ReaderBookmarkService.createService(
-          ReaderBookmarkServiceProviderType.Requirements(
-            { runnable -> NamedThreadPools.namedThreadPoolFactory("reader-bookmarks", 19).newThread(runnable) },
-            readerBookmarkEvents,
-            ReaderBookmarkHTTPCalls(ObjectMapper(), http),
-            bookController
-          ))
-
-      publishEvent(strings.bootingCoverBadgeProvider)
-      val coverBadges =
-        CatalogCoverBadgeImages.create(
-          context.resources,
-          { this.currentThemeColor(context, bookController) },
-          screenSize)
-
-      publishEvent(strings.bootingCoverProvider)
-      val execCovers =
-        NamedThreadPools.namedThreadPool(2, "cover", 19)
-      val coverProvider =
-        BookCoverProvider.newCoverProvider(
-          context,
-          bookRegistry,
-          coverGenerator,
-          coverBadges,
-          execCovers,
-          false,
-          false)
-
-      /*
-       * Log out the current profile after ten minutes, warning one minute before this happens.
-       */
-
-      bookController.profileIdleTimer().setWarningIdleSecondsRemaining(60)
-      bookController.profileIdleTimer().setMaximumIdleSeconds(10 * 60)
-
-      publishEvent(strings.bootingNotificationsService)
-
-      val notificationResourcesType = object : NotificationResourcesType {
-        override val notificationChannelName: String
-          get() = context.getString(R.string.notification_channel_name)
-        override val notificationChannelDescription: String
-          get() = context.getString(R.string.notification_channel_description)
-        override val intentClass: Class<*>
-          get() = SplashActivity::class.java
-        override val titleReadyNotificationContent: String
-          get() = context.getString(R.string.notification_title_ready_content)
-        override val titleReadyNotificationTitle: String
-          get() = context.getString(R.string.notification_title_ready_title)
-        override val smallIcon: Int
-          get() = R.mipmap.ic_launcher
-      }
-
-      val notificationsThreads =
-        NamedThreadPools.namedThreadPoolFactory("notifications", 19)
-
-      val notificationsService = NotificationsService(
-        context = context,
-        threadFactory = notificationsThreads,
-        profileEvents = profileEvents,
-        bookRegistry = bookRegistry,
-        notificationsWrapper = NotificationsWrapper(context),
-        notificationResourcesType = notificationResourcesType)
-
-      publishEvent(strings.bootingNetworkConnectivity)
-      val networkConnectivity = SimplifiedNetworkConnectivity(context)
-
-      try {
-        val packageInfo =
-          context.getPackageManager().getPackageInfo(context.getPackageName(), 0)
-
-        analytics.publishEvent(
-          AnalyticsEvent.ApplicationOpened(
-            LocalDateTime.now(),
-            null,
-            packageInfo.packageName,
-            packageInfo.versionName,
-            packageInfo.versionCode
-          ))
-      } catch (e: PackageManager.NameNotFoundException) {
-        this.logger.debug("could not get package info for analytics: ", e)
-      }
-
-      val execBackground =
-        NamedThreadPools.namedThreadPool(1, "background", 19)
-
-      this.logger.debug("boot completed")
-      onProgress.invoke(BootEvent.BootCompleted(strings.bootCompleted))
-      return SimplifiedServices(
-        accountProviderRegistry = accountProviders,
-        adobeExecutor = adobeDRM,
-        analytics = analytics,
-        backgroundExecutor = execBackground,
-        brandingThemeOverride = brandingThemeOverride,
-        bookCovers = coverProvider,
-        bookRegistry = bookRegistry,
-        booksController = bookController,
-        documentStore = documents,
-        feedLoader = feedLoader,
-        http = http,
-        imageLoader = localImageLoader,
-        networkConnectivity = networkConnectivity,
-        profilesController = bookController,
-        profilesDatabase = profilesDatabase,
-        readerBookmarkService = readerBookmarksService,
-        readerEPUBLoader = epubLoader,
-        readerHTTPServer = httpd,
-        screenSize = screenSize,
-        notificationsService = notificationsService
-      )
+        FeedHTTPTransport.newTransport(services.requireService(HTTPType::class.java))
+      return FeedLoader.create(
+        exec = execCatalogFeeds,
+        parser = services.requireService(OPDSFeedParserType::class.java),
+        searchParser = feedSearchParser,
+        transport = feedTransport,
+        bookRegistry = services.requireService(BookRegistryType::class.java),
+        bundledContent = services.requireService(BundledContentResolverType::class.java))
     }
 
-    private fun currentThemeColor(context: Context, profilesController: ProfilesControllerType): Int {
+    private fun currentThemeColor(
+      context: Context,
+      profilesController: ProfilesControllerType
+    ): Int {
       val theme = try {
         val profile =
           profilesController.profileCurrent()
@@ -608,11 +911,11 @@ class SimplifiedServices private constructor(
       val directoryPrivateBase =
         context.filesDir
       val directoryPrivateBaseVersioned =
-        File(directoryPrivateBase, CURRENT_DATA_VERSION)
+        File(directoryPrivateBase, this.CURRENT_DATA_VERSION)
       val directoryStorageBase =
         this.determineDiskDataDirectory(context)
       val directoryStorageBaseVersioned =
-        File(directoryStorageBase, CURRENT_DATA_VERSION)
+        File(directoryStorageBase, this.CURRENT_DATA_VERSION)
       val directoryStorageDownloads =
         File(directoryStorageBaseVersioned, "downloads")
       val directoryStorageDocuments =
@@ -666,44 +969,6 @@ class SimplifiedServices private constructor(
         directoryStorageDownloads = directoryStorageDownloads,
         directoryStorageDocuments = directoryStorageDocuments,
         directoryStorageProfiles = directoryStorageProfiles)
-    }
-
-    private class ScreenSizeInformation(
-      private val logger: Logger,
-      private val resources: Resources
-    ) : ScreenSizeInformationType {
-
-      init {
-        val dm = this.resources.displayMetrics
-        val dp_height = dm.heightPixels.toFloat() / dm.density
-        val dp_width = dm.widthPixels.toFloat() / dm.density
-        this.logger.debug("screen ({} x {})", dp_width, dp_height)
-        this.logger.debug("screen ({} x {})", dm.widthPixels, dm.heightPixels)
-      }
-
-      override fun screenDPToPixels(
-        dp: Int
-      ): Double {
-        val scale = this.resources.displayMetrics.density
-        return (dp * scale).toDouble() + 0.5
-      }
-
-      override fun screenGetDPI(): Double {
-        val metrics = this.resources.displayMetrics
-        return metrics.densityDpi.toDouble()
-      }
-
-      override fun screenGetHeightPixels(): Int {
-        val rr = NullCheck.notNull(this.resources)
-        val dm = rr.displayMetrics
-        return dm.heightPixels
-      }
-
-      override fun screenGetWidthPixels(): Int {
-        val rr = NullCheck.notNull(this.resources)
-        val dm = rr.displayMetrics
-        return dm.widthPixels
-      }
     }
 
     private fun initBugsnag(
@@ -800,7 +1065,7 @@ class SimplifiedServices private constructor(
      */
     private fun configureInstabug(context: Context) {
       if (BuildConfig.DEBUG) {
-        if (Simplified.application.packageName == SIMPLYE) {
+        if (Simplified.application.packageName == this.SIMPLYE) {
 
           try {
             val inputStream = context.assets.open("instabug.conf")

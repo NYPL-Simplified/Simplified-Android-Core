@@ -24,6 +24,7 @@ import org.nypl.simplified.books.api.BookFormat.BookFormatPDF
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.slf4j.LoggerFactory
 
 /**
@@ -112,13 +113,19 @@ class CatalogBookReadController(
     val manifest = format.manifest
     if (manifest != null) {
       this.sendAnalytics(book)
+      val theme =
+        Simplified.application.services()
+          .requireService(ThemeServiceType::class.java)
+          .findCurrentTheme()
+          .themeWithActionBar
+
       AudioBookPlayerActivity.startActivity(
         from = this.activity,
         parameters = AudioBookPlayerParameters(
           manifestFile = manifest.manifestFile,
           manifestURI = manifest.manifestURI,
           opdsEntry = this.entry.feedEntry,
-          theme = Simplified.application.services().currentTheme.themeWithActionBar,
+          theme = theme,
           bookID = this.id))
     } else {
       ErrorDialogUtilities.showError(

@@ -13,6 +13,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import org.nypl.simplified.app.R
+import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.reader.ReaderColorSchemes
 import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.ReaderSelectedTOCElement
@@ -20,6 +21,7 @@ import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.api.ReaderColorScheme
 import org.slf4j.LoggerFactory
 
@@ -74,7 +76,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
     this.applyColorScheme(
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .profileCurrent()
         .preferences()
         .readerPreferences()
@@ -90,7 +92,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
       this.profileSubscription =
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileEvents()
           .subscribe { event -> this.onProfileEvent(event) }
     } else {
@@ -110,7 +112,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
       if (event.changedReaderPreferences()) {
         val colorScheme =
           Simplified.application.services()
-            .profilesController
+            .requireService(ProfilesControllerType::class.java)
             .profileCurrent()
             .preferences()
             .readerPreferences()
@@ -176,7 +178,9 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
     // Set the left margin based on the desired indentation level.
     val leftIndent = if (element != null) {
-      Simplified.application.services().screenSize.screenDPToPixels(element.indent * 16)
+      Simplified.application.services()
+        .requireService(ScreenSizeInformationType::class.java)
+        .screenDPToPixels(element.indent * 16)
     } else {
       0.0
     }
@@ -186,7 +190,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
     textView.setTextColor(
       ReaderColorSchemes.foregroundAsAndroidColor(
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileCurrent()
           .preferences()
           .readerPreferences()

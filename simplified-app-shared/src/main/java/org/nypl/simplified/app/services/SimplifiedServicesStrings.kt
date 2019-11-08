@@ -6,6 +6,21 @@ import org.nypl.simplified.boot.api.BootStringResourcesType
 
 class SimplifiedServicesStrings(private val resources: Resources) : BootStringResourcesType {
 
+  val bootingUIBackgroundExecutor: String =
+    this.resources.getString(R.string.bootingUIBackgroundExecutor)
+
+  val bootingThemeService: String =
+    this.resources.getString(R.string.bootingThemeService)
+
+  val bootingProfileTimer: String =
+    this.resources.getString(R.string.bootingProfileTimer)
+
+  val bootingHTTPServer: String =
+    this.resources.getString(R.string.bootingHTTPServer)
+
+  val bootingClock: String =
+    this.resources.getString(R.string.bootingClock)
+
   override val bootStarted: String =
     this.resources.getString(R.string.bootStarted)
 
@@ -14,6 +29,9 @@ class SimplifiedServicesStrings(private val resources: Resources) : BootStringRe
 
   override val bootCompleted: String =
     this.resources.getString(R.string.bootingCompleted)
+
+  fun bootingStrings(kind: String): String =
+    this.resources.getString(R.string.bootingStrings, kind)
 
   val bootingNetworkConnectivity: String =
     this.resources.getString(R.string.bootingNetworkConnectivity)
@@ -32,6 +50,9 @@ class SimplifiedServicesStrings(private val resources: Resources) : BootStringRe
 
   val bootingAnalytics: String =
     this.resources.getString(R.string.bootingAnalytics)
+
+  val bootingFeedParser: String =
+    this.resources.getString(R.string.bootingFeedParser)
 
   val bootingFeedLoader: String =
     this.resources.getString(R.string.bootingFeedLoader)
@@ -100,5 +121,5 @@ class SimplifiedServicesStrings(private val resources: Resources) : BootStringRe
     this.resources.getString(R.string.bootingNotificationsService)
 
   val initializingInstabug =
-          this.resources.getString(R.string.initializingInstabug)
+    this.resources.getString(R.string.bootingInstabug)
 }

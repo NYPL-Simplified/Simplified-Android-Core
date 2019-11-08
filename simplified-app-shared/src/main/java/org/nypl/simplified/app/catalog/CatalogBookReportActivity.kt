@@ -12,7 +12,9 @@ import com.io7m.jnull.Nullable
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 
 /**
  * An activity showing options for reporting
@@ -57,7 +59,7 @@ class CatalogBookReportActivity : CatalogActivity() {
       a.getSerializable(FEED_ENTRY) as FeedEntryOPDS
     this.account =
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .profileAccountForBook(this.feedEntry.bookID)
 
     val layout =
@@ -95,7 +97,7 @@ class CatalogBookReportActivity : CatalogActivity() {
     val button = this.typeButtons.find { button -> button.isChecked }
     if (button != null) {
       Simplified.application.services()
-        .booksController
+        .requireService(BooksControllerType::class.java)
         .bookReport(this.account, this.feedEntry, button.tag as String)
       this.finish()
     }

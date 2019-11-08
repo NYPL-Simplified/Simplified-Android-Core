@@ -39,6 +39,7 @@ import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
 import org.nypl.simplified.app.images.ImageAccountIcons;
+import org.nypl.simplified.app.images.ImageLoaderType;
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity;
 import org.nypl.simplified.app.profiles.ProfileSwitchDialog;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
@@ -52,6 +53,7 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.stack.ImmutableStack;
+import org.nypl.simplified.ui.theme.ThemeServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +116,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     final ProfilesControllerType profiles =
       Simplified.getServices()
-        .getProfilesController();
+        .requireService(ProfilesControllerType.class);
 
     if (profiles.profileAnonymousEnabled() == AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED) {
       drawer_items.add(new NavigationDrawerItemSwitchProfile(activity));
@@ -132,7 +134,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         ImmutableList.builder();
       final ImmutableList<AccountProviderType> drawer_item_accounts =
         Simplified.getServices()
-          .getProfilesController()
+          .requireService(ProfilesControllerType.class)
           .profileCurrentlyUsedAccountProviders();
 
       for (final AccountProviderType account : drawer_item_accounts) {
@@ -227,7 +229,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
   protected void onCreate(final @Nullable Bundle state) {
     this.setTheme(
       Simplified.getServices()
-        .getCurrentTheme()
+        .requireService(ThemeServiceType.class)
+        .findCurrentTheme()
         .getThemeWithActionBar());
 
     super.onCreate(state);
@@ -298,7 +301,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
      */
 
     if (!Simplified.getServices()
-      .getProfilesController()
+      .requireService(ProfilesControllerType.class)
       .profileAnyIsCurrent()) {
       LOG.debug("no profile is enabled, aborting!");
       return;
@@ -348,7 +351,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     this.profile_event_subscription =
       Simplified.getServices()
-        .getProfilesController()
+        .requireService(ProfilesControllerType.class)
         .profileEvents()
         .subscribe(this::onProfileEvent);
 
@@ -568,13 +571,13 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       try {
         final AccountProviderType account =
           Simplified.getServices()
-            .getProfilesController()
+            .requireService(ProfilesControllerType.class)
             .profileAccountCurrent()
             .getProvider();
 
         text_view.setText(account.getDisplayName());
         ImageAccountIcons.loadAccountLogoIntoView(
-          Simplified.getServices().getImageLoader(),
+          Simplified.getServices().requireService(ImageLoaderType.class).getLoader(),
           account.toDescription(),
           icon_view);
       } catch (final ProfileNoneCurrentException e) {
@@ -898,7 +901,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
       text_view.setText(this.account.getDisplayName());
       ImageAccountIcons.loadAccountLogoIntoView(
-        Simplified.getServices().getImageLoader(),
+        Simplified.getServices().requireService(ImageLoaderType.class).getLoader(),
         this.account.toDescription(),
         icon_view);
     }
@@ -913,7 +916,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
       UIThread.runOnUIThreadDelayed(() -> {
         Simplified.getServices()
-          .getProfilesController()
+          .requireService(ProfilesControllerType.class)
           .profileAccountSelectByProvider(this.account.getId());
 
         final List<NavigationDrawerItemType> items = array_adapter.getDrawerItems();

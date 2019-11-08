@@ -39,6 +39,8 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
@@ -47,7 +49,10 @@ import org.nypl.simplified.app.catalog.CatalogFeedArguments.CatalogFeedArguments
 import org.nypl.simplified.app.errors.ErrorActivity
 import org.nypl.simplified.app.login.LoginDialogListenerType
 import org.nypl.simplified.app.utilities.UIThread
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusEvent
+import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
 import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
@@ -115,7 +120,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
   override fun onLoginDialogWantsProfilesController(): ProfilesControllerType =
     Simplified.application.services()
-      .profilesController
+      .requireService(ProfilesControllerType::class.java)
 
   /**
    * @return The specific logger instance provided by subclasses
@@ -507,11 +512,14 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     val cfl: CatalogFeedWithGroups
     try {
+      val services =
+        Simplified.application.services()
+
       cfl = CatalogFeedWithGroups(
         this,
-        Simplified.application.services().profilesController.profileAccountCurrent(),
-        Simplified.application.services().screenSize,
-        Simplified.application.services().bookCovers,
+        services.requireService(ProfilesControllerType::class.java).profileAccountCurrent(),
+        services.requireService(ScreenSizeInformationType::class.java),
+        services.requireService(BookCoverProviderType::class.java),
         laneListener,
         feed
       )
@@ -594,10 +602,14 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     this.swipeRefreshLayout = layout.findViewById(R.id.swipe_refresh_layout)
     this.swipeRefreshLayout.setOnRefreshListener({ this.retryFeed() })
 
-    this.configureFacetEntryPointButtons(
-      feedWithoutGroups, layout)
+    this.configureFacetEntryPointButtons(feedWithoutGroups, layout)
+
+    val screenSize =
+      Simplified.application.services()
+        .requireService(ScreenSizeInformationType::class.java)
+
     this.configureFacets(
-      screen = Simplified.application.services().screenSize,
+      screen = screenSize,
       feed = feedWithoutGroups,
       layout = layout)
 
@@ -612,21 +624,17 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     val without: CatalogFeedWithoutGroups
     try {
-      val services = Simplified.application.services()
+      val services =
+        Simplified.application.services()
+      val profilesController =
+        services.requireService(ProfilesControllerType::class.java)
+
       without = CatalogFeedWithoutGroups(
         activity = this,
-        analytics = services.analytics,
-        account = services.profilesController.profileAccountCurrent(),
-        bookCoverProvider = services.bookCovers,
+        services = services,
+        account = profilesController.profileAccountCurrent(),
         bookSelectionListener = bookSelectListener,
-        bookRegistry = services.bookRegistry,
-        bookController = services.booksController,
-        profilesController = services.profilesController,
-        feedLoader = services.feedLoader,
-        feed = feedWithoutGroups,
-        networkConnectivity = services.networkConnectivity,
-        executor = services.backgroundExecutor,
-        screenSizeInformation = services.screenSize)
+        feed = feedWithoutGroups)
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }
@@ -641,7 +649,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     this.bookEventSubscription =
       Simplified.application.services()
-        .bookRegistry
+        .requireService(BookRegistryReadableType::class.java)
         .bookEvents()
         .subscribe { event -> without.onBookEvent(event) }
   }
@@ -714,7 +722,11 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     }
 
     try {
-      this.profile = Simplified.application.services().profilesController.profileCurrent()
+      val profilesController =
+        Simplified.application.services()
+          .requireService(ProfilesControllerType::class.java)
+
+      this.profile = profilesController.profileCurrent()
       this.account = this.profile.accountCurrent()
       this.initialized = true
     } catch (e: ProfileNoneCurrentException) {
@@ -763,7 +775,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     buttonUnder13.setOnClickListener {
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .profilePreferencesUpdate(
           this.profile.preferences()
             .toBuilder()
@@ -783,7 +795,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     buttonOver13.setOnClickListener {
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .profilePreferencesUpdate(
           this.profile.preferences()
             .toBuilder()
@@ -829,7 +841,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     this.profileEventSubscription =
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .profileEvents()
         .subscribe { event -> this.onProfileEvent(event) }
 
@@ -904,7 +916,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      * available, then fail fast and display an error message.
      */
 
-    val net = Simplified.application.services().networkConnectivity
+    val net = Simplified.application.services().requireService(NetworkConnectivityType::class.java)
     if (this.feedArguments.requiresNetworkConnectivity) {
       if (!net.isNetworkAvailable) {
         this.onNetworkUnavailable()
@@ -1152,7 +1164,9 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     return when (val arguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote -> {
         this.logger.debug("invalidating {} in feed cache", arguments.feedURI)
-        Simplified.application.services().feedLoader.invalidate(arguments.feedURI)
+        Simplified.application.services()
+          .requireService(FeedLoaderType::class.java)
+          .invalidate(arguments.feedURI)
         this.startDisplayingFeed()
       }
       is CatalogFeedArgumentsLocalBooks -> {
@@ -1193,7 +1207,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     val filterAccountID =
       if (!showAllCollections) {
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileAccountCurrent()
           .id
       } else {
@@ -1214,7 +1228,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     try {
       val future =
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileFeed(request)
 
       future.addCallback(object : FutureCallback<FeedWithoutGroups> {
@@ -1239,7 +1253,9 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
    */
 
   private fun doLoadRemoteFeed(c: CatalogFeedArgumentsRemote) =
-    this.loadFeed(Simplified.application.services().feedLoader, c.feedURI)
+    this.loadFeed(
+      feedLoader = Simplified.application.services().requireService(FeedLoaderType::class.java),
+      feedURI = c.feedURI)
 
   /**
    * A handler for local book searches.
@@ -1287,14 +1303,14 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     override fun onQueryTextSubmit(query: String): Boolean {
       val profile =
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileCurrent()
 
       val account =
         profile.accountCurrent()
 
       Simplified.application.services()
-        .analytics
+        .requireService(AnalyticsType::class.java)
         .publishEvent(AnalyticsEvent.CatalogSearched(
           profileUUID = profile.id.uuid,
           timestamp = LocalDateTime.now(),
@@ -1411,7 +1427,10 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     private fun onPossiblyReceivedEULALink(latest: URI?) {
       if (latest != null) {
-        val docs = Simplified.application.services().documentStore
+        val docs =
+          Simplified.application.services()
+            .requireService(DocumentStoreType::class.java)
+
         docs.eula.map_ { eula ->
           try {
             eula.documentSetLatestURL(latest.toURL())
