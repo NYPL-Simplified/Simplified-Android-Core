@@ -9,6 +9,7 @@ import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import org.joda.time.Instant
 import org.joda.time.LocalDate
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
@@ -25,7 +26,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
@@ -65,13 +65,11 @@ import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
-import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -86,35 +84,53 @@ import java.util.concurrent.ExecutorService
  */
 
 class Controller private constructor(
-  private val accountEvents: ObservableType<AccountEvent>,
-  private val accountLoginStringResources: AccountLoginStringResourcesType,
-  private val accountLogoutStringResources: AccountLogoutStringResourcesType,
-  private val accountProviderResolutionStrings: AccountProviderResolutionStringsType,
-  private val accountProviders: AccountProviderRegistryType,
-  private val adobeDrm: AdobeAdeptExecutorType?,
-  private val analytics: AnalyticsType,
-  private val authDocumentParsers: AuthenticationDocumentParsersType,
-  private val bookRegistry: BookRegistryType,
-  private val borrowStrings: BookBorrowStringResourcesType,
-  private val bundledContent: BundledContentResolverType,
   private val cacheDirectory: File,
-  private val downloader: DownloaderType,
-  private val feedLoader: FeedLoaderType,
-  private val feedParser: OPDSFeedParserType,
-  private val http: HTTPType,
-  private val patronUserProfileParsers: PatronUserProfileParsersType,
-  private val profileAccountCreationStringResources: ProfileAccountCreationStringResourcesType,
-  private val profileAccountDeletionStringResources: ProfileAccountDeletionStringResourcesType,
+  private val accountEvents: ObservableType<AccountEvent>,
   private val profileEvents: ObservableType<ProfileEvent>,
-  private val profiles: ProfilesDatabaseType,
-  private val readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
-  private val revokeStrings: BookRevokeStringResourcesType,
-  private val taskExecutor: ListeningExecutorService,
-  private val timerExecutor: ExecutorService
+  private val services: ServiceDirectoryType,
+  private val taskExecutor: ListeningExecutorService
 ) : BooksControllerType, ProfilesControllerType {
 
+  private val accountLoginStringResources =
+    this.services.requireService(AccountLoginStringResourcesType::class.java)
+  private val accountLogoutStringResources =
+    this.services.requireService(AccountLogoutStringResourcesType::class.java)
+  private val accountProviderResolutionStrings =
+    this.services.requireService(AccountProviderResolutionStringsType::class.java)
+  private val accountProviders =
+    this.services.requireService(AccountProviderRegistryType::class.java)
+  private val adobeDrm =
+    this.services.optionalService(AdobeAdeptExecutorType::class.java)
+  private val authDocumentParsers =
+    this.services.requireService(AuthenticationDocumentParsersType::class.java)
+  private val bookRegistry =
+    this.services.requireService(BookRegistryType::class.java)
+  private val borrowStrings =
+    this.services.requireService(BookBorrowStringResourcesType::class.java)
+  private val bundledContent =
+    this.services.requireService(BundledContentResolverType::class.java)
+  private val downloader =
+    this.services.requireService(DownloaderType::class.java)
+  private val feedLoader =
+    this.services.requireService(FeedLoaderType::class.java)
+  private val feedParser =
+    this.services.requireService(OPDSFeedParserType::class.java)
+  private val http =
+    this.services.requireService(HTTPType::class.java)
+  private val patronUserProfileParsers =
+    this.services.requireService(PatronUserProfileParsersType::class.java)
+  private val profileAccountCreationStringResources =
+    this.services.requireService(ProfileAccountCreationStringResourcesType::class.java)
+  private val profileAccountDeletionStringResources =
+    this.services.requireService(ProfileAccountDeletionStringResourcesType::class.java)
+  private val profiles =
+    this.services.requireService(ProfilesDatabaseType::class.java)
+  private val revokeStrings =
+    this.services.requireService(BookRevokeStringResourcesType::class.java)
+  private val profileIdleTimer =
+    this.services.requireService(ProfileIdleTimerType::class.java)
+
   private val accountRegistrySubscription: ObservableSubscriptionType<AccountProviderRegistryEvent>
-  private val timer = ProfileIdleTimer.create(this.timerExecutor, this.profileEvents)
   private val downloads: ConcurrentHashMap<BookID, DownloadType> =
     ConcurrentHashMap(32)
 
@@ -170,7 +186,7 @@ class Controller private constructor(
   }
 
   override fun profiles(): SortedMap<ProfileID, ProfileReadableType> {
-    return castMap(this.profiles.profiles())
+    return org.nypl.simplified.books.controller.Controller.Companion.castMap(this.profiles.profiles())
   }
 
   override fun profileAnonymousEnabled(): AnonymousProfileEnabled {
@@ -378,7 +394,7 @@ class Controller private constructor(
   }
 
   override fun profileIdleTimer(): ProfileIdleTimerType {
-    return this.timer
+    return this.profileIdleTimer
   }
 
   override fun bookBorrow(
@@ -490,59 +506,19 @@ class Controller private constructor(
 
   companion object {
 
-    fun create(
+    fun createFromServiceDirectory(
+      services: ServiceDirectoryType,
+      executorService: ExecutorService,
       accountEvents: ObservableType<AccountEvent>,
-      accountLoginStringResources: AccountLoginStringResourcesType,
-      accountLogoutStringResources: AccountLogoutStringResourcesType,
-      accountProviderResolutionStrings: AccountProviderResolutionStringsType,
-      accountProviders: AccountProviderRegistryType,
-      adobeDrm: AdobeAdeptExecutorType?,
-      analytics: AnalyticsType,
-      authDocumentParsers: AuthenticationDocumentParsersType,
-      bookBorrowStrings: BookBorrowStringResourcesType,
-      bookRegistry: BookRegistryType,
-      bundledContent: BundledContentResolverType,
-      cacheDirectory: File,
-      downloader: DownloaderType,
-      exec: ExecutorService,
-      feedLoader: FeedLoaderType,
-      feedParser: OPDSFeedParserType,
-      http: HTTPType,
-      patronUserProfileParsers: PatronUserProfileParsersType,
-      profileAccountCreationStringResources: ProfileAccountCreationStringResourcesType,
-      profileAccountDeletionStringResources: ProfileAccountDeletionStringResourcesType,
       profileEvents: ObservableType<ProfileEvent>,
-      profiles: ProfilesDatabaseType,
-      readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
-      revokeStrings: BookRevokeStringResourcesType,
-      timerExecutor: ExecutorService
+      cacheDirectory: File
     ): Controller {
       return Controller(
-        accountEvents = accountEvents,
-        accountLoginStringResources = accountLoginStringResources,
-        accountLogoutStringResources = accountLogoutStringResources,
-        accountProviderResolutionStrings = accountProviderResolutionStrings,
-        accountProviders = accountProviders,
-        adobeDrm = adobeDrm,
-        analytics = analytics,
-        authDocumentParsers = authDocumentParsers,
-        bookRegistry = bookRegistry,
-        borrowStrings = bookBorrowStrings,
-        bundledContent = bundledContent,
+        services = services,
         cacheDirectory = cacheDirectory,
-        downloader = downloader,
-        feedLoader = feedLoader,
-        feedParser = feedParser,
-        http = http,
-        patronUserProfileParsers = patronUserProfileParsers,
-        profileAccountCreationStringResources = profileAccountCreationStringResources,
-        profileAccountDeletionStringResources = profileAccountDeletionStringResources,
+        accountEvents = accountEvents,
         profileEvents = profileEvents,
-        profiles = profiles,
-        readerBookmarkEvents = readerBookmarkEvents,
-        revokeStrings = revokeStrings,
-        taskExecutor = MoreExecutors.listeningDecorator(exec),
-        timerExecutor = timerExecutor
+        taskExecutor = MoreExecutors.listeningDecorator(executorService)
       )
     }
 

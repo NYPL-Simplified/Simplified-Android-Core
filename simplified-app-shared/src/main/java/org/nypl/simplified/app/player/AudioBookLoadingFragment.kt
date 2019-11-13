@@ -22,6 +22,7 @@ import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.http.core.HTTPProblemReport
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -99,7 +100,7 @@ class AudioBookLoadingFragment : Fragment() {
     if (this.listener.onLoadingFragmentIsNetworkConnectivityAvailable()) {
       val credentials =
         Simplified.application.services()
-          .profilesController
+          .requireService(ProfilesControllerType::class.java)
           .profileAccountForBook(this.playerParameters.bookID)
           .loginState
           .credentials
@@ -186,7 +187,7 @@ class AudioBookLoadingFragment : Fragment() {
 
     val handle =
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .profileAccountForBook(this.playerParameters.bookID)
         .bookDatabase
         .entry(this.playerParameters.bookID)

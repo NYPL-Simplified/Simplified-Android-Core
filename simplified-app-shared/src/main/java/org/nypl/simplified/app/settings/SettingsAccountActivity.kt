@@ -46,14 +46,17 @@ import org.nypl.simplified.app.ReportIssueActivity
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.WebViewActivity
 import org.nypl.simplified.app.errors.ErrorDialogs
+import org.nypl.simplified.app.images.ImageLoaderType
 import org.nypl.simplified.app.signup.CardCreatorActivity
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.documents.eula.EULAType
+import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
 /**
@@ -164,7 +167,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     val extras = this.intent.extras
     this.profile =
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .profileCurrent()
     this.account = getAccount(extras)
 
@@ -264,7 +267,9 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     // https://jira.nypl.org/browse/SIMPLY-2106
     // XXX: Get labels from the current authentication document.
     // XXX: This should be per-account
-    val docs = Simplified.application.services().documentStore
+    val docs = Simplified.application.services()
+      .requireService(DocumentStoreType::class.java)
+
     this.pinText.transformationMethod = PasswordTransformationMethod.getInstance()
     this.handlePinReveal(this.pinText, this.pinReveal)
 
@@ -369,7 +374,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     val logo = accountProvider.logo
     if (logo != null) {
       Simplified.application.services()
-        .imageLoader
+        .requireService(ImageLoaderType::class.java)
+        .loader
         .load(logo.toString())
         .into(this.accountIcon)
     }
@@ -388,7 +394,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
     this.accountEventSubscription =
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
         .accountEvents()
         .subscribe { event -> this.onAccountEvent(event) }
 
@@ -622,7 +628,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   private fun setUnder13() {
     Simplified.application.services()
-      .profilesController
+      .requireService(ProfilesControllerType::class.java)
       .profilePreferencesUpdate(
         this.profile.preferences()
           .toBuilder()
@@ -632,7 +638,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   private fun setOver13() {
     Simplified.application.services()
-      .profilesController
+      .requireService(ProfilesControllerType::class.java)
       .profilePreferencesUpdate(
         this.profile.preferences()
           .toBuilder()
@@ -669,7 +675,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   private fun tryLogout(): Unit {
     Simplified.application.services()
-      .profilesController
+      .requireService(ProfilesControllerType::class.java)
       .profileAccountLogout(this.account.id)
       .onException(Exception::class.java) { exception: Exception ->
         this.logger.error("error during logout: ", exception)
@@ -687,7 +693,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         .build()
 
     Simplified.application.services()
-      .profilesController
+      .requireService(ProfilesControllerType::class.java)
       .profileAccountLogin(this.account.id, credentials)
       .onException(Exception::class.java) { exception ->
         this.logger.error("error during login: ", exception)
@@ -745,7 +751,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       return try {
         val profile =
           Simplified.application.services()
-            .profilesController
+            .requireService(ProfilesControllerType::class.java)
             .profileCurrent()
 
         if (extras != null && extras.containsKey(this.ACCOUNT_ID)) {

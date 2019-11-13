@@ -22,17 +22,19 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.joda.time.LocalDate;
+import org.librarysimplified.services.api.ServiceDirectoryType;
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
-import org.nypl.simplified.app.services.SimplifiedServicesType;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
+import org.nypl.simplified.app.utilities.UIBackgroundExecutorType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.profiles.api.ProfileCreationEvent;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.ui.datepicker.DatePicker;
+import org.nypl.simplified.ui.theme.ThemeServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,8 +67,10 @@ public final class ProfileCreationActivity extends SimplifiedActivity implements
 
     this.setTheme(
       Simplified.getServices()
-        .getCurrentTheme()
+        .requireService(ThemeServiceType.class)
+        .findCurrentTheme()
         .getThemeWithNoActionBar());
+
     super.onCreate(state);
     this.setContentView(R.layout.profiles_creation);
 
@@ -165,14 +169,14 @@ public final class ProfileCreationActivity extends SimplifiedActivity implements
     LOG.debug("gender: {}", gender_text);
     LOG.debug("date: {}", date_value);
 
-    final SimplifiedServicesType services =
+    final ServiceDirectoryType services =
       Simplified.getServices();
     final AccountProviderRegistryType providers =
-      services.getAccountProviderRegistry();
+      services.requireService(AccountProviderRegistryType.class);
     final ProfilesControllerType profiles =
-      services.getProfilesController();
+      services.requireService(ProfilesControllerType.class);
     final ListeningExecutorService exec =
-      services.getBackgroundExecutor();
+      services.requireService(UIBackgroundExecutorType.class);
 
     final ListenableFuture<ProfileCreationEvent> task =
       profiles.profileCreate(

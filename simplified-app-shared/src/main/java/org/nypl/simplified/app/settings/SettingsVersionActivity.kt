@@ -14,6 +14,7 @@ import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.google.common.util.concurrent.MoreExecutors
+import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.app.BuildConfig
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
@@ -26,10 +27,12 @@ import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.slf4j.LoggerFactory
 
 class SettingsVersionActivity : ProfileTimeOutActivity() {
@@ -57,7 +60,12 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
 
-    this.setTheme(Simplified.application.services().currentTheme.themeWithActionBar)
+    this.setTheme(
+      Simplified.application.services()
+      .requireService(ThemeServiceType::class.java)
+      .findCurrentTheme()
+      .themeWithActionBar)
+
     this.setContentView(R.layout.settings_version)
 
     this.developerOptions =
@@ -172,7 +180,8 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
     this.adobeDRMActivationTable.removeAllViews()
 
     val profilesController =
-      Simplified.application.services().profilesController
+      Simplified.application.services()
+        .requireService(ProfilesControllerType::class.java)
 
     this.profileEventSubscription =
       profilesController
@@ -251,7 +260,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
       UIThread.runOnUIThread {
         this.showTesting.isChecked =
           Simplified.application.services()
-            .profilesController
+            .requireService(ProfilesControllerType::class.java)
             .profileCurrent()
             .preferences()
             .showTestingLibraries()
@@ -272,7 +281,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
     val executor =
       Simplified.application.services()
-        .adobeExecutor
+        .optionalService(AdobeAdeptExecutorType::class.java)
 
     if (executor == null) {
       value.setTextColor(ContextCompat.getColor(this, R.color.simplified_material_red_primary))

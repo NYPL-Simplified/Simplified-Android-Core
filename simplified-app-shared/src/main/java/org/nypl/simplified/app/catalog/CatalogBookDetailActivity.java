@@ -11,15 +11,20 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import org.jetbrains.annotations.NotNull;
+import org.librarysimplified.services.api.ServiceDirectoryType;
 import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
+import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.NavigationDrawerActivity;
+import org.nypl.simplified.app.NetworkConnectivityType;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.login.LoginDialogListenerType;
-import org.nypl.simplified.app.services.SimplifiedServicesType;
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
 import org.nypl.simplified.books.book_registry.BookStatusEvent;
+import org.nypl.simplified.books.controller.api.BooksControllerType;
+import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
@@ -111,12 +116,12 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
   protected void onCreate(final @Nullable Bundle state) {
     super.onCreate(state);
 
-    final SimplifiedServicesType services =
+    final ServiceDirectoryType services =
       Simplified.getServices();
     final BookRegistryReadableType bookRegistry =
-      services.getBookRegistry();
+      services.requireService(BookRegistryReadableType.class);
     final ProfilesControllerType profiles =
-      services.getProfilesController();
+      services.requireService(ProfilesControllerType.class);
 
     final FeedEntryOPDS entry = this.getFeedEntry();
     final AccountType account;
@@ -134,13 +139,13 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
         this,
         inflater,
         account,
-        services.getBookCovers(),
+        services.requireService(BookCoverProviderType.class),
         bookRegistry,
-        services.getAnalytics(),
+        services.requireService(AnalyticsType.class),
         profiles,
-        services.getBooksController(),
-        services.getScreenSize(),
-        services.getNetworkConnectivity(),
+        services.requireService(BooksControllerType.class),
+        services.requireService(ScreenSizeInformationType.class),
+        services.requireService(NetworkConnectivityType.class),
         entry);
 
     this.view = detailView;
@@ -162,7 +167,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
 
     this.bookSubscription =
       Simplified.getServices()
-        .getBookRegistry()
+        .requireService(BookRegistryReadableType.class)
         .bookEvents()
         .subscribe(this.view::onBookEvent);
   }
@@ -177,6 +182,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
   @Override
   public ProfilesControllerType onLoginDialogWantsProfilesController() {
     return Simplified.getServices()
-      .getProfilesController();
+      .requireService(ProfilesControllerType.class);
   }
 }

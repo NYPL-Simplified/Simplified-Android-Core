@@ -21,13 +21,15 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
 import org.joda.time.LocalDateTime;
+import org.librarysimplified.services.api.ServiceDirectoryType;
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
+import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
-import org.nypl.simplified.app.services.SimplifiedServicesType;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
+import org.nypl.simplified.app.utilities.UIBackgroundExecutorType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.profiles.api.ProfileEvent;
@@ -35,6 +37,7 @@ import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileReadableType;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
+import org.nypl.simplified.ui.theme.ThemeServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +65,13 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
 
   @Override
   protected void onCreate(final @Nullable Bundle state) {
-    final SimplifiedServicesType services = Simplified.getServices();
-    this.setTheme(services.getCurrentTheme().getThemeWithActionBar());
+    final ServiceDirectoryType services = Simplified.getServices();
+    final int theme =
+      services.requireService(ThemeServiceType.class)
+        .findCurrentTheme()
+        .getThemeWithActionBar();
+
+    this.setTheme(theme);
     super.onCreate(state);
 
     this.setContentView(R.layout.profiles_selection);
@@ -82,8 +90,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
     this.button.setOnClickListener(view -> openCreationDialog());
 
     final ProfilesControllerType profiles =
-      services
-        .getProfilesController();
+      services.requireService(ProfilesControllerType.class);
 
     profiles.profileIdleTimer().stop();
 
@@ -98,7 +105,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
       try {
         final ProfileReadableType profile = profiles.profileCurrent();
         services
-          .getAnalytics()
+          .requireService(AnalyticsType.class)
           .publishEvent(
             new AnalyticsEvent.ProfileLoggedOut(
               LocalDateTime.now(),
@@ -125,9 +132,9 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
   private void onSelectedProfile(
     final ProfileReadableType profile) {
 
-    final SimplifiedServicesType services = Simplified.getServices();
+    final ServiceDirectoryType services = Simplified.getServices();
     LOG.debug("selected profile: {} ({})", profile.getId(), profile.getDisplayName());
-    final ProfilesControllerType profiles = services.getProfilesController();
+    final ProfilesControllerType profiles = services.requireService(ProfilesControllerType.class);
 
     final ProfilePreferences preferences =
       profile.preferences();
@@ -137,7 +144,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
       getWithDefault(preferences.dateOfBirth()
         .map(date -> date.component1().toString()), null);
 
-    services.getAnalytics()
+    services.requireService(AnalyticsType.class)
       .publishEvent(new AnalyticsEvent.ProfileLoggedIn(
         LocalDateTime.now(),
         null,
@@ -160,7 +167,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
           LOG.error("profile selection failed: ", e);
           onProfileSelectionFailed(e);
         }
-      }, services.getBackgroundExecutor());
+      }, services.requireService(UIBackgroundExecutorType.class));
   }
 
   private void onProfileSelectionFailed(final Throwable e) {
@@ -182,7 +189,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
     LOG.debug("onProfileSelectionSucceeded");
     LOG.debug("starting profile idle timer");
     Simplified.getServices()
-      .getProfilesController()
+      .requireService(ProfilesControllerType.class)
       .profileIdleTimer()
       .start();
     UIThread.runOnUIThread(this::openCatalog);
@@ -194,7 +201,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
     UIThread.runOnUIThread(() -> {
       final ProfilesControllerType profiles =
         Simplified.getServices()
-          .getProfilesController();
+          .requireService(ProfilesControllerType.class);
 
       list_items.clear();
       list_items.addAll(profiles.profiles().values());

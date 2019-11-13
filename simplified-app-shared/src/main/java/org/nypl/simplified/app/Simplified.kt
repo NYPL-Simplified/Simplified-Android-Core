@@ -6,9 +6,9 @@ import androidx.multidex.MultiDexApplication
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.rolling.RollingFileAppender
 import com.google.common.util.concurrent.ListenableFuture
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.app.services.SimplifiedServices
 import org.nypl.simplified.app.services.SimplifiedServicesStrings
-import org.nypl.simplified.app.services.SimplifiedServicesType
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.boot.api.BootLoader
 import org.nypl.simplified.boot.api.BootProcessType
@@ -33,8 +33,8 @@ class Simplified : MultiDexApplication() {
       get() = this.INSTANCE
 
     @JvmStatic
-    fun getServices(): SimplifiedServicesType =
-            this.application.services()
+    fun getServices(): ServiceDirectoryType =
+      this.application.services()
 
     /**
      * Checks if Simplified singleton has been initialized already.
@@ -71,16 +71,16 @@ class Simplified : MultiDexApplication() {
     }
   }
 
-  private lateinit var bootFuture: ListenableFuture<SimplifiedServicesType>
+  private lateinit var bootFuture: ListenableFuture<ServiceDirectoryType>
   private val logger = LoggerFactory.getLogger(Simplified::class.java)
-  private val boot: BootLoader<SimplifiedServicesType> =
-          BootLoader(
-                  bootProcess = object : BootProcessType<SimplifiedServicesType> {
-                    override fun execute(onProgress: (BootEvent) -> Unit): SimplifiedServicesType {
-                      return SimplifiedServices.create(this@Simplified, onProgress)
-                    }
-                  },
-                  bootStringResources = ::SimplifiedServicesStrings)
+  private val boot: BootLoader<ServiceDirectoryType> =
+    BootLoader(
+      bootProcess = object : BootProcessType<ServiceDirectoryType> {
+        override fun execute(onProgress: (BootEvent) -> Unit): ServiceDirectoryType {
+          return SimplifiedServices.create(this@Simplified, onProgress)
+        }
+      },
+      bootStringResources = ::SimplifiedServicesStrings)
 
   override fun onCreate() {
     super.onCreate()
@@ -127,7 +127,7 @@ class Simplified : MultiDexApplication() {
    * @return A future representing the application's boot process.
    */
 
-  val servicesBooting: ListenableFuture<SimplifiedServicesType>
+  val servicesBooting: ListenableFuture<ServiceDirectoryType>
     get() = this.bootFuture
 
   /**
@@ -137,8 +137,8 @@ class Simplified : MultiDexApplication() {
    * @return The application's services.
    */
 
-  fun services(): SimplifiedServicesType =
-          this.bootFuture.get(30L, TimeUnit.SECONDS)
+  fun services(): ServiceDirectoryType =
+    this.bootFuture.get(30L, TimeUnit.SECONDS)
 
   @Synchronized
   private fun getActualCardCreator(context: Context): CardCreator {

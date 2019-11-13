@@ -8,6 +8,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.slf4j.LoggerFactory
 
 /**
@@ -30,7 +31,12 @@ class ReaderTOCActivity : AppCompatActivity(), ReaderTOCSelectionListenerType {
     super.onCreate(state)
     logger.debug("onCreate")
 
-    this.setTheme(Simplified.application.services().currentTheme.themeWithActionBar)
+    this.setTheme(
+      Simplified.application.services()
+        .requireService(ThemeServiceType::class.java)
+        .findCurrentTheme()
+        .themeWithActionBar)
+
     this.setTitle(R.string.reader_toc)
 
     val input = this.intent!!

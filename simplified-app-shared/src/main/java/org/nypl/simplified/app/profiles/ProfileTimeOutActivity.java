@@ -87,7 +87,8 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
      */
 
     final ProfilesControllerType profiles =
-      Simplified.getServices().getProfilesController();
+      Simplified.getServices()
+        .requireService(ProfilesControllerType.class);
 
     switch (profiles.profileAnonymousEnabled()) {
       case ANONYMOUS_PROFILE_ENABLED: {
@@ -193,7 +194,7 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
   private void resetTimer() {
     LOG.debug("reset profile idle timer");
     Simplified.getServices()
-      .getProfilesController()
+      .requireService(ProfilesControllerType.class)
       .profileIdleTimer()
       .reset();
   }

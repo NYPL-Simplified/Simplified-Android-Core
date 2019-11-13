@@ -16,6 +16,7 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.utilities.UIBackgroundExecutorType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
@@ -64,7 +65,7 @@ class SettingsCustomOPDSActivity : NavigationDrawerActivity() {
 
     this.profilesController =
       Simplified.application.services()
-        .profilesController
+        .requireService(ProfilesControllerType::class.java)
   }
 
   override fun onStart() {
@@ -86,7 +87,8 @@ class SettingsCustomOPDSActivity : NavigationDrawerActivity() {
       this.future = nextFuture
       nextFuture.addListener(
         Runnable { this.onCreationFinished() },
-        Simplified.application.services().backgroundExecutor)
+        Simplified.application.services()
+          .requireService(UIBackgroundExecutorType::class.java))
     }
 
     this.feedURL.addTextChangedListener(object : TextWatcher {

@@ -7,6 +7,7 @@ import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.ui.errorpage.ErrorPageBaseActivity
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.theme.ThemeServiceType
 
 class ErrorActivity : ErrorPageBaseActivity() {
 
@@ -37,7 +38,8 @@ class ErrorActivity : ErrorPageBaseActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     this.setTheme(
       Simplified.getServices()
-        .currentTheme
+        .requireService(ThemeServiceType::class.java)
+        .findCurrentTheme()
         .themeWithActionBar)
 
     super.onCreate(savedInstanceState)

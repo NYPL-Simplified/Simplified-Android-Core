@@ -10,7 +10,6 @@ import android.widget.ListAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.google.common.base.Function
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Pair
@@ -18,10 +17,12 @@ import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.ScreenSizeInformationType
+import org.nypl.simplified.app.utilities.UIBackgroundExecutorType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusEvent
@@ -50,19 +51,30 @@ import java.util.concurrent.atomic.AtomicReference
 
 class CatalogFeedWithoutGroups(
   private val activity: AppCompatActivity,
-  private val analytics: AnalyticsType,
+  private val services: ServiceDirectoryType,
   private val account: AccountType,
-  private val bookCoverProvider: BookCoverProviderType,
   private val bookSelectionListener: CatalogBookSelectionListenerType,
-  private val bookRegistry: BookRegistryReadableType,
-  private val bookController: BooksControllerType,
-  private val profilesController: ProfilesControllerType,
-  private val feedLoader: FeedLoaderType,
-  private val feed: FeedWithoutGroups,
-  private val networkConnectivity: NetworkConnectivityType,
-  private val executor: ListeningExecutorService,
-  private val screenSizeInformation: ScreenSizeInformationType
+  private val feed: FeedWithoutGroups
 ) : ListAdapter, OnScrollListener {
+
+  private val analytics =
+    this.services.requireService(AnalyticsType::class.java)
+  private val bookCoverProvider =
+    this.services.requireService(BookCoverProviderType::class.java)
+  private val bookRegistry =
+    this.services.requireService(BookRegistryReadableType::class.java)
+  private val bookController =
+    this.services.requireService(BooksControllerType::class.java)
+  private val profilesController =
+    this.services.requireService(ProfilesControllerType::class.java)
+  private val feedLoader =
+    this.services.requireService(FeedLoaderType::class.java)
+  private val networkConnectivity =
+    this.services.requireService(NetworkConnectivityType::class.java)
+  private val screenSizeInformation =
+    this.services.requireService(ScreenSizeInformationType::class.java)
+  private val uiBackgroundExecutor =
+    this.services.requireService(UIBackgroundExecutorType::class.java)
 
   private val adapter: ArrayAdapter<FeedEntry> =
     ArrayAdapter(this.activity, 0, this.feed.entriesInOrder)
@@ -196,10 +208,10 @@ class CatalogFeedWithoutGroups(
         .catching(
           Exception::class.java,
           Function<Exception, FeedLoaderResult>(this@CatalogFeedWithoutGroups::wrapFeedLoaderException),
-          this.executor)
+          this.uiBackgroundExecutor)
         .transform(
           Function<FeedLoaderResult, Unit> { result -> this.onFeedResult(result!!) },
-          this.executor)
+          this.uiBackgroundExecutor)
 
     this.loading.set(Pair.pair<ListenableFuture<Unit>, URI>(future, next))
     return future

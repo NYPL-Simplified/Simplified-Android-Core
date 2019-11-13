@@ -19,6 +19,7 @@ dependencies {
   implementation project(":simplified-patron-api")
   implementation project(":simplified-profiles-api")
   implementation project(":simplified-reader-bookmarks-api")
+  implementation project(":simplified-services-api")
   implementation project(":simplified-taskrecorder-api")
   implementation project(':simplified-accounts-source-spi')
 

@@ -17,10 +17,14 @@ import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
+import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookFormats
@@ -30,11 +34,14 @@ import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookStatusLoaned
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
+import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
+import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
@@ -45,6 +52,7 @@ import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
+import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
@@ -52,6 +60,10 @@ import org.nypl.simplified.profiles.ProfilesDatabases
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.strings.MockAccountCreationStringResources
 import org.nypl.simplified.tests.strings.MockAccountDeletionStringResources
@@ -59,9 +71,11 @@ import org.nypl.simplified.tests.strings.MockAccountLoginStringResources
 import org.nypl.simplified.tests.strings.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockAnalytics
+import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.strings.MockBorrowStringResources
 import org.nypl.simplified.tests.strings.MockRevokeStringResources
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
+import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.slf4j.LoggerFactory
@@ -164,32 +178,52 @@ abstract class BooksControllerContract {
     val analyticsLogger =
       MockAnalytics()
 
-    return Controller.create(
+    val services = MutableServiceDirectory()
+    services.publishServiceReplacing(
+      AnalyticsType::class.java, analyticsLogger)
+    services.publishServiceReplacing(
+      AccountLoginStringResourcesType::class.java, this.accountLoginStringResources)
+    services.publishServiceReplacing(
+      AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources)
+    services.publishServiceReplacing(
+      AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings)
+    services.publishServiceReplacing(
+      AccountProviderRegistryType::class.java, accountProviders)
+    services.publishServiceReplacing(
+      AuthenticationDocumentParsersType::class.java, this.authDocumentParsers)
+    services.publishServiceReplacing(
+      BookRegistryType::class.java, this.bookRegistry)
+    services.publishServiceReplacing(
+      BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources)
+    services.publishServiceReplacing(
+      BundledContentResolverType::class.java, bundledContent)
+    services.publishServiceReplacing(
+      DownloaderType::class.java, downloader)
+    services.publishServiceReplacing(
+      FeedLoaderType::class.java, feedLoader)
+    services.publishServiceReplacing(
+      OPDSFeedParserType::class.java, parser)
+    services.publishServiceReplacing(
+      HTTPType::class.java, http)
+    services.publishServiceReplacing(
+      PatronUserProfileParsersType::class.java, patronUserProfileParsers)
+    services.publishServiceReplacing(
+      ProfileAccountCreationStringResourcesType::class.java, profileAccountCreationStringResources)
+    services.publishServiceReplacing(
+      ProfileAccountDeletionStringResourcesType::class.java, profileAccountDeletionStringResources)
+    services.publishServiceReplacing(
+      ProfilesDatabaseType::class.java, profiles)
+    services.publishServiceReplacing(
+      BookRevokeStringResourcesType::class.java, revokeStringResources)
+    services.publishServiceReplacing(
+      ProfileIdleTimerType::class.java, InoperableIdleTimer())
+
+    return Controller.createFromServiceDirectory(
+      services = services,
+      executorService = exec,
       accountEvents = accountEvents,
-      accountLoginStringResources = this.accountLoginStringResources,
-      accountLogoutStringResources = this.accountLogoutStringResources,
-      accountProviderResolutionStrings = this.accountProviderResolutionStrings,
-      accountProviders = accountProviders,
-      adobeDrm = null,
-      analytics = analyticsLogger,
-      authDocumentParsers = this.authDocumentParsers,
-      bookBorrowStrings = this.bookBorrowStringResources,
-      bookRegistry = books,
-      bundledContent = bundledContent,
-      cacheDirectory = this.cacheDirectory,
-      downloader = downloader,
-      exec = exec,
-      feedLoader = feedLoader,
-      feedParser = parser,
-      http = http,
-      patronUserProfileParsers = patronUserProfileParsers,
-      profileAccountCreationStringResources = this.profileAccountCreationStringResources,
-      profileAccountDeletionStringResources = this.profileAccountDeletionStringResources,
       profileEvents = profileEvents,
-      profiles = profiles,
-      readerBookmarkEvents = Observable.create(),
-      revokeStrings = this.revokeStringResources,
-      timerExecutor = timerExec
+      cacheDirectory = this.cacheDirectory
     )
   }
 

@@ -18,6 +18,7 @@ import org.nypl.simplified.app.catalog.MainCatalogActivity
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
+import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.migration.api.Migrations
 import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.migration.spi.MigrationReport
@@ -43,7 +44,11 @@ import java.util.concurrent.TimeUnit
 class SplashActivity : SimplifiedActivity(), SplashListenerType {
 
   override fun onSplashDone() {
-    when (Simplified.application.services().profilesController.profileAnonymousEnabled()) {
+    val profilesController =
+      Simplified.application.services()
+        .requireService(ProfilesControllerType::class.java)
+
+    when (profilesController.profileAnonymousEnabled()) {
       null,
       ANONYMOUS_PROFILE_ENABLED -> {
         val intent = Intent()
@@ -69,7 +74,8 @@ class SplashActivity : SimplifiedActivity(), SplashListenerType {
   override fun onSplashWantMigrations(): MigrationsType {
 
     val profilesController =
-      Simplified.application.services().profilesController
+      Simplified.application.services()
+        .requireService(ProfilesControllerType::class.java)
 
     val migrationServiceDependencies =
       MigrationServiceDependencies(
@@ -129,7 +135,8 @@ class SplashActivity : SimplifiedActivity(), SplashListenerType {
     this.log.debug("onSplashOpenProfileAnonymous")
 
     val profilesController =
-      Simplified.application.services().profilesController
+      Simplified.application.services()
+        .requireService(ProfilesControllerType::class.java)
 
     profilesController.profileSelect(profilesController.profileCurrent().id)
   }
@@ -147,7 +154,9 @@ class SplashActivity : SimplifiedActivity(), SplashListenerType {
   override fun onSplashWantProfilesMode(): ProfilesDatabaseType.AnonymousProfileEnabled {
     this.log.debug("onSplashWantProfilesMode")
 
-    return Simplified.application.services().profilesController.profileAnonymousEnabled()
+    return Simplified.application.services()
+      .requireService(ProfilesControllerType::class.java)
+      .profileAnonymousEnabled()
   }
 
   override fun onSplashEULAIsProvided(): Boolean {
@@ -161,7 +170,11 @@ class SplashActivity : SimplifiedActivity(), SplashListenerType {
   }
 
   private fun getAvailableEULA(): EULAType? {
-    val eulaOpt = Simplified.application.services().documentStore.eula
+    val eulaOpt =
+      Simplified.application.services()
+        .requireService(DocumentStoreType::class.java)
+        .eula
+
     return if (eulaOpt is Some<EULAType>) {
       eulaOpt.get()
     } else {

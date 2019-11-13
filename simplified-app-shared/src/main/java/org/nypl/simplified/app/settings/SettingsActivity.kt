@@ -22,7 +22,7 @@ class SettingsActivity : NavigationDrawerActivity(), SettingsFragmentListenerTyp
 
   override fun documents(): DocumentStoreType =
     Simplified.application.services()
-      .documentStore
+      .requireService(DocumentStoreType::class.java)
 
   override fun navigationDrawerShouldShowIndicator(): Boolean =
     true
