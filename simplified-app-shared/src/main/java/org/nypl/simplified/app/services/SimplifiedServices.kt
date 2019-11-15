@@ -82,6 +82,7 @@ import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
+import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.bugsnag.IfBugsnag
 import org.nypl.simplified.documents.clock.Clock
 import org.nypl.simplified.documents.clock.ClockType
@@ -234,7 +235,7 @@ class SimplifiedServices private constructor(
         Thread.sleep(100)
       }
 
-      BootTesting.failBootProcessForTestingPurposesIfRequested(context)
+      BootFailureTesting.failBootProcessForTestingPurposesIfRequested(context)
 
       val assets = context.assets
       val strings = SimplifiedServicesStrings(context.resources)

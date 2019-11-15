@@ -2,8 +2,14 @@ dependencies {
   api libraries.androidXConstraintLayout
   api libraries.androidXPreference
 
+  api project(":simplified-ui-errorpage")
+
+  implementation project(":simplified-adobe-extensions")
+  implementation project(":simplified-boot-api")
+  implementation project(":simplified-buildconfig-api")
   implementation project(":simplified-documents")
   implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-reports")
   implementation project(":simplified-services-api")
   implementation project(":simplified-ui-thread-api")
 

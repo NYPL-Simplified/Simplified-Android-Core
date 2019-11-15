@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.services
+package org.nypl.simplified.boot.api
 
 import android.content.Context
 import org.slf4j.LoggerFactory
@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory
  * Functions used to help QA with testing the boot process.
  */
 
-object BootTesting {
+object BootFailureTesting {
 
-  private val logger = LoggerFactory.getLogger(BootTesting::class.java)
+  private val logger = LoggerFactory.getLogger(BootFailureTesting::class.java)
 
   /**
    * @return `true` if boot failures are enabled

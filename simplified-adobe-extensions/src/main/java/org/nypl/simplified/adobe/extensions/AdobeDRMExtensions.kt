@@ -1,4 +1,4 @@
-package org.nypl.simplified.books.controller
+package org.nypl.simplified.adobe.extensions
 
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture

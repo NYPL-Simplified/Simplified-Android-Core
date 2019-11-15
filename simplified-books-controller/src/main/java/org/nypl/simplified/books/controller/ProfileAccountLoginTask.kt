@@ -19,6 +19,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOKType

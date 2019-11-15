@@ -1,6 +1,8 @@
 package org.nypl.simplified.ui.settings
 
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
 /**
  * Navigation functions for the settings screens.
@@ -61,4 +63,16 @@ interface SettingsNavigationControllerType {
    */
 
   fun popBackStack()
+
+  /**
+   * The settings screen wants to open the custom OPDS creation form.
+   */
+
+  fun openSettingsCustomOPDS()
+
+  /**
+   * The settings screen wants to open the error page.
+   */
+
+  fun <E : PresentableErrorType> openErrorPage(parameters: ErrorPageParameters<E>)
 }

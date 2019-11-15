@@ -21,6 +21,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -49,7 +50,7 @@ import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
-import org.nypl.simplified.books.controller.AdobeDRMExtensions.AdobeDRMFulfillmentException
+import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillmentException
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadCancelled
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadFailed
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadOK

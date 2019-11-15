@@ -1,10 +1,10 @@
-package org.nypl.simplified.app.settings
+package org.nypl.simplified.ui.settings
 
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
-import android.view.MenuItem
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -12,17 +12,13 @@ import android.widget.Switch
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.MoreExecutors
+import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.drm.core.AdobeAdeptExecutorType
-import org.nypl.simplified.app.BuildConfig
-import org.nypl.simplified.app.R
-import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.errors.ErrorActivity
-import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
-import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.boot.api.BootFailureTesting
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -32,15 +28,20 @@ import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.theme.ThemeServiceType
+import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
-class SettingsVersionActivity : ProfileTimeOutActivity() {
+/**
+ * A fragment that shows the set of accounts in the current profile.
+ */
 
-  private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
-  private var buildClicks = 1
+class SettingsFragmentVersion : Fragment() {
+
+  private val logger =
+    LoggerFactory.getLogger(SettingsFragmentVersion::class.java)
 
   private lateinit var adobeDRMActivationTable: TableLayout
+  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var buildText: TextView
   private lateinit var buildTitle: TextView
   private lateinit var cacheButton: Button
@@ -49,80 +50,85 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   private lateinit var developerOptions: ViewGroup
   private lateinit var drmTable: TableLayout
   private lateinit var failNextBoot: Switch
+  private lateinit var host: ServiceDirectoryProviderType
+  private lateinit var navigation: SettingsNavigationControllerType
+  private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
   private lateinit var showTesting: Switch
+  private lateinit var uiThread: UIThreadServiceType
   private lateinit var versionText: TextView
   private lateinit var versionTitle: TextView
+  private var adeptExecutor: AdobeAdeptExecutorType? = null
+  private var buildClicks = 1
+  private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
 
-  private val logger = LoggerFactory.getLogger(SettingsVersionActivity::class.java)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
-  override fun onCreate(state: Bundle?) {
-    super.onCreate(state)
+    val context = this.requireContext()
+    if (context is ServiceDirectoryProviderType) {
+      this.host = context
+    } else {
+      throw IllegalStateException(
+        "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
+    }
 
-    this.setTheme(
-      Simplified.application.services()
-      .requireService(ThemeServiceType::class.java)
-      .findCurrentTheme()
-      .themeWithActionBar)
+    this.profilesController =
+      this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      this.host.serviceDirectory.requireService(UIThreadServiceType::class.java)
+    this.buildConfig =
+      this.host.serviceDirectory.requireService(BuildConfigurationServiceType::class.java)
+    this.adeptExecutor =
+      this.host.serviceDirectory.optionalService(AdobeAdeptExecutorType::class.java)
+    this.navigation =
+      this.host.serviceDirectory.requireService(SettingsNavigationControllerType::class.java)
+  }
 
-    this.setContentView(R.layout.settings_version)
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View? {
+    val layout =
+      inflater.inflate(R.layout.settings_version, container, false)
 
     this.developerOptions =
-      this.findViewById(R.id.settings_version_dev)
+      layout.findViewById(R.id.settingsVersionDev)
     this.crashButton =
-      this.developerOptions.findViewById(R.id.settings_version_dev_crash)
+      this.developerOptions.findViewById(R.id.settingsVersionDevCrash)
     this.cacheButton =
-      this.developerOptions.findViewById(R.id.settings_version_dev_show_cache_dir)
+      this.developerOptions.findViewById(R.id.settingsVersionDevShowCacheDir)
     this.sendReportButton =
-      this.developerOptions.findViewById(R.id.settings_version_dev_send_reports)
+      this.developerOptions.findViewById(R.id.settingsVersionDevSendReports)
     this.showErrorButton =
-      this.developerOptions.findViewById(R.id.settings_version_dev_show_error)
+      this.developerOptions.findViewById(R.id.settingsVersionDevShowError)
 
     this.buildTitle =
-      this.findViewById(R.id.settings_version_build_title)
+      layout.findViewById(R.id.settingsVersionBuildTitle)
     this.buildText =
-      this.findViewById(R.id.settings_version_build)
+      layout.findViewById(R.id.settingsVersionBuild)
     this.versionTitle =
-      this.findViewById(R.id.settings_version_version_title)
+      layout.findViewById(R.id.settingsVersionVersionTitle)
     this.versionText =
-      this.findViewById(R.id.settings_version_version)
+      layout.findViewById(R.id.settingsVersionVersion)
     this.drmTable =
-      this.findViewById(R.id.settings_version_drm_support)
+      layout.findViewById(R.id.settingsVersionDrmSupport)
     this.adobeDRMActivationTable =
-      this.findViewById(R.id.settings_version_drm_adobe_activations)
+      layout.findViewById(R.id.settingsVersionDrmAdobeActivations)
     this.showTesting =
-      this.findViewById(R.id.settings_version_dev_production_libraries_switch)
+      layout.findViewById(R.id.settingsVersionDevProductionLibrariesSwitch)
     this.failNextBoot =
-      this.findViewById(R.id.settings_version_dev_fail_next_boot_switch)
+      layout.findViewById(R.id.settingsVersionDevFailNextBootSwitch)
     this.customOPDS =
-      this.findViewById(R.id.settings_version_dev_custom_opds)
-  }
+      layout.findViewById(R.id.settingsVersionDevCustomOPDS)
 
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    return when (item.itemId) {
-      android.R.id.home -> {
-        this.finish()
-        true
-      }
-      else ->
-        super.onOptionsItemSelected(item)
-    }
+    return layout
   }
-
-  data class ExampleError(
-    override val message: String
-  ) : PresentableErrorType
 
   override fun onStart() {
     super.onStart()
-
-    val bar = this.supportActionBar
-    if (bar != null) {
-      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp)
-      bar.setDisplayHomeAsUpEnabled(true)
-      bar.setHomeButtonEnabled(false)
-    }
 
     this.buildTitle.setOnClickListener {
       if (this.buildClicks >= 7) {
@@ -136,34 +142,35 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
     }
 
     this.cacheButton.setOnClickListener {
+      val context = this.requireContext()
       val message = StringBuilder(128)
       message.append("Cache directory is: ")
-      message.append(this.externalCacheDir)
+      message.append(context.externalCacheDir)
       message.append("\n")
       message.append("\n")
       message.append("Exists: ")
-      message.append(this.externalCacheDir?.isDirectory ?: false)
+      message.append(context.externalCacheDir?.isDirectory ?: false)
       message.append("\n")
 
-      AlertDialog.Builder(this)
+      AlertDialog.Builder(context)
         .setTitle("Cache Directory")
         .setMessage(message.toString())
         .show()
     }
 
     try {
-      val pkgManager = this.getPackageManager()
-      val pkgInfo = pkgManager.getPackageInfo(this.packageName, 0)
+      val context = this.requireContext()
+      val pkgManager = context.getPackageManager()
+      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
       this.versionText.text = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
     } catch (e: PackageManager.NameNotFoundException) {
       this.versionText.text = "Unavailable"
     }
 
-    val email = this.resources.getString(R.string.feature_migration_report_email)
     this.sendReportButton.setOnClickListener {
       Reports.sendReportsDefault(
-        context = this,
-        address = email,
+        context = this.requireContext(),
+        address = this.buildConfig.errorReportEmail,
         subject = "[simplye-error-report] ${this.versionText.text}",
         body = "")
     }
@@ -173,23 +180,19 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
     }
 
     this.developerOptions.visibility = View.GONE
-    this.buildText.text = BuildConfig.GIT_COMMIT
+    this.buildText.text = this.buildConfig.vcsCommit
 
     this.drmTable.removeAllViews()
     this.drmTable.addView(this.drmACSSupportRow())
     this.adobeDRMActivationTable.removeAllViews()
 
-    val profilesController =
-      Simplified.application.services()
-        .requireService(ProfilesControllerType::class.java)
-
     this.profileEventSubscription =
-      profilesController
+      this.profilesController
         .profileEvents()
         .subscribe(this::onProfileEvent)
 
     this.showTesting.isChecked =
-      profilesController
+      this.profilesController
         .profileCurrent()
         .preferences()
         .showTestingLibraries()
@@ -198,10 +201,9 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
      * Configure the "fail next boot" switch to enable/disable boot failures.
      */
 
-    this.failNextBoot.isChecked = BootFailureTesting.isBootFailureEnabled(this)
-    this.failNextBoot.setOnClickListener {
-      BootFailureTesting.enableBootFailures(
-        this, !BootFailureTesting.isBootFailureEnabled(this))
+    this.failNextBoot.isChecked = isBootFailureEnabled()
+    this.failNextBoot.setOnCheckedChangeListener { _, checked ->
+      enableBootFailures(checked)
     }
 
     /*
@@ -209,9 +211,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
      */
 
     this.customOPDS.setOnClickListener {
-      val intent = Intent()
-      intent.setClass(this, SettingsCustomOPDSActivity::class.java)
-      this.startActivity(intent)
+      this.navigation.openSettingsCustomOPDS()
     }
 
     /*
@@ -219,15 +219,19 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
      */
 
     this.showTesting.setOnClickListener {
-      profilesController
-        .profilePreferencesUpdate(
-          profilesController.profileCurrent()
-            .preferences()
-            .toBuilder()
-            .setShowTestingLibraries(this.showTesting.isChecked)
-            .build())
+      val newPreferences =
+        this.profilesController.profileCurrent()
+          .preferences()
+          .toBuilder()
+          .setShowTestingLibraries(this.showTesting.isChecked)
+          .build()
+      this.profilesController.profilePreferencesUpdate(newPreferences)
     }
   }
+
+  data class ExampleError(
+    override val message: String
+  ) : PresentableErrorType
 
   private fun showErrorPage() {
     val attributes = sortedMapOf(
@@ -236,36 +240,43 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
     val taskSteps =
       mutableListOf<TaskStep<ExampleError>>()
+
     taskSteps.add(
       TaskStep(
         "Opening error page.",
         TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")))
 
-    val parameters = ErrorPageParameters(
-      emailAddress = "",
-      body = "",
-      subject = "[simplye-error-report] ${this.versionText.text}",
-      attributes = attributes,
-      taskSteps = taskSteps)
+    val parameters =
+      ErrorPageParameters(
+        emailAddress = this.buildConfig.errorReportEmail,
+        body = "",
+        subject = "[simplye-error-report] ${this.versionText.text}",
+        attributes = attributes,
+        taskSteps = taskSteps)
 
-    ErrorActivity.startActivity(this, parameters)
+    this.navigation.openErrorPage(parameters)
   }
 
-  override fun onStop() {
-    super.onStop()
-    this.profileEventSubscription?.unsubscribe()
+  private fun enableBootFailures(enabled: Boolean) {
+    BootFailureTesting.enableBootFailures(
+      context = this.requireContext(),
+      enabled = enabled
+    )
+  }
+
+  private fun isBootFailureEnabled(): Boolean {
+    return BootFailureTesting.isBootFailureEnabled(this.requireContext())
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
     if (event is ProfilePreferencesChanged) {
-      UIThread.runOnUIThread {
+      this.uiThread.runOnUIThread(Runnable {
         this.showTesting.isChecked =
-          Simplified.application.services()
-            .requireService(ProfilesControllerType::class.java)
+          this.profilesController
             .profileCurrent()
             .preferences()
             .showTestingLibraries()
-      }
+      })
     }
   }
 
@@ -280,12 +291,9 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
     key.text = "Adobe ACS"
 
-    val executor =
-      Simplified.application.services()
-        .optionalService(AdobeAdeptExecutorType::class.java)
-
+    val executor = this.adeptExecutor
     if (executor == null) {
-      value.setTextColor(ContextCompat.getColor(this, R.color.simplified_material_red_primary))
+      value.setTextColor(Color.RED)
       value.text = "Unsupported"
       return row
     }
@@ -302,17 +310,17 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
     adeptFuture.addListener(
       Runnable {
-        UIThread.runOnUIThread {
+        this.uiThread.runOnUIThread(Runnable {
           try {
             this.onAdobeDRMReceivedActivations(adeptFuture.get())
           } catch (e: Exception) {
             this.onAdobeDRMReceivedActivationsError(e)
           }
-        }
+        })
       },
       MoreExecutors.directExecutor())
 
-    value.setTextColor(ContextCompat.getColor(this, R.color.simplified_material_green_primary))
+    value.setTextColor(Color.GREEN)
     value.text = "Supported"
     return row
   }
@@ -327,7 +335,10 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
     this.run {
       val row =
         this.layoutInflater.inflate(
-          R.layout.settings_drm_activation_table_item, this.adobeDRMActivationTable, false) as TableRow
+          R.layout.settings_drm_activation_table_item,
+          this.adobeDRMActivationTable,
+          false
+        ) as TableRow
       val index = row.findViewById<TextView>(R.id.index)
       val vendor = row.findViewById<TextView>(R.id.vendor)
       val device = row.findViewById<TextView>(R.id.device)
@@ -348,7 +359,10 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
     for (activation in activations) {
       val row =
         this.layoutInflater.inflate(
-          R.layout.settings_drm_activation_table_item, this.adobeDRMActivationTable, false) as TableRow
+          R.layout.settings_drm_activation_table_item,
+          this.adobeDRMActivationTable,
+          false
+        ) as TableRow
       val index = row.findViewById<TextView>(R.id.index)
       val vendor = row.findViewById<TextView>(R.id.vendor)
       val device = row.findViewById<TextView>(R.id.device)
@@ -365,5 +379,20 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
       this.adobeDRMActivationTable.addView(row)
     }
+  }
+
+  override fun onStop() {
+    super.onStop()
+
+    this.profileEventSubscription?.unsubscribe()
+
+    this.buildTitle.setOnClickListener(null)
+    this.cacheButton.setOnClickListener(null)
+    this.crashButton.setOnClickListener(null)
+    this.customOPDS.setOnClickListener(null)
+    this.failNextBoot.setOnCheckedChangeListener(null)
+    this.sendReportButton.setOnClickListener(null)
+    this.showErrorButton.setOnClickListener(null)
+    this.showTesting.setOnClickListener(null)
   }
 }

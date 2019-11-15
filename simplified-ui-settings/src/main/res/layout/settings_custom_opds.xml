@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <EditText
+    android:id="@+id/settingsCustomOPDSURL"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:hint="@string/settingsCustomOPDSURL"
+    android:inputType="textUri"
+    android:singleLine="true"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <Button
+    android:id="@+id/settingsCustomOPDSCreate"
+    android:layout_width="128dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:text="@string/settingsCustomOPDSCreate"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/settingsCustomOPDSURL" />
+
+  <ProgressBar
+    android:id="@+id/settingsCustomOPDSProgressBar"
+    style="?android:attr/progressBarStyleHorizontal"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:indeterminate="true"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/settingsCustomOPDSCreate" />
+
+  <TextView
+    android:id="@+id/settingsCustomOPDSProgressText"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="16dp"
+    android:textSize="12sp"
+    android:fontFamily="monospace"
+    android:gravity="start|top"
+    android:scrollbarAlwaysDrawVerticalTrack="true"
+    android:text="@string/settingsPlaceholder"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/settingsCustomOPDSProgressBar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

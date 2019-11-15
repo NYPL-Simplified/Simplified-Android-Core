@@ -23,6 +23,10 @@
   <string name="settingsCOPPADeleteBooks">Delete books?</string>
   <string name="settingsCOPPADeleteBooksConfirm">Changing your age will remove all books downloaded from the current account.</string>
   <string name="settingsCOPPAOver13">I am over 13</string>
+  <string name="settingsCustomOPDS">Custom OPDS Feed</string>
+  <string name="settingsCustomOPDSCreate">Create</string>
+  <string name="settingsCustomOPDSInvalidURI">Not a valid URI.</string>
+  <string name="settingsCustomOPDSURL">Custom feed URL…</string>
   <string name="settingsDelete">Delete</string>
   <string name="settingsDocumentation">Documentation</string>
   <string name="settingsEULA">User Agreement</string>
@@ -43,5 +47,8 @@
   <string name="settingsSyncBookmarks">Sync bookmarks</string>
   <string name="settingsUserName">User Name</string>
   <string name="settingsVersion">Version</string>
+  <string name="settingsVersionBuild">Build</string>
+  <string name="settingsVersionDeveloper">Developer Options</string>
   <string name="settingsVersionSummary">Application version information…</string>
+  <string name="settingsVersionVersion">Version</string>
 </resources>
