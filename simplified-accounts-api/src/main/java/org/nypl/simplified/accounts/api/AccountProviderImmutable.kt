@@ -38,6 +38,45 @@ data class AccountProviderImmutable(
   override val updated: DateTime
 ) : AccountProviderType {
 
+  companion object {
+
+    /**
+     * Make an immutable copy of the given account provider. If the other account provider
+     * is already immutable, it will be returned directly.
+     */
+
+    fun copy(other: AccountProviderType): AccountProviderImmutable {
+      if (other is AccountProviderImmutable) {
+        return other
+      }
+
+      return AccountProviderImmutable(
+        addAutomatically = other.addAutomatically,
+        annotationsURI = other.annotationsURI,
+        authentication = other.authentication,
+        authenticationDocumentURI = other.authenticationDocumentURI,
+        cardCreatorURI = other.cardCreatorURI,
+        catalogURI = other.catalogURI,
+        displayName = other.displayName,
+        eula = other.eula,
+        id = other.id,
+        idNumeric = other.idNumeric,
+        isProduction = other.isProduction,
+        license = other.license,
+        loansURI = other.loansURI,
+        logo = other.logo,
+        mainColor = other.mainColor,
+        patronSettingsURI = other.patronSettingsURI,
+        privacyPolicy = other.privacyPolicy,
+        subtitle = other.subtitle,
+        supportEmail = other.supportEmail,
+        supportsReservations = other.supportsReservations,
+        supportsSimplyESynchronization = other.supportsSimplyESynchronization,
+        updated = other.updated
+      )
+    }
+  }
+
   override fun toDescription(): AccountProviderDescriptionType {
     val imageLinks = mutableListOf<Link>()
     this.logo?.let { uri ->

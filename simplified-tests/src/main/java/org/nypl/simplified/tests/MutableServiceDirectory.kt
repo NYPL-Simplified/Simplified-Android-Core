@@ -16,7 +16,14 @@ class MutableServiceDirectory : ServiceDirectoryType {
     }
   }
 
-  fun <T : Any> publishServiceReplacing(
+  fun clear() {
+    this.logger.debug("clearing services")
+    synchronized(this.servicesLock) {
+      this.services.clear()
+    }
+  }
+
+  fun <T : Any> putService(
     interfaces: List<Class<T>>,
     service: T
   ) {
@@ -24,7 +31,7 @@ class MutableServiceDirectory : ServiceDirectoryType {
       interfaces.isNotEmpty(),
       "Must supply at least one interface type")
 
-    logger.debug("registering (replacing) service {}", service.javaClass.canonicalName)
+    this.logger.debug("registering (replacing) service {}", service.javaClass.canonicalName)
     synchronized(this.servicesLock) {
       for (inter in interfaces) {
         this.services[inter] = listOf(service)
@@ -32,10 +39,10 @@ class MutableServiceDirectory : ServiceDirectoryType {
     }
   }
 
-  fun <T : Any> publishServiceReplacing(
+  fun <T : Any> putService(
     interfaceType: Class<T>,
     service: T
-  ) = this.publishServiceReplacing(listOf(interfaceType), service)
+  ) = this.putService(listOf(interfaceType), service)
 
   fun <T : Any> publishService(
     interfaces: List<Class<T>>,
@@ -45,7 +52,7 @@ class MutableServiceDirectory : ServiceDirectoryType {
       interfaces.isNotEmpty(),
       "Must supply at least one interface type")
 
-    logger.debug("registering service {}", service.javaClass.canonicalName)
+    this.logger.debug("registering service {}", service.javaClass.canonicalName)
     synchronized(this.servicesLock) {
       for (inter in interfaces) {
         val existing: List<Any> = this.services[inter] ?: listOf()

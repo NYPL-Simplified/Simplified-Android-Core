@@ -169,7 +169,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       Simplified.application.services()
         .requireService(ProfilesControllerType::class.java)
         .profileCurrent()
-    this.account = getAccount(extras)
+    this.account = org.nypl.simplified.app.settings.SettingsAccountActivity.Companion.getAccount(extras)
 
     this.accountNameText =
       this.findViewById(android.R.id.text1)
@@ -384,7 +384,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   override fun onResume() {
     super.onResume()
     // Show logged in UI if user has pressed the back button from the card creator sscreen
-    configureLoginFieldVisibilityAndContents()
+    this.configureLoginFieldVisibilityAndContents()
   }
 
   override fun onStart() {
@@ -497,7 +497,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     val state = this.account.loginState
 
     val ageGateAuth =
-      when (val auth = account.provider.authentication) {
+      when (val auth = this.account.provider.authentication) {
         is AccountProviderAuthenticationDescription.COPPAAgeGate -> auth
         is AccountProviderAuthenticationDescription.Basic -> null
         null -> null
@@ -517,7 +517,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         this.barcodeText.setText("")
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = true
-        this.ageCheckbox.setOnClickListener(onAgeCheckboxClicked())
+        this.ageCheckbox.setOnClickListener(this.onAgeCheckboxClicked())
 
         this.configureEnableLoginForm()
       }
@@ -528,7 +528,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         this.actionLayout.visibility = View.INVISIBLE
         this.ageCheckbox.isChecked = this.isOver13()
         this.ageCheckbox.isEnabled = true
-        this.ageCheckbox.setOnClickListener(onAgeCheckboxClicked())
+        this.ageCheckbox.setOnClickListener(this.onAgeCheckboxClicked())
 
         this.pinText.setText(credentials.pin().value())
         this.pinText.isEnabled = false
@@ -610,10 +610,10 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     AlertDialog.Builder(this)
       .setTitle(R.string.age_verification_confirm_title)
       .setMessage(R.string.age_verification_confirm_under13_check)
-      .setNegativeButton(R.string.age_verification_cancel_delete, { _, _ ->
+      .setNegativeButton(R.string.age_verification_cancel_delete) { _, _ ->
         this.ageCheckbox.isChecked = !this.ageCheckbox.isChecked
-      })
-      .setPositiveButton(R.string.age_verification_confirm_delete, { _, _ ->
+      }
+      .setPositiveButton(R.string.age_verification_confirm_delete) { _, _ ->
         this.configureDisableLoginForm()
         if (this.ageCheckbox.isChecked) {
           this.setOver13()
@@ -621,7 +621,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
           this.setUnder13()
         }
         this.tryLogout()
-      })
+      }
       .create()
       .show()
   }

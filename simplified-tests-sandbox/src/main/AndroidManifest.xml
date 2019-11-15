@@ -27,6 +27,11 @@
       android:exported="true"/>
 
     <activity
+      android:name="org.nypl.simplified.tests.sandbox.SettingsActivity"
+      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple"
+      android:exported="true"/>
+
+    <activity
       android:name="org.nypl.simplified.tests.sandbox.ErrorPageActivity"
       android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple"
       android:exported="true"/>

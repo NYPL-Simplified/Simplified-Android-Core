@@ -1,0 +1,12 @@
+dependencies {
+  api libraries.androidXConstraintLayout
+  api libraries.androidXPreference
+
+  implementation project(":simplified-documents")
+  implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-services-api")
+  implementation project(":simplified-ui-thread-api")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}
