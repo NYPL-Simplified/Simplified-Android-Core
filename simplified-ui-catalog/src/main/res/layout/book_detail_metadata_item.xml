@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:minHeight="16dp">
+
+  <TextView
+    android:id="@+id/key"
+    android:layout_width="wrap_content"
+    android:maxLines="1"
+    android:maxLength="16"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="32dp"
+    android:text="@string/catalogPlaceholder"/>
+
+  <TextView
+    android:id="@+id/value"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/catalogPlaceholder"/>
+
+</TableRow>

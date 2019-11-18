@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+  <dimen name="catalogBookDetailStatusHeight">64dp</dimen>
+  <dimen name="catalogBookDetailButtonsHeight">64dp</dimen>
+</resources>

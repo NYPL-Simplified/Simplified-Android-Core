@@ -33,7 +33,7 @@ class ProfileDataLoadTask(
             val entry = books.entry(bookId)
             val book = entry.book
             val status = BookStatus.fromBook(book)
-            this.bookRegistry.update(BookWithStatus.create(book, status))
+            this.bookRegistry.update(BookWithStatus(book, status))
           } catch (e: BookDatabaseException) {
             this.logger.error("load: could not load book {}: ", bookId.value(), e)
           }

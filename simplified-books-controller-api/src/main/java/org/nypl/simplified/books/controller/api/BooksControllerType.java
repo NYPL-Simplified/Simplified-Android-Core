@@ -74,7 +74,7 @@ public interface BooksControllerType {
    * @param account The account
    */
 
-  FluentFuture<Unit> booksSync(
+  FluentFuture<kotlin.Unit> booksSync(
     AccountType account);
 
   /**

@@ -85,7 +85,7 @@ class BookCoverFetchTask(
        */
 
       this.bookRegistry.book(this.databaseEntry.book.id).map { withStatus ->
-        this.bookRegistry.update(BookWithStatus.create(this.databaseEntry.book, withStatus.status()))
+        this.bookRegistry.update(BookWithStatus(this.databaseEntry.book, withStatus.status))
       }
     }
   }

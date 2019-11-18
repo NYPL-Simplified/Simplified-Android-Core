@@ -7,6 +7,7 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.joda.time.LocalDateTime
@@ -22,6 +23,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivation
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
+import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillmentException
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -39,18 +41,9 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DR
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnreadableACSM
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedContentType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedSystem
-import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
-import org.nypl.simplified.books.book_registry.BookStatusDownloadInProgress
-import org.nypl.simplified.books.book_registry.BookStatusHeld
-import org.nypl.simplified.books.book_registry.BookStatusHeldReady
-import org.nypl.simplified.books.book_registry.BookStatusHoldable
-import org.nypl.simplified.books.book_registry.BookStatusRequestingDownload
-import org.nypl.simplified.books.book_registry.BookStatusRequestingLoan
-import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
-import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillmentException
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadCancelled
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadFailed
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadOK
@@ -128,7 +121,8 @@ class BookBorrowTask(
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
   private val feedLoader: FeedLoaderType,
-  private val http: HTTPType) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+  private val http: HTTPType
+) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
 
   private val contentTypeACSM =
     "application/vnd.adobe.adept+xml"
@@ -181,13 +175,13 @@ class BookBorrowTask(
       formats = listOf())
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}] ${message}", this.bookId.brief(), *arguments)
+    this.logger.debug("[{}] $message", this.bookId.brief(), *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}] ${message}", this.bookId.brief(), *arguments)
+    this.logger.error("[{}] $message", this.bookId.brief(), *arguments)
 
   private fun warn(message: String, vararg arguments: Any?) =
-    this.logger.warn("[{}] ${message}", this.bookId.brief(), *arguments)
+    this.logger.warn("[{}] $message", this.bookId.brief(), *arguments)
 
   @Throws(Exception::class)
   override fun call(): TaskResult<BookStatusDownloadErrorDetails, Unit> {
@@ -246,7 +240,7 @@ class BookBorrowTask(
             errorValue = UnsupportedAcquisition(
               message = message,
               type = type,
-              attributes = currentAttributesWith(Pair("Acquisition type", type.toString()))
+              attributes = this.currentAttributesWith(Pair("Acquisition type", type.toString()))
             ),
             exception = exception)
           throw exception
@@ -261,7 +255,19 @@ class BookBorrowTask(
         e)
 
       val result = this.steps.finishFailure<Unit>()
-      this.publishBookStatus(BookStatusDownloadFailed(this.bookId, result, Option.none()))
+      val status =
+        if (this.databaseEntryInitialized) {
+          BookStatus.fromBook(this.databaseEntry.book)
+        } else {
+          this.bookRegistry.bookStatusOrNull(this.bookId)
+        }
+
+      if (status is BookStatus.Loaned) {
+        this.publishBookStatus(BookStatus.FailedDownload(this.bookId, result))
+      } else {
+        this.publishBookStatus(BookStatus.FailedLoan(this.bookId, result))
+      }
+
       result
     } finally {
       this.debug("finished")
@@ -296,8 +302,11 @@ class BookBorrowTask(
       val database = this.account.bookDatabase
       this.databaseEntry = database.createOrUpdate(this.bookId, this.entry)
       this.databaseEntryInitialized = true
-      this.publishBookStatus(BookStatusRequestingLoan(
-        this.bookId, this.borrowStrings.borrowBookDatabaseCreateOrUpdate))
+
+      this.publishBookStatus(BookStatus.RequestingLoan(
+        id = this.bookId,
+        detailMessage = this.borrowStrings.borrowBookDatabaseCreateOrUpdate
+      ))
       this.steps.currentStepSucceeded(this.borrowStrings.borrowBookDatabaseUpdated)
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
@@ -332,7 +341,11 @@ class BookBorrowTask(
 
     val httpAuth = this.createHttpAuthIfRequired()
     this.debug("fetching item feed: {}", this.acquisition.uri)
-    this.publishBookStatus(BookStatusRequestingLoan(this.bookId, this.borrowStrings.borrowBookGetFeedEntry))
+
+    this.publishBookStatus(BookStatus.RequestingLoan(
+      id = this.bookId,
+      detailMessage = this.borrowStrings.borrowBookGetFeedEntry
+    ))
 
     val feedResult =
       try {
@@ -513,6 +526,7 @@ class BookBorrowTask(
 
     this.debug("saving state to database")
     this.databaseEntry.writeOPDSEntry(feedEntry.feedEntry)
+    this.debug("database state: {}", BookStatus.fromBook(this.databaseEntry.book))
 
     /*
      * Then, work out what to do based on the latest availability data.
@@ -533,7 +547,12 @@ class BookBorrowTask(
         override fun onHeldReady(a: OPDSAvailabilityHeldReady): Boolean {
           this@BookBorrowTask.debug("book is held but is ready, nothing more to do")
           this@BookBorrowTask.publishBookStatus(
-            BookStatusHeldReady(this@BookBorrowTask.bookId, a.endDate, a.revoke.isSome))
+            BookStatus.Held.HeldReady(
+              id = this@BookBorrowTask.bookId,
+              endDate = this@BookBorrowTask.someOrNull(a.endDate),
+              isRevocable = a.revoke.isSome
+            )
+          )
           return false
         }
 
@@ -544,12 +563,15 @@ class BookBorrowTask(
 
         override fun onHeld(a: OPDSAvailabilityHeld): Boolean {
           this@BookBorrowTask.debug("book is held, nothing more to do")
-          this@BookBorrowTask.publishBookStatus(BookStatusHeld(
-            id = this@BookBorrowTask.bookId,
-            queuePosition = a.position,
-            startDate = a.startDate,
-            endDate = a.endDate,
-            isRevocable = a.revoke.isSome))
+          this@BookBorrowTask.publishBookStatus(
+            BookStatus.Held.HeldInQueue(
+              this@BookBorrowTask.bookId,
+              queuePosition = this@BookBorrowTask.someOrNull(a.position),
+              startDate = this@BookBorrowTask.someOrNull(a.startDate),
+              endDate = this@BookBorrowTask.someOrNull(a.endDate),
+              isRevocable = a.revoke.isSome
+            )
+          )
           return false
         }
 
@@ -563,7 +585,7 @@ class BookBorrowTask(
 
         override fun onHoldable(a: OPDSAvailabilityHoldable): Boolean {
           this@BookBorrowTask.debug("book is holdable, cannot continue!")
-          this@BookBorrowTask.publishBookStatus(BookStatusHoldable(this@BookBorrowTask.bookId))
+          this@BookBorrowTask.publishBookStatus(BookStatus.Holdable(this@BookBorrowTask.bookId))
           return false
         }
 
@@ -587,10 +609,7 @@ class BookBorrowTask(
         override fun onLoaned(a: OPDSAvailabilityLoaned): Boolean {
           this@BookBorrowTask.debug("book is loaned, fulfilling")
           this@BookBorrowTask.publishBookStatus(
-            BookStatusRequestingDownload(
-              id = this@BookBorrowTask.bookId,
-              detailMessage = "",
-              loanEndDate = a.endDate))
+            BookStatus.RequestingDownload(this@BookBorrowTask.bookId))
           return java.lang.Boolean.TRUE
         }
 
@@ -602,10 +621,7 @@ class BookBorrowTask(
         override fun onOpenAccess(a: OPDSAvailabilityOpenAccess): Boolean {
           this@BookBorrowTask.debug("book is open access, fulfilling")
           this@BookBorrowTask.publishBookStatus(
-            BookStatusRequestingDownload(
-              id = this@BookBorrowTask.bookId,
-              detailMessage = "",
-              loanEndDate = Option.none()))
+            BookStatus.RequestingDownload(this@BookBorrowTask.bookId))
           return java.lang.Boolean.TRUE
         }
 
@@ -636,7 +652,9 @@ class BookBorrowTask(
    * Fulfill a book by hitting the generic or open access links.
    */
 
-  private fun runAcquisitionFulfill(ee: OPDSAcquisitionFeedEntry) {
+  private fun runAcquisitionFulfill(
+    ee: OPDSAcquisitionFeedEntry
+  ) {
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfill)
 
     this.debug("fulfilling book")
@@ -780,7 +798,8 @@ class BookBorrowTask(
 
   private fun runAcquisitionFulfillDoDownload(
     acquisition: OPDSAcquisition,
-    httpAuth: OptionType<HTTPAuthType>) {
+    httpAuth: OptionType<HTTPAuthType>
+  ) {
 
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillDownload)
 
@@ -796,6 +815,7 @@ class BookBorrowTask(
 
     val downloadFuture =
       SettableFuture.create<DownloadResult>()
+
     val downloadListener =
       DownloadListener(downloadFuture) { runningTotal, expectedTotal, unconditional ->
         this.downloadDataReceived(
@@ -853,7 +873,7 @@ class BookBorrowTask(
 
       is DownloadFailed -> {
         val exception =
-          someOrNull(result.exception) ?: IOException("I/O error")
+          this.someOrNull(result.exception) ?: IOException("I/O error")
         val message =
           this.borrowStrings.borrowBookFulfillDownloadFailed(exception.localizedMessage)
         val uriAttribute =
@@ -1016,7 +1036,9 @@ class BookBorrowTask(
    * Fulfill the given ACSM file, if Adobe DRM is supported. Otherwise, fail.
    */
 
-  private fun runFulfillACSM(file: File) {
+  private fun runFulfillACSM(
+    file: File
+  ) {
     this.debug("fulfilling ACSM file")
 
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillACSM)
@@ -1386,7 +1408,11 @@ class BookBorrowTask(
   private fun runAcquisitionBundled() {
     this.debug("acquisition is bundled")
     this.steps.beginNewStep(this.borrowStrings.borrowBookBundledCopy)
-    this.publishBookStatus(BookStatusRequestingLoan(this.bookId, this.borrowStrings.borrowBookBundledCopy))
+
+    this.publishBookStatus(BookStatus.RequestingLoan(
+      id = this.bookId,
+      detailMessage = this.borrowStrings.borrowBookBundledCopy
+    ))
 
     this.fulfillURI = this.acquisition.uri
     val file = this.databaseEntry.temporaryFile()
@@ -1443,7 +1469,7 @@ class BookBorrowTask(
     }
   }
 
-  private fun publishBookStatus(status: BookStatusType) {
+  private fun publishBookStatus(status: BookStatus) {
     val book =
       if (this.databaseEntryInitialized) {
         this.databaseEntry.book
@@ -1451,14 +1477,15 @@ class BookBorrowTask(
         this.warn("publishing status using a fake book")
         this.bookInitial
       }
-    this.bookRegistry.update(BookWithStatus.create(book, status))
+    this.bookRegistry.update(BookWithStatus(book, status))
   }
 
   private fun downloadDataReceived(
     detailMessage: String,
     runningTotal: Long,
     expectedTotal: Long,
-    unconditional: Boolean) {
+    unconditional: Boolean
+  ) {
 
     /*
      * Because "data received" updates happen at such a huge rate, we want
@@ -1471,13 +1498,12 @@ class BookBorrowTask(
     val period = Period(this.downloadTimeThen, timeNow, PeriodType.millis())
     if (period.millis >= 100 || unconditional) {
       val status =
-        BookStatusDownloadInProgress(
+        BookStatus.Downloading(
           id = this.bookId,
           detailMessage = detailMessage,
           currentTotalBytes = runningTotal,
-          expectedTotalBytes = expectedTotal,
-          loanEndDate = Option.none())
-      this.bookRegistry.update(BookWithStatus.create(this.databaseEntry.book, status))
+          expectedTotalBytes = expectedTotal)
+      this.bookRegistry.update(BookWithStatus(this.databaseEntry.book, status))
       this.downloadRunningTotal = runningTotal
     }
   }

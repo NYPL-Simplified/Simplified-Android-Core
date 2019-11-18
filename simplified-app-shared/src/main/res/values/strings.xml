@@ -540,6 +540,7 @@
   <string name="hs_issuebutton_title">Report An Issue</string>
   <string name="hs_message_hint">Message</string>
   <string name="hs_subject_hint">Subject</string>
+  <string name="revokeNotRevocable">Not revocable.</string>
 
 
 </resources>

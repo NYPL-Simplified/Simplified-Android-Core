@@ -206,7 +206,7 @@ class FeedLoader private constructor(
           val bookWithStatus = this.bookRegistry.books().get(id)
           if (bookWithStatus != null) {
             this.log.debug("updating entry {} from book registry", id)
-            val en = FeedEntry.FeedEntryOPDS(bookWithStatus.book().entry)
+            val en = FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry)
             feed.entriesInOrder.set(index, en)
           }
         }
@@ -222,7 +222,7 @@ class FeedLoader private constructor(
             val bookWithStatus = this.bookRegistry.books().get(id)
             if (bookWithStatus != null) {
               this.log.debug("updating entry {} from book registry", id)
-              entries.set(gi, FeedEntry.FeedEntryOPDS(bookWithStatus.book().entry))
+              entries.set(gi, FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry))
             }
           }
         }

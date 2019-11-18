@@ -20,7 +20,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.Cancelled
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError
@@ -31,9 +31,6 @@ import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NoCr
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NotRevocable
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.TimedOut
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.UnexpectedException
-import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
-import org.nypl.simplified.books.book_registry.BookStatusRevoked
-import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionBadFeed
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionDeviceNotActivated
@@ -75,16 +72,14 @@ class BookRevokeTask(
   private val feedLoader: FeedLoaderType,
   private val revokeStrings: BookRevokeStringResourcesType,
   private val revokeACSTimeoutDuration: Duration = Duration.standardMinutes(1L),
-  private val revokeServerTimeoutDuration: Duration = Duration.standardMinutes(3L))
-  : Callable<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
-
-  private val adobeACS = "Adobe ACS"
+  private val revokeServerTimeoutDuration: Duration = Duration.standardMinutes(3L)
+) : Callable<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
 
   private lateinit var databaseEntry: BookDatabaseEntryType
-  private var databaseEntryInitialized: Boolean = false
-
+  private val adobeACS = "Adobe ACS"
   private val logger = LoggerFactory.getLogger(BookRevokeTask::class.java)
   private val steps = TaskRecorder.create<BookStatusRevokeErrorDetails>()
+  private var databaseEntryInitialized: Boolean = false
 
   private fun debug(message: String, vararg arguments: Any?) =
     this.logger.debug("[{}] ${message}", this.bookID.brief(), *arguments)
@@ -95,7 +90,7 @@ class BookRevokeTask(
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}] ${message}", this.bookID.brief(), *arguments)
 
-  private fun publishBookStatus(status: BookStatusType) {
+  private fun publishBookStatus(status: BookStatus) {
     val book =
       if (this.databaseEntryInitialized) {
         this.databaseEntry.book
@@ -126,16 +121,15 @@ class BookRevokeTask(
           listOf())
       }
 
-    this.bookRegistry.update(BookWithStatus.create(book, status))
+    this.bookRegistry.update(BookWithStatus(book, status))
   }
 
   private fun publishRequestingRevokeStatus() {
-    this.publishBookStatus(BookStatusRequestingRevoke(this.bookID, this.steps.currentStep()!!.description))
+    this.publishBookStatus(BookStatus.RequestingRevoke(this.bookID))
   }
 
   private fun publishRevokedStatus() {
-    this.publishBookStatus(BookStatusRevoked(this.bookID))
-
+    this.publishBookStatus(BookStatus.Revoked(this.bookID))
   }
 
   override fun call(): TaskResult<BookStatusRevokeErrorDetails, Unit> {
@@ -143,6 +137,7 @@ class BookRevokeTask(
       this.steps.beginNewStep(this.revokeStrings.revokeStarted)
       this.debug("revoke")
 
+      this.publishRequestingRevokeStatus()
       this.setupBookDatabaseEntry()
       this.revokeFormatHandle()
       this.revokeNotifyServer()
@@ -157,12 +152,13 @@ class BookRevokeTask(
         this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e)
 
       val failure = this.steps.finishFailure<Unit>()
-      this.publishBookStatus(BookStatusRevokeFailed(this.bookID, failure))
+      this.publishBookStatus(BookStatus.FailedRevoke(this.bookID, failure))
       failure
     } finally {
       this.debug("finished")
     }
   }
+
 
   private fun revokeNotifyServer() {
     this.debug("notifying server of revocation")
@@ -249,7 +245,8 @@ class BookRevokeTask(
 
   private fun revokeNotifyServerURI(
     targetURI: URI,
-    revokeType: RevokeType) {
+    revokeType: RevokeType
+  ) {
     this.debug("notifying server of {} revocation via {}", revokeType, targetURI)
     this.steps.beginNewStep(this.revokeStrings.revokeServerNotifyURI(targetURI))
     this.publishRequestingRevokeStatus()

@@ -10,17 +10,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.joda.time.DateTime;
 import org.joda.time.Hours;
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.book_registry.BookStatusHeld;
-import org.nypl.simplified.books.book_registry.BookStatusHeldReady;
-import org.nypl.simplified.books.book_registry.BookStatusHoldable;
-import org.nypl.simplified.books.book_registry.BookStatusLoanable;
-import org.nypl.simplified.books.book_registry.BookStatusLoanedType;
-import org.nypl.simplified.books.book_registry.BookStatusMatcherType;
-import org.nypl.simplified.books.book_registry.BookStatusRequestingLoan;
-import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke;
-import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed;
-import org.nypl.simplified.books.book_registry.BookStatusRevoked;
-import org.nypl.simplified.books.book_registry.BookStatusType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
@@ -116,94 +105,6 @@ public final class CatalogBookAvailabilityStrings
   private static String onOpenAccess(final Resources r)
   {
     return r.getString(R.string.catalog_book_availability_open_access);
-  }
-
-  /**
-   * Produce a human-readable string for the given book status value.
-   *
-   * @param r The application resources
-   * @param s The status value
-   *
-   * @return A descriptive string
-   */
-
-  public static String getAvailabilityString(
-    final Resources r,
-    final BookStatusType s)
-  {
-    NullCheck.notNull(r);
-    NullCheck.notNull(s);
-
-    return s.matchBookStatus(
-      new BookStatusMatcherType<String, UnreachableCodeException>()
-      {
-        @Override
-        public String onBookStatusHoldable(
-          final BookStatusHoldable s)
-        {
-          return CatalogBookAvailabilityStrings.onHoldable(r);
-        }
-
-        @Override
-        public String onBookStatusHeld(
-          final BookStatusHeld s)
-        {
-          final OptionType<DateTime> end_date_opt = s.getEndDate();
-          final OptionType<Integer> queue_opt = s.getQueuePosition();
-          return CatalogBookAvailabilityStrings.onHeld(
-            end_date_opt, queue_opt, r);
-        }
-
-        @Override
-        public String onBookStatusHeldReady(
-          final BookStatusHeldReady s)
-        {
-          return CatalogBookAvailabilityStrings.onReserved(
-            s.getExpiryDate(), r);
-        }
-
-        @Override
-        public String onBookStatusLoanedType(
-          final BookStatusLoanedType s)
-        {
-          return CatalogBookAvailabilityStrings.onLoaned(
-            s.getLoanExpiryDate(), r);
-        }
-
-        @Override
-        public String onBookStatusRequestingLoan(
-          final BookStatusRequestingLoan s)
-        {
-          return "";
-        }
-
-        @Override
-        public String onBookStatusRequestingRevoke(
-          final BookStatusRequestingRevoke s)
-        {
-          return "";
-        }
-
-        @Override
-        public String onBookStatusLoanable(
-          final BookStatusLoanable s)
-        {
-          return CatalogBookAvailabilityStrings.onLoanable(r);
-        }
-
-        @Override
-        public String onBookStatusRevokeFailed(final BookStatusRevokeFailed s)
-        {
-          return "";
-        }
-
-        @Override
-        public String onBookStatusRevoked(final BookStatusRevoked s)
-          throws UnreachableCodeException
-        {
-          return CatalogBookAvailabilityStrings.onRevoked(r);
-        }
-      });
   }
 
   private static String onLoanable(final Resources r)

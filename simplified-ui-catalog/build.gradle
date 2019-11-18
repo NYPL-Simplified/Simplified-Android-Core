@@ -1,0 +1,21 @@
+dependencies {
+  api libraries.androidXConstraintLayout
+  api libraries.androidXAppCompat
+
+  api project(":simplified-books-api")
+  api project(":simplified-feeds-api")
+  api project(":simplified-ui-errorpage")
+
+  implementation project(":simplified-adobe-extensions")
+  implementation project(":simplified-books-controller-api")
+  implementation project(":simplified-books-registry-api")
+  implementation project(":simplified-documents")
+  implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-services-api")
+  implementation project(":simplified-ui-screen")
+  implementation project(":simplified-ui-theme")
+  implementation project(":simplified-ui-thread-api")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

@@ -35,12 +35,22 @@ interface UIThreadServiceType {
    * @param r The runnable
    */
 
-  fun runOnUIThread(
-    r: Runnable) {
+  fun runOnUIThread(r: Runnable) {
     val looper = Looper.getMainLooper()
     val h = Handler(looper)
     h.post(r)
   }
+
+  /**
+   * Run the given function on the UI thread.
+   *
+   * @param f The function
+   */
+
+  fun runOnUIThread(f: () -> Unit) =
+    this.runOnUIThread(Runnable {
+      f.invoke()
+    })
 
   /**
    * Run the given Runnable on the UI thread after the specified delay.
@@ -51,9 +61,27 @@ interface UIThreadServiceType {
 
   fun runOnUIThreadDelayed(
     r: Runnable,
-    ms: Long) {
+    ms: Long
+  ) {
     val looper = Looper.getMainLooper()
     val h = Handler(looper)
     h.postDelayed(r, ms)
   }
+
+  /**
+   * Run the given function on the UI thread.
+   *
+   * @param f The function
+   */
+
+  fun runOnUIThreadDelayed(
+    f: () -> Unit,
+    ms: Long
+  ) =
+    this.runOnUIThreadDelayed(
+      r = Runnable {
+        f.invoke()
+      },
+      ms = ms
+    )
 }

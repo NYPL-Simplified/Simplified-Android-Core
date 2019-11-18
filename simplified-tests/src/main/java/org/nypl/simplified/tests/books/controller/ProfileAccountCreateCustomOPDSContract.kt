@@ -437,7 +437,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }
 
-  private fun logBookEventsFor(bookId: BookID?) {
+  private fun logBookEventsFor(bookId: BookID) {
     this.bookRegistry.bookEvents().subscribe {
       this.bookRegistry.bookStatus(bookId).map_ { status ->
         this.logger.debug("status: {}", status)

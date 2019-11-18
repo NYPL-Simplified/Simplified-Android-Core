@@ -43,9 +43,9 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.*
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.*
-import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
 import org.nypl.simplified.downloader.core.DownloaderHTTP
@@ -248,7 +248,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(1))
@@ -339,7 +339,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(1))
@@ -467,7 +467,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(1))
@@ -1193,7 +1193,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }
 
-  private fun logBookEventsFor(bookId: BookID?) {
+  private fun logBookEventsFor(bookId: BookID) {
     this.bookRegistry.bookEvents().subscribe {
       this.bookRegistry.bookStatus(bookId).map_ { status ->
         this.logger.debug("status: {}", status)

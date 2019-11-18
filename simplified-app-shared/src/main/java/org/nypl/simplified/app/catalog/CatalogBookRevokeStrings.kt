@@ -11,6 +11,9 @@ import java.net.URI
 
 class CatalogBookRevokeStrings(private val resources: Resources) : BookRevokeStringResourcesType {
 
+  override val revokeNotRevocable: String
+    get() = this.resources.getString(R.string.revokeNotRevocable)
+
   override val revokeUnexpectedException: String
     get() = this.resources.getString(R.string.unexpectedException)
 

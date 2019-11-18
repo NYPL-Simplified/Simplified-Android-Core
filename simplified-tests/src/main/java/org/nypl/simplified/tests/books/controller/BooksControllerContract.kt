@@ -30,8 +30,8 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
-import org.nypl.simplified.books.book_registry.BookStatusLoaned
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
@@ -687,7 +687,7 @@ abstract class BooksControllerContract {
     Assert.assertFalse(
       "Book must not have a saved EPUB file",
       this.bookRegistry.bookOrException(bookId)
-        .book()
+        .book
         .isDownloaded)
 
     /*
@@ -766,12 +766,12 @@ abstract class BooksControllerContract {
 
     val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
-    val statusBefore = this.bookRegistry.bookOrException(bookId).status()
-    Assert.assertThat(statusBefore, IsInstanceOf.instanceOf(BookStatusLoaned::class.java))
+    val statusBefore = this.bookRegistry.bookOrException(bookId).status
+    Assert.assertThat(statusBefore, IsInstanceOf.instanceOf(BookStatus.Loaned.LoanedNotDownloaded::class.java))
 
     controller.bookRevokeFailedDismiss(account, bookId).get()
 
-    val statusAfter = this.bookRegistry.bookOrException(bookId).status()
+    val statusAfter = this.bookRegistry.bookOrException(bookId).status
     Assert.assertEquals(statusBefore, statusAfter)
   }
 

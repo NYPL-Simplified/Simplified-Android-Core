@@ -5,36 +5,37 @@
   android:versionCode="1"
   android:versionName="0.0.1">
 
-  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.INTERNET" />
 
-  <application android:allowBackup="false"
-    android:label="SimplifiedSandbox"
-    android:icon="@drawable/sandbox">
+  <application
+    android:allowBackup="false"
+    android:icon="@drawable/sandbox"
+    android:label="SimplifiedSandbox">
 
     <activity
       android:name="org.nypl.simplified.tests.sandbox.StyledActivity"
-      android:theme="@style/SimplifiedBlank"
-      android:exported="true">
+      android:exported="true"
+      android:theme="@style/SimplifiedBlank">
       <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
 
     <activity
       android:name="org.nypl.simplified.tests.sandbox.SplashActivity"
-      android:theme="@style/SimplifiedTheme_ActionBar_Blue"
-      android:exported="true"/>
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_ActionBar_Blue" />
 
     <activity
-      android:name="org.nypl.simplified.tests.sandbox.SettingsActivity"
-      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple"
-      android:exported="true"/>
+      android:name="org.nypl.simplified.tests.sandbox.BookDetailActivity"
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
 
     <activity
       android:name="org.nypl.simplified.tests.sandbox.ErrorPageActivity"
-      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple"
-      android:exported="true"/>
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
   </application>
 
 </manifest>

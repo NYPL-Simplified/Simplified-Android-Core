@@ -386,7 +386,7 @@ class Controller private constructor(
     val bookWithStatus = this.bookRegistry.book(id)
 
     if (bookWithStatus.isSome) {
-      val accountId = (bookWithStatus as Some<BookWithStatus>).get().book().account
+      val accountId = (bookWithStatus as Some<BookWithStatus>).get().book.account
       return this.profileCurrent().account(accountId)
     }
 
@@ -428,11 +428,10 @@ class Controller private constructor(
     NullCheck.notNull(id, "Book ID")
 
     this.taskExecutor.submit(BookBorrowFailedDismissTask(
-      this.downloader,
-      this.downloads,
-      account.bookDatabase,
-      this.bookRegistry,
-      id))
+      bookDatabase = account.bookDatabase,
+      bookRegistry = this.bookRegistry,
+      id = id
+    ))
   }
 
   override fun bookDownloadCancel(
@@ -462,7 +461,7 @@ class Controller private constructor(
       reportType = reportType)))
   }
 
-  override fun booksSync(account: AccountType): FluentFuture<Unit> {
+  override fun booksSync(account: AccountType): FluentFuture<kotlin.Unit> {
     return FluentFuture.from(this.taskExecutor.submit(BookSyncTask(
       this,
       account,

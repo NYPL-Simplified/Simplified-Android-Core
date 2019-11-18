@@ -1,5 +1,7 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.Context
+import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
@@ -34,20 +36,21 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
-import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.books.bundled.api.BundledContentResolverType
-import org.nypl.simplified.books.controller.BookBorrowTask
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.*
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMDeviceNotActive
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedContentType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedSystem
+import org.nypl.simplified.books.book_registry.BookWithStatus
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.books.controller.BookBorrowTask
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedLoader
@@ -60,10 +63,14 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.opds.core.OPDSFeedParser
+import org.nypl.simplified.opds.core.OPDSIndirectAcquisition
+import org.nypl.simplified.opds.core.OPDSJSONParser
+import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.strings.MockBorrowStringResources
+import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.http.MockingHTTP
+import org.nypl.simplified.tests.strings.MockBorrowStringResources
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -93,22 +100,24 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   protected abstract val logger: Logger
 
-  private lateinit var executorFeeds: ListeningExecutorService
-  private lateinit var executorDownloads: ListeningExecutorService
-  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var adeptConnector: AdobeAdeptConnectorType
+  private lateinit var adeptExecutor: AdobeAdeptExecutorType
+  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookRegistry: BookRegistryType
+  private lateinit var booksDirectory: File
+  private lateinit var bundledContent: BundledContentResolverType
+  private lateinit var cacheDirectory: File
+  private lateinit var clock: () -> Instant
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
-  private lateinit var http: MockingHTTP
   private lateinit var downloader: DownloaderType
-  private lateinit var bookRegistry: BookRegistryType
-  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var executorDownloads: ListeningExecutorService
+  private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
-  private lateinit var bundledContent: BundledContentResolverType
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var clock: () -> Instant
-  private lateinit var adeptExecutor: AdobeAdeptExecutorType
-  private lateinit var adeptConnector: AdobeAdeptConnectorType
-  private lateinit var cacheDirectory: File
+  private lateinit var http: MockingHTTP
+  private lateinit var tempDirectory: File
 
   private val bookBorrowStrings = MockBorrowStringResources()
 
@@ -142,9 +151,16 @@ abstract class BookBorrowTaskAdobeDRMContract {
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
-    this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
-    this.cacheDirectory.delete()
+
+    this.tempDirectory = TestDirectories.temporaryDirectory()
+    this.cacheDirectory = File(this.tempDirectory, "cache")
+    this.booksDirectory = File(this.tempDirectory, "books")
+
     this.cacheDirectory.mkdirs()
+    this.booksDirectory.mkdirs()
+    Preconditions.checkState(this.cacheDirectory.isDirectory)
+    Preconditions.checkState(this.booksDirectory.isDirectory)
+
     this.clock = { Instant.now() }
 
     this.adeptConnector =
@@ -160,6 +176,19 @@ abstract class BookBorrowTaskAdobeDRMContract {
     this.executorFeeds.shutdown()
     this.executorDownloads.shutdown()
     this.executorTimer.shutdown()
+  }
+
+  private fun createBookDatabase(): BookDatabaseType {
+    val context =
+      Mockito.mock(Context::class.java)
+
+    return BookDatabase.open(
+      context = context,
+      parser = OPDSJSONParser.newParser(),
+      serializer = OPDSJSONSerializer.newSerializer(),
+      owner = this.accountID,
+      directory = this.booksDirectory
+    )
   }
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
@@ -185,17 +214,13 @@ abstract class BookBorrowTaskAdobeDRMContract {
    * Borrowing an epub via an ACSM works if the connector says it has.
    */
 
-  @Test(timeout = 5_000L)
+  @Test//(timeout = 5_000L)
   fun testBorrowFeedACSMForEPUB() {
 
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    val formatHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+      this.createBookDatabase()
 
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
@@ -274,8 +299,11 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
-        listOf())
+        Option.none(),
+        listOf(OPDSIndirectAcquisition(
+          "application/vnd.adobe.adept+xml",
+          listOf(OPDSIndirectAcquisition("application/epub+zip", listOf()))
+        )))
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -293,23 +321,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.logBookEventsFor(bookId)
 
-    val book =
-      Book(
-        id = bookId,
-        account = this.accountID,
-        cover = null,
-        thumbnail = null,
-        entry = opdsEntry,
-        formats = listOf())
-
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
-    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
-      .thenReturn(bookDatabaseEntry)
-    Mockito.`when`(bookDatabaseEntry.book)
-      .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
-      .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
@@ -335,10 +348,11 @@ abstract class BookBorrowTaskAdobeDRMContract {
      * Check that the book was saved to the database.
      */
 
-    Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(loan)
-    Mockito.verify(formatHandle, Mockito.times(1))
-      .copyInBook(anyNonNull())
+    val formatHandle =
+      bookDatabase.entry(bookId).findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
+
+    Assert.assertEquals(loan, formatHandle.format.adobeRights)
+    Assert.assertNotEquals(null, formatHandle.format.file)
   }
 
   /**
@@ -348,14 +362,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMForEPUBUnavailableDRM() {
 
+    val bookDatabase =
+      this.createBookDatabase()
     val account =
       Mockito.mock(AccountType::class.java)
-    val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    val formatHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
@@ -403,23 +413,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val bookId =
       BookID.create("a")
 
-    val book =
-      Book(
-        id = bookId,
-        account = this.accountID,
-        cover = null,
-        thumbnail = null,
-        entry = opdsEntry,
-        formats = listOf())
-
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
-    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
-      .thenReturn(bookDatabaseEntry)
-    Mockito.`when`(bookDatabaseEntry.book)
-      .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
-      .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
@@ -451,7 +446,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
      */
 
     val bookWithStatus = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
-    Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
+    Assert.assertEquals(BookStatus.FailedDownload::class.java, bookWithStatus.status.javaClass)
   }
 
   /**
@@ -461,14 +456,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMForNonEPUB() {
 
+    val bookDatabase =
+      this.createBookDatabase()
     val account =
       Mockito.mock(AccountType::class.java)
-    val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    val formatHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
@@ -566,23 +557,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.logBookEventsFor(bookId)
 
-    val book =
-      Book(
-        id = bookId,
-        account = this.accountID,
-        cover = null,
-        thumbnail = null,
-        entry = opdsEntry,
-        formats = listOf())
-
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
-    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
-      .thenReturn(bookDatabaseEntry)
-    Mockito.`when`(bookDatabaseEntry.book)
-      .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
-      .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
@@ -615,7 +591,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
      */
 
     val bookWithStatus = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
-    Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
+    Assert.assertEquals(BookStatus.FailedDownload::class.java, bookWithStatus.status.javaClass)
   }
 
   /**
@@ -625,14 +601,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMDeviceNotActive() {
 
+    val bookDatabase =
+      this.createBookDatabase()
     val account =
       Mockito.mock(AccountType::class.java)
-    val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    val formatHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
@@ -698,23 +670,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.logBookEventsFor(bookId)
 
-    val book =
-      Book(
-        id = bookId,
-        account = this.accountID,
-        cover = null,
-        thumbnail = null,
-        entry = opdsEntry,
-        formats = listOf())
-
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
-    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
-      .thenReturn(bookDatabaseEntry)
-    Mockito.`when`(bookDatabaseEntry.book)
-      .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
-      .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
@@ -746,7 +703,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
      */
 
     val bookWithStatus = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
-    Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
+    Assert.assertEquals(BookStatus.FailedDownload::class.java, bookWithStatus.status.javaClass)
   }
 
   /**
@@ -756,14 +713,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMUnparseable() {
 
+    val bookDatabase =
+      this.createBookDatabase()
     val account =
       Mockito.mock(AccountType::class.java)
-    val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    val formatHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
@@ -816,23 +769,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.logBookEventsFor(bookId)
 
-    val book =
-      Book(
-        id = bookId,
-        account = this.accountID,
-        cover = null,
-        thumbnail = null,
-        entry = opdsEntry,
-        formats = listOf())
-
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
-    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
-      .thenReturn(bookDatabaseEntry)
-    Mockito.`when`(bookDatabaseEntry.book)
-      .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
-      .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
@@ -864,24 +802,20 @@ abstract class BookBorrowTaskAdobeDRMContract {
      */
 
     val bookWithStatus = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
-    Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
+    Assert.assertEquals(BookStatus.FailedDownload::class.java, bookWithStatus.status.javaClass)
   }
 
   /**
    * Borrowing something via an ACSM fails if download is cancelled.
    */
 
-  @Test(timeout = 5_000L)
+  @Test(timeout = 5000L)
   fun testBorrowFeedACSMCancellation() {
 
+    val bookDatabase =
+      this.createBookDatabase()
     val account =
       Mockito.mock(AccountType::class.java)
-    val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    val formatHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
@@ -954,23 +888,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.logBookEventsFor(bookId)
 
-    val book =
-      Book(
-        id = bookId,
-        account = this.accountID,
-        cover = null,
-        thumbnail = null,
-        entry = opdsEntry,
-        formats = listOf())
-
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
-    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
-      .thenReturn(bookDatabaseEntry)
-    Mockito.`when`(bookDatabaseEntry.book)
-      .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
-      .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
@@ -997,7 +916,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
      */
 
     val bookWithStatus = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
-    Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
+    Assert.assertEquals(BookStatus.FailedDownload::class.java, bookWithStatus.status.javaClass)
   }
 
   /**
@@ -1007,14 +926,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMFailsErrorCode() {
 
+    val bookDatabase =
+      this.createBookDatabase()
     val account =
       Mockito.mock(AccountType::class.java)
-    val bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    val bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    val formatHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
@@ -1087,23 +1002,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.logBookEventsFor(bookId)
 
-    val book =
-      Book(
-        id = bookId,
-        account = this.accountID,
-        cover = null,
-        thumbnail = null,
-        entry = opdsEntry,
-        formats = listOf())
-
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
-    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
-      .thenReturn(bookDatabaseEntry)
-    Mockito.`when`(bookDatabaseEntry.book)
-      .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
-      .thenReturn(formatHandle)
 
     val task =
       BookBorrowTask(
@@ -1136,13 +1036,13 @@ abstract class BookBorrowTaskAdobeDRMContract {
      */
 
     val bookWithStatus = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
-    Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
+    Assert.assertEquals(BookStatus.FailedDownload::class.java, bookWithStatus.status.javaClass)
   }
 
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }
 
-  private fun logBookEventsFor(bookId: BookID?) {
+  private fun logBookEventsFor(bookId: BookID) {
     this.bookRegistry.bookEvents().subscribe {
       this.bookRegistry.bookStatus(bookId).map_ { status ->
         this.logger.debug("status: {}", status)

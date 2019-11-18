@@ -129,27 +129,27 @@ abstract class NotificationsServiceContract {
                         entry = opdsEntry2,
                         formats = listOf())
 
-        val bookStatusHeld = Mockito.mock(BookStatusHeld::class.java)
+        val bookStatusHeld = Mockito.mock(BookStatus.Held.HeldInQueue::class.java)
         Mockito.`when`(bookStatusHeld.id).thenReturn(bookId)
 
-        val bookStatusHeldReady = Mockito.mock(BookStatusHeldReady::class.java)
+        val bookStatusHeldReady = Mockito.mock(BookStatus.Held.HeldReady::class.java)
         Mockito.`when`(bookStatusHeldReady.id).thenReturn(bookId)
 
-        val bookStatusHeldReady2 = Mockito.mock(BookStatusHeldReady::class.java)
+        val bookStatusHeldReady2 = Mockito.mock(BookStatus.Held.HeldReady::class.java)
         Mockito.`when`(bookStatusHeldReady.id).thenReturn(bookId2)
 
         // Populate book registry
-        bookWithStatusHeld = BookWithStatus.create(
+        bookWithStatusHeld = BookWithStatus(
                 book,
                 bookStatusHeld
         )
 
-        bookWithStatusHeldReady = BookWithStatus.create(
+        bookWithStatusHeldReady = BookWithStatus(
                 book,
                 bookStatusHeldReady
         )
 
-        bookWithStatusHeldReady2 = BookWithStatus.create(
+        bookWithStatusHeldReady2 = BookWithStatus(
                 book2,
                 bookStatusHeldReady2
         )

@@ -7,6 +7,7 @@ import org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
+import java.io.Serializable
 import java.net.URI
 
 /**
@@ -51,7 +52,9 @@ data class Book(
    * The available formats.
    */
 
-  val formats: List<BookFormat>) {
+  val formats: List<BookFormat>
+
+) {
 
   /**
    * If any format is downloaded, then the book as a whole is currently considered to be downloaded

@@ -120,7 +120,7 @@ class BookCoverProvider private constructor(
     val bookOpt = this.bookRegistry.book(entry.bookID)
     if (bookOpt is Some<BookWithStatus>) {
       val book = bookOpt.get()
-      return book.book().cover?.toURI()
+      return book.book.cover?.toURI()
     }
     return mapOptionToNull(entry.feedEntry.cover)
   }
@@ -129,7 +129,7 @@ class BookCoverProvider private constructor(
     val bookOpt = this.bookRegistry.book(entry.bookID)
     if (bookOpt is Some<BookWithStatus>) {
       val book = bookOpt.get()
-      return book.book().cover?.toURI()
+      return book.book.cover?.toURI()
     }
     return mapOptionToNull(entry.feedEntry.thumbnail)
   }

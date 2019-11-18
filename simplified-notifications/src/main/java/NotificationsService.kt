@@ -101,8 +101,8 @@ class NotificationsService(
      * posts a notification if it satisfies the rules for doing so.
      */
     private fun compareToCache(bookStatus: BookWithStatus?) {
-        logger.debug("NotificationsService::compareToCache ${bookStatus?.status()}")
-        var cachedBookStatus = registryCache[bookStatus?.book()?.id]
+        logger.debug("NotificationsService::compareToCache ${bookStatus?.status}")
+        var cachedBookStatus = registryCache[bookStatus?.book?.id]
         if (statusChangedSufficiently(cachedBookStatus, bookStatus)) {
             publishNotification(notificationResourcesType.titleReadyNotificationTitle,
                     notificationResourcesType.titleReadyNotificationContent)
@@ -150,10 +150,10 @@ class NotificationsService(
      */
     private fun statusChangedSufficiently(statusBefore: BookWithStatus?, statusNow: BookWithStatus?): Boolean {
         // Compare statusBefore and statusNow, only return true if statusNow is actually [BookStatusHeldReady]
-        logger.debug("NotificationsService::statusChangedSufficiently comparing ${statusBefore?.status()} to ${statusNow?.status()}")
+        logger.debug("NotificationsService::statusChangedSufficiently comparing ${statusBefore?.status} to ${statusNow?.status}")
         if (statusBefore != null && statusNow != null) {
-            return statusBefore.status() is BookStatusHeld &&
-                    statusNow.status() is BookStatusHeldReady
+            return statusBefore.status is BookStatus.Held.HeldInQueue &&
+                    statusNow.status is BookStatus.Held.HeldReady
         }
 
         // No status change met criteria
