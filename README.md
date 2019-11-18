@@ -225,6 +225,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.accounts.source.nyplregistry](simplified-accounts-source-nyplregistry)|NYPL registry client implementation|
 |[org.librarysimplified.accounts.source.resolution](simplified-accounts-source-resolution)|Standard account provider resolution logic|
 |[org.librarysimplified.accounts.source.spi](simplified-accounts-source-spi)|Account provider source SPI|
+|[org.librarysimplified.adobe.extensions](simplified-adobe-extensions)|Adobe DRM convenience functions|
 |[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
 |[org.librarysimplified.analytics.lfa](simplified-analytics-lfa)|LibraryForAll analytics implementation|
@@ -241,6 +242,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.books.registry.api](simplified-books-registry-api)|Book registry API|
 |[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
 |[org.librarysimplified.bugsnag](simplified-bugsnag)|Bugsnag functionality|
+|[org.librarysimplified.buildconfig.api](simplified-buildconfig-api)|Build-time configuration API|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
 |[org.librarysimplified.documents](simplified-documents)|Documents API|
 |[org.librarysimplified.downloader.core](simplified-downloader-core)|Downloader|
@@ -283,11 +285,15 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.tests.strings](simplified-tests-strings)|Mock strings for test suites|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
+|[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
 |[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
 |[org.librarysimplified.ui.datepicker.demo](simplified-ui-datepicker-demo)|Date picker UI component demo|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
+|[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
+|[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
 |[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
+|[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
 
 _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
 
