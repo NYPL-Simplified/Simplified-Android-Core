@@ -71,9 +71,8 @@ sealed class FeedLoaderResult {
         exception =
         if (exception is java.lang.Exception) exception
         else java.lang.Exception(exception),
-        message = exception.localizedMessage,
+        message = exception.localizedMessage ?: "",
         attributesInitial = sortedMapOf(Pair("Feed URI", uri.toASCIIString())))
     }
-
   }
 }

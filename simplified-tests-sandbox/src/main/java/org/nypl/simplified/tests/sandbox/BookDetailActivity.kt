@@ -269,8 +269,7 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
       CatalogFragmentBookDetail.create(
         CatalogFragmentBookDetailParameters(
           accountId = MockProfilesController.profileAccountCurrent().id,
-          feedEntry = feedEntry,
-          debugShowStatus = true
+          feedEntry = feedEntry
         ))
 
     this.registry.update(

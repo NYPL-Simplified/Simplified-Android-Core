@@ -33,6 +33,16 @@
       android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
 
     <activity
+      android:name="org.nypl.simplified.tests.sandbox.LaneActivity"
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
+
+    <activity
+      android:name="org.nypl.simplified.tests.sandbox.CatalogFeedActivity"
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
+
+    <activity
       android:name="org.nypl.simplified.tests.sandbox.ErrorPageActivity"
       android:exported="true"
       android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />

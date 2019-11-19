@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resources>
+  <string name="feedDetails">@string/catalogDetails</string>
+  <string name="feedLoadingError">An error occurred while loading the catalog.</string>
+  <string name="feedNavigationNotSupported">Navigation feeds are not currently supported. Sorry!</string>
+  <string name="feedRetry">@string/catalogRetry</string>
+  <string name="feedTitleBooks">Books</string>
+  <string name="feedTitleCatalog">Catalog</string>
+  <string name="feedTitleHolds">Holds</string>
+  <string name="feedSortBy">Sort By</string>
+  <string name="feedByAuthor">Author</string>
+  <string name="feedByTitle">Title</string>
+</resources>

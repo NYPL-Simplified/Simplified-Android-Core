@@ -3,4 +3,8 @@
 <resources>
   <dimen name="catalogBookDetailStatusHeight">64dp</dimen>
   <dimen name="catalogBookDetailButtonsHeight">64dp</dimen>
+  <dimen name="catalogFeedCoversHeight">96dp</dimen>
+  <dimen name="catalogFeedCoversWidth">80dp</dimen>
+  <dimen name="catalogFeedCoversEndSpace">16dp</dimen>
+  <dimen name="catalogFeedCoversSpace">8dp</dimen>
 </resources>

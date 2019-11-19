@@ -50,6 +50,7 @@
   <string name="catalogDownload">Download</string>
   <string name="catalogGet">Get</string>
   <string name="catalogHoldCannotCancel">This reservation cannot be cancelled.</string>
+  <string name="catalogInformation">Information</string>
   <string name="catalogListen">Listen</string>
   <string name="catalogMetaCategories">Categories</string>
   <string name="catalogMetaDistributor">Distributor</string>

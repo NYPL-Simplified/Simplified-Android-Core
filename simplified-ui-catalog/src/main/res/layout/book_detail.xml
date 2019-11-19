@@ -147,6 +147,19 @@
       android:layout_marginBottom="16dp"
       android:background="?android:attr/listDivider" />
 
+    <TextView
+      android:id="@+id/bookDetailMetadataTitle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:text="@string/catalogInformation"
+      android:textSize="18sp"
+      android:textStyle="bold" />
+
     <TableLayout
       android:id="@+id/bookDetailMetadataTable"
       android:layout_width="match_parent"
@@ -171,6 +184,7 @@
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="16dp"
       android:text="@string/catalogRelatedBooks"
+      android:textSize="18sp"
       android:textStyle="bold" />
 
     <View
@@ -187,6 +201,7 @@
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="16dp"
       android:text="@string/catalogReportIssue"
+      android:textSize="18sp"
       android:textStyle="bold" />
 
     <View

@@ -88,8 +88,9 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private lateinit var title: TextView
   private lateinit var uiThread: UIThreadServiceType
   private val parametersId = PARAMETERS_ID
-  private var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
   private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
+  private var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
+  private var debugService: CatalogDebuggingServiceType? = null
 
   private val dateFormatter =
     DateTimeFormatterBuilder()
@@ -129,6 +130,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
     this.parameters =
       this.arguments!![this.parametersId] as CatalogFragmentBookDetailParameters
 
+    this.debugService =
+      this.host.serviceDirectory.optionalService(CatalogDebuggingServiceType::class.java)
     this.bookRegistry =
       this.host.serviceDirectory.requireService(BookRegistryReadableType::class.java)
     this.uiThread =
@@ -191,7 +194,7 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
     this.statusFailed.visibility = View.INVISIBLE
 
     this.debugStatus.visibility =
-      if (this.parameters.debugShowStatus) {
+      if (this.debugService?.showBookDetailStatus == true) {
         View.VISIBLE
       } else {
         View.INVISIBLE

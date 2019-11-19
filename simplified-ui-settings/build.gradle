@@ -1,7 +1,4 @@
 dependencies {
-  api libraries.androidXConstraintLayout
-  api libraries.androidXPreference
-
   api project(":simplified-ui-errorpage")
 
   implementation project(":simplified-adobe-extensions")
@@ -13,6 +10,10 @@ dependencies {
   implementation project(":simplified-services-api")
   implementation project(":simplified-ui-thread-api")
 
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXConstraintLayout
+  implementation libraries.androidXPreference
+  implementation libraries.androidXRecyclerView
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 }

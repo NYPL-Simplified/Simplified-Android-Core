@@ -31,7 +31,7 @@ class MutableServiceDirectory : ServiceDirectoryType {
       interfaces.isNotEmpty(),
       "Must supply at least one interface type")
 
-    this.logger.debug("registering (replacing) service {}", service.javaClass.canonicalName)
+    this.logger.debug("registering (replacing) service {}", service.javaClass)
     synchronized(this.servicesLock) {
       for (inter in interfaces) {
         this.services[inter] = listOf(service)
@@ -52,7 +52,7 @@ class MutableServiceDirectory : ServiceDirectoryType {
       interfaces.isNotEmpty(),
       "Must supply at least one interface type")
 
-    this.logger.debug("registering service {}", service.javaClass.canonicalName)
+    this.logger.debug("registering service {}", service.javaClass)
     synchronized(this.servicesLock) {
       for (inter in interfaces) {
         val existing: List<Any> = this.services[inter] ?: listOf()

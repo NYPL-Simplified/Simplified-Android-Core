@@ -40,7 +40,8 @@ interface BookCoverProviderType {
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
-    height: Int): FluentFuture<Unit>
+    height: Int
+  ): FluentFuture<Unit>
 
   /**
    * Load or generate a cover based on `entry` into the image view
@@ -59,5 +60,6 @@ interface BookCoverProviderType {
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
-    height: Int): FluentFuture<Unit>
+    height: Int
+  ): FluentFuture<Unit>
 }

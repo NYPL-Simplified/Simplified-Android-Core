@@ -21,13 +21,7 @@ data class CatalogFragmentBookDetailParameters(
    * The OPDS feed entry.
    */
 
-  val feedEntry: FeedEntry.FeedEntryOPDS,
-
-  /**
-   * `true` if the status of the book entry should be displayed (for debugging purposes).
-   */
-
-  val debugShowStatus: Boolean = false
+  val feedEntry: FeedEntry.FeedEntryOPDS
 
 ) : Serializable {
 
