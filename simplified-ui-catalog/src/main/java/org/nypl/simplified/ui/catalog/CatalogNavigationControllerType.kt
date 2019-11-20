@@ -28,4 +28,10 @@ interface CatalogNavigationControllerType {
 
   fun <E : PresentableErrorType> openErrorPage(
     parameters: ErrorPageParameters<E>)
+
+  /**
+   * A catalog screen wants to open a feed.
+   */
+
+  fun openFeed(feedArguments: CatalogFeedArguments)
 }

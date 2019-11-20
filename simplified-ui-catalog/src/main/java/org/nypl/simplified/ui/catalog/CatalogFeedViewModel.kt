@@ -29,22 +29,16 @@ import java.util.UUID
 import javax.annotation.concurrent.GuardedBy
 
 /**
- * The base type of catalog feed view models. This class is abstract purely because the AndroidX
- * ViewModel API requires that we fetch view models by class, and we need to store separate view
- * models for each of the different app sections that want to display feeds.
+ * A feed view model.
  *
- * The responsibilities of this class are essentially to make asynchronous calls to the feed loader
- * and profile API and convert those calls into observable events, and to manage a history in the
- * form of a stack of feed state values.
- *
- * @see [CatalogFeedViewModelBooks]
- * @see [CatalogFeedViewModelHolds]
- * @see [CatalogFeedViewModelExternal]
+ * The responsibility of this class is essentially to make asynchronous calls to the feed loader
+ * and profile API and convert those calls into observable events.
  */
 
-abstract class CatalogFeedViewModelAbstract(
+class CatalogFeedViewModel(
   val context: Context,
-  val services: ServiceDirectoryType
+  val services: ServiceDirectoryType,
+  val feedArguments: CatalogFeedArguments
 ) : ViewModel(), CatalogFeedViewModelType {
 
   private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -55,34 +49,26 @@ abstract class CatalogFeedViewModelAbstract(
     this.services.requireService(CatalogConfigurationServiceType::class.java)
   private val profilesController: ProfilesControllerType =
     this.services.requireService(ProfilesControllerType::class.java)
+  private val instanceId =
+    UUID.randomUUID()
 
   /**
    * The stack of feeds that lead to the current feed. The current feed is the feed on top
    * of this stack.
    */
 
-  private val historyLock = Any()
-  @GuardedBy("historyLock")
-  private var history: List<CatalogFeedState> = listOf()
-
-  /**
-   * The initial feed URI that will be used for the feed view.
-   */
-
-  abstract fun initialFeedArguments(
-    context: Context,
-    profiles: ProfilesControllerType
-  ): CatalogFeedArguments
+  private val stateLock = Any()
+  @GuardedBy("stateLock")
+  private var state: CatalogFeedState? = null
 
   private fun loadFeed(
-    requestId: UUID,
     arguments: CatalogFeedArguments
   ): CatalogFeedState {
     return when (arguments) {
       is CatalogFeedArgumentsRemote ->
-        this.doLoadRemoteFeed(requestId, arguments)
+        this.doLoadRemoteFeed(arguments)
       is CatalogFeedArgumentsLocalBooks ->
-        this.doLoadLocalFeed(requestId, arguments)
+        this.doLoadLocalFeed(arguments)
     }
   }
 
@@ -91,10 +77,9 @@ abstract class CatalogFeedViewModelAbstract(
    */
 
   private fun doLoadLocalFeed(
-    requestId: UUID,
     arguments: CatalogFeedArgumentsLocalBooks
   ): CatalogFeedState {
-    this.logger.debug("[{}]: loading local feed {}", requestId, arguments.selection)
+    this.logger.debug("[{}]: loading local feed {}", this.instanceId, arguments.selection)
 
     val booksUri =
       URI.create("Books")
@@ -125,7 +110,7 @@ abstract class CatalogFeedViewModelAbstract(
         .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
         .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
 
-    return this.createNewStatus(requestId, arguments, future)
+    return this.createNewStatus(arguments, future)
   }
 
   /**
@@ -133,10 +118,9 @@ abstract class CatalogFeedViewModelAbstract(
    */
 
   private fun doLoadRemoteFeed(
-    requestId: UUID,
     arguments: CatalogFeedArgumentsRemote
   ): CatalogFeedState {
-    this.logger.debug("[{}]: loading remote feed {}", requestId, arguments.feedURI)
+    this.logger.debug("[{}]: loading remote feed {}", instanceId, arguments.feedURI)
 
     val account = this.profilesController.profileAccountCurrent()
     val loginState = account.loginState
@@ -150,7 +134,7 @@ abstract class CatalogFeedViewModelAbstract(
     val future =
       this.feedLoader.fetchURIWithBookRegistryEntries(arguments.feedURI, authentication)
 
-    return this.createNewStatus(requestId, arguments, future)
+    return this.createNewStatus(arguments, future)
   }
 
   /**
@@ -159,23 +143,21 @@ abstract class CatalogFeedViewModelAbstract(
    */
 
   private fun createNewStatus(
-    requestId: UUID,
     arguments: CatalogFeedArguments,
     future: FluentFuture<FeedLoaderResult>
   ): CatalogFeedState.CatalogFeedLoading {
-    val newRequestState =
+    val newState =
       CatalogFeedState.CatalogFeedLoading(
-        requestId = requestId,
         arguments = arguments,
         future = future
       )
 
-    synchronized(this.historyLock) {
+    synchronized(this.stateLock) {
       Preconditions.checkState(
-        !this.history.any { state -> state.requestId == requestId },
-        "There must not be an existing state with request ID $requestId")
-
-      this.history = this.history.plus(newRequestState)
+        this.state == null,
+        "State must be null (received ${this.state})"
+      )
+      this.state = newState
     }
     this.feedStatus.send(Unit)
 
@@ -184,26 +166,20 @@ abstract class CatalogFeedViewModelAbstract(
      */
 
     future.map { feedLoaderResult ->
-      this.onFeedStatusUpdated(requestId, feedLoaderResult)
+      this.onFeedStatusUpdated(feedLoaderResult, newState)
       feedLoaderResult
     }
-    return newRequestState
+    return newState
   }
 
   private fun onFeedStatusUpdated(
-    requestId: UUID,
-    result: FeedLoaderResult
+    result: FeedLoaderResult,
+    state: CatalogFeedState
   ) {
-    this.logger.debug("[{}]: feed status updated: {}", requestId, result.javaClass)
+    this.logger.debug("[{}]: feed status updated: {}", result.javaClass)
 
-    synchronized(this.historyLock) {
-      this.history = this.history.map { state ->
-        if (state.requestId == requestId) {
-          this.feedLoaderResultToFeedState(result, state)
-        } else {
-          state
-        }
-      }
+    synchronized(this.stateLock) {
+      this.state = this.feedLoaderResultToFeedState(result, state)
     }
 
     this.feedStatus.send(Unit)
@@ -218,44 +194,20 @@ abstract class CatalogFeedViewModelAbstract(
         when (val feed = result.feed) {
           is Feed.FeedWithoutGroups ->
             CatalogFeedWithoutGroups(
-              requestId = state.requestId,
               arguments = state.arguments,
               feed = feed
             )
           is Feed.FeedWithGroups ->
             CatalogFeedWithGroups(
-              requestId = state.requestId,
               arguments = state.arguments,
               feed = feed
             )
         }
       is FeedLoaderResult.FeedLoaderFailure ->
         CatalogFeedState.CatalogFeedLoadFailed(
-          requestId = state.requestId,
           arguments = state.arguments,
           failure = result
         )
-    }
-  }
-
-  /**
-   * Attempt to resolve a URI.
-   */
-
-  private fun resolveURI(uri: URI): URI {
-    if (uri.isAbsolute) {
-      return uri
-    }
-
-    val currentState = synchronized(this.historyLock) {
-      this.history.lastOrNull()
-    } ?: return uri
-
-    return when (val arguments = currentState.arguments) {
-      is CatalogFeedArgumentsRemote ->
-        arguments.feedURI.resolve(uri).normalize()
-      is CatalogFeedArgumentsLocalBooks ->
-        uri
     }
   }
 
@@ -272,61 +224,35 @@ abstract class CatalogFeedViewModelAbstract(
     }
   }
 
-  /**
-   * The status of the current feed.
-   */
-
   override val feedStatus: ObservableType<Unit> =
     Observable.create<Unit>()
 
-  /**
-   * Retrieve the status of the current feed, or load a new feed using the initial feed
-   * arguments defined for this view model.
-   *
-   * @see [initialFeedArguments]
-   */
-
   override fun feedState(): CatalogFeedState {
-    val currentState = synchronized(this.historyLock) {
-      this.history.lastOrNull()
-    }
-
+    val currentState = synchronized(this.stateLock, this::state)
     if (currentState != null) {
       return currentState
     }
-
-    return this.loadFeed(
-      requestId = UUID.randomUUID(),
-      arguments = this.initialFeedArguments(this.context, this.profilesController)
-    )
+    return this.loadFeed(this.feedArguments)
   }
 
-  /**
-   * Resolve and load a given URI as a remote feed. The URI, if non-absolute, is resolved against
-   * the URI at the top of the current request stack (assuming that the top of the stack refers
-   * to a remote feed).
-   *
-   * @param title The title of the feed
-   * @param uri The URI of the remote feed
-   * @param isSearchResults `true` if the feed refers to search results
-   */
-
-  override fun resolveAndLoadFeed(
+  override fun resolveFeed(
     title: String,
     uri: URI,
     isSearchResults: Boolean
-  ): CatalogFeedState {
-    val requestId = UUID.randomUUID()
-    this.logger.debug("[{}]: resolving and loading feed: {}", requestId, uri)
-    val resolvedURI = this.resolveURI(uri)
-    this.logger.debug("[{}]: resolved URI: {}", requestId, resolvedURI)
-
-    return this.loadFeed(
-      requestId = requestId,
-      arguments = CatalogFeedArgumentsRemote(
-        title = title,
-        feedURI = resolvedURI,
-        isSearchResults = isSearchResults
-      ))
+  ): CatalogFeedArguments {
+    return when (val arguments = this.feedArguments) {
+      is CatalogFeedArgumentsRemote ->
+        CatalogFeedArgumentsRemote(
+          title = title,
+          feedURI = arguments.feedURI.resolve(uri).normalize(),
+          isSearchResults = isSearchResults
+        )
+      is CatalogFeedArgumentsLocalBooks ->
+        CatalogFeedArgumentsRemote(
+          title = title,
+          feedURI = uri,
+          isSearchResults = isSearchResults
+        )
+    }
   }
 }

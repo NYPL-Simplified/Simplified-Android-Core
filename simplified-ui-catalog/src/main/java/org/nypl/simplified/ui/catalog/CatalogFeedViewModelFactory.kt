@@ -12,8 +12,9 @@ import org.slf4j.LoggerFactory
  */
 
 class CatalogFeedViewModelFactory(
-  val context: Context,
-  val services: ServiceDirectoryType
+  private val context: Context,
+  private val services: ServiceDirectoryType,
+  private val feedArguments: CatalogFeedArguments
 ) : ViewModelProvider.Factory {
 
   private val logger =
@@ -23,12 +24,8 @@ class CatalogFeedViewModelFactory(
     this.logger.debug("requested creation of view model of type {}", modelClass)
 
     return when {
-      modelClass.isAssignableFrom(CatalogFeedViewModelBooks::class.java) ->
-        CatalogFeedViewModelBooks(this.context, this.services) as T
-      modelClass.isAssignableFrom(CatalogFeedViewModelHolds::class.java) ->
-        CatalogFeedViewModelHolds(this.context, this.services) as T
-      modelClass.isAssignableFrom(CatalogFeedViewModelExternal::class.java) ->
-        CatalogFeedViewModelExternal(this.context, this.services) as T
+      modelClass.isAssignableFrom(CatalogFeedViewModel::class.java) ->
+        CatalogFeedViewModel(this.context, this.services, this.feedArguments) as T
       else ->
         throw IllegalArgumentException(
           "This view model factory (${this.javaClass}) cannot produce view models of type $modelClass")

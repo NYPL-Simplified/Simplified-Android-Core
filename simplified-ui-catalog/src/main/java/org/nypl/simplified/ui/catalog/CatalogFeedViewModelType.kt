@@ -10,33 +10,29 @@ import java.net.URI
 interface CatalogFeedViewModelType {
 
   /**
-   * The status of the current feed.
+   * An observable value that publishes events each time the value of [feedState] has changed.
    */
 
   val feedStatus: ObservableType<Unit>
 
   /**
-   * Retrieve the status of the current feed, or load a new feed using the initial feed
-   * arguments defined for this view model.
-   *
-   * @see [initialFeedArguments]
+   * Retrieve the status of the current feed.
    */
 
   fun feedState(): CatalogFeedState
 
   /**
-   * Resolve and load a given URI as a remote feed. The URI, if non-absolute, is resolved against
-   * the URI at the top of the current request stack (assuming that the top of the stack refers
-   * to a remote feed).
+   * Resolve a given URI as a remote feed. The URI, if non-absolute, is resolved against
+   * the current feed arguments in order to produce new arguments to load another feed.
    *
-   * @param title The title of the feed
-   * @param uri The URI of the remote feed
-   * @param isSearchResults `true` if the feed refers to search results
+   * @param title The title of the target feed
+   * @param uri The URI of the target feed
+   * @param isSearchResults `true` if the target feed refers to search results
    */
 
-  fun resolveAndLoadFeed(
+  fun resolveFeed(
     title: String,
     uri: URI,
     isSearchResults: Boolean
-  ): CatalogFeedState
+  ): CatalogFeedArguments
 }

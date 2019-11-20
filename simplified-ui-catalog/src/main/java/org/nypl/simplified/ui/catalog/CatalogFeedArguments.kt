@@ -1,14 +1,15 @@
 package org.nypl.simplified.ui.catalog
 
 import org.nypl.simplified.feeds.api.FeedBooksSelection
-import org.nypl.simplified.feeds.api.FeedFacet
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
+import java.io.Serializable
 import java.net.URI
 
 /**
  * The type of arguments used to fetch and/or display feeds.
  */
 
-sealed class CatalogFeedArguments {
+sealed class CatalogFeedArguments : Serializable {
 
   /**
    * `true` if the feed requires network connectivity. This translates to showing an error
@@ -50,7 +51,7 @@ sealed class CatalogFeedArguments {
 
   data class CatalogFeedArgumentsLocalBooks(
     override val title: String,
-    val facetType: FeedFacet.FeedFacetPseudo.FacetType,
+    val facetType: FacetType,
     val searchTerms: String?,
     val selection: FeedBooksSelection
   ) : CatalogFeedArguments() {

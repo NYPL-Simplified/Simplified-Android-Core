@@ -29,8 +29,27 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
  * models for each of the different app sections that want to display feeds.
  */
 
-abstract class CatalogFragmentFeedAbstract<T : CatalogFeedViewModelAbstract> : Fragment() {
+class CatalogFragmentFeed : Fragment() {
 
+  companion object {
+
+    private const val PARAMETERS_ID =
+      "org.nypl.simplified.ui.catalog.CatalogFragmentFeed.parameters"
+
+    /**
+     * Create a login fragment for the given parameters.
+     */
+
+    fun create(parameters: CatalogFeedArguments): CatalogFragmentFeed {
+      val arguments = Bundle()
+      arguments.putSerializable(this.PARAMETERS_ID, parameters)
+      val fragment = CatalogFragmentFeed()
+      fragment.arguments = arguments
+      return fragment
+    }
+  }
+
+  private lateinit var parameters: CatalogFeedArguments
   private lateinit var catalogNavigation: CatalogNavigationControllerType
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var feedError: ViewGroup
@@ -46,13 +65,8 @@ abstract class CatalogFragmentFeedAbstract<T : CatalogFeedViewModelAbstract> : F
   private lateinit var host: ServiceDirectoryProviderType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
+  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
   private var feedStatusSubscription: ObservableSubscriptionType<Unit>? = null
-
-  /**
-   * The precise type of view model used for implementations of this class.
-   */
-
-  abstract val viewModelClass: Class<T>
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -64,6 +78,9 @@ abstract class CatalogFragmentFeedAbstract<T : CatalogFeedViewModelAbstract> : F
       throw IllegalStateException(
         "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
     }
+
+    this.parameters =
+      this.arguments!![this.parametersId] as CatalogFeedArguments
 
     this.profilesController =
       this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
@@ -119,10 +136,13 @@ abstract class CatalogFragmentFeedAbstract<T : CatalogFeedViewModelAbstract> : F
 
     this.feedModel =
       ViewModelProviders.of(
-        this.requireActivity(),
-        CatalogFeedViewModelFactory(this.requireContext(), this.host.serviceDirectory))
-        .get(this.viewModelClass)
-        as CatalogFeedViewModelType
+        this,
+        CatalogFeedViewModelFactory(
+          context = this.requireContext(),
+          services = this.host.serviceDirectory,
+          feedArguments = this.parameters
+        ))
+        .get(CatalogFeedViewModel::class.java)
 
     /*
      * Configure the lanes based on the viewmodel.
@@ -134,13 +154,12 @@ abstract class CatalogFragmentFeedAbstract<T : CatalogFeedViewModelAbstract> : F
         uiThread = this.uiThread,
         context = this.requireContext(),
         coverLoader = this.host.serviceDirectory.requireService(BookCoverProviderType::class.java),
-        onBookSelected = this.catalogNavigation::openBookDetail,
+        onBookSelected = { opdsEntry ->
+          this.catalogNavigation.openBookDetail(opdsEntry)
+        },
         onFeedSelected = { title, uri ->
-          this.feedModel.resolveAndLoadFeed(
-            title = title,
-            uri = uri,
-            isSearchResults = false
-          )
+          this.catalogNavigation.openFeed(
+            this.feedModel.resolveFeed(title, uri, false))
         }
       )
 
