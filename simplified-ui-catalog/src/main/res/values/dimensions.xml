@@ -7,4 +7,7 @@
   <dimen name="catalogFeedCoversWidth">80dp</dimen>
   <dimen name="catalogFeedCoversEndSpace">16dp</dimen>
   <dimen name="catalogFeedCoversSpace">8dp</dimen>
+
+  <dimen name="catalogFeedCellImageWidth">72dp</dimen>
+  <dimen name="catalogFeedCellHeight">96dp</dimen>
 </resources>

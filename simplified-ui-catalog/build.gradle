@@ -19,6 +19,7 @@ dependencies {
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout
   implementation libraries.androidXLifecycle
+  implementation libraries.androidXPaging
   implementation libraries.androidXRecyclerView
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

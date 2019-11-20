@@ -5,9 +5,9 @@
   android:layout_width="match_parent"
   android:layout_height="@dimen/catalogBookDetailStatusHeight">
 
-  <include layout="@layout/book_detail_status_download" />
+  <include layout="@layout/book_detail_status_idle" />
 
-  <include layout="@layout/book_detail_status_download_failed" />
+  <include layout="@layout/book_detail_status_failed" />
 
-  <include layout="@layout/book_detail_status_downloading" />
+  <include layout="@layout/book_detail_status_in_progress" />
 </FrameLayout>

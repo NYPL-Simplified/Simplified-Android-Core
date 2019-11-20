@@ -3,6 +3,8 @@ package org.nypl.simplified.ui.catalog
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
 import com.io7m.jfunctional.Option
@@ -36,9 +38,9 @@ import javax.annotation.concurrent.GuardedBy
  */
 
 class CatalogFeedViewModel(
-  val context: Context,
-  val services: ServiceDirectoryType,
-  val feedArguments: CatalogFeedArguments
+  private val context: Context,
+  private val services: ServiceDirectoryType,
+  private val feedArguments: CatalogFeedArguments
 ) : ViewModel(), CatalogFeedViewModelType {
 
   private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -120,7 +122,7 @@ class CatalogFeedViewModel(
   private fun doLoadRemoteFeed(
     arguments: CatalogFeedArgumentsRemote
   ): CatalogFeedState {
-    this.logger.debug("[{}]: loading remote feed {}", instanceId, arguments.feedURI)
+    this.logger.debug("[{}]: loading remote feed {}", this.instanceId, arguments.feedURI)
 
     val account = this.profilesController.profileAccountCurrent()
     val loginState = account.loginState
@@ -176,7 +178,7 @@ class CatalogFeedViewModel(
     result: FeedLoaderResult,
     state: CatalogFeedState
   ) {
-    this.logger.debug("[{}]: feed status updated: {}", result.javaClass)
+    this.logger.debug("[{}]: feed status updated: {}", this.instanceId, result.javaClass)
 
     synchronized(this.stateLock) {
       this.state = this.feedLoaderResultToFeedState(result, state)
@@ -193,22 +195,67 @@ class CatalogFeedViewModel(
       is FeedLoaderResult.FeedLoaderSuccess ->
         when (val feed = result.feed) {
           is Feed.FeedWithoutGroups ->
-            CatalogFeedWithoutGroups(
-              arguments = state.arguments,
-              feed = feed
-            )
+            this.onReceivedFeedWithoutGroups(state, feed)
           is Feed.FeedWithGroups ->
-            CatalogFeedWithGroups(
-              arguments = state.arguments,
-              feed = feed
-            )
+            this.onReceivedFeedWithoutGroups(state, feed)
         }
       is FeedLoaderResult.FeedLoaderFailure ->
-        CatalogFeedState.CatalogFeedLoadFailed(
-          arguments = state.arguments,
-          failure = result
-        )
+        this.onReceivedFeedFailure(state, result)
     }
+  }
+
+  private fun onReceivedFeedFailure(
+    state: CatalogFeedState,
+    result: FeedLoaderResult.FeedLoaderFailure
+  ): CatalogFeedState.CatalogFeedLoadFailed {
+    return CatalogFeedState.CatalogFeedLoadFailed(
+      arguments = state.arguments,
+      failure = result
+    )
+  }
+
+  private fun onReceivedFeedWithoutGroups(
+    state: CatalogFeedState,
+    feed: Feed.FeedWithGroups
+  ): CatalogFeedWithGroups {
+    return CatalogFeedWithGroups(
+      arguments = state.arguments,
+      feed = feed
+    )
+  }
+
+  private fun onReceivedFeedWithoutGroups(
+    state: CatalogFeedState,
+    feed: Feed.FeedWithoutGroups
+  ): CatalogFeedWithoutGroups {
+
+    /*
+     * Construct a paged list for infinitely scrolling feeds.
+     */
+
+    val dataSourceFactory =
+      CatalogPagedDataSourceFactory(
+        feedLoader = this.feedLoader,
+        initialFeed = feed,
+        profilesController = this.profilesController
+      )
+
+    val pagedListConfig =
+      PagedList.Config.Builder()
+        .setEnablePlaceholders(true)
+        .setPageSize(50)
+        .setMaxSize(250)
+        .setPrefetchDistance(25)
+        .build()
+
+    val pagedList =
+      LivePagedListBuilder(dataSourceFactory, pagedListConfig)
+        .build()
+
+    return CatalogFeedWithoutGroups(
+      arguments = state.arguments,
+      pagedList = pagedList
+    )
   }
 
   override fun onCleared() {

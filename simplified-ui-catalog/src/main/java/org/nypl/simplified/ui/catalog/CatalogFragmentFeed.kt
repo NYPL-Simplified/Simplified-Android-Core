@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +24,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.slf4j.LoggerFactory
 
 /**
  * The base type of feed fragments. This class is abstract purely because the AndroidX
@@ -52,6 +54,7 @@ class CatalogFragmentFeed : Fragment() {
 
   private lateinit var catalogNavigation: CatalogNavigationControllerType
   private lateinit var configurationService: CatalogConfigurationServiceType
+  private lateinit var coverLoader: BookCoverProviderType
   private lateinit var feedError: ViewGroup
   private lateinit var feedLoader: FeedLoaderType
   private lateinit var feedLoading: ViewGroup
@@ -62,11 +65,14 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var feedWithGroupsData: MutableList<FeedGroup>
   private lateinit var feedWithGroupsList: RecyclerView
   private lateinit var feedWithoutGroups: ViewGroup
+  private lateinit var feedWithoutGroupsAdapter: CatalogPagedAdapter
+  private lateinit var feedWithoutGroupsList: RecyclerView
   private lateinit var host: ServiceDirectoryProviderType
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
+  private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
   private var feedStatusSubscription: ObservableSubscriptionType<Unit>? = null
 
@@ -84,6 +90,8 @@ class CatalogFragmentFeed : Fragment() {
     this.parameters =
       this.arguments!![this.parametersId] as CatalogFeedArguments
 
+    this.coverLoader =
+      this.host.serviceDirectory.requireService(BookCoverProviderType::class.java)
     this.screenInformation =
       this.host.serviceDirectory.requireService(ScreenSizeInformationType::class.java)
     this.profilesController =
@@ -119,15 +127,18 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithoutGroups =
       layout.findViewById(R.id.feedWithoutGroups)
 
-    this.feedWithGroupsList =
-      this.feedWithGroups.findViewById(R.id.feedWithGroupsList)
-
+    this.feedWithGroupsList = this.feedWithGroups.findViewById(R.id.feedWithGroupsList)
     this.feedWithGroupsList.setHasFixedSize(true)
     this.feedWithGroupsList.layoutManager = LinearLayoutManager(this.context)
     (this.feedWithGroupsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
     this.feedWithGroupsList.addItemDecoration(
       CatalogFeedWithGroupsDecorator(this.screenInformation.dpToPixels(16).toInt())
     )
+
+    this.feedWithoutGroupsList = this.feedWithoutGroups.findViewById(R.id.feedWithoutGroupsList)
+    this.feedWithoutGroupsList.setHasFixedSize(true)
+    this.feedWithoutGroupsList.layoutManager = LinearLayoutManager(this.context)
+    (this.feedWithoutGroupsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -160,7 +171,7 @@ class CatalogFragmentFeed : Fragment() {
         groups = this.feedWithGroupsData,
         uiThread = this.uiThread,
         context = this.requireContext(),
-        coverLoader = this.host.serviceDirectory.requireService(BookCoverProviderType::class.java),
+        coverLoader = this.coverLoader,
         onBookSelected = { opdsEntry ->
           this.catalogNavigation.openBookDetail(opdsEntry)
         },
@@ -238,6 +249,19 @@ class CatalogFragmentFeed : Fragment() {
     this.feedNavigation.visibility = View.INVISIBLE
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.VISIBLE
+
+    this.feedWithoutGroupsAdapter =
+      CatalogPagedAdapter(
+        context = this.requireContext(),
+        covers = this.coverLoader,
+        uiThread = this.uiThread
+      )
+
+    this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
+    feedState.pagedList.observe(this, Observer { newPagedList ->
+      this.logger.debug("received paged list ({} elements)", newPagedList.size)
+      this.feedWithoutGroupsAdapter.submitList(newPagedList)
+    })
   }
 
   @UiThread
