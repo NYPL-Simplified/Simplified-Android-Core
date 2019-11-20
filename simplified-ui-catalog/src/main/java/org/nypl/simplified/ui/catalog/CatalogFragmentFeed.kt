@@ -21,6 +21,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
+import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 
 /**
@@ -49,7 +50,6 @@ class CatalogFragmentFeed : Fragment() {
     }
   }
 
-  private lateinit var parameters: CatalogFeedArguments
   private lateinit var catalogNavigation: CatalogNavigationControllerType
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var feedError: ViewGroup
@@ -63,9 +63,11 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var feedWithGroupsList: RecyclerView
   private lateinit var feedWithoutGroups: ViewGroup
   private lateinit var host: ServiceDirectoryProviderType
+  private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
+  private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
-  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
+  private val parametersId = PARAMETERS_ID
   private var feedStatusSubscription: ObservableSubscriptionType<Unit>? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,6 +84,8 @@ class CatalogFragmentFeed : Fragment() {
     this.parameters =
       this.arguments!![this.parametersId] as CatalogFeedArguments
 
+    this.screenInformation =
+      this.host.serviceDirectory.requireService(ScreenSizeInformationType::class.java)
     this.profilesController =
       this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
     this.configurationService =
@@ -121,6 +125,9 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroupsList.setHasFixedSize(true)
     this.feedWithGroupsList.layoutManager = LinearLayoutManager(this.context)
     (this.feedWithGroupsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+    this.feedWithGroupsList.addItemDecoration(
+      CatalogFeedWithGroupsDecorator(this.screenInformation.dpToPixels(16).toInt())
+    )
 
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE

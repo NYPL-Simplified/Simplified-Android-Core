@@ -95,6 +95,7 @@ class BookCoverProvider private constructor(
           fallbackRequest.resize(width, height)
           fallbackRequest.transform(badgePainter)
           fallbackRequest.into(imageView, callbackFinal)
+          fallbackRequest.noFade()
         }
       }
 
@@ -103,6 +104,7 @@ class BookCoverProvider private constructor(
       request.resize(width, height)
       request.transform(badgePainter)
       request.into(imageView, fallbackToGeneration)
+      request.noFade()
     } else {
       this.log.debug("{}: {}: loading generated uri {}", tag, entry.bookID, uriGenerated)
 
@@ -111,6 +113,7 @@ class BookCoverProvider private constructor(
       request.resize(width, height)
       request.transform(badgePainter)
       request.into(imageView, callbackFinal)
+      request.noFade()
     }
 
     return FluentFuture.from(future)

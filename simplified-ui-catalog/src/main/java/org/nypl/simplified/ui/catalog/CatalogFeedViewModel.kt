@@ -211,6 +211,11 @@ class CatalogFeedViewModel(
     }
   }
 
+  override fun onCleared() {
+    super.onCleared()
+    this.logger.debug("[{}]: deleting viewmodel", this.instanceId)
+  }
+
   private class CatalogFacetPseudoTitleProvider(
     val resources: Resources
   ) : FeedFacetPseudoTitleProviderType {

@@ -33,6 +33,9 @@ class CatalogFeedWithGroupsAdapter(
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit
 ) : RecyclerView.Adapter<CatalogFeedWithGroupsAdapter.ViewHolder>() {
 
+  private val shortAnimationDuration =
+    this.context.resources.getInteger(android.R.integer.config_shortAnimTime)
+
   private val endSpaceLayoutParams =
     LinearLayout.LayoutParams(
       this.context.resources.getDimensionPixelSize(R.dimen.catalogFeedCoversEndSpace),
@@ -75,6 +78,7 @@ class CatalogFeedWithGroupsAdapter(
 
     holder.progress.visibility = View.VISIBLE
     holder.scrollView.visibility = View.INVISIBLE
+    holder.scrollView.scrollX = 0
     holder.covers.removeAllViews()
 
     /*
@@ -113,8 +117,12 @@ class CatalogFeedWithGroupsAdapter(
       val entry = group.groupEntries[i]
       if (entry is FeedEntry.FeedEntryOPDS) {
         val imageView = ImageView(this.context)
-        imageView.scaleType = ImageView.ScaleType.FIT_XY
-        imageView.layoutParams = this.coverLayoutParams
+        imageView.scaleType =
+          ImageView.ScaleType.FIT_XY
+        imageView.layoutParams =
+          this.coverLayoutParams
+        imageView.contentDescription =
+          CatalogBookAccessibilityStrings.coverDescription(this.context.resources, entry)
         imageView.setOnClickListener {
           this.onBookSelected.invoke(entry)
         }
@@ -155,6 +163,11 @@ class CatalogFeedWithGroupsAdapter(
     loadingFuture.map {
       this.uiThread.runOnUIThread {
         holder.scrollView.visibility = View.VISIBLE
+        holder.scrollView.alpha = 0.0f
+        holder.scrollView.animate()
+          .alpha(1f)
+          .setDuration(this.shortAnimationDuration.toLong())
+          .setListener(null)
         holder.progress.visibility = View.INVISIBLE
       }
     }

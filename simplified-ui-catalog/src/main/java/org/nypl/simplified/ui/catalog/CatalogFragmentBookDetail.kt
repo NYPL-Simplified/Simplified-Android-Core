@@ -1,5 +1,7 @@
 package org.nypl.simplified.ui.catalog
 
+import android.animation.Animator
+import android.animation.Animator.AnimatorListener
 import android.content.Context
 import android.os.Bundle
 import android.text.Html
@@ -30,7 +32,9 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
@@ -70,6 +74,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private lateinit var booksController: BooksControllerType
   private lateinit var buttons: LinearLayout
   private lateinit var cover: ImageView
+  private lateinit var coverProgress: ProgressBar
+  private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
   private lateinit var format: TextView
   private lateinit var host: ServiceDirectoryProviderType
@@ -142,6 +148,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
       this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
     this.booksController =
       this.host.serviceDirectory.requireService(BooksControllerType::class.java)
+    this.covers =
+      this.host.serviceDirectory.requireService(BookCoverProviderType::class.java)
   }
 
   override fun onCreateView(
@@ -154,6 +162,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
 
     this.cover =
       layout.findViewById(R.id.bookDetailCover)
+    this.coverProgress =
+      layout.findViewById<ProgressBar>(R.id.bookDetailCoverProgress)
     this.title =
       layout.findViewById(R.id.bookDetailTitle)
     this.format =
@@ -205,6 +215,30 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
 
   override fun onStart() {
     super.onStart()
+
+    val shortAnimationDuration =
+      this.requireContext().resources.getInteger(android.R.integer.config_shortAnimTime)
+
+    this.cover.visibility = View.INVISIBLE
+    this.coverProgress.visibility = View.VISIBLE
+
+    this.covers.loadCoverInto(
+      this.parameters.feedEntry,
+      this.cover,
+      this.cover.layoutParams.width,
+      this.cover.layoutParams.height
+    ).map {
+      this.uiThread.runOnUIThread {
+        this.coverProgress.visibility = View.INVISIBLE
+
+        this.cover.visibility = View.VISIBLE
+        this.cover.alpha = 0.0f
+        this.cover.animate()
+          .alpha(1f)
+          .setDuration(shortAnimationDuration.toLong())
+          .setListener(null)
+      }
+    }
 
     /*
      * Retrieve the current status of the book, or synthesize a status value based on the
