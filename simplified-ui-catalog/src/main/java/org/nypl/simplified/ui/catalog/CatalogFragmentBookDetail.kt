@@ -1,7 +1,5 @@
 package org.nypl.simplified.ui.catalog
 
-import android.animation.Animator
-import android.animation.Animator.AnimatorListener
 import android.content.Context
 import android.os.Bundle
 import android.text.Html
