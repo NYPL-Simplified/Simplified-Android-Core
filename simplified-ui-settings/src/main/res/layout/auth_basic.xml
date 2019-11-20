@@ -37,7 +37,7 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/authBasicUserNameLabel" />
 
-  <EditText
+  <androidx.appcompat.widget.AppCompatEditText
     android:id="@+id/authBasicUserNameField"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
@@ -46,11 +46,12 @@
     android:inputType="textPersonName"
     android:label="@id/authBasicUserNameLabel"
     android:textSize="14sp"
+    android:theme="@style/SimplifiedEditText"
     app:layout_constraintBaseline_toBaselineOf="@id/authBasicUserNameLabel"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/authBasicUserNameLabel" />
 
-  <EditText
+  <androidx.appcompat.widget.AppCompatEditText
     android:id="@+id/authBasicPasswordField"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
@@ -59,6 +60,7 @@
     android:inputType="textPassword"
     android:label="@id/authBasicPasswordLabel"
     android:textSize="14sp"
+    android:theme="@style/SimplifiedEditText"
     app:layout_constraintBaseline_toBaselineOf="@id/authBasicPasswordLabel"
     app:layout_constraintEnd_toStartOf="@id/authBasicPasswordShow"
     app:layout_constraintStart_toEndOf="@id/authBasicPasswordLabel" />

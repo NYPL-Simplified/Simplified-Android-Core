@@ -29,6 +29,7 @@ import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
+import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 

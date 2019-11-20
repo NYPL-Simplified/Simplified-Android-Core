@@ -8,6 +8,7 @@ dependencies {
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-reports")
   implementation project(":simplified-services-api")
+  implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
 
   implementation libraries.androidXAppCompat

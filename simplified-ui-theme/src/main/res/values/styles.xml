@@ -55,12 +55,16 @@
     <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
 
+    <item name="android:actionBarStyle">@style/SimplifiedActionBar</item>
+    <item name="android:alertDialogStyle">@style/SimplifiedAlertDialog</item>
+    <item name="android:alertDialogTheme">@style/SimplifiedAlertDialog</item>
+    <item name="android:buttonStyle">@style/SimplifiedButton</item>
+    <item name="android:dialogTheme">@style/SimplifiedDialog</item>
+    <item name="android:editTextStyle">@style/SimplifiedEditText</item>
+    <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     <item name="windowActionBar">false</item>
     <item name="windowNoTitle">true</item>
-    <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
-
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-    <item name="android:buttonStyle">@style/SimplifiedButton</item>
   </style>
 
   <!--
@@ -82,12 +86,14 @@
     <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
 
-    <item name="android:alertDialogTheme">@style/SimplifiedAlertDialog</item>
-    <item name="android:alertDialogStyle">@style/SimplifiedAlertDialog</item>
     <item name="android:actionBarStyle">@style/SimplifiedActionBar</item>
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="android:alertDialogStyle">@style/SimplifiedAlertDialog</item>
+    <item name="android:alertDialogTheme">@style/SimplifiedAlertDialog</item>
     <item name="android:buttonStyle">@style/SimplifiedButton</item>
+    <item name="android:dialogTheme">@style/SimplifiedDialog</item>
+    <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
   </style>
 
   <style name="SimplifiedActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
@@ -105,6 +111,24 @@
     <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
     <item name="android:colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
     <item name="android:colorAccent">?attr/simplifiedColorPrimaryLight</item>
+  </style>
+
+  <style name="SimplifiedDialog" parent="Theme.AppCompat.Light.Dialog">
+    <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
+    <item name="android:colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
+    <item name="android:colorAccent">?attr/simplifiedColorPrimaryLight</item>
+    <item name="android:buttonStyle">@style/SimplifiedButton</item>
+  </style>
+
+  <style name="SimplifiedEditText" parent="Widget.AppCompat.EditText">
+    <item name="android:colorAccent">?attr/simplifiedColorPrimaryLight</item>
+    <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
+    <item name="android:colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
+    <item name="android:textColor">?attr/simplifiedColorPrimary</item>
+    <item name="android:textColorHint">?attr/simplifiedColorPrimaryDark</item>
+    <item name="colorAccent">?attr/simplifiedColorPrimary</item>
+    <item name="colorControlActivated">?attr/simplifiedColorPrimary</item>
+    <item name="colorControlNormal">?attr/simplifiedColorPrimary</item>
   </style>
 
   <!-- Material Design Color Palette -->

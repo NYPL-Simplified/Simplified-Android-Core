@@ -17,6 +17,8 @@ import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
 import org.nypl.simplified.books.covers.BookCoverGenerator
 import org.nypl.simplified.books.covers.BookCoverProvider
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.documents.store.DocumentStore
+import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
@@ -29,6 +31,7 @@ import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.tenprint.TenPrintGenerator
 import org.nypl.simplified.tests.MockBooksController
+import org.nypl.simplified.tests.MockDocumentStore
 import org.nypl.simplified.tests.MockProfilesController
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
@@ -67,6 +70,8 @@ class CatalogFeedActivity : AppCompatActivity(), ServiceDirectoryProviderType {
 
     val bookRegistry = BookRegistry.create()
 
+    val documentStore = MockDocumentStore()
+
     val feedLoader =
       FeedLoader.create(
         exec = MoreExecutors.listeningDecorator(this.executor),
@@ -92,6 +97,10 @@ class CatalogFeedActivity : AppCompatActivity(), ServiceDirectoryProviderType {
         debugLogging = false
       )
 
+    this.serviceDirectory.putService(
+      interfaceType = DocumentStoreType::class.java,
+      service = documentStore
+    )
     this.serviceDirectory.putService(
       interfaceType = BookCoverProviderType::class.java,
       service = coverLoader
