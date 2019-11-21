@@ -19,7 +19,7 @@ internal class CatalogFeedWithGroupsDecorator(
     state: RecyclerView.State
   ) {
     super.getItemOffsets(outRect, view, parent, state)
-    val dataSize = state.getItemCount()
+    val dataSize = state.itemCount
     val position = parent.getChildAdapterPosition(view)
     if (dataSize > 0 && position == dataSize - 1) {
       outRect.set(0, 0, 0, this.bottomOffset)

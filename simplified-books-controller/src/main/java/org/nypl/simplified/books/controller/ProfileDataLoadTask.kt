@@ -4,15 +4,13 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.observable.ObservableType
-import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileType
 import org.slf4j.LoggerFactory
 
 class ProfileDataLoadTask(
   private val profile: ProfileType,
-  private val bookRegistry: BookRegistryType,
-  private val events: ObservableType<ProfileEvent>) : Runnable {
+  private val bookRegistry: BookRegistryType
+) : Runnable {
 
   private val logger = LoggerFactory.getLogger(ProfileDataLoadTask::class.java)
 

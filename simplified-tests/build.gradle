@@ -38,7 +38,6 @@ dependencies {
   api project(":simplified-migration-from3master")
   api project(":simplified-migration-spi")
   api project(":simplified-notifications")
-  api project(":simplified-observable")
   api project(":simplified-opds-auth-document")
   api project(":simplified-opds-auth-document-api")
   api project(":simplified-opds-core")

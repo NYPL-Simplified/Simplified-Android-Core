@@ -2,12 +2,12 @@ dependencies {
   api project(':simplified-accounts-api')
   api project(':simplified-accounts-registry-api')
   api project(':simplified-accounts-source-spi')
-  api project(':simplified-observable')
 
   api libraries.googleGuava
   api libraries.io7mJFunctional
   api libraries.jodaTime
   api libraries.nyplDRMCore
+  api libraries.rxjava2
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

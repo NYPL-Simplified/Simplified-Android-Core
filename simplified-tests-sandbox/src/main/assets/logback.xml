@@ -34,22 +34,14 @@
   </appender>
 
   <logger
-    name="org.nypl.simplified.app.catalog.CatalogFeedBookCellView"
-    level="INFO" />
-
-  <logger
-    name="org.nypl.simplified.app.catalog.CatalogFeedLane"
-    level="INFO" />
-
-  <logger
-    name="org.nypl.simplified.app.BookCoverProvider"
-    level="DEBUG" />
+    name="org.nypl.simplified.books.covers.BookCoverProvider"
+    level="ERROR" />
 
   <logger
     name="org.nypl.drm"
     level="DEBUG" />
 
-  <root level="DEBUG">
+  <root level="TRACE">
     <appender-ref ref="LOG_CAT" />
     <appender-ref ref="ASYNC_FILE" />
     <appender-ref ref="BUGSNAG" />

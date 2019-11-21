@@ -9,13 +9,14 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.splash.SplashActivity;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon;
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.reactivex.disposables.Disposable;
 
 /**
  * An activity that handles profile inactivity timeouts. Timeouts are not processed if the
@@ -33,7 +34,7 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProfileTimeOutActivity.class);
 
-  private ObservableSubscriptionType<ProfileEvent> profile_event_sub;
+  private Disposable profile_event_sub;
   private boolean foreground;
   private ProfileTimeOutDialog warn_dialog;
 
@@ -106,7 +107,7 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
     super.onStop();
 
     if (this.profile_event_sub != null) {
-      this.profile_event_sub.unsubscribe();
+      this.profile_event_sub.dispose();
       this.profile_event_sub = null;
     }
   }

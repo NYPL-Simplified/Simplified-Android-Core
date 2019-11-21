@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.DialogFragment
 import com.io7m.jfunctional.Some
+import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
@@ -26,7 +27,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -80,7 +80,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
   private lateinit var userName: EditText
   private lateinit var userNameLabel: TextView
   private val parametersId = PARAMETERS_ID
-  private var accountEventSubscription: ObservableSubscriptionType<AccountEvent>? = null
+  private var accountEventSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -369,7 +369,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
     this.eula.setOnCheckedChangeListener(null)
     this.userName.removeTextChangedListener(this.fieldListener)
     this.password.removeTextChangedListener(this.fieldListener)
-    this.accountEventSubscription?.unsubscribe()
+    this.accountEventSubscription?.dispose()
   }
 
   override fun onDismiss(dialog: DialogInterface) {

@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
+import io.reactivex.subjects.PublishSubject
 import org.hamcrest.core.IsInstanceOf
 import org.junit.After
 import org.junit.Assert
@@ -47,8 +48,6 @@ import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -64,19 +63,19 @@ import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.MockAnalytics
+import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
+import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
+import org.nypl.simplified.tests.http.MockingHTTP
 import org.nypl.simplified.tests.strings.MockAccountCreationStringResources
 import org.nypl.simplified.tests.strings.MockAccountDeletionStringResources
 import org.nypl.simplified.tests.strings.MockAccountLoginStringResources
 import org.nypl.simplified.tests.strings.MockAccountLogoutStringResources
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockAnalytics
-import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.strings.MockBorrowStringResources
 import org.nypl.simplified.tests.strings.MockRevokeStringResources
-import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
-import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
-import org.nypl.simplified.tests.http.MockingHTTP
-import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -100,7 +99,7 @@ abstract class BooksControllerContract {
   @Rule
   val expected = ExpectedException.none()
 
-  private lateinit var accountEvents: ObservableType<AccountEvent>
+  private lateinit var accountEvents: PublishSubject<AccountEvent>
   private lateinit var accountEventsReceived: MutableList<AccountEvent>
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
   private lateinit var bookEvents: MutableList<BookEvent>
@@ -116,7 +115,7 @@ abstract class BooksControllerContract {
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var http: MockingHTTP
   private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
-  private lateinit var profileEvents: ObservableType<ProfileEvent>
+  private lateinit var profileEvents: PublishSubject<ProfileEvent>
   private lateinit var profileEventsReceived: MutableList<ProfileEvent>
   private lateinit var profiles: ProfilesDatabaseType
 
@@ -146,8 +145,8 @@ abstract class BooksControllerContract {
   private fun createController(
     exec: ExecutorService,
     feedExecutor: ListeningExecutorService,
-    accountEvents: ObservableType<AccountEvent>,
-    profileEvents: ObservableType<ProfileEvent>,
+    accountEvents: PublishSubject<AccountEvent>,
+    profileEvents: PublishSubject<ProfileEvent>,
     http: HTTPType,
     books: BookRegistryType,
     profiles: ProfilesDatabaseType,
@@ -238,9 +237,9 @@ abstract class BooksControllerContract {
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.directoryDownloads = DirectoryUtilities.directoryCreateTemporary()
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
-    this.profileEvents = Observable.create<ProfileEvent>()
+    this.profileEvents = PublishSubject.create<ProfileEvent>()
     this.profileEventsReceived = Collections.synchronizedList(ArrayList())
-    this.accountEvents = Observable.create<AccountEvent>()
+    this.accountEvents = PublishSubject.create<AccountEvent>()
     this.accountEventsReceived = Collections.synchronizedList(ArrayList())
     this.profiles = profilesDatabaseWithoutAnonymous(this.accountEvents, this.directoryProfiles)
     this.bookEvents = Collections.synchronizedList(ArrayList())
@@ -797,7 +796,7 @@ abstract class BooksControllerContract {
 
   @Throws(ProfileDatabaseException::class)
   private fun profilesDatabaseWithoutAnonymous(
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: PublishSubject<AccountEvent>,
     dirProfiles: File): ProfilesDatabaseType {
     return ProfilesDatabases.openWithAnonymousProfileDisabled(
       context(),

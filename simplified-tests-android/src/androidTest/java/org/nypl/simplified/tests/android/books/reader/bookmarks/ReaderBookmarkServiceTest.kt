@@ -2,9 +2,9 @@ package org.nypl.simplified.tests.android.books.reader.bookmarks
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import io.reactivex.subjects.Subject
 import org.junit.runner.RunWith
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
@@ -22,7 +22,7 @@ class ReaderBookmarkServiceTest : ReaderBookmarkServiceContract() {
 
   override fun bookmarkService(
     threads: (Runnable) -> Thread,
-    events: ObservableType<ReaderBookmarkEvent>,
+    events: Subject<ReaderBookmarkEvent>,
     httpCalls: ReaderBookmarkHTTPCallsType,
     profilesController: ProfilesControllerType): ReaderBookmarkServiceType {
     return ReaderBookmarkService.Companion.createService(ReaderBookmarkServiceProviderType.Requirements(

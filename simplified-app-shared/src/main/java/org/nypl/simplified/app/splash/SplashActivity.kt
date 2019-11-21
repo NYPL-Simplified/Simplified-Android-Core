@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.jfunctional.Some
+import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountLoginState
@@ -23,7 +24,6 @@ import org.nypl.simplified.migration.api.Migrations
 import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
-import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
@@ -146,7 +146,7 @@ class SplashActivity : SimplifiedActivity(), SplashListenerType {
     return Simplified.application.servicesBooting
   }
 
-  override fun onSplashWantBootEvents(): ObservableReadableType<BootEvent> {
+  override fun onSplashWantBootEvents(): Observable<BootEvent> {
     this.log.debug("onSplashWantBootEvents")
     return Simplified.application.servicesBootEvents
   }

@@ -15,7 +15,6 @@ import org.nypl.simplified.accounts.database.api.AccountType;
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.api.BookID;
 import org.nypl.simplified.feeds.api.Feed;
-import org.nypl.simplified.observable.ObservableReadableType;
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent;
 import org.nypl.simplified.profiles.api.ProfileCreationEvent;
 import org.nypl.simplified.profiles.api.ProfileEvent;
@@ -30,6 +29,8 @@ import org.nypl.simplified.taskrecorder.api.TaskResult;
 
 import java.net.URI;
 import java.util.SortedMap;
+
+import io.reactivex.Observable;
 
 import static org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData;
 import static org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData;
@@ -72,7 +73,7 @@ public interface ProfilesControllerType {
    * @return An observable that publishes profile events
    */
 
-  ObservableReadableType<ProfileEvent> profileEvents();
+  Observable<ProfileEvent> profileEvents();
 
   /**
    * Create a profile, asynchronously, and return a profile event.
@@ -196,7 +197,7 @@ public interface ProfilesControllerType {
    * @return An observable that publishes account events
    */
 
-  ObservableReadableType<AccountEvent> accountEvents();
+  Observable<AccountEvent> accountEvents();
 
   /**
    * @return A list of all of the account providers used by the current profile

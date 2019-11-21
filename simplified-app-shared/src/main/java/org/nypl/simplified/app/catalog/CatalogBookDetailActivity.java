@@ -22,13 +22,13 @@ import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.login.LoginDialogListenerType;
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
-import org.nypl.simplified.books.book_registry.BookStatusEvent;
 import org.nypl.simplified.books.controller.api.BooksControllerType;
 import org.nypl.simplified.books.covers.BookCoverProviderType;
-import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.stack.ImmutableStack;
+
+import io.reactivex.disposables.Disposable;
 
 import static org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 
@@ -45,7 +45,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
   }
 
   private CatalogBookDetailView view;
-  private ObservableSubscriptionType<BookStatusEvent> bookSubscription;
+  private Disposable bookSubscription;
 
   /**
    * Construct an activity.
@@ -175,7 +175,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements 
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    this.bookSubscription.unsubscribe();
+    this.bookSubscription.dispose();
   }
 
   @NotNull

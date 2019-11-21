@@ -3,6 +3,8 @@ package org.nypl.simplified.tests
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.SettableFuture
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDate
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
@@ -14,9 +16,6 @@ import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.Feed
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -47,10 +46,10 @@ object MockProfilesController : ProfilesControllerType {
       .toMap()
       .toSortedMap()
 
-  val profileEventSource: ObservableType<ProfileEvent> =
-    Observable.create<ProfileEvent>()
-  val accountEventSource: ObservableType<AccountEvent> =
-    Observable.create<AccountEvent>()
+  val profileEventSource: PublishSubject<ProfileEvent> =
+    PublishSubject.create<ProfileEvent>()
+  val accountEventSource: PublishSubject<AccountEvent> =
+    PublishSubject.create<AccountEvent>()
 
   override fun profiles(): SortedMap<ProfileID, ProfileReadableType> {
     return this.profiles as SortedMap<ProfileID, ProfileReadableType>
@@ -68,7 +67,7 @@ object MockProfilesController : ProfilesControllerType {
     return true
   }
 
-  override fun profileEvents(): ObservableReadableType<ProfileEvent> {
+  override fun profileEvents(): Observable<ProfileEvent> {
     return this.profileEventSource;
   }
 
@@ -128,7 +127,7 @@ object MockProfilesController : ProfilesControllerType {
     return this.profileCurrent().accountsByProvider()[provider]!!
   }
 
-  override fun accountEvents(): ObservableReadableType<AccountEvent> {
+  override fun accountEvents(): Observable<AccountEvent> {
     return this.accountEventSource
   }
 

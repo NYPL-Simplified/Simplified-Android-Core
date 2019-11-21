@@ -2,7 +2,6 @@ package org.nypl.simplified.profiles.api.idle_timer;
 
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.observable.ObservableType;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import io.reactivex.subjects.Subject;
 
 /**
  * The default implementation of the {@link ProfileIdleTimerType} interface.
@@ -21,14 +22,14 @@ public final class ProfileIdleTimer implements ProfileIdleTimerType {
   private static final Logger LOG = LoggerFactory.getLogger(ProfileIdleTimer.class);
 
   private final ExecutorService exec;
-  private final ObservableType<ProfileEvent> events;
+  private final Subject<ProfileEvent> events;
   private final AtomicInteger seconds_maximum;
   private final AtomicInteger seconds_warning;
   private final AtomicReference<TimerTask> running;
 
   private ProfileIdleTimer(
     final ExecutorService exec,
-    final ObservableType<ProfileEvent> events) {
+    final Subject<ProfileEvent> events) {
 
     this.exec = NullCheck.notNull(exec, "Exec");
     this.events = NullCheck.notNull(events, "Events");
@@ -47,7 +48,7 @@ public final class ProfileIdleTimer implements ProfileIdleTimerType {
 
   public static ProfileIdleTimerType create(
     final ExecutorService exec,
-    final ObservableType<ProfileEvent> events) {
+    final Subject<ProfileEvent> events) {
     return new ProfileIdleTimer(exec, events);
   }
 
@@ -108,13 +109,13 @@ public final class ProfileIdleTimer implements ProfileIdleTimerType {
     private final AtomicInteger seconds_elapsed;
     private final AtomicInteger seconds_warning;
     private final AtomicInteger seconds_maximum;
-    private final ObservableType<ProfileEvent> events;
+    private final Subject<ProfileEvent> events;
     private final AtomicBoolean warned;
 
     TimerTask(
       final AtomicInteger seconds_warning,
       final AtomicInteger seconds_maximum,
-      final ObservableType<ProfileEvent> events) {
+      final Subject<ProfileEvent> events) {
       this.seconds_warning = seconds_warning;
       this.seconds_maximum = seconds_maximum;
       this.seconds_elapsed = new AtomicInteger(0);
@@ -137,14 +138,14 @@ public final class ProfileIdleTimer implements ProfileIdleTimerType {
           final int elapsed = this.seconds_elapsed.get();
           final int maximum = this.seconds_maximum.get();
           if (elapsed >= maximum) {
-            this.events.send(ProfileIdleTimedOut.get());
+            this.events.onNext(ProfileIdleTimedOut.get());
             LOG.debug("timed out");
             break;
           }
 
           if (maximum - elapsed <= this.seconds_warning.get() && !this.warned.get()) {
             this.warned.set(true);
-            this.events.send(ProfileIdleTimeOutSoon.get());
+            this.events.onNext(ProfileIdleTimeOutSoon.get());
             LOG.debug("time out warning published");
           }
 

@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.local.books.reader.bookmarks
 
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
@@ -17,7 +17,7 @@ class ReaderBookmarkServiceTest : ReaderBookmarkServiceContract() {
 
   override fun bookmarkService(
     threads: (Runnable) -> Thread,
-    events: ObservableType<ReaderBookmarkEvent>,
+    events: Subject<ReaderBookmarkEvent>,
     httpCalls: ReaderBookmarkHTTPCallsType,
     profilesController: ProfilesControllerType): ReaderBookmarkServiceType {
 

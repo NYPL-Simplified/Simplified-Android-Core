@@ -2,6 +2,8 @@ package org.nypl.simplified.tests.books.reader.bookmarks
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.io7m.jfunctional.Option
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import org.joda.time.LocalDateTime
 import org.junit.After
 import org.junit.Assert
@@ -22,7 +24,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPResultType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileType
@@ -49,7 +50,7 @@ abstract class ReaderBookmarkServiceContract {
 
   protected abstract fun bookmarkService(
     threads: (Runnable) -> Thread,
-    events: ObservableType<ReaderBookmarkEvent>,
+    events: Subject<ReaderBookmarkEvent>,
     httpCalls: ReaderBookmarkHTTPCallsType,
     profilesController: ProfilesControllerType): ReaderBookmarkServiceType
 

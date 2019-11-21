@@ -1,11 +1,11 @@
 package org.nypl.simplified.accounts.database.api
 
 import android.content.Context
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
-import org.nypl.simplified.observable.ObservableType
 import java.io.File
 
 /**
@@ -29,7 +29,7 @@ interface AccountsDatabaseFactoryType {
   @Throws(AccountsDatabaseException::class)
   fun openDatabase(
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     bookDatabases: BookDatabaseFactoryType,
     context: Context,
@@ -49,7 +49,7 @@ interface AccountsDatabaseFactoryType {
   @Throws(AccountsDatabaseException::class)
   fun openDatabase(
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     context: Context,
     directory: File): AccountsDatabaseType

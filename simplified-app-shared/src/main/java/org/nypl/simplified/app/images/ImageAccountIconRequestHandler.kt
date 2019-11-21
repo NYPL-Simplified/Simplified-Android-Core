@@ -4,6 +4,7 @@ import com.squareup.picasso.Picasso.LoadedFrom.DISK
 import com.squareup.picasso.Picasso.LoadedFrom.NETWORK
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
+import okio.Okio
 import java.io.ByteArrayInputStream
 import java.net.URL
 
@@ -26,10 +27,10 @@ class ImageAccountIconRequestHandler : RequestHandler() {
         this.failQuietly()
       }
     } else {
-      return Result(URL(request.uri.toString()).openStream(), NETWORK)
+      return Result(Okio.source(URL(request.uri.toString()).openStream()), NETWORK)
     }
   }
 
   private fun failQuietly() =
-    Result(ByteArrayInputStream(ByteArray(0)), DISK)
+    Result(Okio.source(ByteArrayInputStream(ByteArray(0))), DISK)
 }

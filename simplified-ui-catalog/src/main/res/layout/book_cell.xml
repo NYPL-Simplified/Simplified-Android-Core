@@ -7,4 +7,6 @@
   <include layout="@layout/book_cell_idle" />
 
   <include layout="@layout/book_cell_end_loading" />
+
+  <include layout="@layout/book_cell_corrupt" />
 </FrameLayout>

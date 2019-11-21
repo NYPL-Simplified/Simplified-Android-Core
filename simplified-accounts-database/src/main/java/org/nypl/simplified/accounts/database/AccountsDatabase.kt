@@ -5,6 +5,7 @@ import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.FunctionType
+import io.reactivex.subjects.Subject
 
 import net.jcip.annotations.GuardedBy
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
@@ -33,7 +34,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
-import org.nypl.simplified.observable.ObservableType
 import org.slf4j.LoggerFactory
 
 import java.io.File
@@ -53,7 +53,7 @@ import java.util.concurrent.ConcurrentSkipListMap
 class AccountsDatabase private constructor(
   private val context: Context,
   private val directory: File,
-  private val accountEvents: ObservableType<AccountEvent>,
+  private val accountEvents: Subject<AccountEvent>,
   @GuardedBy("accountsLock")
   private val accounts: SortedMap<AccountID, Account>,
   @GuardedBy("accountsLock")
@@ -191,7 +191,7 @@ class AccountsDatabase private constructor(
     override val directory: File,
     override val bookDatabase: BookDatabaseType,
 
-    private val accountEvents: ObservableType<AccountEvent>,
+    private val accountEvents: Subject<AccountEvent>,
 
     @GuardedBy("descriptionLock")
     private var description: AccountDescription,
@@ -262,7 +262,7 @@ class AccountsDatabase private constructor(
         this.loginStateActual = state
       }
 
-      this.accountEvents.send(AccountEventLoginStateChanged(
+      this.accountEvents.onNext(AccountEventLoginStateChanged(
         message = "",
         accountID = this.id,
         state = state))
@@ -305,7 +305,7 @@ class AccountsDatabase private constructor(
           this.description = newDescription
         }
 
-        this.accountEvents.send(AccountEventUpdated("", this.id))
+        this.accountEvents.onNext(AccountEventUpdated("", this.id))
       } catch (e: IOException) {
         throw AccountsDatabaseIOException("Could not write account data", e)
       }
@@ -386,7 +386,7 @@ class AccountsDatabase private constructor(
     @Throws(AccountsDatabaseException::class)
     fun open(
       context: Context,
-      accountEvents: ObservableType<AccountEvent>,
+      accountEvents: Subject<AccountEvent>,
       bookDatabases: BookDatabaseFactoryType,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       directory: File): AccountsDatabaseType {
@@ -440,7 +440,7 @@ class AccountsDatabase private constructor(
       accounts: SortedMap<AccountID, Account>,
       accountsByProvider: SortedMap<URI, Account>,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
-      accountEvents: ObservableType<AccountEvent>,
+      accountEvents: Subject<AccountEvent>,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,
       directory: File,
@@ -567,7 +567,7 @@ class AccountsDatabase private constructor(
      */
 
     private fun openOneAccount(
-      accountEvents: ObservableType<AccountEvent>,
+      accountEvents: Subject<AccountEvent>,
       accountIdName: String,
       bookDatabases: BookDatabaseFactoryType,
       context: Context,

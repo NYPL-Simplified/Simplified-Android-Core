@@ -4,7 +4,6 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.accounts.api.AccountProviderType;
-import org.nypl.simplified.observable.ObservableType;
 import org.nypl.simplified.profiles.api.ProfileCreationEvent;
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth;
 import org.nypl.simplified.profiles.api.ProfileEvent;
@@ -12,6 +11,8 @@ import org.nypl.simplified.profiles.api.ProfileType;
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType;
 
 import java.util.concurrent.Callable;
+
+import io.reactivex.subjects.Subject;
 
 import static org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed;
 import static org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_DISPLAY_NAME_ALREADY_USED;
@@ -21,7 +22,7 @@ import static org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreat
 final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
 
   private final ProfilesDatabaseType profiles;
-  private final ObservableType<ProfileEvent> profile_events;
+  private final Subject<ProfileEvent> profile_events;
   private final String display_name;
   private final String gender;
   private final ProfileDateOfBirth date;
@@ -29,7 +30,7 @@ final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
 
   ProfileCreationTask(
       final ProfilesDatabaseType in_profiles,
-      final ObservableType<ProfileEvent> in_profile_events,
+      final Subject<ProfileEvent> in_profile_events,
       final AccountProviderType in_account_provider,
       final String in_display_name,
       final String in_gender,
@@ -76,7 +77,7 @@ final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
   @Override
   public ProfileCreationEvent call() throws Exception {
     final ProfileCreationEvent event = execute();
-    this.profile_events.send(event);
+    this.profile_events.onNext(event);
     return event;
   }
 }

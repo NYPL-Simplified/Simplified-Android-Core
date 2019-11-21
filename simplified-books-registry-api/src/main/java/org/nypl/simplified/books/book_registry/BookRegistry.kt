@@ -3,12 +3,11 @@ package org.nypl.simplified.books.book_registry
 import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookStatusEvent.Type.BOOK_CHANGED
 import org.nypl.simplified.books.book_registry.BookStatusEvent.Type.BOOK_REMOVED
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableType
 import org.slf4j.LoggerFactory
 import java.util.Collections
 import java.util.HashSet
@@ -23,14 +22,14 @@ class BookRegistry private constructor(
     LoggerFactory.getLogger(BookRegistry::class.java)
   private val booksReadOnly: SortedMap<BookID, BookWithStatus> =
     Collections.unmodifiableSortedMap(this.books)
-  private val observable: ObservableType<BookStatusEvent> =
-    Observable.create()
+  private val observable: PublishSubject<BookStatusEvent> =
+    PublishSubject.create()
 
   override fun books(): SortedMap<BookID, BookWithStatus> {
     return this.booksReadOnly
   }
 
-  override fun bookEvents(): ObservableReadableType<BookStatusEvent> {
+  override fun bookEvents(): Observable<BookStatusEvent> {
     return this.observable
   }
 
@@ -44,7 +43,7 @@ class BookRegistry private constructor(
 
   override fun update(status: BookWithStatus) {
     this.books[status.book.id] = status
-    this.observable.send(BookStatusEvent.create(status.book.id, BOOK_CHANGED))
+    this.observable.onNext(BookStatusEvent.create(status.book.id, BOOK_CHANGED))
   }
 
   override fun updateIfStatusIsMoreImportant(status: BookWithStatus) {
@@ -69,13 +68,13 @@ class BookRegistry private constructor(
     val ids = HashSet(this.books.keys)
     this.books.clear()
     for (id in ids) {
-      this.observable.send(BookStatusEvent.create(id, BOOK_REMOVED))
+      this.observable.onNext(BookStatusEvent.create(id, BOOK_REMOVED))
     }
   }
 
   override fun clearFor(id: BookID) {
     this.books.remove(id)
-    this.observable.send(BookStatusEvent.create(id, BOOK_REMOVED))
+    this.observable.onNext(BookStatusEvent.create(id, BOOK_REMOVED))
   }
 
   companion object {

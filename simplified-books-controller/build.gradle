@@ -14,7 +14,6 @@ dependencies {
   implementation project(":simplified-futures")
   implementation project(":simplified-http-core")
   implementation project(":simplified-json-core")
-  implementation project(":simplified-observable")
   implementation project(":simplified-opds-auth-document-api")
   implementation project(":simplified-opds-core")
   implementation project(":simplified-patron-api")

@@ -3,10 +3,10 @@ dependencies {
   api project(':simplified-accounts-registry-api')
   api project(':simplified-accounts-source-spi')
   api project(':simplified-books-database')
-  api project(':simplified-observable')
 
   api libraries.io7mJFunctional
   api libraries.nyplDRMCore
+  api libraries.rxjava2
 
   implementation libraries.kotlinStdlib
 

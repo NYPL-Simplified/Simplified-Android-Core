@@ -2,17 +2,15 @@ package org.nypl.simplified.ui.catalog
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import io.reactivex.disposables.CompositeDisposable
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.slf4j.LoggerFactory
 
 /**
  * An adapter that handles views for paged lists. This is essentially responsible for
@@ -20,82 +18,68 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
  */
 
 class CatalogPagedAdapter(
+  private val bookRegistry: BookRegistryReadableType,
+  private val bookCovers: BookCoverProviderType,
   private val context: Context,
-  private val covers: BookCoverProviderType,
-  private val uiThread: UIThreadServiceType
-) : PagedListAdapter<FeedEntry, CatalogPagedAdapter.ViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
+  private val uiThread: UIThreadServiceType,
+  private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit
+) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
+
+  private val logger =
+    LoggerFactory.getLogger(CatalogPagedAdapter::class.java)
 
   private val shortAnimationDuration =
     this.context.resources.getInteger(android.R.integer.config_shortAnimTime)
 
+  private var viewHolders = 0
+
+  private val compositeDisposable =
+    CompositeDisposable()
+
   override fun onCreateViewHolder(
     parent: ViewGroup,
     viewType: Int
-  ): ViewHolder {
-    return this.ViewHolder(LayoutInflater.from(parent.context)
-      .inflate(R.layout.book_cell, parent, false))
+  ): CatalogPagedViewHolder {
+    ++this.viewHolders
+    this.logger.trace("creating view holder (${viewHolders})")
+
+    return CatalogPagedViewHolder(
+      bookRegistry = this.bookRegistry,
+      bookCovers = this.bookCovers,
+      compositeDisposable = this.compositeDisposable,
+      uiThread = this.uiThread,
+      parent = LayoutInflater.from(parent.context).inflate(R.layout.book_cell, parent, false),
+      shortAnimationDuration = this.shortAnimationDuration,
+      onBookSelected = this.onBookSelected
+    )
   }
 
-  override fun onBindViewHolder(
-    holder: ViewHolder,
-    position: Int
-  ) {
-    return when (val item = this.getItem(position)) {
-      is FeedEntry.FeedEntryCorrupt -> {
+  override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+    this.logger.trace("detaching from recycler view")
 
-      }
-
-      is FeedEntry.FeedEntryOPDS -> {
-        holder.loading.visibility = View.INVISIBLE
-        holder.idle.visibility = View.VISIBLE
-
-        holder.idleCover.visibility = View.INVISIBLE
-        holder.idleProgress.visibility = View.VISIBLE
-        holder.idleText.text = item.feedEntry.title
-
-        this.covers.loadThumbnailInto(
-          item,
-          holder.idleCover,
-          holder.idleCover.layoutParams.width,
-          holder.idleCover.layoutParams.height
-        ).map {
-          this.uiThread.runOnUIThread {
-            holder.idleProgress.visibility = View.INVISIBLE
-            holder.idleCover.visibility = View.VISIBLE
-            holder.idleCover.alpha = 0.0f
-            holder.idleCover.animate()
-              .alpha(1f)
-              .setDuration(this.shortAnimationDuration.toLong())
-              .setListener(null)
-          }
-        }
-        Unit
-      }
-
-      null -> {
-        holder.loading.visibility = View.VISIBLE
-        holder.idle.visibility = View.INVISIBLE
-      }
+    this.compositeDisposable.dispose()
+    val childCount = recyclerView.childCount
+    for (childIndex in 0 until childCount) {
+      val holder =
+        recyclerView.getChildViewHolder(recyclerView.getChildAt(childIndex))
+          as CatalogPagedViewHolder
+      holder.unbind()
     }
   }
 
-  inner class ViewHolder(val parent: View) : RecyclerView.ViewHolder(parent) {
-    val idle =
-      this.parent.findViewById<ViewGroup>(R.id.bookCellIdle)
-    val idleCover =
-      this.parent.findViewById<ImageView>(R.id.bookCellCover)
-    val idleProgress =
-      this.parent.findViewById<ProgressBar>(R.id.bookCellCoverProgress)
-    val idleText =
-      this.idle.findViewById<TextView>(R.id.bookCellTitle)
-
-    val loading =
-      this.parent.findViewById<ViewGroup>(R.id.bookCellEndLoading)
-    val loadingProgress =
-      this.loading.findViewById<ProgressBar>(R.id.bookCellEndLoadingProgress)
+  override fun onViewDetachedFromWindow(holder: CatalogPagedViewHolder) {
+    holder.unbind()
   }
 
-  companion object {
+  override fun onViewRecycled(holder: CatalogPagedViewHolder) {
+    this.logger.trace("view recycled")
+    holder.unbind()
+  }
 
+  override fun onBindViewHolder(
+    holder: CatalogPagedViewHolder,
+    position: Int
+  ) {
+    holder.bindTo(this.getItem(position))
   }
 }

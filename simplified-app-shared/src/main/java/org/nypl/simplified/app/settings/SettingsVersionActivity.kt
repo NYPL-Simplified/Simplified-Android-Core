@@ -14,16 +14,16 @@ import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.google.common.util.concurrent.MoreExecutors
+import io.reactivex.disposables.Disposable
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.app.BuildConfig
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.errors.ErrorActivity
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.boot.api.BootFailureTesting
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory
 
 class SettingsVersionActivity : ProfileTimeOutActivity() {
 
-  private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
+  private var profileEventSubscription: Disposable? = null
   private var buildClicks = 1
 
   private lateinit var adobeDRMActivationTable: TableLayout
@@ -253,7 +253,7 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
 
   override fun onStop() {
     super.onStop()
-    this.profileEventSubscription?.unsubscribe()
+    this.profileEventSubscription?.dispose()
   }
 
   private fun onProfileEvent(event: ProfileEvent) {

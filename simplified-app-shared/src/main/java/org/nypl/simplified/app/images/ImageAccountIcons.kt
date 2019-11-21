@@ -44,7 +44,7 @@ object ImageAccountIcons {
         iconView.visibility = View.VISIBLE
       }
 
-      override fun onError() {
+      override fun onError(e: Exception) {
         iconView.visibility = View.INVISIBLE
       }
     })

@@ -1,19 +1,19 @@
 package org.nypl.simplified.tests
 
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
 import java.net.URI
 
 class MockAccountProviderRegistry : AccountProviderRegistryType {
 
-  val eventSource = Observable.create<AccountProviderRegistryEvent>()
+  val eventSource = PublishSubject.create<AccountProviderRegistryEvent>()
 
-  override val events: ObservableReadableType<AccountProviderRegistryEvent>
+  override val events: Observable<AccountProviderRegistryEvent>
     get() = eventSource
 
   override val defaultProvider: AccountProviderType

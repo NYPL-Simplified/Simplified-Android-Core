@@ -33,6 +33,7 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnreachableCodeException
+import io.reactivex.disposables.Disposable
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
@@ -50,7 +51,6 @@ import org.nypl.simplified.app.errors.ErrorActivity
 import org.nypl.simplified.app.login.LoginDialogListenerType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.feeds.api.Feed
@@ -69,7 +69,6 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
 import org.nypl.simplified.futures.FluentFutureExtensions.map
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
@@ -115,8 +114,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   private var savedScrollPosition: Int = 0
   private var previouslyPaused: Boolean = false
   private var searchView: SearchView? = null
-  private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
-  private var bookEventSubscription: ObservableSubscriptionType<BookStatusEvent>? = null
+  private var profileEventSubscription: Disposable? = null
+  private var bookEventSubscription: Disposable? = null
 
   override fun onLoginDialogWantsProfilesController(): ProfilesControllerType =
     Simplified.application.services()
@@ -966,8 +965,8 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
   override fun onStop() {
     super.onStop()
 
-    this.profileEventSubscription?.unsubscribe()
-    this.bookEventSubscription?.unsubscribe()
+    this.profileEventSubscription?.dispose()
+    this.bookEventSubscription?.dispose()
   }
 
   override fun onResume() {
@@ -1081,10 +1080,10 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     future?.cancel(true)
 
     val profileSub = this.profileEventSubscription
-    profileSub?.unsubscribe()
+    profileSub?.dispose()
 
     val bookSub = this.bookEventSubscription
-    bookSub?.unsubscribe()
+    bookSub?.dispose()
   }
 
   /**

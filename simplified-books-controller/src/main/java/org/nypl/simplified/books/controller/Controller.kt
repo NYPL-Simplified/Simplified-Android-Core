@@ -7,6 +7,9 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+import io.reactivex.subjects.Subject
 import org.joda.time.Instant
 import org.joda.time.LocalDate
 import org.librarysimplified.services.api.ServiceDirectoryType
@@ -44,9 +47,6 @@ import org.nypl.simplified.futures.FluentFutureExtensions
 import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.http.core.HTTPType
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableSubscriptionType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -85,8 +85,8 @@ import java.util.concurrent.ExecutorService
 
 class Controller private constructor(
   private val cacheDirectory: File,
-  private val accountEvents: ObservableType<AccountEvent>,
-  private val profileEvents: ObservableType<ProfileEvent>,
+  private val accountEvents: Subject<AccountEvent>,
+  private val profileEvents: Subject<ProfileEvent>,
   private val services: ServiceDirectoryType,
   private val taskExecutor: ListeningExecutorService
 ) : BooksControllerType, ProfilesControllerType {
@@ -130,7 +130,7 @@ class Controller private constructor(
   private val profileIdleTimer =
     this.services.requireService(ProfileIdleTimerType::class.java)
 
-  private val accountRegistrySubscription: ObservableSubscriptionType<AccountProviderRegistryEvent>
+  private val accountRegistrySubscription: Disposable
   private val downloads: ConcurrentHashMap<BookID, DownloadType> =
     ConcurrentHashMap(32)
 
@@ -198,7 +198,7 @@ class Controller private constructor(
     return this.profiles.currentProfileUnsafe()
   }
 
-  override fun profileEvents(): ObservableReadableType<ProfileEvent> {
+  override fun profileEvents(): Observable<ProfileEvent> {
     return this.profileEvents
   }
 
@@ -334,7 +334,7 @@ class Controller private constructor(
       ?: throw AccountsDatabaseNonexistentException("No account with provider: $provider")
   }
 
-  override fun accountEvents(): ObservableReadableType<AccountEvent> {
+  override fun accountEvents(): Observable<AccountEvent> {
     return this.accountEvents
   }
 
@@ -508,8 +508,8 @@ class Controller private constructor(
     fun createFromServiceDirectory(
       services: ServiceDirectoryType,
       executorService: ExecutorService,
-      accountEvents: ObservableType<AccountEvent>,
-      profileEvents: ObservableType<ProfileEvent>,
+      accountEvents: Subject<AccountEvent>,
+      profileEvents: Subject<ProfileEvent>,
       cacheDirectory: File
     ): Controller {
       return Controller(

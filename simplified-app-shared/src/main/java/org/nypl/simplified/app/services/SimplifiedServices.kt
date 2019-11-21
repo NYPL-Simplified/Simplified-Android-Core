@@ -15,6 +15,7 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.squareup.picasso.Picasso
+import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
@@ -98,9 +99,6 @@ import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.notifications.NotificationsWrapper
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -441,7 +439,7 @@ class SimplifiedServices private constructor(
         }
       )
 
-      val accountEvents = Observable.create<AccountEvent>()
+      val accountEvents = PublishSubject.create<AccountEvent>()
       publishMandatoryService(
         message = strings.bootingProfilesDatabase,
         interfaceType = ProfilesDatabaseType::class.java,
@@ -518,7 +516,7 @@ class SimplifiedServices private constructor(
         }
       )
 
-      val profileEvents = Observable.create<ProfileEvent>()
+      val profileEvents = PublishSubject.create<ProfileEvent>()
       publishMandatoryService(
         message = strings.bootingProfileTimer,
         interfaceType = ProfileIdleTimerType::class.java,
@@ -624,7 +622,7 @@ class SimplifiedServices private constructor(
 
     private fun createNotificationsService(
       context: Context,
-      profileEvents: ObservableReadableType<ProfileEvent>,
+      profileEvents: PublishSubject<ProfileEvent>,
       bookRegistry: BookRegistryReadableType
     ): NotificationsService {
       val notificationsThreads =
@@ -639,7 +637,7 @@ class SimplifiedServices private constructor(
         notificationResourcesType = NotificationResources(context))
     }
 
-    private fun createProfileIdleTimer(profileEvents: ObservableType<ProfileEvent>): ProfileIdleTimerType {
+    private fun createProfileIdleTimer(profileEvents: PublishSubject<ProfileEvent>): ProfileIdleTimerType {
       val execProfileTimer =
         NamedThreadPools.namedThreadPool(1, "profile-timer", 19)
       return ProfileIdleTimer.create(execProfileTimer, profileEvents)
@@ -659,7 +657,7 @@ class SimplifiedServices private constructor(
       return ReaderBookmarkService.createService(
         ReaderBookmarkServiceProviderType.Requirements(
           threads = threadFactory,
-          events = Observable.create(),
+          events = PublishSubject.create(),
           httpCalls = httpCalls,
           profilesController = bookController
         ))
@@ -838,7 +836,7 @@ class SimplifiedServices private constructor(
     private fun createProfileDatabase(
       context: Context,
       resources: Resources,
-      accountEvents: ObservableType<AccountEvent>,
+      accountEvents: PublishSubject<AccountEvent>,
       accountProviders: AccountProviderRegistryType,
       accountBundledCredentials: AccountBundledCredentialsType,
       accountCredentialsStore: AccountAuthenticationCredentialsStoreType,

@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import com.io7m.jfunctional.Some
+import io.reactivex.disposables.Disposable
 import org.joda.time.LocalDate
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -28,7 +29,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
@@ -69,8 +69,8 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var parameters: SettingsFragmentAccountParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
-  private var accountSubscription: ObservableSubscriptionType<AccountEvent>? = null
-  private var profileSubscription: ObservableSubscriptionType<ProfileEvent>? = null
+  private var accountSubscription: Disposable? = null
+  private var profileSubscription: Disposable? = null
 
   private val parametersId =
     org.nypl.simplified.ui.settings.SettingsFragmentAccount.Companion.PARAMETERS_ID
@@ -304,8 +304,8 @@ class SettingsFragmentAccount : Fragment() {
     this.authenticationCOPPAOver13.setOnClickListener {}
     this.authenticationBasicUser.removeTextChangedListener(this.authenticationBasicUserListener)
     this.authenticationBasicPass.removeTextChangedListener(this.authenticationBasicPassListener)
-    this.accountSubscription?.unsubscribe()
-    this.profileSubscription?.unsubscribe()
+    this.accountSubscription?.dispose()
+    this.profileSubscription?.dispose()
   }
 
   private fun onProfileEvent(event: ProfileEvent) {

@@ -1,6 +1,7 @@
 package org.nypl.simplified.tests.books.accounts
 
 import android.content.Context
+import io.reactivex.subjects.PublishSubject
 import org.hamcrest.BaseMatcher
 import org.hamcrest.Description
 import org.junit.Assert
@@ -19,8 +20,6 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.tests.MockAccountProviders
 import org.slf4j.LoggerFactory
@@ -32,8 +31,8 @@ abstract class AccountsDatabaseContract {
 
   private val logger = LoggerFactory.getLogger(AccountsDatabaseContract::class.java)
 
-  private var accountEvents: ObservableType<AccountEvent>? = null
-  private var profileEvents: ObservableType<ProfileEvent>? = null
+  private var accountEvents: PublishSubject<AccountEvent>? = null
+  private var profileEvents: PublishSubject<ProfileEvent>? = null
   private var credentialStore: FakeAccountCredentialStorage? = null
 
   @Rule
@@ -45,8 +44,8 @@ abstract class AccountsDatabaseContract {
   @Before
   open fun setup() {
     this.credentialStore = FakeAccountCredentialStorage()
-    this.accountEvents = Observable.create()
-    this.profileEvents = Observable.create()
+    this.accountEvents = PublishSubject.create()
+    this.profileEvents = PublishSubject.create()
   }
 
   /**

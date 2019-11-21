@@ -4,6 +4,7 @@ import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Some
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
@@ -17,7 +18,6 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileDatabaseAccountsException
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileDatabaseIOException
@@ -59,7 +59,7 @@ object ProfilesDatabases {
   @Throws(ProfileDatabaseException::class)
   fun openWithAnonymousProfileDisabled(
     context: Context,
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
@@ -109,7 +109,7 @@ object ProfilesDatabases {
 
   private fun openAllProfiles(
     context: Context,
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
@@ -158,7 +158,7 @@ object ProfilesDatabases {
   @Throws(ProfileDatabaseException::class)
   fun openWithAnonymousProfileEnabled(
     context: Context,
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
@@ -299,7 +299,7 @@ object ProfilesDatabases {
 
   private fun openOneProfile(
     context: Context,
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountsDatabases: AccountsDatabaseFactoryType,
     accountBundledCredentials: AccountBundledCredentialsType,
@@ -377,7 +377,7 @@ object ProfilesDatabases {
   internal fun createProfileActual(
     context: Context,
     accountBundledCredentials: AccountBundledCredentialsType,
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountsDatabases: AccountsDatabaseFactoryType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,

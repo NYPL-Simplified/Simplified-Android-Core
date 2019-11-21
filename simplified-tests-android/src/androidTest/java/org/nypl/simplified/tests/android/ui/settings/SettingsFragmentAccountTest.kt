@@ -378,7 +378,7 @@ class SettingsFragmentAccountTest
     Assert.assertEquals(accountCurrent.id, profilesController.profileAccountLogouts[0])
 
     accountCurrent.setLoginState(AccountLoginState.AccountNotLoggedIn)
-    profilesController.accountEventSource.send(AccountEventLoginStateChanged(
+    profilesController.accountEventSource.onNext(AccountEventLoginStateChanged(
       message = "Logged out!",
       accountID = accountCurrent.id,
       state = AccountLoginState.AccountNotLoggedIn

@@ -5,8 +5,8 @@ import android.content.res.Resources
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
@@ -40,11 +40,11 @@ class BootLoader<T>(
         thread
       })
 
-  private val eventsActual = Observable.create<BootEvent>()
+  private val eventsActual = PublishSubject.create<BootEvent>()
   private val bootLock: Any = Any()
   private var boot: FluentFuture<T>? = null
 
-  override val events: ObservableReadableType<BootEvent> =
+  override val events: Observable<BootEvent> =
     this.eventsActual
 
   override fun start(context: Context): FluentFuture<T> {
@@ -66,7 +66,7 @@ class BootLoader<T>(
       val strings = this.bootStringResources.invoke(context.resources)
 
       try {
-        future.set(this.bootProcess.execute { event -> this.eventsActual.send(event) })
+        future.set(this.bootProcess.execute { event -> this.eventsActual.onNext(event) })
         this.logger.debug("finished executing boot")
       } catch (e: Throwable) {
         this.logger.error("boot failed: ", e)
@@ -82,7 +82,7 @@ class BootLoader<T>(
             exception = PresentableException(strings.bootFailedGeneric, e))
         }
 
-        this.eventsActual.send(event)
+        this.eventsActual.onNext(event)
         future.setException(event.exception)
       }
     }

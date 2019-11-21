@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
@@ -19,7 +20,6 @@ import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -45,8 +45,8 @@ class SettingsFragmentAccountRegistry : Fragment() {
   private lateinit var refresh: Button
   private lateinit var title: TextView
   private lateinit var uiThread: UIThreadServiceType
-  private var accountCreationSubscription: ObservableSubscriptionType<AccountEvent>? = null
-  private var accountRegistrySubscription: ObservableSubscriptionType<AccountProviderRegistryEvent>? = null
+  private var accountCreationSubscription: Disposable? = null
+  private var accountRegistrySubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -258,8 +258,8 @@ class SettingsFragmentAccountRegistry : Fragment() {
   override fun onStop() {
     super.onStop()
 
-    this.accountCreationSubscription?.unsubscribe()
-    this.accountRegistrySubscription?.unsubscribe()
+    this.accountCreationSubscription?.dispose()
+    this.accountRegistrySubscription?.dispose()
   }
 
 }

@@ -5,13 +5,13 @@ import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.junreachable.UnreachableCodeException
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
 import org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException
 import org.nypl.simplified.profiles.api.ProfileCreateDuplicateException
@@ -38,7 +38,7 @@ import javax.annotation.concurrent.GuardedBy
 
 internal class ProfilesDatabase internal constructor(
   private val accountBundledCredentials: AccountBundledCredentialsType,
-  private val accountEvents: ObservableType<AccountEvent>,
+  private val accountEvents: Subject<AccountEvent>,
   private val accountProviders: AccountProviderRegistryType,
   private val accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
   private val accountsDatabases: AccountsDatabaseFactoryType,

@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
+import io.reactivex.subjects.PublishSubject
 import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.junit.After
@@ -35,8 +36,6 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
@@ -87,7 +86,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   private lateinit var accountProviderRegistry: AccountProviderRegistryType
   private lateinit var defaultProvider: AccountProviderImmutable
   private lateinit var context: Context
-  private lateinit var accountEvents: ObservableType<AccountEvent>
+  private lateinit var accountEvents: PublishSubject<AccountEvent>
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorDownloads: ListeningExecutorService
   private lateinit var executorBooks: ListeningExecutorService
@@ -112,7 +111,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     this.context = Mockito.mock(Context::class.java)
     this.defaultProvider = MockAccountProviders.fakeProvider("urn:fake:0")
     this.accountProviderRegistry = AccountProviderRegistry.createFrom(this.context, listOf(), this.defaultProvider)
-    this.accountEvents = Observable.create()
+    this.accountEvents = PublishSubject.create()
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
     this.executorDownloads = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorBooks = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())

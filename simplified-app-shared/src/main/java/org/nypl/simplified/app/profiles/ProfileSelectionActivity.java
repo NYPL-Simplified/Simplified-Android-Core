@@ -31,8 +31,6 @@ import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIBackgroundExecutorType;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.observable.ObservableSubscriptionType;
-import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
 import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileReadableType;
@@ -44,6 +42,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import io.reactivex.disposables.Disposable;
 
 /**
  * An activity that allows users to pick from a list of profiles, or to create a new profile.
@@ -57,7 +57,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
   private ListView list;
   private ProfileArrayAdapter list_adapter;
   private ArrayList<ProfileReadableType> list_items;
-  private ObservableSubscriptionType<ProfileEvent> profile_event_subscription;
+  private Disposable profile_event_subscription;
 
   public ProfileSelectionActivity() {
 
@@ -122,7 +122,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    this.profile_event_subscription.unsubscribe();
+    this.profile_event_subscription.dispose();
   }
 
   private <A> A getWithDefault(OptionType<A> optional, A orElse) {

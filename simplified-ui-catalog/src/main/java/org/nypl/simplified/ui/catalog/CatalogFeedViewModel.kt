@@ -2,12 +2,15 @@ package org.nypl.simplified.ui.catalog
 
 import android.content.Context
 import android.content.res.Resources
+import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
 import com.io7m.jfunctional.Option
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.feeds.api.Feed
@@ -17,8 +20,6 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onAnyError
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
@@ -53,6 +54,9 @@ class CatalogFeedViewModel(
     this.services.requireService(ProfilesControllerType::class.java)
   private val instanceId =
     UUID.randomUUID()
+
+  private var feedWithoutGroupsViewState: Parcelable? = null
+  private var feedWithGroupsViewState: Parcelable? = null
 
   /**
    * The stack of feeds that lead to the current feed. The current feed is the feed on top
@@ -161,7 +165,7 @@ class CatalogFeedViewModel(
       )
       this.state = newState
     }
-    this.feedStatus.send(Unit)
+    this.feedStatusSource.onNext(Unit)
 
     /*
      * Register a callback that updates the feed status when the future completes.
@@ -184,7 +188,7 @@ class CatalogFeedViewModel(
       this.state = this.feedLoaderResultToFeedState(result, state)
     }
 
-    this.feedStatus.send(Unit)
+    this.feedStatusSource.onNext(Unit)
   }
 
   private fun feedLoaderResultToFeedState(
@@ -276,8 +280,11 @@ class CatalogFeedViewModel(
     }
   }
 
-  override val feedStatus: ObservableType<Unit> =
-    Observable.create<Unit>()
+  private val feedStatusSource =
+    PublishSubject.create<Unit>()
+
+  override val feedStatus: Observable<Unit> =
+    this.feedStatusSource
 
   override fun feedState(): CatalogFeedState {
     val currentState = synchronized(this.stateLock, this::state)
@@ -306,5 +313,21 @@ class CatalogFeedViewModel(
           isSearchResults = isSearchResults
         )
     }
+  }
+
+  override fun saveFeedWithGroupsViewState(state: Parcelable?) {
+    this.feedWithGroupsViewState = state
+  }
+
+  override fun restoreFeedWithGroupsViewState(): Parcelable? {
+    return this.feedWithGroupsViewState
+  }
+
+  override fun saveFeedWithoutGroupsViewState(state: Parcelable?) {
+    this.feedWithoutGroupsViewState = state
+  }
+
+  override fun restoreFeedWithoutGroupsViewState(): Parcelable? {
+    return this.feedWithoutGroupsViewState
   }
 }

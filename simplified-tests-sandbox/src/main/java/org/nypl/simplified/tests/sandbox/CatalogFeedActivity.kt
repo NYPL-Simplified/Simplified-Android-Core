@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.MoreExecutors
+import leakcanary.AppWatcher
+import leakcanary.LeakCanary
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.books.book_database.api.BookFormats
@@ -17,7 +19,6 @@ import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
 import org.nypl.simplified.books.covers.BookCoverGenerator
 import org.nypl.simplified.books.covers.BookCoverProvider
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.documents.store.DocumentStore
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
@@ -34,6 +35,7 @@ import org.nypl.simplified.tests.MockBooksController
 import org.nypl.simplified.tests.MockDocumentStore
 import org.nypl.simplified.tests.MockProfilesController
 import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
@@ -45,7 +47,6 @@ import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import java.net.URI
-import java.util.concurrent.Executors
 
 class CatalogFeedActivity : AppCompatActivity(), ServiceDirectoryProviderType {
 
@@ -53,12 +54,27 @@ class CatalogFeedActivity : AppCompatActivity(), ServiceDirectoryProviderType {
 
   override val serviceDirectory = MutableServiceDirectory()
 
-  private val executor = Executors.newSingleThreadExecutor()
+  private val executor =
+    NamedThreadPools.namedThreadPool(4, "bg", 19)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     this.setContentView(R.layout.fragment_host)
+
+    LeakCanary.config =
+      LeakCanary.config.copy(
+        dumpHeap = true
+      )
+
+    AppWatcher.config =
+      AppWatcher.config.copy(
+        enabled = true,
+        watchActivities = true,
+        watchFragments = true,
+        watchDurationMillis = 1_000L,
+        watchFragmentViews = true
+      )
 
     MockProfilesController.profileAccountCurrent()
       .setAccountProvider(
@@ -120,6 +136,11 @@ class CatalogFeedActivity : AppCompatActivity(), ServiceDirectoryProviderType {
       interfaceType = CatalogNavigationControllerType::class.java,
       service = object: CatalogNavigationControllerType {
         override fun openFeed(feedArguments: CatalogFeedArguments) {
+          LeakCanary.config =
+            LeakCanary.config.copy(
+              dumpHeap = true
+            )
+
           this@CatalogFeedActivity.supportFragmentManager
             .beginTransaction()
             .setCustomAnimations(
@@ -134,10 +155,20 @@ class CatalogFeedActivity : AppCompatActivity(), ServiceDirectoryProviderType {
         }
 
         override fun popBackStack() {
+          LeakCanary.config =
+            LeakCanary.config.copy(
+              dumpHeap = true
+            )
+
           this@CatalogFeedActivity.supportFragmentManager.popBackStack()
         }
 
         override fun openBookDetail(entry: FeedEntry.FeedEntryOPDS) {
+          LeakCanary.config =
+            LeakCanary.config.copy(
+              dumpHeap = true
+            )
+
           val parameters =
             CatalogFragmentBookDetailParameters(
               accountId = MockProfilesController.profileAccountCurrent().id,

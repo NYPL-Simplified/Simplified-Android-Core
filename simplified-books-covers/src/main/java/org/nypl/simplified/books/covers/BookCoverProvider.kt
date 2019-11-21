@@ -52,7 +52,8 @@ class BookCoverProvider private constructor(
     width: Int,
     height: Int,
     tag: String,
-    uriSpecified: URI?): FluentFuture<Unit> {
+    uriSpecified: URI?
+  ): FluentFuture<Unit> {
 
     val future = SettableFuture.create<Unit>()
     val uriGenerated = this.generateCoverURI(entry)
@@ -62,9 +63,9 @@ class BookCoverProvider private constructor(
         future.set(Unit)
       }
 
-      override fun onError() {
-        future.setException(IOException(
-          StringBuilder(128)
+      override fun onError(e: Exception) {
+        val ioException =
+          IOException(StringBuilder(128)
             .append("Failed to load image.\n")
             .append("  URI (specified): ")
             .append(uriSpecified)
@@ -72,7 +73,10 @@ class BookCoverProvider private constructor(
             .append("  URI (generated): ")
             .append(uriGenerated)
             .append('\n')
-            .toString()))
+            .toString(),
+            e)
+
+        future.setException(ioException)
       }
     }
 
@@ -85,12 +89,16 @@ class BookCoverProvider private constructor(
           future.set(Unit)
         }
 
-        override fun onError() {
+        override fun onError(e: Exception) {
           this@BookCoverProvider.log.debug(
-            "{}: {}: failed to load uri {}, falling back to generation",
-            tag, entry.bookID, uriSpecified)
+            "{}: {}: failed to load uri {}, falling back to generation: ",
+            tag,
+            entry.bookID,
+            uriSpecified,
+            e)
 
-          val fallbackRequest = this@BookCoverProvider.picasso.load(uriGenerated.toString())
+          val fallbackRequest =
+            this@BookCoverProvider.picasso.load(uriGenerated.toString())
           fallbackRequest.tag(tag)
           fallbackRequest.resize(width, height)
           fallbackRequest.transform(badgePainter)
@@ -141,8 +149,8 @@ class BookCoverProvider private constructor(
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
-    height: Int): FluentFuture<Unit> {
-
+    height: Int
+  ): FluentFuture<Unit> {
     return doLoad(
       entry = entry,
       imageView = imageView,
@@ -156,8 +164,8 @@ class BookCoverProvider private constructor(
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
-    height: Int): FluentFuture<Unit> {
-
+    height: Int
+  ): FluentFuture<Unit> {
     return doLoad(
       entry = entry,
       imageView = imageView,
@@ -204,7 +212,8 @@ class BookCoverProvider private constructor(
       badgeLookup: BookCoverBadgeLookupType,
       executor: ExecutorService,
       debugCacheIndicators: Boolean,
-      debugLogging: Boolean): BookCoverProviderType {
+      debugLogging: Boolean
+    ): BookCoverProviderType {
 
       val picassoBuilder = Picasso.Builder(context)
       picassoBuilder.defaultBitmapConfig(Bitmap.Config.RGB_565)

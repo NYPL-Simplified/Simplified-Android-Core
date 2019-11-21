@@ -1,15 +1,13 @@
 package org.nypl.simplified.migration.api
 
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationProviderType
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.migration.spi.MigrationType
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.threads.NamedThreadPools
 import org.slf4j.LoggerFactory
-import java.lang.IllegalStateException
 import java.util.ServiceLoader
 
 /**
@@ -21,10 +19,9 @@ class Migrations(
   private val services: () -> List<MigrationProviderType>) : MigrationsType {
 
   private var migrationServices: List<MigrationType>
-  private val executor =
-    NamedThreadPools.namedThreadPool(1, "migrations", 19)
+
   private val eventsObservable =
-    Observable.create<MigrationEvent>()
+    PublishSubject.create<MigrationEvent>()
   private val logger =
     LoggerFactory.getLogger(Migrations::class.java)
 
@@ -41,7 +38,7 @@ class Migrations(
     }
   }
 
-  override val events: ObservableReadableType<MigrationEvent> =
+  override val events: Observable<MigrationEvent> =
     this.eventsObservable
 
   override fun anyNeedToRun(): Boolean {
@@ -54,13 +51,13 @@ class Migrations(
 
     return migrationService?.let { service ->
       val subscription =
-        migrationService.events.subscribe { event -> this.eventsObservable.send(event) }
+        migrationService.events.subscribe(this.eventsObservable::onNext)
 
        try {
         this.logger.debug("running migration service {}", migrationService.javaClass.canonicalName)
         service.run()
       } finally {
-        subscription.unsubscribe()
+        subscription.dispose()
       }
     }
   }

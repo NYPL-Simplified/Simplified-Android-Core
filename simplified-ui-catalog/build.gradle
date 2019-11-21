@@ -9,7 +9,6 @@ dependencies {
   implementation project(":simplified-books-registry-api")
   implementation project(":simplified-documents")
   implementation project(":simplified-futures")
-  implementation project(":simplified-observable")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
   implementation project(":simplified-ui-screen")

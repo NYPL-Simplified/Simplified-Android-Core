@@ -14,6 +14,7 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialogFragment
+import io.reactivex.disposables.Disposable
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -26,7 +27,6 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.errors.ErrorDialogs
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
@@ -48,7 +48,7 @@ class LoginDialog : AppCompatDialogFragment() {
   private lateinit var barcodeLabel: TextView
   private lateinit var text: TextView
 
-  private var accountSubscription: ObservableSubscriptionType<AccountEvent>? = null
+  private var accountSubscription: Disposable? = null
   private var shownAlert = true
 
   private val logger =
@@ -198,7 +198,7 @@ class LoginDialog : AppCompatDialogFragment() {
   override fun onStop() {
     super.onStop()
 
-    this.accountSubscription?.unsubscribe()
+    this.accountSubscription?.dispose()
   }
 
   private fun onAccountEvent(event: AccountEvent) {

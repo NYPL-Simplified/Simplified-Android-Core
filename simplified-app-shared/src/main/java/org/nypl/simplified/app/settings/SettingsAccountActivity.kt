@@ -25,6 +25,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
+import io.reactivex.disposables.Disposable
 import org.joda.time.LocalDate
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
@@ -52,7 +53,6 @@ import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
@@ -92,7 +92,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private lateinit var actionText: TextView
   private lateinit var actionProgress: ProgressBar
 
-  private var accountEventSubscription: ObservableSubscriptionType<AccountEvent>? = null
+  private var accountEventSubscription: Disposable? = null
 
   override fun navigationDrawerGetActivityTitle(resources: Resources): String {
     return resources.getString(R.string.settings)
@@ -404,7 +404,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   override fun onStop() {
     super.onStop()
 
-    this.accountEventSubscription?.unsubscribe()
+    this.accountEventSubscription?.dispose()
   }
 
   private fun onAccountEvent(event: AccountEvent): Unit {

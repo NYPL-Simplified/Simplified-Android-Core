@@ -4,8 +4,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.nypl.simplified.observable.Observable;
-import org.nypl.simplified.observable.ObservableType;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon;
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut;
@@ -19,11 +17,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.reactivex.subjects.PublishSubject;
+
 public abstract class ProfileIdleTimerContract {
 
   private ExecutorService exec_single;
   private ExecutorService exec_multi;
-  private ObservableType<ProfileEvent> events;
+  private PublishSubject<ProfileEvent> events;
   private List<ProfileEvent> event_log;
 
   @Before
@@ -31,7 +31,7 @@ public abstract class ProfileIdleTimerContract {
   {
     this.exec_single = Executors.newFixedThreadPool(1);
     this.exec_multi = Executors.newCachedThreadPool();
-    this.events = Observable.create();
+    this.events = PublishSubject.create();
     this.event_log = Collections.synchronizedList(new ArrayList<>());
   }
 

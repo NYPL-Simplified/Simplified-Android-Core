@@ -1,6 +1,7 @@
 package org.nypl.simplified.ui.catalog
 
-import org.nypl.simplified.observable.ObservableType
+import android.os.Parcelable
+import io.reactivex.Observable
 import java.net.URI
 
 /**
@@ -13,7 +14,7 @@ interface CatalogFeedViewModelType {
    * An observable value that publishes events each time the value of [feedState] has changed.
    */
 
-  val feedStatus: ObservableType<Unit>
+  val feedStatus: Observable<Unit>
 
   /**
    * Retrieve the status of the current feed.
@@ -35,4 +36,10 @@ interface CatalogFeedViewModelType {
     uri: URI,
     isSearchResults: Boolean
   ): CatalogFeedArguments
+
+  fun saveFeedWithGroupsViewState(state: Parcelable?)
+  fun restoreFeedWithGroupsViewState(): Parcelable?
+
+  fun saveFeedWithoutGroupsViewState(state: Parcelable?)
+  fun restoreFeedWithoutGroupsViewState(): Parcelable?
 }

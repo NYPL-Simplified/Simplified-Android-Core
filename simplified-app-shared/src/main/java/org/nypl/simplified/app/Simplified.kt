@@ -6,6 +6,7 @@ import androidx.multidex.MultiDexApplication
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.rolling.RollingFileAppender
 import com.google.common.util.concurrent.ListenableFuture
+import io.reactivex.Observable
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.app.services.SimplifiedServices
 import org.nypl.simplified.app.services.SimplifiedServicesStrings
@@ -13,7 +14,6 @@ import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.boot.api.BootLoader
 import org.nypl.simplified.boot.api.BootProcessType
 import org.nypl.simplified.cardcreator.CardCreator
-import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.prefs.Prefs
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -120,7 +120,7 @@ class Simplified : MultiDexApplication() {
    * An observable value that publishes events as the application is booting.
    */
 
-  val servicesBootEvents: ObservableReadableType<BootEvent>
+  val servicesBootEvents: Observable<BootEvent>
     get() = this.boot.events
 
   /**

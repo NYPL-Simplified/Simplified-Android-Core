@@ -13,10 +13,10 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import com.io7m.jnull.Nullable
+import io.reactivex.disposables.Disposable
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
@@ -47,7 +47,7 @@ class ReaderSettingsDialog : DialogFragment() {
   private lateinit var viewFontSans: TextView
   private lateinit var viewFontSerif: TextView
   private lateinit var readerPreferencesBuilder: ReaderPreferences.Builder
-  private var profileEvents: ObservableSubscriptionType<ProfileEvent>? = null
+  private var profileEvents: Disposable? = null
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -200,7 +200,7 @@ class ReaderSettingsDialog : DialogFragment() {
   override fun onStop() {
     super.onStop()
 
-    this.profileEvents?.unsubscribe()
+    this.profileEvents?.dispose()
   }
 
   private fun onProfileEvent(event: ProfileEvent) {

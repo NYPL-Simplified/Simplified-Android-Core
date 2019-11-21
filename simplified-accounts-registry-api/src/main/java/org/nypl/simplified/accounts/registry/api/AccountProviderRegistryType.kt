@@ -1,8 +1,9 @@
 package org.nypl.simplified.accounts.registry.api
 
+import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.observable.ObservableReadableType
+
 import java.net.URI
 import javax.annotation.concurrent.ThreadSafe
 
@@ -19,7 +20,7 @@ interface AccountProviderRegistryType {
    * A source of registry events.
    */
 
-  val events: ObservableReadableType<AccountProviderRegistryEvent>
+  val events: Observable<AccountProviderRegistryEvent>
 
   /**
    * The default, guaranteed-to-exist account provider.

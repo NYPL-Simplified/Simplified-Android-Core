@@ -46,7 +46,6 @@ import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
 import org.nypl.simplified.app.settings.SettingsActivity;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.feeds.api.FeedBooksSelection;
-import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
@@ -59,6 +58,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.disposables.Disposable;
 
 import static org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE;
 import static org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled;
@@ -84,7 +85,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
   private ListView drawer_list_view;
   private SharedPreferences drawer_settings;
   private boolean finishing;
-  private ObservableSubscriptionType<ProfileEvent> profile_event_subscription;
+  private Disposable profile_event_subscription;
   private DrawerLayout drawer_layout;
   private boolean open_drawer;
 
@@ -362,9 +363,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
   protected void onStop() {
     super.onStop();
 
-    final ObservableSubscriptionType<ProfileEvent> subscription = this.profile_event_subscription;
+    final Disposable subscription = this.profile_event_subscription;
     if (subscription != null) {
-      subscription.unsubscribe();
+      subscription.dispose();
     }
   }
 

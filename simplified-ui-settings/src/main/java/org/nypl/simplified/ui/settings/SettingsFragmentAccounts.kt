@@ -11,13 +11,13 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 
@@ -37,7 +37,7 @@ class SettingsFragmentAccounts : Fragment() {
   private lateinit var host: ServiceDirectoryProviderType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
-  private var accountSubscription: ObservableSubscriptionType<AccountEvent>? = null
+  private var accountSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -167,6 +167,6 @@ class SettingsFragmentAccounts : Fragment() {
   override fun onStop() {
     super.onStop()
 
-    this.accountSubscription?.unsubscribe()
+    this.accountSubscription?.dispose()
   }
 }

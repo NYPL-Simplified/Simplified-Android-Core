@@ -21,6 +21,7 @@ import android.widget.TextView
 import com.google.common.collect.ImmutableList
 import com.io7m.jfunctional.Unit
 import com.squareup.picasso.Picasso
+import io.reactivex.disposables.Disposable
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
@@ -46,7 +47,6 @@ import org.nypl.simplified.app.images.ImageLoaderType
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIBackgroundExecutorType
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectFailed
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectSucceeded
@@ -72,8 +72,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   private lateinit var accountListView: ListView
   private lateinit var accountCurrentView: LinearLayout
 
-  private var accountsSubscription: ObservableSubscriptionType<AccountEvent>? = null
-  private var profilesSubscription: ObservableSubscriptionType<ProfileEvent>? = null
+  private var accountsSubscription: Disposable? = null
+  private var profilesSubscription: Disposable? = null
 
   companion object {
 
@@ -312,8 +312,8 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   override fun onDestroy() {
     super.onDestroy()
-    this.profilesSubscription?.unsubscribe()
-    this.accountsSubscription?.unsubscribe()
+    this.profilesSubscription?.dispose()
+    this.accountsSubscription?.dispose()
   }
 
   private fun onAccountEvent(event: AccountEvent): Unit {
@@ -547,7 +547,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
         }
     }
 
-    dialog.setOnDismissListener { subscription.unsubscribe() }
+    dialog.setOnDismissListener { subscription.dispose() }
     reconfigureUI()
     dialog.show()
   }
@@ -592,7 +592,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
           }
         }
 
-    dialog.setOnDismissListener { subscription.unsubscribe() }
+    dialog.setOnDismissListener { subscription.dispose() }
     dialog.show()
   }
 

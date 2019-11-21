@@ -24,6 +24,8 @@ dependencies {
   androidTestImplementation libraries.androidXAppCompat
   androidTestImplementation libraries.androidXFragmentTesting
   androidTestImplementation libraries.androidXLegacySupport
+  androidTestImplementation libraries.androidXPreference
+  androidTestImplementation libraries.androidXRecyclerView
   androidTestImplementation libraries.androidXTestEspressoCore
   androidTestImplementation libraries.androidXTestExtensions
   androidTestImplementation libraries.androidXTestRules

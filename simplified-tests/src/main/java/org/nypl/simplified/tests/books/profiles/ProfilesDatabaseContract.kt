@@ -2,6 +2,7 @@ package org.nypl.simplified.tests.books.profiles
 
 import android.content.Context
 import com.io7m.jfunctional.Option
+import io.reactivex.subjects.PublishSubject
 import org.hamcrest.BaseMatcher
 import org.hamcrest.Description
 import org.hamcrest.core.StringContains
@@ -11,14 +12,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.ProfilesDatabases
 import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
@@ -38,8 +38,8 @@ abstract class ProfilesDatabaseContract {
   private val logger = LoggerFactory.getLogger(ProfilesDatabaseContract::class.java)
 
   private lateinit var credentialStore: FakeAccountCredentialStorage
-  private lateinit var accountEvents: ObservableType<org.nypl.simplified.accounts.api.AccountEvent>
-  private lateinit var profileEvents: ObservableType<org.nypl.simplified.profiles.api.ProfileEvent>
+  private lateinit var accountEvents: PublishSubject<AccountEvent>
+  private lateinit var profileEvents: PublishSubject<org.nypl.simplified.profiles.api.ProfileEvent>
 
   @JvmField
   @Rule
@@ -50,8 +50,8 @@ abstract class ProfilesDatabaseContract {
   @Before
   open fun setup() {
     this.credentialStore = FakeAccountCredentialStorage()
-    this.accountEvents = Observable.create()
-    this.profileEvents = Observable.create()
+    this.accountEvents = PublishSubject.create()
+    this.profileEvents = PublishSubject.create()
   }
 
   /**

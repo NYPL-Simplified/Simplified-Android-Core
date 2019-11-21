@@ -11,11 +11,13 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderType
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedNavigation
@@ -25,6 +27,8 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
+import java.net.URI
+
 
 /**
  * The base type of feed fragments. This class is abstract purely because the AndroidX
@@ -52,9 +56,13 @@ class CatalogFragmentFeed : Fragment() {
     }
   }
 
+  private val scrollPositionKey =
+    "org.nypl.simplified.ui.catalog.CatalogFragmentFeed.state.scrollPosition"
+
+  private lateinit var bookCovers: BookCoverProviderType
+  private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var catalogNavigation: CatalogNavigationControllerType
   private lateinit var configurationService: CatalogConfigurationServiceType
-  private lateinit var coverLoader: BookCoverProviderType
   private lateinit var feedError: ViewGroup
   private lateinit var feedLoader: FeedLoaderType
   private lateinit var feedLoading: ViewGroup
@@ -73,8 +81,8 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
-  private val parametersId = PARAMETERS_ID
-  private var feedStatusSubscription: ObservableSubscriptionType<Unit>? = null
+  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
+  private var feedStatusSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -90,8 +98,10 @@ class CatalogFragmentFeed : Fragment() {
     this.parameters =
       this.arguments!![this.parametersId] as CatalogFeedArguments
 
-    this.coverLoader =
+    this.bookCovers =
       this.host.serviceDirectory.requireService(BookCoverProviderType::class.java)
+    this.bookRegistry =
+      this.host.serviceDirectory.requireService(BookRegistryReadableType::class.java)
     this.screenInformation =
       this.host.serviceDirectory.requireService(ScreenSizeInformationType::class.java)
     this.profilesController =
@@ -170,15 +180,9 @@ class CatalogFragmentFeed : Fragment() {
       CatalogFeedWithGroupsAdapter(
         groups = this.feedWithGroupsData,
         uiThread = this.uiThread,
-        context = this.requireContext(),
-        coverLoader = this.coverLoader,
-        onBookSelected = { opdsEntry ->
-          this.catalogNavigation.openBookDetail(opdsEntry)
-        },
-        onFeedSelected = { title, uri ->
-          this.catalogNavigation.openFeed(
-            this.feedModel.resolveFeed(title, uri, false))
-        }
+        coverLoader = this.bookCovers,
+        onFeedSelected = this::onFeedSelected,
+        onBookSelected = this::onBookSelected
       )
 
     this.feedWithGroupsList.adapter =
@@ -191,7 +195,20 @@ class CatalogFragmentFeed : Fragment() {
         }
       }
 
+    this.feedWithGroupsList.layoutManager!!.onRestoreInstanceState(
+      this.feedModel.restoreFeedWithGroupsViewState())
+    this.feedWithoutGroupsList.layoutManager!!.onRestoreInstanceState(
+      this.feedModel.restoreFeedWithoutGroupsViewState())
+
     this.reconfigureUI(this.feedModel.feedState())
+  }
+
+  private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
+    this.catalogNavigation.openBookDetail(opdsEntry)
+  }
+
+  private fun onFeedSelected(title: String, uri: URI) {
+    this.catalogNavigation.openFeed(this.feedModel.resolveFeed(title, uri, false))
   }
 
   @UiThread
@@ -215,7 +232,19 @@ class CatalogFragmentFeed : Fragment() {
   override fun onStop() {
     super.onStop()
 
-    this.feedStatusSubscription?.unsubscribe()
+    this.feedModel.saveFeedWithGroupsViewState(
+      this.feedWithGroupsList.layoutManager!!.onSaveInstanceState())
+    this.feedModel.saveFeedWithoutGroupsViewState(
+      this.feedWithoutGroupsList.layoutManager!!.onSaveInstanceState())
+
+    /*
+     * We aggressively unset adapters here in order to try to encourage prompt unsubscription
+     * of views from the book registry.
+     */
+
+    this.feedWithoutGroupsList.adapter = null
+    this.feedWithGroupsList.adapter = null
+    this.feedStatusSubscription?.dispose()
   }
 
   @UiThread
@@ -253,8 +282,10 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithoutGroupsAdapter =
       CatalogPagedAdapter(
         context = this.requireContext(),
-        covers = this.coverLoader,
-        uiThread = this.uiThread
+        bookRegistry = this.bookRegistry,
+        bookCovers = this.bookCovers,
+        uiThread = this.uiThread,
+        onBookSelected = this::onBookSelected
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter

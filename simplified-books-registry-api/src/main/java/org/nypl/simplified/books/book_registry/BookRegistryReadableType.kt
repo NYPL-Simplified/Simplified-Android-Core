@@ -4,9 +4,9 @@ import com.io7m.jfunctional.None
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.OptionVisitorType
 import com.io7m.jfunctional.Some
+import io.reactivex.Observable
 
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.observable.ObservableReadableType
 
 import java.util.NoSuchElementException
 import java.util.SortedMap
@@ -27,7 +27,7 @@ interface BookRegistryReadableType {
    * @return An observable that publishes book status events
    */
 
-  fun bookEvents(): ObservableReadableType<BookStatusEvent>
+  fun bookEvents(): Observable<BookStatusEvent>
 
   /**
    * @param id The book ID

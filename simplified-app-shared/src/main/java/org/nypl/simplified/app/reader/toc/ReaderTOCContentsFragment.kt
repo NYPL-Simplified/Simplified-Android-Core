@@ -12,13 +12,13 @@ import android.widget.ListView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import io.reactivex.disposables.Disposable
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.reader.ReaderColorSchemes
 import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.ReaderSelectedTOCElement
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
@@ -38,7 +38,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
   private lateinit var adapter: ArrayAdapter<ReaderTOCElement>
   private lateinit var listener: ReaderTOCSelectionListenerType
   private lateinit var parameters: ReaderTOCParameters
-  private var profileSubscription: ObservableSubscriptionType<ProfileEvent>? = null
+  private var profileSubscription: Disposable? = null
 
   companion object {
 
@@ -103,7 +103,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
   override fun onDetach() {
     super.onDetach()
-    this.profileSubscription?.unsubscribe()
+    this.profileSubscription?.dispose()
     this.profileSubscription = null
   }
 

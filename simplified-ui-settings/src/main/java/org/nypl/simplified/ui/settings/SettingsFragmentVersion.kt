@@ -14,12 +14,12 @@ import android.widget.TableRow
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.MoreExecutors
+import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
@@ -61,7 +61,7 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var versionTitle: TextView
   private var adeptExecutor: AdobeAdeptExecutorType? = null
   private var buildClicks = 1
-  private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
+  private var profileEventSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -384,7 +384,7 @@ class SettingsFragmentVersion : Fragment() {
   override fun onStop() {
     super.onStop()
 
-    this.profileEventSubscription?.unsubscribe()
+    this.profileEventSubscription?.dispose()
 
     this.buildTitle.setOnClickListener(null)
     this.cacheButton.setOnClickListener(null)

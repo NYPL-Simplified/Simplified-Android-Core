@@ -5,6 +5,8 @@ import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.google.common.util.concurrent.MoreExecutors
+import io.reactivex.Observable
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationSucceeded
@@ -29,8 +31,6 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Even
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Remote.BookmarkSaved
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event.Remote.SyncingEnabled
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Command
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
@@ -64,7 +64,7 @@ import java.util.concurrent.Executors
 class ReaderBookmarkService private constructor(
   private val threads: (Runnable) -> Thread,
   private val httpCalls: ReaderBookmarkHTTPCallsType,
-  private val bookmarkEventsOut: ObservableType<ReaderBookmarkEvent>,
+  private val bookmarkEventsOut: Subject<ReaderBookmarkEvent>,
   private val profilesController: ProfilesControllerType)
   : ReaderBookmarkServiceType {
 
@@ -85,7 +85,7 @@ class ReaderBookmarkService private constructor(
     this.executor.shutdown()
   }
 
-  override val bookmarkEvents: ObservableReadableType<ReaderBookmarkEvent>
+  override val bookmarkEvents: Observable<ReaderBookmarkEvent>
     get() = this.bookmarkEventsOut
 
   private val logger = LoggerFactory.getLogger(ReaderBookmarkService::class.java)
@@ -236,7 +236,7 @@ class ReaderBookmarkService private constructor(
   private class OpSyncAccountInProfile(
     logger: Logger,
     private val httpCalls: ReaderBookmarkHTTPCallsType,
-    private val bookmarkEventsOut: ObservableType<ReaderBookmarkEvent>,
+    private val bookmarkEventsOut: Subject<ReaderBookmarkEvent>,
     private val objectMapper: ObjectMapper,
     private val profile: ProfileReadableType,
     private val accountID: AccountID,
@@ -256,7 +256,7 @@ class ReaderBookmarkService private constructor(
         return
       }
 
-      this.bookmarkEventsOut.send(ReaderBookmarkSyncStarted(syncable.account.id))
+      this.bookmarkEventsOut.onNext(ReaderBookmarkSyncStarted(syncable.account.id))
 
       val bookmarks: List<Bookmark> =
         try {
@@ -276,7 +276,7 @@ class ReaderBookmarkService private constructor(
         this.evaluatePolicyInput(BookmarkReceived(syncable.account.id, bookmark))
       }
 
-      this.bookmarkEventsOut.send(ReaderBookmarkSyncFinished(syncable.account.id))
+      this.bookmarkEventsOut.onNext(ReaderBookmarkSyncFinished(syncable.account.id))
     }
   }
 
@@ -375,7 +375,7 @@ class ReaderBookmarkService private constructor(
   private class OpLocallySaveBookmark(
     logger: Logger,
     private val profile: ProfileReadableType,
-    private val bookmarkEventsOut: ObservableType<ReaderBookmarkEvent>,
+    private val bookmarkEventsOut: Subject<ReaderBookmarkEvent>,
     private val accountID: AccountID,
     private val bookmark: Bookmark)
     : ReaderBookmarkControllerOp<Unit>(logger) {
@@ -401,7 +401,7 @@ class ReaderBookmarkService private constructor(
               handle.setBookmarks(handle.format.bookmarks.plus(this.bookmark))
           }
 
-          this.bookmarkEventsOut.send(ReaderBookmarkSaved(this.accountID, this.bookmark))
+          this.bookmarkEventsOut.onNext(ReaderBookmarkSaved(this.accountID, this.bookmark))
         } else {
           this.logger.debug("[{}]: unable to save bookmark; no format handle", this.profile.id.uuid)
         }

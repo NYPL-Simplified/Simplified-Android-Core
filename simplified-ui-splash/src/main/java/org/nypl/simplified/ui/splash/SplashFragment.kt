@@ -24,21 +24,19 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import io.reactivex.disposables.Disposable
 import org.joda.time.format.DateTimeFormat
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.migration.api.MigrationReportXML
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.reports.Reports
-import org.nypl.simplified.ui.splash.R
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.StringBuilder
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -61,13 +59,13 @@ class SplashFragment : Fragment() {
 
   private lateinit var listener: SplashListenerType
   private lateinit var parameters: SplashParameters
-  private lateinit var bootSubscription: ObservableSubscriptionType<BootEvent>
+  private lateinit var bootSubscription: Disposable
   private lateinit var viewsForImage: ViewsImage
   private lateinit var viewsForEULA: ViewsEULA
   private lateinit var viewsForMigrationRunning: ViewsMigrationRunning
   private lateinit var viewsForMigrationReport: ViewsMigrationReport
   private lateinit var bootFuture: ListenableFuture<*>
-  private var migrationSubscription: ObservableSubscriptionType<MigrationEvent>? = null
+  private var migrationSubscription: Disposable? = null
   private var migrationTried = false
 
   private class ViewsImage(
@@ -326,7 +324,7 @@ class SplashFragment : Fragment() {
 
     this.bootSubscription =
       this.listener.onSplashWantBootEvents()
-        .subscribe { event -> this.onBootEvent(event) }
+        .subscribe(this::onBootEvent)
 
     /*
      * Subscribe to the boot future specifically so that we don't risk missing the delivery
@@ -346,8 +344,8 @@ class SplashFragment : Fragment() {
 
   override fun onStop() {
     super.onStop()
-    this.bootSubscription.unsubscribe()
-    this.migrationSubscription?.unsubscribe()
+    this.bootSubscription.dispose()
+    this.migrationSubscription?.dispose()
   }
 
   private fun onBootEvent(event: BootEvent) {

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Some
+import io.reactivex.disposables.Disposable
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
@@ -19,7 +20,6 @@ import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
@@ -46,7 +46,7 @@ class CatalogAcquisitionButton(
   private val onWantOpenLoginDialog: () -> Unit
 ) : AppCompatButton(context), CatalogBookButtonType {
 
-  private var accountEventSubscription: ObservableSubscriptionType<AccountEvent>? = null
+  private var accountEventSubscription: Disposable? = null
 
   init {
     val texts =
@@ -108,7 +108,7 @@ class CatalogAcquisitionButton(
   }
 
   private fun unsubscribe() {
-    this.accountEventSubscription?.unsubscribe()
+    this.accountEventSubscription?.dispose()
   }
 
   private fun tryLogin() {

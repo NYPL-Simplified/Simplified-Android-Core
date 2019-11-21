@@ -1,12 +1,12 @@
 package org.nypl.simplified.migration.spi
 
 import android.content.Context
+import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import java.net.URI
 
@@ -33,7 +33,7 @@ data class MigrationServiceDependencies(
    * A source of account events.
    */
 
-  val accountEvents: ObservableReadableType<AccountEvent>,
+  val accountEvents: Observable<AccountEvent>,
 
   /**
    * `true` if the application is running in anonymous profile mode.

@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.boot.api.BootEvent
@@ -14,8 +16,6 @@ import org.nypl.simplified.migration.api.Migrations
 import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.ui.splash.SplashFragment
@@ -50,22 +50,22 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
     MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor())
 
   private val bootEvents =
-    Observable.create<BootEvent>()
+    PublishSubject.create<BootEvent>()
 
   private val bootFuture =
     this.executor.submit {
       for (i in 0 until 5) {
-        this.bootEvents.send(BootEvent.BootInProgress("Loading $i"))
+        this.bootEvents.onNext(BootEvent.BootInProgress("Loading $i"))
         Thread.sleep(1000)
       }
-      this.bootEvents.send(BootEvent.BootCompleted("Loaded!"))
+      this.bootEvents.onNext(BootEvent.BootCompleted("Loaded!"))
     }
 
   override fun onSplashWantBootFuture(): ListenableFuture<*> {
     return this.bootFuture
   }
 
-  override fun onSplashWantBootEvents(): ObservableReadableType<BootEvent> =
+  override fun onSplashWantBootEvents(): Observable<BootEvent> =
     this.bootEvents
 
   override fun onSplashEULAIsProvided(): Boolean {
@@ -106,7 +106,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
   private val migrations =
     Migrations.create(
       MigrationServiceDependencies(
-        accountEvents = Observable.create(),
+        accountEvents = PublishSubject.create(),
         createAccount = {
           val taskRecorder =
             TaskRecorder.create<AccountCreateErrorDetails>()

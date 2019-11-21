@@ -60,7 +60,6 @@ import org.nypl.simplified.books.api.BookmarkKind;
 import org.nypl.simplified.books.book_database.api.BookDatabaseException;
 import org.nypl.simplified.feeds.api.FeedEntry;
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
-import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
@@ -86,6 +85,8 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import io.reactivex.disposables.Disposable;
 
 import static org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode.AUTO;
 import static org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE;
@@ -143,7 +144,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   private int current_page_index = 0;
   private int current_page_count = 1;
   private String current_chapter_title = "Unknown";
-  private ObservableSubscriptionType<ProfileEvent> profile_subscription;
+  private Disposable profile_subscription;
   private BookDatabaseEntryFormatHandleEPUB formatHandle;
 
   /**
@@ -633,9 +634,9 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       LOG.error("profile is not current: ", ex);
     }
 
-    final ObservableSubscriptionType<ProfileEvent> sub = this.profile_subscription;
+    final Disposable sub = this.profile_subscription;
     if (sub != null) {
-      sub.unsubscribe();
+      sub.dispose();
     }
     this.profile_subscription = null;
   }

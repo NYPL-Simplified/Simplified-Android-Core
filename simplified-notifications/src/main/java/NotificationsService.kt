@@ -2,11 +2,15 @@ package org.nypl.simplified.notifications
 
 import android.content.Context
 import com.io7m.jfunctional.Some
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.*
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.books.book_registry.BookRegistry
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatusEvent
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.threads.NamedThreadPools
@@ -17,7 +21,7 @@ import java.util.concurrent.ThreadFactory
 class NotificationsService(
         val context: Context,
         val threadFactory: ThreadFactory,
-        val profileEvents: ObservableReadableType<ProfileEvent>,
+        val profileEvents: Observable<ProfileEvent>,
         val bookRegistry: BookRegistryReadableType,
         private val notificationsWrapper: NotificationsWrapper,
         val notificationResourcesType: NotificationResourcesType) {
@@ -31,13 +35,13 @@ class NotificationsService(
 
     private val executor: ExecutorService = NamedThreadPools.namedThreadPoolOf(1, threadFactory)
 
-    private val profileSubscription: ObservableSubscriptionType<ProfileEvent>? =
+    private val profileSubscription: Disposable? =
             profileEvents.subscribe(::onProfileEvent)
 
     private var registryCache: Map<BookID, BookWithStatus> = mapOf()
 
     // Start null until we have a profile selected event
-    var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
+    var bookRegistrySubscription: Disposable? = null
 
     /**
      * Method for handling [ProfileEvent]s the service is subscribed to.
@@ -142,7 +146,7 @@ class NotificationsService(
      */
     private fun unsubscribeFromBookEvents() {
         logger.debug("NotificationsService::unsubscribeFromBookEvents")
-        bookRegistrySubscription?.unsubscribe()
+        bookRegistrySubscription?.dispose()
     }
 
     /**

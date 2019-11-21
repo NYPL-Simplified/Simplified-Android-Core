@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.google.common.util.concurrent.FluentFuture
+import io.reactivex.disposables.Disposable
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountType
@@ -18,7 +19,6 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.UIBackgroundExecutorType
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
@@ -29,7 +29,7 @@ class SettingsCustomOPDSActivity : NavigationDrawerActivity() {
   private val logger = LoggerFactory.getLogger(SettingsCustomOPDSActivity::class.java)
 
   @Volatile
-  private var accountSubscription: ObservableSubscriptionType<AccountEvent>? = null
+  private var accountSubscription: Disposable? = null
 
   @Volatile
   private var future: FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>>? = null
@@ -145,6 +145,6 @@ class SettingsCustomOPDSActivity : NavigationDrawerActivity() {
 
   override fun onStop() {
     super.onStop()
-    this.accountSubscription?.unsubscribe()
+    this.accountSubscription?.dispose()
   }
 }

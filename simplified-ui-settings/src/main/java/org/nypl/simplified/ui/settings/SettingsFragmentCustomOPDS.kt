@@ -13,11 +13,11 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.MoreExecutors
+import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -34,7 +34,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
     LoggerFactory.getLogger(SettingsFragmentCustomOPDS::class.java)
 
   @Volatile
-  private var accountSubscription: ObservableSubscriptionType<AccountEvent>? = null
+  private var accountSubscription: Disposable? = null
 
   @Volatile
   private var future: FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>>? = null
@@ -159,7 +159,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
   override fun onStop() {
     super.onStop()
 
-    this.accountSubscription?.unsubscribe()
+    this.accountSubscription?.dispose()
     this.create.setOnClickListener(null)
     this.feedURL.removeTextChangedListener(this.uriTextWatcher)
   }

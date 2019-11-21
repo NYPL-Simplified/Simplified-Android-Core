@@ -19,6 +19,7 @@ import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Some
+import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
@@ -33,7 +34,6 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.futures.FluentFutureExtensions.map
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
@@ -93,7 +93,7 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private lateinit var uiThread: UIThreadServiceType
   private val parametersId = PARAMETERS_ID
   private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
-  private var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
+  private var bookRegistrySubscription: Disposable? = null
   private var debugService: CatalogDebuggingServiceType? = null
 
   private val dateFormatter =
@@ -896,7 +896,7 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
 
   override fun onStop() {
     super.onStop()
-    this.bookRegistrySubscription?.unsubscribe()
+    this.bookRegistrySubscription?.dispose()
   }
 
   @UiThread
