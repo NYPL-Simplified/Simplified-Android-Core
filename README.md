@@ -259,7 +259,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.migration.spi](simplified-migration-spi)|Data migration SPI|
 |[org.librarysimplified.mime](simplified-mime)|MIME type handling|
 |[org.librarysimplified.notifications](simplified-notifications)|Notification service|
-|[org.librarysimplified.observable](simplified-observable)|Lightweight, type-safe Observable implementation|
 |[org.librarysimplified.opds.auth_document](simplified-opds-auth-document)|OPDS authentication document parser implementation|
 |[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
 |[org.librarysimplified.opds.core](simplified-opds-core)|OPDS feed parser|
