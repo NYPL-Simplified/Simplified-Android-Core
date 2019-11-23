@@ -13,9 +13,9 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.boot.api.BootFailureTesting
@@ -28,6 +28,8 @@ import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.host.HostViewModel
+import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
@@ -50,7 +52,7 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var developerOptions: ViewGroup
   private lateinit var drmTable: TableLayout
   private lateinit var failNextBoot: Switch
-  private lateinit var host: ServiceDirectoryProviderType
+  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendReportButton: Button
@@ -62,29 +64,6 @@ class SettingsFragmentVersion : Fragment() {
   private var adeptExecutor: AdobeAdeptExecutorType? = null
   private var buildClicks = 1
   private var profileEventSubscription: Disposable? = null
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    val context = this.requireContext()
-    if (context is ServiceDirectoryProviderType) {
-      this.host = context
-    } else {
-      throw IllegalStateException(
-        "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
-    }
-
-    this.profilesController =
-      this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      this.host.serviceDirectory.requireService(UIThreadServiceType::class.java)
-    this.buildConfig =
-      this.host.serviceDirectory.requireService(BuildConfigurationServiceType::class.java)
-    this.adeptExecutor =
-      this.host.serviceDirectory.optionalService(AdobeAdeptExecutorType::class.java)
-    this.navigation =
-      this.host.serviceDirectory.requireService(SettingsNavigationControllerType::class.java)
-  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -129,6 +108,22 @@ class SettingsFragmentVersion : Fragment() {
 
   override fun onStart() {
     super.onStart()
+
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
+
+    this.profilesController =
+      this.hostModel.services.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      this.hostModel.services.requireService(UIThreadServiceType::class.java)
+    this.buildConfig =
+      this.hostModel.services.requireService(BuildConfigurationServiceType::class.java)
+    this.adeptExecutor =
+      this.hostModel.services.optionalService(AdobeAdeptExecutorType::class.java)
+
+    this.navigation =
+      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
 
     this.buildTitle.setOnClickListener {
       if (this.buildClicks >= 7) {

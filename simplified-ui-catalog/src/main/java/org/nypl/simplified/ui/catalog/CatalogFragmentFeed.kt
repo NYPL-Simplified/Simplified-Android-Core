@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -24,11 +23,12 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
+import org.nypl.simplified.ui.host.HostViewModel
+import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
-
 
 /**
  * The base type of feed fragments. This class is abstract purely because the AndroidX
@@ -56,11 +56,9 @@ class CatalogFragmentFeed : Fragment() {
     }
   }
 
-  private val scrollPositionKey =
-    "org.nypl.simplified.ui.catalog.CatalogFragmentFeed.state.scrollPosition"
-
   private lateinit var bookCovers: BookCoverProviderType
   private lateinit var bookRegistry: BookRegistryReadableType
+  private lateinit var buttonCreator: CatalogButtons
   private lateinit var catalogNavigation: CatalogNavigationControllerType
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var feedError: ViewGroup
@@ -75,46 +73,20 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var feedWithoutGroups: ViewGroup
   private lateinit var feedWithoutGroupsAdapter: CatalogPagedAdapter
   private lateinit var feedWithoutGroupsList: RecyclerView
-  private lateinit var host: ServiceDirectoryProviderType
+  private lateinit var hostModel: HostViewModelReadableType
+  private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
-  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
+  private val parametersId = PARAMETERS_ID
   private var feedStatusSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    val context = this.requireContext()
-    if (context is ServiceDirectoryProviderType) {
-      this.host = context
-    } else {
-      throw IllegalStateException(
-        "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
-    }
-
-    this.parameters =
-      this.arguments!![this.parametersId] as CatalogFeedArguments
-
-    this.bookCovers =
-      this.host.serviceDirectory.requireService(BookCoverProviderType::class.java)
-    this.bookRegistry =
-      this.host.serviceDirectory.requireService(BookRegistryReadableType::class.java)
-    this.screenInformation =
-      this.host.serviceDirectory.requireService(ScreenSizeInformationType::class.java)
-    this.profilesController =
-      this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
-    this.configurationService =
-      this.host.serviceDirectory.requireService(CatalogConfigurationServiceType::class.java)
-    this.catalogNavigation =
-      this.host.serviceDirectory.requireService(CatalogNavigationControllerType::class.java)
-    this.feedLoader =
-      this.host.serviceDirectory.requireService(FeedLoaderType::class.java)
-    this.uiThread =
-      this.host.serviceDirectory.requireService(UIThreadServiceType::class.java)
-
+    this.parameters = this.arguments!![this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
   }
 
@@ -123,6 +95,32 @@ class CatalogFragmentFeed : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
+
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
+
+    this.bookCovers =
+      this.hostModel.services.requireService(BookCoverProviderType::class.java)
+    this.bookRegistry =
+      this.hostModel.services.requireService(BookRegistryReadableType::class.java)
+    this.screenInformation =
+      this.hostModel.services.requireService(ScreenSizeInformationType::class.java)
+    this.profilesController =
+      this.hostModel.services.requireService(ProfilesControllerType::class.java)
+    this.configurationService =
+      this.hostModel.services.requireService(CatalogConfigurationServiceType::class.java)
+    this.feedLoader =
+      this.hostModel.services.requireService(FeedLoaderType::class.java)
+    this.uiThread =
+      this.hostModel.services.requireService(UIThreadServiceType::class.java)
+
+    this.catalogNavigation =
+      this.hostModel.navigationController(CatalogNavigationControllerType::class.java)
+
+    this.buttonCreator =
+      CatalogButtons(this.requireContext(), this.screenInformation)
+
     val layout =
       inflater.inflate(R.layout.feed, container, false)
 
@@ -139,6 +137,7 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedWithGroupsList = this.feedWithGroups.findViewById(R.id.feedWithGroupsList)
     this.feedWithGroupsList.setHasFixedSize(true)
+    this.feedWithGroupsList.setItemViewCacheSize(32)
     this.feedWithGroupsList.layoutManager = LinearLayoutManager(this.context)
     (this.feedWithGroupsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
     this.feedWithGroupsList.addItemDecoration(
@@ -147,6 +146,7 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedWithoutGroupsList = this.feedWithoutGroups.findViewById(R.id.feedWithoutGroupsList)
     this.feedWithoutGroupsList.setHasFixedSize(true)
+    this.feedWithoutGroupsList.setItemViewCacheSize(32)
     this.feedWithoutGroupsList.layoutManager = LinearLayoutManager(this.context)
     (this.feedWithoutGroupsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 
@@ -167,10 +167,14 @@ class CatalogFragmentFeed : Fragment() {
         this,
         CatalogFeedViewModelFactory(
           context = this.requireContext(),
-          services = this.host.serviceDirectory,
+          services = this.hostModel.services,
           feedArguments = this.parameters
         ))
         .get(CatalogFeedViewModel::class.java)
+
+    this.loginDialogModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(CatalogLoginViewModel::class.java)
 
     /*
      * Configure the lanes based on the viewmodel.
@@ -184,9 +188,7 @@ class CatalogFragmentFeed : Fragment() {
         onFeedSelected = this::onFeedSelected,
         onBookSelected = this::onBookSelected
       )
-
-    this.feedWithGroupsList.adapter =
-      this.feedWithGroupsAdapter
+    this.feedWithGroupsList.adapter = this.feedWithGroupsAdapter
 
     this.feedStatusSubscription =
       this.feedModel.feedStatus.subscribe {
@@ -281,11 +283,15 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedWithoutGroupsAdapter =
       CatalogPagedAdapter(
-        context = this.requireContext(),
-        bookRegistry = this.bookRegistry,
         bookCovers = this.bookCovers,
-        uiThread = this.uiThread,
-        onBookSelected = this::onBookSelected
+        bookRegistry = this.bookRegistry,
+        buttonCreator = this.buttonCreator,
+        context = this.requireContext(),
+        fragmentManager = this.requireFragmentManager(),
+        loginViewModel = this.loginDialogModel,
+        onBookSelected = this::onBookSelected,
+        profilesController = this.profilesController,
+        uiThread = this.uiThread
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter

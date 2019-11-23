@@ -44,6 +44,7 @@
   <string name="catalogCancel">Cancel</string>
   <string name="catalogCancelHold">Cancel Reservation</string>
   <string name="catalogCancelling">Cancelling…</string>
+  <string name="catalogCorrupted">The metadata for this book is damaged and cannot be displayed. Reloading the feed or syncing your account might fix the problem.</string>
   <string name="catalogDescription">Description</string>
   <string name="catalogDetails">Details</string>
   <string name="catalogDismiss">Dismiss</string>

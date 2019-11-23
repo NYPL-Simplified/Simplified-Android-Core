@@ -1,9 +1,7 @@
 package org.nypl.simplified.ui.catalog
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Html
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,18 +9,16 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.Space
 import android.widget.TableLayout
 import android.widget.TextView
-import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatterBuilder
-import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.book_database.api.BookFormats
@@ -36,6 +32,8 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.host.HostViewModel
+import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
@@ -45,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference
  * A book detail page.
  */
 
-class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListenerType {
+class CatalogFragmentBookDetail : Fragment() {
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentBookDetail::class.java)
 
@@ -70,13 +68,15 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private lateinit var authors: TextView
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var booksController: BooksControllerType
+  private lateinit var buttonCreator: CatalogButtons
   private lateinit var buttons: LinearLayout
   private lateinit var cover: ImageView
   private lateinit var coverProgress: ProgressBar
   private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
   private lateinit var format: TextView
-  private lateinit var host: ServiceDirectoryProviderType
+  private lateinit var hostModel: HostViewModelReadableType
+  private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var metadata: TableLayout
   private lateinit var parameters: CatalogFragmentBookDetailParameters
   private lateinit var profilesController: ProfilesControllerType
@@ -95,6 +95,7 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
   private var bookRegistrySubscription: Disposable? = null
   private var debugService: CatalogDebuggingServiceType? = null
+  private var loginDialogModelSubscription: Disposable? = null
 
   private val dateFormatter =
     DateTimeFormatterBuilder()
@@ -122,32 +123,7 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    val context = this.requireContext()
-    if (context is ServiceDirectoryProviderType) {
-      this.host = context
-    } else {
-      throw IllegalStateException(
-        "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
-    }
-
-    this.parameters =
-      this.arguments!![this.parametersId] as CatalogFragmentBookDetailParameters
-
-    this.debugService =
-      this.host.serviceDirectory.optionalService(CatalogDebuggingServiceType::class.java)
-    this.bookRegistry =
-      this.host.serviceDirectory.requireService(BookRegistryReadableType::class.java)
-    this.uiThread =
-      this.host.serviceDirectory.requireService(UIThreadServiceType::class.java)
-    this.screenSize =
-      this.host.serviceDirectory.requireService(ScreenSizeInformationType::class.java)
-    this.profilesController =
-      this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
-    this.booksController =
-      this.host.serviceDirectory.requireService(BooksControllerType::class.java)
-    this.covers =
-      this.host.serviceDirectory.requireService(BookCoverProviderType::class.java)
+    this.parameters = this.arguments!![this.parametersId] as CatalogFragmentBookDetailParameters
   }
 
   override fun onCreateView(
@@ -155,13 +131,45 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
+
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
+
+    this.debugService =
+      this.hostModel.services.optionalService(CatalogDebuggingServiceType::class.java)
+    this.bookRegistry =
+      this.hostModel.services.requireService(BookRegistryReadableType::class.java)
+    this.uiThread =
+      this.hostModel.services.requireService(UIThreadServiceType::class.java)
+    this.screenSize =
+      this.hostModel.services.requireService(ScreenSizeInformationType::class.java)
+    this.profilesController =
+      this.hostModel.services.requireService(ProfilesControllerType::class.java)
+    this.booksController =
+      this.hostModel.services.requireService(BooksControllerType::class.java)
+    this.covers =
+      this.hostModel.services.requireService(BookCoverProviderType::class.java)
+
+    this.loginDialogModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(CatalogLoginViewModel::class.java)
+
+    this.loginDialogModelSubscription =
+      this.loginDialogModel.loginDialogCompleted.subscribe {
+        this.onDialogClosed()
+      }
+
+    this.buttonCreator =
+      CatalogButtons(this.requireContext(), this.screenSize)
+    
     val layout =
       inflater.inflate(R.layout.book_detail, container, false)
 
     this.cover =
       layout.findViewById(R.id.bookDetailCover)
     this.coverProgress =
-      layout.findViewById<ProgressBar>(R.id.bookDetailCoverProgress)
+      layout.findViewById(R.id.bookDetailCoverProgress)
     this.title =
       layout.findViewById(R.id.bookDetailTitle)
     this.format =
@@ -414,17 +422,16 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusFailedLoanUI(bookStatus: BookStatus.FailedLoan) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createDismissButton(context) {
+    this.buttons.addView(this.buttonCreator.createDismissButton {
       this.tryDismissError()
     })
-    this.buttons.addView(this.createButtonSpace(context))
-    this.buttons.addView(this.createDetailsButton(context) {
+    this.buttons.addView(this.buttonCreator.createButtonSpace())
+    this.buttons.addView(this.buttonCreator.createDetailsButton {
       this.tryShowError()
     })
-    this.buttons.addView(this.createButtonSpace(context))
-    this.buttons.addView(this.createRetryButton(context, this::tryBorrowMaybeAuthenticated))
+    this.buttons.addView(this.buttonCreator.createButtonSpace())
+    this.buttons.addView(this.buttonCreator.createRetryButton(this::tryBorrowMaybeAuthenticated))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -436,9 +443,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusRevokedUI(bookStatus: BookStatus.Revoked) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createCenteredTextForButtons(context, R.string.catalogRequesting))
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogRequesting))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -453,9 +459,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusRequestingLoanUI(bookStatus: BookStatus.RequestingLoan) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createCenteredTextForButtons(context, R.string.catalogRequesting))
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogRequesting))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.VISIBLE
@@ -470,9 +475,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusLoanableUI(bookStatus: BookStatus.Loanable) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createGetButton(context, this::tryBorrowMaybeAuthenticated))
+    this.buttons.addView(this.buttonCreator.createGetButton(this::tryBorrowMaybeAuthenticated))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -487,9 +491,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusHoldableUI(bookStatus: BookStatus.Holdable) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createReserveButton(context, this::tryReserveMaybeAuthenticated))
+    this.buttons.addView(this.buttonCreator.createReserveButton(this::tryReserveMaybeAuthenticated))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -504,24 +507,23 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusHeldUI(bookStatus: BookStatus.Held) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
     when (bookStatus) {
       is BookStatus.Held.HeldInQueue ->
         if (bookStatus.isRevocable) {
           this.buttons.addView(
-            this.createRevokeHoldButton(context, this::tryRevokeMaybeAuthenticated))
+            this.buttonCreator.createRevokeHoldButton(this::tryRevokeMaybeAuthenticated))
         } else {
           this.buttons.addView(
-            this.createCenteredTextForButtons(context, R.string.catalogHoldCannotCancel))
+            this.buttonCreator.createCenteredTextForButtons(R.string.catalogHoldCannotCancel))
         }
 
       is BookStatus.Held.HeldReady -> {
         if (bookStatus.isRevocable) {
           this.buttons.addView(
-            this.createRevokeHoldButton(context, this::tryRevokeMaybeAuthenticated))
+            this.buttonCreator.createRevokeHoldButton(this::tryRevokeMaybeAuthenticated))
         }
-        this.buttons.addView(this.createGetButton(context, this::tryBorrowMaybeAuthenticated))
+        this.buttons.addView(this.buttonCreator.createGetButton(this::tryBorrowMaybeAuthenticated))
       }
     }
     this.checkButtonViewCount()
@@ -537,36 +539,35 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusLoanedUI(bookStatus: BookStatus.Loaned) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
     when (bookStatus) {
       is BookStatus.Loaned.LoanedNotDownloaded ->
-        this.buttons.addView(this.createDownloadButton(context, this::tryBorrowMaybeAuthenticated))
+        this.buttons.addView(this.buttonCreator.createDownloadButton(this::tryBorrowMaybeAuthenticated))
 
       is BookStatus.Loaned.LoanedDownloaded ->
         when (this.parameters.feedEntry.probableFormat) {
           null,
           BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB -> {
-            this.buttons.addView(this.createReadButton(context) {
+            this.buttons.addView(this.buttonCreator.createReadButton {
 
             })
           }
           BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO -> {
-            this.buttons.addView(this.createListenButton(context) {
+            this.buttons.addView(this.buttonCreator.createListenButton {
 
             })
           }
           BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF -> {
-            this.buttons.addView(this.createReadButton(context) {
+            this.buttons.addView(this.buttonCreator.createReadButton {
 
             })
           }
         }
     }
     if (bookStatus.returnable) {
-      this.buttons.addView(this.createButtonSpace(context))
-      this.buttons.addView(this.createRevokeLoanButton(
-        context, this@CatalogFragmentBookDetail::tryRevokeMaybeAuthenticated))
+      this.buttons.addView(this.buttonCreator.createButtonSpace())
+      this.buttons.addView(this.buttonCreator.createRevokeLoanButton(
+        this@CatalogFragmentBookDetail::tryRevokeMaybeAuthenticated))
     }
     this.checkButtonViewCount()
 
@@ -581,9 +582,8 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusDownloadingUI(bookStatus: BookStatus.Downloading) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createCancelDownloadButton(context) {
+    this.buttons.addView(this.buttonCreator.createCancelDownloadButton {
       this.tryCancelDownload()
     })
     this.checkButtonViewCount()
@@ -592,20 +592,17 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.INVISIBLE
     this.statusInProgressText.visibility = View.VISIBLE
-    this.statusInProgressText.text =
-      this.progressPercentText(bookStatus.currentTotalBytes, bookStatus.expectedTotalBytes)
+    this.statusInProgressText.text = "${bookStatus.progressPercent.toInt()}%"
     this.statusInProgressBar.isIndeterminate = false
-    this.statusInProgressBar.progress =
-      this.progressPercent(bookStatus.currentTotalBytes, bookStatus.expectedTotalBytes)
+    this.statusInProgressBar.progress = bookStatus.progressPercent.toInt()
   }
 
   @UiThread
   private fun onBookStatusRequestingDownloadUI(bookStatus: BookStatus.RequestingDownload) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createCenteredTextForButtons(context, R.string.catalogRequesting))
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogRequesting))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.VISIBLE
@@ -618,10 +615,9 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   @UiThread
   private fun onBookStatusRequestingRevokeUI(bookStatus: BookStatus.RequestingRevoke) {
     this.uiThread.checkIsUIThread()
-
-    val context = this.requireContext()
+    
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createCenteredTextForButtons(context, R.string.catalogRequesting))
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogRequesting))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.VISIBLE
@@ -635,17 +631,16 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun onBookStatusFailedDownloadUI(bookStatus: BookStatus.FailedDownload) {
     this.uiThread.checkIsUIThread()
 
-    val context = this.requireContext()
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createDismissButton(context) {
+    this.buttons.addView(this.buttonCreator.createDismissButton {
       this.tryDismissError()
     })
-    this.buttons.addView(this.createButtonSpace(context))
-    this.buttons.addView(this.createDetailsButton(context) {
+    this.buttons.addView(this.buttonCreator.createButtonSpace())
+    this.buttons.addView(this.buttonCreator.createDetailsButton {
       this.tryShowError()
     })
-    this.buttons.addView(this.createButtonSpace(context))
-    this.buttons.addView(this.createRetryButton(context, this::tryBorrowMaybeAuthenticated))
+    this.buttons.addView(this.buttonCreator.createButtonSpace())
+    this.buttons.addView(this.buttonCreator.createRetryButton(this::tryBorrowMaybeAuthenticated))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -656,237 +651,24 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   @UiThread
   private fun onBookStatusFailedRevokeUI(bookStatus: BookStatus.FailedRevoke) {
     this.uiThread.checkIsUIThread()
-
-    val context = this.requireContext()
+    
     this.buttons.removeAllViews()
-    this.buttons.addView(this.createDismissButton(context) {
+    this.buttons.addView(this.buttonCreator.createDismissButton {
       this.tryDismissError()
     })
-    this.buttons.addView(this.createButtonSpace(context))
-    this.buttons.addView(this.createDetailsButton(context) {
+    this.buttons.addView(this.buttonCreator.createButtonSpace())
+    this.buttons.addView(this.buttonCreator.createDetailsButton {
       this.tryShowError()
     })
-    this.buttons.addView(this.createButtonSpace(context))
-    this.buttons.addView(this.createRetryButton(context, this::tryRevokeMaybeAuthenticated))
+    this.buttons.addView(this.buttonCreator.createButtonSpace())
+    this.buttons.addView(this.buttonCreator.createRetryButton(this::tryRevokeMaybeAuthenticated))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
   }
-
-  private fun progressPercentText(
-    currentTotalBytes: Long,
-    expectedTotalBytes: Long
-  ): String {
-    val percentI = this.progressPercent(currentTotalBytes, expectedTotalBytes)
-    return "$percentI%"
-  }
-
-  private fun progressPercent(
-    currentTotalBytes: Long,
-    expectedTotalBytes: Long
-  ): Int {
-    val percentF = (currentTotalBytes.toDouble() / expectedTotalBytes.toDouble()) * 100.0
-    return percentF.toInt()
-  }
-
-  @UiThread
-  private fun createButtonSpace(context: Context): Space {
-    val space = Space(context)
-    space.layoutParams = this.buttonSpaceLayoutParameters()
-    return space
-  }
-
-  @UiThread
-  private fun createCenteredTextForButtons(
-    context: Context,
-    @StringRes res: Int
-  ): TextView {
-    val text = TextView(context)
-    text.gravity = Gravity.CENTER
-    text.text = context.getString(res)
-    return text
-  }
-
-  @UiThread
-  private fun createButton(
-    context: Context,
-    text: Int,
-    description: Int,
-    onClick: (Button) -> Unit
-  ): Button {
-    val button = Button(context)
-    button.text = context.getString(text)
-    button.contentDescription = context.getString(description)
-    button.layoutParams = this.buttonLayoutParameters()
-    button.setOnClickListener {
-      button.isEnabled = false
-      onClick.invoke(button)
-    }
-    return button
-  }
-
-  @UiThread
-  private fun createReadButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogRead,
-      description = R.string.catalogAccessibilityBookRead,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createListenButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogListen,
-      description = R.string.catalogAccessibilityBookListen,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createDownloadButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogDownload,
-      description = R.string.catalogAccessibilityBookDownload,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createRevokeHoldButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogCancelHold,
-      description = R.string.catalogAccessibilityBookRevokeHold,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createRevokeLoanButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogReturn,
-      description = R.string.catalogAccessibilityBookRevokeLoan,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createCancelDownloadButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogCancel,
-      description = R.string.catalogAccessibilityBookDownloadCancel,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createReserveButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogReserve,
-      description = R.string.catalogAccessibilityBookReserve,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createGetButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogGet,
-      description = R.string.catalogAccessibilityBookBorrow,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createRetryButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogRetry,
-      description = R.string.catalogAccessibilityBookErrorRetry,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createDetailsButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogDetails,
-      description = R.string.catalogAccessibilityBookErrorDetails,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun createDismissButton(
-    context: Context,
-    onClick: (Button) -> Unit
-  ): Button {
-    return this.createButton(
-      context = context,
-      text = R.string.catalogDismiss,
-      description = R.string.catalogAccessibilityBookErrorDismiss,
-      onClick = onClick
-    )
-  }
-
-  @UiThread
-  private fun buttonSpaceLayoutParameters(): LinearLayout.LayoutParams {
-    val spaceLayoutParams = LinearLayout.LayoutParams(0, 0)
-    spaceLayoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
-    spaceLayoutParams.width = this.screenSize.dpToPixels(16).toInt()
-    return spaceLayoutParams
-  }
-
-  @UiThread
-  private fun buttonLayoutParameters(): LinearLayout.LayoutParams {
-    val buttonLayoutParams = LinearLayout.LayoutParams(0, 0)
-    buttonLayoutParams.weight = 1.0f
-    buttonLayoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
-    buttonLayoutParams.width = 0
-    return buttonLayoutParams
-  }
-
+  
   @UiThread
   private fun checkButtonViewCount() {
     Preconditions.checkState(
@@ -897,10 +679,11 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   override fun onStop() {
     super.onStop()
     this.bookRegistrySubscription?.dispose()
+    this.loginDialogModelSubscription?.dispose()
   }
 
   @UiThread
-  override fun onDialogClosed() {
+  fun onDialogClosed() {
     this.uiThread.checkIsUIThread()
     this.logger.debug("login dialog was closed")
     this.runOnLoginDialogClosed.getAndSet(null)?.invoke()
@@ -916,7 +699,6 @@ class CatalogFragmentBookDetail : Fragment(), CatalogFragmentLoginDialogListener
   private fun openLoginDialogAndThen(execute: () -> Unit) {
     val dialogParameters = CatalogFragmentLoginDialogParameters(this.parameters.accountId)
     val dialog = CatalogFragmentLoginDialog.create(dialogParameters)
-    dialog.setTargetFragment(this, 0)
     dialog.show(this.requireFragmentManager(), "LOGIN")
     this.runOnLoginDialogClosed.set(execute)
   }

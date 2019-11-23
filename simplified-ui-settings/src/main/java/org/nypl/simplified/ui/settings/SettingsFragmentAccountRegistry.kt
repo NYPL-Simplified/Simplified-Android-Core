@@ -9,11 +9,11 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
@@ -22,6 +22,8 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.host.HostViewModel
+import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
@@ -33,12 +35,12 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
   private val logger = LoggerFactory.getLogger(SettingsFragmentAccountRegistry::class.java)
 
-  private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: SettingsAccountProviderDescriptionAdapter
   private lateinit var accountListData: MutableList<AccountProviderDescriptionType>
   private lateinit var accountRegistry: AccountProviderRegistryType
-  private lateinit var host: ServiceDirectoryProviderType
+  private lateinit var hostModel: HostViewModelReadableType
+  private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var progress: ProgressBar
   private lateinit var progressText: TextView
@@ -50,23 +52,6 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    val context = this.requireContext()
-    if (context is ServiceDirectoryProviderType) {
-      this.host = context
-    } else {
-      throw IllegalStateException(
-        "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
-    }
-
-    this.accountRegistry =
-      this.host.serviceDirectory.requireService(AccountProviderRegistryType::class.java)
-    this.navigation =
-      this.host.serviceDirectory.requireService(SettingsNavigationControllerType::class.java)
-    this.profilesController =
-      this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      this.host.serviceDirectory.requireService(UIThreadServiceType::class.java)
 
     this.accountListData = mutableListOf()
     this.accountListAdapter =
@@ -160,6 +145,21 @@ class SettingsFragmentAccountRegistry : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
+
+    this.accountRegistry =
+      this.hostModel.services.requireService(AccountProviderRegistryType::class.java)
+    this.profilesController =
+      this.hostModel.services.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      this.hostModel.services.requireService(UIThreadServiceType::class.java)
+
+    this.navigation =
+      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+
     val layout =
       inflater.inflate(R.layout.settings_account_registry, container, false)
 

@@ -13,9 +13,9 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProviders
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -28,6 +28,8 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentExce
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.host.HostViewModel
+import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
@@ -64,11 +66,11 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
   private lateinit var account: AccountType
   private lateinit var action: Button
+  private lateinit var dialogModel: CatalogLoginViewModel
   private lateinit var documents: DocumentStoreType
   private lateinit var eula: CheckBox
   private lateinit var fieldListener: OnTextChangeListener
-  private lateinit var host: ServiceDirectoryProviderType
-  private lateinit var listener: CatalogFragmentLoginDialogListenerType
+  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var parameters: CatalogFragmentLoginDialogParameters
   private lateinit var password: EditText
   private lateinit var passwordLabel: TextView
@@ -84,36 +86,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    val context = this.requireContext()
-    if (context is ServiceDirectoryProviderType) {
-      this.host = context
-    } else {
-      throw IllegalStateException(
-        "The context hosting this fragment must implement " +
-          "${ServiceDirectoryProviderType::class.java} (received $context)")
-    }
-
-    val targetFragment = this.targetFragment
-    if (targetFragment is CatalogFragmentLoginDialogListenerType) {
-      this.listener = targetFragment
-    } else {
-      throw IllegalStateException(
-        "The target fragment hosting this dialog must implement " +
-          "${CatalogFragmentLoginDialogListenerType::class.java} (received $targetFragment)")
-    }
-
-    this.parameters =
-      this.arguments!![this.parametersId] as CatalogFragmentLoginDialogParameters
-
-    this.profilesController =
-      this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      this.host.serviceDirectory.requireService(UIThreadServiceType::class.java)
-    this.documents =
-      this.host.serviceDirectory.requireService(DocumentStoreType::class.java)
-    this.screenSize =
-      this.host.serviceDirectory.requireService(ScreenSizeInformationType::class.java)
+    this.parameters = this.arguments!![this.parametersId] as CatalogFragmentLoginDialogParameters
   }
 
   override fun onCreateView(
@@ -152,6 +125,23 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
   override fun onStart() {
     super.onStart()
+
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
+
+    this.profilesController =
+      this.hostModel.services.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      this.hostModel.services.requireService(UIThreadServiceType::class.java)
+    this.documents =
+      this.hostModel.services.requireService(DocumentStoreType::class.java)
+    this.screenSize =
+      this.hostModel.services.requireService(ScreenSizeInformationType::class.java)
+
+    this.dialogModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(CatalogLoginViewModel::class.java)
 
     this.resizeDialog()
 
@@ -374,6 +364,6 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
   override fun onDismiss(dialog: DialogInterface) {
     super.onDismiss(dialog)
-    this.listener.onDialogClosed()
+    this.dialogModel.loginDialogCompleted.onNext(Unit)
   }
 }

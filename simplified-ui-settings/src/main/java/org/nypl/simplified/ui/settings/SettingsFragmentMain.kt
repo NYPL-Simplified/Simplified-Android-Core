@@ -1,11 +1,13 @@
 package org.nypl.simplified.ui.settings
 
 import android.os.Bundle
+import androidx.lifecycle.ViewModelProviders
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.io7m.jfunctional.Some
-import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.documents.store.DocumentStoreType
+import org.nypl.simplified.ui.host.HostViewModel
+import org.nypl.simplified.ui.host.HostViewModelReadableType
 
 /**
  * The main settings page containing links to other settings pages.
@@ -14,8 +16,8 @@ import org.nypl.simplified.documents.store.DocumentStoreType
 class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private lateinit var documents: DocumentStoreType
+  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var navigation: SettingsNavigationControllerType
-  private lateinit var host: ServiceDirectoryProviderType
 
   override fun onCreatePreferences(
     savedInstanceState: Bundle?,
@@ -23,18 +25,14 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   ) {
     this.setPreferencesFromResource(R.xml.settings, rootKey)
 
-    val context = this.requireContext()
-    if (context is ServiceDirectoryProviderType) {
-      this.host = context
-    } else {
-      throw IllegalStateException(
-        "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
-    }
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
 
     this.navigation =
-      this.host.serviceDirectory.requireService(SettingsNavigationControllerType::class.java)
+      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
     this.documents =
-      this.host.serviceDirectory.requireService(DocumentStoreType::class.java)
+      this.hostModel.services.requireService(DocumentStoreType::class.java)
 
     val settingsAbout =
       this.findPreference<Preference>("settingsAbout")!!

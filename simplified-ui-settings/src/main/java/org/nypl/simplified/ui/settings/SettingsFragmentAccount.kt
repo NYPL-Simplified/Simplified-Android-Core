@@ -14,10 +14,10 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.joda.time.LocalDate
-import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -33,6 +33,8 @@ import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.host.HostViewModel
+import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
@@ -60,7 +62,7 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var bookmarkSyncCheck: Switch
   private lateinit var documents: DocumentStoreType
   private lateinit var eulaCheckbox: CheckBox
-  private lateinit var host: ServiceDirectoryProviderType
+  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var login: ViewGroup
   private lateinit var loginButton: Button
   private lateinit var loginProgress: ProgressBar
@@ -95,35 +97,7 @@ class SettingsFragmentAccount : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    val context = this.requireContext()
-    if (context is ServiceDirectoryProviderType) {
-      this.host = context
-    } else {
-      throw IllegalStateException(
-        "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
-    }
-
-    this.parameters =
-      this.arguments!![this.parametersId] as SettingsFragmentAccountParameters
-
-    this.profilesController =
-      this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
-    this.documents =
-      this.host.serviceDirectory.requireService(DocumentStoreType::class.java)
-    this.uiThread =
-      this.host.serviceDirectory.requireService(UIThreadServiceType::class.java)
-    this.navigation =
-      this.host.serviceDirectory.requireService(SettingsNavigationControllerType::class.java)
-
-    try {
-      this.account =
-        this.profilesController.profileCurrent()
-          .account(this.parameters.accountId)
-    } catch (e: AccountsDatabaseNonexistentException) {
-      this.logger.error("account no longer exists: ", e)
-
-    }
+    this.parameters = this.arguments!![this.parametersId] as SettingsFragmentAccountParameters
   }
 
   override fun onCreateView(
@@ -235,6 +209,27 @@ class SettingsFragmentAccount : Fragment() {
 
   override fun onStart() {
     super.onStart()
+
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
+
+    this.profilesController =
+      this.hostModel.services.requireService(ProfilesControllerType::class.java)
+    this.documents =
+      this.hostModel.services.requireService(DocumentStoreType::class.java)
+    this.uiThread =
+      this.hostModel.services.requireService(UIThreadServiceType::class.java)
+    this.navigation =
+      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+
+    try {
+      this.account =
+        this.profilesController.profileCurrent()
+          .account(this.parameters.accountId)
+    } catch (e: AccountsDatabaseNonexistentException) {
+      this.logger.error("account no longer exists: ", e)
+    }
 
     this.accountTitle.text =
       this.account.provider.displayName

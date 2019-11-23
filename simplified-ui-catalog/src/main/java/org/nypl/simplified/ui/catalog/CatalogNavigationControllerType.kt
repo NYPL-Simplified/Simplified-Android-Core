@@ -3,12 +3,13 @@ package org.nypl.simplified.ui.catalog
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.host.HostNavigationControllerType
 
 /**
  * Navigation functions for the catalog screens.
  */
 
-interface CatalogNavigationControllerType {
+interface CatalogNavigationControllerType : HostNavigationControllerType {
 
   /**
    * A catalog screen wants to pop the current screen from the stack.

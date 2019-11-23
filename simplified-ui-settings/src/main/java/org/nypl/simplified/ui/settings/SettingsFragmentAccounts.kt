@@ -8,17 +8,19 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.host.HostViewModel
+import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 
 /**
@@ -27,35 +29,20 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 
 class SettingsFragmentAccounts : Fragment() {
 
-  private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var accountCurrentSubtitle: TextView
   private lateinit var accountCurrentTitle: TextView
-  private lateinit var accountListData: MutableList<AccountType>
   private lateinit var accountCurrentView: ViewGroup
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: SettingsAccountsAdapter
-  private lateinit var host: ServiceDirectoryProviderType
+  private lateinit var accountListData: MutableList<AccountType>
+  private lateinit var hostModel: HostViewModelReadableType
+  private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
   private var accountSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    val context = this.requireContext()
-    if (context is ServiceDirectoryProviderType) {
-      this.host = context
-    } else {
-      throw IllegalStateException(
-        "The context hosting this fragment must implement ${ServiceDirectoryProviderType::class.java}")
-    }
-
-    this.profilesController =
-      this.host.serviceDirectory.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      this.host.serviceDirectory.requireService(UIThreadServiceType::class.java)
-    this.navigation =
-      this.host.serviceDirectory.requireService(SettingsNavigationControllerType::class.java)
 
     this.accountListData = mutableListOf()
     this.accountListAdapter =
@@ -114,6 +101,17 @@ class SettingsFragmentAccounts : Fragment() {
 
   override fun onStart() {
     super.onStart()
+
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
+
+    this.profilesController =
+      this.hostModel.services.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      this.hostModel.services.requireService(UIThreadServiceType::class.java)
+    this.navigation =
+      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
 
     this.accountSubscription =
       this.profilesController.accountEvents()

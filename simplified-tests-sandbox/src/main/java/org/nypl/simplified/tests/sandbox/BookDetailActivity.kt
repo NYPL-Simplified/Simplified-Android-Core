@@ -42,12 +42,13 @@ import java.util.concurrent.TimeUnit
 
 class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
 
+  private lateinit var services: MutableServiceDirectory
   private lateinit var executor: ScheduledExecutorService
   private lateinit var fragment: Fragment
   private lateinit var registry: BookRegistryType
   private var randomStates = false
 
-  override val serviceDirectory = MutableServiceDirectory()
+  override fun serviceDirectory() = this.services
 
   private fun bookStatusValues(feedEntry: FeedEntry.FeedEntryOPDS): List<BookStatus> {
     val statusValues = mutableListOf<BookStatus>()
@@ -251,16 +252,17 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
 
     this.setContentView(R.layout.fragment_host)
 
+    this.services = MutableServiceDirectory()
     val books = MockBooksController()
     val documents = MockDocumentStore()
     this.registry = BookRegistry.create()
-    this.serviceDirectory.putService(BookRegistryType::class.java, this.registry)
-    this.serviceDirectory.putService(BookRegistryReadableType::class.java, this.registry)
-    this.serviceDirectory.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
-    this.serviceDirectory.putService(ScreenSizeInformationType::class.java, ScreenSizeInformation(this.resources))
-    this.serviceDirectory.putService(DocumentStoreType::class.java, documents)
-    this.serviceDirectory.putService(ProfilesControllerType::class.java, MockProfilesController)
-    this.serviceDirectory.putService(BooksControllerType::class.java, books)
+    this.services.putService(BookRegistryType::class.java, this.registry)
+    this.services.putService(BookRegistryReadableType::class.java, this.registry)
+    this.services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
+    this.services.putService(ScreenSizeInformationType::class.java, ScreenSizeInformation(this.resources))
+    this.services.putService(DocumentStoreType::class.java, documents)
+    this.services.putService(ProfilesControllerType::class.java, MockProfilesController)
+    this.services.putService(BooksControllerType::class.java, books)
 
     val feedEntry =
       FeedEntry.FeedEntryOPDS(this.makeEntry(this.resources))

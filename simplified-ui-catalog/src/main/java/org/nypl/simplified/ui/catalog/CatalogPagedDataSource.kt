@@ -41,6 +41,8 @@ class CatalogPagedDataSource(
   ) {
     callback.onResult(
       this.initialFeed.entriesInOrder,
+      0,
+      Integer.MAX_VALUE,
       null,
       this.initialFeed.feedNext
     )

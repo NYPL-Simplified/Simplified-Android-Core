@@ -1,0 +1,8 @@
+dependencies {
+  api project(":simplified-services-api")
+
+  api libraries.androidXLifecycle
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

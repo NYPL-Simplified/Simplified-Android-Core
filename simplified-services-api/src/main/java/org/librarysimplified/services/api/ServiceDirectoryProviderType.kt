@@ -16,6 +16,6 @@ interface ServiceDirectoryProviderType {
    * A reference to the current service directory.
    */
 
-  val serviceDirectory: ServiceDirectoryType
+  fun serviceDirectory(): ServiceDirectoryType
 
 }
