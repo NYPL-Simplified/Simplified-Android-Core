@@ -2,6 +2,7 @@ package org.nypl.simplified.ui.catalog
 
 import android.os.Parcelable
 import io.reactivex.Observable
+import org.nypl.simplified.feeds.api.FeedFacet
 import java.net.URI
 
 /**
@@ -35,6 +36,16 @@ interface CatalogFeedViewModelType {
     title: String,
     uri: URI,
     isSearchResults: Boolean
+  ): CatalogFeedArguments
+
+  /**
+   * Resolve a given facet as a set of feed arguments.
+   *
+   * @param facet The facet
+   */
+
+  fun resolveFacet(
+    facet: FeedFacet
   ): CatalogFeedArguments
 
   /**

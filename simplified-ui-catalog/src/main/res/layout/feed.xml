@@ -6,6 +6,8 @@
 
   <include layout="@layout/feed_error" />
 
+  <include layout="@layout/feed_empty" />
+
   <include layout="@layout/feed_loading" />
 
   <include layout="@layout/feed_navigation" />

@@ -35,6 +35,7 @@ import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedNavigation
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
@@ -78,6 +79,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var catalogNavigation: CatalogNavigationControllerType
   private lateinit var configurationService: CatalogConfigurationServiceType
+  private lateinit var feedEmpty: ViewGroup
   private lateinit var feedError: ViewGroup
   private lateinit var feedLoader: FeedLoaderType
   private lateinit var feedLoading: ViewGroup
@@ -105,7 +107,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
-  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
+  private val parametersId = PARAMETERS_ID
   private var feedStatusSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,6 +151,8 @@ class CatalogFragmentFeed : Fragment() {
     val layout =
       inflater.inflate(R.layout.feed, container, false)
 
+    this.feedEmpty =
+      layout.findViewById(R.id.feedEmpty)
     this.feedError =
       layout.findViewById(R.id.feedError)
     this.feedLoading =
@@ -271,6 +275,8 @@ class CatalogFragmentFeed : Fragment() {
         this.onCatalogFeedNavigationUI(feedState)
       is CatalogFeedLoadFailed ->
         this.onCatalogFeedLoadFailed(feedState)
+      is CatalogFeedEmpty ->
+        this.onCatalogFeedEmpty(feedState)
     }
   }
 
@@ -293,9 +299,22 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   @UiThread
+  private fun onCatalogFeedEmpty(feedState: CatalogFeedEmpty) {
+    this.uiThread.checkIsUIThread()
+
+    this.feedEmpty.visibility = View.VISIBLE
+    this.feedError.visibility = View.INVISIBLE
+    this.feedLoading.visibility = View.INVISIBLE
+    this.feedNavigation.visibility = View.INVISIBLE
+    this.feedWithGroups.visibility = View.INVISIBLE
+    this.feedWithoutGroups.visibility = View.INVISIBLE
+  }
+
+  @UiThread
   private fun onCatalogFeedLoadingUI(feedState: CatalogFeedLoading) {
     this.uiThread.checkIsUIThread()
 
+    this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.VISIBLE
     this.feedNavigation.visibility = View.INVISIBLE
@@ -307,6 +326,7 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedNavigationUI(feedState: CatalogFeedNavigation) {
     this.uiThread.checkIsUIThread()
 
+    this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
     this.feedNavigation.visibility = View.VISIBLE
@@ -318,6 +338,7 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedWithoutGroupsUI(feedState: CatalogFeedWithoutGroups) {
     this.uiThread.checkIsUIThread()
 
+    this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
     this.feedNavigation.visibility = View.INVISIBLE
@@ -353,6 +374,7 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedWithGroupsUI(feedState: CatalogFeedWithGroups) {
     this.uiThread.checkIsUIThread()
 
+    this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
     this.feedNavigation.visibility = View.INVISIBLE
@@ -430,6 +452,8 @@ class CatalogFragmentFeed : Fragment() {
 
     val sortedNames = remainingGroups.keys.sorted()
     val context = this.requireContext()
+
+    facetLayout.removeAllViews()
     sortedNames.forEach { groupName ->
       val group = remainingGroups[groupName]!!
       if (FeedFacets.facetGroupIsEntryPointTyped(group)) {
@@ -450,6 +474,7 @@ class CatalogFragmentFeed : Fragment() {
       button.id = View.generateViewId()
       button.layoutParams = buttonLayoutParams
       button.text = active?.title
+      button.ellipsize = TextUtils.TruncateAt.END
       button.setOnClickListener {
         this.showFacetSelectDialog(groupName, group)
       }
@@ -489,6 +514,7 @@ class CatalogFragmentFeed : Fragment() {
      * Add a set of radio buttons to the view.
      */
 
+    facetTabs.removeAllViews()
     val size = facetGroup.size
     for (index in 0 until size) {
       val facet = facetGroup[index]
@@ -526,6 +552,7 @@ class CatalogFragmentFeed : Fragment() {
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener { ignored ->
         this.logger.debug("selected entry point facet: {}", facet.title)
+        this.catalogNavigation.openFeed(this.feedModel.resolveFacet(facet))
       }
       facetTabs.addView(button)
     }
@@ -578,8 +605,14 @@ class CatalogFragmentFeed : Fragment() {
     val alertBuilder = AlertDialog.Builder(this.requireContext())
     alertBuilder.setTitle(groupName)
     alertBuilder.setSingleChoiceItems(names, initiallyChecked) { dialog, checked ->
+
+      /*
+       * Wait a second in order to give the dialog list time to animate the selection.
+       */
+
       this.uiThread.runOnUIThreadDelayed({
         dialog.dismiss()
+        this.catalogNavigation.openFeed(this.feedModel.resolveFacet(group[checked]))
       }, 1_000L)
     }
 

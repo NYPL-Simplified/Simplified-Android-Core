@@ -69,5 +69,13 @@ sealed class CatalogFeedState {
     data class CatalogFeedNavigation(
       override val arguments: CatalogFeedArguments)
       : CatalogFeedLoaded()
+
+    /**
+     * A feed was loaded, but it turned out to be empty.
+     */
+
+    data class CatalogFeedEmpty(
+      override val arguments: CatalogFeedArguments
+    ) : CatalogFeedLoaded()
   }
 }

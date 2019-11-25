@@ -1,6 +1,7 @@
 package org.nypl.simplified.ui.catalog
 
 import androidx.paging.PageKeyedDataSource
+import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.feeds.api.Feed
@@ -39,6 +40,10 @@ class CatalogPagedDataSource(
     params: LoadInitialParams<URI>,
     callback: LoadInitialCallback<URI, FeedEntry>
   ) {
+    Preconditions.checkArgument(
+      this.initialFeed.entriesInOrder.isNotEmpty(),
+      "Do not pass an empty initial feed to the paged data source!")
+
     callback.onResult(
       this.initialFeed.entriesInOrder,
       0,

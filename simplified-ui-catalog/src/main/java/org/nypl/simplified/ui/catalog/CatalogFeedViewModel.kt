@@ -24,8 +24,8 @@ import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.*
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
@@ -201,7 +201,7 @@ class CatalogFeedViewModel(
           is Feed.FeedWithoutGroups ->
             this.onReceivedFeedWithoutGroups(state, feed)
           is Feed.FeedWithGroups ->
-            this.onReceivedFeedWithoutGroups(state, feed)
+            this.onReceivedFeedWithGroups(state, feed)
         }
       is FeedLoaderResult.FeedLoaderFailure ->
         this.onReceivedFeedFailure(state, result)
@@ -218,10 +218,14 @@ class CatalogFeedViewModel(
     )
   }
 
-  private fun onReceivedFeedWithoutGroups(
+  private fun onReceivedFeedWithGroups(
     state: CatalogFeedState,
     feed: Feed.FeedWithGroups
-  ): CatalogFeedWithGroups {
+  ): CatalogFeedLoaded {
+    if (feed.size == 0) {
+      return CatalogFeedEmpty(arguments = state.arguments)
+    }
+
     return CatalogFeedWithGroups(
       arguments = state.arguments,
       feed = feed
@@ -231,7 +235,11 @@ class CatalogFeedViewModel(
   private fun onReceivedFeedWithoutGroups(
     state: CatalogFeedState,
     feed: Feed.FeedWithoutGroups
-  ): CatalogFeedWithoutGroups {
+  ): CatalogFeedLoaded {
+
+    if (feed.entriesInOrder.isEmpty()) {
+      return CatalogFeedEmpty(arguments = state.arguments)
+    }
 
     /*
      * Construct a paged list for infinitely scrolling feeds.
@@ -314,6 +322,42 @@ class CatalogFeedViewModel(
           feedURI = uri,
           isSearchResults = isSearchResults
         )
+    }
+  }
+
+  override fun resolveFacet(
+    facet: FeedFacet
+  ): CatalogFeedArguments {
+
+    return when (val currentArguments = this.feedArguments) {
+      is CatalogFeedArgumentsRemote ->
+        when (facet) {
+          is FeedFacet.FeedFacetOPDS ->
+            CatalogFeedArgumentsRemote(
+              title = facet.title,
+              feedURI = currentArguments.feedURI.resolve(facet.opdsFacet.uri).normalize(),
+              isSearchResults = currentArguments.isSearchResults
+            )
+          is FeedFacet.FeedFacetPseudo ->
+            currentArguments
+        }
+      is CatalogFeedArgumentsLocalBooks -> {
+        when (facet) {
+          is FeedFacet.FeedFacetOPDS ->
+            CatalogFeedArgumentsRemote(
+              title = facet.title,
+              feedURI = facet.opdsFacet.uri,
+              isSearchResults = currentArguments.isSearchResults
+            )
+          is FeedFacet.FeedFacetPseudo ->
+            CatalogFeedArgumentsLocalBooks(
+              title = facet.title,
+              facetType = facet.type,
+              selection = currentArguments.selection,
+              searchTerms = currentArguments.searchTerms
+            )
+        }
+      }
     }
   }
 
