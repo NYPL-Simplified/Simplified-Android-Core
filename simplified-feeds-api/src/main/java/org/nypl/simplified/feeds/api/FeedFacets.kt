@@ -18,7 +18,7 @@ object FeedFacets {
    */
 
   @JvmStatic
-  fun findEntryPointFacetGroupForFeed(feed: Feed): OptionType<List<FeedFacet>> {
+  fun findEntryPointFacetGroupForFeed(feed: Feed): List<FeedFacet>? {
     return when (feed) {
       is Feed.FeedWithoutGroups ->
         findEntryPointFacetGroup(feed.facetsByGroup)
@@ -35,20 +35,21 @@ object FeedFacets {
    */
 
   @JvmStatic
-  private fun findEntryPointFacetGroup(
-    groups: Map<String, List<FeedFacet>>): OptionType<List<FeedFacet>> {
+  fun findEntryPointFacetGroup(
+    groups: Map<String, List<FeedFacet>>
+  ): List<FeedFacet>? {
 
     for (groupName in groups.keys) {
       val facets = groups[groupName]!!
       if (!facets.isEmpty()) {
         val facet = facets.get(0)
         if (facetIsEntryPointTyped(facet)) {
-          return Option.some(facets)
+          return facets
         }
       }
     }
 
-    return Option.none()
+    return null
   }
 
   /**

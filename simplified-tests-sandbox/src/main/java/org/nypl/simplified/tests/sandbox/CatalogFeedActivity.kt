@@ -57,6 +57,14 @@ import java.net.URI
 
 class CatalogFeedActivity : AppCompatActivity() {
 
+  companion object {
+//    val targetURI = URI.create(
+//      "https://circulation.librarysimplified.org/NYNYPL/feed/1?entrypoint=Book")
+
+    val targetURI = URI.create(
+      "https://circulation.librarysimplified.org/NYNYPL/")
+  }
+
   class Services(
     private val context: Context
   ) : ServiceDirectoryProviderType {
@@ -82,7 +90,7 @@ class CatalogFeedActivity : AppCompatActivity() {
       MockProfilesController.profileAccountCurrent()
         .setAccountProvider(
           AccountProviderImmutable.copy(MockProfilesController.profileAccountCurrent().provider)
-            .copy(catalogURI = URI.create("https://circulation.librarysimplified.org/"))
+            .copy(catalogURI = targetURI)
         )
 
       val bookController =
@@ -288,7 +296,7 @@ class CatalogFeedActivity : AppCompatActivity() {
         CatalogFragmentFeed.create(
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
             title = "Catalog",
-            feedURI = URI.create("https://circulation.librarysimplified.org/"),
+            feedURI = targetURI,
             isSearchResults = false
           )
         )

@@ -150,7 +150,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
 
     val facetsView =
       layout.findViewById<RadioGroup>(R.id.catalog_feed_facet_tabs)
-    val facetGroupOpt =
+    val facetGroup =
       FeedFacets.findEntryPointFacetGroupForFeed(feed!!)
 
     /*
@@ -158,7 +158,7 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
      * they would have appeared.
      */
 
-    if (facetGroupOpt.isNone) {
+    if (facetGroup == null) {
       facetsView.visibility = View.GONE
       return
     }
@@ -166,8 +166,6 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     /*
      * Add a set of radio buttons to the view.
      */
-
-    val facetGroup = (facetGroupOpt as Some<List<FeedFacet>>).get()
 
     val size = facetGroup.size
     for (index in 0 until size) {

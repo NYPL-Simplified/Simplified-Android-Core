@@ -258,7 +258,9 @@ class CatalogFeedViewModel(
 
     return CatalogFeedWithoutGroups(
       arguments = state.arguments,
-      pagedList = pagedList
+      entries = pagedList,
+      facetsInOrder = feed.facetsOrder,
+      facetsByGroup = feed.facetsByGroup
     )
   }
 

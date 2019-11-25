@@ -63,20 +63,10 @@ class CatalogFeedWithGroupsAdapter(
   override fun getItemCount(): Int =
     this.groups.size
 
-  override fun onViewRecycled(holder: CatalogFeedWithGroupsLaneViewHolder) {
-    this.logger.trace("view recycled")
-    holder.unbind()
-  }
-
-  override fun onViewDetachedFromWindow(holder: CatalogFeedWithGroupsLaneViewHolder) {
-    holder.unbind()
-  }
-
   override fun onBindViewHolder(
     holder: CatalogFeedWithGroupsLaneViewHolder,
     position: Int
   ) {
     holder.bindTo(this.groups[position])
   }
-
 }
