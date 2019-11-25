@@ -451,7 +451,7 @@ class CatalogFragmentFeed : Fragment() {
       button.layoutParams = buttonLayoutParams
       button.text = active?.title
       button.setOnClickListener {
-        this.showFacetSelectDialog(group)
+        this.showFacetSelectDialog(groupName, group)
       }
 
       spaceStart.layoutParams = spacerLayoutParams
@@ -565,8 +565,10 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   @UiThread
-  private fun showFacetSelectDialog(group: List<FeedFacet>)
-  {
+  private fun showFacetSelectDialog(
+    groupName: String,
+    group: List<FeedFacet>
+  ) {
     val names =
       group.map { facet -> facet.title }
         .toTypedArray()
@@ -574,6 +576,7 @@ class CatalogFragmentFeed : Fragment() {
       group.indexOfFirst(FeedFacet::isActive)
 
     val alertBuilder = AlertDialog.Builder(this.requireContext())
+    alertBuilder.setTitle(groupName)
     alertBuilder.setSingleChoiceItems(names, initiallyChecked) { dialog, checked ->
       this.uiThread.runOnUIThreadDelayed({
         dialog.dismiss()

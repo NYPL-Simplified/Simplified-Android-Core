@@ -2,6 +2,7 @@ package org.nypl.simplified.ui.catalog
 
 import android.content.Context
 import android.view.Gravity
+import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Space
@@ -187,6 +188,15 @@ class CatalogButtons(
   }
 
   @UiThread
+  fun createButtonSizedSpace(): View? {
+    val space = Space(this.context)
+    space.layoutParams = this.buttonLayoutParameters()
+    space.visibility = View.INVISIBLE
+    space.isEnabled = false
+    return space
+  }
+
+  @UiThread
   fun buttonSpaceLayoutParameters(): LinearLayout.LayoutParams {
     val spaceLayoutParams = LinearLayout.LayoutParams(0, 0)
     spaceLayoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
@@ -199,7 +209,7 @@ class CatalogButtons(
     val buttonLayoutParams = LinearLayout.LayoutParams(0, 0)
     buttonLayoutParams.weight = 1.0f
     buttonLayoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
-    buttonLayoutParams.width = 0
+    buttonLayoutParams.width = this.screenSizeInformation.dpToPixels(64).toInt()
     return buttonLayoutParams
   }
 }

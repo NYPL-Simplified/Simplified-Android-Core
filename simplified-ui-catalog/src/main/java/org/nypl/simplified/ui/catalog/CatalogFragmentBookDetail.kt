@@ -499,9 +499,11 @@ class CatalogFragmentBookDetail : Fragment() {
     this.uiThread.checkIsUIThread()
 
     this.buttons.removeAllViews()
+    this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.buttons.addView(this.buttonCreator.createGetButton { button ->
       this.tryBorrowMaybeAuthenticated(button, book)
     })
+    this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -520,9 +522,11 @@ class CatalogFragmentBookDetail : Fragment() {
     this.uiThread.checkIsUIThread()
 
     this.buttons.removeAllViews()
+    this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.buttons.addView(this.buttonCreator.createReserveButton { button ->
       this.tryReserveMaybeAuthenticated(button, book)
     })
+    this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -544,10 +548,12 @@ class CatalogFragmentBookDetail : Fragment() {
     when (bookStatus) {
       is BookStatus.Held.HeldInQueue ->
         if (bookStatus.isRevocable) {
+          this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
           this.buttons.addView(
             this.buttonCreator.createRevokeHoldButton { button ->
               this.tryRevokeMaybeAuthenticated(button, book)
             })
+          this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
         } else {
           this.buttons.addView(
             this.buttonCreator.createCenteredTextForButtons(R.string.catalogHoldCannotCancel))
@@ -594,6 +600,7 @@ class CatalogFragmentBookDetail : Fragment() {
             this.buttons.addView(this.buttonCreator.createReadButton {
               this.navigation.openEPUBReader(book, format)
             })
+            this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
           }
           is BookFormat.BookFormatAudioBook -> {
             this.buttons.addView(this.buttonCreator.createListenButton {
@@ -630,9 +637,11 @@ class CatalogFragmentBookDetail : Fragment() {
     this.uiThread.checkIsUIThread()
 
     this.buttons.removeAllViews()
+    this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.buttons.addView(this.buttonCreator.createCancelDownloadButton {
       this.tryCancelDownload(book.id)
     })
+    this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.VISIBLE

@@ -369,6 +369,8 @@ class CatalogPagedViewHolder(
     this.idleButtons.addView(this.buttonCreator.createDownloadButton { button ->
       this.tryBorrowMaybeAuthenticated(button, book)
     })
+    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
+    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
   @UiThread
@@ -382,6 +384,8 @@ class CatalogPagedViewHolder(
     this.idleButtons.addView(this.buttonCreator.createGetButton { button ->
       this.tryBorrowMaybeAuthenticated(button, book)
     })
+    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
+    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
   @UiThread
@@ -395,6 +399,8 @@ class CatalogPagedViewHolder(
     this.idleButtons.addView(this.buttonCreator.createReserveButton { button ->
       this.tryReserveMaybeAuthenticated(button, book)
     })
+    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
+    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
   @UiThread
@@ -434,6 +440,8 @@ class CatalogPagedViewHolder(
         this.buttonCreator.createRevokeHoldButton { button ->
           this.tryRevokeMaybeAuthenticated(button, book)
         })
+      this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
+      this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
     } else {
       this.idleButtons.addView(
         this.buttonCreator.createCenteredTextForButtons(R.string.catalogHoldCannotCancel))
@@ -466,9 +474,12 @@ class CatalogPagedViewHolder(
         })
       }
       null -> {
-
+        this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
       }
     }
+
+    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
+    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
   @UiThread
