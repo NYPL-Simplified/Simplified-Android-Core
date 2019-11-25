@@ -5,7 +5,7 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.documents.clock.ClockType;
+import org.nypl.simplified.clock.ClockType;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTPType;
 import org.slf4j.Logger;

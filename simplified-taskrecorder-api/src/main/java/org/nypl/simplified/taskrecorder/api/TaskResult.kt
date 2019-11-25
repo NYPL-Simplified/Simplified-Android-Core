@@ -90,4 +90,31 @@ sealed class TaskResult<E : Serializable, A> {
         Failure(this.steps)
     }
   }
+
+  companion object {
+
+    /**
+     * Create a task result that indicates that a task immediately failed with the
+     * given error.
+     */
+
+    fun <E : Serializable, A> fail(
+      description: String,
+      resolution: String,
+      errorValue: E
+    ): TaskResult<E, A> {
+      return Failure(
+        steps = listOf(
+          TaskStep(
+            description = description,
+            resolution = TaskStepResolution.TaskStepFailed(
+              message = resolution,
+              errorValue = errorValue,
+              exception = null
+            )
+          )
+        )
+      )
+    }
+  }
 }

@@ -52,7 +52,6 @@ import org.nypl.simplified.app.signup.CardCreatorActivity
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
-import org.nypl.simplified.futures.FluentFutureExtensions.onException
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
@@ -677,11 +676,6 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     Simplified.application.services()
       .requireService(ProfilesControllerType::class.java)
       .profileAccountLogout(this.account.id)
-      .onException(Exception::class.java) { exception: Exception ->
-        this.logger.error("error during logout: ", exception)
-        null
-      }
-
     return Unit.unit()
   }
 
@@ -695,10 +689,6 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     Simplified.application.services()
       .requireService(ProfilesControllerType::class.java)
       .profileAccountLogin(this.account.id, credentials)
-      .onException(Exception::class.java) { exception ->
-        this.logger.error("error during login: ", exception)
-        null
-      }
     return Unit.unit()
   }
 

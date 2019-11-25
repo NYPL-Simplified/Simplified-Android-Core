@@ -85,8 +85,8 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.bugsnag.IfBugsnag
-import org.nypl.simplified.documents.clock.Clock
-import org.nypl.simplified.documents.clock.ClockType
+import org.nypl.simplified.clock.Clock
+import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.documents.store.DocumentStore
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
@@ -304,7 +304,7 @@ class SimplifiedServices private constructor(
       publishMandatoryService(
         message = strings.bootingClock,
         interfaceType = ClockType::class.java,
-        serviceConstructor = { Clock.get() })
+        serviceConstructor = { Clock })
 
       publishEvent(strings.bootingDirectories)
       val directories = this.initializeDirectories(context)

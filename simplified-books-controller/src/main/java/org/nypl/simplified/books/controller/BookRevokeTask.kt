@@ -76,6 +76,7 @@ class BookRevokeTask(
 ) : Callable<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
 
   private lateinit var databaseEntry: BookDatabaseEntryType
+
   private val adobeACS = "Adobe ACS"
   private val logger = LoggerFactory.getLogger(BookRevokeTask::class.java)
   private val steps = TaskRecorder.create<BookStatusRevokeErrorDetails>()

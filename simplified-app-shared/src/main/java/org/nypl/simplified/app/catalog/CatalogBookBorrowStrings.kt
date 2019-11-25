@@ -9,6 +9,9 @@ import java.io.File
 
 class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResourcesType {
 
+  override val borrowBookSelectingAcquisition: String
+    get() = this.resources.getString(R.string.borrowBookSelectingAcquisition)
+
   override fun borrowBookFeedLoadingFailed(cause: String): String =
     this.resources.getString(R.string.borrowBookFeedLoadingFailed, cause)
 

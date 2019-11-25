@@ -66,4 +66,12 @@ class MutableServiceDirectory : ServiceDirectoryType {
     service: T
   ) = this.publishService(listOf(interfaceType), service)
 
+  fun <T : Any> ensureServiceIsNotPresent(
+    interfaceType: Class<T>
+  ) {
+    synchronized(this.servicesLock) {
+      this.services.remove(interfaceType)
+    }
+  }
+
 }

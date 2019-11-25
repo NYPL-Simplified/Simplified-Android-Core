@@ -27,6 +27,8 @@ import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
+import org.nypl.simplified.clock.Clock
+import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
@@ -191,6 +193,8 @@ abstract class ProfilesControllerContract {
       BookRevokeStringResourcesType::class.java, bookRevokeStringResources)
     services.putService(
       ProfileIdleTimerType::class.java, InoperableIdleTimer())
+    services.putService(
+      ClockType::class.java, Clock)
 
     return Controller.createFromServiceDirectory(
       services = services,

@@ -1,5 +1,7 @@
 package org.nypl.simplified.ui.catalog
 
+import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -35,4 +37,31 @@ interface CatalogNavigationControllerType : HostNavigationControllerType {
    */
 
   fun openFeed(feedArguments: CatalogFeedArguments)
+
+  /**
+   * A catalog screen wants to open an EPUB reader.
+   */
+
+  fun openEPUBReader(
+    book: Book,
+    format: BookFormat.BookFormatEPUB
+  )
+
+  /**
+   * A catalog screen wants to open an AudioBook listener.
+   */
+
+  fun openAudioBookListener(
+    book: Book,
+    format: BookFormat.BookFormatAudioBook
+  )
+
+  /**
+   * A catalog screen wants to open a PDF reader.
+   */
+
+  fun openPDFReader(
+    book: Book,
+    format: BookFormat.BookFormatPDF
+  )
 }

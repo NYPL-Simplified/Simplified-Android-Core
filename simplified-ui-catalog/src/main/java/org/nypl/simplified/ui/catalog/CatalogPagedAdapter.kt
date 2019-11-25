@@ -7,11 +7,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.disposables.CompositeDisposable
-import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
 /**
@@ -20,15 +17,13 @@ import org.slf4j.LoggerFactory
  */
 
 class CatalogPagedAdapter(
-  private val bookCovers: BookCoverProviderType,
-  private val bookRegistry: BookRegistryReadableType,
   private val buttonCreator: CatalogButtons,
   private val context: Context,
   private val fragmentManager: FragmentManager,
   private val loginViewModel: CatalogLoginViewModel,
+  private val navigation: CatalogNavigationControllerType,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
-  private val profilesController: ProfilesControllerType,
-  private val uiThread: UIThreadServiceType
+  private val services: ServiceDirectoryType
 ) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
 
   private val logger =
@@ -36,7 +31,7 @@ class CatalogPagedAdapter(
 
   private var viewHolders = 0
 
-  private val compositeDisposable =
+  private val registrySubscriptions =
     CompositeDisposable()
 
   override fun onCreateViewHolder(
@@ -47,17 +42,15 @@ class CatalogPagedAdapter(
     this.logger.trace("creating view holder (${viewHolders})")
 
     return CatalogPagedViewHolder(
-      bookCovers = this.bookCovers,
-      bookRegistry = this.bookRegistry,
       buttonCreator = this.buttonCreator,
-      compositeDisposable = this.compositeDisposable,
+      registrySubscriptions = this.registrySubscriptions,
       context = this.context,
       fragmentManager = this.fragmentManager,
       loginViewModel = this.loginViewModel,
+      navigation = this.navigation,
       onBookSelected = this.onBookSelected,
       parent = LayoutInflater.from(parent.context).inflate(R.layout.book_cell, parent, false),
-      profilesController = this.profilesController,
-      uiThread = this.uiThread
+      services = this.services
     )
   }
 
@@ -69,7 +62,7 @@ class CatalogPagedAdapter(
      * to aggressively unsubscribe the views when the adapter is detached from the recycler view.
      */
 
-    this.compositeDisposable.dispose()
+    this.registrySubscriptions.dispose()
     val childCount = recyclerView.childCount
     for (childIndex in 0 until childCount) {
       val holder =

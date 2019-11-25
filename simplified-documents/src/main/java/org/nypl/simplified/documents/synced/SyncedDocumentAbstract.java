@@ -11,7 +11,7 @@ import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
-import org.nypl.simplified.documents.clock.ClockType;
+import org.nypl.simplified.clock.ClockType;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -140,7 +140,7 @@ public abstract class SyncedDocumentAbstract implements SyncedDocumentType
 
         if (this.fetch_in_progress.compareAndSet(false, true)) {
           final long diff =
-            this.clock.clockNow() - this.fetch_last_success.get();
+            this.clock.clockNow().getMillis() - this.fetch_last_success.get();
           if (diff >= 86400) {
             SyncedDocumentAbstract.LOG.debug(
               "time difference {} >= 86400, fetch_in_progress {}",
@@ -254,7 +254,7 @@ public abstract class SyncedDocumentAbstract implements SyncedDocumentType
     throws IOException
   {
     FileUtilities.fileRename(this.current_tmp, this.current);
-    final long now = this.clock.clockNow();
+    final long now = this.clock.clockNow().getMillis();
     this.writeMeta(u, now);
     this.fetch_last_success.set(now);
   }

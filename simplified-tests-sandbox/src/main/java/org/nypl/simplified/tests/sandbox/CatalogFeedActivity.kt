@@ -10,6 +10,8 @@ import leakcanary.LeakCanary
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
+import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -132,6 +134,10 @@ class CatalogFeedActivity : AppCompatActivity() {
       newServices.putService(
         interfaceType = CatalogConfigurationServiceType::class.java,
         service = object : CatalogConfigurationServiceType {
+          override val supportErrorReportEmailAddress: String
+            get() = "someone@example.com"
+          override val supportErrorReportSubject: String
+            get() = "[printer on fire]"
           override val showAllCollectionsInLocalFeeds: Boolean
             get() = true
         }
@@ -167,6 +173,28 @@ class CatalogFeedActivity : AppCompatActivity() {
   class CatalogNavigationController(
     private val context: AppCompatActivity
   ) : CatalogNavigationControllerType {
+
+    override fun openEPUBReader(
+      book: Book,
+      format: BookFormat.BookFormatEPUB
+    ) {
+
+    }
+
+    override fun openAudioBookListener(
+      book: Book,
+      format: BookFormat.BookFormatAudioBook
+    ) {
+
+    }
+
+    override fun openPDFReader(
+      book: Book,
+      format: BookFormat.BookFormatPDF
+    ) {
+
+    }
+
     override fun openFeed(feedArguments: CatalogFeedArguments) {
       LeakCanary.config =
         LeakCanary.config.copy(

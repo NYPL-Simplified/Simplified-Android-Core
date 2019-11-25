@@ -37,9 +37,29 @@ interface CatalogFeedViewModelType {
     isSearchResults: Boolean
   ): CatalogFeedArguments
 
+  /**
+   * Store the layout state of the feed-with-groups view. This is typically the
+   * result of calling [androidx.recyclerview.widget.LinearLayoutManager.onSaveInstanceState].
+   */
+
   fun saveFeedWithGroupsViewState(state: Parcelable?)
+
+  /**
+   * Return the state that was previously stored with [saveFeedWithGroupsViewState].
+   */
+
   fun restoreFeedWithGroupsViewState(): Parcelable?
 
+  /**
+   * Store the layout state of the feed-without-groups view. This is typically the
+   * result of calling [androidx.recyclerview.widget.LinearLayoutManager.onSaveInstanceState].
+   */
+
   fun saveFeedWithoutGroupsViewState(state: Parcelable?)
+
+  /**
+   * Return the state that was previously stored with [saveFeedWithoutGroupsViewState].
+   */
+
   fun restoreFeedWithoutGroupsViewState(): Parcelable?
 }

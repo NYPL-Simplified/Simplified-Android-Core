@@ -18,4 +18,22 @@ interface CatalogConfigurationServiceType {
    */
 
   val showAllCollectionsInLocalFeeds: Boolean
+
+  /**
+   * The email address to which to send error reports. On most devices, users will be
+   * able to override this as the address is passed to the external Android
+   * mail activity, and this typically allows for editing both the message and the
+   * sender address.
+   */
+
+  val supportErrorReportEmailAddress: String
+
+  /**
+   * The subject text used in error reports.
+   *
+   * @see [supportErrorReportEmailAddress]
+   */
+
+  val supportErrorReportSubject: String
+
 }

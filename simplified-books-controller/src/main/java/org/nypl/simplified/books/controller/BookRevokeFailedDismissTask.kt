@@ -1,7 +1,6 @@
 package org.nypl.simplified.books.controller
 
 import com.io7m.jfunctional.Some
-import com.io7m.jfunctional.Unit
 
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
@@ -22,7 +21,7 @@ class BookRevokeFailedDismissTask(
     LoggerFactory.getLogger(BookRevokeFailedDismissTask::class.java)
 
   @Throws(Exception::class)
-  override fun call(): Unit {
+  override fun call() {
     try {
       this.logger.debug("[{}] revoke failure dismiss", this.bookId.brief())
 
@@ -39,6 +38,5 @@ class BookRevokeFailedDismissTask(
     } finally {
       this.logger.debug("[{}] revoke failure dismiss finished", this.bookId.brief())
     }
-    return Unit.unit()
   }
 }

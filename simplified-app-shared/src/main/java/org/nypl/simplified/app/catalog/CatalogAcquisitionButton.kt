@@ -7,7 +7,6 @@ import android.util.TypedValue
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
@@ -220,12 +219,10 @@ class CatalogAcquisitionButton(
       val bookID = entry.bookID
       val opdsEntry = entry.feedEntry
 
-      val acquisitionOpt =
+      val acquisition =
         BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitions)
 
-      if (acquisitionOpt is Some<OPDSAcquisition>) {
-        val acquisition = acquisitionOpt.get()
-
+      if (acquisition != null) {
         val button =
           CatalogAcquisitionButton(
             context = context,
@@ -238,9 +235,10 @@ class CatalogAcquisitionButton(
             onWantOpenLoginDialog = onWantOpenLoginDialog)
 
         viewGroup.addView(button)
-      } else {
-        LOG.error("[{}]: no available acquisition for book ({})", bookID.brief(), opdsEntry.title)
+        return
       }
+
+      LOG.error("[{}]: no available acquisition for book ({})", bookID.brief(), opdsEntry.title)
     }
 
     /**

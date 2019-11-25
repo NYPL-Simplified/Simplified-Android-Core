@@ -3,7 +3,6 @@ package org.nypl.simplified.books.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
-import com.io7m.jfunctional.Unit
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -17,11 +16,12 @@ class BookReportTask(
   private val http: HTTPType,
   private val account: AccountType,
   private val feedEntry: FeedEntry.FeedEntryOPDS,
-  private val reportType: String) : Callable<Unit> {
+  private val reportType: String
+) : Callable<Unit> {
 
   private val logger = LoggerFactory.getLogger(BookReportTask::class.java)
 
-  override fun call(): Unit {
+  override fun call() {
     return try {
       this.logger.debug(
         "[{}]: running {} for {}",
@@ -35,7 +35,7 @@ class BookReportTask(
           "[{}]: no issues URI for {}, giving up",
           this.account.id.uuid,
           this.feedEntry.bookID.brief())
-        return Unit.unit()
+        return
       }
 
       val credentials = this.account.loginState.credentials
@@ -61,20 +61,20 @@ class BookReportTask(
           error.message,
           error.status,
           error.problemReport)
-        Unit.unit()
+        Unit
       }, { error ->
         this.logger.error("[{}]: http exception for {}: ",
           this.account.id.uuid,
           this.feedEntry.bookID.brief(),
           error.error)
-        Unit.unit()
+        Unit
       }, { ok ->
         this.logger.debug("[{}]: succeeded for {} ({} {})",
           this.account.id.uuid,
           this.feedEntry.bookID.brief(),
           ok.status,
           ok.message)
-        Unit.unit()
+        Unit
       })
 
     } catch (e: Exception) {

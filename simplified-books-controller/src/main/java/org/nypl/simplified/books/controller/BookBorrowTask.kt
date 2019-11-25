@@ -7,12 +7,12 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
-import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.joda.time.LocalDateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptConnectorType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeAdeptFulfillmentToken
@@ -54,6 +54,7 @@ import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoUsableAcqui
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookUnexpectedTypeException
 import org.nypl.simplified.books.controller.api.BookUnsupportedTypeException
+import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
@@ -108,21 +109,31 @@ import java.util.concurrent.TimeoutException
 class BookBorrowTask(
   private val account: AccountType,
   private val acquisition: OPDSAcquisition,
-  private val adobeDRM: AdobeAdeptExecutorType?,
   private val bookId: BookID,
-  private val bookRegistry: BookRegistryType,
-  private val borrowStrings: BookBorrowStringResourcesType,
   private val borrowTimeoutDuration: Duration = Duration.standardMinutes(1L),
-  private val bundledContent: BundledContentResolverType,
   private val cacheDirectory: File,
-  private val clock: () -> Instant,
-  private val downloader: DownloaderType,
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
-  private val feedLoader: FeedLoaderType,
-  private val http: HTTPType
+  private val services: ServiceDirectoryType
 ) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+
+  private val adobeDRM =
+    this.services.optionalService(AdobeAdeptExecutorType::class.java)
+  private val bookRegistry =
+    this.services.requireService(BookRegistryType::class.java)
+  private val borrowStrings =
+    this.services.requireService(BookBorrowStringResourcesType::class.java)
+  private val bundledContent =
+    this.services.requireService(BundledContentResolverType::class.java)
+  private val clock =
+    this.services.requireService(ClockType::class.java)
+  private val downloader =
+    this.services.requireService(DownloaderType::class.java)
+  private val feedLoader =
+    this.services.requireService(FeedLoaderType::class.java)
+  private val http =
+    this.services.requireService(HTTPType::class.java)
 
   private val contentTypeACSM =
     "application/vnd.adobe.adept+xml"
@@ -152,7 +163,7 @@ class BookBorrowTask(
   private var downloadRunningTotal: Long = 0L
 
   @Volatile
-  private var downloadTimeThen = this.clock.invoke()
+  private var downloadTimeThen = this.clock.clockNow()
 
   @Volatile
   private lateinit var fulfillURI: URI
@@ -1494,7 +1505,7 @@ class BookBorrowTask(
      * second.
      */
 
-    val timeNow = this.clock.invoke()
+    val timeNow = this.clock.clockNow()
     val period = Period(this.downloadTimeThen, timeNow, PeriodType.millis())
     if (period.millis >= 100 || unconditional) {
       val status =

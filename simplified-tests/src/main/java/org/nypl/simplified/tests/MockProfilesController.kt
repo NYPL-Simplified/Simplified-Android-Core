@@ -72,10 +72,10 @@ object MockProfilesController : ProfilesControllerType {
   }
 
   override fun profileCreate(
-    account_provider: AccountProviderType?,
-    display_name: String?,
-    gender: String?,
-    date: LocalDate?
+    accountProvider: AccountProviderType,
+    displayName: String,
+    gender: String,
+    date: LocalDate
   ): FluentFuture<ProfileCreationEvent> {
     return FluentFuture.from(SettableFuture.create())
   }
@@ -142,7 +142,7 @@ object MockProfilesController : ProfilesControllerType {
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profilePreferencesUpdate(preferences: ProfilePreferences): FluentFuture<com.io7m.jfunctional.Unit> {
+  override fun profilePreferencesUpdate(preferences: ProfilePreferences): FluentFuture<Unit> {
     return FluentFuture.from(SettableFuture.create())
   }
 

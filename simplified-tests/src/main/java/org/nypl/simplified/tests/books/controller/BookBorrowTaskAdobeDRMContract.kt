@@ -42,6 +42,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError
@@ -51,12 +52,16 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DR
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
+import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.clock.Clock
+import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPResultOK
+import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -68,6 +73,7 @@ import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.nypl.simplified.tests.strings.MockBorrowStringResources
@@ -117,6 +123,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var feedLoader: FeedLoaderType
   private lateinit var http: MockingHTTP
+  private lateinit var services: MutableServiceDirectory
   private lateinit var tempDirectory: File
 
   private val bookBorrowStrings = MockBorrowStringResources()
@@ -167,6 +174,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
       Mockito.mock(AdobeAdeptConnectorType::class.java)
     this.adeptExecutor =
       Mockito.mock(AdobeAdeptExecutorType::class.java)
+
+    this.services = MutableServiceDirectory()
   }
 
   @After
@@ -324,22 +333,26 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
+    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
+
     val task =
       BookBorrowTask(
         account = account,
         acquisition = acquisition,
-        adobeDRM = this.adeptExecutor,
         bookId = bookId,
-        bookRegistry = this.bookRegistry,
-        borrowStrings = this.bookBorrowStrings,
-        bundledContent = this.bundledContent,
         cacheDirectory = this.cacheDirectory,
-        clock = this.clock,
-        downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = this.feedLoader,
-        http = this.http,
-        entry = opdsEntry)
+        entry = opdsEntry,
+        services = this.services
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -416,22 +429,26 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
+    this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
+
     val task =
       BookBorrowTask(
         account = account,
         acquisition = acquisition,
-        adobeDRM = null,
         bookId = bookId,
-        bookRegistry = this.bookRegistry,
-        borrowStrings = this.bookBorrowStrings,
-        bundledContent = this.bundledContent,
         cacheDirectory = this.cacheDirectory,
-        clock = this.clock,
-        downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = this.feedLoader,
-        http = this.http,
-        entry = opdsEntry)
+        entry = opdsEntry,
+        services = this.services
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -560,22 +577,26 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
+    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
+
     val task =
       BookBorrowTask(
         account = account,
         acquisition = acquisition,
-        adobeDRM = this.adeptExecutor,
         bookId = bookId,
-        bookRegistry = this.bookRegistry,
-        borrowStrings = this.bookBorrowStrings,
-        bundledContent = this.bundledContent,
         cacheDirectory = this.cacheDirectory,
-        clock = this.clock,
-        downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = this.feedLoader,
-        http = this.http,
-        entry = opdsEntry)
+        entry = opdsEntry,
+        services = this.services
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -673,22 +694,26 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
+    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
+
     val task =
       BookBorrowTask(
         account = account,
         acquisition = acquisition,
-        adobeDRM = this.adeptExecutor,
         bookId = bookId,
-        bookRegistry = this.bookRegistry,
-        borrowStrings = this.bookBorrowStrings,
-        bundledContent = this.bundledContent,
         cacheDirectory = this.cacheDirectory,
-        clock = this.clock,
-        downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = this.feedLoader,
-        http = this.http,
-        entry = opdsEntry)
+        entry = opdsEntry,
+        services = this.services
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -772,22 +797,26 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
+    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
+
     val task =
       BookBorrowTask(
         account = account,
         acquisition = acquisition,
-        adobeDRM = this.adeptExecutor,
         bookId = bookId,
-        bookRegistry = this.bookRegistry,
-        borrowStrings = this.bookBorrowStrings,
-        bundledContent = this.bundledContent,
         cacheDirectory = this.cacheDirectory,
-        clock = this.clock,
-        downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = this.feedLoader,
-        http = this.http,
-        entry = opdsEntry)
+        entry = opdsEntry,
+        services = this.services
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -891,22 +920,26 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
+    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
+
     val task =
       BookBorrowTask(
         account = account,
         acquisition = acquisition,
-        adobeDRM = this.adeptExecutor,
         bookId = bookId,
-        bookRegistry = this.bookRegistry,
-        borrowStrings = this.bookBorrowStrings,
-        bundledContent = this.bundledContent,
         cacheDirectory = this.cacheDirectory,
-        clock = this.clock,
-        downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = this.feedLoader,
-        http = this.http,
-        entry = opdsEntry)
+        entry = opdsEntry,
+        services = this.services
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
@@ -1005,22 +1038,26 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
+    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
+
     val task =
       BookBorrowTask(
         account = account,
         acquisition = acquisition,
-        adobeDRM = this.adeptExecutor,
         bookId = bookId,
-        bookRegistry = this.bookRegistry,
-        borrowStrings = this.bookBorrowStrings,
-        bundledContent = this.bundledContent,
         cacheDirectory = this.cacheDirectory,
-        clock = this.clock,
-        downloader = this.downloader,
         downloads = ConcurrentHashMap(),
-        feedLoader = this.feedLoader,
-        http = this.http,
-        entry = opdsEntry)
+        entry = opdsEntry,
+        services = this.services
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure

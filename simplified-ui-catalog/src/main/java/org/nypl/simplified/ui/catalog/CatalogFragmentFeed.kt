@@ -283,15 +283,13 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedWithoutGroupsAdapter =
       CatalogPagedAdapter(
-        bookCovers = this.bookCovers,
-        bookRegistry = this.bookRegistry,
         buttonCreator = this.buttonCreator,
         context = this.requireContext(),
         fragmentManager = this.requireFragmentManager(),
         loginViewModel = this.loginDialogModel,
+        navigation = this.catalogNavigation,
         onBookSelected = this::onBookSelected,
-        profilesController = this.profilesController,
-        uiThread = this.uiThread
+        services = this.hostModel.services
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter

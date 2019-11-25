@@ -379,6 +379,7 @@
   <string name="logoutDeactivatingDeviceAdobeFailed">Deactivating the device failed: %1$s (%2$s)</string>
 
   <!-- Borrowing strings -->
+  <string name="borrowBookSelectingAcquisition">Selecting an OPDS acquisition…</string>
   <string name="borrowStarted">Borrowing started…</string>
   <string name="borrowBookDatabaseCreateOrUpdate">Setting up book database entry…</string>
   <string name="borrowBookDatabaseUpdated">Book database entry updated successfully.</string>
