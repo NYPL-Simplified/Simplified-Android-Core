@@ -16,7 +16,9 @@ import android.widget.Space
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -27,13 +29,14 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacets
 import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderType
+import org.nypl.simplified.feeds.api.FeedSearch
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedNavigation
@@ -105,9 +108,10 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
+  private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
-  private val parametersId = PARAMETERS_ID
+  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
   private var feedStatusSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -209,15 +213,13 @@ class CatalogFragmentFeed : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.feedModel =
-      ViewModelProviders.of(
-        this,
-        CatalogFeedViewModelFactory(
-          context = this.requireContext(),
-          services = this.hostModel.services,
-          feedArguments = this.parameters
-        ))
-        .get(CatalogFeedViewModel::class.java)
+    if (this.activity is ToolbarHostType) {
+      this.toolbar = (this.activity as ToolbarHostType).toolbar
+    } else {
+      throw IllegalStateException("The activity (${this.activity}) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    }
+
+    this.feedModel = this.createOrGetFeedModel()
 
     this.loginDialogModel =
       ViewModelProviders.of(this.requireActivity())
@@ -250,6 +252,17 @@ class CatalogFragmentFeed : Fragment() {
       this.feedModel.restoreFeedWithoutGroupsViewState())
 
     this.reconfigureUI(this.feedModel.feedState())
+  }
+
+  private fun createOrGetFeedModel(): CatalogFeedViewModel {
+    return ViewModelProviders.of(
+      this,
+      CatalogFeedViewModelFactory(
+        context = this.requireContext(),
+        services = this.hostModel.services,
+        feedArguments = this.parameters
+      ))
+      .get(CatalogFeedViewModel::class.java)
   }
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
@@ -308,6 +321,8 @@ class CatalogFragmentFeed : Fragment() {
     this.feedNavigation.visibility = View.INVISIBLE
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
+
+    this.configureToolbar(feedState.title, feedState.search)
   }
 
   @UiThread
@@ -320,6 +335,8 @@ class CatalogFragmentFeed : Fragment() {
     this.feedNavigation.visibility = View.INVISIBLE
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
+
+    this.configureToolbar(feedState.title, feedState.search)
   }
 
   @UiThread
@@ -332,6 +349,8 @@ class CatalogFragmentFeed : Fragment() {
     this.feedNavigation.visibility = View.VISIBLE
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
+
+    this.configureToolbar(feedState.title, feedState.search)
   }
 
   @UiThread
@@ -344,6 +363,8 @@ class CatalogFragmentFeed : Fragment() {
     this.feedNavigation.visibility = View.INVISIBLE
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.VISIBLE
+
+    this.configureToolbar(feedState.title, feedState.search)
 
     this.configureFacets(
       facetHeader = this.feedWithoutGroupsHeader,
@@ -381,6 +402,8 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroups.visibility = View.VISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
 
+    this.configureToolbar(feedState.title, feedState.search)
+
     this.configureFacets(
       facetHeader = this.feedWithGroupsHeader,
       facetTabs = this.feedWithGroupsTabs,
@@ -391,6 +414,109 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroupsData.clear()
     this.feedWithGroupsData.addAll(feedState.feed.feedGroupsInOrder)
     this.feedWithGroupsAdapter.notifyDataSetChanged()
+  }
+
+  @UiThread
+  private fun configureToolbar(
+    title: String,
+    search: FeedSearch?
+  ) {
+    val context = this.requireContext()
+    this.configureToolbarTitles(context, title)
+    this.configureToolbarMenu(context, search, title)
+  }
+
+  @UiThread
+  private fun configureToolbarMenu(
+    context: Context,
+    search: FeedSearch?,
+    title: String
+  ) {
+    this.toolbar.menu.clear()
+    this.toolbar.inflateMenu(R.menu.catalog)
+
+    val menuSearch =
+      this.toolbar.menu.findItem(R.id.catalogMenuActionSearch)
+    val menuReload =
+      this.toolbar.menu.findItem(R.id.catalogMenuActionReload)
+
+    if (search != null) {
+      menuSearch.title = context.getString(R.string.catalogSearchIn, title)
+      menuSearch.setOnMenuItemClickListener {
+        this.openSearchDialog(search)
+        true
+      }
+    } else {
+      menuSearch.isVisible = false
+    }
+
+    menuReload.title = context.getString(R.string.catalogAccessibilityReloadFeed)
+    menuReload.isEnabled = true
+    menuReload.setOnMenuItemClickListener { item ->
+      item.isEnabled = false
+      this.feedModel.reloadFeed(this.feedModel.feedState().arguments)
+      true
+    }
+  }
+
+  @UiThread
+  private fun configureToolbarTitles(
+    context: Context,
+    title: String
+  ) {
+    try {
+      val accountProvider =
+        this.profilesController.profileCurrent()
+          .account(this.parameters.accountId)
+          .provider
+
+      when {
+        title.isBlank() -> {
+          this.toolbar.title = accountProvider.displayName
+          this.toolbar.subtitle = accountProvider.subtitle
+        }
+        title == accountProvider.displayName -> {
+          this.toolbar.title = title
+          this.toolbar.subtitle = accountProvider.subtitle
+        }
+        else -> {
+          this.toolbar.title = title
+          this.toolbar.subtitle = accountProvider.displayName
+        }
+      }
+    } catch (e: Exception) {
+      this.toolbar.title = title
+      this.toolbar.subtitle = ""
+    } finally {
+      val color = ContextCompat.getColor(context, R.color.simplifiedColorBackground)
+      this.toolbar.setTitleTextColor(color)
+      this.toolbar.setSubtitleTextColor(color)
+    }
+  }
+
+  @UiThread
+  private fun openSearchDialog(search: FeedSearch) {
+    val context = this.requireContext()
+
+    val inflater =
+      LayoutInflater.from(context)
+    val dialogView =
+      inflater.inflate(R.layout.search_dialog, this.toolbar, false)
+    val editText =
+      dialogView.findViewById<AppCompatEditText>(R.id.searchDialogText)!!
+
+    val alertBuilder = AlertDialog.Builder(context)
+    alertBuilder.setTitle(R.string.catalogSearch)
+    alertBuilder.setView(dialogView)
+    alertBuilder.setPositiveButton(R.string.catalogSearch) { dialog, which ->
+      this.catalogNavigation.openFeed(
+        this.feedModel.resolveSearch(
+          search = search,
+          query = editText.text?.toString() ?: ""
+        ))
+      dialog.dismiss()
+    }
+    alertBuilder.create().show()
   }
 
   @UiThread

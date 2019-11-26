@@ -244,6 +244,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.bugsnag](simplified-bugsnag)|Bugsnag functionality|
 |[org.librarysimplified.buildconfig.api](simplified-buildconfig-api)|Build-time configuration API|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
+|[org.librarysimplified.clock](simplified-clock)|Clock API|
 |[org.librarysimplified.documents](simplified-documents)|Documents API|
 |[org.librarysimplified.downloader.core](simplified-downloader-core)|Downloader|
 |[org.librarysimplified.feeds.api](simplified-feeds-api)|Feed API|
@@ -288,11 +289,13 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
 |[org.librarysimplified.ui.datepicker.demo](simplified-ui-datepicker-demo)|Date picker UI component demo|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
+|[org.librarysimplified.ui.host](simplified-ui-host)|Fragment hosting and navigation base API|
 |[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
 |[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
 |[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
 |[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
+|[org.librarysimplified.ui.toolbar](simplified-ui-toolbar)|Sane toolbar handling|
 
 _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
 

@@ -18,6 +18,7 @@ import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
+import org.nypl.simplified.feeds.api.FeedSearch
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onAnyError
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
@@ -223,7 +224,11 @@ class CatalogFeedViewModel(
     feed: Feed.FeedWithGroups
   ): CatalogFeedLoaded {
     if (feed.size == 0) {
-      return CatalogFeedEmpty(arguments = state.arguments)
+      return CatalogFeedEmpty(
+        arguments = state.arguments,
+        search = feed.feedSearch,
+        title = feed.feedTitle
+      )
     }
 
     return CatalogFeedWithGroups(
@@ -238,7 +243,11 @@ class CatalogFeedViewModel(
   ): CatalogFeedLoaded {
 
     if (feed.entriesInOrder.isEmpty()) {
-      return CatalogFeedEmpty(arguments = state.arguments)
+      return CatalogFeedEmpty(
+        arguments = state.arguments,
+        search = feed.feedSearch,
+        title = feed.feedTitle
+      )
     }
 
     /*
@@ -268,7 +277,9 @@ class CatalogFeedViewModel(
       arguments = state.arguments,
       entries = pagedList,
       facetsInOrder = feed.facetsOrder,
-      facetsByGroup = feed.facetsByGroup
+      facetsByGroup = feed.facetsByGroup,
+      search = feed.feedSearch,
+      title = feed.feedTitle
     )
   }
 
@@ -314,21 +325,29 @@ class CatalogFeedViewModel(
         CatalogFeedArgumentsRemote(
           title = title,
           feedURI = arguments.feedURI.resolve(uri).normalize(),
-          isSearchResults = isSearchResults
+          isSearchResults = isSearchResults,
+          accountId = arguments.accountId
         )
       is CatalogFeedArgumentsLocalBooks ->
         CatalogFeedArgumentsRemote(
           title = title,
           feedURI = uri,
-          isSearchResults = isSearchResults
+          isSearchResults = isSearchResults,
+          accountId = arguments.accountId
         )
     }
+  }
+
+  override fun reloadFeed(arguments: CatalogFeedArguments) {
+    synchronized(this.stateLock) {
+      this.state = null
+    }
+    this.loadFeed(arguments)
   }
 
   override fun resolveFacet(
     facet: FeedFacet
   ): CatalogFeedArguments {
-
     return when (val currentArguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote ->
         when (facet) {
@@ -336,7 +355,8 @@ class CatalogFeedViewModel(
             CatalogFeedArgumentsRemote(
               title = facet.title,
               feedURI = currentArguments.feedURI.resolve(facet.opdsFacet.uri).normalize(),
-              isSearchResults = currentArguments.isSearchResults
+              isSearchResults = currentArguments.isSearchResults,
+              accountId = currentArguments.accountId
             )
           is FeedFacet.FeedFacetPseudo ->
             currentArguments
@@ -347,14 +367,16 @@ class CatalogFeedViewModel(
             CatalogFeedArgumentsRemote(
               title = facet.title,
               feedURI = facet.opdsFacet.uri,
-              isSearchResults = currentArguments.isSearchResults
+              isSearchResults = currentArguments.isSearchResults,
+              accountId = currentArguments.accountId
             )
           is FeedFacet.FeedFacetPseudo ->
             CatalogFeedArgumentsLocalBooks(
               title = facet.title,
               facetType = facet.type,
               selection = currentArguments.selection,
-              searchTerms = currentArguments.searchTerms
+              searchTerms = currentArguments.searchTerms,
+              accountId = currentArguments.accountId
             )
         }
       }
@@ -375,5 +397,55 @@ class CatalogFeedViewModel(
 
   override fun restoreFeedWithoutGroupsViewState(): Parcelable? {
     return this.feedWithoutGroupsViewState
+  }
+
+  override fun resolveSearch(
+    search: FeedSearch,
+    query: String
+  ): CatalogFeedArguments {
+    return when (val currentArguments = this.feedArguments) {
+      is CatalogFeedArgumentsRemote -> {
+        when (search) {
+          FeedSearch.FeedSearchLocal -> {
+            CatalogFeedArgumentsRemote(
+              title = currentArguments.title,
+              feedURI = currentArguments.feedURI,
+              isSearchResults = true,
+              accountId = currentArguments.accountId
+            )
+          }
+          is FeedSearch.FeedSearchOpen1_1 -> {
+            CatalogFeedArgumentsRemote(
+              title = currentArguments.title,
+              feedURI = search.search.getQueryURIForTerms(query),
+              isSearchResults = true,
+              accountId = currentArguments.accountId
+            )
+          }
+        }
+      }
+      is CatalogFeedArgumentsLocalBooks -> {
+        when (search) {
+          FeedSearch.FeedSearchLocal -> {
+            CatalogFeedArgumentsLocalBooks(
+              title = currentArguments.title,
+              facetType = currentArguments.facetType,
+              searchTerms = query,
+              selection = currentArguments.selection,
+              accountId = currentArguments.accountId
+            )
+          }
+          is FeedSearch.FeedSearchOpen1_1 -> {
+            CatalogFeedArgumentsLocalBooks(
+              title = currentArguments.title,
+              facetType = currentArguments.facetType,
+              searchTerms = query,
+              selection = currentArguments.selection,
+              accountId = currentArguments.accountId
+            )
+          }
+        }
+      }
+    }
   }
 }

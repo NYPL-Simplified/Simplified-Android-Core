@@ -1,8 +1,10 @@
 package org.nypl.simplified.ui.catalog
 
 import android.os.Parcelable
+import android.text.Editable
 import io.reactivex.Observable
 import org.nypl.simplified.feeds.api.FeedFacet
+import org.nypl.simplified.feeds.api.FeedSearch
 import java.net.URI
 
 /**
@@ -39,6 +41,12 @@ interface CatalogFeedViewModelType {
   ): CatalogFeedArguments
 
   /**
+   * Reload the current feed using the given arguments.
+   */
+
+  fun reloadFeed(arguments: CatalogFeedArguments)
+
+  /**
    * Resolve a given facet as a set of feed arguments.
    *
    * @param facet The facet
@@ -73,4 +81,13 @@ interface CatalogFeedViewModelType {
    */
 
   fun restoreFeedWithoutGroupsViewState(): Parcelable?
+
+  /**
+   * Execute the given search based on the current feed.
+   */
+
+  fun resolveSearch(
+    search: FeedSearch,
+    query: String
+  ): CatalogFeedArguments
 }

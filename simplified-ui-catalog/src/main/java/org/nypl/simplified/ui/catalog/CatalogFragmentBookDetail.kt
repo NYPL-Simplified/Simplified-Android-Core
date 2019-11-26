@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.catalog
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
@@ -12,6 +13,8 @@ import android.widget.ProgressBar
 import android.widget.TableLayout
 import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.base.Preconditions
@@ -37,6 +40,7 @@ import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
@@ -99,6 +103,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var statusInProgressText: TextView
   private lateinit var summary: TextView
   private lateinit var title: TextView
+  private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
   private val parametersId = PARAMETERS_ID
   private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
@@ -236,6 +241,12 @@ class CatalogFragmentBookDetail : Fragment() {
   override fun onStart() {
     super.onStart()
 
+    if (this.activity is ToolbarHostType) {
+      this.toolbar = (this.activity as ToolbarHostType).toolbar
+    } else {
+      throw IllegalStateException("The activity (${this.activity}) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    }
+
     val shortAnimationDuration =
       this.requireContext().resources.getInteger(android.R.integer.config_shortAnimTime)
 
@@ -282,10 +293,46 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.onBookStatusUI(status)
     this.onOPDSFeedEntryUI(this.parameters.feedEntry)
+    this.configureToolbar()
 
     this.bookRegistrySubscription =
       this.bookRegistry.bookEvents()
         .subscribe(this::onBookStatusEvent)
+  }
+
+  private fun configureToolbar() {
+    val context = this.requireContext()
+    this.configureToolbarTitles(context)
+    this.configureToolbarMenu(context)
+  }
+
+  @UiThread
+  private fun configureToolbarMenu(
+    context: Context
+  ) {
+    this.toolbar.menu.clear()
+  }
+
+  @UiThread
+  private fun configureToolbarTitles(
+    context: Context
+  ) {
+    this.toolbar.title = this.parameters.feedEntry.feedEntry.title
+
+    try {
+      val accountProvider =
+        this.profilesController.profileCurrent()
+          .account(this.parameters.accountId)
+          .provider
+
+      this.toolbar.subtitle = accountProvider.displayName
+    } catch (e: Exception) {
+      this.toolbar.subtitle = ""
+    } finally {
+      val color = ContextCompat.getColor(context, R.color.simplifiedColorBackground)
+      this.toolbar.setTitleTextColor(color)
+      this.toolbar.setSubtitleTextColor(color)
+    }
   }
 
   private fun onBookStatusEvent(event: BookStatusEvent) {

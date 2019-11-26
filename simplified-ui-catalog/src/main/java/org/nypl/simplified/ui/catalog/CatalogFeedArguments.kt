@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.catalog
 
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
 import java.io.Serializable
@@ -10,6 +11,12 @@ import java.net.URI
  */
 
 sealed class CatalogFeedArguments : Serializable {
+
+  /**
+   * The account to which the feed belongs.
+   */
+
+  abstract val accountId: AccountID
 
   /**
    * `true` if the feed requires network connectivity. This translates to showing an error
@@ -40,7 +47,8 @@ sealed class CatalogFeedArguments : Serializable {
   data class CatalogFeedArgumentsRemote(
     override val title: String,
     val feedURI: URI,
-    override val isSearchResults: Boolean
+    override val isSearchResults: Boolean,
+    override val accountId: AccountID
   ) : CatalogFeedArguments() {
     override val requiresNetworkConnectivity = true
   }
@@ -53,7 +61,8 @@ sealed class CatalogFeedArguments : Serializable {
     override val title: String,
     val facetType: FacetType,
     val searchTerms: String?,
-    val selection: FeedBooksSelection
+    val selection: FeedBooksSelection,
+    override val accountId: AccountID
   ) : CatalogFeedArguments() {
     override val requiresNetworkConnectivity = false
     override val isSearchResults: Boolean = false

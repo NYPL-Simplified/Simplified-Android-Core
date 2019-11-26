@@ -63,6 +63,8 @@
     <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="toolbarStyle">@style/SimplifiedToolBarStyle</item>
+
     <item name="windowActionBar">false</item>
     <item name="windowNoTitle">true</item>
   </style>
@@ -94,6 +96,7 @@
     <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="toolbarStyle">@style/SimplifiedToolBarStyle</item>
   </style>
 
   <style name="SimplifiedActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
@@ -129,6 +132,19 @@
     <item name="colorAccent">?attr/simplifiedColorPrimary</item>
     <item name="colorControlActivated">?attr/simplifiedColorPrimary</item>
     <item name="colorControlNormal">?attr/simplifiedColorPrimary</item>
+  </style>
+
+  <style name="SimplifiedToolBarStyle" parent="Widget.AppCompat.Toolbar">
+    <item name="titleTextAppearance">@style/SimplifiedTitleTextAppearance</item>
+    <item name="subtitleTextAppearance">@style/SimplifiedSubTitleTextAppearance</item>
+  </style>
+
+  <style name="SimplifiedTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <item name="android:textColor">#ffffff</item>
+  </style>
+
+  <style name="SimplifiedSubTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+    <item name="android:textSize">10sp</item>
   </style>
 
   <!-- Material Design Color Palette -->

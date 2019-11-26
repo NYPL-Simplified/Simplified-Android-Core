@@ -16,6 +16,7 @@ dependencies {
   implementation project(":simplified-ui-splash")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-ui-toolbar")
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout

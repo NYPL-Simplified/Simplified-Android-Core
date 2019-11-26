@@ -18,6 +18,7 @@
   <string name="catalogAccessibilityCoverEpub">%1$s, ebook, by %2$s</string>
   <string name="catalogAccessibilityCoverPdf">%1$s, pdf, by %2$s</string>
   <string name="catalogAccessibilityCoverUnknownFormat">%1$s, by %2$s</string>
+  <string name="catalogAccessibilityReloadFeed">Reload feed</string>
   <string name="catalogBookAvailabilityHeldIndefinite">You have this book on hold.</string>
   <string name="catalogBookAvailabilityHeldQueue">You are at position %1$d in the queue for this book.</string>
   <string name="catalogBookAvailabilityHeldTimed">You will be able to borrow this book in %1$s.</string>
@@ -62,9 +63,12 @@
   <string name="catalogPlaceholder">Lorem ipsum dolor sit amet, probatus volutpat has at, vis adhuc iuvaret omittantur an, sadipscing conclusionemque his ad. Eam ut simul tempor. Primis consetetur appellantur vim eu, eum an iudico dolorum. Ad vis utamur honestatis, sanctus debitis referrentur an eam.</string>
   <string name="catalogRead">Read</string>
   <string name="catalogRelatedBooks">Related books…</string>
+  <string name="catalogReload">Reload</string>
   <string name="catalogReportIssue">Report issue…</string>
   <string name="catalogRequesting">Requesting…</string>
   <string name="catalogReserve">Reserve</string>
   <string name="catalogRetry">Retry</string>
   <string name="catalogReturn">Return</string>
+  <string name="catalogSearch">Search</string>
+  <string name="catalogSearchIn">Search in %1$s</string>
 </resources>

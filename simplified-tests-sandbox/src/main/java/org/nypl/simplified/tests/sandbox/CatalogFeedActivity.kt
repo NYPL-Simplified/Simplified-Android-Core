@@ -3,6 +3,7 @@ package org.nypl.simplified.tests.sandbox
 import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.MoreExecutors
 import leakcanary.AppWatcher
@@ -40,6 +41,7 @@ import org.nypl.simplified.tests.MockDocumentStore
 import org.nypl.simplified.tests.MockProfilesController
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.threads.NamedThreadPools
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
@@ -53,9 +55,12 @@ import org.nypl.simplified.ui.host.HostViewModelType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.slf4j.LoggerFactory
 import java.net.URI
 
-class CatalogFeedActivity : AppCompatActivity() {
+class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
+
+  private val logger = LoggerFactory.getLogger(CatalogFeedActivity::class.java)
 
   companion object {
 //    val targetURI = URI.create(
@@ -70,12 +75,12 @@ class CatalogFeedActivity : AppCompatActivity() {
   ) : ServiceDirectoryProviderType {
 
     @Volatile
-    private var services : ServiceDirectoryType? = null
+    private var services: ServiceDirectoryType? = null
 
     override fun serviceDirectory(): ServiceDirectoryType {
       return this.services
-        ?: run {
-          val newServices = createServices()
+        ?: this.run {
+          val newServices = this.createServices()
           this.services = newServices
           newServices
         }
@@ -90,7 +95,11 @@ class CatalogFeedActivity : AppCompatActivity() {
       MockProfilesController.profileAccountCurrent()
         .setAccountProvider(
           AccountProviderImmutable.copy(MockProfilesController.profileAccountCurrent().provider)
-            .copy(catalogURI = targetURI)
+            .copy(
+              catalogURI = targetURI,
+              displayName = "The New York Public Library",
+              subtitle = "Inspiring lifelong learning, advancing knowledge, and strengthening our communities."
+            )
         )
 
       val bookController =
@@ -291,13 +300,28 @@ class CatalogFeedActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     this.setContentView(R.layout.fragment_host)
 
+    this.toolbar = this.findViewById(R.id.toolbar)
+    this.toolbar.menu.clear()
+    this.toolbar.inflateMenu(R.menu.catalog)
+
+    this.toolbar.title =
+      MockProfilesController.profileAccountCurrent().provider.displayName
+    this.toolbar.subtitle =
+      MockProfilesController.profileAccountCurrent().provider.subtitle
+
+    this.toolbar.setTitleTextAppearance(
+      this, R.style.SimplifiedTitleTextAppearance)
+    this.toolbar.setSubtitleTextAppearance(
+      this, R.style.SimplifiedSubTitleTextAppearance)
+
     if (savedInstanceState == null) {
       val fragment =
         CatalogFragmentFeed.create(
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
             title = "Catalog",
             feedURI = targetURI,
-            isSearchResults = false
+            isSearchResults = false,
+            accountId = MockProfilesController.profileAccountCurrent().id
           )
         )
 
@@ -313,8 +337,9 @@ class CatalogFeedActivity : AppCompatActivity() {
     }
   }
 
-  override fun onStop()
-  {
+  override lateinit var toolbar: Toolbar
+
+  override fun onStop() {
     super.onStop()
 
     this.model.removeNavigationController(CatalogNavigationControllerType::class.java)
