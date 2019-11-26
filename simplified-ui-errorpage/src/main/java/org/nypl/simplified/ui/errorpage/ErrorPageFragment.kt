@@ -7,11 +7,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TableLayout
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
@@ -43,26 +45,40 @@ class ErrorPageFragment : Fragment() {
     }
   }
 
-  private lateinit var parameters: ErrorPageParameters<PresentableErrorType>
   private lateinit var errorAttributesTable: TableLayout
   private lateinit var errorAttributesTitle: TextView
   private lateinit var errorStepsList: RecyclerView
   private lateinit var errorTitle: TextView
   private lateinit var listener: ErrorPageListenerType
+  private lateinit var parameters: ErrorPageParameters<PresentableErrorType>
   private lateinit var sendButton: Button
+  private lateinit var toolbar: Toolbar
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     this.logger.debug("onCreate")
 
-    val className = ErrorPageListenerType::class.java.canonicalName
-    val activity = this.requireActivity()
-    if (activity is ErrorPageListenerType) {
-      this.listener = activity
-    } else {
-      throw IllegalStateException(
-        "The activity hosting this fragment must implement ${className}")
+    run {
+      val className = ErrorPageListenerType::class.java.canonicalName
+      val activity = this.requireActivity()
+      if (activity is ErrorPageListenerType) {
+        this.listener = activity
+      } else {
+        throw IllegalStateException(
+          "The activity hosting this fragment must implement ${className}")
+      }
+    }
+
+    run {
+      val className = ToolbarHostType::class.java.canonicalName
+      val activity = this.requireActivity()
+      if (activity is ToolbarHostType) {
+        this.toolbar = activity.toolbar
+      } else {
+        throw IllegalStateException(
+          "The activity hosting this fragment must implement ${className}")
+      }
     }
   }
 
@@ -123,6 +139,10 @@ class ErrorPageFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
+
+    this.toolbar.menu.clear()
+    this.toolbar.setTitle(R.string.errorDetailsTitle)
+    this.toolbar.subtitle = ""
 
     this.sendButton.isEnabled = true
     this.sendButton.setOnClickListener {

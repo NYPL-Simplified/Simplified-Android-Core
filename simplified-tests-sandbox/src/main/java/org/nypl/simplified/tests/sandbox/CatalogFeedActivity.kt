@@ -48,6 +48,8 @@ import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
 import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
+import org.nypl.simplified.ui.errorpage.ErrorPageFragment
+import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelFactory
@@ -58,7 +60,7 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
-class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
+class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerType {
 
   private val logger = LoggerFactory.getLogger(CatalogFeedActivity::class.java)
 
@@ -73,6 +75,8 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
   class Services(
     private val context: Context
   ) : ServiceDirectoryProviderType {
+
+    lateinit var profiles: MockProfilesController
 
     @Volatile
     private var services: ServiceDirectoryType? = null
@@ -92,9 +96,15 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
       val executor =
         NamedThreadPools.namedThreadPool(4, "bg", 19)
 
-      MockProfilesController.profileAccountCurrent()
+      this.profiles =
+        MockProfilesController(
+          profileCount = 2,
+          accountCount = 3
+        )
+
+      profiles.profileAccountCurrent()
         .setAccountProvider(
-          AccountProviderImmutable.copy(MockProfilesController.profileAccountCurrent().provider)
+          AccountProviderImmutable.copy(profiles.profileAccountCurrent().provider)
             .copy(
               catalogURI = targetURI,
               displayName = "The New York Public Library",
@@ -161,7 +171,7 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
       )
       newServices.putService(
         interfaceType = ProfilesControllerType::class.java,
-        service = MockProfilesController
+        service = profiles
       )
       newServices.putService(
         interfaceType = UIThreadServiceType::class.java,
@@ -188,6 +198,7 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
   }
 
   class CatalogNavigationController(
+    private val services: Services,
     private val context: AppCompatActivity
   ) : CatalogNavigationControllerType {
 
@@ -248,7 +259,7 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
 
       val parameters =
         CatalogFragmentBookDetailParameters(
-          accountId = MockProfilesController.profileAccountCurrent().id,
+          accountId = services.profiles.profileAccountCurrent().id,
           feedEntry = entry
         )
 
@@ -266,7 +277,17 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
     }
 
     override fun <E : PresentableErrorType> openErrorPage(parameters: ErrorPageParameters<E>) {
-
+      this.context.supportFragmentManager
+        .beginTransaction()
+        .setCustomAnimations(
+          R.anim.slide_in_right,
+          R.anim.slide_out_left,
+          android.R.anim.slide_in_left,
+          android.R.anim.slide_out_right
+        )
+        .addToBackStack(null)
+        .replace(R.id.fragmentHolder, ErrorPageFragment.create(parameters))
+        .commit()
     }
   }
 
@@ -288,26 +309,30 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
         watchFragmentViews = true
       )
 
+    val services = Services(this.applicationContext)
+
     this.model =
-      ViewModelProviders.of(this, HostViewModelFactory(Services(this.applicationContext)))
+      ViewModelProviders.of(this, HostViewModelFactory(services))
         .get(HostViewModel::class.java)
 
     this.model.updateNavigationController(
       navigationInterface = CatalogNavigationControllerType::class.java,
-      navigationInstance = CatalogNavigationController(this)
+      navigationInstance = CatalogNavigationController(services, this)
     )
 
     super.onCreate(savedInstanceState)
     this.setContentView(R.layout.fragment_host)
 
     this.toolbar = this.findViewById(R.id.toolbar)
+    this.toolbar.overflowIcon = this.getDrawable(org.nypl.simplified.ui.catalog.R.drawable.overflow)
+
     this.toolbar.menu.clear()
     this.toolbar.inflateMenu(R.menu.catalog)
 
     this.toolbar.title =
-      MockProfilesController.profileAccountCurrent().provider.displayName
+      services.profiles.profileAccountCurrent().provider.displayName
     this.toolbar.subtitle =
-      MockProfilesController.profileAccountCurrent().provider.subtitle
+      services.profiles.profileAccountCurrent().provider.subtitle
 
     this.toolbar.setTitleTextAppearance(
       this, R.style.SimplifiedTitleTextAppearance)
@@ -321,7 +346,7 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
             title = "Catalog",
             feedURI = targetURI,
             isSearchResults = false,
-            accountId = MockProfilesController.profileAccountCurrent().id
+            accountId = services.profiles.profileAccountCurrent().id
           )
         )
 
@@ -343,5 +368,9 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType {
     super.onStop()
 
     this.model.removeNavigationController(CatalogNavigationControllerType::class.java)
+  }
+
+  override fun onErrorPageSendReport(parameters: ErrorPageParameters<*>) {
+
   }
 }

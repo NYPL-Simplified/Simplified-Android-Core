@@ -313,6 +313,15 @@ class CatalogFragmentBookDetail : Fragment() {
     this.toolbar.menu.clear()
   }
 
+  private fun hasOtherAccounts(): Boolean {
+    return try {
+      this.profilesController.profileCurrent().accounts().size > 1
+    } catch (e: Exception) {
+      this.logger.error("could not fetch current account/profile: ", e)
+      false
+    }
+  }
+
   @UiThread
   private fun configureToolbarTitles(
     context: Context

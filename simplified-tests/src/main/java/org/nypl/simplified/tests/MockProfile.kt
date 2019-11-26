@@ -14,12 +14,15 @@ import java.net.URI
 import java.util.SortedMap
 import java.util.UUID
 
-class MockProfile(override val id: ProfileID) : ProfileType {
+class MockProfile(
+  override val id: ProfileID,
+  accountCount: Int) : ProfileType {
 
   private val accountList =
-    IntRange(0, 20)
+    IntRange(1, accountCount)
       .toList()
       .map { MockAccount(AccountID(UUID.randomUUID())) }
+      .toMutableList()
 
   private val accounts =
     this.accountList.map { account -> Pair(account.id, account) }

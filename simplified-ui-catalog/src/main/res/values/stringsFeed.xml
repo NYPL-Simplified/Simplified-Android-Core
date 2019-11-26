@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <resources>
+  <string name="catalogFeedLoading">Loading feed…</string>
   <string name="feedByAuthor">Author</string>
   <string name="feedByTitle">Title</string>
   <string name="feedDetails">@string/catalogDetails</string>

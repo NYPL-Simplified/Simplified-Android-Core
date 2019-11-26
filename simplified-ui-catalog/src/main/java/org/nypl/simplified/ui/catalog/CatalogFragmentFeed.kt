@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.TEXT_ALIGNMENT_TEXT_END
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -27,15 +28,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacets
 import org.nypl.simplified.feeds.api.FeedGroup
+import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
@@ -43,6 +50,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
@@ -50,6 +58,7 @@ import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.SortedMap
 
 /**
  * The base type of feed fragments. This class is abstract purely because the AndroidX
@@ -84,6 +93,8 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var feedEmpty: ViewGroup
   private lateinit var feedError: ViewGroup
+  private lateinit var feedErrorDetails: Button
+  private lateinit var feedErrorRetry: Button
   private lateinit var feedLoader: FeedLoaderType
   private lateinit var feedLoading: ViewGroup
   private lateinit var feedModel: CatalogFeedViewModelType
@@ -111,7 +122,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
-  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
+  private val parametersId = PARAMETERS_ID
   private var feedStatusSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -200,6 +211,11 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithoutGroupsList.setItemViewCacheSize(32)
     this.feedWithoutGroupsList.layoutManager = LinearLayoutManager(this.context)
     (this.feedWithoutGroupsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+
+    this.feedErrorRetry =
+      this.feedError.findViewById(R.id.feedErrorRetry)
+    this.feedErrorDetails =
+      this.feedError.findViewById(R.id.feedErrorDetails)
 
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -417,6 +433,31 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   @UiThread
+  private fun onCatalogFeedLoadFailed(feedState: CatalogFeedLoadFailed) {
+    this.uiThread.checkIsUIThread()
+
+    this.feedEmpty.visibility = View.INVISIBLE
+    this.feedError.visibility = View.VISIBLE
+    this.feedLoading.visibility = View.INVISIBLE
+    this.feedNavigation.visibility = View.INVISIBLE
+    this.feedWithGroups.visibility = View.INVISIBLE
+    this.feedWithoutGroups.visibility = View.INVISIBLE
+
+    this.configureToolbar(feedState.title, feedState.search)
+
+    this.feedErrorRetry.isEnabled = true
+    this.feedErrorRetry.setOnClickListener { button ->
+      button.isEnabled = false
+      this.feedModel.reloadFeed(this.feedModel.feedState().arguments)
+    }
+
+    this.feedErrorDetails.isEnabled = true
+    this.feedErrorDetails.setOnClickListener {
+      this.catalogNavigation.openErrorPage(errorPageParameters(feedState.failure))
+    }
+  }
+
+  @UiThread
   private fun configureToolbar(
     title: String,
     search: FeedSearch?
@@ -439,11 +480,13 @@ class CatalogFragmentFeed : Fragment() {
       this.toolbar.menu.findItem(R.id.catalogMenuActionSearch)
     val menuReload =
       this.toolbar.menu.findItem(R.id.catalogMenuActionReload)
+    val menuAccounts =
+      this.toolbar.menu.findItem(R.id.catalogMenuActionAccounts)
 
     if (search != null) {
       menuSearch.title = context.getString(R.string.catalogSearchIn, title)
       menuSearch.setOnMenuItemClickListener {
-        this.openSearchDialog(search)
+        this.openSearchDialog(context, search)
         true
       }
     } else {
@@ -456,6 +499,51 @@ class CatalogFragmentFeed : Fragment() {
       item.isEnabled = false
       this.feedModel.reloadFeed(this.feedModel.feedState().arguments)
       true
+    }
+
+    if (this.hasOtherAccounts()) {
+      menuAccounts.title = context.getString(R.string.catalogAccounts)
+      menuAccounts.setOnMenuItemClickListener { item ->
+        CatalogAccountsDialog.openAccountsDialog(
+          context = context,
+          toolbar = this.toolbar,
+          profilesController = this.profilesController,
+          onAccountSelected = this@CatalogFragmentFeed::onAccountSelected
+        )
+        true
+      }
+    } else {
+      menuAccounts.isVisible = false
+    }
+  }
+
+  private fun onAccountSelected(account: AccountType) {
+    this.catalogNavigation.openFeed(
+      when (val arguments = this.parameters) {
+        is CatalogFeedArguments.CatalogFeedArgumentsRemote ->
+          CatalogFeedArguments.CatalogFeedArgumentsRemote(
+            title = account.provider.displayName,
+            feedURI = account.provider.catalogURI,
+            isSearchResults = false,
+            accountId = account.id
+          )
+        is CatalogFeedArguments.CatalogFeedArgumentsLocalBooks ->
+          CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
+            title = account.provider.displayName,
+            facetType = FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+            searchTerms = null,
+            selection = arguments.selection,
+            accountId = account.id
+          )
+      })
+  }
+
+  private fun hasOtherAccounts(): Boolean {
+    return try {
+      this.profilesController.profileCurrent().accounts().size > 1
+    } catch (e: Exception) {
+      this.logger.error("could not fetch current account/profile: ", e)
+      false
     }
   }
 
@@ -485,6 +573,7 @@ class CatalogFragmentFeed : Fragment() {
         }
       }
     } catch (e: Exception) {
+      this.logger.error("could not fetch current account/profile: ", e)
       this.toolbar.title = title
       this.toolbar.subtitle = ""
     } finally {
@@ -495,9 +584,10 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   @UiThread
-  private fun openSearchDialog(search: FeedSearch) {
-    val context = this.requireContext()
-
+  private fun openSearchDialog(
+    context: Context,
+    search: FeedSearch
+  ) {
     val inflater =
       LayoutInflater.from(context)
     val dialogView =
@@ -746,14 +836,24 @@ class CatalogFragmentFeed : Fragment() {
       .show()
   }
 
-  @UiThread
-  private fun onCatalogFeedLoadFailed(feedState: CatalogFeedLoadFailed) {
-    this.uiThread.checkIsUIThread()
+  private fun errorPageParameters(
+    failure: FeedLoaderResult.FeedLoaderFailure
+  ): ErrorPageParameters<FeedLoaderResult.FeedLoaderFailure> {
+    val step =
+      TaskStep(
+        description = this.resources.getString(R.string.catalogFeedLoading),
+        resolution =
+        TaskStepResolution.TaskStepFailed(
+          message = failure.message,
+          errorValue = failure,
+          exception = failure.exception
+        ))
 
-    this.feedError.visibility = View.VISIBLE
-    this.feedLoading.visibility = View.INVISIBLE
-    this.feedNavigation.visibility = View.INVISIBLE
-    this.feedWithGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
+    return ErrorPageParameters(
+      emailAddress = this.configurationService.supportErrorReportEmailAddress,
+      body = "",
+      subject = this.configurationService.supportErrorReportSubject,
+      attributes = failure.attributes.toSortedMap(),
+      taskSteps = listOf(step))
   }
 }

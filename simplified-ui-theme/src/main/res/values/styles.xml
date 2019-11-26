@@ -144,7 +144,7 @@
   </style>
 
   <style name="SimplifiedSubTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
-    <item name="android:textSize">10sp</item>
+    <item name="android:textSize">11sp</item>
   </style>
 
   <!-- Material Design Color Palette -->

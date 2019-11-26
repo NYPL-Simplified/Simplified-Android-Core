@@ -15,4 +15,10 @@
     android:title="@string/catalogReload"
     app:showAsAction="ifRoom" />
 
+  <item
+    android:id="@+id/catalogMenuActionAccounts"
+    android:icon="@drawable/accounts"
+    android:title="@string/catalogAccounts"
+    app:showAsAction="ifRoom" />
+
 </menu>

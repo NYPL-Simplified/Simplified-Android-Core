@@ -31,15 +31,17 @@ import java.net.URI
 import java.util.SortedMap
 import java.util.UUID
 
-object MockProfilesController : ProfilesControllerType {
+class MockProfilesController(
+  profileCount: Int,
+  accountCount: Int
+) : ProfilesControllerType {
 
   private val profileList =
-    listOf(
-      MockProfile(ProfileID(UUID.randomUUID())),
-      MockProfile(ProfileID(UUID.randomUUID())),
-      MockProfile(ProfileID(UUID.randomUUID())),
-      MockProfile(ProfileID(UUID.randomUUID())),
-      MockProfile(ProfileID(UUID.randomUUID())))
+    IntRange(1, profileCount)
+      .toList()
+      .map {
+        MockProfile(ProfileID(UUID.randomUUID()), accountCount)
+      }
 
   private val profiles =
     this.profileList.map { profile -> Pair(profile.id, profile) }

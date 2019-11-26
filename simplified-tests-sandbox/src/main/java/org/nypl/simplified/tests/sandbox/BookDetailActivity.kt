@@ -255,13 +255,15 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
     this.services = MutableServiceDirectory()
     val books = MockBooksController()
     val documents = MockDocumentStore()
+    val profiles = MockProfilesController(3, 3)
+
     this.registry = BookRegistry.create()
     this.services.putService(BookRegistryType::class.java, this.registry)
     this.services.putService(BookRegistryReadableType::class.java, this.registry)
     this.services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
     this.services.putService(ScreenSizeInformationType::class.java, ScreenSizeInformation(this.resources))
     this.services.putService(DocumentStoreType::class.java, documents)
-    this.services.putService(ProfilesControllerType::class.java, MockProfilesController)
+    this.services.putService(ProfilesControllerType::class.java, profiles)
     this.services.putService(BooksControllerType::class.java, books)
 
     val feedEntry =
@@ -270,7 +272,7 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
     this.fragment =
       CatalogFragmentBookDetail.create(
         CatalogFragmentBookDetailParameters(
-          accountId = MockProfilesController.profileAccountCurrent().id,
+          accountId = profiles.profileAccountCurrent().id,
           feedEntry = feedEntry
         ))
 
