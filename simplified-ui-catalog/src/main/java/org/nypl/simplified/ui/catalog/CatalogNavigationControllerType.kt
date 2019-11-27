@@ -14,12 +14,6 @@ import org.nypl.simplified.ui.host.HostNavigationControllerType
 interface CatalogNavigationControllerType : HostNavigationControllerType {
 
   /**
-   * A catalog screen wants to pop the current screen from the stack.
-   */
-
-  fun popBackStack()
-
-  /**
    * The catalog wants to open a book detail page.
    */
 

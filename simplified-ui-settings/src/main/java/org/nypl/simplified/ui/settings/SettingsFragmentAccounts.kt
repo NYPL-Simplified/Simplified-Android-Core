@@ -19,7 +19,7 @@ import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.toolbar.ToolbarHostType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -131,6 +131,7 @@ class SettingsFragmentAccounts : Fragment() {
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
+        context = host,
         shouldArrowBePresent = {
           this.findNavigationController().backStackSize() > 1
         },

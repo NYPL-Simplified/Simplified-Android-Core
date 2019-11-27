@@ -28,7 +28,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
-import org.nypl.simplified.toolbar.ToolbarHostType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
@@ -238,6 +238,7 @@ class SettingsFragmentVersion : Fragment() {
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
+        context = host,
         shouldArrowBePresent = {
           this.findNavigationController().backStackSize() > 1
         },

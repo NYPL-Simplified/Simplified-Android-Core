@@ -6,7 +6,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.io7m.jfunctional.Some
 import org.nypl.simplified.documents.store.DocumentStoreType
-import org.nypl.simplified.toolbar.ToolbarHostType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 
@@ -70,6 +70,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
+        context = host,
         shouldArrowBePresent = {
           this.findNavigationController().backStackSize() > 1
         },

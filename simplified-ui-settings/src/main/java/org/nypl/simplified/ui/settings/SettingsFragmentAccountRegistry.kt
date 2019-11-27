@@ -8,7 +8,6 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +22,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.toolbar.ToolbarHostType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -127,8 +126,10 @@ class SettingsFragmentAccountRegistry : Fragment() {
           this.progressText.text = event.message
         })
 
-      is AccountEventCreation.AccountEventCreationSucceeded ->
+      is AccountEventCreation.AccountEventCreationSucceeded -> {
         this.findNavigationController().popBackStack()
+        Unit
+      }
 
       is AccountEventCreation.AccountEventCreationFailed ->
         this.uiThread.runOnUIThread(Runnable {
@@ -211,6 +212,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
+        context = host,
         shouldArrowBePresent = {
           this.findNavigationController().backStackSize() > 1
         },

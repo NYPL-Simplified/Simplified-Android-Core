@@ -9,6 +9,12 @@ package org.nypl.simplified.ui.host
 interface HostNavigationControllerType {
 
   /**
+   * A screen wants to pop the current screen from the stack.
+   */
+
+  fun popBackStack(): Boolean
+
+  /**
    * @return The current size of the backstack
    */
 

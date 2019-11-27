@@ -10,7 +10,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.FluentFuture
@@ -21,7 +20,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.toolbar.ToolbarHostType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -77,14 +76,14 @@ class SettingsFragmentCustomOPDS : Fragment() {
   override fun onStart() {
     super.onStart()
 
+    this.hostModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(HostViewModel::class.java)
+
     this.configureToolbar()
 
     this.uriTextWatcher =
       this.URITextWatcher()
-
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
 
     this.profilesController =
       this.hostModel.services.requireService(ProfilesControllerType::class.java)
@@ -123,6 +122,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
+        context = host,
         shouldArrowBePresent = {
           this.findNavigationController().backStackSize() > 1
         },

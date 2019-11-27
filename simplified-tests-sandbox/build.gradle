@@ -15,6 +15,7 @@ dependencies {
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-settings")
   implementation project(":simplified-ui-splash")
+  implementation project(":simplified-ui-tabs")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-ui-toolbar")

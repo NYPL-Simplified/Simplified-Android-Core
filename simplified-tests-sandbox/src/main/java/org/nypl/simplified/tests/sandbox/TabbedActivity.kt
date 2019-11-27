@@ -3,11 +3,9 @@ package org.nypl.simplified.tests.sandbox
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -53,7 +51,7 @@ import org.nypl.simplified.tests.MockDocumentStore
 import org.nypl.simplified.tests.MockProfilesController
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.threads.NamedThreadPools
-import org.nypl.simplified.toolbar.ToolbarHostType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
@@ -81,10 +79,6 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 
 class TabbedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerType {
-
-  override fun toolbarBackArrow(): Drawable {
-    return this.getDrawable(R.drawable.toolbar_back_arrow)
-  }
 
   private val logger = LoggerFactory.getLogger(TabbedActivity::class.java)
 
@@ -237,7 +231,6 @@ class TabbedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerTy
   }
 
   class SettingsNavigationController(
-    private val services: Services,
     private val navigator: BottomNavigator
   ) : SettingsNavigationControllerType {
 
@@ -286,8 +279,8 @@ class TabbedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerTy
       )
     }
 
-    override fun popBackStack() {
-      this.navigator.pop()
+    override fun popBackStack(): Boolean {
+      return this.navigator.pop()
     }
 
     override fun openSettingsCustomOPDS() {
@@ -342,8 +335,8 @@ class TabbedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerTy
       )
     }
 
-    override fun popBackStack() {
-      this.navigator.pop()
+    override fun popBackStack(): Boolean {
+      return this.navigator.pop()
     }
 
     override fun openBookDetail(entry: FeedEntry.FeedEntryOPDS) {
@@ -396,7 +389,7 @@ class TabbedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerTy
     this.setContentView(R.layout.tabbed_host)
 
     this.toolbar = this.findViewById(R.id.toolbar)
-    this.toolbar.overflowIcon = this.getDrawable(org.nypl.simplified.ui.catalog.R.drawable.overflow)
+    this.toolbar.overflowIcon = this.getDrawable(R.drawable.toolbar_overflow)
 
     this.toolbar.menu.clear()
     this.toolbar.inflateMenu(R.menu.catalog)
@@ -445,7 +438,7 @@ class TabbedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerTy
     )
     this.model.updateNavigationController(
       navigationInterface = SettingsNavigationControllerType::class.java,
-      navigationInstance = SettingsNavigationController(services, this.navigator)
+      navigationInstance = SettingsNavigationController(this.navigator)
     )
   }
 

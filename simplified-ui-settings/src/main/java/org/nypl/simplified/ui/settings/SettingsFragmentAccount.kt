@@ -13,7 +13,6 @@ import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.io7m.jfunctional.Some
@@ -34,7 +33,7 @@ import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.toolbar.ToolbarHostType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -304,6 +303,7 @@ class SettingsFragmentAccount : Fragment() {
         subtitle = this.account.provider.displayName
       )
       host.toolbarSetBackArrowConditionally(
+        context = host,
         shouldArrowBePresent = {
           this.findNavigationController().backStackSize() > 1
         },

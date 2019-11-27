@@ -60,12 +60,6 @@ interface SettingsNavigationControllerType : HostNavigationControllerType {
   fun openSettingsVersion()
 
   /**
-   * The settings screen wants to pop the current screen from the stack.
-   */
-
-  fun popBackStack()
-
-  /**
    * The settings screen wants to open the custom OPDS creation form.
    */
 
