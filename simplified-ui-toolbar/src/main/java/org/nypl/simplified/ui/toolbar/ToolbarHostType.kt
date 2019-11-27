@@ -15,7 +15,7 @@ interface ToolbarHostType {
    * Retrieve access to the toolbar.
    */
 
-  val toolbar: Toolbar
+  fun findToolbar(): Toolbar
 
   /**
    * The icon used to represent a back arrow in the toolbar.
@@ -56,7 +56,7 @@ interface ToolbarHostType {
    */
 
   fun toolbarClearMenu() {
-    this.toolbar.menu.clear()
+    this.findToolbar().menu.clear()
   }
 
   /**
@@ -67,8 +67,9 @@ interface ToolbarHostType {
     title: String,
     subtitle: String
   ) {
-    this.toolbar.title = title
-    this.toolbar.subtitle = subtitle
+    val toolbar = this.findToolbar()
+    toolbar.title = title
+    toolbar.subtitle = subtitle
   }
 
   /**
@@ -83,12 +84,13 @@ interface ToolbarHostType {
     shouldArrowBePresent: () -> Boolean,
     onArrowClicked: () -> Unit
   ) {
+    val toolbar = this.findToolbar()
     if (shouldArrowBePresent()) {
-      this.toolbar.navigationIcon = this.toolbarIconBackArrow(context)
-      this.toolbar.setNavigationOnClickListener { onArrowClicked() }
+      toolbar.navigationIcon = this.toolbarIconBackArrow(context)
+      toolbar.setNavigationOnClickListener { onArrowClicked() }
     } else {
-      this.toolbar.navigationIcon = null
-      this.toolbar.setNavigationOnClickListener(null)
+      toolbar.navigationIcon = null
+      toolbar.setNavigationOnClickListener(null)
     }
   }
 }

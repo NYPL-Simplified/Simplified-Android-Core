@@ -69,17 +69,6 @@ class ErrorPageFragment : Fragment() {
           "The activity hosting this fragment must implement ${className}")
       }
     }
-
-    run {
-      val className = ToolbarHostType::class.java.canonicalName
-      val activity = this.requireActivity()
-      if (activity is ToolbarHostType) {
-        this.toolbar = activity.toolbar
-      } else {
-        throw IllegalStateException(
-          "The activity hosting this fragment must implement ${className}")
-      }
-    }
   }
 
   override fun onCreateView(
@@ -140,9 +129,19 @@ class ErrorPageFragment : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.toolbar.menu.clear()
-    this.toolbar.setTitle(R.string.errorDetailsTitle)
-    this.toolbar.subtitle = ""
+    run {
+      val className = ToolbarHostType::class.java.canonicalName
+      val activity = this.requireActivity()
+      if (activity is ToolbarHostType) {
+        val toolbar = activity.findToolbar()
+        toolbar.menu.clear()
+        toolbar.setTitle(R.string.errorDetailsTitle)
+        toolbar.subtitle = ""
+      } else {
+        throw IllegalStateException(
+          "The activity hosting this fragment must implement ${className}")
+      }
+    }
 
     this.sendButton.isEnabled = true
     this.sendButton.setOnClickListener {

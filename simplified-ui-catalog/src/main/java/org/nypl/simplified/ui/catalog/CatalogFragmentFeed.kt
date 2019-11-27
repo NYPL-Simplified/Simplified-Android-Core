@@ -479,8 +479,9 @@ class CatalogFragmentFeed : Fragment() {
     search: FeedSearch?
   ) {
     val context = this.requireContext()
-    this.configureToolbarTitles(context, toolbarHost.toolbar, title)
-    this.configureToolbarMenu(context, toolbarHost.toolbar, search, title)
+    val toolbar = toolbarHost.findToolbar()
+    this.configureToolbarTitles(context, toolbar, title)
+    this.configureToolbarMenu(context, toolbar, search, title)
 
     toolbarHost.toolbarSetBackArrowConditionally(
       context = context,

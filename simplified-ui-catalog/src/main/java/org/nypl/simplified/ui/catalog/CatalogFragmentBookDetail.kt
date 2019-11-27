@@ -285,7 +285,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
     val toolbarHost = this.activity
     if (toolbarHost is ToolbarHostType) {
-      val toolbar = (toolbarHost as ToolbarHostType).toolbar
+      val toolbar = (toolbarHost as ToolbarHostType).findToolbar()
       this.configureToolbar(toolbarHost, toolbar)
     } else {
       throw IllegalStateException("The activity ($toolbarHost) hosting this fragment must implement ${ToolbarHostType::class.java}")
