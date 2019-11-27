@@ -88,6 +88,9 @@ class SettingsFragmentAccounts : Fragment() {
     this.accountCurrentSubtitle =
       this.accountCurrentView.findViewById(R.id.accountCellSubtitle)
 
+    this.accountCurrentTitle.text = ""
+    this.accountCurrentSubtitle.text = ""
+
     this.accountList =
       layout.findViewById(R.id.accountList)
 
@@ -178,6 +181,9 @@ class SettingsFragmentAccounts : Fragment() {
     this.accountCurrentTitle.text = accountNow.provider.displayName
     this.accountCurrentSubtitle.text = accountNow.provider.subtitle
 
+    this.accountCurrentView.setOnClickListener { this.onAccountClicked(profile.accountCurrent()) }
+    this.accountCurrentTitle.setOnClickListener { this.onAccountClicked(profile.accountCurrent()) }
+
     this.accountListData.clear()
     this.accountListData.addAll(accountList)
     this.accountListAdapter.notifyDataSetChanged()
@@ -186,6 +192,8 @@ class SettingsFragmentAccounts : Fragment() {
   override fun onStop() {
     super.onStop()
 
+    this.accountCurrentView.setOnClickListener(null)
+    this.accountCurrentTitle.setOnClickListener(null)
     this.accountSubscription?.dispose()
   }
 
