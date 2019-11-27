@@ -48,7 +48,7 @@ class CatalogPagedViewHolder(
   private val context: Context,
   private val fragmentManager: FragmentManager,
   private val loginViewModel: CatalogLoginViewModel,
-  private val navigation: CatalogNavigationControllerType,
+  private val navigation: () -> CatalogNavigationControllerType,
   private val onBookSelected: (FeedEntryOPDS) -> Unit,
   private val parent: View,
   private val services: ServiceDirectoryType
@@ -460,17 +460,17 @@ class CatalogPagedViewHolder(
     when (val format = book.findPreferredFormat()) {
       is BookFormat.BookFormatEPUB -> {
         this.idleButtons.addView(this.buttonCreator.createReadButton {
-          this.navigation.openEPUBReader(book, format)
+          this.navigation().openEPUBReader(book, format)
         })
       }
       is BookFormat.BookFormatAudioBook -> {
         this.idleButtons.addView(this.buttonCreator.createListenButton {
-          this.navigation.openAudioBookListener(book, format)
+          this.navigation().openAudioBookListener(book, format)
         })
       }
       is BookFormat.BookFormatPDF -> {
         this.idleButtons.addView(this.buttonCreator.createReadButton {
-          this.navigation.openPDFReader(book, format)
+          this.navigation().openPDFReader(book, format)
         })
       }
       null -> {
@@ -697,7 +697,7 @@ class CatalogPagedViewHolder(
       attributes = collectAttributes(result),
       taskSteps = result.steps
     )
-    this.navigation.openErrorPage(errorPageParameters)
+    this.navigation().openErrorPage(errorPageParameters)
   }
 
   private fun <E : PresentableErrorType> collectAttributes(

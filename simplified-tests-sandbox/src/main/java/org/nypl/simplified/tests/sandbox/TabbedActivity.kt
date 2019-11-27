@@ -1,16 +1,24 @@
 package org.nypl.simplified.tests.sandbox
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.bottomnavigation.LabelVisibilityMode
 import com.google.common.util.concurrent.MoreExecutors
+import com.pandora.bottomnavigator.BottomNavigator
 import leakcanary.AppWatcher
 import leakcanary.LeakCanary
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.librarysimplified.services.api.ServiceDirectoryType
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
@@ -25,8 +33,11 @@ import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
 import org.nypl.simplified.books.covers.BookCoverGenerator
 import org.nypl.simplified.books.covers.BookCoverProvider
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.store.DocumentStoreType
+import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -57,17 +68,27 @@ import org.nypl.simplified.ui.host.HostViewModelFactory
 import org.nypl.simplified.ui.host.HostViewModelType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
+import org.nypl.simplified.ui.settings.SettingsFragmentAccount
+import org.nypl.simplified.ui.settings.SettingsFragmentAccountParameters
+import org.nypl.simplified.ui.settings.SettingsFragmentAccounts
+import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
+import org.nypl.simplified.ui.settings.SettingsFragmentMain
+import org.nypl.simplified.ui.settings.SettingsFragmentVersion
+import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
+import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
-class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerType {
+class TabbedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerType {
 
   override fun toolbarBackArrow(): Drawable {
     return this.getDrawable(R.drawable.toolbar_back_arrow)
   }
 
-  private val logger = LoggerFactory.getLogger(CatalogFeedActivity::class.java)
+  private val logger = LoggerFactory.getLogger(TabbedActivity::class.java)
+
+  private lateinit var navigator: BottomNavigator
 
   companion object {
 //    val targetURI = URI.create(
@@ -107,11 +128,11 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListe
           accountCount = 3
         )
 
-      profiles.profileAccountCurrent()
+      this.profiles.profileAccountCurrent()
         .setAccountProvider(
-          AccountProviderImmutable.copy(profiles.profileAccountCurrent().provider)
+          AccountProviderImmutable.copy(this.profiles.profileAccountCurrent().provider)
             .copy(
-              catalogURI = targetURI,
+              catalogURI = org.nypl.simplified.tests.sandbox.TabbedActivity.Companion.targetURI,
               displayName = "The New York Public Library",
               subtitle = "Inspiring lifelong learning, advancing knowledge, and strengthening our communities."
             )
@@ -151,6 +172,19 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListe
           debugLogging = false
         )
 
+      val buildConfig =
+        object: BuildConfigurationServiceType {
+          override val vcsCommit: String
+            get() = "deadbeef"
+          override val errorReportEmail: String
+            get() = "someone@example.com"
+
+        }
+
+      newServices.putService(
+        interfaceType = BuildConfigurationServiceType::class.java,
+        service = buildConfig
+      )
       newServices.putService(
         interfaceType = DocumentStoreType::class.java,
         service = documentStore
@@ -176,7 +210,7 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListe
       )
       newServices.putService(
         interfaceType = ProfilesControllerType::class.java,
-        service = profiles
+        service = this.profiles
       )
       newServices.putService(
         interfaceType = UIThreadServiceType::class.java,
@@ -202,12 +236,82 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListe
     }
   }
 
+  class SettingsNavigationController(
+    private val services: Services,
+    private val navigator: BottomNavigator
+  ) : SettingsNavigationControllerType {
+
+    override fun backStackSize(): Int {
+      return this.navigator.stackSize(this.navigator.currentTab())
+    }
+
+    override fun openSettingsAbout() {
+
+    }
+
+    override fun openSettingsAccount(id: AccountID) {
+      this.navigator.addFragment(
+        fragment = SettingsFragmentAccount.create(SettingsFragmentAccountParameters(id)),
+        tab = this.navigator.currentTab()
+      )
+    }
+
+    override fun openSettingsAccounts() {
+      this.navigator.addFragment(
+        fragment = SettingsFragmentAccounts(),
+        tab = this.navigator.currentTab()
+      )
+    }
+
+    override fun openSettingsAcknowledgements() {
+
+    }
+
+    override fun openSettingsEULA() {
+
+    }
+
+    override fun openSettingsFaq() {
+
+    }
+
+    override fun openSettingsLicense() {
+
+    }
+
+    override fun openSettingsVersion() {
+      this.navigator.addFragment(
+        fragment = SettingsFragmentVersion(),
+        tab = this.navigator.currentTab()
+      )
+    }
+
+    override fun popBackStack() {
+      this.navigator.pop()
+    }
+
+    override fun openSettingsCustomOPDS() {
+      this.navigator.addFragment(
+        fragment = SettingsFragmentCustomOPDS(),
+        tab = this.navigator.currentTab()
+      )
+    }
+
+    override fun <E : PresentableErrorType> openErrorPage(parameters: ErrorPageParameters<E>) {
+      this.navigator.addFragment(
+        fragment = ErrorPageFragment.create(parameters),
+        tab = this.navigator.currentTab()
+      )
+    }
+  }
+
   class CatalogNavigationController(
     private val services: Services,
-    private val context: AppCompatActivity
+    private val navigator: BottomNavigator
   ) : CatalogNavigationControllerType {
+
     override fun backStackSize(): Int {
-      return 0
+      return this.navigator.stackSize(this.navigator.currentTab())
     }
 
     override fun openEPUBReader(
@@ -232,70 +336,34 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListe
     }
 
     override fun openFeed(feedArguments: CatalogFeedArguments) {
-      LeakCanary.config =
-        LeakCanary.config.copy(
-          dumpHeap = true
-        )
-
-      this.context.supportFragmentManager
-        .beginTransaction()
-        .setCustomAnimations(
-          R.anim.slide_in_right,
-          R.anim.slide_out_left,
-          android.R.anim.slide_in_left,
-          android.R.anim.slide_out_right
-        )
-        .addToBackStack(null)
-        .replace(R.id.fragmentHolder, CatalogFragmentFeed.create(feedArguments))
-        .commit()
+      this.navigator.addFragment(
+        fragment = CatalogFragmentFeed.create(feedArguments),
+        tab = this.navigator.currentTab()
+      )
     }
 
     override fun popBackStack() {
-      LeakCanary.config =
-        LeakCanary.config.copy(
-          dumpHeap = true
-        )
-
-      this.context.supportFragmentManager.popBackStack()
+      this.navigator.pop()
     }
 
     override fun openBookDetail(entry: FeedEntry.FeedEntryOPDS) {
-      LeakCanary.config =
-        LeakCanary.config.copy(
-          dumpHeap = true
-        )
-
       val parameters =
         CatalogFragmentBookDetailParameters(
-          accountId = services.profiles.profileAccountCurrent().id,
+          accountId = this.services.profiles.profileAccountCurrent().id,
           feedEntry = entry
         )
 
-      this.context.supportFragmentManager
-        .beginTransaction()
-        .setCustomAnimations(
-          R.anim.slide_in_right,
-          R.anim.slide_out_left,
-          android.R.anim.slide_in_left,
-          android.R.anim.slide_out_right
-        )
-        .addToBackStack(null)
-        .replace(R.id.fragmentHolder, CatalogFragmentBookDetail.create(parameters))
-        .commit()
+      this.navigator.addFragment(
+        fragment = CatalogFragmentBookDetail.create(parameters),
+        tab = this.navigator.currentTab()
+      )
     }
 
     override fun <E : PresentableErrorType> openErrorPage(parameters: ErrorPageParameters<E>) {
-      this.context.supportFragmentManager
-        .beginTransaction()
-        .setCustomAnimations(
-          R.anim.slide_in_right,
-          R.anim.slide_out_left,
-          android.R.anim.slide_in_left,
-          android.R.anim.slide_out_right
-        )
-        .addToBackStack(null)
-        .replace(R.id.fragmentHolder, ErrorPageFragment.create(parameters))
-        .commit()
+      this.navigator.addFragment(
+        fragment = ErrorPageFragment.create(parameters),
+        tab = this.navigator.currentTab()
+      )
     }
   }
 
@@ -318,18 +386,14 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListe
       )
 
     val services = Services(this.applicationContext)
+    services.serviceDirectory()
 
     this.model =
       ViewModelProviders.of(this, HostViewModelFactory(services))
         .get(HostViewModel::class.java)
 
-    this.model.updateNavigationController(
-      navigationInterface = CatalogNavigationControllerType::class.java,
-      navigationInstance = CatalogNavigationController(services, this)
-    )
-
     super.onCreate(savedInstanceState)
-    this.setContentView(R.layout.fragment_host)
+    this.setContentView(R.layout.tabbed_host)
 
     this.toolbar = this.findViewById(R.id.toolbar)
     this.toolbar.overflowIcon = this.getDrawable(org.nypl.simplified.ui.catalog.R.drawable.overflow)
@@ -347,27 +411,92 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListe
     this.toolbar.setSubtitleTextAppearance(
       this, R.style.SimplifiedSubTitleTextAppearance)
 
-    if (savedInstanceState == null) {
-      val fragment =
-        CatalogFragmentFeed.create(
-          CatalogFeedArguments.CatalogFeedArgumentsRemote(
-            title = "Catalog",
-            feedURI = targetURI,
-            isSearchResults = false,
-            accountId = services.profiles.profileAccountCurrent().id
-          )
-        )
+    val navigationView =
+      this.findViewById<BottomNavigationView>(R.id.bottomNavigator)
 
-      this.supportFragmentManager.beginTransaction()
-        .setCustomAnimations(
-          R.anim.slide_in_right,
-          R.anim.slide_out_left,
-          android.R.anim.slide_in_left,
-          android.R.anim.slide_out_right
-        )
-        .replace(R.id.fragmentHolder, fragment, "MAIN")
-        .commit()
-    }
+    this.navigator = BottomNavigator.onCreate(
+      fragmentContainer = R.id.fragmentHolder,
+      bottomNavigationView = navigationView,
+      rootFragmentsFactory = mapOf(
+        R.id.tabCatalog to {
+          this.createCatalogFragment(services.profiles)
+        },
+        R.id.tabBooks to {
+          this.createBooksFragment(services.profiles)
+        },
+        R.id.tabHolds to {
+          this.createHoldsFragment(services.profiles)
+        },
+        R.id.tabSettings to {
+          this.createSettingsFragment()
+        }
+      ),
+      defaultTab = R.id.tabCatalog,
+      activity = this
+    )
+
+    navigationView.itemIconTintList = this.colorStateListForTabs()
+    navigationView.itemTextColor = this.colorStateListForTabs()
+    navigationView.labelVisibilityMode = LabelVisibilityMode.LABEL_VISIBILITY_LABELED
+
+    this.model.updateNavigationController(
+      navigationInterface = CatalogNavigationControllerType::class.java,
+      navigationInstance = CatalogNavigationController(services, this.navigator)
+    )
+    this.model.updateNavigationController(
+      navigationInterface = SettingsNavigationControllerType::class.java,
+      navigationInstance = SettingsNavigationController(services, this.navigator)
+    )
+  }
+
+  private fun colorStateListForTabs(): ColorStateList {
+    val states =
+      arrayOf(
+        intArrayOf(android.R.attr.state_checked),
+        intArrayOf(-android.R.attr.state_checked))
+
+    val colors =
+      intArrayOf(
+        ThemeControl.resolveColorAttribute(this.theme, R.attr.colorPrimary),
+        Color.DKGRAY)
+
+    return ColorStateList(states, colors)
+  }
+
+  private fun createSettingsFragment(): Fragment {
+    return SettingsFragmentMain()
+  }
+
+  private fun createHoldsFragment(profiles: MockProfilesController): Fragment {
+    val account = profiles.profileAccountCurrent()
+    return CatalogFragmentFeed.create(CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
+      title = "Holds",
+      facetType = FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+      searchTerms = null,
+      selection = FeedBooksSelection.BOOKS_FEED_HOLDS,
+      accountId = account.id
+    ))
+  }
+
+  private fun createBooksFragment(profiles: MockProfilesController): Fragment {
+    val account = profiles.profileAccountCurrent()
+    return CatalogFragmentFeed.create(CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
+      title = "Books",
+      facetType = FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+      searchTerms = null,
+      selection = FeedBooksSelection.BOOKS_FEED_LOANED,
+      accountId = account.id
+    ))
+  }
+
+  private fun createCatalogFragment(profiles: MockProfilesController): Fragment {
+    val account = profiles.profileAccountCurrent()
+    return CatalogFragmentFeed.create(CatalogFeedArguments.CatalogFeedArgumentsRemote(
+      title = account.provider.displayName,
+      feedURI = account.provider.catalogURI,
+      isSearchResults = false,
+      accountId = account.id
+    ))
   }
 
   override lateinit var toolbar: Toolbar
@@ -376,6 +505,12 @@ class CatalogFeedActivity : AppCompatActivity(), ToolbarHostType, ErrorPageListe
     super.onStop()
 
     this.model.removeNavigationController(CatalogNavigationControllerType::class.java)
+  }
+
+  override fun onBackPressed() {
+    if (!this.navigator.pop()) {
+      super.onBackPressed()
+    }
   }
 
   override fun onErrorPageSendReport(parameters: ErrorPageParameters<*>) {

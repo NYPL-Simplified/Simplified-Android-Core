@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.FluentFuture
@@ -20,6 +21,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -56,7 +58,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
     savedInstanceState: Bundle?
   ): View? {
     val layout =
-      inflater.inflate(R.layout.settings_version, container, false)
+      inflater.inflate(R.layout.settings_custom_opds, container, false)
 
     this.feedURL =
       layout.findViewById(R.id.settingsCustomOPDSURL)
@@ -74,6 +76,8 @@ class SettingsFragmentCustomOPDS : Fragment() {
 
   override fun onStart() {
     super.onStart()
+
+    this.configureToolbar()
 
     this.uriTextWatcher =
       this.URITextWatcher()
@@ -108,6 +112,26 @@ class SettingsFragmentCustomOPDS : Fragment() {
     }
 
     this.feedURL.addTextChangedListener(this.uriTextWatcher)
+  }
+
+  private fun configureToolbar() {
+    val host = this.activity
+    if (host is ToolbarHostType) {
+      host.toolbarClearMenu()
+      host.toolbarSetTitleSubtitle(
+        title = this.requireContext().getString(R.string.settingsCustomOPDS),
+        subtitle = ""
+      )
+      host.toolbarSetBackArrowConditionally(
+        shouldArrowBePresent = {
+          this.findNavigationController().backStackSize() > 1
+        },
+        onArrowClicked = {
+          this.findNavigationController().popBackStack()
+        })
+    } else {
+      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    }
   }
 
   private fun onCreationFinished() {
@@ -168,5 +192,9 @@ class SettingsFragmentCustomOPDS : Fragment() {
       this@SettingsFragmentCustomOPDS.create.isEnabled =
         this@SettingsFragmentCustomOPDS.isValidURI()
     }
+  }
+
+  private fun findNavigationController(): SettingsNavigationControllerType {
+    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
   }
 }

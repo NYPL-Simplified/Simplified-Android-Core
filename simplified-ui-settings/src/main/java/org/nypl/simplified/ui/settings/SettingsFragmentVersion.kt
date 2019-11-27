@@ -12,6 +12,7 @@ import android.widget.Switch
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.MoreExecutors
@@ -27,6 +28,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
@@ -53,11 +55,11 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var drmTable: TableLayout
   private lateinit var failNextBoot: Switch
   private lateinit var hostModel: HostViewModelReadableType
-  private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
   private lateinit var showTesting: Switch
+  private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var versionText: TextView
   private lateinit var versionTitle: TextView
@@ -113,6 +115,8 @@ class SettingsFragmentVersion : Fragment() {
       ViewModelProviders.of(this.requireActivity())
         .get(HostViewModel::class.java)
 
+    this.configureToolbar()
+
     this.profilesController =
       this.hostModel.services.requireService(ProfilesControllerType::class.java)
     this.uiThread =
@@ -122,14 +126,15 @@ class SettingsFragmentVersion : Fragment() {
     this.adeptExecutor =
       this.hostModel.services.optionalService(AdobeAdeptExecutorType::class.java)
 
-    this.navigation =
-      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
-
     this.buildTitle.setOnClickListener {
       if (this.buildClicks >= 7) {
         this.developerOptions.visibility = View.VISIBLE
       }
       ++this.buildClicks
+    }
+
+    if (this.buildClicks >= 7) {
+      this.developerOptions.visibility = View.VISIBLE
     }
 
     this.crashButton.setOnClickListener {
@@ -206,7 +211,7 @@ class SettingsFragmentVersion : Fragment() {
      */
 
     this.customOPDS.setOnClickListener {
-      this.navigation.openSettingsCustomOPDS()
+      this.findNavigationController().openSettingsCustomOPDS()
     }
 
     /*
@@ -221,6 +226,26 @@ class SettingsFragmentVersion : Fragment() {
           .setShowTestingLibraries(this.showTesting.isChecked)
           .build()
       this.profilesController.profilePreferencesUpdate(newPreferences)
+    }
+  }
+
+  private fun configureToolbar() {
+    val host = this.activity
+    if (host is ToolbarHostType) {
+      host.toolbarClearMenu()
+      host.toolbarSetTitleSubtitle(
+        title = this.requireContext().getString(R.string.settingsVersion),
+        subtitle = ""
+      )
+      host.toolbarSetBackArrowConditionally(
+        shouldArrowBePresent = {
+          this.findNavigationController().backStackSize() > 1
+        },
+        onArrowClicked = {
+          this.findNavigationController().popBackStack()
+        })
+    } else {
+      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
     }
   }
 
@@ -249,7 +274,7 @@ class SettingsFragmentVersion : Fragment() {
         attributes = attributes,
         taskSteps = taskSteps)
 
-    this.navigation.openErrorPage(parameters)
+    this.findNavigationController().openErrorPage(parameters)
   }
 
   private fun enableBootFailures(enabled: Boolean) {
@@ -389,5 +414,9 @@ class SettingsFragmentVersion : Fragment() {
     this.sendReportButton.setOnClickListener(null)
     this.showErrorButton.setOnClickListener(null)
     this.showTesting.setOnClickListener(null)
+  }
+
+  private fun findNavigationController(): SettingsNavigationControllerType {
+    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
   }
 }

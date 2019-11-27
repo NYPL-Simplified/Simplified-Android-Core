@@ -6,4 +6,11 @@ package org.nypl.simplified.ui.host
  * various application screens.
  */
 
-interface HostNavigationControllerType
+interface HostNavigationControllerType {
+
+  /**
+   * @return The current size of the backstack
+   */
+
+  fun backStackSize(): Int
+}

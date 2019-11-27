@@ -21,7 +21,7 @@ class CatalogPagedAdapter(
   private val context: Context,
   private val fragmentManager: FragmentManager,
   private val loginViewModel: CatalogLoginViewModel,
-  private val navigation: CatalogNavigationControllerType,
+  private val navigation: () -> CatalogNavigationControllerType,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
   private val services: ServiceDirectoryType
 ) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {

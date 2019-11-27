@@ -4,6 +4,7 @@ dependencies {
   implementation project(":simplified-accounts-source-filebased")
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-controller-api")
+  implementation project(":simplified-buildconfig-api")
   implementation project(":simplified-migration-fake")
   implementation project(":simplified-services-api")
   implementation project(":simplified-tests")
@@ -23,6 +24,7 @@ dependencies {
   implementation libraries.androidXLegacySupport
   implementation libraries.androidXLifecycle
   implementation libraries.androidXMultidex
+  implementation libraries.bottomNavigator
   implementation libraries.googleAndroidMaterial
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJUnreachable

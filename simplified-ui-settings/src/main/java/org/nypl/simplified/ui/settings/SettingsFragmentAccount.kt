@@ -13,6 +13,7 @@ import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.io7m.jfunctional.Some
@@ -33,6 +34,7 @@ import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -67,7 +69,6 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var loginButton: Button
   private lateinit var loginProgress: ProgressBar
   private lateinit var loginProgressText: TextView
-  private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var parameters: SettingsFragmentAccountParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
@@ -220,8 +221,6 @@ class SettingsFragmentAccount : Fragment() {
       this.hostModel.services.requireService(DocumentStoreType::class.java)
     this.uiThread =
       this.hostModel.services.requireService(UIThreadServiceType::class.java)
-    this.navigation =
-      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
 
     try {
       this.account =
@@ -229,7 +228,11 @@ class SettingsFragmentAccount : Fragment() {
           .account(this.parameters.accountId)
     } catch (e: AccountsDatabaseNonexistentException) {
       this.logger.error("account no longer exists: ", e)
+      this.findNavigationController().popBackStack()
+      return
     }
+
+    this.configureToolbar()
 
     this.accountTitle.text =
       this.account.provider.displayName
@@ -290,6 +293,26 @@ class SettingsFragmentAccount : Fragment() {
         .subscribe(this::onProfileEvent)
 
     this.reconfigureAccountUI()
+  }
+
+  private fun configureToolbar() {
+    val host = this.activity
+    if (host is ToolbarHostType) {
+      host.toolbarClearMenu()
+      host.toolbarSetTitleSubtitle(
+        title = this.requireContext().getString(R.string.settingsAccounts),
+        subtitle = this.account.provider.displayName
+      )
+      host.toolbarSetBackArrowConditionally(
+        shouldArrowBePresent = {
+          this.findNavigationController().backStackSize() > 1
+        },
+        onArrowClicked = {
+          this.findNavigationController().popBackStack()
+        })
+    } else {
+      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    }
   }
 
   override fun onStop() {
@@ -560,4 +583,8 @@ class SettingsFragmentAccount : Fragment() {
     ProfileDateOfBirth(
       date = LocalDate.now().minusYears(years),
       isSynthesized = true)
+
+  private fun findNavigationController(): SettingsNavigationControllerType {
+    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+  }
 }

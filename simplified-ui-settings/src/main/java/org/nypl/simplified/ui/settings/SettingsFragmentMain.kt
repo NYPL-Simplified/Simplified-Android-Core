@@ -6,6 +6,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.io7m.jfunctional.Some
 import org.nypl.simplified.documents.store.DocumentStoreType
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 
@@ -17,7 +18,6 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private lateinit var documents: DocumentStoreType
   private lateinit var hostModel: HostViewModelReadableType
-  private lateinit var navigation: SettingsNavigationControllerType
 
   override fun onCreatePreferences(
     savedInstanceState: Bundle?,
@@ -29,8 +29,6 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       ViewModelProviders.of(this.requireActivity())
         .get(HostViewModel::class.java)
 
-    this.navigation =
-      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
     this.documents =
       this.hostModel.services.requireService(DocumentStoreType::class.java)
 
@@ -58,11 +56,36 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     this.configureVersion(settingsVersion)
   }
 
+  override fun onStart() {
+    super.onStart()
+    this.configureToolbar()
+  }
+
+  private fun configureToolbar() {
+    val host = this.activity
+    if (host is ToolbarHostType) {
+      host.toolbarClearMenu()
+      host.toolbarSetTitleSubtitle(
+        title = this.requireContext().getString(R.string.settings),
+        subtitle = ""
+      )
+      host.toolbarSetBackArrowConditionally(
+        shouldArrowBePresent = {
+          this.findNavigationController().backStackSize() > 1
+        },
+        onArrowClicked = {
+          this.findNavigationController().popBackStack()
+        })
+    } else {
+      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    }
+  }
+
   private fun configureAcknowledgements(preference: Preference) {
     preference.isEnabled = this.documents.acknowledgements is Some
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigation.openSettingsAcknowledgements()
+        this.findNavigationController().openSettingsAcknowledgements()
         true
       }
   }
@@ -70,7 +93,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   private fun configureVersion(preference: Preference) {
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigation.openSettingsVersion()
+        this.findNavigationController().openSettingsVersion()
         true
       }
   }
@@ -79,7 +102,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.documents.licenses is Some
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigation.openSettingsLicense()
+        this.findNavigationController().openSettingsLicense()
         true
       }
   }
@@ -88,7 +111,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = false
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigation.openSettingsFaq()
+        this.findNavigationController().openSettingsFaq()
         true
       }
   }
@@ -97,7 +120,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.documents.eula is Some
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigation.openSettingsEULA()
+        this.findNavigationController().openSettingsEULA()
         true
       }
   }
@@ -105,7 +128,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   private fun configureAccounts(preference: Preference) {
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigation.openSettingsAccounts()
+        this.findNavigationController().openSettingsAccounts()
         true
       }
   }
@@ -114,8 +137,12 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.documents.about is Some
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigation.openSettingsAbout()
+        this.findNavigationController().openSettingsAbout()
         true
       }
+  }
+
+  private fun findNavigationController(): SettingsNavigationControllerType {
+    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
   }
 }

@@ -1,12 +1,12 @@
 package org.nypl.simplified.ui.settings
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +19,7 @@ import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -36,7 +37,6 @@ class SettingsFragmentAccounts : Fragment() {
   private lateinit var accountListAdapter: SettingsAccountsAdapter
   private lateinit var accountListData: MutableList<AccountType>
   private lateinit var hostModel: HostViewModelReadableType
-  private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
   private var accountSubscription: Disposable? = null
@@ -70,7 +70,7 @@ class SettingsFragmentAccounts : Fragment() {
   @UiThread
   private fun onAccountClicked(account: AccountType) {
     this.uiThread.checkIsUIThread()
-    this.navigation.openSettingsAccount(account.id)
+    this.findNavigationController().openSettingsAccount(account.id)
   }
 
   override fun onCreateView(
@@ -106,12 +106,12 @@ class SettingsFragmentAccounts : Fragment() {
       ViewModelProviders.of(this.requireActivity())
         .get(HostViewModel::class.java)
 
+    this.configureToolbar()
+
     this.profilesController =
       this.hostModel.services.requireService(ProfilesControllerType::class.java)
     this.uiThread =
       this.hostModel.services.requireService(UIThreadServiceType::class.java)
-    this.navigation =
-      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
 
     this.accountSubscription =
       this.profilesController.accountEvents()
@@ -120,6 +120,26 @@ class SettingsFragmentAccounts : Fragment() {
     this.uiThread.runOnUIThread(Runnable {
       this.reconfigureAccountListUI()
     })
+  }
+
+  private fun configureToolbar() {
+    val host = this.activity
+    if (host is ToolbarHostType) {
+      host.toolbarClearMenu()
+      host.toolbarSetTitleSubtitle(
+        title = this.requireContext().getString(R.string.settingsAccounts),
+        subtitle = ""
+      )
+      host.toolbarSetBackArrowConditionally(
+        shouldArrowBePresent = {
+          this.findNavigationController().backStackSize() > 1
+        },
+        onArrowClicked = {
+          this.findNavigationController().popBackStack()
+        })
+    } else {
+      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    }
   }
 
   private fun onAccountEvent(accountEvent: AccountEvent) {
@@ -166,5 +186,9 @@ class SettingsFragmentAccounts : Fragment() {
     super.onStop()
 
     this.accountSubscription?.dispose()
+  }
+
+  private fun findNavigationController(): SettingsNavigationControllerType {
+    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
   }
 }

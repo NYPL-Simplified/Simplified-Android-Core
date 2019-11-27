@@ -90,7 +90,6 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var hostModel: HostViewModelReadableType
   private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var metadata: TableLayout
-  private lateinit var navigation: CatalogNavigationControllerType
   private lateinit var parameters: CatalogFragmentBookDetailParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenSize: ScreenSizeInformationType
@@ -103,7 +102,6 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var statusInProgressText: TextView
   private lateinit var summary: TextView
   private lateinit var title: TextView
-  private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
   private val parametersId = PARAMETERS_ID
   private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
@@ -166,9 +164,6 @@ class CatalogFragmentBookDetail : Fragment() {
       this.hostModel.services.requireService(BooksControllerType::class.java)
     this.covers =
       this.hostModel.services.requireService(BookCoverProviderType::class.java)
-
-    this.navigation =
-      this.hostModel.navigationController(CatalogNavigationControllerType::class.java)
 
     this.loginDialogModel =
       ViewModelProviders.of(this.requireActivity())
@@ -241,12 +236,6 @@ class CatalogFragmentBookDetail : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    if (this.activity is ToolbarHostType) {
-      this.toolbar = (this.activity as ToolbarHostType).toolbar
-    } else {
-      throw IllegalStateException("The activity (${this.activity}) hosting this fragment must implement ${ToolbarHostType::class.java}")
-    }
-
     val shortAnimationDuration =
       this.requireContext().resources.getInteger(android.R.integer.config_shortAnimTime)
 
@@ -293,40 +282,35 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.onBookStatusUI(status)
     this.onOPDSFeedEntryUI(this.parameters.feedEntry)
-    this.configureToolbar()
+
+    val toolbarHost = this.activity
+    if (toolbarHost is ToolbarHostType) {
+      val toolbar = (toolbarHost as ToolbarHostType).toolbar
+      this.configureToolbar(toolbarHost, toolbar)
+    } else {
+      throw IllegalStateException("The activity ($toolbarHost) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    }
 
     this.bookRegistrySubscription =
       this.bookRegistry.bookEvents()
         .subscribe(this::onBookStatusEvent)
   }
 
-  private fun configureToolbar() {
-    val context = this.requireContext()
-    this.configureToolbarTitles(context)
-    this.configureToolbarMenu(context)
-  }
-
-  @UiThread
-  private fun configureToolbarMenu(
-    context: Context
+  private fun configureToolbar(
+    toolbarHost: ToolbarHostType,
+    toolbar: Toolbar
   ) {
-    this.toolbar.menu.clear()
-  }
-
-  private fun hasOtherAccounts(): Boolean {
-    return try {
-      this.profilesController.profileCurrent().accounts().size > 1
-    } catch (e: Exception) {
-      this.logger.error("could not fetch current account/profile: ", e)
-      false
-    }
+    val context = this.requireContext()
+    toolbarHost.toolbarClearMenu()
+    this.configureToolbarTitles(context, toolbar)
   }
 
   @UiThread
   private fun configureToolbarTitles(
-    context: Context
+    context: Context,
+    toolbar: Toolbar
   ) {
-    this.toolbar.title = this.parameters.feedEntry.feedEntry.title
+    toolbar.title = this.parameters.feedEntry.feedEntry.title
 
     try {
       val accountProvider =
@@ -334,13 +318,13 @@ class CatalogFragmentBookDetail : Fragment() {
           .account(this.parameters.accountId)
           .provider
 
-      this.toolbar.subtitle = accountProvider.displayName
+      toolbar.subtitle = accountProvider.displayName
     } catch (e: Exception) {
-      this.toolbar.subtitle = ""
+      toolbar.subtitle = ""
     } finally {
       val color = ContextCompat.getColor(context, R.color.simplifiedColorBackground)
-      this.toolbar.setTitleTextColor(color)
-      this.toolbar.setSubtitleTextColor(color)
+      toolbar.setTitleTextColor(color)
+      toolbar.setSubtitleTextColor(color)
     }
   }
 
@@ -654,18 +638,18 @@ class CatalogFragmentBookDetail : Fragment() {
         when (val format = book.findPreferredFormat()) {
           is BookFormat.BookFormatEPUB -> {
             this.buttons.addView(this.buttonCreator.createReadButton {
-              this.navigation.openEPUBReader(book, format)
+              this.findNavigationController().openEPUBReader(book, format)
             })
             this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
           }
           is BookFormat.BookFormatAudioBook -> {
             this.buttons.addView(this.buttonCreator.createListenButton {
-              this.navigation.openAudioBookListener(book, format)
+              this.findNavigationController().openAudioBookListener(book, format)
             })
           }
           is BookFormat.BookFormatPDF -> {
             this.buttons.addView(this.buttonCreator.createReadButton {
-              this.navigation.openPDFReader(book, format)
+              this.findNavigationController().openPDFReader(book, format)
             })
           }
         }
@@ -942,7 +926,11 @@ class CatalogFragmentBookDetail : Fragment() {
       attributes = collectAttributes(result),
       taskSteps = result.steps
     )
-    this.navigation.openErrorPage(errorPageParameters)
+    this.findNavigationController().openErrorPage(errorPageParameters)
+  }
+
+  private fun findNavigationController(): CatalogNavigationControllerType {
+    return this.hostModel.navigationController(CatalogNavigationControllerType::class.java)
   }
 
   private fun <E : PresentableErrorType> collectAttributes(

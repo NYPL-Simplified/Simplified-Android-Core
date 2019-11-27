@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +23,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -40,7 +42,6 @@ class SettingsFragmentAccountRegistry : Fragment() {
   private lateinit var accountListData: MutableList<AccountProviderDescriptionType>
   private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var hostModel: HostViewModelReadableType
-  private lateinit var navigation: SettingsNavigationControllerType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var progress: ProgressBar
   private lateinit var progressText: TextView
@@ -127,7 +128,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
         })
 
       is AccountEventCreation.AccountEventCreationSucceeded ->
-        this.navigation.popBackStack()
+        this.findNavigationController().popBackStack()
 
       is AccountEventCreation.AccountEventCreationFailed ->
         this.uiThread.runOnUIThread(Runnable {
@@ -156,9 +157,6 @@ class SettingsFragmentAccountRegistry : Fragment() {
       this.hostModel.services.requireService(ProfilesControllerType::class.java)
     this.uiThread =
       this.hostModel.services.requireService(UIThreadServiceType::class.java)
-
-    this.navigation =
-      this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
 
     val layout =
       inflater.inflate(R.layout.settings_account_registry, container, false)
@@ -190,6 +188,8 @@ class SettingsFragmentAccountRegistry : Fragment() {
   override fun onStart() {
     super.onStart()
 
+    this.configureToolbar()
+
     this.accountRegistrySubscription =
       this.accountRegistry.events.subscribe(this::onAccountRegistryEvent)
 
@@ -200,6 +200,26 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
     this.reconfigureViewForRegistryStatus(this.accountRegistry.status)
     this.accountRegistry.refresh()
+  }
+
+  private fun configureToolbar() {
+    val host = this.activity
+    if (host is ToolbarHostType) {
+      host.toolbarClearMenu()
+      host.toolbarSetTitleSubtitle(
+        title = this.requireContext().getString(R.string.settingsAccounts),
+        subtitle = ""
+      )
+      host.toolbarSetBackArrowConditionally(
+        shouldArrowBePresent = {
+          this.findNavigationController().backStackSize() > 1
+        },
+        onArrowClicked = {
+          this.findNavigationController().popBackStack()
+        })
+    } else {
+      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    }
   }
 
   private fun onAccountRegistryEvent(event: AccountProviderRegistryEvent) {
@@ -262,4 +282,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
     this.accountRegistrySubscription?.dispose()
   }
 
+  private fun findNavigationController(): SettingsNavigationControllerType {
+    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+  }
 }

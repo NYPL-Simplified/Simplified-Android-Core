@@ -43,6 +43,11 @@
       android:theme="@style/SimplifiedTheme_NoActionBar_DeepPurple" />
 
     <activity
+      android:name="org.nypl.simplified.tests.sandbox.TabbedActivity"
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_NoActionBar_Indigo" />
+
+    <activity
       android:name="org.nypl.simplified.tests.sandbox.ErrorPageActivity"
       android:exported="true"
       android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />

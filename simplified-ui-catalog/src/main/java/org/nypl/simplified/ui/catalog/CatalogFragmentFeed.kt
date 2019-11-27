@@ -38,9 +38,7 @@ import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.toolbar.ToolbarHostType
@@ -58,7 +56,6 @@ import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.SortedMap
 
 /**
  * The base type of feed fragments. This class is abstract purely because the AndroidX
@@ -89,7 +86,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var bookCovers: BookCoverProviderType
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var buttonCreator: CatalogButtons
-  private lateinit var catalogNavigation: CatalogNavigationControllerType
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var feedEmpty: ViewGroup
   private lateinit var feedError: ViewGroup
@@ -119,7 +115,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
-  private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
@@ -156,9 +151,6 @@ class CatalogFragmentFeed : Fragment() {
       this.hostModel.services.requireService(FeedLoaderType::class.java)
     this.uiThread =
       this.hostModel.services.requireService(UIThreadServiceType::class.java)
-
-    this.catalogNavigation =
-      this.hostModel.navigationController(CatalogNavigationControllerType::class.java)
 
     this.buttonCreator =
       CatalogButtons(this.requireContext(), this.screenInformation)
@@ -229,12 +221,6 @@ class CatalogFragmentFeed : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    if (this.activity is ToolbarHostType) {
-      this.toolbar = (this.activity as ToolbarHostType).toolbar
-    } else {
-      throw IllegalStateException("The activity (${this.activity}) hosting this fragment must implement ${ToolbarHostType::class.java}")
-    }
-
     this.feedModel = this.createOrGetFeedModel()
 
     this.loginDialogModel =
@@ -281,12 +267,17 @@ class CatalogFragmentFeed : Fragment() {
       .get(CatalogFeedViewModel::class.java)
   }
 
+  private fun findNavigationController(): CatalogNavigationControllerType {
+    return this.hostModel.navigationController(CatalogNavigationControllerType::class.java)
+  }
+
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.catalogNavigation.openBookDetail(opdsEntry)
+    this.findNavigationController().openBookDetail(opdsEntry)
   }
 
   private fun onFeedSelected(title: String, uri: URI) {
-    this.catalogNavigation.openFeed(this.feedModel.resolveFeed(title, uri, false))
+    this.findNavigationController().openFeed(
+      this.feedModel.resolveFeed(title, uri, false))
   }
 
   @UiThread
@@ -338,7 +329,11 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
 
-    this.configureToolbar(feedState.title, feedState.search)
+    this.configureToolbar(
+      toolbarHost = this.requireActivity() as ToolbarHostType,
+      title = feedState.title,
+      search = feedState.search
+    )
   }
 
   @UiThread
@@ -352,7 +347,11 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
 
-    this.configureToolbar(feedState.title, feedState.search)
+    this.configureToolbar(
+      toolbarHost = this.requireActivity() as ToolbarHostType,
+      title = feedState.title,
+      search = feedState.search
+    )
   }
 
   @UiThread
@@ -366,7 +365,11 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
 
-    this.configureToolbar(feedState.title, feedState.search)
+    this.configureToolbar(
+      toolbarHost = this.requireActivity() as ToolbarHostType,
+      title = feedState.title,
+      search = feedState.search
+    )
   }
 
   @UiThread
@@ -380,7 +383,11 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.VISIBLE
 
-    this.configureToolbar(feedState.title, feedState.search)
+    this.configureToolbar(
+      toolbarHost = this.requireActivity() as ToolbarHostType,
+      title = feedState.title,
+      search = feedState.search
+    )
 
     this.configureFacets(
       facetHeader = this.feedWithoutGroupsHeader,
@@ -395,7 +402,7 @@ class CatalogFragmentFeed : Fragment() {
         context = this.requireContext(),
         fragmentManager = this.requireFragmentManager(),
         loginViewModel = this.loginDialogModel,
-        navigation = this.catalogNavigation,
+        navigation = this::findNavigationController,
         onBookSelected = this::onBookSelected,
         services = this.hostModel.services
       )
@@ -418,7 +425,11 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroups.visibility = View.VISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
 
-    this.configureToolbar(feedState.title, feedState.search)
+    this.configureToolbar(
+      toolbarHost = this.requireActivity() as ToolbarHostType,
+      title = feedState.title,
+      search = feedState.search
+    )
 
     this.configureFacets(
       facetHeader = this.feedWithGroupsHeader,
@@ -443,7 +454,11 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
 
-    this.configureToolbar(feedState.title, feedState.search)
+    this.configureToolbar(
+      toolbarHost = this.requireActivity() as ToolbarHostType,
+      title = feedState.title,
+      search = feedState.search
+    )
 
     this.feedErrorRetry.isEnabled = true
     this.feedErrorRetry.setOnClickListener { button ->
@@ -453,40 +468,50 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedErrorDetails.isEnabled = true
     this.feedErrorDetails.setOnClickListener {
-      this.catalogNavigation.openErrorPage(errorPageParameters(feedState.failure))
+      this.findNavigationController().openErrorPage(errorPageParameters(feedState.failure))
     }
   }
 
   @UiThread
   private fun configureToolbar(
+    toolbarHost: ToolbarHostType,
     title: String,
     search: FeedSearch?
   ) {
     val context = this.requireContext()
-    this.configureToolbarTitles(context, title)
-    this.configureToolbarMenu(context, search, title)
+    this.configureToolbarTitles(context, toolbarHost.toolbar, title)
+    this.configureToolbarMenu(context, toolbarHost.toolbar, search, title)
+
+    toolbarHost.toolbarSetBackArrowConditionally(
+      shouldArrowBePresent = {
+        this.findNavigationController().backStackSize() > 1
+      },
+      onArrowClicked = {
+        this.findNavigationController().popBackStack()
+      })
   }
 
   @UiThread
   private fun configureToolbarMenu(
     context: Context,
+    toolbar: Toolbar,
     search: FeedSearch?,
     title: String
   ) {
-    this.toolbar.menu.clear()
-    this.toolbar.inflateMenu(R.menu.catalog)
+    toolbar.menu.clear()
+    toolbar.inflateMenu(R.menu.catalog)
 
     val menuSearch =
-      this.toolbar.menu.findItem(R.id.catalogMenuActionSearch)
+      toolbar.menu.findItem(R.id.catalogMenuActionSearch)
     val menuReload =
-      this.toolbar.menu.findItem(R.id.catalogMenuActionReload)
+      toolbar.menu.findItem(R.id.catalogMenuActionReload)
     val menuAccounts =
-      this.toolbar.menu.findItem(R.id.catalogMenuActionAccounts)
+      toolbar.menu.findItem(R.id.catalogMenuActionAccounts)
 
     if (search != null) {
       menuSearch.title = context.getString(R.string.catalogSearchIn, title)
       menuSearch.setOnMenuItemClickListener {
-        this.openSearchDialog(context, search)
+        this.openSearchDialog(context, toolbar, search)
         true
       }
     } else {
@@ -506,7 +531,7 @@ class CatalogFragmentFeed : Fragment() {
       menuAccounts.setOnMenuItemClickListener { item ->
         CatalogAccountsDialog.openAccountsDialog(
           context = context,
-          toolbar = this.toolbar,
+          toolbar = toolbar,
           profilesController = this.profilesController,
           onAccountSelected = this@CatalogFragmentFeed::onAccountSelected
         )
@@ -518,7 +543,7 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun onAccountSelected(account: AccountType) {
-    this.catalogNavigation.openFeed(
+    this.findNavigationController().openFeed(
       when (val arguments = this.parameters) {
         is CatalogFeedArguments.CatalogFeedArgumentsRemote ->
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
@@ -550,6 +575,7 @@ class CatalogFragmentFeed : Fragment() {
   @UiThread
   private fun configureToolbarTitles(
     context: Context,
+    toolbar: Toolbar,
     title: String
   ) {
     try {
@@ -560,38 +586,39 @@ class CatalogFragmentFeed : Fragment() {
 
       when {
         title.isBlank() -> {
-          this.toolbar.title = accountProvider.displayName
-          this.toolbar.subtitle = accountProvider.subtitle
+          toolbar.title = accountProvider.displayName
+          toolbar.subtitle = accountProvider.subtitle
         }
         title == accountProvider.displayName -> {
-          this.toolbar.title = title
-          this.toolbar.subtitle = accountProvider.subtitle
+          toolbar.title = title
+          toolbar.subtitle = accountProvider.subtitle
         }
         else -> {
-          this.toolbar.title = title
-          this.toolbar.subtitle = accountProvider.displayName
+          toolbar.title = title
+          toolbar.subtitle = accountProvider.displayName
         }
       }
     } catch (e: Exception) {
       this.logger.error("could not fetch current account/profile: ", e)
-      this.toolbar.title = title
-      this.toolbar.subtitle = ""
+      toolbar.title = title
+      toolbar.subtitle = ""
     } finally {
       val color = ContextCompat.getColor(context, R.color.simplifiedColorBackground)
-      this.toolbar.setTitleTextColor(color)
-      this.toolbar.setSubtitleTextColor(color)
+      toolbar.setTitleTextColor(color)
+      toolbar.setSubtitleTextColor(color)
     }
   }
 
   @UiThread
   private fun openSearchDialog(
     context: Context,
+    toolbar: Toolbar,
     search: FeedSearch
   ) {
     val inflater =
       LayoutInflater.from(context)
     val dialogView =
-      inflater.inflate(R.layout.search_dialog, this.toolbar, false)
+      inflater.inflate(R.layout.search_dialog, toolbar, false)
     val editText =
       dialogView.findViewById<AppCompatEditText>(R.id.searchDialogText)!!
 
@@ -599,7 +626,7 @@ class CatalogFragmentFeed : Fragment() {
     alertBuilder.setTitle(R.string.catalogSearch)
     alertBuilder.setView(dialogView)
     alertBuilder.setPositiveButton(R.string.catalogSearch) { dialog, which ->
-      this.catalogNavigation.openFeed(
+      this.findNavigationController().openFeed(
         this.feedModel.resolveSearch(
           search = search,
           query = editText.text?.toString() ?: ""
@@ -768,7 +795,7 @@ class CatalogFragmentFeed : Fragment() {
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener { ignored ->
         this.logger.debug("selected entry point facet: {}", facet.title)
-        this.catalogNavigation.openFeed(this.feedModel.resolveFacet(facet))
+        this.findNavigationController().openFeed(this.feedModel.resolveFacet(facet))
       }
       facetTabs.addView(button)
     }
@@ -828,7 +855,7 @@ class CatalogFragmentFeed : Fragment() {
 
       this.uiThread.runOnUIThreadDelayed({
         dialog.dismiss()
-        this.catalogNavigation.openFeed(this.feedModel.resolveFacet(group[checked]))
+        this.findNavigationController().openFeed(this.feedModel.resolveFacet(group[checked]))
       }, 1_000L)
     }
 
