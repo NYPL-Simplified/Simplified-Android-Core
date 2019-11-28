@@ -1,3 +1,15 @@
+android {
+  packagingOptions {
+    exclude "META-INF/LICENSE"
+
+    // The PDF library and Readium both provide this shared library. This will
+    // cause the build to fail because Gradle doesn"t know which one to pick.
+    pickFirst "lib/arm64-v8a/libc++_shared.so"
+    pickFirst "lib/armeabi-v7a/libc++_shared.so"
+    pickFirst "lib/x86/libc++_shared.so"
+  }
+}
+
 dependencies {
   implementation project(":simplified-accounts-registry")
   implementation project(":simplified-accounts-registry-api")
@@ -11,15 +23,19 @@ dependencies {
   implementation project(":simplified-tests-strings")
   implementation project(":simplified-ui-catalog")
   implementation project(":simplified-ui-errorpage")
-  implementation project(":simplified-ui-host")
   implementation project(":simplified-ui-images")
+  implementation project(":simplified-ui-navigation-api")
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-settings")
   implementation project(":simplified-ui-splash")
-  implementation project(":simplified-ui-tabs")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-ui-toolbar")
+  implementation project(":simplified-viewer-api")
+  implementation project(":simplified-viewer-audiobook")
+  implementation project(":simplified-viewer-epub-readium1")
+  implementation project(":simplified-viewer-pdf")
+  implementation project(':simplified-ui-navigation-tabs')
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout

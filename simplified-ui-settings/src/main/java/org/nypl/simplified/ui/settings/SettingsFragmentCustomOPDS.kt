@@ -15,14 +15,14 @@ import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
-import org.nypl.simplified.ui.host.HostViewModel
-import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -44,13 +44,23 @@ class SettingsFragmentCustomOPDS : Fragment() {
 
   private lateinit var create: Button
   private lateinit var feedURL: EditText
-  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var progress: ProgressBar
   private lateinit var progressText: TextView
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var uriTextWatcher: URITextWatcher
 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    
+    val services = Services.serviceDirectory()
+
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      services.requireService(UIThreadServiceType::class.java)
+  }
+  
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -76,19 +86,10 @@ class SettingsFragmentCustomOPDS : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
-
     this.configureToolbar()
 
     this.uriTextWatcher =
       this.URITextWatcher()
-
-    this.profilesController =
-      this.hostModel.services.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      this.hostModel.services.requireService(UIThreadServiceType::class.java)
 
     this.progress.visibility = View.INVISIBLE
 
@@ -195,6 +196,9 @@ class SettingsFragmentCustomOPDS : Fragment() {
   }
 
   private fun findNavigationController(): SettingsNavigationControllerType {
-    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+    return NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
   }
 }

@@ -241,41 +241,9 @@
   <string name="book_format_audiobook">Audiobook</string>
   <string name="book_format_epub">eBook</string>
 
-  <!-- Reader strings -->
-  <string name="reader">Reader</string>
-  <string name="reader_toc">Table Of Contents</string>
-
-  <!-- Accessibility strings used for content descriptions (Reader) -->
-  <string name="reader_accessibility_bookmark">Add bookmark for this page</string>
-  <string name="reader_accessibility_toc">Show table of contents</string>
-  <string name="reader_accessibility_toc_back">Close the table of contents without selecting an item</string>
-  <string name="reader_accessibility_settings">Show reader settings</string>
-  <string name="reader_accessibility_close">Close the book</string>
-  <string name="reader_accessibility_media_previous">Go to previous media item</string>
-  <string name="reader_accessibility_media_next">Go to next media item</string>
-  <string name="reader_accessibility_media_play">Play or pause current media item</string>
 
 
-  <string name="reader_accessibility_settings_sans_font">Sans font</string>
-  <string name="reader_accessibility_settings_serif_font">Serif font</string>
-  <string name="reader_accessibility_settings_open_dyslexic_font">Open dyslexic font</string>
-  <string name="reader_accessibility_settings_white_on_black_text">White on black text</string>
-  <string name="reader_accessibility_settings_black_on_sepia_text">Black on sepia text</string>
-  <string name="reader_accessibility_settings_black_on_white_text">Black on white text</string>
-  <string name="reader_accessibility_settings_decrease_font_size">Decrease font size</string>
-  <string name="reader_accessibility_settings_increase_font_size">Increase font size</string>
-  <string name="reader_accessibility_settings_brightness_slider">Brightness slider</string>
-  <string name="reader_accessibility_settings_close">Close reader settings</string>
-  <string name="reader_settings_close">Close</string>
 
-  <!-- Audio book player strings -->
-  <string name="audio_book_player">Audiobook Player</string>
-  <string name="audio_book_player_error_engine_open">Unable to initialize audio engine</string>
-  <string name="audio_book_player_error_book_open">Unable to open audio book</string>
-  <string name="audio_book_player_return_title">Your Audiobook Has Finished</string>
-  <string name="audio_book_player_return_question">Would you like to return it?</string>
-  <string name="audio_book_player_do_keep">Keep</string>
-  <string name="audio_book_player_do_return">Return</string>
 
   <!-- Welcome Strings -->
   <string name="welcome_library_header">Read E-Books from Your Library</string>

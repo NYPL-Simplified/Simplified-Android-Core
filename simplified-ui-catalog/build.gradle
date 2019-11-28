@@ -11,11 +11,11 @@ dependencies {
   implementation project(":simplified-futures")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
-  implementation project(":simplified-ui-host")
-  implementation project(":simplified-ui-toolbar")
+  implementation project(":simplified-ui-navigation-api")
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-ui-toolbar")
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout

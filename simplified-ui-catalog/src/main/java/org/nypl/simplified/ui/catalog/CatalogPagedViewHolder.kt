@@ -458,19 +458,15 @@ class CatalogPagedViewHolder(
     this.idleButtons.removeAllViews()
 
     when (val format = book.findPreferredFormat()) {
+      is BookFormat.BookFormatPDF,
       is BookFormat.BookFormatEPUB -> {
         this.idleButtons.addView(this.buttonCreator.createReadButton {
-          this.navigation().openEPUBReader(book, format)
+          this.navigation().openViewer(book, format)
         })
       }
       is BookFormat.BookFormatAudioBook -> {
         this.idleButtons.addView(this.buttonCreator.createListenButton {
-          this.navigation().openAudioBookListener(book, format)
-        })
-      }
-      is BookFormat.BookFormatPDF -> {
-        this.idleButtons.addView(this.buttonCreator.createReadButton {
-          this.navigation().openPDFReader(book, format)
+          this.navigation().openViewer(book, format)
         })
       }
       null -> {

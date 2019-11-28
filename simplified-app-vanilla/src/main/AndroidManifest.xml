@@ -127,7 +127,7 @@
       android:exported="false"
       android:label="@string/reader" />
     <activity
-      android:name="org.nypl.simplified.app.reader.toc.ReaderTOCActivity"
+      android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/reader_toc"
       android:exported="false"
@@ -135,7 +135,7 @@
 
     <!-- Audio book player -->
     <activity
-      android:name="org.nypl.simplified.app.player.AudioBookPlayerActivity"
+      android:name="org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/audio_book_player"
       android:exported="false"
@@ -143,7 +143,7 @@
 
     <!-- PDF Reader -->
     <activity
-      android:name="org.nypl.simplified.app.pdf.PdfReaderActivity"
+      android:name="org.nypl.simplified.viewer.pdf.PdfReaderActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/reader"
       android:exported="true"

@@ -116,14 +116,14 @@
       android:contentDescription="@string/reader"
       android:exported="false"
       android:label="@string/reader" />
-    <activity android:name="org.nypl.simplified.app.reader.toc.ReaderTOCActivity"
+    <activity android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/reader_toc"
       android:exported="false"
       android:label="@string/reader_toc" />
 
     <!-- Audio book player -->
-    <activity android:name="org.nypl.simplified.app.player.AudioBookPlayerActivity"
+    <activity android:name="org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/audio_book_player"
       android:exported="false"

@@ -14,13 +14,14 @@ import android.widget.TableRow
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
+import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
+import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
@@ -28,11 +29,9 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.host.HostViewModel
-import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
@@ -54,7 +53,6 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var developerOptions: ViewGroup
   private lateinit var drmTable: TableLayout
   private lateinit var failNextBoot: Switch
-  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
@@ -67,6 +65,21 @@ class SettingsFragmentVersion : Fragment() {
   private var buildClicks = 1
   private var profileEventSubscription: Disposable? = null
 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    val services = Services.serviceDirectory()
+
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      services.requireService(UIThreadServiceType::class.java)
+    this.buildConfig =
+      services.requireService(BuildConfigurationServiceType::class.java)
+    this.adeptExecutor =
+      services.optionalService(AdobeAdeptExecutorType::class.java)
+  }
+  
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -111,20 +124,7 @@ class SettingsFragmentVersion : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
-
     this.configureToolbar()
-
-    this.profilesController =
-      this.hostModel.services.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      this.hostModel.services.requireService(UIThreadServiceType::class.java)
-    this.buildConfig =
-      this.hostModel.services.requireService(BuildConfigurationServiceType::class.java)
-    this.adeptExecutor =
-      this.hostModel.services.optionalService(AdobeAdeptExecutorType::class.java)
 
     this.buildTitle.setOnClickListener {
       if (this.buildClicks >= 7) {
@@ -418,6 +418,9 @@ class SettingsFragmentVersion : Fragment() {
   }
 
   private fun findNavigationController(): SettingsNavigationControllerType {
-    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+    return NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
   }
 }

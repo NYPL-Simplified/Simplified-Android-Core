@@ -1,0 +1,6 @@
+dependencies {
+  api project(":simplified-networkconnectivity-api")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

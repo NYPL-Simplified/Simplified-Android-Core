@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
@@ -38,10 +39,10 @@ import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
+import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedNavigation
@@ -49,11 +50,10 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.host.HostViewModel
-import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -110,7 +110,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var feedWithoutGroupsHeader: ViewGroup
   private lateinit var feedWithoutGroupsList: RecyclerView
   private lateinit var feedWithoutGroupsTabs: RadioGroup
-  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
@@ -125,6 +124,22 @@ class CatalogFragmentFeed : Fragment() {
 
     this.parameters = this.arguments!![this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
+
+    val services = Services.serviceDirectory()
+    this.bookCovers =
+      services.requireService(BookCoverProviderType::class.java)
+    this.bookRegistry =
+      services.requireService(BookRegistryReadableType::class.java)
+    this.screenInformation =
+      services.requireService(ScreenSizeInformationType::class.java)
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    this.configurationService =
+      services.requireService(CatalogConfigurationServiceType::class.java)
+    this.feedLoader =
+      services.requireService(FeedLoaderType::class.java)
+    this.uiThread =
+      services.requireService(UIThreadServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -132,25 +147,6 @@ class CatalogFragmentFeed : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
-
-    this.bookCovers =
-      this.hostModel.services.requireService(BookCoverProviderType::class.java)
-    this.bookRegistry =
-      this.hostModel.services.requireService(BookRegistryReadableType::class.java)
-    this.screenInformation =
-      this.hostModel.services.requireService(ScreenSizeInformationType::class.java)
-    this.profilesController =
-      this.hostModel.services.requireService(ProfilesControllerType::class.java)
-    this.configurationService =
-      this.hostModel.services.requireService(CatalogConfigurationServiceType::class.java)
-    this.feedLoader =
-      this.hostModel.services.requireService(FeedLoaderType::class.java)
-    this.uiThread =
-      this.hostModel.services.requireService(UIThreadServiceType::class.java)
 
     this.buttonCreator =
       CatalogButtons(this.requireContext(), this.screenInformation)
@@ -261,23 +257,20 @@ class CatalogFragmentFeed : Fragment() {
       this,
       CatalogFeedViewModelFactory(
         context = this.requireContext(),
-        services = this.hostModel.services,
+        services = Services.serviceDirectory(),
         feedArguments = this.parameters
       ))
       .get(CatalogFeedViewModel::class.java)
   }
 
-  private fun findNavigationController(): CatalogNavigationControllerType {
-    return this.hostModel.navigationController(CatalogNavigationControllerType::class.java)
-  }
-
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.findNavigationController().openBookDetail(opdsEntry)
+    findNavigationController()
+      .openBookDetail(opdsEntry)
   }
 
   private fun onFeedSelected(title: String, uri: URI) {
-    this.findNavigationController().openFeed(
-      this.feedModel.resolveFeed(title, uri, false))
+    findNavigationController()
+      .openFeed(this.feedModel.resolveFeed(title, uri, false))
   }
 
   @UiThread
@@ -404,7 +397,7 @@ class CatalogFragmentFeed : Fragment() {
         loginViewModel = this.loginDialogModel,
         navigation = this::findNavigationController,
         onBookSelected = this::onBookSelected,
-        services = this.hostModel.services
+        services = Services.serviceDirectory()
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
@@ -468,7 +461,8 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedErrorDetails.isEnabled = true
     this.feedErrorDetails.setOnClickListener {
-      this.findNavigationController().openErrorPage(errorPageParameters(feedState.failure))
+      findNavigationController()
+        .openErrorPage(errorPageParameters(feedState.failure))
     }
   }
 
@@ -486,10 +480,12 @@ class CatalogFragmentFeed : Fragment() {
     toolbarHost.toolbarSetBackArrowConditionally(
       context = context,
       shouldArrowBePresent = {
-        this.findNavigationController().backStackSize() > 1
+        findNavigationController()
+          .backStackSize() > 1
       },
       onArrowClicked = {
-        this.findNavigationController().popBackStack()
+        findNavigationController()
+          .popBackStack()
       })
   }
 
@@ -545,8 +541,8 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun onAccountSelected(account: AccountType) {
-    this.findNavigationController().openFeed(
-      when (val arguments = this.parameters) {
+    findNavigationController()
+      .openFeed(when (val arguments = this.parameters) {
         is CatalogFeedArguments.CatalogFeedArgumentsRemote ->
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
             title = account.provider.displayName,
@@ -628,8 +624,8 @@ class CatalogFragmentFeed : Fragment() {
     alertBuilder.setTitle(R.string.catalogSearch)
     alertBuilder.setView(dialogView)
     alertBuilder.setPositiveButton(R.string.catalogSearch) { dialog, which ->
-      this.findNavigationController().openFeed(
-        this.feedModel.resolveSearch(
+      findNavigationController()
+        .openFeed(this.feedModel.resolveSearch(
           search = search,
           query = editText.text?.toString() ?: ""
         ))
@@ -797,7 +793,8 @@ class CatalogFragmentFeed : Fragment() {
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener { ignored ->
         this.logger.debug("selected entry point facet: {}", facet.title)
-        this.findNavigationController().openFeed(this.feedModel.resolveFacet(facet))
+        findNavigationController()
+          .openFeed(this.feedModel.resolveFacet(facet))
       }
       facetTabs.addView(button)
     }
@@ -857,13 +854,20 @@ class CatalogFragmentFeed : Fragment() {
 
       this.uiThread.runOnUIThreadDelayed({
         dialog.dismiss()
-        this.findNavigationController().openFeed(this.feedModel.resolveFacet(group[checked]))
+        findNavigationController()
+          .openFeed(this.feedModel.resolveFacet(group[checked]))
       }, 1_000L)
     }
 
     alertBuilder.create()
       .show()
   }
+
+  private fun findNavigationController() =
+    NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = CatalogNavigationControllerType::class.java
+    )
 
   private fun errorPageParameters(
     failure: FeedLoaderResult.FeedLoaderFailure

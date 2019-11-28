@@ -22,6 +22,7 @@ import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatterBuilder
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
@@ -35,17 +36,16 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.futures.FluentFutureExtensions.map
+import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.host.HostViewModel
-import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.util.SortedMap
 import java.util.concurrent.atomic.AtomicReference
@@ -87,7 +87,6 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
   private lateinit var format: TextView
-  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var metadata: TableLayout
   private lateinit var parameters: CatalogFragmentBookDetailParameters
@@ -136,6 +135,25 @@ class CatalogFragmentBookDetail : Fragment() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     this.parameters = this.arguments!![this.parametersId] as CatalogFragmentBookDetailParameters
+
+    val services = Services.serviceDirectory()
+
+    this.configurationService =
+      services.requireService(CatalogConfigurationServiceType::class.java)
+    this.debugService =
+      services.optionalService(CatalogDebuggingServiceType::class.java)
+    this.bookRegistry =
+      services.requireService(BookRegistryReadableType::class.java)
+    this.uiThread =
+      services.requireService(UIThreadServiceType::class.java)
+    this.screenSize =
+      services.requireService(ScreenSizeInformationType::class.java)
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    this.booksController =
+      services.requireService(BooksControllerType::class.java)
+    this.covers =
+      services.requireService(BookCoverProviderType::class.java)
   }
 
   override fun onCreateView(
@@ -143,28 +161,6 @@ class CatalogFragmentBookDetail : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
-
-    this.configurationService =
-      this.hostModel.services.requireService(CatalogConfigurationServiceType::class.java)
-    this.debugService =
-      this.hostModel.services.optionalService(CatalogDebuggingServiceType::class.java)
-    this.bookRegistry =
-      this.hostModel.services.requireService(BookRegistryReadableType::class.java)
-    this.uiThread =
-      this.hostModel.services.requireService(UIThreadServiceType::class.java)
-    this.screenSize =
-      this.hostModel.services.requireService(ScreenSizeInformationType::class.java)
-    this.profilesController =
-      this.hostModel.services.requireService(ProfilesControllerType::class.java)
-    this.booksController =
-      this.hostModel.services.requireService(BooksControllerType::class.java)
-    this.covers =
-      this.hostModel.services.requireService(BookCoverProviderType::class.java)
-
     this.loginDialogModel =
       ViewModelProviders.of(this.requireActivity())
         .get(CatalogLoginViewModel::class.java)
@@ -636,20 +632,15 @@ class CatalogFragmentBookDetail : Fragment() {
 
       is BookStatus.Loaned.LoanedDownloaded ->
         when (val format = book.findPreferredFormat()) {
+          is BookFormat.BookFormatPDF,
           is BookFormat.BookFormatEPUB -> {
             this.buttons.addView(this.buttonCreator.createReadButton {
-              this.findNavigationController().openEPUBReader(book, format)
+              this.findNavigationController().openViewer(book, format)
             })
-            this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
           }
           is BookFormat.BookFormatAudioBook -> {
             this.buttons.addView(this.buttonCreator.createListenButton {
-              this.findNavigationController().openAudioBookListener(book, format)
-            })
-          }
-          is BookFormat.BookFormatPDF -> {
-            this.buttons.addView(this.buttonCreator.createReadButton {
-              this.findNavigationController().openPDFReader(book, format)
+              this.findNavigationController().openViewer(book, format)
             })
           }
         }
@@ -929,9 +920,11 @@ class CatalogFragmentBookDetail : Fragment() {
     this.findNavigationController().openErrorPage(errorPageParameters)
   }
 
-  private fun findNavigationController(): CatalogNavigationControllerType {
-    return this.hostModel.navigationController(CatalogNavigationControllerType::class.java)
-  }
+  private fun findNavigationController(): CatalogNavigationControllerType =
+    NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = CatalogNavigationControllerType::class.java
+    )
 
   private fun <E : PresentableErrorType> collectAttributes(
     result: TaskResult.Failure<E, *>

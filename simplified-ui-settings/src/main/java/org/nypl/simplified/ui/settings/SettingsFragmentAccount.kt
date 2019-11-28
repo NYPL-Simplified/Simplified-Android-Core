@@ -15,10 +15,10 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.joda.time.LocalDate
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -30,17 +30,15 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
+import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
-import org.nypl.simplified.ui.host.HostViewModel
-import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.images.ImageAccountIcons
-import org.nypl.simplified.ui.images.ImageLoader
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
@@ -68,7 +66,6 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var bookmarkSyncCheck: Switch
   private lateinit var documents: DocumentStoreType
   private lateinit var eulaCheckbox: CheckBox
-  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var imageLoader: ImageLoaderType
   private lateinit var login: ViewGroup
   private lateinit var loginButton: Button
@@ -104,6 +101,17 @@ class SettingsFragmentAccount : Fragment() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     this.parameters = this.arguments!![this.parametersId] as SettingsFragmentAccountParameters
+
+    val services = Services.serviceDirectory()
+    
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    this.documents =
+      services.requireService(DocumentStoreType::class.java)
+    this.imageLoader =
+      services.requireService(ImageLoaderType::class.java)
+    this.uiThread =
+      services.requireService(UIThreadServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -217,19 +225,6 @@ class SettingsFragmentAccount : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
-
-    this.profilesController =
-      this.hostModel.services.requireService(ProfilesControllerType::class.java)
-    this.documents =
-      this.hostModel.services.requireService(DocumentStoreType::class.java)
-    this.imageLoader =
-      this.hostModel.services.requireService(ImageLoaderType::class.java)
-    this.uiThread =
-      this.hostModel.services.requireService(UIThreadServiceType::class.java)
 
     try {
       this.account =
@@ -603,6 +598,9 @@ class SettingsFragmentAccount : Fragment() {
       isSynthesized = true)
 
   private fun findNavigationController(): SettingsNavigationControllerType {
-    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+    return NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
   }
 }

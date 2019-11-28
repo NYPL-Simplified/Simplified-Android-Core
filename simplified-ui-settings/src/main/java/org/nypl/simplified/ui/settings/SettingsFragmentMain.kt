@@ -1,14 +1,13 @@
 package org.nypl.simplified.ui.settings
 
 import android.os.Bundle
-import androidx.lifecycle.ViewModelProviders
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.io7m.jfunctional.Some
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.documents.store.DocumentStoreType
+import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
-import org.nypl.simplified.ui.host.HostViewModel
-import org.nypl.simplified.ui.host.HostViewModelReadableType
 
 /**
  * The main settings page containing links to other settings pages.
@@ -17,7 +16,6 @@ import org.nypl.simplified.ui.host.HostViewModelReadableType
 class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private lateinit var documents: DocumentStoreType
-  private lateinit var hostModel: HostViewModelReadableType
 
   override fun onCreatePreferences(
     savedInstanceState: Bundle?,
@@ -25,12 +23,8 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   ) {
     this.setPreferencesFromResource(R.xml.settings, rootKey)
 
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
-
-    this.documents =
-      this.hostModel.services.requireService(DocumentStoreType::class.java)
+    val services = Services.serviceDirectory()
+    this.documents = services.requireService(DocumentStoreType::class.java)
 
     val settingsAbout =
       this.findPreference<Preference>("settingsAbout")!!
@@ -144,6 +138,9 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun findNavigationController(): SettingsNavigationControllerType {
-    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+    return NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
   }
 }

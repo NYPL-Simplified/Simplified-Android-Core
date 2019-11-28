@@ -1,15 +1,15 @@
 package org.nypl.simplified.ui.settings
 
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.host.HostNavigationControllerType
 
 /**
  * Navigation functions for the settings screens.
  */
 
-interface SettingsNavigationControllerType : HostNavigationControllerType {
+interface SettingsNavigationControllerType : NavigationControllerType {
 
   /**
    * The settings screen wants to open the "about" section.

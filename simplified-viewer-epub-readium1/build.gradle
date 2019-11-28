@@ -1,0 +1,27 @@
+dependencies {
+  implementation project(":simplified-adobe-extensions")
+  implementation project(":simplified-analytics-api")
+  implementation project(":simplified-books-api")
+  implementation project(":simplified-bugsnag")
+  implementation project(":simplified-files")
+  implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-reader-bookmarks-api")
+  implementation project(":simplified-services-api")
+  implementation project(":simplified-ui-navigation-api")
+  implementation project(":simplified-ui-screen")
+  implementation project(":simplified-ui-theme")
+  implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-viewer-spi")
+
+  annotationProcessor libraries.googleAutoValue
+
+  compileOnly libraries.googleAutoValue
+
+  implementation libraries.androidAsync
+  implementation libraries.androidXAppCompat
+  implementation libraries.googleAndroidMaterial
+  implementation libraries.kotlinStdlib
+  implementation libraries.nyplDRMCore
+  implementation libraries.readium
+  implementation libraries.readiumSharedJS
+}

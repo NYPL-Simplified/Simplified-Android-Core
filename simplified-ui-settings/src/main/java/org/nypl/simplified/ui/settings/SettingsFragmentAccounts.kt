@@ -9,23 +9,22 @@ import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
-import org.nypl.simplified.ui.host.HostViewModel
-import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 /**
  * A fragment that shows the set of accounts in the current profile.
@@ -40,7 +39,6 @@ class SettingsFragmentAccounts : Fragment() {
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: SettingsAccountsAdapter
   private lateinit var accountListData: MutableList<AccountType>
-  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var imageLoader: ImageLoaderType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
@@ -50,6 +48,15 @@ class SettingsFragmentAccounts : Fragment() {
     super.onCreate(savedInstanceState)
 
     this.accountListData = mutableListOf()
+
+    val services = Services.serviceDirectory()
+
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    this.imageLoader =
+      services.requireService(ImageLoaderType::class.java)
+    this.uiThread =
+      services.requireService(UIThreadServiceType::class.java)
   }
 
   @UiThread
@@ -105,18 +112,7 @@ class SettingsFragmentAccounts : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
-
     this.configureToolbar()
-
-    this.profilesController =
-      this.hostModel.services.requireService(ProfilesControllerType::class.java)
-    this.imageLoader =
-      this.hostModel.services.requireService(ImageLoaderType::class.java)
-    this.uiThread =
-      this.hostModel.services.requireService(UIThreadServiceType::class.java)
 
     this.accountSubscription =
       this.profilesController.accountEvents()
@@ -216,6 +212,9 @@ class SettingsFragmentAccounts : Fragment() {
   }
 
   private fun findNavigationController(): SettingsNavigationControllerType {
-    return this.hostModel.navigationController(SettingsNavigationControllerType::class.java)
+    return NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
   }
 }

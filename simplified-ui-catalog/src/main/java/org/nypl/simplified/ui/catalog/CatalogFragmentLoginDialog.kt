@@ -16,6 +16,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProviders
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -28,8 +29,6 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentExce
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.host.HostViewModel
-import org.nypl.simplified.ui.host.HostViewModelReadableType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
@@ -70,7 +69,6 @@ class CatalogFragmentLoginDialog : DialogFragment() {
   private lateinit var documents: DocumentStoreType
   private lateinit var eula: CheckBox
   private lateinit var fieldListener: OnTextChangeListener
-  private lateinit var hostModel: HostViewModelReadableType
   private lateinit var parameters: CatalogFragmentLoginDialogParameters
   private lateinit var password: EditText
   private lateinit var passwordLabel: TextView
@@ -87,6 +85,17 @@ class CatalogFragmentLoginDialog : DialogFragment() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     this.parameters = this.arguments!![this.parametersId] as CatalogFragmentLoginDialogParameters
+
+    val services = Services.serviceDirectory()
+
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      services.requireService(UIThreadServiceType::class.java)
+    this.documents =
+      services.requireService(DocumentStoreType::class.java)
+    this.screenSize =
+      services.requireService(ScreenSizeInformationType::class.java)
   }
 
   override fun onCreateView(
@@ -125,19 +134,6 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
   override fun onStart() {
     super.onStart()
-
-    this.hostModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(HostViewModel::class.java)
-
-    this.profilesController =
-      this.hostModel.services.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      this.hostModel.services.requireService(UIThreadServiceType::class.java)
-    this.documents =
-      this.hostModel.services.requireService(DocumentStoreType::class.java)
-    this.screenSize =
-      this.hostModel.services.requireService(ScreenSizeInformationType::class.java)
 
     this.dialogModel =
       ViewModelProviders.of(this.requireActivity())

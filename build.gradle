@@ -193,6 +193,7 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
           targetSdkVersion androidTargetSDKVersion
         }
         compileOptions {
+          encoding 'UTF-8'
           sourceCompatibility JavaVersion.VERSION_1_8
           targetCompatibility JavaVersion.VERSION_1_8
         }
@@ -217,6 +218,7 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
           useLibrary 'org.apache.http.legacy'
         }
         compileOptions {
+          encoding 'UTF-8'
           sourceCompatibility JavaVersion.VERSION_1_8
           targetCompatibility JavaVersion.VERSION_1_8
         }
