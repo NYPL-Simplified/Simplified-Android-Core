@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
@@ -22,6 +23,8 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
+import org.nypl.simplified.ui.images.ImageAccountIcons
+import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 
 /**
@@ -30,6 +33,7 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 
 class SettingsFragmentAccounts : Fragment() {
 
+  private lateinit var accountCurrentIcon: ImageView
   private lateinit var accountCurrentSubtitle: TextView
   private lateinit var accountCurrentTitle: TextView
   private lateinit var accountCurrentView: ViewGroup
@@ -37,6 +41,7 @@ class SettingsFragmentAccounts : Fragment() {
   private lateinit var accountListAdapter: SettingsAccountsAdapter
   private lateinit var accountListData: MutableList<AccountType>
   private lateinit var hostModel: HostViewModelReadableType
+  private lateinit var imageLoader: ImageLoaderType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
   private var accountSubscription: Disposable? = null
@@ -45,11 +50,6 @@ class SettingsFragmentAccounts : Fragment() {
     super.onCreate(savedInstanceState)
 
     this.accountListData = mutableListOf()
-    this.accountListAdapter =
-      SettingsAccountsAdapter(
-        accounts = this.accountListData,
-        onItemClicked = { account -> this.onAccountClicked(account) },
-        onItemLongClicked = { account -> this.onAccountLongClicked(account) })
   }
 
   @UiThread
@@ -87,6 +87,8 @@ class SettingsFragmentAccounts : Fragment() {
       this.accountCurrentView.findViewById(R.id.accountCellTitle)
     this.accountCurrentSubtitle =
       this.accountCurrentView.findViewById(R.id.accountCellSubtitle)
+    this.accountCurrentIcon =
+      this.accountCurrentView.findViewById(R.id.accountCellIcon)
 
     this.accountCurrentTitle.text = ""
     this.accountCurrentSubtitle.text = ""
@@ -96,9 +98,7 @@ class SettingsFragmentAccounts : Fragment() {
 
     this.accountList.setHasFixedSize(true)
     this.accountList.layoutManager = LinearLayoutManager(this.context)
-    this.accountList.adapter = this.accountListAdapter
     (this.accountList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-
     return layout
   }
 
@@ -113,12 +113,23 @@ class SettingsFragmentAccounts : Fragment() {
 
     this.profilesController =
       this.hostModel.services.requireService(ProfilesControllerType::class.java)
+    this.imageLoader =
+      this.hostModel.services.requireService(ImageLoaderType::class.java)
     this.uiThread =
       this.hostModel.services.requireService(UIThreadServiceType::class.java)
 
     this.accountSubscription =
       this.profilesController.accountEvents()
         .subscribe(this::onAccountEvent)
+
+    this.accountListAdapter =
+      SettingsAccountsAdapter(
+        accounts = this.accountListData,
+        imageLoader = this.imageLoader,
+        onItemClicked = { account -> this.onAccountClicked(account) },
+        onItemLongClicked = { account -> this.onAccountLongClicked(account) })
+
+    this.accountList.adapter = this.accountListAdapter
 
     this.uiThread.runOnUIThread(Runnable {
       this.reconfigureAccountListUI()
@@ -178,11 +189,17 @@ class SettingsFragmentAccounts : Fragment() {
         .filter { account -> account.id != accountNow.id }
         .sortedBy { account -> account.provider.displayName }
 
-    this.accountCurrentTitle.text = accountNow.provider.displayName
     this.accountCurrentSubtitle.text = accountNow.provider.subtitle
-
-    this.accountCurrentView.setOnClickListener { this.onAccountClicked(profile.accountCurrent()) }
     this.accountCurrentTitle.setOnClickListener { this.onAccountClicked(profile.accountCurrent()) }
+    this.accountCurrentTitle.text = accountNow.provider.displayName
+    this.accountCurrentView.setOnClickListener { this.onAccountClicked(profile.accountCurrent()) }
+
+    ImageAccountIcons.loadAccountLogoIntoView(
+      loader = imageLoader.loader,
+      account = accountNow.provider.toDescription(),
+      defaultIcon = R.drawable.account_default,
+      iconView = this.accountCurrentIcon
+    )
 
     this.accountListData.clear()
     this.accountListData.addAll(accountList)
@@ -194,6 +211,7 @@ class SettingsFragmentAccounts : Fragment() {
 
     this.accountCurrentView.setOnClickListener(null)
     this.accountCurrentTitle.setOnClickListener(null)
+    this.accountCurrentIcon.setImageDrawable(null)
     this.accountSubscription?.dispose()
   }
 

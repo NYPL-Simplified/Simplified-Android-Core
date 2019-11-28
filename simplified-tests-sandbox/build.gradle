@@ -12,6 +12,7 @@ dependencies {
   implementation project(":simplified-ui-catalog")
   implementation project(":simplified-ui-errorpage")
   implementation project(":simplified-ui-host")
+  implementation project(":simplified-ui-images")
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-settings")
   implementation project(":simplified-ui-splash")

@@ -49,6 +49,8 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelFactory
 import org.nypl.simplified.ui.host.HostViewModelType
+import org.nypl.simplified.ui.images.ImageLoader
+import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
@@ -102,7 +104,8 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
             .copy(
               catalogURI = targetURI,
               displayName = "The New York Public Library",
-              subtitle = "Inspiring lifelong learning, advancing knowledge, and strengthening our communities."
+              subtitle = "Inspiring lifelong learning, advancing knowledge, and strengthening our communities.",
+              logo = URI.create("http://www.librarysimplified.org/assets/logos/simplye2.png")
             )
         )
 
@@ -149,6 +152,13 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
 
         }
 
+      val imageLoader =
+        ImageLoader.create(this.context)
+
+      newServices.putService(
+        interfaceType = ImageLoaderType::class.java,
+        service = imageLoader
+      )
       newServices.putService(
         interfaceType = BuildConfigurationServiceType::class.java,
         service = buildConfig

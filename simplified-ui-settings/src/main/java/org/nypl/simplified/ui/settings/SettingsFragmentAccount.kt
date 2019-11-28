@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
@@ -36,6 +37,9 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.host.HostViewModel
 import org.nypl.simplified.ui.host.HostViewModelReadableType
+import org.nypl.simplified.ui.images.ImageAccountIcons
+import org.nypl.simplified.ui.images.ImageLoader
+import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
@@ -48,6 +52,7 @@ class SettingsFragmentAccount : Fragment() {
   private val logger = LoggerFactory.getLogger(SettingsFragmentAccount::class.java)
 
   private lateinit var account: AccountType
+  private lateinit var accountIcon: ImageView
   private lateinit var accountSubtitle: TextView
   private lateinit var accountTitle: TextView
   private lateinit var authentication: ViewGroup
@@ -64,6 +69,7 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var documents: DocumentStoreType
   private lateinit var eulaCheckbox: CheckBox
   private lateinit var hostModel: HostViewModelReadableType
+  private lateinit var imageLoader: ImageLoaderType
   private lateinit var login: ViewGroup
   private lateinit var loginButton: Button
   private lateinit var loginProgress: ProgressBar
@@ -112,6 +118,8 @@ class SettingsFragmentAccount : Fragment() {
       layout.findViewById(R.id.accountCellTitle)
     this.accountSubtitle =
       layout.findViewById(R.id.accountCellSubtitle)
+    this.accountIcon =
+      layout.findViewById(R.id.accountCellIcon)
 
     this.authentication =
       layout.findViewById(R.id.auth)
@@ -218,6 +226,8 @@ class SettingsFragmentAccount : Fragment() {
       this.hostModel.services.requireService(ProfilesControllerType::class.java)
     this.documents =
       this.hostModel.services.requireService(DocumentStoreType::class.java)
+    this.imageLoader =
+      this.hostModel.services.requireService(ImageLoaderType::class.java)
     this.uiThread =
       this.hostModel.services.requireService(UIThreadServiceType::class.java)
 
@@ -237,6 +247,13 @@ class SettingsFragmentAccount : Fragment() {
       this.account.provider.displayName
     this.accountSubtitle.text =
       this.account.provider.subtitle
+
+    ImageAccountIcons.loadAccountLogoIntoView(
+      this.imageLoader.loader,
+      this.account.provider.toDescription(),
+      R.drawable.account_default,
+      this.accountIcon
+    )
 
     /*
      * Only show a EULA checkbox if there's actually a EULA.
@@ -318,6 +335,7 @@ class SettingsFragmentAccount : Fragment() {
   override fun onStop() {
     super.onStop()
 
+    this.accountIcon.setImageDrawable(null)
     this.eulaCheckbox.setOnCheckedChangeListener(null)
     this.authenticationCOPPAOver13.setOnClickListener {}
     this.authenticationBasicUser.removeTextChangedListener(this.authenticationBasicUserListener)

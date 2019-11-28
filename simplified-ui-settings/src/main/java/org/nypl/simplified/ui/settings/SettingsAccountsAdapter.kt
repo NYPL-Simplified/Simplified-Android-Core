@@ -7,12 +7,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.ui.images.ImageAccountIcons
+import org.nypl.simplified.ui.images.ImageLoaderType
 
 /**
  * An adapter for a list of accounts.
  */
 
 class SettingsAccountsAdapter(
+  private val imageLoader: ImageLoaderType,
   private val accounts: List<AccountType>,
   private val onItemClicked: (AccountType) -> Unit,
   private val onItemLongClicked: (AccountType) -> Unit
@@ -38,6 +41,10 @@ class SettingsAccountsAdapter(
     position: Int
   ) {
     val account = this.accounts[position]
+
+    holder.accountIcon.setImageDrawable(null)
+    holder.accountTitleView.text = account.provider.displayName
+    holder.accountSubtitleView.text = account.provider.subtitle
     holder.parent.setOnClickListener {
       this.onItemClicked.invoke(account)
     }
@@ -45,8 +52,13 @@ class SettingsAccountsAdapter(
       this.onItemLongClicked.invoke(account)
       true
     }
-    holder.accountTitleView.text = account.provider.displayName
-    holder.accountSubtitleView.text = account.provider.subtitle
+
+    ImageAccountIcons.loadAccountLogoIntoView(
+      loader = this.imageLoader.loader,
+      account = account.provider.toDescription(),
+      defaultIcon = R.drawable.account_default,
+      iconView = holder.accountIcon
+    )
   }
 
   inner class AccountViewHolder(val parent: View) : RecyclerView.ViewHolder(parent) {
@@ -57,5 +69,4 @@ class SettingsAccountsAdapter(
     val accountSubtitleView =
       parent.findViewById<TextView>(R.id.accountCellSubtitle)
   }
-
 }

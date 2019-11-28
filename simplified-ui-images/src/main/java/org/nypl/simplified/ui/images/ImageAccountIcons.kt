@@ -1,13 +1,14 @@
-package org.nypl.simplified.app.images
+package org.nypl.simplified.ui.images
 
 import android.view.View
 import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
-import org.nypl.simplified.app.R
 import org.slf4j.LoggerFactory
+import java.net.URI
 
 /**
  * Functions to efficiently load account logos.
@@ -27,16 +28,17 @@ object ImageAccountIcons {
   fun loadAccountLogoIntoView(
     loader: Picasso,
     account: AccountProviderDescriptionType,
+    @DrawableRes defaultIcon: Int,
     iconView: ImageView
   ) {
 
     val request: RequestCreator
-    val logoURI = account.metadata.logoURI
+    val logoURI : URI? = account.metadata.logoURI?.hrefURI
     if (logoURI != null) {
       LOG.debug("configuring account logo: {}", logoURI)
       request = loader.load(logoURI.toString())
     } else {
-      request = loader.load(R.drawable.librarylogomagic)
+      request = loader.load(defaultIcon)
     }
 
     request.into(iconView, object : Callback {
@@ -45,7 +47,9 @@ object ImageAccountIcons {
       }
 
       override fun onError(e: Exception) {
-        iconView.visibility = View.INVISIBLE
+        LOG.error("failed to load account icon: ", e)
+        iconView.setImageResource(defaultIcon)
+        iconView.visibility = View.VISIBLE
       }
     })
   }

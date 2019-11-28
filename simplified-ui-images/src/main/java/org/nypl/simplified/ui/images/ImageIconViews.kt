@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.images
+package org.nypl.simplified.ui.images
 
 import android.content.res.AssetManager
 import android.graphics.Bitmap
