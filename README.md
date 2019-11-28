@@ -259,6 +259,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
 |[org.librarysimplified.migration.spi](simplified-migration-spi)|Data migration SPI|
 |[org.librarysimplified.mime](simplified-mime)|MIME type handling|
+|[org.librarysimplified.networkconnectivity](simplified-networkconnectivity)|Network connectivity|
+|[org.librarysimplified.networkconnectivity.api](simplified-networkconnectivity-api)|Network connectivity API|
 |[org.librarysimplified.notifications](simplified-notifications)|Notification service|
 |[org.librarysimplified.opds.auth_document](simplified-opds-auth-document)|OPDS authentication document parser implementation|
 |[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
@@ -289,13 +291,20 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
 |[org.librarysimplified.ui.datepicker.demo](simplified-ui-datepicker-demo)|Date picker UI component demo|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
-|[org.librarysimplified.ui.host](simplified-ui-host)|Fragment hosting and navigation base API|
+|[org.librarysimplified.ui.images](simplified-ui-images)|Image loader API for general image resources|
+|[org.librarysimplified.ui.navigation.api](simplified-ui-navigation-api)|Navigation API|
+|[org.librarysimplified.ui.tabs](simplified-ui-navigation-tabs)|Tabbed UI|
 |[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
 |[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
 |[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
 |[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
 |[org.librarysimplified.ui.toolbar](simplified-ui-toolbar)|Sane toolbar handling|
+|[org.librarysimplified.viewer.pdf](simplified-viewer-api)|PDF reader|
+|[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|
+|[org.librarysimplified.viewer.epub.readium1](simplified-viewer-epub-readium1)|Readium 1 EPUB reader|
+|[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|
+|[org.librarysimplified.viewer.spi](simplified-viewer-spi)|Viewer SPI|
 
 _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
 
