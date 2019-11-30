@@ -1,4 +1,4 @@
-package org.nypl.simplified.vanilla
+package org.nypl.simplified.vanilla.with_profiles
 
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 
@@ -9,7 +9,7 @@ import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 class VanillaCatalogConfigurationService : CatalogConfigurationServiceType {
 
   override val showHoldsTab: Boolean
-    get() = true
+    get() = false
 
   override val showAllCollectionsInLocalFeeds: Boolean
     get() = true

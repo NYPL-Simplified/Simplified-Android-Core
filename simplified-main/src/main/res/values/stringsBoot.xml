@@ -13,6 +13,7 @@
   <string name="bootingBuildConfigurationService">Initializing build configuration service…</string>
   <string name="bootingBundledContent">Initializing bundled content…</string>
   <string name="bootingBundledCredentials">Initializing bundled credentials…</string>
+  <string name="bootingCatalogConfigurationService">Initializing catalog configuration…</string>
   <string name="bootingClock">Initializing clock…</string>
   <string name="bootingCompleted">Startup completed!</string>
   <string name="bootingCoverBadgeProvider">Starting cover badge provider…</string>
@@ -36,6 +37,7 @@
   <string name="bootingProfileTimer">Initializing profile idle timer…</string>
   <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
   <string name="bootingScreenSize">Starting screen size…</string>
+  <string name="bootingSettingsConfigurationService">Initializing settings configuration…</string>
   <string name="bootingStrings">Initializing %1$s strings…</string>
   <string name="bootingTenPrint">Booting TenPrint…</string>
   <string name="bootingThemeService">Initializing theme service…</string>

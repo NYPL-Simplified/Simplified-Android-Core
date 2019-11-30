@@ -7,6 +7,12 @@ internal class MainServicesStrings(
   private val resources: Resources
 ) : BootStringResourcesType {
 
+  val bootingCatalogConfiguration: String =
+    this.resources.getString(R.string.bootingCatalogConfigurationService)
+
+  val bootingSettingsConfiguration: String =
+    this.resources.getString(R.string.bootingSettingsConfigurationService)
+
   val bootingBuildConfigurationService: String =
     this.resources.getString(R.string.bootingBuildConfigurationService)
 

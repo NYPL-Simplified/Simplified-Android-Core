@@ -37,7 +37,6 @@ import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.profiles.ProfileModificationDefaultFragment
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
@@ -62,7 +61,6 @@ class MainActivity :
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
 
   private lateinit var migrationExecutor: ListeningScheduledExecutorService
-  private lateinit var navigationController: TabbedNavigationController
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var splashMainFragment: SplashFragment
   private lateinit var toolbar: Toolbar

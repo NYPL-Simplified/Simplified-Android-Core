@@ -105,6 +105,7 @@ import org.nypl.simplified.ui.images.ImageAccountIconRequestHandler
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
+import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
@@ -630,6 +631,21 @@ internal object MainServices {
     }
   }
 
+  private fun findSettingsConfiguration(): SettingsConfigurationServiceType {
+    val existing =
+      this.optionalFromServiceLoader(SettingsConfigurationServiceType::class.java)
+
+    if (existing != null) {
+      return existing
+    }
+
+    this.logger.debug("returning fallback settings configuration service")
+    return object : SettingsConfigurationServiceType {
+      override val allowAccountsAccess: Boolean
+        get() = true
+    }
+  }
+
   private fun findCatalogConfiguration(): CatalogConfigurationServiceType {
     val existing =
       this.optionalFromServiceLoader(CatalogConfigurationServiceType::class.java)
@@ -640,6 +656,8 @@ internal object MainServices {
 
     this.logger.debug("returning fallback catalog configuration service")
     return object : CatalogConfigurationServiceType {
+      override val showHoldsTab: Boolean
+        get() = true
       override val showAllCollectionsInLocalFeeds: Boolean
         get() = true
       override val supportErrorReportEmailAddress: String
@@ -742,9 +760,14 @@ internal object MainServices {
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) })
 
     addService(
-      message = strings.bootingStrings("catalog configuration"),
+      message = strings.bootingCatalogConfiguration,
       interfaceType = CatalogConfigurationServiceType::class.java,
       serviceConstructor = { this.findCatalogConfiguration() })
+
+    addService(
+      message = strings.bootingSettingsConfiguration,
+      interfaceType = SettingsConfigurationServiceType::class.java,
+      serviceConstructor = { this.findSettingsConfiguration() })
 
     val clock =
       addService(

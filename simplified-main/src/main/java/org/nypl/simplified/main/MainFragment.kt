@@ -11,6 +11,7 @@ import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
@@ -19,6 +20,7 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 class MainFragment : Fragment() {
 
+  private lateinit var catalogConfig: CatalogConfigurationServiceType
   private lateinit var bottomNavigator: TabbedNavigationController
   private lateinit var bottomView: BottomNavigationView
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
@@ -37,6 +39,8 @@ class MainFragment : Fragment() {
       services.requireService(ProfilesControllerType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
+    this.catalogConfig =
+      services.requireService(CatalogConfigurationServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -76,6 +80,9 @@ class MainFragment : Fragment() {
         )
     }
 
+    val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
+    holdsItem.isVisible = this.catalogConfig.showHoldsTab
+    holdsItem.isEnabled = this.catalogConfig.showHoldsTab
     return layout
   }
 

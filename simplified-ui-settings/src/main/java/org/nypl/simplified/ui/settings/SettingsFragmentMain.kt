@@ -15,6 +15,7 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 class SettingsFragmentMain : PreferenceFragmentCompat() {
 
+  private lateinit var configuration: SettingsConfigurationServiceType
   private lateinit var documents: DocumentStoreType
 
   override fun onCreatePreferences(
@@ -23,8 +24,12 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   ) {
     this.setPreferencesFromResource(R.xml.settings, rootKey)
 
-    val services = Services.serviceDirectory()
-    this.documents = services.requireService(DocumentStoreType::class.java)
+    val services =
+      Services.serviceDirectory()
+    this.documents =
+      services.requireService(DocumentStoreType::class.java)
+    this.configuration =
+      services.requireService(SettingsConfigurationServiceType::class.java)
 
     val settingsAbout =
       this.findPreference<Preference>("settingsAbout")!!
@@ -117,11 +122,17 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureAccounts(preference: Preference) {
-    preference.onPreferenceClickListener =
-      Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsAccounts()
-        true
-      }
+    if (this.configuration.allowAccountsAccess) {
+      preference.isEnabled = true
+      preference.onPreferenceClickListener =
+        Preference.OnPreferenceClickListener {
+          this.findNavigationController().openSettingsAccounts()
+          true
+        }
+    } else {
+      preference.isVisible = false
+      preference.isEnabled = false
+    }
   }
 
   private fun configureAbout(preference: Preference) {

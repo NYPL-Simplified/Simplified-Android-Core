@@ -20,6 +20,15 @@ interface CatalogConfigurationServiceType {
   val showAllCollectionsInLocalFeeds: Boolean
 
   /**
+   * Should the "holds" tab be shown?
+   *
+   * If set to `true`, the holds tab will be visible.
+   * If set to `false`, the holds tab will not be visible.
+   */
+
+  val showHoldsTab: Boolean
+
+  /**
    * The email address to which to send error reports. On most devices, users will be
    * able to override this as the address is passed to the external Android
    * mail activity, and this typically allows for editing both the message and the
