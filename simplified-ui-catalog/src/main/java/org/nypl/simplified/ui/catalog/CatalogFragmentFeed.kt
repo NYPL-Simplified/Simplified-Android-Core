@@ -84,6 +84,7 @@ class CatalogFragmentFeed : Fragment() {
     }
   }
 
+  private lateinit var feedWithoutGroupsScrollListener: RecyclerView.OnScrollListener
   private lateinit var bookCovers: BookCoverProviderType
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var buttonCreator: CatalogButtons
@@ -250,6 +251,8 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithoutGroupsList.layoutManager!!.onRestoreInstanceState(
       this.feedModel.restoreFeedWithoutGroupsViewState())
 
+    this.feedWithoutGroupsScrollListener = CatalogScrollListener(this.bookCovers)
+    this.feedWithoutGroupsList.addOnScrollListener(this.feedWithoutGroupsScrollListener)
     this.reconfigureUI(this.feedModel.feedState())
   }
 
@@ -313,6 +316,7 @@ class CatalogFragmentFeed : Fragment() {
      * of views from the book registry.
      */
 
+    this.feedWithoutGroupsList.removeOnScrollListener(this.feedWithoutGroupsScrollListener)
     this.feedWithoutGroupsList.adapter = null
     this.feedWithGroupsList.adapter = null
     this.feedStatusSubscription?.dispose()

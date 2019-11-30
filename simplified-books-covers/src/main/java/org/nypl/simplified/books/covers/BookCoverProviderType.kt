@@ -14,10 +14,10 @@ interface BookCoverProviderType {
    * Pause loading of any covers. Loading will continue upon calling [loadingThumbnailsContinue].
    */
 
-  fun loadingThumbailsPause()
+  fun loadingThumbnailsPause()
 
   /**
-   * Continue loading of covers after having been paused with [loadingThumbailsPause].
+   * Continue loading of covers after having been paused with [loadingThumbnailsPause].
    * Has no effect if loading is not paused.
    */
 

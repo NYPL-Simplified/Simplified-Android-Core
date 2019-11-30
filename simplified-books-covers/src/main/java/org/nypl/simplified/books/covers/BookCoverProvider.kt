@@ -183,7 +183,7 @@ class BookCoverProvider private constructor(
     }
   }
 
-  override fun loadingThumbailsPause() {
+  override fun loadingThumbnailsPause() {
     this.picasso.pauseTag(this.thumbnailTag)
   }
 
