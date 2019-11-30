@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.FragmentManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
@@ -25,6 +26,7 @@ import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
@@ -36,6 +38,11 @@ import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
+import org.nypl.simplified.ui.profiles.ProfileModificationDefaultFragment
+import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
+import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
+import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
+import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashParameters
@@ -155,8 +162,74 @@ class MainActivity :
     }
   }
 
-  private fun openProfileScreen() {
+  private class ProfilesNavigationController(
+    private val supportFragmentManager: FragmentManager
+  ) : ProfilesNavigationControllerType {
 
+    private val logger =
+      LoggerFactory.getLogger(ProfilesNavigationController::class.java)
+
+    private fun openModificationFragment(
+      parameters: ProfileModificationFragmentParameters
+    ) {
+      val fragmentService =
+        Services.serviceDirectory()
+          .optionalService(ProfileModificationFragmentServiceType::class.java)
+
+      val fragment =
+        fragmentService?.createModificationFragment(parameters)
+          ?: ProfileModificationDefaultFragment.create(parameters)
+
+      this.supportFragmentManager.beginTransaction()
+        .replace(R.id.mainFragmentHolder, fragment, "MAIN")
+        .addToBackStack(null)
+        .commit()
+    }
+
+    override fun openMain() {
+      this.logger.debug("openMain")
+
+      val mainFragment = MainFragment()
+      this.supportFragmentManager.beginTransaction()
+        .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
+        .commit()
+    }
+
+    override fun openProfileModify(id: ProfileID) {
+      this.logger.debug("openProfileModify: ${id.uuid}")
+      this.openModificationFragment(ProfileModificationFragmentParameters(id))
+    }
+
+    override fun openProfileCreate() {
+      this.logger.debug("openProfileCreate")
+      this.openModificationFragment(ProfileModificationFragmentParameters(null))
+    }
+
+    override fun popBackStack(): Boolean {
+      this.logger.debug("popBackStack")
+      this.supportFragmentManager.popBackStack()
+      return true
+    }
+
+    override fun backStackSize(): Int {
+      this.logger.debug("backStackSize")
+      return this.supportFragmentManager.backStackEntryCount
+    }
+  }
+
+  private fun openProfileScreen() {
+    val controller = ProfilesNavigationController(this.supportFragmentManager)
+
+    this.navigationControllerDirectory.updateNavigationController(
+      ProfilesNavigationControllerType::class.java, controller)
+    this.navigationControllerDirectory.updateNavigationController(
+      NavigationControllerType::class.java, controller)
+
+    val profilesFragment = ProfileSelectionFragment()
+
+    this.supportFragmentManager.beginTransaction()
+      .replace(R.id.mainFragmentHolder, profilesFragment, "MAIN")
+      .commit()
   }
 
   private fun openCatalog() {

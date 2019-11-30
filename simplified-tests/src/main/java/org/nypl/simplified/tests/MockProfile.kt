@@ -59,7 +59,7 @@ class MockProfile(
     get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
 
   override val displayName: String
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    get() = "Profile ${id.uuid}"
 
   override fun accountCurrent(): AccountType {
     return this.accountList[0]

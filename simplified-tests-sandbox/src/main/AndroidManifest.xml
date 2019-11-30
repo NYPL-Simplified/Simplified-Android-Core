@@ -38,17 +38,12 @@
       android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
 
     <activity
-      android:name="org.nypl.simplified.tests.sandbox.CatalogFeedActivity"
-      android:exported="true"
-      android:theme="@style/SimplifiedTheme_NoActionBar_DeepPurple" />
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.TabbedActivity"
+      android:name="org.nypl.simplified.tests.sandbox.Tabbed2Activity"
       android:exported="true"
       android:theme="@style/SimplifiedTheme_NoActionBar_Indigo" />
 
     <activity
-      android:name="org.nypl.simplified.tests.sandbox.Tabbed2Activity"
+      android:name="org.nypl.simplified.tests.sandbox.ProfileActivity"
       android:exported="true"
       android:theme="@style/SimplifiedTheme_NoActionBar_Indigo" />
 
