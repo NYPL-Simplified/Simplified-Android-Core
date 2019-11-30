@@ -85,7 +85,7 @@ class NotificationsService(
      * Method for handling [BookEvent]s the service is subscribed to.
      */
     private fun onBookEvent(event: BookEvent) {
-        logger.debug("NotificationsService::onBookEvent $event")
+        logger.trace("NotificationsService::onBookEvent $event")
         executor.execute {
             if (event is BookStatusEvent) {
                 /*
@@ -105,7 +105,7 @@ class NotificationsService(
      * posts a notification if it satisfies the rules for doing so.
      */
     private fun compareToCache(bookStatus: BookWithStatus?) {
-        logger.debug("NotificationsService::compareToCache ${bookStatus?.status}")
+        logger.trace("NotificationsService::compareToCache ${bookStatus?.status}")
         var cachedBookStatus = registryCache[bookStatus?.book?.id]
         if (statusChangedSufficiently(cachedBookStatus, bookStatus)) {
             publishNotification(notificationResourcesType.titleReadyNotificationTitle,

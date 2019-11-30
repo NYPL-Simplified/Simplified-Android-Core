@@ -1,6 +1,6 @@
 package org.nypl.simplified.ui.catalog
 
-import android.content.Context
+import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference
 class CatalogPagedViewHolder(
   private val buttonCreator: CatalogButtons,
   private val registrySubscriptions: CompositeDisposable,
-  private val context: Context,
+  private val context: Activity,
   private val fragmentManager: FragmentManager,
   private val loginViewModel: CatalogLoginViewModel,
   private val navigation: () -> CatalogNavigationControllerType,
@@ -461,12 +461,12 @@ class CatalogPagedViewHolder(
       is BookFormat.BookFormatPDF,
       is BookFormat.BookFormatEPUB -> {
         this.idleButtons.addView(this.buttonCreator.createReadButton {
-          this.navigation().openViewer(book, format)
+          this.navigation().openViewer(this.context, book, format)
         })
       }
       is BookFormat.BookFormatAudioBook -> {
         this.idleButtons.addView(this.buttonCreator.createListenButton {
-          this.navigation().openViewer(book, format)
+          this.navigation().openViewer(this.context, book, format)
         })
       }
       null -> {

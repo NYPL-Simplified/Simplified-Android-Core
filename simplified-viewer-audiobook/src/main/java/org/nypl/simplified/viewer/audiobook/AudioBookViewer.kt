@@ -1,5 +1,6 @@
 package org.nypl.simplified.viewer.audiobook
 
+import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.viewer.spi.ViewerProviderType
@@ -31,4 +32,23 @@ class AudioBookViewer : ViewerProviderType {
         true
     }
   }
+
+  override fun open(
+    activity: Activity,
+    book: Book,
+    format: BookFormat
+  ) {
+    val formatAudio = format as BookFormat.BookFormatAudioBook
+    AudioBookPlayerActivity.startActivity(
+      from = activity,
+      parameters = AudioBookPlayerParameters(
+        formatAudio.manifest!!.manifestFile,
+        formatAudio.manifest!!.manifestURI,
+        book.id,
+        book.entry,
+        TODO()
+      )
+    )
+  }
+
 }

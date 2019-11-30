@@ -1,7 +1,6 @@
-package org.nypl.simplified.app.catalog
+package org.nypl.simplified.main
 
 import android.content.res.Resources
-import org.nypl.simplified.app.R
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import java.net.URI
 
@@ -9,7 +8,9 @@ import java.net.URI
  * Status strings for revocation.
  */
 
-class CatalogBookRevokeStrings(private val resources: Resources) : BookRevokeStringResourcesType {
+class MainCatalogBookRevokeStrings(
+  private val resources: Resources
+) : BookRevokeStringResourcesType {
 
   override val revokeNotRevocable: String
     get() = this.resources.getString(R.string.revokeNotRevocable)

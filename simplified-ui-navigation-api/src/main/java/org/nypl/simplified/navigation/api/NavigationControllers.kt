@@ -26,8 +26,6 @@ object NavigationControllers {
     activity: FragmentActivity,
     interfaceType: Class<T>
   ): T {
-    return this.findDirectory(activity)
-      .navigationController(interfaceType)
+    return this.findDirectory(activity).navigationController(interfaceType)
   }
-
 }

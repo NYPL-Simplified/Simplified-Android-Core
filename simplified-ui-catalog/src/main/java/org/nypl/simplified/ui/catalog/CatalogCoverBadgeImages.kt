@@ -1,16 +1,15 @@
-package org.nypl.simplified.app.catalog
+package org.nypl.simplified.ui.catalog
 
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import org.nypl.simplified.app.R
-import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
 import org.nypl.simplified.books.covers.BookCoverBadge
 import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 
 /**
  * The images used to add badges to book covers.
@@ -32,8 +31,8 @@ class CatalogCoverBadgeImages private constructor(
       BOOK_FORMAT_AUDIO -> {
         BookCoverBadge(
           bitmap = this.audioBookIcon,
-          width = this.screenSize.screenDPToPixels(24).toInt(),
-          height = this.screenSize.screenDPToPixels(24).toInt(),
+          width = this.screenSize.dpToPixels(24).toInt(),
+          height = this.screenSize.dpToPixels(24).toInt(),
           backgroundColorRGBA = { this.backgroundColorRGBA() })
       }
       BOOK_FORMAT_PDF -> {

@@ -1,10 +1,15 @@
 package org.nypl.simplified.tests
 
 import com.google.common.base.Preconditions
+import org.librarysimplified.services.api.ServiceDirectoryBuilderType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.slf4j.LoggerFactory
 
 class MutableServiceDirectory : ServiceDirectoryType {
+
+  override fun toBuilder(): ServiceDirectoryBuilderType {
+    TODO("not implemented")
+  }
 
   private val logger = LoggerFactory.getLogger(MutableServiceDirectory::class.java)
   private val servicesLock = Object()

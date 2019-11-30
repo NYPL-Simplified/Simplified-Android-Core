@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+  <string name="loginDeviceActivated">Device activated</string>
+  <string name="loginDeviceActivating">Attempting to activate device…</string>
+  <string name="loginAuthRequired">Authentication is required. Continuing…</string>
+  <string name="loginCheckingAuthenticationRequirement">Checking authentication requirement…</string>
+  <string name="loginPatronSettingsRequesting">Requesting patron settings…</string>
+  <string name="loginPatronSettingsOK">Received patron settings</string>
+  <string name="loginErrorServer">Server returned an error: %1$d %2$s</string>
+  <string name="loginErrorAuthNotRequired">Authentication is not required!</string>
+  <string name="loginErrorNoPatronURI">No patron settings URI is defined!</string>
+  <string name="loginErrorInvalidCredentials">Your barcode and pin combination was not valid. Please try again.</string>
+  <string name="loginErrorConnectionFailed">A network error occurred. Please check your connection or try again later.</string>
+  <string name="loginErrorPatronSettingsParseError">Could not parse patron settings returned by server!</string>
+  <string name="loginDeviceDRMNotSupported">This account requires Adobe ACS DRM, but this version of the application does not support it.</string>
+  <string name="loginDeviceActivationPostDeviceManager">Contacting device manager…</string>
+  <string name="loginDeviceActivationPostDeviceManagerDone">Posted to device manager URI.</string>
+  <string name="loginDeviceActivationFailed">Device activation failed: %1$s (%2$s)</string>
+</resources>

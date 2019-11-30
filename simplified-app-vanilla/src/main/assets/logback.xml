@@ -33,22 +33,6 @@
     <appender-ref ref="FILE" />
   </appender>
 
-  <logger
-    name="org.nypl.simplified.app.catalog.CatalogFeedBookCellView"
-    level="INFO" />
-
-  <logger
-    name="org.nypl.simplified.app.catalog.CatalogFeedLane"
-    level="INFO" />
-
-  <logger
-    name="org.nypl.simplified.app.BookCoverProvider"
-    level="DEBUG" />
-
-  <logger
-    name="org.nypl.drm"
-    level="DEBUG" />
-
   <root level="DEBUG">
     <appender-ref ref="LOG_CAT" />
     <appender-ref ref="ASYNC_FILE" />

@@ -1,4 +1,4 @@
-package org.nypl.simplified.app;
+package org.nypl.simplified.main;
 
 import android.content.res.AssetManager;
 
@@ -16,26 +16,22 @@ import java.util.Properties;
 /**
  * Bugsnag config loader
  */
-public final class Bugsnag
-{
-  private static final Logger LOG = LoggerFactory.getLogger(Bugsnag.class);
+public final class MainBugsnag {
+  private static final Logger LOG = LoggerFactory.getLogger(MainBugsnag.class);
 
   /**
    * Construct bugsnag
    */
-  private Bugsnag()
-  {
+  private MainBugsnag() {
   }
 
   /**
    * Get BugSnag API token if it has been provided as part of the build.
    *
    * @param in_mgr The current asset manager
-   *
    * @return The BugSnag API token.
    */
-  public static OptionType<String> getApiToken(final AssetManager in_mgr)
-  {
+  public static OptionType<String> getApiToken(final AssetManager in_mgr) {
     NullCheck.notNull(in_mgr);
 
     InputStream s = null;
@@ -49,11 +45,11 @@ public final class Bugsnag
       }
       return Option.some(api_token);
     } catch (final IOException e) {
-      Bugsnag.LOG.debug(
+      MainBugsnag.LOG.debug(
         "i/o error on attempting to open bugsnag.conf: ", e);
       return Option.none();
     } catch (final BugsnagConfigurationMissingParameter e) {
-      Bugsnag.LOG.debug(
+      MainBugsnag.LOG.debug(
         "missing parameter in bugsnag.conf: {}: ", e.getMessage(), e);
       return Option.none();
     } finally {
@@ -62,24 +58,20 @@ public final class Bugsnag
           s.close();
         }
       } catch (final IOException e) {
-        Bugsnag.LOG.debug("ignoring exception raised on close: ", e);
+        MainBugsnag.LOG.debug("ignoring exception raised on close: ", e);
       }
     }
   }
 
-  private static abstract class BugsnagConfigurationError extends Exception
-  {
-    BugsnagConfigurationError(final String in_message)
-    {
+  private static abstract class BugsnagConfigurationError extends Exception {
+    BugsnagConfigurationError(final String in_message) {
       super(in_message);
     }
   }
 
   private static final class BugsnagConfigurationMissingParameter
-    extends BugsnagConfigurationError
-  {
-    BugsnagConfigurationMissingParameter(final String in_message)
-    {
+    extends BugsnagConfigurationError {
+    BugsnagConfigurationMissingParameter(final String in_message) {
       super(in_message);
     }
   }

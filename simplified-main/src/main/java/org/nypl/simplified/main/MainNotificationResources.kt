@@ -1,15 +1,13 @@
-package org.nypl.simplified.app.notifications
+package org.nypl.simplified.main
 
 import android.content.Context
-import org.nypl.simplified.app.R
-import org.nypl.simplified.app.splash.SplashActivity
 import org.nypl.simplified.notifications.NotificationResourcesType
 
 /**
  * Resources used by the notifications service.
  */
 
-class NotificationResources(
+class MainNotificationResources(
   private val context: Context
 ) : NotificationResourcesType {
 
@@ -20,7 +18,7 @@ class NotificationResources(
     get() = context.getString(R.string.notification_channel_description)
 
   override val intentClass: Class<*>
-    get() = SplashActivity::class.java
+    get() = MainActivity::class.java
 
   override val titleReadyNotificationContent: String
     get() = context.getString(R.string.notification_title_ready_content)
@@ -29,5 +27,5 @@ class NotificationResources(
     get() = context.getString(R.string.notification_title_ready_title)
 
   override val smallIcon: Int
-    get() = R.mipmap.ic_launcher
+    get() = R.drawable.main_icon
 }

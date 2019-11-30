@@ -1,5 +1,6 @@
 package org.nypl.simplified.viewer.pdf
 
+import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.viewer.spi.ViewerProviderType
@@ -27,5 +28,22 @@ class PdfViewerProvider : ViewerProviderType {
         true
       }
     }
+  }
+
+  override fun open(
+    activity: Activity,
+    book: Book,
+    format: BookFormat
+  ) {
+    val formatPDF = format as BookFormat.BookFormatPDF
+    PdfReaderActivity.startActivity(
+      from = activity,
+      parameters = PdfReaderParameters(
+        accountId = book.account,
+        documentTile = book.entry.title,
+        pdfFile = formatPDF.file!!,
+        id = book.id
+      )
+    )
   }
 }

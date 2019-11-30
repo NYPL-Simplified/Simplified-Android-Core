@@ -65,12 +65,8 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       )
       host.toolbarSetBackArrowConditionally(
         context = host,
-        shouldArrowBePresent = {
-          this.findNavigationController().backStackSize() > 1
-        },
-        onArrowClicked = {
-          this.findNavigationController().popBackStack()
-        })
+        shouldArrowBePresent = { this.findNavigationController().backStackSize() > 1 },
+        onArrowClicked = { this.findNavigationController().popBackStack() })
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
     }

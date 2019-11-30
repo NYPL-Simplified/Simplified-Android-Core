@@ -1,6 +1,6 @@
 package org.nypl.simplified.ui.catalog
 
-import android.content.Context
+import android.app.Activity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 
 class CatalogPagedAdapter(
   private val buttonCreator: CatalogButtons,
-  private val context: Context,
+  private val context: Activity,
   private val fragmentManager: FragmentManager,
   private val loginViewModel: CatalogLoginViewModel,
   private val navigation: () -> CatalogNavigationControllerType,

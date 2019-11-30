@@ -94,9 +94,9 @@ public final class DRMLicensor implements Serializable
     final StringBuilder builder = new StringBuilder(64);
     builder.append("[DRMLicensor ");
     builder.append(this.vendor);
-    builder.append(" → ");
+    builder.append(" -> ");
     builder.append(this.client_token);
-    builder.append(" → ");
+    builder.append(" -> ");
     builder.append(this.device_manager);
     builder.append("]");
     return NullCheck.notNull(builder.toString());

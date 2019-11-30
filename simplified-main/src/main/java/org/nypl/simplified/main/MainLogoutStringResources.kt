@@ -1,14 +1,15 @@
-package org.nypl.simplified.app.login
+package org.nypl.simplified.main
 
 import android.content.res.Resources
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
-import org.nypl.simplified.app.R
 
 /**
  * Strings related to logout events.
  */
 
-class LogoutStringResources(val resources: Resources) : AccountLogoutStringResourcesType {
+class MainLogoutStringResources(
+  private val resources: Resources
+) : AccountLogoutStringResourcesType {
 
   override val logoutUnexpectedException: String
     get() = this.resources.getString(R.string.unexpectedException)

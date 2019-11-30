@@ -1,13 +1,14 @@
-package org.nypl.simplified.app.catalog
+package org.nypl.simplified.main
 
 import android.content.res.Resources
-import org.nypl.simplified.app.R
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAvailabilityType
 import java.io.File
 
-class CatalogBookBorrowStrings(val resources: Resources) : BookBorrowStringResourcesType {
+class MainCatalogBookBorrowStrings(
+  private val resources: Resources
+) : BookBorrowStringResourcesType {
 
   override val borrowBookSelectingAcquisition: String
     get() = this.resources.getString(R.string.borrowBookSelectingAcquisition)

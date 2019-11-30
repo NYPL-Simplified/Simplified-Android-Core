@@ -1,5 +1,6 @@
 package org.nypl.simplified.viewer.spi
 
+import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 
@@ -15,5 +16,11 @@ interface ViewerProviderType {
     book: Book,
     format: BookFormat
   ): Boolean
+
+  fun open(
+    activity: Activity,
+    book: Book,
+    format: BookFormat
+  )
 
 }

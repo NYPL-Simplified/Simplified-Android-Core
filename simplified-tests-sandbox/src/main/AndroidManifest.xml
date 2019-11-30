@@ -56,6 +56,11 @@
       android:name="org.nypl.simplified.tests.sandbox.ErrorPageActivity"
       android:exported="true"
       android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
+
+    <activity
+      android:name="org.nypl.simplified.tests.sandbox.TestTabbedActivity"
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_NoActionBar_Indigo" />
   </application>
 
 </manifest>

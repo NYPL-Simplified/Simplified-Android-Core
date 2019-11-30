@@ -1,12 +1,12 @@
-package org.nypl.simplified.app.profiles
+package org.nypl.simplified.main
 
 import android.content.res.Resources
-import org.nypl.simplified.app.R
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 
-class ProfileAccountDeletionStringResources(
-  val resources: Resources
+class MainProfileAccountDeletionStringResources(
+  private val resources: Resources
 ) : ProfileAccountDeletionStringResourcesType {
+
   override val deletionSucceeded: String
     get() = this.resources.getString(R.string.profileAccountDeletionSucceeded)
 

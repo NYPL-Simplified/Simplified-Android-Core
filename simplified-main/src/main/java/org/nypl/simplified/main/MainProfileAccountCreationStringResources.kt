@@ -1,11 +1,10 @@
-package org.nypl.simplified.app.profiles
+package org.nypl.simplified.main
 
 import android.content.res.Resources
-import org.nypl.simplified.app.R
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 
-class ProfileAccountCreationStringResources(
-  val resources: Resources
+class MainProfileAccountCreationStringResources(
+  private val resources: Resources
 ) : ProfileAccountCreationStringResourcesType {
 
   override val creatingAnAccountProviderDescription: String

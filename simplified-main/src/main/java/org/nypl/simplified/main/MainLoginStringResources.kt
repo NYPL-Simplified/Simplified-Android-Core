@@ -1,14 +1,15 @@
-package org.nypl.simplified.app.login
+package org.nypl.simplified.main
 
 import android.content.res.Resources
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
-import org.nypl.simplified.app.R
 
 /**
  * Strings related to login events.
  */
 
-class LoginStringResources(val resources: Resources) : AccountLoginStringResourcesType {
+class MainLoginStringResources(
+  private val resources: Resources
+) : AccountLoginStringResourcesType {
 
   override val loginAuthRequired: String
     get() = this.resources.getString(R.string.loginAuthRequired)

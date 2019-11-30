@@ -1,11 +1,13 @@
 package org.nypl.simplified.ui.navigation.tabs
 
+import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomnavigation.LabelVisibilityMode
 import com.pandora.bottomnavigator.BottomNavigator
@@ -33,6 +35,7 @@ import org.nypl.simplified.ui.settings.SettingsFragmentVersion
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.viewer.api.Viewers
+import org.slf4j.LoggerFactory
 
 /**
  * A tabbed navigation controller based on Pandora's BottomNavigator.
@@ -48,6 +51,8 @@ class TabbedNavigationController private constructor(
 
   companion object {
 
+    private val logger = LoggerFactory.getLogger(TabbedNavigationController::class.java)
+
     /**
      * Create a new tabbed navigation controller. The controller will load fragments into the
      * fragment container specified by [fragmentContainerId], using the Pandora BottomNavigator
@@ -55,7 +60,7 @@ class TabbedNavigationController private constructor(
      */
 
     fun create(
-      activity: AppCompatActivity,
+      activity: FragmentActivity,
       profilesController: ProfilesControllerType,
       @IdRes fragmentContainerId: Int,
       navigationView: BottomNavigationView
@@ -67,30 +72,33 @@ class TabbedNavigationController private constructor(
           bottomNavigationView = navigationView,
           rootFragmentsFactory = mapOf(
             R.id.tabCatalog to {
-              createCatalogFragment(profilesController)
+              this.createCatalogFragment(profilesController, R.id.tabCatalog)
             },
             R.id.tabBooks to {
-              createBooksFragment(activity, profilesController)
+              this.createBooksFragment(activity, profilesController, R.id.tabBooks)
             },
             R.id.tabHolds to {
-              createHoldsFragment(activity, profilesController)
+              this.createHoldsFragment(activity, profilesController, R.id.tabBooks)
             },
             R.id.tabSettings to {
-              createSettingsFragment()
+              this.createSettingsFragment(R.id.tabSettings)
             }
           ),
           defaultTab = R.id.tabCatalog,
           activity = activity
         )
 
-      navigationView.itemIconTintList = colorStateListForTabs(activity)
-      navigationView.itemTextColor = colorStateListForTabs(activity)
+      navigationView.itemIconTintList = this.colorStateListForTabs(activity)
+      navigationView.itemTextColor = this.colorStateListForTabs(activity)
       navigationView.labelVisibilityMode = LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 
-      return TabbedNavigationController(profilesController, navigator)
+      return TabbedNavigationController(
+        profilesController = profilesController,
+        navigator = navigator
+      )
     }
 
-    private fun colorStateListForTabs(context: AppCompatActivity): ColorStateList {
+    private fun colorStateListForTabs(context: FragmentActivity): ColorStateList {
       val states =
         arrayOf(
           intArrayOf(android.R.attr.state_checked),
@@ -104,14 +112,18 @@ class TabbedNavigationController private constructor(
       return ColorStateList(states, colors)
     }
 
-    private fun createSettingsFragment(): Fragment {
+    private fun createSettingsFragment(id: Int): Fragment {
+      this.logger.debug("[{}]: creating settings fragment", id)
       return SettingsFragmentMain()
     }
 
     private fun createHoldsFragment(
       context: Context,
-      profilesController: ProfilesControllerType
+      profilesController: ProfilesControllerType,
+      id: Int
     ): Fragment {
+      this.logger.debug("[{}]: creating holds fragment", id)
+
       val account = profilesController.profileAccountCurrent()
       return CatalogFragmentFeed.create(CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
         title = context.getString(R.string.tabHolds),
@@ -124,8 +136,11 @@ class TabbedNavigationController private constructor(
 
     private fun createBooksFragment(
       context: Context,
-      profilesController: ProfilesControllerType
+      profilesController: ProfilesControllerType,
+      id: Int
     ): Fragment {
+      this.logger.debug("[{}]: creating books fragment", id)
+
       val account = profilesController.profileAccountCurrent()
       return CatalogFragmentFeed.create(CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
         title = context.getString(R.string.tabBooks),
@@ -136,7 +151,12 @@ class TabbedNavigationController private constructor(
       ))
     }
 
-    private fun createCatalogFragment(profilesController: ProfilesControllerType): Fragment {
+    private fun createCatalogFragment(
+      profilesController: ProfilesControllerType,
+      id: Int
+    ): Fragment {
+      this.logger.debug("[{}]: creating catalog fragment", id)
+
       val account = profilesController.profileAccountCurrent()
       return CatalogFragmentFeed.create(CatalogFeedArguments.CatalogFeedArgumentsRemote(
         title = account.provider.displayName,
@@ -231,9 +251,10 @@ class TabbedNavigationController private constructor(
   }
 
   override fun openViewer(
+    activity: Activity,
     book: Book,
     format: BookFormat
   ) {
-    Viewers.openViewer(book, format)
+    Viewers.openViewer(activity, book, format)
   }
 }

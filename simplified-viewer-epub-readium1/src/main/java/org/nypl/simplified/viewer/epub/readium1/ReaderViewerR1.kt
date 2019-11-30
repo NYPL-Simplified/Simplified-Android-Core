@@ -1,7 +1,9 @@
 package org.nypl.simplified.viewer.epub.readium1
 
+import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.viewer.spi.ViewerProviderType
 import org.slf4j.LoggerFactory
 
@@ -29,5 +31,17 @@ class ReaderViewerR1 : ViewerProviderType {
     }
   }
 
-
+  override fun open(
+    activity: Activity,
+    book: Book,
+    format: BookFormat
+  ) {
+    val formatEPUB = format as BookFormat.BookFormatEPUB
+    ReaderActivity.startActivity(
+      activity,
+      book.id,
+      formatEPUB.file,
+      FeedEntry.FeedEntryOPDS(book.entry)
+    )
+  }
 }

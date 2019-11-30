@@ -85,10 +85,15 @@ interface ToolbarHostType {
     onArrowClicked: () -> Unit
   ) {
     val toolbar = this.findToolbar()
-    if (shouldArrowBePresent()) {
-      toolbar.navigationIcon = this.toolbarIconBackArrow(context)
-      toolbar.setNavigationOnClickListener { onArrowClicked() }
-    } else {
+    try {
+      if (shouldArrowBePresent()) {
+        toolbar.navigationIcon = this.toolbarIconBackArrow(context)
+        toolbar.setNavigationOnClickListener { onArrowClicked() }
+      } else {
+        toolbar.navigationIcon = null
+        toolbar.setNavigationOnClickListener(null)
+      }
+    } catch (e: Exception) {
       toolbar.navigationIcon = null
       toolbar.setNavigationOnClickListener(null)
     }

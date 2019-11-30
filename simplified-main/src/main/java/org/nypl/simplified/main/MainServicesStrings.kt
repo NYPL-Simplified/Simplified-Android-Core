@@ -1,10 +1,17 @@
-package org.nypl.simplified.app.services
+package org.nypl.simplified.main
 
 import android.content.res.Resources
-import org.nypl.simplified.app.R
 import org.nypl.simplified.boot.api.BootStringResourcesType
 
-class SimplifiedServicesStrings(private val resources: Resources) : BootStringResourcesType {
+internal class MainServicesStrings(
+  private val resources: Resources
+) : BootStringResourcesType {
+
+  val bootingBuildConfigurationService: String =
+    this.resources.getString(R.string.bootingBuildConfigurationService)
+
+  val bootingUIThreadService: String =
+    this.resources.getString(R.string.bootingUIThreadService)
 
   val bootingUIBackgroundExecutor: String =
     this.resources.getString(R.string.bootingUIBackgroundExecutor)

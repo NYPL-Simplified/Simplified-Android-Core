@@ -8,6 +8,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.common.util.concurrent.MoreExecutors
 import leakcanary.AppWatcher
 import leakcanary.LeakCanary
+import org.librarysimplified.services.api.ServiceDirectory
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
@@ -54,6 +55,7 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerType {
 
@@ -128,7 +130,7 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
   }
 
   private fun initializeServices(): ServiceDirectoryType {
-    val newServices = Services.startInitializing()
+    val newServices = ServiceDirectory.builder()
 
     val executor =
       NamedThreadPools.namedThreadPool(4, "bg", 19)
@@ -251,7 +253,9 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
       service = bookController
     )
 
-    return newServices.build()
+    val services = newServices.build()
+    Services.initialize(services)
+    return services
   }
 
   override fun onStart() {
@@ -272,14 +276,17 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
   }
 
   private fun recreateNavigationController(navigationView: BottomNavigationView) {
+    val profilesController =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+        .requireService(ProfilesControllerType::class.java)
+
     this.navigationController =
       TabbedNavigationController.create(
         activity = this,
-        profilesController = Services.serviceDirectory().requireService(ProfilesControllerType::class.java),
+        profilesController = profilesController,
         fragmentContainerId = R.id.fragmentHolder,
         navigationView = navigationView
       )
-
     this.navigationControllers.updateNavigationController(
       navigationInterface = CatalogNavigationControllerType::class.java,
       navigationInstance = this.navigationController

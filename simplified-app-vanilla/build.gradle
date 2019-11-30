@@ -55,11 +55,8 @@ android {
 }
 
 dependencies {
-  implementation project(":simplified-app-shared")
+  implementation project(":simplified-main")
   implementation project(":simplified-accounts-source-nyplregistry")
-
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXLegacySupport
 
   annotationProcessor libraries.googleAutoValue
 }

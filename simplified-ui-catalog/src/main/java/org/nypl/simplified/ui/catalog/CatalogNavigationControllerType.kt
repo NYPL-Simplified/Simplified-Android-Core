@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.catalog
 
+import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
@@ -37,6 +38,7 @@ interface CatalogNavigationControllerType : NavigationControllerType {
    */
 
   fun openViewer(
+    activity: Activity,
     book: Book,
     format: BookFormat
   )

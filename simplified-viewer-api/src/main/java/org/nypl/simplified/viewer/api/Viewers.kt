@@ -1,5 +1,6 @@
 package org.nypl.simplified.viewer.api
 
+import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.viewer.spi.ViewerProviderType
@@ -11,6 +12,7 @@ object Viewers {
   private val logger = LoggerFactory.getLogger(Viewers::class.java)
 
   fun openViewer(
+    activity: Activity,
     book: Book,
     format: BookFormat
   ) {
@@ -33,6 +35,7 @@ object Viewers {
       if (supported) {
         this.logger.debug(
           "[{}] viewer provider {} supports the book, using it!", index, viewerProvider.name)
+        viewerProvider.open(activity, book, format)
         return
       } else {
         this.logger.debug(

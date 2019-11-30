@@ -1,4 +1,4 @@
-package org.nypl.simplified.app;
+package org.nypl.simplified.main;
 
 import android.content.res.AssetManager;
 
@@ -17,13 +17,13 @@ import java.net.URI;
  * An implementation of the bundled content resolver based on Android assets.
  */
 
-public final class BundledContentResolver implements BundledContentResolverType {
+public final class MainBundledContentResolver implements BundledContentResolverType {
 
-  private static final Logger LOG = LoggerFactory.getLogger(BundledContentResolver.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MainBundledContentResolver.class);
 
   private final AssetManager assets;
 
-  private BundledContentResolver(
+  private MainBundledContentResolver(
       final AssetManager assets)
   {
     this.assets = NullCheck.notNull(assets, "assets");
@@ -32,7 +32,7 @@ public final class BundledContentResolver implements BundledContentResolverType 
   public static BundledContentResolverType create(
       final AssetManager assets)
   {
-    return new BundledContentResolver(assets);
+    return new MainBundledContentResolver(assets);
   }
 
   @Override

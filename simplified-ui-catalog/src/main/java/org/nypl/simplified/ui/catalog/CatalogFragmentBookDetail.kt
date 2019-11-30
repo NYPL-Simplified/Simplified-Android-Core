@@ -635,12 +635,12 @@ class CatalogFragmentBookDetail : Fragment() {
           is BookFormat.BookFormatPDF,
           is BookFormat.BookFormatEPUB -> {
             this.buttons.addView(this.buttonCreator.createReadButton {
-              this.findNavigationController().openViewer(book, format)
+              this.findNavigationController().openViewer(this.requireActivity(), book, format)
             })
           }
           is BookFormat.BookFormatAudioBook -> {
             this.buttons.addView(this.buttonCreator.createListenButton {
-              this.findNavigationController().openViewer(book, format)
+              this.findNavigationController().openViewer(this.requireActivity(), book, format)
             })
           }
         }

@@ -5,5 +5,5 @@ import org.nypl.simplified.ui.settings.SettingsFragmentMain
 
 class SettingsFragmentMainActivity : NavigationHostActivity<SettingsFragmentMain>() {
   override fun createFragment(): SettingsFragmentMain =
-    SettingsFragmentMain()
+    SettingsFragmentMain(id)
 }
