@@ -1516,6 +1516,7 @@ class BookBorrowTask(
           expectedTotalBytes = expectedTotal)
       this.bookRegistry.update(BookWithStatus(this.databaseEntry.book, status))
       this.downloadRunningTotal = runningTotal
+      this.downloadTimeThen = timeNow
     }
   }
 }
