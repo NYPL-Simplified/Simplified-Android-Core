@@ -5,10 +5,13 @@ import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
+import org.nypl.simplified.profiles.api.ProfileAttributes
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.reader.api.ReaderPreferences
 import java.io.File
 import java.net.URI
 import java.util.SortedMap
@@ -18,6 +21,18 @@ class MockProfile(
   override val id: ProfileID,
   accountCount: Int
 ) : ProfileType {
+
+  override fun setDescription(newDescription: ProfileDescription) {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun description(): ProfileDescription {
+    return ProfileDescription(
+      displayName = "Profile ${id.uuid}",
+      preferences = ProfilePreferences(null, false, ReaderPreferences.builder().build()),
+      attributes = ProfileAttributes(sortedMapOf())
+    )
+  }
 
   override fun delete() {
 
@@ -35,10 +50,6 @@ class MockProfile(
       .toSortedMap()
 
   override fun accountsDatabase(): AccountsDatabaseType {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun preferencesUpdate(preferences: ProfilePreferences) {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
@@ -66,22 +77,12 @@ class MockProfile(
   override val displayName: String
     get() = "Profile ${id.uuid}"
 
-  override fun setDisplayName(newName: String) {
-
-  }
-
   override fun accountCurrent(): AccountType {
     return this.accountList[0]
   }
 
   override fun accounts(): SortedMap<AccountID, AccountType> {
     return this.accounts as SortedMap<AccountID, AccountType>
-  }
-
-  override fun preferences(): ProfilePreferences {
-    return ProfilePreferences.builder()
-      .setShowTestingLibraries(true)
-      .build()
   }
 
   override fun accountsByProvider(): SortedMap<URI, AccountType> {

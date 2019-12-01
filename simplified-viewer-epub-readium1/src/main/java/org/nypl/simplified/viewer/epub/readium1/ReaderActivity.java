@@ -42,6 +42,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentExce
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.reader.ReaderColorSchemes;
+import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
 import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOC;
@@ -329,7 +330,7 @@ public final class ReaderActivity extends AppCompatActivity implements
           .requireService(ProfilesControllerType.class)
           .profileCurrent()
           .preferences()
-          .readerPreferences();
+          .getReaderPreferences();
     } catch (final ProfileNoneCurrentException e) {
       this.onEPUBLoadFailed(e);
       this.finish();
@@ -499,9 +500,11 @@ public final class ReaderActivity extends AppCompatActivity implements
 
   private void onProfileEventPreferencesChanged(
     final ProfileUpdated.Succeeded event) {
-    if (!event.getOldPreferences().equals(event.getNewPreferences())) {
+    final ProfilePreferences oldPreferences = event.getOldDescription().getPreferences();
+    final ProfilePreferences newPreferences = event.getNewDescription().getPreferences();
+    if (!oldPreferences.equals(newPreferences)) {
       LOG.debug("onProfileEventPreferencesChanged: reader settings changed");
-      applyReaderPreferences(event.getNewPreferences().readerPreferences());
+      applyReaderPreferences(newPreferences.getReaderPreferences());
     }
   }
 
@@ -807,7 +810,7 @@ public final class ReaderActivity extends AppCompatActivity implements
           .requireService(ProfilesControllerType.class)
           .profileCurrent()
           .preferences()
-          .readerPreferences());
+          .getReaderPreferences());
     } catch (final ProfileNoneCurrentException e) {
       throw new IllegalStateException(e);
     }

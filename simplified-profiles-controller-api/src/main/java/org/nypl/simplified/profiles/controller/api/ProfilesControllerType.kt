@@ -3,7 +3,7 @@ package org.nypl.simplified.profiles.controller.api
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.Observable
-import org.joda.time.LocalDate
+import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
@@ -19,11 +19,11 @@ import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
@@ -86,7 +86,7 @@ interface ProfilesControllerType {
     accountProvider: AccountProviderType,
     displayName: String,
     gender: String,
-    date: LocalDate
+    date: DateTime
   ): FluentFuture<ProfileCreationEvent>
 
   /**
@@ -239,43 +239,31 @@ interface ProfilesControllerType {
   ): FluentFuture<TaskResult<AccountLogoutErrorData, Unit>>
 
   /**
-   * Update preferences for the current profile.
+   * Update values for the current profile.
    *
-   * @param preferences A function that transforms the profile's current preferences
+   * @param update A function that transforms the profile's current description
    * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
    * @see .profileSelect
    * @see .profileAnonymousEnabled
    */
 
   @Throws(ProfileNoneCurrentException::class)
-  fun profilePreferencesUpdate(
-    preferences: (ProfilePreferences) -> ProfilePreferences
+  fun profileUpdate(
+    update: (ProfileDescription) -> ProfileDescription
   ): FluentFuture<ProfileUpdated>
 
   /**
-   * Update preferences for the given profile.
+   * Update values for the given profile.
    *
    * @param profile     The target profile
-   * @param preferences A function that transforms the profile's current preferences
+   * @param update A function that transforms the profile's current description
    * @see .profileSelect
    * @see .profileAnonymousEnabled
    */
 
-  fun profilePreferencesUpdateFor(
+  fun profileUpdateFor(
     profile: ProfileID,
-    preferences: (ProfilePreferences) -> ProfilePreferences
-  ): FluentFuture<ProfileUpdated>
-
-  /**
-   * Update the display name for the given profile.
-   *
-   * @param profile     The target profile
-   * @param displayName The new display name
-   */
-
-  fun profileDisplayNameUpdateFor(
-    profile: ProfileID,
-    displayName: String
+    update: (ProfileDescription) -> ProfileDescription
   ): FluentFuture<ProfileUpdated>
 
   /**

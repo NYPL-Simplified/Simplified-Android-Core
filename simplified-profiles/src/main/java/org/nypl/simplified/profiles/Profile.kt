@@ -32,13 +32,14 @@ internal class Profile internal constructor(
   override val directory: File,
   private val accounts: AccountsDatabaseType,
   initialDescription: ProfileDescription,
-  initialAccountCurrent: AccountType) : ProfileType {
+  initialAccountCurrent: AccountType
+) : ProfileType {
 
   private val logger = LoggerFactory.getLogger(Profile::class.java)
 
   private val descriptionLock: Any = Any()
   @GuardedBy("descriptionLock")
-  private var description: ProfileDescription = initialDescription
+  private var descriptionCurrent: ProfileDescription = initialDescription
 
   private val accountCurrentLock: Any = Any()
   @GuardedBy("accountCurrentLock")
@@ -54,11 +55,6 @@ internal class Profile internal constructor(
   override val isCurrent: Boolean
     get() = this.owner?.currentProfile()?.map { p -> p.id } == Option.some(this.id)
 
-  override val displayName: String
-    get() = synchronized(this.descriptionLock) {
-      this.description.displayName()
-    }
-
   override fun accountCurrent(): AccountType {
     synchronized(this.accountCurrentLock) {
       return this.accountCurrent
@@ -67,12 +63,6 @@ internal class Profile internal constructor(
 
   override fun accounts(): SortedMap<AccountID, AccountType> {
     return this.accounts.accounts()
-  }
-
-  override fun preferences(): ProfilePreferences {
-    synchronized(this.descriptionLock) {
-      return this.description.preferences()
-    }
   }
 
   override fun accountsByProvider(): SortedMap<URI, AccountType> {
@@ -89,27 +79,16 @@ internal class Profile internal constructor(
     return this.accounts
   }
 
-  @Throws(IOException::class)
-  override fun preferencesUpdate(preferences: ProfilePreferences) {
-    val newDescription: ProfileDescription
+  override fun setDescription(newDescription: ProfileDescription) {
     synchronized(this.descriptionLock) {
-      newDescription = this.description.toBuilder()
-        .setPreferences(preferences)
-        .build()
-
-      ProfilesDatabases.writeDescription(this.directory, newDescription)
-      this.description = newDescription
-    }
-  }
-
-  override fun setDisplayName(newName: String) {
-    val newNameNormal = normalizeDisplayName(newName)
-    synchronized(this.descriptionLock) {
-      val existing = this.owner!!.findProfileWithDisplayName(newNameNormal)
+      val newNameNormal =
+        normalizeDisplayName(newDescription.displayName)
+      val existing =
+        this.owner!!.findProfileWithDisplayName(newNameNormal)
 
       /*
-         * If a profile exists with the given name, and it's not this profile... Abort!
-         */
+       * If a profile exists with the given name, and it's not this profile... Abort!
+       */
 
       if (existing.isSome) {
         if (existing != Option.of(this)) {
@@ -118,13 +97,9 @@ internal class Profile internal constructor(
         }
       }
 
-      val newDescription =
-        this.description.toBuilder()
-          .setDisplayName(newNameNormal)
-          .build()
 
       ProfilesDatabases.writeDescription(this.directory, newDescription)
-      this.description = newDescription
+      this.descriptionCurrent = newDescription
     }
   }
 
@@ -173,6 +148,12 @@ internal class Profile internal constructor(
       } else {
         throw AccountsDatabaseNonexistentException("No such account: $id")
       }
+    }
+  }
+
+  override fun description(): ProfileDescription {
+    return synchronized(this.descriptionLock) {
+      this.descriptionCurrent
     }
   }
 

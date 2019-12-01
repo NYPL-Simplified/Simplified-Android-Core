@@ -88,7 +88,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
         .requireService(ProfilesControllerType::class.java)
         .profileCurrent()
         .preferences()
-        .readerPreferences()
+        .readerPreferences
         .colorScheme())
 
     return this.readerTOCLayout
@@ -118,9 +118,9 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
   private fun onProfileEvent(event: ProfileEvent) {
     if (event is ProfileUpdated.Succeeded) {
-      if (event.oldPreferences != event.newPreferences) {
+      if (event.oldDescription.preferences != event.newDescription.preferences) {
         this.uiThread.runOnUIThread {
-          this.applyColorScheme(event.newPreferences.readerPreferences().colorScheme())
+          this.applyColorScheme(event.newDescription.preferences.readerPreferences.colorScheme())
         }
       }
     }
@@ -197,7 +197,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
           .requireService(ProfilesControllerType::class.java)
           .profileCurrent()
           .preferences()
-          .readerPreferences()
+          .readerPreferences
           .colorScheme()))
 
     itemView.setOnClickListener {

@@ -139,7 +139,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
           .requireService(ProfilesControllerType::class.java)
           .profileCurrent()
           .preferences()
-          .readerPreferences()
+          .readerPreferences
           .colorScheme()))
 
     layoutView.setOnClickListener {

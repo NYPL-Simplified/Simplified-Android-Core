@@ -83,7 +83,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
         .profileCurrentlyUsedAccountProviders()
         .map { p -> p.toDescription() }
 
-    this.logger.debug("should show testing providers: {}", preferences.showTestingLibraries())
+    this.logger.debug("should show testing providers: {}", preferences.showTestingLibraries)
     this.logger.debug("profile is using {} providers", usedAccountProviders.size)
 
     val availableAccountProviders =
@@ -107,7 +107,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
     provider: AccountProviderDescriptionType,
     preferences: ProfilePreferences
   ) =
-    provider.metadata.isProduction || preferences.showTestingLibraries()
+    provider.metadata.isProduction || preferences.showTestingLibraries
 
   @UiThread
   private fun onAccountClicked(account: AccountProviderDescriptionType) {

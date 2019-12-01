@@ -61,12 +61,7 @@ final class ProfileCreationTask implements Callable<ProfileCreationEvent> {
       final ProfileType profile =
           this.profiles.createProfile(this.account_provider, this.display_name);
 
-      profile.preferencesUpdate(
-          profile.preferences()
-              .toBuilder()
-              .setGender(this.gender)
-              .setDateOfBirth(this.date)
-              .build());
+
 
       return ProfileCreationSucceeded.of(this.display_name, profile.getId());
     } catch (final Exception e) {

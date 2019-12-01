@@ -17,6 +17,7 @@ import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -532,26 +533,26 @@ class SettingsFragmentAccount : Fragment() {
   }
 
   private fun setUnder13() {
-    this.profilesController.profilePreferencesUpdate { preferences ->
-      preferences.toBuilder()
-        .setDateOfBirth(this.synthesizeDateOfBirth(0))
-        .build()
+    this.profilesController.profileUpdate { description ->
+      description.copy(
+        preferences = description.preferences.copy(
+          dateOfBirth = this.synthesizeDateOfBirth(0)))
     }
   }
 
   private fun setOver13() {
-    this.profilesController.profilePreferencesUpdate { preferences ->
-      preferences.toBuilder()
-        .setDateOfBirth(this.synthesizeDateOfBirth(14))
-        .build()
+    this.profilesController.profileUpdate { description ->
+      description.copy(
+        preferences = description.preferences.copy(
+          dateOfBirth = this.synthesizeDateOfBirth(14)))
     }
   }
 
   private fun isOver13(): Boolean {
     val profile = this.profilesController.profileCurrent()
-    val age = profile.preferences().dateOfBirth()
-    return if (age is Some<ProfileDateOfBirth>) {
-      age.get().yearsOld(LocalDate.now()) >= 13
+    val age = profile.preferences().dateOfBirth
+    return if (age != null) {
+      age.yearsOld(DateTime.now()) >= 13
     } else {
       false
     }
@@ -592,7 +593,7 @@ class SettingsFragmentAccount : Fragment() {
 
   private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth =
     ProfileDateOfBirth(
-      date = LocalDate.now().minusYears(years),
+      date = DateTime.now().minusYears(years),
       isSynthesized = true)
 
   private fun findNavigationController(): SettingsNavigationControllerType {

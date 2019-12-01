@@ -4,7 +4,7 @@ import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.subjects.PublishSubject
-import org.joda.time.LocalDate
+import org.joda.time.DateTime
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -286,7 +286,7 @@ abstract class ProfilesControllerContract {
     val accountProvider =
       MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
 
-    controller.profileCreate(accountProvider, "Kermit", "Female", LocalDate.now()).get()
+    controller.profileCreate(accountProvider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
@@ -318,7 +318,7 @@ abstract class ProfilesControllerContract {
 
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
 
-    val date = LocalDate.now()
+    val date = DateTime.now()
 
     val accountProvider =
       MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
@@ -354,37 +354,34 @@ abstract class ProfilesControllerContract {
 
     val provider =
       MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
-    controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
+    controller.profileCreate(provider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(provider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
-    controller.profilePreferencesUpdate { preferences ->
-      preferences
-    }.get()
+    controller.profileUpdate { description -> description }.get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
 
     EventAssertions.isTypeAndMatches(ProfileUpdated.Succeeded::class.java, this.profileEventsReceived, 0) { e ->
-      Assert.assertTrue("Preferences must not have changed", e.oldPreferences == e.newPreferences)
-      Assert.assertTrue("Name must not have changed", e.oldDisplayName == e.newDisplayName)
+      Assert.assertTrue("Preferences must not have changed", e.oldDescription == e.newDescription)
     }
 
     this.profileEventsReceived.clear()
-    controller.profilePreferencesUpdate { preferences ->
-      preferences.toBuilder()
-        .setReaderPreferences(
-          ReaderPreferences.builder()
-            .setBrightness(0.2)
-            .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
-            .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
-            .setFontScale(2.0)
-            .build())
-        .build()
+    controller.profileUpdate { description ->
+      description.copy(preferences =
+      description.preferences.copy(
+        readerPreferences = ReaderPreferences.builder()
+          .setBrightness(0.2)
+          .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
+          .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
+          .setFontScale(2.0)
+          .build()
+      ))
     }.get()
 
     EventAssertions.isTypeAndMatches(ProfileUpdated.Succeeded::class.java, this.profileEventsReceived, 0) { e ->
-      Assert.assertTrue("Preferences must have changed", e.oldPreferences != e.newPreferences)
+      Assert.assertTrue("Preferences must have changed", e.oldDescription != e.newDescription)
     }
   }
 
@@ -409,7 +406,7 @@ abstract class ProfilesControllerContract {
 
     val provider =
       MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
-    controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
+    controller.profileCreate(provider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(provider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }

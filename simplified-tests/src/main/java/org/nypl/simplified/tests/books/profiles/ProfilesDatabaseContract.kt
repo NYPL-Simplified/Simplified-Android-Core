@@ -6,6 +6,7 @@ import io.reactivex.subjects.PublishSubject
 import org.hamcrest.BaseMatcher
 import org.hamcrest.Description
 import org.hamcrest.core.StringContains
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.junit.Assert
 import org.junit.Before
@@ -27,6 +28,7 @@ import org.nypl.simplified.profiles.api.ProfileCreateDuplicateException
 import org.nypl.simplified.profiles.api.ProfileDatabaseDeleteAnonymousException
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNonexistentException
@@ -422,15 +424,17 @@ abstract class ProfilesDatabaseContract {
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
     val p0 = db.createProfile(acc, "Kermit")
-    p0.preferencesUpdate(
-      p0.preferences()
-        .toBuilder()
-        .setDateOfBirth(ProfileDateOfBirth(LocalDate(2010, 10, 30), true))
-        .build())
+    p0.setDescription(
+      ProfileDescription(
+        p0.displayName,
+        p0.preferences().copy(dateOfBirth = ProfileDateOfBirth(DateTime(20L), true)),
+        p0.attributes()
+      )
+    )
 
     Assert.assertEquals(
-      Option.some(ProfileDateOfBirth(LocalDate(2010, 10, 30), true)),
-      p0.preferences().dateOfBirth())
+      ProfileDateOfBirth(DateTime(20L), true),
+      p0.preferences().dateOfBirth)
   }
 
   /**
@@ -1086,7 +1090,7 @@ abstract class ProfilesDatabaseContract {
     val p1 = db0.createProfile(acc0, "Grouch")
 
     this.expected.expect(ProfileCreateDuplicateException::class.java)
-    p0.setDisplayName("Grouch")
+    p0.setDescription(p0.description().copy(displayName = "Grouch"))
   }
 
   /**
@@ -1120,7 +1124,7 @@ abstract class ProfilesDatabaseContract {
     val p0 = db0.createProfile(acc0, "Kermit")
     val p1 = db0.createProfile(acc0, "Grouch")
 
-    p0.setDisplayName("Big Bird")
+    p0.setDescription(p0.description().copy(displayName = "Big Bird"))
 
     Assert.assertEquals("Big Bird", p0.displayName)
     Assert.assertEquals("Grouch", p1.displayName)

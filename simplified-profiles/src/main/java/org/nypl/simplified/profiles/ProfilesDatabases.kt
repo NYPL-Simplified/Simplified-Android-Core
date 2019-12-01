@@ -19,6 +19,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
+import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileDatabaseAccountsException
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileDatabaseIOException
@@ -28,6 +29,7 @@ import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
+import org.nypl.simplified.reader.api.ReaderPreferences
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -396,10 +398,17 @@ object ProfilesDatabases {
         File(directory, id.uuid.toString())
       val profileAccountsDir =
         File(profileDir, "accounts")
-      val prefs =
-        ProfilePreferences.builder().build()
-      val desc =
-        ProfileDescription.builder(displayName, prefs).build()
+
+      val description =
+        ProfileDescription(
+          displayName = displayName,
+          preferences = ProfilePreferences(
+            dateOfBirth = null,
+            showTestingLibraries = false,
+            readerPreferences = ReaderPreferences.builder().build()
+          ),
+          attributes = ProfileAttributes(sortedMapOf())
+        )
 
       try {
         val accounts =
@@ -419,9 +428,9 @@ object ProfilesDatabases {
         val account =
           accounts.createAccount(accountProvider)
         val profile =
-          Profile(null, id, profileDir, accounts, desc, account)
+          Profile(null, id, profileDir, accounts, description, account)
 
-        this.writeDescription(profileDir, desc)
+        this.writeDescription(profileDir, description)
         return profile
       } catch (e: AccountsDatabaseException) {
         throw ProfileDatabaseAccountsException("Could not initialize accounts database", e)

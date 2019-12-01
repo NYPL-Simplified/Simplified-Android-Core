@@ -13,7 +13,7 @@ import com.io7m.jfunctional.None
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
-import org.joda.time.LocalDate
+import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -25,7 +25,6 @@ import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
-import java.lang.Exception
 
 class ProfileModificationDefaultFragment : Fragment() {
 
@@ -92,15 +91,16 @@ class ProfileModificationDefaultFragment : Fragment() {
       accountProvider = this.accountProviderRegistry.defaultProvider,
       displayName = name,
       gender = "",
-      date = LocalDate.now()
+      date = DateTime.now()
     )
   }
 
   private fun profileModify(profileID: ProfileID) {
-    this.profilesController.profileDisplayNameUpdateFor(
-      profile = profileID,
-      displayName = this.nameField.text.trim().toString()
-    )
+    val nameNow = this.nameField.text.trim().toString()
+
+    this.profilesController.profileUpdate { description ->
+      description.copy(displayName = nameNow)
+    }
   }
 
   private fun onProfileEvent(event: ProfileEvent) {

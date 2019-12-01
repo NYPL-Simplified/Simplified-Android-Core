@@ -33,24 +33,13 @@ interface ProfileType : ProfileReadableType {
   fun accountsDatabase(): AccountsDatabaseType
 
   /**
-   * Set the profile's preferences to the given value.
+   * Set the profile's description to the given value.
    *
-   * @param preferences The new preferences
+   * @param newDescription The new description
    */
 
   @Throws(IOException::class)
-  fun preferencesUpdate(preferences: ProfilePreferences)
-
-  /**
-   * Set the name of the profile. This method will fail if there is another profile with the
-   * given name already existing.
-   *
-   * @param newName The new profile name
-   * @throws ProfileDatabaseException On errors
-   */
-
-  @Throws(IOException::class)
-  fun setDisplayName(newName: String)
+  fun setDescription(newDescription: ProfileDescription)
 
   /**
    * Create an account using the given provider.

@@ -17,7 +17,6 @@ import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.api.ReaderColorScheme
@@ -101,7 +100,7 @@ class ReaderSettingsDialog : DialogFragment() {
         this.profiles
           .profileCurrent()
           .preferences()
-          .readerPreferences()
+          .readerPreferences
 
       this.readerPreferencesBuilder = readerPreferences.toBuilder()
     } catch (e: ProfileNoneCurrentException) {
@@ -216,8 +215,8 @@ class ReaderSettingsDialog : DialogFragment() {
 
   private fun onProfileEvent(event: ProfileEvent) {
     if (event is ProfileUpdated.Succeeded) {
-      if (event.oldPreferences != event.newPreferences) {
-        this.onReaderPreferencesChanged(event.newPreferences.readerPreferences())
+      if (event.oldDescription.preferences.readerPreferences != event.newDescription.preferences.readerPreferences) {
+        this.onReaderPreferencesChanged(event.newDescription.preferences.readerPreferences)
       }
     }
   }
@@ -285,10 +284,8 @@ class ReaderSettingsDialog : DialogFragment() {
   }
 
   private fun updatePreferences(prefs: ReaderPreferences) {
-    this.profiles.profilePreferencesUpdate { preferences ->
-      preferences.toBuilder()
-        .setReaderPreferences(prefs)
-        .build()
+    this.profiles.profileUpdate { description ->
+      description.copy(preferences = description.preferences.copy(readerPreferences = prefs))
     }
   }
 

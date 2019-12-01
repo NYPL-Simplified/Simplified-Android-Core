@@ -8,6 +8,7 @@ import com.io7m.jfunctional.Some
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.Subject
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
@@ -53,14 +54,14 @@ import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
-import org.nypl.simplified.profiles.api.ProfilePreferences
-import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
@@ -225,7 +226,7 @@ class Controller private constructor(
     accountProvider: AccountProviderType,
     displayName: String,
     gender: String,
-    date: LocalDate
+    date: DateTime
   ): FluentFuture<ProfileCreationEvent> {
     return this.submitTask(ProfileCreationTask(
       this.profiles,
@@ -395,43 +396,29 @@ class Controller private constructor(
     }
   }
 
-  override fun profilePreferencesUpdate(
-    preferences: (ProfilePreferences) -> ProfilePreferences
+  override fun profileUpdate(
+    update: (ProfileDescription) -> ProfileDescription
   ): FluentFuture<ProfileUpdated> {
     return this.submitTask(
-      ProfilePreferencesUpdateTask(
-        events = this.profileEvents,
+      ProfileUpdateTask(
+        this.profileEvents,
         requestedProfileId = null,
         profiles = this.profiles,
-        preferencesUpdate = preferences
+        update = update
       )
     )
   }
 
-  override fun profilePreferencesUpdateFor(
+  override fun profileUpdateFor(
     profile: ProfileID,
-    preferences: (ProfilePreferences) -> ProfilePreferences
+    update: (ProfileDescription) -> ProfileDescription
   ): FluentFuture<ProfileUpdated> {
     return this.submitTask(
-      ProfilePreferencesUpdateTask(
-        events = this.profileEvents,
+      ProfileUpdateTask(
+        this.profileEvents,
         requestedProfileId = profile,
         profiles = this.profiles,
-        preferencesUpdate = preferences
-      )
-    )
-  }
-
-  override fun profileDisplayNameUpdateFor(
-    profile: ProfileID,
-    displayName: String
-  ): FluentFuture<ProfileUpdated> {
-    return this.submitTask(
-      ProfileDisplayNameUpdateTask(
-        events = this.profileEvents,
-        requestedProfileId = profile,
-        profiles = this.profiles,
-        displayName = displayName
+        update = update
       )
     )
   }

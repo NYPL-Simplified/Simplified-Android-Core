@@ -1,6 +1,6 @@
 package org.nypl.simplified.profiles.api
 
-import org.joda.time.LocalDate
+import org.joda.time.DateTime
 import org.joda.time.Years
 
 /**
@@ -13,7 +13,7 @@ data class ProfileDateOfBirth(
    * The date the profile holder was born.
    */
 
-  val date: LocalDate,
+  val date: DateTime,
 
   /**
    * `true` if the date of birth was synthesized for privacy reasons.
@@ -25,6 +25,6 @@ data class ProfileDateOfBirth(
    * The age in years that date of birth implies.
    */
 
-  fun yearsOld(now: LocalDate): Int =
+  fun yearsOld(now: DateTime): Int =
     Years.yearsBetween(this.date, now).years
 }

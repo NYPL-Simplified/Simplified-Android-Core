@@ -10,10 +10,8 @@ sealed class ProfileUpdated : ProfileEvent() {
 
   data class Succeeded(
     override val profileID: ProfileID,
-    val oldPreferences: ProfilePreferences,
-    val newPreferences: ProfilePreferences,
-    val oldDisplayName: String,
-    val newDisplayName: String
+    val oldDescription: ProfileDescription,
+    val newDescription: ProfileDescription
   ) : ProfileUpdated()
 
   data class Failed(

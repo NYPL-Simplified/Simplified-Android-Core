@@ -50,6 +50,13 @@ interface ProfileReadableType : Comparable<ProfileReadableType> {
    */
 
   val displayName: String
+    get() = this.description().displayName
+
+  /**
+   * @return The profile's current description
+   */
+
+  fun description(): ProfileDescription
 
   /**
    * @return The current account
@@ -67,7 +74,15 @@ interface ProfileReadableType : Comparable<ProfileReadableType> {
    * @return Access to the profile's preferences
    */
 
-  fun preferences(): ProfilePreferences
+  fun preferences(): ProfilePreferences =
+    this.description().preferences
+
+  /**
+   * @return Access to the profile's attributes
+   */
+
+  fun attributes(): ProfileAttributes =
+    this.description().attributes
 
   /**
    * @return A read-only map of the accounts for this profile, organized by provider

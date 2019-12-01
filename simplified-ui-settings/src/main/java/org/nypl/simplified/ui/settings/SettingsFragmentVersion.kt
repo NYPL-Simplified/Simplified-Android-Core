@@ -195,7 +195,7 @@ class SettingsFragmentVersion : Fragment() {
       this.profilesController
         .profileCurrent()
         .preferences()
-        .showTestingLibraries()
+        .showTestingLibraries
 
     /*
      * Configure the "fail next boot" switch to enable/disable boot failures.
@@ -220,10 +220,8 @@ class SettingsFragmentVersion : Fragment() {
 
     this.showTesting.setOnClickListener {
       val show = this.showTesting.isChecked
-      this.profilesController.profilePreferencesUpdate { preferences ->
-        preferences.toBuilder()
-          .setShowTestingLibraries(show)
-          .build()
+      this.profilesController.profileUpdate { description ->
+        description.copy(preferences = description.preferences.copy(showTestingLibraries = show))
       }
     }
   }
@@ -295,7 +293,7 @@ class SettingsFragmentVersion : Fragment() {
           this.profilesController
             .profileCurrent()
             .preferences()
-            .showTestingLibraries()
+            .showTestingLibraries
       })
     }
   }

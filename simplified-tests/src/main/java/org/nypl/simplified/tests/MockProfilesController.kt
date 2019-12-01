@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
@@ -19,9 +20,9 @@ import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
@@ -37,6 +38,23 @@ class MockProfilesController(
   profileCount: Int,
   accountCount: Int
 ) : ProfilesControllerType {
+
+  override fun profileCreate(
+    accountProvider: AccountProviderType,
+    displayName: String,
+    gender: String,
+    date: DateTime
+  ): FluentFuture<ProfileCreationEvent> {
+    return FluentFuture.from(SettableFuture.create())
+  }
+
+  override fun profileUpdate(update: (ProfileDescription) -> ProfileDescription): FluentFuture<ProfileUpdated> {
+    return FluentFuture.from(SettableFuture.create())
+  }
+
+  override fun profileUpdateFor(profile: ProfileID, update: (ProfileDescription) -> ProfileDescription): FluentFuture<ProfileUpdated> {
+    return FluentFuture.from(SettableFuture.create())
+  }
 
   private val profileList =
     IntRange(1, profileCount)
@@ -73,15 +91,6 @@ class MockProfilesController(
 
   override fun profileEvents(): Observable<ProfileEvent> {
     return this.profileEventSource;
-  }
-
-  override fun profileCreate(
-    accountProvider: AccountProviderType,
-    displayName: String,
-    gender: String,
-    date: LocalDate
-  ): FluentFuture<ProfileCreationEvent> {
-    return FluentFuture.from(SettableFuture.create())
   }
 
   override fun profileSelect(id: ProfileID): FluentFuture<Unit> {
@@ -147,18 +156,6 @@ class MockProfilesController(
   }
 
   override fun profileFeed(request: ProfileFeedRequest): FluentFuture<Feed.FeedWithoutGroups> {
-    return FluentFuture.from(SettableFuture.create())
-  }
-
-  override fun profilePreferencesUpdate(preferences: (ProfilePreferences) -> ProfilePreferences): FluentFuture<ProfileUpdated> {
-    return FluentFuture.from(SettableFuture.create())
-  }
-
-  override fun profilePreferencesUpdateFor(profile: ProfileID, preferences: (ProfilePreferences) -> ProfilePreferences): FluentFuture<ProfileUpdated> {
-    return FluentFuture.from(SettableFuture.create())
-  }
-
-  override fun profileDisplayNameUpdateFor(profile: ProfileID, displayName: String): FluentFuture<ProfileUpdated> {
     return FluentFuture.from(SettableFuture.create())
   }
 
