@@ -24,7 +24,7 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
@@ -219,13 +219,12 @@ class SettingsFragmentVersion : Fragment() {
      */
 
     this.showTesting.setOnClickListener {
-      val newPreferences =
-        this.profilesController.profileCurrent()
-          .preferences()
-          .toBuilder()
-          .setShowTestingLibraries(this.showTesting.isChecked)
+      val show = this.showTesting.isChecked
+      this.profilesController.profilePreferencesUpdate { preferences ->
+        preferences.toBuilder()
+          .setShowTestingLibraries(show)
           .build()
-      this.profilesController.profilePreferencesUpdate(newPreferences)
+      }
     }
   }
 
@@ -290,7 +289,7 @@ class SettingsFragmentVersion : Fragment() {
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
-    if (event is ProfilePreferencesChanged) {
+    if (event is ProfileUpdated) {
       this.uiThread.runOnUIThread(Runnable {
         this.showTesting.isChecked =
           this.profilesController

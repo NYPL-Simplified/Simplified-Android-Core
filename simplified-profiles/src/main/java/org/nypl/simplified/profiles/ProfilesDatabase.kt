@@ -12,6 +12,8 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
 import org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException
 import org.nypl.simplified.profiles.api.ProfileCreateDuplicateException
@@ -26,6 +28,7 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.IOException
 import java.util.Collections
 import java.util.SortedMap
 import java.util.UUID
@@ -42,10 +45,12 @@ internal class ProfilesDatabase internal constructor(
   private val accountProviders: AccountProviderRegistryType,
   private val accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
   private val accountsDatabases: AccountsDatabaseFactoryType,
+  private val analytics: AnalyticsType,
   private val anonymousProfileEnabled: ProfilesDatabaseType.AnonymousProfileEnabled,
   private val context: Context,
   private val directory: File,
-  private val profiles: ConcurrentSkipListMap<ProfileID, Profile>) : ProfilesDatabaseType {
+  private val profiles: ConcurrentSkipListMap<ProfileID, Profile>
+) : ProfilesDatabaseType {
 
   private val logger = LoggerFactory.getLogger(ProfilesDatabase::class.java)
 
@@ -194,6 +199,18 @@ internal class ProfilesDatabase internal constructor(
         return this.profiles[id]!!
       }
       throw ProfileNoneCurrentException("No profile is current")
+    }
+  }
+
+  @Throws(IOException::class)
+  internal fun deleteProfile(profile: Profile) {
+    synchronized(this.profileCurrentLock) {
+      this.profiles.remove(profile.id)
+      if (this.profileCurrent === profile.id) {
+        this.profileCurrent = null
+      }
+
+      DirectoryUtilities.directoryDelete(profile.directory)
     }
   }
 }

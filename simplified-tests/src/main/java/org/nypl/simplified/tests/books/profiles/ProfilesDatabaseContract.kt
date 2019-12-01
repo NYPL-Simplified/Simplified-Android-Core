@@ -12,19 +12,25 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.profiles.ProfilesDatabases
 import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
+import org.nypl.simplified.profiles.api.ProfileCreateDuplicateException
+import org.nypl.simplified.profiles.api.ProfileDatabaseDeleteAnonymousException
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNonexistentException
+import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.slf4j.LoggerFactory
@@ -37,9 +43,10 @@ abstract class ProfilesDatabaseContract {
 
   private val logger = LoggerFactory.getLogger(ProfilesDatabaseContract::class.java)
 
-  private lateinit var credentialStore: FakeAccountCredentialStorage
   private lateinit var accountEvents: PublishSubject<AccountEvent>
-  private lateinit var profileEvents: PublishSubject<org.nypl.simplified.profiles.api.ProfileEvent>
+  private lateinit var analytics: AnalyticsType
+  private lateinit var credentialStore: FakeAccountCredentialStorage
+  private lateinit var profileEvents: PublishSubject<ProfileEvent>
 
   @JvmField
   @Rule
@@ -52,6 +59,7 @@ abstract class ProfilesDatabaseContract {
     this.credentialStore = FakeAccountCredentialStorage()
     this.accountEvents = PublishSubject.create()
     this.profileEvents = PublishSubject.create()
+    this.analytics = Mockito.mock(AnalyticsType::class.java)
   }
 
   /**
@@ -107,6 +115,7 @@ abstract class ProfilesDatabaseContract {
     this.expected.expect(CausesContains(IOException::class.java, "Not a directory"))
     ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -131,6 +140,7 @@ abstract class ProfilesDatabaseContract {
 
     ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -157,6 +167,7 @@ abstract class ProfilesDatabaseContract {
     this.expected.expect(CausesContains(IOException::class.java, "Not a directory"))
     ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -185,6 +196,7 @@ abstract class ProfilesDatabaseContract {
 
     ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -213,6 +225,7 @@ abstract class ProfilesDatabaseContract {
     this.expected.expect(CausesContains(IOException::class.java, "Could not parse profile: "))
     ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -233,6 +246,7 @@ abstract class ProfilesDatabaseContract {
 
     val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -260,6 +274,7 @@ abstract class ProfilesDatabaseContract {
 
     val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       accountProviders,
       AccountBundledCredentialsEmpty.getInstance(),
@@ -342,6 +357,7 @@ abstract class ProfilesDatabaseContract {
 
     val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       accountProviders,
       AccountBundledCredentialsEmpty.getInstance(),
@@ -358,6 +374,7 @@ abstract class ProfilesDatabaseContract {
 
     val db1 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       accountProviders,
       AccountBundledCredentialsEmpty.getInstance(),
@@ -394,6 +411,7 @@ abstract class ProfilesDatabaseContract {
 
     val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -427,6 +445,7 @@ abstract class ProfilesDatabaseContract {
 
     val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -455,6 +474,7 @@ abstract class ProfilesDatabaseContract {
 
     val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -481,6 +501,7 @@ abstract class ProfilesDatabaseContract {
 
     val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -510,6 +531,7 @@ abstract class ProfilesDatabaseContract {
 
     val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -542,6 +564,7 @@ abstract class ProfilesDatabaseContract {
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileEnabled(
         this.context(),
+        this.analytics,
         this.accountEvents,
         accountProviders,
         AccountBundledCredentialsEmpty.getInstance(),
@@ -572,6 +595,7 @@ abstract class ProfilesDatabaseContract {
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileEnabled(
         this.context(),
+        this.analytics,
         this.accountEvents,
         accountProviders,
         AccountBundledCredentialsEmpty.getInstance(),
@@ -596,6 +620,7 @@ abstract class ProfilesDatabaseContract {
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
         this.context(),
+        this.analytics,
         this.accountEvents,
         MockAccountProviders.fakeAccountProviders(),
         AccountBundledCredentialsEmpty.getInstance(),
@@ -629,6 +654,7 @@ abstract class ProfilesDatabaseContract {
 
     val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -660,6 +686,7 @@ abstract class ProfilesDatabaseContract {
 
     val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -689,6 +716,7 @@ abstract class ProfilesDatabaseContract {
 
     val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -722,6 +750,7 @@ abstract class ProfilesDatabaseContract {
 
     val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -753,6 +782,7 @@ abstract class ProfilesDatabaseContract {
 
     val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -784,6 +814,7 @@ abstract class ProfilesDatabaseContract {
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
         this.context(),
+        this.analytics,
         this.accountEvents,
         accountProviders,
         AccountBundledCredentialsEmpty.getInstance(),
@@ -801,6 +832,7 @@ abstract class ProfilesDatabaseContract {
 
     ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProvidersMissing1(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -828,6 +860,7 @@ abstract class ProfilesDatabaseContract {
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
         this.context(),
+        this.analytics,
         this.accountEvents,
         MockAccountProviders.fakeAccountProvidersMissing0(),
         AccountBundledCredentialsEmpty.getInstance(),
@@ -842,6 +875,7 @@ abstract class ProfilesDatabaseContract {
 
     ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analytics,
       this.accountEvents,
       MockAccountProviders.fakeAccountProvidersMissing0(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -868,6 +902,7 @@ abstract class ProfilesDatabaseContract {
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
         this.context(),
+        this.analytics,
         this.accountEvents,
         accountProviders,
         AccountBundledCredentialsEmpty.getInstance(),
@@ -885,6 +920,7 @@ abstract class ProfilesDatabaseContract {
     val db1 =
       ProfilesDatabases.openWithAnonymousProfileEnabled(
         this.context(),
+        this.analytics,
         this.accountEvents,
         accountProviders,
         AccountBundledCredentialsEmpty.getInstance(),
@@ -914,6 +950,7 @@ abstract class ProfilesDatabaseContract {
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
         this.context(),
+        this.analytics,
         this.accountEvents,
         accountProviders,
         AccountBundledCredentialsEmpty.getInstance(),
@@ -933,5 +970,159 @@ abstract class ProfilesDatabaseContract {
     Assert.assertEquals(2, accountsByProvider.size)
     Assert.assertNotNull(accountsByProvider[acc.id])
     Assert.assertNotNull(accountsByProvider[MockAccountProviders.fakeAccountProviderDefaultAutoURI()])
+  }
+
+  /**
+   * Deleting a profile works.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testDeleteAnonymous() {
+    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
+    val f_pro = File(f_tmp, "profiles")
+
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
+
+    val db0 = ProfilesDatabases.openWithAnonymousProfileEnabled(
+      this.context(),
+      this.analytics,
+      this.accountEvents,
+      accountProviders,
+      AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
+      this.accountsDatabases(),
+      f_pro)
+
+    val p0 = db0.currentProfileUnsafe()
+    this.expected.expect(ProfileDatabaseDeleteAnonymousException::class.java)
+    p0.delete()
+  }
+
+  /**
+   * Deleting a profile works.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testDeleteOK() {
+    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
+    val f_pro = File(f_tmp, "profiles")
+
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
+
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.analytics,
+      this.accountEvents,
+      accountProviders,
+      AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
+      this.accountsDatabases(),
+      f_pro)
+
+    val p0 = db0.createProfile(acc0, "Kermit")
+    Assert.assertEquals(Option.none<ProfileType>(), db0.currentProfile())
+    db0.setProfileCurrent(p0.id)
+    Assert.assertEquals(Option.some(p0), db0.currentProfile())
+
+    p0.delete()
+    Assert.assertEquals(Option.none<ProfileType>(), db0.currentProfile())
+
+    val db1 = ProfilesDatabases.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.analytics,
+      this.accountEvents,
+      accountProviders,
+      AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
+      this.accountsDatabases(),
+      f_pro)
+
+    Assert.assertEquals(0L, db1.profiles().size.toLong())
+  }
+
+  /**
+   * Renaming a profile fails if another profile has the same name.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testCreateRenameDuplicate() {
+    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
+    val f_pro = File(f_tmp, "profiles")
+
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
+
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.analytics,
+      this.accountEvents,
+      accountProviders,
+      AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
+      this.accountsDatabases(),
+      f_pro)
+
+    val acc0 = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val acc1 = MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
+
+    val p0 = db0.createProfile(acc0, "Kermit")
+    val p1 = db0.createProfile(acc0, "Grouch")
+
+    this.expected.expect(ProfileCreateDuplicateException::class.java)
+    p0.setDisplayName("Grouch")
+  }
+
+  /**
+   * Renaming a profile succeeds if no other profile has the name.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testCreateRenameOK() {
+    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
+    val f_pro = File(f_tmp, "profiles")
+
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
+
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.analytics,
+      this.accountEvents,
+      accountProviders,
+      AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
+      this.accountsDatabases(),
+      f_pro)
+
+    val acc0 = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val acc1 = MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
+
+    val p0 = db0.createProfile(acc0, "Kermit")
+    val p1 = db0.createProfile(acc0, "Grouch")
+
+    p0.setDisplayName("Big Bird")
+
+    Assert.assertEquals("Big Bird", p0.displayName)
+    Assert.assertEquals("Grouch", p1.displayName)
   }
 }

@@ -466,6 +466,7 @@ internal object MainServices {
   private fun createProfileDatabase(
     context: Context,
     resources: Resources,
+    analytics: AnalyticsType,
     accountEvents: PublishSubject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
@@ -482,6 +483,7 @@ internal object MainServices {
       this.logger.debug("opening profile database with anonymous profile")
       return ProfilesDatabases.openWithAnonymousProfileEnabled(
         context,
+        analytics,
         accountEvents,
         accountProviders,
         accountBundledCredentials,
@@ -493,6 +495,7 @@ internal object MainServices {
     this.logger.debug("opening profile database without anonymous profile")
     return ProfilesDatabases.openWithAnonymousProfileDisabled(
       context,
+      analytics,
       accountEvents,
       accountProviders,
       accountBundledCredentials,
@@ -887,7 +890,19 @@ internal object MainServices {
         interfaceType = AccountAuthenticationCredentialsStoreType::class.java,
         serviceConstructor = { this.createAccountAuthenticationCredentialsStore(directories) })
 
-    val accountEvents = PublishSubject.create<AccountEvent>()
+    val analytics =
+      addService(
+        message = strings.bootingAnalytics,
+        interfaceType = AnalyticsType::class.java,
+        serviceConstructor = {
+          Analytics.create(AnalyticsConfiguration(
+            context = context,
+            http = http))
+        }
+      )
+
+    val accountEvents =
+      PublishSubject.create<AccountEvent>()
 
     val profilesDatabase =
       addService(
@@ -897,6 +912,7 @@ internal object MainServices {
           this.createProfileDatabase(
             context,
             context.resources,
+            analytics,
             accountEvents,
             accountProviderRegistry,
             accountBundledCredentials,
@@ -932,17 +948,6 @@ internal object MainServices {
         )
       }
     )
-
-    val analytics =
-      addService(
-        message = strings.bootingAnalytics,
-        interfaceType = AnalyticsType::class.java,
-        serviceConstructor = {
-          Analytics.create(AnalyticsConfiguration(
-            context = context,
-            http = http))
-        }
-      )
 
     addService(
       message = strings.bootingPatronProfileParsers,

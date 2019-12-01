@@ -16,7 +16,12 @@ import java.util.UUID
 
 class MockProfile(
   override val id: ProfileID,
-  accountCount: Int) : ProfileType {
+  accountCount: Int
+) : ProfileType {
+
+  override fun delete() {
+
+  }
 
   private val accountList =
     IntRange(1, accountCount)
@@ -60,6 +65,10 @@ class MockProfile(
 
   override val displayName: String
     get() = "Profile ${id.uuid}"
+
+  override fun setDisplayName(newName: String) {
+
+  }
 
   override fun accountCurrent(): AccountType {
     return this.accountList[0]

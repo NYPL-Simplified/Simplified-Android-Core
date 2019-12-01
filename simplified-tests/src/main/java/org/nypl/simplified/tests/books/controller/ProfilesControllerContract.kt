@@ -50,7 +50,7 @@ import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationSucc
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
-import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
@@ -127,6 +127,8 @@ abstract class ProfilesControllerContract {
     MockAccountDeletionStringResources()
   private val profileAccountCreationStringResources =
     MockAccountCreationStringResources()
+  private val analyticsLogger =
+    MockAnalytics()
 
   private fun controller(
     profiles: ProfilesDatabaseType,
@@ -150,9 +152,6 @@ abstract class ProfilesControllerContract {
         parser = parser,
         searchParser = OPDSSearchParser.newParser(),
         transport = transport)
-
-    val analyticsLogger =
-      MockAnalytics()
 
     val services = MutableServiceDirectory()
     services.putService(
@@ -359,20 +358,21 @@ abstract class ProfilesControllerContract {
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(provider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
-    controller.profilePreferencesUpdate(profiles.currentProfileUnsafe().preferences()).get()
+    controller.profilePreferencesUpdate { preferences ->
+      preferences
+    }.get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
-      Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences())
+    EventAssertions.isTypeAndMatches(ProfileUpdated.Succeeded::class.java, this.profileEventsReceived, 0) { e ->
+      Assert.assertTrue("Preferences must not have changed", e.oldPreferences == e.newPreferences)
+      Assert.assertTrue("Name must not have changed", e.oldDisplayName == e.newDisplayName)
     }
 
     this.profileEventsReceived.clear()
-    controller.profilePreferencesUpdate(
-      profiles.currentProfileUnsafe()
-        .preferences()
-        .toBuilder()
+    controller.profilePreferencesUpdate { preferences ->
+      preferences.toBuilder()
         .setReaderPreferences(
           ReaderPreferences.builder()
             .setBrightness(0.2)
@@ -380,11 +380,11 @@ abstract class ProfilesControllerContract {
             .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
             .setFontScale(2.0)
             .build())
-        .build())
-      .get()
+        .build()
+    }.get()
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
-      Assert.assertTrue("Preferences must have changed", e.changedReaderPreferences())
+    EventAssertions.isTypeAndMatches(ProfileUpdated.Succeeded::class.java, this.profileEventsReceived, 0) { e ->
+      Assert.assertTrue("Preferences must have changed", e.oldPreferences != e.newPreferences)
     }
   }
 
@@ -430,6 +430,7 @@ abstract class ProfilesControllerContract {
   private fun profilesDatabaseWithoutAnonymous(dir_profiles: File): ProfilesDatabaseType {
     return ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analyticsLogger,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),

@@ -18,12 +18,14 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
+import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -86,6 +88,18 @@ interface ProfilesControllerType {
     gender: String,
     date: LocalDate
   ): FluentFuture<ProfileCreationEvent>
+
+  /**
+   * Delete a profile, asynchronously, and return a profile event.
+   *
+   * @param profileID The ID of the profile to delete
+   *
+   * @return A future that returns a status value
+   */
+
+  fun profileDelete(
+    profileID: ProfileID
+  ): FluentFuture<ProfileDeletionEvent>
 
   /**
    * Set the given profile as the current profile. The operation always succeeds if a profile
@@ -227,7 +241,7 @@ interface ProfilesControllerType {
   /**
    * Update preferences for the current profile.
    *
-   * @param preferences The new preferences
+   * @param preferences A function that transforms the profile's current preferences
    * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
    * @see .profileSelect
    * @see .profileAnonymousEnabled
@@ -235,8 +249,34 @@ interface ProfilesControllerType {
 
   @Throws(ProfileNoneCurrentException::class)
   fun profilePreferencesUpdate(
-    preferences: ProfilePreferences
-  ): FluentFuture<Unit>
+    preferences: (ProfilePreferences) -> ProfilePreferences
+  ): FluentFuture<ProfileUpdated>
+
+  /**
+   * Update preferences for the given profile.
+   *
+   * @param profile     The target profile
+   * @param preferences A function that transforms the profile's current preferences
+   * @see .profileSelect
+   * @see .profileAnonymousEnabled
+   */
+
+  fun profilePreferencesUpdateFor(
+    profile: ProfileID,
+    preferences: (ProfilePreferences) -> ProfilePreferences
+  ): FluentFuture<ProfileUpdated>
+
+  /**
+   * Update the display name for the given profile.
+   *
+   * @param profile     The target profile
+   * @param displayName The new display name
+   */
+
+  fun profileDisplayNameUpdateFor(
+    profile: ProfileID,
+    displayName: String
+  ): FluentFuture<ProfileUpdated>
 
   /**
    * Produce a feed of all the books in the current profile.

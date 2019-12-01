@@ -17,7 +17,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.app.reader.ReaderColorSchemes
 import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelection.ReaderSelectedTOCElement
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.api.ReaderColorScheme
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
@@ -117,16 +117,11 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
-    if (event is ProfilePreferencesChanged) {
-      if (event.changedReaderPreferences()) {
-        val colorScheme =
-          Services.serviceDirectory()
-            .requireService(ProfilesControllerType::class.java)
-            .profileCurrent()
-            .preferences()
-            .readerPreferences()
-            .colorScheme()
-        this.uiThread.runOnUIThread { this.applyColorScheme(colorScheme) }
+    if (event is ProfileUpdated.Succeeded) {
+      if (event.oldPreferences != event.newPreferences) {
+        this.uiThread.runOnUIThread {
+          this.applyColorScheme(event.newPreferences.readerPreferences().colorScheme())
+        }
       }
     }
   }

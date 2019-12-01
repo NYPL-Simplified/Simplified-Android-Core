@@ -16,6 +16,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.profiles.api.ProfileDatabaseAccountsException
@@ -59,6 +60,7 @@ object ProfilesDatabases {
   @Throws(ProfileDatabaseException::class)
   fun openWithAnonymousProfileDisabled(
     context: Context,
+    analytics: AnalyticsType,
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
@@ -96,6 +98,7 @@ object ProfilesDatabases {
     }
 
     return ProfilesDatabase(
+      analytics = analytics,
       accountBundledCredentials = accountBundledCredentials,
       accountEvents = accountEvents,
       accountProviders = accountProviders,
@@ -158,6 +161,7 @@ object ProfilesDatabases {
   @Throws(ProfileDatabaseException::class)
   fun openWithAnonymousProfileEnabled(
     context: Context,
+    analytics: AnalyticsType,
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
@@ -206,6 +210,7 @@ object ProfilesDatabases {
 
     val database =
       ProfilesDatabase(
+        analytics = analytics,
         accountBundledCredentials = accountBundledCredentials,
         accountEvents = accountEvents,
         accountProviders = accountProviders,

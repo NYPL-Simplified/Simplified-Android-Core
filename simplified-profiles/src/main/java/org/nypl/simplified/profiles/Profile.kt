@@ -7,12 +7,14 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
+import org.nypl.simplified.profiles.api.ProfileCreateDuplicateException
+import org.nypl.simplified.profiles.api.ProfileDatabaseDeleteAnonymousException
 import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileType
-import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.net.URI
@@ -25,12 +27,14 @@ import javax.annotation.concurrent.GuardedBy
  */
 
 internal class Profile internal constructor(
-  private var owner: ProfilesDatabaseType?,
+  private var owner: ProfilesDatabase?,
   override val id: ProfileID,
   override val directory: File,
   private val accounts: AccountsDatabaseType,
   initialDescription: ProfileDescription,
   initialAccountCurrent: AccountType) : ProfileType {
+
+  private val logger = LoggerFactory.getLogger(Profile::class.java)
 
   private val descriptionLock: Any = Any()
   @GuardedBy("descriptionLock")
@@ -98,6 +102,36 @@ internal class Profile internal constructor(
     }
   }
 
+  override fun setDisplayName(newName: String) {
+    val newNameNormal = normalizeDisplayName(newName)
+    synchronized(this.descriptionLock) {
+      val existing = this.owner!!.findProfileWithDisplayName(newNameNormal)
+
+      /*
+         * If a profile exists with the given name, and it's not this profile... Abort!
+         */
+
+      if (existing.isSome) {
+        if (existing != Option.of(this)) {
+          throw ProfileCreateDuplicateException(
+            "A profile already exists with the name '$newNameNormal'")
+        }
+      }
+
+      val newDescription =
+        this.description.toBuilder()
+          .setDisplayName(newNameNormal)
+          .build()
+
+      ProfilesDatabases.writeDescription(this.directory, newDescription)
+      this.description = newDescription
+    }
+  }
+
+  private fun normalizeDisplayName(newName: String): String {
+    return newName.trim()
+  }
+
   @Throws(AccountsDatabaseException::class)
   override fun createAccount(accountProvider: AccountProviderType): AccountType {
     return this.accounts.createAccount(accountProvider)
@@ -140,5 +174,15 @@ internal class Profile internal constructor(
         throw AccountsDatabaseNonexistentException("No such account: $id")
       }
     }
+  }
+
+  override fun delete() {
+    this.logger.debug("[{}]: delete", this.id.uuid)
+
+    if (this.isAnonymous) {
+      throw ProfileDatabaseDeleteAnonymousException("Cannot delete the anonymous profile")
+    }
+
+    this.owner?.deleteProfile(this)
   }
 }

@@ -137,6 +137,8 @@ abstract class BooksControllerContract {
     MockAccountDeletionStringResources()
   private val profileAccountCreationStringResources =
     MockAccountCreationStringResources()
+  private val analytics =
+    MockAnalytics()
 
   private fun correctCredentials(): AccountAuthenticationCredentials {
     return AccountAuthenticationCredentials.builder(
@@ -175,12 +177,9 @@ abstract class BooksControllerContract {
         bookRegistry = books,
         bundledContent = bundledContent)
 
-    val analyticsLogger =
-      MockAnalytics()
-
     val services = MutableServiceDirectory()
     services.putService(
-      AnalyticsType::class.java, analyticsLogger)
+      AnalyticsType::class.java, this.analytics)
     services.putService(
       AccountLoginStringResourcesType::class.java, this.accountLoginStringResources)
     services.putService(
@@ -801,9 +800,11 @@ abstract class BooksControllerContract {
   @Throws(ProfileDatabaseException::class)
   private fun profilesDatabaseWithoutAnonymous(
     accountEvents: PublishSubject<AccountEvent>,
-    dirProfiles: File): ProfilesDatabaseType {
+    dirProfiles: File
+  ): ProfilesDatabaseType {
     return ProfilesDatabases.openWithAnonymousProfileDisabled(
       context(),
+      this.analytics,
       accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),

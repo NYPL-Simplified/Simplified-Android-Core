@@ -3,16 +3,21 @@
 <resources>
   <string name="profileCancel">Cancel</string>
   <string name="profileCreate">Create</string>
-  <string name="profileCreationError">Error</string>
-  <string name="profileCreationErrorGeneral">An error occurred whilst trying to create your profile.</string>
+  <string name="profileCreationError">@string/profileError</string>
+  <string name="profileCreationErrorGeneral">An error occurred whilst trying to create your profile: %1$s</string>
   <string name="profileCreationErrorNameAlreadyUsed">That name has already been used. Please pick another.</string>
   <string name="profileCreationErrorNameBlank">Name cannot be blank!</string>
   <string name="profileDelete">Delete</string>
   <string name="profileDeleteAsk">Delete profile?</string>
   <string name="profileDeleteAskMessage">Are you sure you want to delete the profile \'%1$s\'?</string>
+  <string name="profileDeletionError">@string/profileError</string>
+  <string name="profileDeletionFailedMessage">An error occurred whilst trying to delete the profile: %1$s</string>
+  <string name="profileError">Error</string>
   <string name="profileModify">Modify</string>
   <string name="profileName">Name</string>
   <string name="profilePlaceholder">Lorem ipsum dolor sit amet, probatus volutpat has at, vis adhuc iuvaret omittantur an, sadipscing conclusionemque his ad. Eam ut simul tempor. Primis consetetur appellantur vim eu, eum an iudico dolorum. Ad vis utamur honestatis, sanctus debitis referrentur an eam.</string>
   <string name="profileSelect">Please select a profile, or create a new one.</string>
   <string name="profilesTitle">Profiles</string>
+  <string name="profileUpdateError">@string/profileError</string>
+  <string name="profileUpdateFailedMessage">An error occurred whilst trying to update the profile: %1$s</string>
 </resources>

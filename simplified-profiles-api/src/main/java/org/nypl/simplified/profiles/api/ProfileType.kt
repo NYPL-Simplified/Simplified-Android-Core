@@ -42,6 +42,17 @@ interface ProfileType : ProfileReadableType {
   fun preferencesUpdate(preferences: ProfilePreferences)
 
   /**
+   * Set the name of the profile. This method will fail if there is another profile with the
+   * given name already existing.
+   *
+   * @param newName The new profile name
+   * @throws ProfileDatabaseException On errors
+   */
+
+  @Throws(IOException::class)
+  fun setDisplayName(newName: String)
+
+  /**
    * Create an account using the given provider.
    *
    * @param accountProvider The account provider
@@ -70,4 +81,14 @@ interface ProfileType : ProfileReadableType {
 
   @Throws(AccountsDatabaseNonexistentException::class)
   fun selectAccount(accountProvider: URI): AccountType
+
+  /**
+   * Delete the profile.
+   *
+   * @throws ProfileDatabaseException On errors
+   * @throws IOException              On I/O errors
+   */
+
+  @Throws(ProfileDatabaseException::class, IOException::class)
+  fun delete()
 }

@@ -4,9 +4,10 @@ dependencies {
   api libraries.io7mJFunctional
   api libraries.nyplDRMCore
 
+  implementation project(":simplified-accounts-source-spi")
+  implementation project(":simplified-analytics-api")
   implementation project(":simplified-files")
   implementation project(":simplified-json-core")
-  implementation project(":simplified-accounts-source-spi")
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

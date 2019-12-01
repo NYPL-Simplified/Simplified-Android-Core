@@ -61,7 +61,7 @@ import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
-import org.nypl.simplified.profiles.api.ProfilePreferencesChanged;
+import org.nypl.simplified.profiles.api.ProfileUpdated;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.reader.api.ReaderColorScheme;
 import org.nypl.simplified.reader.api.ReaderPreferences;
@@ -492,29 +492,16 @@ public final class ReaderActivity extends AppCompatActivity implements
   }
 
   private void onProfileEvent(final ProfileEvent event) {
-    if (event instanceof ProfilePreferencesChanged) {
-      try {
-        onProfileEventPreferencesChanged((ProfilePreferencesChanged) event);
-      } catch (ProfileNoneCurrentException e) {
-        throw new IllegalStateException(e);
-      }
+    if (event instanceof ProfileUpdated.Succeeded) {
+      onProfileEventPreferencesChanged((ProfileUpdated.Succeeded) event);
     }
   }
 
   private void onProfileEventPreferencesChanged(
-    final ProfilePreferencesChanged event)
-    throws ProfileNoneCurrentException {
-    if (event.changedReaderPreferences()) {
+    final ProfileUpdated.Succeeded event) {
+    if (!event.getOldPreferences().equals(event.getNewPreferences())) {
       LOG.debug("onProfileEventPreferencesChanged: reader settings changed");
-
-      final ReaderPreferences preferences =
-        Services.INSTANCE.serviceDirectory()
-          .requireService(ProfilesControllerType.class)
-          .profileCurrent()
-          .preferences()
-          .readerPreferences();
-
-      applyReaderPreferences(preferences);
+      applyReaderPreferences(event.getNewPreferences().readerPreferences());
     }
   }
 

@@ -33,7 +33,7 @@ import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
@@ -341,7 +341,7 @@ class SettingsFragmentAccount : Fragment() {
 
   private fun onProfileEvent(event: ProfileEvent) {
     return when (event) {
-      is ProfilePreferencesChanged -> {
+      is ProfileUpdated -> {
         this.uiThread.runOnUIThread(Runnable {
           this.reconfigureAccountUI()
         })
@@ -532,21 +532,19 @@ class SettingsFragmentAccount : Fragment() {
   }
 
   private fun setUnder13() {
-    val profile = this.profilesController.profileCurrent()
-    this.profilesController.profilePreferencesUpdate(
-      profile.preferences()
-        .toBuilder()
+    this.profilesController.profilePreferencesUpdate { preferences ->
+      preferences.toBuilder()
         .setDateOfBirth(this.synthesizeDateOfBirth(0))
-        .build())
+        .build()
+    }
   }
 
   private fun setOver13() {
-    val profile = this.profilesController.profileCurrent()
-    this.profilesController.profilePreferencesUpdate(
-      profile.preferences()
-        .toBuilder()
+    this.profilesController.profilePreferencesUpdate { preferences ->
+      preferences.toBuilder()
         .setDateOfBirth(this.synthesizeDateOfBirth(14))
-        .build())
+        .build()
+    }
   }
 
   private fun isOver13(): Boolean {

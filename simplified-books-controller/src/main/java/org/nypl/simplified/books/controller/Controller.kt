@@ -52,11 +52,13 @@ import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfilePreferences
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
@@ -207,6 +209,16 @@ class Controller private constructor(
 
   override fun profileEvents(): Observable<ProfileEvent> {
     return this.profileEvents
+  }
+
+  override fun profileDelete(
+    profileID: ProfileID
+  ): FluentFuture<ProfileDeletionEvent> {
+    return this.submitTask(ProfileDeletionTask(
+      this.profiles,
+      this.profileEvents,
+      profileID
+    ))
   }
 
   override fun profileCreate(
@@ -383,15 +395,45 @@ class Controller private constructor(
     }
   }
 
-  @Throws(ProfileNoneCurrentException::class)
   override fun profilePreferencesUpdate(
-    preferences: ProfilePreferences
-  ): FluentFuture<Unit> {
-    return this.submitTask(ProfilePreferencesUpdateTask(
-      events = this.profileEvents,
-      profile = this.profiles.currentProfileUnsafe(),
-      preferences = preferences
-    ))
+    preferences: (ProfilePreferences) -> ProfilePreferences
+  ): FluentFuture<ProfileUpdated> {
+    return this.submitTask(
+      ProfilePreferencesUpdateTask(
+        events = this.profileEvents,
+        requestedProfileId = null,
+        profiles = this.profiles,
+        preferencesUpdate = preferences
+      )
+    )
+  }
+
+  override fun profilePreferencesUpdateFor(
+    profile: ProfileID,
+    preferences: (ProfilePreferences) -> ProfilePreferences
+  ): FluentFuture<ProfileUpdated> {
+    return this.submitTask(
+      ProfilePreferencesUpdateTask(
+        events = this.profileEvents,
+        requestedProfileId = profile,
+        profiles = this.profiles,
+        preferencesUpdate = preferences
+      )
+    )
+  }
+
+  override fun profileDisplayNameUpdateFor(
+    profile: ProfileID,
+    displayName: String
+  ): FluentFuture<ProfileUpdated> {
+    return this.submitTask(
+      ProfileDisplayNameUpdateTask(
+        events = this.profileEvents,
+        requestedProfileId = profile,
+        profiles = this.profiles,
+        displayName = displayName
+      )
+    )
   }
 
   @Throws(ProfileNoneCurrentException::class)

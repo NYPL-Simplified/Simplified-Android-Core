@@ -18,10 +18,12 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
+import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
@@ -144,16 +146,28 @@ class MockProfilesController(
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profilePreferencesUpdate(preferences: ProfilePreferences): FluentFuture<Unit> {
+  override fun profileFeed(request: ProfileFeedRequest): FluentFuture<Feed.FeedWithoutGroups> {
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profileFeed(request: ProfileFeedRequest): FluentFuture<Feed.FeedWithoutGroups> {
+  override fun profilePreferencesUpdate(preferences: (ProfilePreferences) -> ProfilePreferences): FluentFuture<ProfileUpdated> {
+    return FluentFuture.from(SettableFuture.create())
+  }
+
+  override fun profilePreferencesUpdateFor(profile: ProfileID, preferences: (ProfilePreferences) -> ProfilePreferences): FluentFuture<ProfileUpdated> {
+    return FluentFuture.from(SettableFuture.create())
+  }
+
+  override fun profileDisplayNameUpdateFor(profile: ProfileID, displayName: String): FluentFuture<ProfileUpdated> {
     return FluentFuture.from(SettableFuture.create())
   }
 
   override fun profileAccountForBook(id: BookID): AccountType {
     return TODO()
+  }
+
+  override fun profileDelete(profileID: ProfileID): FluentFuture<ProfileDeletionEvent> {
+    return FluentFuture.from(SettableFuture.create())
   }
 
   override fun profileIdleTimer(): ProfileIdleTimerType {

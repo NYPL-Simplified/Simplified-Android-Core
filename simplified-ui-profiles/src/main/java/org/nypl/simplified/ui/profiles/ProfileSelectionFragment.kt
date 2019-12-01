@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileSelection
@@ -88,9 +89,9 @@ class ProfileSelectionFragment : Fragment() {
     AlertDialog.Builder(context)
       .setTitle(R.string.profileDeleteAsk)
       .setMessage(context.getString(R.string.profileDeleteAskMessage, profile.displayName))
-      .setPositiveButton(R.string.profileDelete, { dialog, which ->
-
-      })
+      .setPositiveButton(R.string.profileDelete) { _, _ ->
+        this.profilesController.profileDelete(profile.id)
+      }
       .create()
       .show()
   }
@@ -124,13 +125,32 @@ class ProfileSelectionFragment : Fragment() {
 
   private fun onProfileEvent(event: ProfileEvent) {
     when (event) {
-      is ProfileSelection.ProfileSelectionCompleted -> {
+      is ProfileSelection.ProfileSelectionCompleted ->
         this.uiThread.runOnUIThread {
           NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
             .openMain()
         }
-      }
+      is ProfileDeletionEvent.ProfileDeletionSucceeded ->
+        this.uiThread.runOnUIThread {
+          this.updateProfilesList()
+        }
+      is ProfileDeletionEvent.ProfileDeletionFailed ->
+        this.uiThread.runOnUIThread {
+          this.onProfileDeletionFailed(event)
+        }
     }
+  }
+
+  @UiThread
+  private fun onProfileDeletionFailed(event: ProfileDeletionEvent.ProfileDeletionFailed) {
+    this.uiThread.checkIsUIThread()
+
+    val context = this.requireContext()
+    AlertDialog.Builder(context)
+      .setTitle(R.string.profileDeletionError)
+      .setMessage(context.getString(R.string.profileDeletionFailedMessage, event.exception.message))
+      .create()
+      .show()
   }
 
   @UiThread

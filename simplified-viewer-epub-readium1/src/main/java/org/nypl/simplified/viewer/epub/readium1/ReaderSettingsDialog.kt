@@ -17,7 +17,8 @@ import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
-import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.api.ProfilePreferences
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.api.ReaderColorScheme
 import org.nypl.simplified.reader.api.ReaderFontSelection
@@ -187,7 +188,7 @@ class ReaderSettingsDialog : DialogFragment() {
         }
       })
 
-    this.onReaderPreferencesChanged()
+    this.onReaderPreferencesChanged(this.readerPreferencesBuilder.build())
     return layout
   }
 
@@ -214,24 +215,18 @@ class ReaderSettingsDialog : DialogFragment() {
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
-    if (event is ProfilePreferencesChanged) {
-      if (event.changedReaderPreferences()) {
-        this.onReaderPreferencesChanged()
+    if (event is ProfileUpdated.Succeeded) {
+      if (event.oldPreferences != event.newPreferences) {
+        this.onReaderPreferencesChanged(event.newPreferences.readerPreferences())
       }
     }
   }
 
-  private fun onReaderPreferencesChanged() {
+  private fun onReaderPreferencesChanged(newPreferences: ReaderPreferences) {
     this.logger.debug("reader preferences changed")
 
-    val prefs =
-      this.profiles
-        .profileCurrent()
-        .preferences()
-        .readerPreferences()
-
-    val colorScheme = prefs.colorScheme()
-    val fontFamily = prefs.fontFamily()
+    val colorScheme = newPreferences.colorScheme()
+    val fontFamily = newPreferences.fontFamily()
 
     this.uiThread.runOnUIThread {
       this.configureViewsForColorScheme(colorScheme)
@@ -290,19 +285,10 @@ class ReaderSettingsDialog : DialogFragment() {
   }
 
   private fun updatePreferences(prefs: ReaderPreferences) {
-    try {
-      val profile =
-        this.profiles.profileCurrent()
-
-      val profilePrefs =
-        profile.preferences()
-          .toBuilder()
-          .setReaderPreferences(prefs)
-          .build()
-
-      this.profiles.profilePreferencesUpdate(profilePrefs)
-    } catch (e: ProfileNoneCurrentException) {
-      throw IllegalStateException(e)
+    this.profiles.profilePreferencesUpdate { preferences ->
+      preferences.toBuilder()
+        .setReaderPreferences(prefs)
+        .build()
     }
   }
 
