@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
+import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
@@ -43,10 +44,15 @@ import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
+import org.nypl.simplified.futures.FluentFutureExtensions
+import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedNavigation
@@ -61,6 +67,7 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
+
 
 /**
  * The base type of feed fragments. This class is abstract purely because the AndroidX
@@ -92,6 +99,9 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var configurationService: CatalogConfigurationServiceType
+  private lateinit var feedCOPPAGate: ViewGroup
+  private lateinit var feedCOPPAOver13: Button
+  private lateinit var feedCOPPAUnder13: Button
   private lateinit var feedEmpty: ViewGroup
   private lateinit var feedError: ViewGroup
   private lateinit var feedErrorDetails: Button
@@ -123,12 +133,14 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
-  private val parametersId = PARAMETERS_ID
+  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
   private var accountSubscription: Disposable? = null
   private var feedStatusSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    FluentFutureExtensions.fluentFutureOfValue(23)
 
     this.parameters = this.arguments!![this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
@@ -164,6 +176,8 @@ class CatalogFragmentFeed : Fragment() {
     val layout =
       inflater.inflate(R.layout.feed, container, false)
 
+    this.feedCOPPAGate =
+      layout.findViewById(R.id.feedCOPPAGate)
     this.feedEmpty =
       layout.findViewById(R.id.feedEmpty)
     this.feedError =
@@ -215,6 +229,12 @@ class CatalogFragmentFeed : Fragment() {
     this.feedErrorDetails =
       this.feedError.findViewById(R.id.feedErrorDetails)
 
+    this.feedCOPPAOver13 =
+      this.feedCOPPAGate.findViewById(R.id.feedAgeGateOver)
+    this.feedCOPPAUnder13 =
+      this.feedCOPPAGate.findViewById(R.id.feedAgeGateUnder)
+
+    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
     this.feedNavigation.visibility = View.INVISIBLE
@@ -324,6 +344,8 @@ class CatalogFragmentFeed : Fragment() {
     }
 
     return when (feedState) {
+      is CatalogFeedAgeGate ->
+        this.onCatalogFeedAgeGateUI(activity, feedState)
       is CatalogFeedLoading ->
         this.onCatalogFeedLoadingUI(activity, feedState)
       is CatalogFeedWithGroups ->
@@ -360,12 +382,75 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   @UiThread
+  private fun onCatalogFeedAgeGateUI(
+    activity: FragmentActivity,
+    feedState: CatalogFeedAgeGate
+  ) {
+    this.uiThread.checkIsUIThread()
+
+    this.feedCOPPAGate.visibility = View.VISIBLE
+    this.feedEmpty.visibility = View.INVISIBLE
+    this.feedError.visibility = View.INVISIBLE
+    this.feedLoading.visibility = View.INVISIBLE
+    this.feedNavigation.visibility = View.INVISIBLE
+    this.feedWithGroups.visibility = View.INVISIBLE
+    this.feedWithoutGroups.visibility = View.INVISIBLE
+
+    this.configureToolbar(
+      toolbarHost = activity as ToolbarHostType,
+      title = feedState.title,
+      search = feedState.search
+    )
+
+    this.feedCOPPAOver13.setOnClickListener {
+      this.feedCOPPAUnder13.isEnabled = false
+      this.feedCOPPAOver13.isEnabled = false
+
+      this.profilesController.profileUpdate { description ->
+        this.synthesizeDateOfBirthDescription(description, 14)
+      }.map {
+        this.logger.debug("age updated")
+        this.uiThread.runOnUIThread { this.feedModel.reloadFeed(this.parameters) }
+      }
+    }
+
+    this.feedCOPPAUnder13.setOnClickListener {
+      this.feedCOPPAUnder13.isEnabled = false
+      this.feedCOPPAOver13.isEnabled = false
+
+      this.profilesController.profileUpdate { description ->
+        this.synthesizeDateOfBirthDescription(description, 0)
+      }.map {
+        this.logger.debug("age updated")
+        this.uiThread.runOnUIThread { this.feedModel.reloadFeed(this.parameters) }
+      }
+    }
+  }
+
+  private fun synthesizeDateOfBirthDescription(
+    description: ProfileDescription,
+    years: Int
+  ): ProfileDescription {
+    val newPreferences =
+      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
+    return description.copy(preferences = newPreferences)
+  }
+
+  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
+    return ProfileDateOfBirth(
+      date = DateTime.now().minusYears(years),
+      isSynthesized = true
+    )
+  }
+
+  @UiThread
   private fun onCatalogFeedEmpty(
     activity: FragmentActivity,
     feedState: CatalogFeedEmpty
   ) {
     this.uiThread.checkIsUIThread()
 
+    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.VISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -387,6 +472,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
+    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.VISIBLE
@@ -408,6 +494,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
+    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -429,6 +516,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
+    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -474,6 +562,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
+    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -506,6 +595,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
+    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.VISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -688,11 +778,21 @@ class CatalogFragmentFeed : Fragment() {
       this.findNavigationController()
         .openFeed(this.feedModel.resolveSearch(
           search = search,
-          query = editText.text?.toString() ?: ""
+          query = searchText(editText)
         ))
       dialog.dismiss()
     }
     alertBuilder.create().show()
+  }
+
+  private fun searchText(editText: AppCompatEditText): String {
+    val text = editText.text
+    return if (text == null) {
+      ""
+    } else {
+      val trimmed = text.trim()
+      trimmed.toString()
+    }
   }
 
   @UiThread

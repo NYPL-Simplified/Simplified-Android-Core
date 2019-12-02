@@ -13,6 +13,7 @@ import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
@@ -129,7 +130,33 @@ class CatalogFeedViewModel(
   ): CatalogFeedState {
     this.logger.debug("[{}]: loading remote feed {}", this.instanceId, arguments.feedURI)
 
+    val profile = this.profilesController.profileCurrent()
     val account = this.profilesController.profileAccountCurrent()
+
+    /*
+     * If the remote feed has an age gate, and we haven't given an age, then display an
+     * age gate!
+     */
+
+    when (account.provider.authentication) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate -> {
+        val dateOfBirth = profile.preferences().dateOfBirth
+        if (dateOfBirth == null) {
+          this.logger.debug("[{}]: showing age gate", this.instanceId)
+          val newState = CatalogFeedState.CatalogFeedAgeGate(this.feedArguments)
+          synchronized(this.stateLock) {
+            this.state = newState
+          }
+          this.feedStatusSource.onNext(Unit)
+          return newState
+        }
+      }
+      is AccountProviderAuthenticationDescription.Basic,
+      null -> {
+
+      }
+    }
+
     val loginState = account.loginState
     val authentication =
       if (loginState.credentials != null) {
@@ -160,10 +187,6 @@ class CatalogFeedViewModel(
       )
 
     synchronized(this.stateLock) {
-      Preconditions.checkState(
-        this.state == null,
-        "State must be null (received ${this.state})"
-      )
       this.state = newState
     }
     this.feedStatusSource.onNext(Unit)

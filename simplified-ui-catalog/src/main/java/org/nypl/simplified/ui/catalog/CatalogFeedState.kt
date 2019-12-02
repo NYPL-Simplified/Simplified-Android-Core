@@ -34,6 +34,17 @@ sealed class CatalogFeedState {
   abstract val title: String
 
   /**
+   * The feed requires an age gate check.
+   */
+
+  data class CatalogFeedAgeGate(
+    override val arguments: CatalogFeedArguments
+  ) : CatalogFeedState() {
+    override val title: String = ""
+    override val search: FeedSearch? = null
+  }
+
+  /**
    * The feed is currently loading.
    */
 

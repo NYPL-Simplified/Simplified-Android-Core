@@ -13,4 +13,7 @@
   <string name="feedTitleBooks">Books</string>
   <string name="feedTitleCatalog">Catalog</string>
   <string name="feedTitleHolds">Holds</string>
+  <string name="feedCOPPAQuestion">You must be 13 years of age or older to download some of the books from this collection.\nHow old are you?</string>
+  <string name="feedCOPPAOver13">13 or Older</string>
+  <string name="feedCOPPAUnder13">Under 13</string>
 </resources>

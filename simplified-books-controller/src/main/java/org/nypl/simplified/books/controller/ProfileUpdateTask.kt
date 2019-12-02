@@ -35,6 +35,8 @@ class ProfileUpdateTask(
       val newDescription =
         this.update.invoke(oldDescription)
 
+      profile.setDescription(newDescription)
+
       val event =
         ProfileUpdated.Succeeded(
           profileID = profileId,
