@@ -36,6 +36,10 @@ class ProfileActivity : FragmentActivity(), ToolbarHostType {
         .updateNavigationController(
           ProfilesNavigationControllerType::class.java,
           object: ProfilesNavigationControllerType{
+            override fun openProfileSelect() {
+
+            }
+
             override fun openMain() {
 
             }

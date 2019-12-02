@@ -220,6 +220,8 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
     newServices.addService(
       interfaceType = CatalogConfigurationServiceType::class.java,
       service = object : CatalogConfigurationServiceType {
+        override val showSettingsTab: Boolean
+          get() = true
         override val showHoldsTab: Boolean
           get() = true
         override val supportErrorReportEmailAddress: String
