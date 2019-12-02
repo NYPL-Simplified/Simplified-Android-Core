@@ -51,6 +51,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -84,7 +85,6 @@ class CatalogFragmentFeed : Fragment() {
     }
   }
 
-  private lateinit var feedWithoutGroupsScrollListener: RecyclerView.OnScrollListener
   private lateinit var bookCovers: BookCoverProviderType
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var buttonCreator: CatalogButtons
@@ -111,7 +111,9 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var feedWithoutGroupsFacetsScroll: ViewGroup
   private lateinit var feedWithoutGroupsHeader: ViewGroup
   private lateinit var feedWithoutGroupsList: RecyclerView
+  private lateinit var feedWithoutGroupsScrollListener: RecyclerView.OnScrollListener
   private lateinit var feedWithoutGroupsTabs: RadioGroup
+  private lateinit var imageLoader: ImageLoaderType
   private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
@@ -142,6 +144,8 @@ class CatalogFragmentFeed : Fragment() {
       services.requireService(FeedLoaderType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
+    this.imageLoader =
+      services.requireService(ImageLoaderType::class.java)
   }
 
   override fun onCreateView(
@@ -554,6 +558,7 @@ class CatalogFragmentFeed : Fragment() {
           context = context,
           toolbar = toolbar,
           profilesController = this.profilesController,
+          imageLoader = this.imageLoader,
           onAccountSelected = this@CatalogFragmentFeed::onAccountSelected
         )
         true

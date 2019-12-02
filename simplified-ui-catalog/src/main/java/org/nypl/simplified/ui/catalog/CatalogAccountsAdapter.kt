@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.ui.images.ImageLoaderType
 
 /**
  * An adapter for a list of accounts.
@@ -11,6 +12,7 @@ import org.nypl.simplified.accounts.database.api.AccountType
 
 class CatalogAccountsAdapter(
   private val accounts: List<AccountType>,
+  private val imageLoader: ImageLoaderType,
   private val onItemClicked: (AccountType) -> Unit
 ) : RecyclerView.Adapter<CatalogAccountViewHolder>() {
 
@@ -22,7 +24,7 @@ class CatalogAccountsAdapter(
       LayoutInflater.from(parent.context)
     val item =
       inflater.inflate(R.layout.account_cell, parent, false)
-    return CatalogAccountViewHolder(item)
+    return CatalogAccountViewHolder(item, this.imageLoader)
   }
 
   override fun getItemCount(): Int {

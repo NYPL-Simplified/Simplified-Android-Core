@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.images.ImageLoaderType
 
 /**
  * Functions to open account selection dialogs.
@@ -22,6 +23,7 @@ object CatalogAccountsDialog {
     context: Context,
     toolbar: Toolbar,
     profilesController: ProfilesControllerType,
+    imageLoader: ImageLoaderType,
     onAccountSelected: (AccountType) -> Unit
   ) {
     val inflater =
@@ -44,6 +46,7 @@ object CatalogAccountsDialog {
     listView.adapter =
       CatalogAccountsAdapter(
         accounts = this.listAccounts(profilesController),
+        imageLoader = imageLoader,
         onItemClicked = { account ->
           profilesController.profileAccountSelectByProvider(account.provider.id)
           onAccountSelected.invoke(account)
