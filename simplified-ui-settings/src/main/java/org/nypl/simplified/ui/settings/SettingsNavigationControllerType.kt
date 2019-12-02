@@ -70,4 +70,10 @@ interface SettingsNavigationControllerType : NavigationControllerType {
    */
 
   fun <E : PresentableErrorType> openErrorPage(parameters: ErrorPageParameters<E>)
+
+  /**
+   * The settings screen wants to open the account registry.
+   */
+
+  fun openSettingsAccountRegistry()
 }

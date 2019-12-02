@@ -16,11 +16,16 @@ import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
-import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletionFailed
+import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletionSucceeded
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -39,6 +44,7 @@ class SettingsFragmentAccounts : Fragment() {
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: SettingsAccountsAdapter
   private lateinit var accountListData: MutableList<AccountType>
+  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var imageLoader: ImageLoaderType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
@@ -57,6 +63,8 @@ class SettingsFragmentAccounts : Fragment() {
       services.requireService(ImageLoaderType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
+    this.buildConfig =
+      services.requireService(BuildConfigurationServiceType::class.java)
   }
 
   @UiThread
@@ -68,6 +76,7 @@ class SettingsFragmentAccounts : Fragment() {
       .setTitle(R.string.settingsAccountDeleteConfirmTitle)
       .setMessage(context.getString(R.string.settingsAccountDeleteConfirm, account.provider.displayName))
       .setPositiveButton(R.string.settingsAccountDelete) { dialog, which ->
+        this.profilesController.profileAccountDeleteByProvider(account.provider.id)
         dialog.dismiss()
       }
       .create()
@@ -135,7 +144,17 @@ class SettingsFragmentAccounts : Fragment() {
   private fun configureToolbar() {
     val host = this.activity
     if (host is ToolbarHostType) {
+      val toolbar = host.findToolbar()
+
       host.toolbarClearMenu()
+      toolbar.inflateMenu(R.menu.accounts)
+
+      val accountAdd = toolbar.menu.findItem(R.id.settingsMenuActionAccountAdd)
+      accountAdd.setOnMenuItemClickListener {
+        this.findNavigationController().openSettingsAccountRegistry()
+        true
+      }
+
       host.toolbarSetTitleSubtitle(
         title = this.requireContext().getString(R.string.settingsAccounts),
         subtitle = ""
@@ -156,16 +175,60 @@ class SettingsFragmentAccounts : Fragment() {
   private fun onAccountEvent(accountEvent: AccountEvent) {
     return when (accountEvent) {
       is AccountEventCreation.AccountEventCreationSucceeded,
-      is AccountEventDeletion.AccountEventDeletionSucceeded,
+      is AccountEventDeletionSucceeded,
       is AccountEventUpdated -> {
         this.uiThread.runOnUIThread(Runnable {
           this.reconfigureAccountListUI()
         })
       }
+
+      is AccountEventDeletionFailed -> {
+        this.uiThread.runOnUIThread(Runnable {
+          this.showAccountDeletionFailedDialog(accountEvent)
+        })
+      }
+
       else -> {
 
       }
     }
+  }
+
+  @UiThread
+  private fun showAccountDeletionFailedDialog(accountEvent: AccountEventDeletionFailed) {
+    this.uiThread.checkIsUIThread()
+
+    AlertDialog.Builder(this.requireContext())
+      .setTitle(R.string.settingsAccountDeletionFailed)
+      .setMessage(R.string.settingsAccountDeletionFailedMessage)
+      .setPositiveButton(R.string.settingsDetails) { dialog, which ->
+        showErrorPage(accountEvent)
+      }
+      .create()
+      .show()
+  }
+
+  @UiThread
+  private fun showErrorPage(accountEvent: AccountEventDeletionFailed) {
+    this.uiThread.checkIsUIThread()
+
+    val taskSteps =
+      mutableListOf<TaskStep<SettingsFragmentVersion.ExampleError>>()
+
+    taskSteps.add(
+      TaskStep(
+        "Opening error page.",
+        TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")))
+
+    val parameters =
+      ErrorPageParameters(
+        emailAddress = this.buildConfig.errorReportEmail,
+        body = "",
+        subject = "[simplye-error-report]",
+        attributes = accountEvent.attributes.toSortedMap(),
+        taskSteps = taskSteps)
+
+    this.findNavigationController().openErrorPage(parameters)
   }
 
   @UiThread

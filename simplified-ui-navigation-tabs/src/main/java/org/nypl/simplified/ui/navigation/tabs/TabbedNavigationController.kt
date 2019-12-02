@@ -29,6 +29,7 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
 import org.nypl.simplified.ui.settings.SettingsFragmentAccount
 import org.nypl.simplified.ui.settings.SettingsFragmentAccountParameters
+import org.nypl.simplified.ui.settings.SettingsFragmentAccountRegistry
 import org.nypl.simplified.ui.settings.SettingsFragmentAccounts
 import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
 import org.nypl.simplified.ui.settings.SettingsFragmentMain
@@ -253,6 +254,14 @@ class TabbedNavigationController private constructor(
       tab = this.navigator.currentTab()
     )
   }
+
+  override fun openSettingsAccountRegistry() {
+    this.navigator.addFragment(
+      fragment = SettingsFragmentAccountRegistry(),
+      tab = this.navigator.currentTab()
+    )
+  }
+
 
   override fun openViewer(
     activity: Activity,

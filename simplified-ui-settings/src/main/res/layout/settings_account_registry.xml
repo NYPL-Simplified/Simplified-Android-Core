@@ -36,6 +36,14 @@
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintBottom_toTopOf="@id/accountRegistryProgress" />
 
+  <View
+    android:layout_width="0dp"
+    android:layout_height="1dp"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintBottom_toTopOf="@id/accountRegistryList"
+    android:background="?android:attr/listDivider" />
+
   <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/accountRegistryList"
     android:layout_width="match_parent"
@@ -46,6 +54,14 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/accountRegistryTitle" />
+
+  <View
+    android:layout_width="0dp"
+    android:layout_height="1dp"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/accountRegistryList"
+    android:background="?android:attr/listDivider" />
 
   <Button
     android:id="@+id/accountRegistryRefreshButton"
