@@ -306,10 +306,7 @@
   <string name="profiles_account_creation_error_general">An error occurred whilst trying to create the account.</string>
   <string name="profiles_account_creation_failed">Account creation failed</string>
   <string name="profiles_account_deletion_error_general">An error occurred whilst trying to delete the account.</string>
-  <string name="profiles_switch">Switch Profile</string>
-  <string name="profiles_switch_confirm">Are you sure you want to switch profiles?</string>
-  <string name="profiles_time_out_soon">The current profile will soon be logged out due to inactivity. Please touch the screen if you want to stay logged in.</string>
-  <string name="profiles_time_out_soon_title">Profile Inactivity</string>
+
   <string name="versions_revision">Build</string>
   <string name="versions_version">Version</string>
 

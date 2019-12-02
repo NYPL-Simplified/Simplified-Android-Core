@@ -22,4 +22,9 @@
     android:icon="@drawable/tab_settings"
     android:title="@string/tabSettings" />
 
+  <item
+    android:id="@+id/tabProfile"
+    android:icon="@drawable/tab_profile"
+    android:title="@string/tabProfile" />
+
 </menu>

@@ -22,6 +22,10 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
+/**
+ * A fragment that displays a profile selection screen.
+ */
+
 class ProfileSelectionFragment : Fragment() {
 
   private lateinit var create: Button

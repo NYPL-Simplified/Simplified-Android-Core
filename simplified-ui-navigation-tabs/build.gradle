@@ -1,6 +1,7 @@
 dependencies {
   api project(":simplified-ui-catalog")
   api project(":simplified-ui-navigation-api")
+  api project(":simplified-ui-profiles")
   api project(":simplified-ui-settings")
   api project(":simplified-ui-theme")
 

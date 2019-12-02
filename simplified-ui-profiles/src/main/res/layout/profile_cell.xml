@@ -9,7 +9,7 @@
     android:id="@+id/profileImage"
     android:layout_width="@dimen/profileItemImageSize"
     android:layout_height="@dimen/profileItemImageSize"
-    android:layout_marginStart="16dp"
+    android:layout_marginStart="8dp"
     android:src="@drawable/profile_icon"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
@@ -45,11 +45,11 @@
     android:id="@+id/profileDelete"
     android:layout_width="@dimen/profileItemImageSize"
     android:layout_height="@dimen/profileItemImageSize"
-    android:layout_marginEnd="16dp"
+    android:layout_marginEnd="8dp"
+    android:src="@drawable/profile_delete"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    android:src="@drawable/profile_delete" />
+    app:layout_constraintTop_toTopOf="parent" />
 
   <View
     android:layout_width="match_parent"

@@ -7,6 +7,9 @@ internal class MainServicesStrings(
   private val resources: Resources
 ) : BootStringResourcesType {
 
+  val bootingIdleTimerConfigurationService: String =
+    this.resources.getString(R.string.bootingIdleTimerConfigurationService)
+
   val bootingCatalogConfiguration: String =
     this.resources.getString(R.string.bootingCatalogConfigurationService)
 

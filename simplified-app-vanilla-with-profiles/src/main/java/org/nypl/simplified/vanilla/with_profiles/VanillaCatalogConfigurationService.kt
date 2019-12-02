@@ -8,6 +8,9 @@ import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 
 class VanillaCatalogConfigurationService : CatalogConfigurationServiceType {
 
+  override val showSettingsTab: Boolean
+    get() = false
+
   override val showHoldsTab: Boolean
     get() = false
 

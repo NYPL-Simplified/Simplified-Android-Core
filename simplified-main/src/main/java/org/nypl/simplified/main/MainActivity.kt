@@ -193,6 +193,15 @@ class MainActivity :
         .commit()
     }
 
+    override fun openProfileSelect() {
+      this.logger.debug("openProfileSelect")
+
+      val newFragment = ProfileSelectionFragment()
+      this.supportFragmentManager.beginTransaction()
+        .replace(R.id.mainFragmentHolder, newFragment, "MAIN")
+        .commit()
+    }
+
     override fun openProfileModify(id: ProfileID) {
       this.logger.debug("openProfileModify: ${id.uuid}")
       this.openModificationFragment(ProfileModificationFragmentParameters(id))
@@ -350,5 +359,20 @@ class MainActivity :
       address = parameters.emailAddress,
       subject = parameters.subject,
       body = parameters.body)
+  }
+
+  override fun onUserInteraction() {
+    super.onUserInteraction()
+
+    /*
+     * Each time the user interacts with something onscreen, reset the timer.
+     */
+
+    if (Services.isInitialized()) {
+      Services.serviceDirectory()
+        .requireService(ProfilesControllerType::class.java)
+        .profileIdleTimer()
+        .reset()
+    }
   }
 }

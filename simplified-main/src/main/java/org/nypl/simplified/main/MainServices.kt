@@ -88,6 +88,7 @@ import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerConfigurationServiceType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
@@ -659,6 +660,8 @@ internal object MainServices {
 
     this.logger.debug("returning fallback catalog configuration service")
     return object : CatalogConfigurationServiceType {
+      override val showSettingsTab: Boolean
+        get() = true
       override val showHoldsTab: Boolean
         get() = true
       override val showAllCollectionsInLocalFeeds: Boolean
@@ -684,6 +687,23 @@ internal object MainServices {
         get() = BuildConfig.GIT_COMMIT
       override val errorReportEmail: String
         get() = ""
+    }
+  }
+
+  private fun findIdleTimerConfiguration(): ProfileIdleTimerConfigurationServiceType {
+    val existing =
+      this.optionalFromServiceLoader(ProfileIdleTimerConfigurationServiceType::class.java)
+
+    if (existing != null) {
+      return existing
+    }
+
+    this.logger.debug("returning fallback idle timer configuration service")
+    return object : ProfileIdleTimerConfigurationServiceType {
+      override val warningWhenSecondsRemaining: Int
+        get() = 60
+      override val logOutAfterSeconds: Int
+        get() = 10 * 60
     }
   }
 
@@ -1050,12 +1070,15 @@ internal object MainServices {
       }
     )
 
-    /*
-     * Log out the current profile after ten minutes, warning one minute before this happens.
-     */
+    val idleTimerConfiguration =
+      addService(
+        message = strings.bootingIdleTimerConfigurationService,
+        interfaceType = ProfileIdleTimerConfigurationServiceType::class.java,
+        serviceConstructor = { this.findIdleTimerConfiguration() })
 
-    bookController.profileIdleTimer().setWarningIdleSecondsRemaining(60)
-    bookController.profileIdleTimer().setMaximumIdleSeconds(10 * 60)
+    val idleTimer = bookController.profileIdleTimer()
+    idleTimer.setWarningIdleSecondsRemaining(idleTimerConfiguration.warningWhenSecondsRemaining)
+    idleTimer.setMaximumIdleSeconds(idleTimerConfiguration.logOutAfterSeconds)
 
     addService(
       message = strings.bootingNotificationsService,

@@ -26,6 +26,7 @@ import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.profiles.ProfileTabFragment
 import org.nypl.simplified.ui.settings.SettingsFragmentAccount
 import org.nypl.simplified.ui.settings.SettingsFragmentAccountParameters
 import org.nypl.simplified.ui.settings.SettingsFragmentAccounts
@@ -82,6 +83,9 @@ class TabbedNavigationController private constructor(
             },
             R.id.tabSettings to {
               this.createSettingsFragment(R.id.tabSettings)
+            },
+            R.id.tabProfile to {
+              ProfileTabFragment()
             }
           ),
           defaultTab = R.id.tabCatalog,

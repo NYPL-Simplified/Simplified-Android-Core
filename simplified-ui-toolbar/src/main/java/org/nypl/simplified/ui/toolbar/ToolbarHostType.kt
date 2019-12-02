@@ -90,12 +90,20 @@ interface ToolbarHostType {
         toolbar.navigationIcon = this.toolbarIconBackArrow(context)
         toolbar.setNavigationOnClickListener { onArrowClicked() }
       } else {
-        toolbar.navigationIcon = null
-        toolbar.setNavigationOnClickListener(null)
+        this.toolbarUnsetArrow()
       }
     } catch (e: Exception) {
-      toolbar.navigationIcon = null
-      toolbar.setNavigationOnClickListener(null)
+      this.toolbarUnsetArrow()
     }
+  }
+
+  /**
+   * A convenience function to hide the back arrow for the toolbar.
+   */
+
+  fun toolbarUnsetArrow() {
+    val toolbar = this.findToolbar()
+    toolbar.navigationIcon = null
+    toolbar.setNavigationOnClickListener(null)
   }
 }

@@ -7,6 +7,15 @@ package org.nypl.simplified.ui.catalog
 interface CatalogConfigurationServiceType {
 
   /**
+   * Should the "settings" tab be shown?
+   *
+   * If set to `true`, the settings tab will be visible.
+   * If set to `false`, the settings tab will not be visible.
+   */
+
+  val showSettingsTab: Boolean
+
+  /**
    * Should all collections be shown in the local "My Books" and "Holds" feeds?
    *
    * If set to `true`, books from all collections will be shown in local feeds.

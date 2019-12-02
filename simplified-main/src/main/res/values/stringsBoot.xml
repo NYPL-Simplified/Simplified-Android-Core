@@ -44,4 +44,5 @@
   <string name="bootingUIBackgroundExecutor">Initializing UI background executor…</string>
   <string name="bootingUIThreadService">Initializing UI thread service…</string>
   <string name="bootStarted">Starting application…</string>
+  <string name="bootingIdleTimerConfigurationService">Initializing idle timer configuration...</string>
 </resources>
