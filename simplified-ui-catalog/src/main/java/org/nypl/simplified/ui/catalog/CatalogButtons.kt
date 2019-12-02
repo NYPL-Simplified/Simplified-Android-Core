@@ -152,6 +152,18 @@ class CatalogButtons(
   }
 
   @UiThread
+  fun createDeleteButton(
+    onClick: (Button) -> Unit
+  ): Button {
+    return this.createButton(
+      context = this.context,
+      text = R.string.catalogDelete,
+      description = R.string.catalogAccessibilityBookDelete,
+      onClick = onClick
+    )
+  }
+
+  @UiThread
   fun createRetryButton(
     onClick: (Button) -> Unit
   ): Button {

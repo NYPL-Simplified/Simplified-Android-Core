@@ -102,7 +102,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var summary: TextView
   private lateinit var title: TextView
   private lateinit var uiThread: UIThreadServiceType
-  private val parametersId = PARAMETERS_ID
+  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail.Companion.PARAMETERS_ID
   private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
   private var bookRegistrySubscription: Disposable? = null
   private var debugService: CatalogDebuggingServiceType? = null
@@ -264,17 +264,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
     val status =
       this.bookRegistry.bookOrNull(this.parameters.bookID)
-        ?: run {
-          val book = Book(
-            id = this.parameters.bookID,
-            account = this.parameters.accountId,
-            cover = null,
-            thumbnail = null,
-            entry = this.parameters.feedEntry.feedEntry,
-            formats = listOf()
-          )
-          BookWithStatus(book, BookStatus.fromBook(book))
-        }
+        ?:  this.synthesizeBookWithStatus()
 
     this.onBookStatusUI(status)
     this.onOPDSFeedEntryUI(this.parameters.feedEntry)
@@ -290,6 +280,18 @@ class CatalogFragmentBookDetail : Fragment() {
     this.bookRegistrySubscription =
       this.bookRegistry.bookEvents()
         .subscribe(this::onBookStatusEvent)
+  }
+
+  private fun synthesizeBookWithStatus(): BookWithStatus {
+    val book = Book(
+      id = this.parameters.bookID,
+      account = this.parameters.accountId,
+      cover = null,
+      thumbnail = null,
+      entry = this.parameters.feedEntry.feedEntry,
+      formats = listOf()
+    )
+    return BookWithStatus(book, BookStatus.fromBook(book))
   }
 
   private fun configureToolbar(
@@ -329,13 +331,12 @@ class CatalogFragmentBookDetail : Fragment() {
       return
     }
 
-    val bookWithStatus = this.bookRegistry.bookOrNull(this.parameters.bookID)
-    if (bookWithStatus != null) {
-      this.uiThread.runOnUIThread {
-        this.onBookStatusUI(bookWithStatus)
-      }
-      this.onOPDSFeedEntry(FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry))
-    }
+    val bookWithStatus =
+      this.bookRegistry.bookOrNull(this.parameters.bookID)
+        ?: synthesizeBookWithStatus()
+
+    this.uiThread.runOnUIThread { this.onBookStatusUI(bookWithStatus) }
+    this.onOPDSFeedEntry(FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry))
   }
 
   private fun onOPDSFeedEntry(entry: FeedEntry.FeedEntryOPDS) {
@@ -645,12 +646,21 @@ class CatalogFragmentBookDetail : Fragment() {
           }
         }
     }
+
     if (bookStatus.returnable) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
       this.buttons.addView(this.buttonCreator.createRevokeLoanButton { button ->
         this.tryRevokeMaybeAuthenticated(button, book)
       })
     }
+
+    if (BookFormats.isLocallyDeletable(book)) {
+      this.buttons.addView(this.buttonCreator.createButtonSpace())
+      this.buttons.addView(this.buttonCreator.createDeleteButton { button ->
+        this.tryDelete(book.id)
+      })
+    }
+
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -914,7 +924,7 @@ class CatalogFragmentBookDetail : Fragment() {
       emailAddress = this.configurationService.supportErrorReportEmailAddress,
       body = "",
       subject = this.configurationService.supportErrorReportSubject,
-      attributes = collectAttributes(result),
+      attributes = this.collectAttributes(result),
       taskSteps = result.steps
     )
     this.findNavigationController().openErrorPage(errorPageParameters)
@@ -956,5 +966,10 @@ class CatalogFragmentBookDetail : Fragment() {
   private fun tryCancelDownload(id: BookID) {
     this.logger.debug("cancelling: {}", id)
     this.booksController.bookDownloadCancel(this.parameters.accountId, id)
+  }
+
+  private fun tryDelete(id: BookID) {
+    this.logger.debug("deleting: {}", id)
+    this.booksController.bookDelete(this.parameters.accountId, id)
   }
 }

@@ -15,6 +15,13 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 
 class MockBooksController : BooksControllerType {
 
+  override fun bookDelete(
+    account: AccountID,
+    bookId: BookID
+  ): FluentFuture<Unit> {
+    return FluentFuture.from(SettableFuture.create())
+  }
+
   override fun bookBorrow(
     accountID: AccountID,
     bookID: BookID,

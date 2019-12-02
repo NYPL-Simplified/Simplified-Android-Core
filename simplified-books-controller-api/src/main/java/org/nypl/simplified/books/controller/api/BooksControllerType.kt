@@ -189,6 +189,18 @@ interface BooksControllerType {
   ): FluentFuture<Unit>
 
   /**
+   * Delete the given book.
+   *
+   * @param account The account
+   * @param bookId The ID of the book
+   */
+
+  fun bookDelete(
+    account: AccountID,
+    bookId: BookID
+  ): FluentFuture<Unit>
+
+  /**
    * Dismiss a failed book revocation.
    *
    * @param account The account that failed to revoke the book

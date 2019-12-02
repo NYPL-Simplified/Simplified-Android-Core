@@ -29,8 +29,10 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
@@ -459,6 +461,7 @@ class Controller private constructor(
     bookID: BookID,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+    this.publishRequestingDownload(bookID)
     return this.submitTask(BookBorrowWithDefaultAcquisitionTask(
       account = account,
       bookId = bookID,
@@ -474,6 +477,7 @@ class Controller private constructor(
     bookID: BookID,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+    this.publishRequestingDownload(bookID)
     return this.accountFor(accountID).flatMap { account ->
       this.bookBorrowWithDefaultAcquisition(account, bookID, entry)
     }
@@ -485,6 +489,7 @@ class Controller private constructor(
     acquisition: OPDSAcquisition,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+    this.publishRequestingDownload(bookID)
     return this.accountFor(accountID).flatMap { account ->
       this.bookBorrow(account, bookID, acquisition, entry)
     }
@@ -496,6 +501,7 @@ class Controller private constructor(
     acquisition: OPDSAcquisition,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+    this.publishRequestingDownload(bookID)
     return this.submitTask(BookBorrowTask(
       account = account,
       acquisition = acquisition,
@@ -505,6 +511,14 @@ class Controller private constructor(
       entry = entry,
       services = this.services
     ))
+  }
+
+  private fun publishRequestingDownload(bookID: BookID) {
+    this.bookRegistry.bookOrNull(bookID)?.let { bookWithStatus ->
+      this.bookRegistry.update(BookWithStatus(
+        book = bookWithStatus.book,
+        status = BookStatus.RequestingDownload(bookID)))
+    }
   }
 
   override fun bookBorrowFailedDismiss(
@@ -580,6 +594,7 @@ class Controller private constructor(
     account: AccountType,
     bookId: BookID
   ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
+    this.publishRequestingDelete(bookId)
     return this.submitTask(BookRevokeTask(
       account = account,
       adobeDRM = this.adobeDrm,
@@ -594,20 +609,44 @@ class Controller private constructor(
     accountID: AccountID,
     bookId: BookID
   ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
+    this.publishRequestingDelete(bookId)
     return this.accountFor(accountID).flatMap { account ->
       this.bookRevoke(account, bookId)
     }
   }
 
   override fun bookDelete(
+    account: AccountID,
+    bookId: BookID
+  ): FluentFuture<Unit> {
+    this.publishRequestingDelete(bookId)
+    return this.submitTask(BookDeleteTask(
+      accountId = account,
+      bookRegistry = this.bookRegistry,
+      bookId = bookId,
+      profiles = this.profiles
+    ))
+  }
+
+  override fun bookDelete(
     account: AccountType,
     bookId: BookID
   ): FluentFuture<Unit> {
+    this.publishRequestingDelete(bookId)
     return this.submitTask(BookDeleteTask(
-      account = account,
+      accountId = account.id,
       bookRegistry = this.bookRegistry,
-      bookId = bookId
+      bookId = bookId,
+      profiles = this.profiles
     ))
+  }
+
+  private fun publishRequestingDelete(bookId: BookID) {
+    this.bookRegistry.bookOrNull(bookId)?.let { bookWithStatus ->
+      this.bookRegistry.update(BookWithStatus(
+        book = bookWithStatus.book,
+        status = BookStatus.RequestingRevoke(bookId)))
+    }
   }
 
   override fun bookRevokeFailedDismiss(

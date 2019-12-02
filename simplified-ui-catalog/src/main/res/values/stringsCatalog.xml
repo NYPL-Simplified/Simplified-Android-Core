@@ -72,4 +72,5 @@
   <string name="catalogReturn">Return</string>
   <string name="catalogSearch">Search</string>
   <string name="catalogSearchIn">Search in %1$s…</string>
+  <string name="catalogDelete">Delete</string>
 </resources>
