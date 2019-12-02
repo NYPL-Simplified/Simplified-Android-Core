@@ -30,6 +30,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventCreation
+import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
@@ -121,6 +124,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
+  private var accountSubscription: Disposable? = null
   private var feedStatusSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -258,6 +262,34 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithoutGroupsScrollListener = CatalogScrollListener(this.bookCovers)
     this.feedWithoutGroupsList.addOnScrollListener(this.feedWithoutGroupsScrollListener)
     this.reconfigureUI(this.feedModel.feedState())
+
+    this.accountSubscription =
+      this.profilesController.accountEvents()
+        .subscribe(this::onAccountEvent)
+  }
+
+  private fun onAccountEvent(event: AccountEvent) {
+
+    /*
+     * When an account is created or deleted, refresh the feed if the current feed refers
+     * to local books.
+     */
+
+    return when (event) {
+      is AccountEventCreation.AccountEventCreationSucceeded,
+      is AccountEventDeletion.AccountEventDeletionSucceeded -> {
+        when (this.parameters) {
+          is CatalogFeedArguments.CatalogFeedArgumentsRemote -> {
+
+          }
+          is CatalogFeedArguments.CatalogFeedArgumentsLocalBooks ->
+            this.feedModel.reloadFeed(this.parameters)
+        }
+      }
+      else -> {
+
+      }
+    }
   }
 
   private fun createOrGetFeedModel(): CatalogFeedViewModel {
@@ -324,6 +356,7 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithoutGroupsList.adapter = null
     this.feedWithGroupsList.adapter = null
     this.feedStatusSubscription?.dispose()
+    this.accountSubscription?.dispose()
   }
 
   @UiThread
