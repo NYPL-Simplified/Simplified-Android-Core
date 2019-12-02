@@ -25,28 +25,12 @@
     android:layout_margin="16dp"
     android:ellipsize="end"
     android:maxLines="1"
-    android:text="@string/catalogPlaceholder"
-    android:textColor="@color/simplifiedColorBackground"
-    android:textStyle="bold"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellErrorIcon"
-    app:layout_constraintTop_toTopOf="parent" />
-
-  <TextView
-    android:id="@+id/bookCellErrorText"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginEnd="16dp"
-    android:ellipsize="end"
-    android:maxLines="2"
     android:text="@string/catalogOperationFailed"
     android:textColor="@color/simplifiedColorBackground"
     android:textStyle="bold"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/bookCellErrorIcon"
-    app:layout_constraintTop_toBottomOf="@id/bookCellErrorTitle" />
+    app:layout_constraintTop_toTopOf="parent" />
 
   <LinearLayout
     android:id="@+id/bookCellErrorButtons"
