@@ -138,11 +138,19 @@ nexusStaging {
 }
 
 allprojects {
-  group = project.ext["GROUP"]
+  group   = project.ext["GROUP"]
   version = project.ext["VERSION_NAME"]
 }
 
 subprojects { project ->
+
+  def versionName = project.ext["VERSION_NAME"]
+  def isReleaseVersion = !versionName.endsWith("SNAPSHOT")
+  if (isReleaseVersion) {
+    logger.warn("${POM_NAME}: ${versionName} appears to be a release version")
+  } else {
+    logger.warn("${POM_NAME}: ${versionName} appears to be a snapshot version")
+  }
 
   switch (POM_PACKAGING) {
     case "jar":
@@ -348,8 +356,15 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
   }
 
   signing {
+    required {
+      isReleaseVersion
+    }
+
     useGpgCmd()
-    sign publishing.publications.basicJar
+
+    if (required) {
+      sign publishing.publications.basicJar
+    }
   }
 
   repositories {
