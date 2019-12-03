@@ -2,6 +2,7 @@ package org.nypl.simplified.profiles.api
 
 import org.joda.time.DateTime
 import org.joda.time.Years
+import org.joda.time.format.ISODateTimeFormat
 
 /**
  * A date-of-birth value.
@@ -19,7 +20,16 @@ data class ProfileDateOfBirth(
    * `true` if the date of birth was synthesized for privacy reasons.
    */
 
-  val isSynthesized: Boolean) {
+  val isSynthesized: Boolean
+) {
+
+  /**
+   * Show the date as an ISO string.
+   */
+
+  fun show(): String {
+    return ISODateTimeFormat.dateTime().print(this.date)
+  }
 
   /*
    * The age in years that date of birth implies.

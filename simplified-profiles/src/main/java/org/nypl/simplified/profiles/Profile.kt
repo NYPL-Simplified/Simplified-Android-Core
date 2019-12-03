@@ -1,22 +1,23 @@
 package org.nypl.simplified.profiles
 
 import com.io7m.jfunctional.Option
+import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
+import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.profiles.api.ProfileCreateDuplicateException
 import org.nypl.simplified.profiles.api.ProfileDatabaseDeleteAnonymousException
 import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileID
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileType
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.IOException
 import java.net.URI
 import java.util.Objects
 import java.util.SortedMap
@@ -30,6 +31,7 @@ internal class Profile internal constructor(
   private var owner: ProfilesDatabase?,
   override val id: ProfileID,
   override val directory: File,
+  private val analytics: AnalyticsType,
   private val accounts: AccountsDatabaseType,
   initialDescription: ProfileDescription,
   initialAccountCurrent: AccountType
@@ -82,7 +84,7 @@ internal class Profile internal constructor(
   override fun setDescription(newDescription: ProfileDescription) {
     synchronized(this.descriptionLock) {
       val newNameNormal =
-        normalizeDisplayName(newDescription.displayName)
+        this.normalizeDisplayName(newDescription.displayName)
       val existing =
         this.owner!!.findProfileWithDisplayName(newNameNormal)
 
@@ -101,6 +103,8 @@ internal class Profile internal constructor(
       ProfilesDatabases.writeDescription(this.directory, newDescription)
       this.descriptionCurrent = newDescription
     }
+
+    this.logProfileModified()
   }
 
   private fun normalizeDisplayName(newName: String): String {
@@ -164,6 +168,29 @@ internal class Profile internal constructor(
       throw ProfileDatabaseDeleteAnonymousException("Cannot delete the anonymous profile")
     }
 
+    this.logProfileDeleted()
     this.owner?.deleteProfile(this)
+  }
+
+  private fun logProfileDeleted() {
+    this.analytics.publishEvent(AnalyticsEvent.ProfileDeleted(
+      timestamp = LocalDateTime.now(),
+      credentials = null,
+      profileUUID = this.id.uuid,
+      displayName = this.displayName,
+      birthDate = this.preferences().dateOfBirth?.date?.toString(),
+      attributes = this.description().attributes.attributes
+    ))
+  }
+
+  private fun logProfileModified() {
+    this.analytics.publishEvent(AnalyticsEvent.ProfileUpdated(
+      timestamp = LocalDateTime.now(),
+      credentials = null,
+      profileUUID = this.id.uuid,
+      displayName = this.displayName,
+      birthDate = this.preferences().dateOfBirth?.date?.toString(),
+      attributes = this.description().attributes.attributes
+    ))
   }
 }

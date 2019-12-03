@@ -1,6 +1,5 @@
 package org.nypl.simplified.analytics.lfa
 
-import android.provider.Settings
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
@@ -88,18 +87,97 @@ class LFAAnalyticsSystem(
 
   private fun eventToText(event: AnalyticsEvent): String? {
     return when (event) {
-      is AnalyticsEvent.ProfileLoggedIn ->
-        "profile_selected,${event.profileUUID},${event.displayName},${event.gender},${event.birthDate}"
+      is AnalyticsEvent.ProfileLoggedIn -> {
+        val eventBuilder = StringBuilder(128)
+        eventBuilder.append("profile_selected,")
+        eventBuilder.append(event.profileUUID)
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(event.displayName))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["gender"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.birthDate)))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["role"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["school"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["grade"])))
+        eventBuilder.toString()
+      }
+
+      is AnalyticsEvent.ProfileCreated -> {
+        val eventBuilder = StringBuilder(128)
+        eventBuilder.append("profile_created,")
+        eventBuilder.append(event.profileUUID)
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(event.displayName))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["gender"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.birthDate)))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["role"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["school"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["grade"])))
+        eventBuilder.toString()
+      }
+
+      is AnalyticsEvent.ProfileDeleted -> {
+        val eventBuilder = StringBuilder(128)
+        eventBuilder.append("profile_deleted,")
+        eventBuilder.append(event.profileUUID)
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(event.displayName))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["gender"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.birthDate)))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["role"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["school"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["grade"])))
+        eventBuilder.toString()
+      }
+
+      is AnalyticsEvent.ProfileUpdated -> {
+        val eventBuilder = StringBuilder(128)
+        eventBuilder.append("profile_modified,")
+        eventBuilder.append(event.profileUUID)
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(event.displayName))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["gender"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.birthDate)))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["role"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["school"])))
+        eventBuilder.append(',')
+        eventBuilder.append(scrubCommas(orEmpty(event.attributes["grade"])))
+        eventBuilder.toString()
+      }
+
       is AnalyticsEvent.ProfileLoggedOut ->
         null
+
       is AnalyticsEvent.CatalogSearched ->
         "catalog_searched,${event.searchQuery}"
+
       is AnalyticsEvent.BookOpened ->
         "book_opened,${event.profileUUID},${event.profileDisplayName},${event.bookTitle}"
+
       is AnalyticsEvent.BookPageTurned ->
         "book_open_page,${event.bookPage}/${event.bookPagesTotal},${event.bookTitle}"
+
       is AnalyticsEvent.BookClosed ->
         null
+
       is AnalyticsEvent.ApplicationOpened ->
         "app_open,${event.packageName},${event.packageVersion},${event.packageVersionCode}"
     }
@@ -180,4 +258,11 @@ class LFAAnalyticsSystem(
     }
   }
 
+  private fun orEmpty(text: String?): String {
+    return text ?: ""
+  }
+
+  private fun scrubCommas(text: String): String {
+    return text.replace(",", "")
+  }
 }

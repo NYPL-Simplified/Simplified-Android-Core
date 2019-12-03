@@ -30,11 +30,14 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
+import org.joda.time.LocalDateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -95,6 +98,7 @@ class CatalogFragmentFeed : Fragment() {
     }
   }
 
+  private lateinit var analytics: AnalyticsType
   private lateinit var bookCovers: BookCoverProviderType
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var buttonCreator: CatalogButtons
@@ -133,7 +137,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
-  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentFeed.Companion.PARAMETERS_ID
+  private val parametersId = PARAMETERS_ID
   private var accountSubscription: Disposable? = null
   private var feedStatusSubscription: Disposable? = null
 
@@ -146,6 +150,9 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroupsData = mutableListOf()
 
     val services = Services.serviceDirectory()
+
+    this.analytics =
+      services.requireService(AnalyticsType::class.java)
     this.bookCovers =
       services.requireService(BookCoverProviderType::class.java)
     this.bookRegistry =
@@ -775,14 +782,25 @@ class CatalogFragmentFeed : Fragment() {
     alertBuilder.setTitle(R.string.catalogSearch)
     alertBuilder.setView(dialogView)
     alertBuilder.setPositiveButton(R.string.catalogSearch) { dialog, which ->
-      this.findNavigationController()
-        .openFeed(this.feedModel.resolveSearch(
-          search = search,
-          query = searchText(editText)
-        ))
+      val query = searchText(editText)
+      this.logSearchToAnalytics(query)
+      this.findNavigationController().openFeed(this.feedModel.resolveSearch(search, query))
       dialog.dismiss()
     }
     alertBuilder.create().show()
+  }
+
+  private fun logSearchToAnalytics(query: String) {
+    val account = this.profilesController.profileAccountCurrent()
+    val profile = this.profilesController.profileCurrent()
+    this.analytics.publishEvent(AnalyticsEvent.CatalogSearched(
+      timestamp = LocalDateTime.now(),
+      credentials = account.loginState.credentials,
+      profileUUID = profile.id.uuid,
+      accountProvider = account.provider.id,
+      accountUUID = account.id.uuid,
+      searchQuery = query
+    ))
   }
 
   private fun searchText(editText: AppCompatEditText): String {

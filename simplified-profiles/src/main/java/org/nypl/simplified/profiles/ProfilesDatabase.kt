@@ -6,12 +6,14 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.subjects.Subject
+import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
@@ -121,19 +123,22 @@ internal class ProfilesDatabase internal constructor(
 
     val profile =
       ProfilesDatabases.createProfileActual(
-        this.context,
-        this.accountBundledCredentials,
-        this.accountEvents,
-        this.accountProviders,
-        this.accountsDatabases,
-        this.accountCredentialsStore,
-        accountProvider,
-        this.directory,
-        displayName,
-        next)
+        context = this.context,
+        analytics = this.analytics,
+        accountBundledCredentials = this.accountBundledCredentials,
+        accountEvents = this.accountEvents,
+        accountProviders = this.accountProviders,
+        accountsDatabases = this.accountsDatabases,
+        accountCredentialsStore = this.accountCredentialsStore,
+        accountProvider = accountProvider,
+        directory = this.directory,
+        displayName = displayName,
+        id = next)
 
     this.profiles[profile.id] = profile
     profile.setOwner(this)
+
+    logProfileCreated(profile)
     return profile
   }
 
@@ -212,5 +217,16 @@ internal class ProfilesDatabase internal constructor(
 
       DirectoryUtilities.directoryDelete(profile.directory)
     }
+  }
+
+  private fun logProfileCreated(profile: Profile) {
+    this.analytics.publishEvent(AnalyticsEvent.ProfileCreated(
+      timestamp = LocalDateTime.now(),
+      credentials = null,
+      profileUUID = profile.id.uuid,
+      displayName = profile.displayName,
+      birthDate = profile.preferences().dateOfBirth?.show(),
+      attributes = profile.description().attributes.attributes
+    ))
   }
 }

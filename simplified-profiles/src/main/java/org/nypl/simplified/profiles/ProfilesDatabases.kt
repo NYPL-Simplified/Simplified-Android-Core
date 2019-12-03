@@ -78,6 +78,7 @@ object ProfilesDatabases {
     val errors = ArrayList<Exception>()
     this.openAllProfiles(
       context = context,
+      analytics = analytics,
       accountEvents = accountEvents,
       accountProviders = accountProviders,
       accountBundledCredentials = accountBundledCredentials,
@@ -114,6 +115,7 @@ object ProfilesDatabases {
 
   private fun openAllProfiles(
     context: Context,
+    analytics: AnalyticsType,
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
@@ -139,6 +141,7 @@ object ProfilesDatabases {
         val profile =
           this.openOneProfile(
             context = context,
+            analytics = analytics,
             accountEvents = accountEvents,
             accountProviders = accountProviders,
             accountsDatabases = accountsDatabases,
@@ -179,6 +182,7 @@ object ProfilesDatabases {
     val errors = ArrayList<Exception>()
     this.openAllProfiles(
       context = context,
+      analytics = analytics,
       accountEvents = accountEvents,
       accountProviders = accountProviders,
       accountBundledCredentials = accountBundledCredentials,
@@ -193,6 +197,7 @@ object ProfilesDatabases {
       val anon =
         this.createProfileActual(
           context = context,
+          analytics = analytics,
           accountBundledCredentials = accountBundledCredentials,
           accountEvents = accountEvents,
           accountProviders = accountProviders,
@@ -266,7 +271,8 @@ object ProfilesDatabases {
   private fun openOneProfileDirectoryDoMigration(
     ownerDirectory: File,
     existingDirectory: File,
-    profileIdName: String): ProfileID? {
+    profileIdName: String
+  ): ProfileID? {
 
     this.logger.debug("attempting to migrate {} directory", existingDirectory)
 
@@ -306,6 +312,7 @@ object ProfilesDatabases {
 
   private fun openOneProfile(
     context: Context,
+    analytics: AnalyticsType,
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountsDatabases: AccountsDatabaseFactoryType,
@@ -314,7 +321,8 @@ object ProfilesDatabases {
     jom: ObjectMapper,
     directory: File,
     errors: MutableList<Exception>,
-    profileIdName: String): Profile? {
+    profileIdName: String
+  ): Profile? {
 
     val profileId =
       this.openOneProfileDirectory(errors, directory, profileIdName) ?: return null
@@ -361,7 +369,15 @@ object ProfilesDatabases {
         "Accounts database must not be empty")
 
       val account = accounts.accounts()[accounts.accounts().firstKey()]!!
-      return Profile(null, profileId, profileDir, accounts, desc, account)
+      return Profile(
+        owner = null,
+        id = profileId,
+        directory = profileDir,
+        analytics = analytics,
+        accounts = accounts,
+        initialDescription = desc,
+        initialAccountCurrent = account
+      )
     } catch (e: AccountsDatabaseException) {
       errors.add(e)
       return null
@@ -383,6 +399,7 @@ object ProfilesDatabases {
   @Throws(ProfileDatabaseException::class)
   internal fun createProfileActual(
     context: Context,
+    analytics: AnalyticsType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
@@ -391,7 +408,8 @@ object ProfilesDatabases {
     accountProvider: AccountProviderType,
     directory: File,
     displayName: String,
-    id: ProfileID): Profile {
+    id: ProfileID
+  ): Profile {
 
     try {
       val profileDir =
@@ -428,7 +446,15 @@ object ProfilesDatabases {
         val account =
           accounts.createAccount(accountProvider)
         val profile =
-          Profile(null, id, profileDir, accounts, description, account)
+          Profile(
+            owner = null,
+            id = id,
+            directory = profileDir,
+            analytics = analytics,
+            accounts = accounts,
+            initialDescription = description,
+            initialAccountCurrent = account
+          )
 
         this.writeDescription(profileDir, description)
         return profile

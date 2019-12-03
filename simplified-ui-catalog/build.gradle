@@ -5,6 +5,7 @@ dependencies {
   api project(":simplified-ui-errorpage")
 
   implementation project(":simplified-adobe-extensions")
+  implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-controller-api")
   implementation project(":simplified-books-registry-api")
   implementation project(":simplified-documents")
