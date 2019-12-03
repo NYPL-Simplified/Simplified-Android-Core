@@ -54,10 +54,10 @@ ext {
   }
 
   if (!project.hasProperty("org.librarysimplified.nexus.depend")) {
-    logger.warn("org.librarysimplified.nexus.depend is not set: We will not depend on artifacts the NYPL Nexus")
+    logger.warn("org.librarysimplified.nexus.depend is not set: We will not depend on artifacts on the NYPL Nexus")
     useNYPLNexusDepend = false
   } else {
-    logger.warn("org.librarysimplified.nexus.depend is set: We will depend artifacts on the NYPL Nexus")
+    logger.warn("org.librarysimplified.nexus.depend is set: We will depend on artifacts on the NYPL Nexus")
     useNYPLNexusDepend = true
   }
 
@@ -144,12 +144,16 @@ allprojects {
 
 subprojects { project ->
 
+  /*
+   * Do not PGP sign snapshot releases.
+   */
+
   def versionName = project.ext["VERSION_NAME"]
   def isReleaseVersion = !versionName.endsWith("SNAPSHOT")
   if (isReleaseVersion) {
-    logger.warn("${POM_NAME}: ${versionName} appears to be a release version")
+    logger.warn("${POM_NAME}: ${versionName} appears to be a release version; artifacts will be PGP signed")
   } else {
-    logger.warn("${POM_NAME}: ${versionName} appears to be a snapshot version")
+    logger.warn("${POM_NAME}: ${versionName} appears to be a snapshot version; artifacts will not be PGP signed")
   }
 
   switch (POM_PACKAGING) {
