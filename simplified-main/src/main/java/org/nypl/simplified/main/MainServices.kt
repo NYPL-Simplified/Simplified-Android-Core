@@ -76,11 +76,13 @@ import org.nypl.simplified.networkconnectivity.NetworkConnectivity
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.notifications.NotificationsWrapper
+import org.nypl.simplified.opds.auth_document.AuthenticationDocumentParsers
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.patron.PatronUserProfileParsers
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabases
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
@@ -531,12 +533,6 @@ internal object MainServices {
       BookFormats.supportedBookMimeTypes()))
   }
 
-  private fun <T : Any> oneFromServiceLoader(interfaceType: Class<T>): T {
-    return ServiceLoader.load(interfaceType)
-      .iterator()
-      .next()
-  }
-
   private fun <T : Any> optionalFromServiceLoader(interfaceType: Class<T>): T? {
     return ServiceLoader.load(interfaceType)
       .toList()
@@ -972,12 +968,12 @@ internal object MainServices {
     addService(
       message = strings.bootingPatronProfileParsers,
       interfaceType = PatronUserProfileParsersType::class.java,
-      serviceConstructor = { this.oneFromServiceLoader(PatronUserProfileParsersType::class.java) })
+      serviceConstructor = { PatronUserProfileParsers() })
 
     addService(
       message = strings.bootingAuthenticationDocumentParsers,
       interfaceType = AuthenticationDocumentParsersType::class.java,
-      serviceConstructor = { this.oneFromServiceLoader(AuthenticationDocumentParsersType::class.java) })
+      serviceConstructor = { AuthenticationDocumentParsers() })
 
     val profileEvents = PublishSubject.create<ProfileEvent>()
     addService(
