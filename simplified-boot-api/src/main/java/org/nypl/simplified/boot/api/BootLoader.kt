@@ -9,6 +9,7 @@ import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.slf4j.LoggerFactory
+import java.util.ServiceLoader
 import java.util.concurrent.Executors
 
 /**
@@ -65,6 +66,8 @@ class BootLoader<T>(
     this.executor.execute {
       val strings = this.bootStringResources.invoke(context.resources)
 
+      this.executeBootPreHooks(context)
+
       try {
         future.set(this.bootProcess.execute { event -> this.eventsActual.onNext(event) })
         this.logger.debug("finished executing boot")
@@ -87,5 +90,22 @@ class BootLoader<T>(
       }
     }
     return FluentFuture.from(future)
+  }
+
+  private fun executeBootPreHooks(context: Context) {
+    try {
+      val hooks = ServiceLoader.load(BootPreHookType::class.java).toList()
+      this.logger.debug("executing {} boot pre-hooks", hooks.size)
+
+      for (hook in hooks) {
+        try {
+          hook.execute(context)
+        } catch (e: Throwable) {
+          this.logger.error("failed to execute boot pre-hook {}: ", hook, e)
+        }
+      }
+    } catch (e: Throwable) {
+      this.logger.error("failed to execute boot pre-hook: ", e)
+    }
   }
 }
