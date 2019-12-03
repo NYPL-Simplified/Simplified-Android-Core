@@ -570,6 +570,9 @@ object ProfilesDatabases {
             publishResolutionError(accountEvents, resolutionResult)
           }
         }
+      } else {
+        this.logger.debug("[{}]: account provider {} is not automatic",
+          profile.uuid, description.metadata.id)
       }
     }
 

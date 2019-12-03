@@ -1,0 +1,19 @@
+[
+  {
+    "@version": "20190708",
+    "addAutomatically": true,
+    "catalogURI": "http://openbookshelf.dp.la/OB/groups/3",
+    "idUUID": "urn:provider:la.dp.openbookshelf",
+    "isProduction": true,
+    "logo": "simplified-asset:logos/dpla.png",
+    "mainColor": "#ec1c24",
+    "displayName": "Open Bookshelf",
+    "subtitle": "Open Bookshelf",
+    "supportsBarcodeDisplay": false,
+    "supportsBarcodeScanner": false,
+    "supportsCardCreator": false,
+    "supportsHelpCenter": false,
+    "supportsReservations": false,
+    "supportsSimplyESync": false
+  }
+]
