@@ -73,8 +73,9 @@ class MainApplication : MultiDexApplication() {
         while (index.hasNext()) {
           val appender = index.next()
           if (appender is RollingFileAppender<*>) {
-            (appender as RollingFileAppender<*>).file =
-              File(externalCacheDir, "log.txt").absolutePath
+            externalCacheDir?.mkdirs()
+            val path = File(externalCacheDir, "log.txt").absolutePath
+            (appender as RollingFileAppender<*>).file = path
             appender.start()
           }
         }
