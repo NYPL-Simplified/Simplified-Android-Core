@@ -102,7 +102,7 @@ class ProfileModificationDefaultFragment : Fragment() {
   private fun profileModify(profileID: ProfileID) {
     val nameNow = this.nameField.text.trim().toString()
 
-    this.profilesController.profileUpdate { description ->
+    this.profilesController.profileUpdateFor(profileID) { description ->
       description.copy(displayName = nameNow)
     }
   }
