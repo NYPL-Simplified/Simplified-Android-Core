@@ -98,6 +98,8 @@ class CatalogPagedViewHolder(
   private val progressText =
     this.parent.findViewById<TextView>(R.id.bookCellInProgressTitle)!!
 
+  private val errorTitle =
+    this.error.findViewById<TextView>(R.id.bookCellErrorTitle)
   private val errorDismiss =
     this.error.findViewById<Button>(R.id.bookCellErrorButtonDismiss)
   private val errorDetails =
@@ -198,6 +200,7 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.idleProgress, View.VISIBLE)
     this.idleTitle.text = item.feedEntry.title
     this.idleAuthor.text = item.feedEntry.authorsCommaSeparated
+    this.errorTitle.text = item.feedEntry.title
 
     this.thumbnailLoading =
       this.bookCovers.loadThumbnailInto(
