@@ -33,6 +33,8 @@ class CatalogAccountViewHolder(
 
     this.parent.setOnClickListener { onItemClicked.invoke(account) }
     this.accountTitleView.text = account.provider.displayName
+    this.accountTitleView.visibility = View.VISIBLE
     this.accountSubtitleView.text = account.provider.subtitle
+    this.accountSubtitleView.visibility = View.VISIBLE
   }
 }
