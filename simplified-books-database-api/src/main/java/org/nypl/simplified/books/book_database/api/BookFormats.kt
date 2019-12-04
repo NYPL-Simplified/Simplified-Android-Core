@@ -111,31 +111,6 @@ object BookFormats {
   }
 
   /**
-   * @return `true` if a book can be safely deleted locally
-   */
-
-  fun isLocallyDeletable(book: Book): Boolean {
-    return book.entry.availability.matchAvailability(
-      object : OPDSAvailabilityMatcherType<Boolean, Exception> {
-        override fun onHeldReady(availability: OPDSAvailabilityHeldReady): Boolean = false
-
-        override fun onHeld(availability: OPDSAvailabilityHeld): Boolean = false
-
-        override fun onHoldable(availability: OPDSAvailabilityHoldable): Boolean = false
-
-        override fun onLoaned(availability: OPDSAvailabilityLoaned): Boolean =
-          availability.revoke.isNone && book.isDownloaded
-
-        override fun onLoanable(availability: OPDSAvailabilityLoanable): Boolean = false
-
-        override fun onOpenAccess(availability: OPDSAvailabilityOpenAccess): Boolean =
-          book.isDownloaded
-
-        override fun onRevoked(availability: OPDSAvailabilityRevoked): Boolean = false
-      })
-  }
-
-  /**
    * The type of available book formats.
    */
 

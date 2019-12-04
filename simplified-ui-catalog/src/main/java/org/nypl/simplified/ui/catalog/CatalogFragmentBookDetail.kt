@@ -38,6 +38,14 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
+import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
+import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
+import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -654,7 +662,7 @@ class CatalogFragmentBookDetail : Fragment() {
       })
     }
 
-    if (BookFormats.isLocallyDeletable(book)) {
+    if (this.shouldShowDeleteButton(book)) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
       this.buttons.addView(this.buttonCreator.createDeleteButton { button ->
         this.tryDelete(book.id)
@@ -668,6 +676,48 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusFailed.visibility = View.INVISIBLE
     this.statusIdleText.text =
       CatalogBookAvailabilityStrings.statusString(this.resources, bookStatus)
+  }
+
+  /**
+   * Determine whether or not a book can be "deleted".
+   *
+   * A book can be deleted if:
+   *
+   * * It is loaned, downloaded, and not revocable (because otherwise, a revocation is needed).
+   * * It is loanable, but there is a book database entry for it
+   * * It is open access but there is a book database entry for it
+   */
+
+  private fun shouldShowDeleteButton(book: Book): Boolean {
+    val profile = this.profilesController.profileCurrent()
+    val account = profile.account(this.parameters.accountId)
+    return if (account.bookDatabase.books().contains(book.id)) {
+      book.entry.availability.matchAvailability(
+        object : OPDSAvailabilityMatcherType<Boolean, Exception> {
+          override fun onHeldReady(availability: OPDSAvailabilityHeldReady): Boolean =
+            false
+
+          override fun onHeld(availability: OPDSAvailabilityHeld): Boolean =
+            false
+
+          override fun onHoldable(availability: OPDSAvailabilityHoldable): Boolean =
+            false
+
+          override fun onLoaned(availability: OPDSAvailabilityLoaned): Boolean =
+            availability.revoke.isNone && book.isDownloaded
+
+          override fun onLoanable(availability: OPDSAvailabilityLoanable): Boolean =
+            true
+
+          override fun onOpenAccess(availability: OPDSAvailabilityOpenAccess): Boolean =
+            true
+
+          override fun onRevoked(availability: OPDSAvailabilityRevoked): Boolean =
+            false
+        })
+    } else {
+      false
+    }
   }
 
   @UiThread
