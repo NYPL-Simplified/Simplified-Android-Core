@@ -4,6 +4,7 @@ import android.content.Context
 import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
@@ -11,6 +12,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
 import java.io.File
+import java.net.URI
 
 /**
  * The default implementation of the {@link AccountsDatabaseFactoryType} interface.
@@ -25,13 +27,16 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
     accountProviders: AccountProviderRegistryType,
     bookDatabases: BookDatabaseFactoryType,
     context: Context,
-    directory: File): AccountsDatabaseType {
+    directory: File
+  ): AccountsDatabaseType {
     return AccountsDatabase.open(
-      context,
-      accountEvents,
-      bookDatabases,
-      accountAuthenticationCredentialsStore,
-      directory)
+      context = context,
+      accountEvents = accountEvents,
+      bookDatabases = bookDatabases,
+      accountCredentials = accountAuthenticationCredentialsStore,
+      accountProviders = accountProviders,
+      directory = directory
+    )
   }
 
   @Throws(AccountsDatabaseException::class)
@@ -40,12 +45,15 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     context: Context,
-    directory: File): AccountsDatabaseType {
+    directory: File
+  ): AccountsDatabaseType {
     return AccountsDatabase.open(
-      context,
-      accountEvents,
-      BookDatabases,
-      accountAuthenticationCredentialsStore,
-      directory)
+      context = context,
+      accountEvents = accountEvents,
+      bookDatabases = BookDatabases,
+      accountCredentials = accountAuthenticationCredentialsStore,
+      accountProviders = accountProviders,
+      directory = directory
+    )
   }
 }

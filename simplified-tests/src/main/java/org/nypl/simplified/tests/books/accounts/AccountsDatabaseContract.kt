@@ -9,6 +9,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -17,6 +18,7 @@ import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.database.AccountsDatabase
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseDuplicateProviderException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
@@ -31,9 +33,10 @@ abstract class AccountsDatabaseContract {
 
   private val logger = LoggerFactory.getLogger(AccountsDatabaseContract::class.java)
 
-  private var accountEvents: PublishSubject<AccountEvent>? = null
-  private var profileEvents: PublishSubject<ProfileEvent>? = null
-  private var credentialStore: FakeAccountCredentialStorage? = null
+  private lateinit var accountEvents: PublishSubject<AccountEvent>
+  private lateinit var accountProviders: AccountProviderRegistryType
+  private lateinit var credentialStore: FakeAccountCredentialStorage
+  private lateinit var profileEvents: PublishSubject<ProfileEvent>
 
   @Rule
   @JvmField
@@ -46,6 +49,7 @@ abstract class AccountsDatabaseContract {
     this.credentialStore = FakeAccountCredentialStorage()
     this.accountEvents = PublishSubject.create()
     this.profileEvents = PublishSubject.create()
+    this.accountProviders = Mockito.mock(AccountProviderRegistryType::class.java)
   }
 
   /**
@@ -98,9 +102,10 @@ abstract class AccountsDatabaseContract {
 
     AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
   }
 
@@ -136,9 +141,10 @@ abstract class AccountsDatabaseContract {
     this.expected.expect(CausesContains(IOException::class.java, "Could not parse account: "))
     val database = AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
   }
 
@@ -160,9 +166,10 @@ abstract class AccountsDatabaseContract {
     this.expected.expect(CausesContains(IOException::class.java, "Could not parse account: "))
     AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
   }
 
@@ -187,9 +194,10 @@ abstract class AccountsDatabaseContract {
     this.expected.expect(CausesContains(IOException::class.java, "Could not parse account: "))
     AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
   }
 
@@ -206,9 +214,10 @@ abstract class AccountsDatabaseContract {
 
     val db = AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
 
     Assert.assertEquals(0, db.accounts().size.toLong())
@@ -231,9 +240,10 @@ abstract class AccountsDatabaseContract {
 
     val db = AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
 
     val provider0 =
@@ -281,11 +291,12 @@ abstract class AccountsDatabaseContract {
 
     val db =
       AccountsDatabase.open(
-      this.context(),
-      this.accountEvents!!,
-      this.bookDatabases(),
-      this.credentialStore!!,
-      f_acc)
+        this.context(),
+        this.accountEvents,
+        this.bookDatabases(),
+        this.credentialStore,
+        this.accountProviders,
+        f_acc)
 
     val provider0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -308,9 +319,10 @@ abstract class AccountsDatabaseContract {
 
     val db0 = AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
 
     val provider0 =
@@ -323,9 +335,10 @@ abstract class AccountsDatabaseContract {
 
     val db1 = AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
 
     val acr0 = db1.accounts()[acc0.id]!!
@@ -352,9 +365,10 @@ abstract class AccountsDatabaseContract {
 
     val db0 = AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
 
     val provider0 =
@@ -383,9 +397,10 @@ abstract class AccountsDatabaseContract {
 
     val db0 = AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
 
     val provider0 =
@@ -412,9 +427,10 @@ abstract class AccountsDatabaseContract {
 
     val db0 = AccountsDatabase.open(
       this.context(),
-      this.accountEvents!!,
+      this.accountEvents,
       this.bookDatabases(),
-      this.credentialStore!!,
+      this.credentialStore,
+      this.accountProviders,
       f_acc)
 
     val provider0 =
