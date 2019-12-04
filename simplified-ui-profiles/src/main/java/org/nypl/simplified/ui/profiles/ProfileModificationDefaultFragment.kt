@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.profiles
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +26,9 @@ import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
+import android.os.IBinder
+import android.view.inputmethod.InputMethodManager
+
 
 class ProfileModificationDefaultFragment : Fragment() {
 
@@ -275,5 +279,16 @@ class ProfileModificationDefaultFragment : Fragment() {
     this.profileSubscription?.dispose()
     this.create.setOnClickListener(null)
     this.cancel.setOnClickListener(null)
+
+    this.closeKeyboard(this.requireContext(), this.nameField.windowToken)
+  }
+
+  private fun closeKeyboard(
+    context: Context,
+    windowToken: IBinder
+  ) {
+    val manager =
+      context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    manager.hideSoftInputFromWindow(windowToken, 0)
   }
 }
