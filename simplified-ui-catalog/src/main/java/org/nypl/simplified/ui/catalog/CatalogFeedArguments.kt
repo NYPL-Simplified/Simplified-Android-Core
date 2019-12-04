@@ -1,6 +1,5 @@
 package org.nypl.simplified.ui.catalog
 
-import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
 import java.io.Serializable
@@ -11,20 +10,6 @@ import java.net.URI
  */
 
 sealed class CatalogFeedArguments : Serializable {
-
-  /**
-   * The account to which the feed belongs.
-   */
-
-  abstract val accountId: AccountID
-
-  /**
-   * `true` if the feed requires network connectivity. This translates to showing an error
-   * if a request is made to show the feed, but the device doesn't currently have network
-   * connectivity.
-   */
-
-  abstract val requiresNetworkConnectivity: Boolean
 
   /**
    * The title to be displayed in the action bar for the feed.
@@ -47,10 +32,18 @@ sealed class CatalogFeedArguments : Serializable {
   data class CatalogFeedArgumentsRemote(
     override val title: String,
     val feedURI: URI,
-    override val isSearchResults: Boolean,
-    override val accountId: AccountID
+    override val isSearchResults: Boolean
+  ) : CatalogFeedArguments()
+
+  /**
+   * Arguments that specify whatever is the default remote feed for the account that is current
+   * at the time the loading is invoked.
+   */
+
+  data class CatalogFeedArgumentsRemoteAccountDefault(
+    override val title: String
   ) : CatalogFeedArguments() {
-    override val requiresNetworkConnectivity = true
+    override val isSearchResults: Boolean = false
   }
 
   /**
@@ -61,10 +54,8 @@ sealed class CatalogFeedArguments : Serializable {
     override val title: String,
     val facetType: FacetType,
     val searchTerms: String?,
-    val selection: FeedBooksSelection,
-    override val accountId: AccountID
+    val selection: FeedBooksSelection
   ) : CatalogFeedArguments() {
-    override val requiresNetworkConnectivity = false
     override val isSearchResults: Boolean = false
   }
 }

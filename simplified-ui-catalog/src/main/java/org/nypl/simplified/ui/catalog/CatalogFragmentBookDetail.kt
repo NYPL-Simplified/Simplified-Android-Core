@@ -689,33 +689,38 @@ class CatalogFragmentBookDetail : Fragment() {
    */
 
   private fun shouldShowDeleteButton(book: Book): Boolean {
-    val profile = this.profilesController.profileCurrent()
-    val account = profile.account(this.parameters.accountId)
-    return if (account.bookDatabase.books().contains(book.id)) {
-      book.entry.availability.matchAvailability(
-        object : OPDSAvailabilityMatcherType<Boolean, Exception> {
-          override fun onHeldReady(availability: OPDSAvailabilityHeldReady): Boolean =
-            false
+    return try {
+      val profile = this.profilesController.profileCurrent()
+      val account = profile.account(this.parameters.accountId)
+      return if (account.bookDatabase.books().contains(book.id)) {
+        book.entry.availability.matchAvailability(
+          object : OPDSAvailabilityMatcherType<Boolean, Exception> {
+            override fun onHeldReady(availability: OPDSAvailabilityHeldReady): Boolean =
+              false
 
-          override fun onHeld(availability: OPDSAvailabilityHeld): Boolean =
-            false
+            override fun onHeld(availability: OPDSAvailabilityHeld): Boolean =
+              false
 
-          override fun onHoldable(availability: OPDSAvailabilityHoldable): Boolean =
-            false
+            override fun onHoldable(availability: OPDSAvailabilityHoldable): Boolean =
+              false
 
-          override fun onLoaned(availability: OPDSAvailabilityLoaned): Boolean =
-            availability.revoke.isNone && book.isDownloaded
+            override fun onLoaned(availability: OPDSAvailabilityLoaned): Boolean =
+              availability.revoke.isNone && book.isDownloaded
 
-          override fun onLoanable(availability: OPDSAvailabilityLoanable): Boolean =
-            true
+            override fun onLoanable(availability: OPDSAvailabilityLoanable): Boolean =
+              true
 
-          override fun onOpenAccess(availability: OPDSAvailabilityOpenAccess): Boolean =
-            true
+            override fun onOpenAccess(availability: OPDSAvailabilityOpenAccess): Boolean =
+              true
 
-          override fun onRevoked(availability: OPDSAvailabilityRevoked): Boolean =
-            false
-        })
-    } else {
+            override fun onRevoked(availability: OPDSAvailabilityRevoked): Boolean =
+              false
+          })
+      } else {
+        false
+      }
+    } catch (e: Exception) {
+      this.logger.error("could not configure delete button: ", e)
       false
     }
   }

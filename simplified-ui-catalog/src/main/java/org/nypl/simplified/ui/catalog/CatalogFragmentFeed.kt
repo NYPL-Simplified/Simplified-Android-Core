@@ -35,6 +35,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
@@ -306,6 +307,7 @@ class CatalogFragmentFeed : Fragment() {
       is AccountEventCreation.AccountEventCreationSucceeded,
       is AccountEventDeletion.AccountEventDeletionSucceeded -> {
         when (this.parameters) {
+          is CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault,
           is CatalogFeedArguments.CatalogFeedArgumentsRemote -> {
 
           }
@@ -406,7 +408,8 @@ class CatalogFragmentFeed : Fragment() {
     this.configureToolbar(
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
-      search = feedState.search
+      search = feedState.search,
+      accountId = feedState.accountID
     )
 
     this.feedCOPPAOver13.setOnClickListener {
@@ -468,7 +471,8 @@ class CatalogFragmentFeed : Fragment() {
     this.configureToolbar(
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
-      search = feedState.search
+      search = feedState.search,
+      accountId = feedState.accountID
     )
   }
 
@@ -490,7 +494,8 @@ class CatalogFragmentFeed : Fragment() {
     this.configureToolbar(
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
-      search = feedState.search
+      search = feedState.search,
+      accountId = feedState.accountID
     )
   }
 
@@ -512,7 +517,8 @@ class CatalogFragmentFeed : Fragment() {
     this.configureToolbar(
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
-      search = feedState.search
+      search = feedState.search,
+      accountId = feedState.accountID
     )
   }
 
@@ -534,7 +540,8 @@ class CatalogFragmentFeed : Fragment() {
     this.configureToolbar(
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
-      search = feedState.search
+      search = feedState.search,
+      accountId = feedState.accountID
     )
 
     this.configureFacets(
@@ -580,7 +587,8 @@ class CatalogFragmentFeed : Fragment() {
     this.configureToolbar(
       toolbarHost = this.requireActivity() as ToolbarHostType,
       title = feedState.title,
-      search = feedState.search
+      search = feedState.search,
+      accountId = feedState.accountID
     )
 
     this.configureFacets(
@@ -613,7 +621,8 @@ class CatalogFragmentFeed : Fragment() {
     this.configureToolbar(
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
-      search = feedState.search
+      search = feedState.search,
+      accountId = feedState.accountID
     )
 
     this.feedErrorRetry.isEnabled = true
@@ -632,12 +641,13 @@ class CatalogFragmentFeed : Fragment() {
   @UiThread
   private fun configureToolbar(
     toolbarHost: ToolbarHostType,
+    accountId: AccountID,
     title: String,
     search: FeedSearch?
   ) {
     val context = this.requireContext()
     val toolbar = toolbarHost.findToolbar()
-    this.configureToolbarTitles(context, toolbar, title)
+    this.configureToolbarTitles(context, toolbar, accountId, title)
     this.configureToolbarMenu(context, toolbar, search, title)
 
     toolbarHost.toolbarSetBackArrowConditionally(
@@ -705,17 +715,18 @@ class CatalogFragmentFeed : Fragment() {
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
             title = account.provider.displayName,
             feedURI = account.provider.catalogURI,
-            isSearchResults = false,
-            accountId = account.id
+            isSearchResults = false
           )
         is CatalogFeedArguments.CatalogFeedArgumentsLocalBooks ->
           CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
             title = account.provider.displayName,
             facetType = FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE,
             searchTerms = null,
-            selection = arguments.selection,
-            accountId = account.id
+            selection = arguments.selection
           )
+        is CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault ->
+          CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault(
+            title = account.provider.displayName)
       })
   }
 
@@ -732,12 +743,13 @@ class CatalogFragmentFeed : Fragment() {
   private fun configureToolbarTitles(
     context: Context,
     toolbar: Toolbar,
+    accountId: AccountID,
     title: String
   ) {
     try {
       val accountProvider =
         this.profilesController.profileCurrent()
-          .account(this.parameters.accountId)
+          .account(accountId)
           .provider
 
       when {
@@ -756,7 +768,7 @@ class CatalogFragmentFeed : Fragment() {
       }
     } catch (e: Exception) {
       this.logger.error("could not fetch current account/profile: ", e)
-      toolbar.title = title
+      toolbar.title = ""
       toolbar.subtitle = ""
     } finally {
       val color = ContextCompat.getColor(context, R.color.simplifiedColorBackground)

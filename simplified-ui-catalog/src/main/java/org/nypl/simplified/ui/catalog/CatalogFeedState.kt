@@ -3,6 +3,7 @@ package org.nypl.simplified.ui.catalog
 import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
 import com.google.common.util.concurrent.FluentFuture
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
@@ -14,6 +15,12 @@ import org.nypl.simplified.feeds.api.FeedSearch
  */
 
 sealed class CatalogFeedState {
+
+  /**
+   * The account ID to which the feed belongs
+   */
+
+  abstract val accountID: AccountID
 
   /**
    * The arguments used to produce the feed
@@ -38,6 +45,7 @@ sealed class CatalogFeedState {
    */
 
   data class CatalogFeedAgeGate(
+    override val accountID: AccountID,
     override val arguments: CatalogFeedArguments
   ) : CatalogFeedState() {
     override val title: String = ""
@@ -49,6 +57,7 @@ sealed class CatalogFeedState {
    */
 
   data class CatalogFeedLoading(
+    override val accountID: AccountID,
     override val arguments: CatalogFeedArguments,
     val future: FluentFuture<FeedLoaderResult>
   ) : CatalogFeedState() {
@@ -61,6 +70,7 @@ sealed class CatalogFeedState {
    */
 
   data class CatalogFeedLoadFailed(
+    override val accountID: AccountID,
     override val arguments: CatalogFeedArguments,
     val failure: FeedLoaderResult.FeedLoaderFailure
   ) : CatalogFeedState() {
@@ -76,6 +86,7 @@ sealed class CatalogFeedState {
      */
 
     data class CatalogFeedWithGroups(
+      override val accountID: AccountID,
       override val arguments: CatalogFeedArguments,
       val feed: Feed.FeedWithGroups
     ) : CatalogFeedLoaded() {
@@ -91,6 +102,7 @@ sealed class CatalogFeedState {
      */
 
     data class CatalogFeedWithoutGroups(
+      override val accountID: AccountID,
       override val arguments: CatalogFeedArguments,
       val entries: LiveData<PagedList<FeedEntry>>,
       val facetsInOrder: List<FeedFacet>,
@@ -104,6 +116,7 @@ sealed class CatalogFeedState {
      */
 
     data class CatalogFeedNavigation(
+      override val accountID: AccountID,
       override val arguments: CatalogFeedArguments,
       override val search: FeedSearch?,
       override val title: String
@@ -114,6 +127,7 @@ sealed class CatalogFeedState {
      */
 
     data class CatalogFeedEmpty(
+      override val accountID: AccountID,
       override val arguments: CatalogFeedArguments,
       override val search: FeedSearch?,
       override val title: String

@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
@@ -60,8 +61,10 @@ class MainActivity :
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
 
+  private lateinit var mainViewModel: MainFragmentViewModel
   private lateinit var migrationExecutor: ListeningScheduledExecutorService
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
+  private lateinit var profilesNavigationController: ProfilesNavigationController
   private lateinit var splashMainFragment: SplashFragment
   private lateinit var toolbar: Toolbar
 
@@ -142,6 +145,7 @@ class MainActivity :
     this.splashMainFragment =
       SplashFragment.newInstance(parameters)
 
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, this.splashMainFragment, "SPLASH_MAIN")
       .commit()
@@ -161,7 +165,8 @@ class MainActivity :
   }
 
   private class ProfilesNavigationController(
-    private val supportFragmentManager: FragmentManager
+    private val supportFragmentManager: FragmentManager,
+    private val mainViewModel: MainFragmentViewModel
   ) : ProfilesNavigationControllerType {
 
     private val logger =
@@ -186,8 +191,10 @@ class MainActivity :
 
     override fun openMain() {
       this.logger.debug("openMain")
+      this.mainViewModel.clearHistory = true
 
       val mainFragment = MainFragment()
+      this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
       this.supportFragmentManager.beginTransaction()
         .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
         .commit()
@@ -195,8 +202,10 @@ class MainActivity :
 
     override fun openProfileSelect() {
       this.logger.debug("openProfileSelect")
+      this.mainViewModel.clearHistory = true
 
       val newFragment = ProfileSelectionFragment()
+      this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
       this.supportFragmentManager.beginTransaction()
         .replace(R.id.mainFragmentHolder, newFragment, "MAIN")
         .commit()
@@ -225,23 +234,21 @@ class MainActivity :
   }
 
   private fun openProfileScreen() {
-    val controller = ProfilesNavigationController(this.supportFragmentManager)
-
-    this.navigationControllerDirectory.updateNavigationController(
-      ProfilesNavigationControllerType::class.java, controller)
-    this.navigationControllerDirectory.updateNavigationController(
-      NavigationControllerType::class.java, controller)
+    this.mainViewModel.clearHistory = true
 
     val profilesFragment = ProfileSelectionFragment()
-
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, profilesFragment, "MAIN")
       .commit()
   }
 
   private fun openCatalog() {
-    val mainFragment = MainFragment()
+    ViewModelProviders.of(this)
+      .get(MainFragmentViewModel::class.java)
+      .clearHistory = true
 
+    val mainFragment = MainFragment()
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
       .commit()
@@ -258,7 +265,17 @@ class MainActivity :
     this.toolbar = this.findViewById(R.id.mainToolbar)
     this.toolbar.visibility = View.GONE
 
+    this.mainViewModel =
+      ViewModelProviders.of(this)
+        .get(MainFragmentViewModel::class.java)
+
+    this.profilesNavigationController =
+      ProfilesNavigationController(this.supportFragmentManager, this.mainViewModel)
+    this.navigationControllerDirectory.updateNavigationController(
+      ProfilesNavigationControllerType::class.java, this.profilesNavigationController)
+
     if (savedInstanceState == null) {
+      this.mainViewModel.clearHistory = true
       this.showSplashScreen()
     }
   }

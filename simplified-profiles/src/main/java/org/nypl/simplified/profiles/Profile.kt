@@ -39,6 +39,9 @@ internal class Profile internal constructor(
 
   private val logger = LoggerFactory.getLogger(Profile::class.java)
 
+  @Volatile
+  private var deleted: Boolean = false
+
   private val descriptionLock: Any = Any()
   @GuardedBy("descriptionLock")
   private var descriptionCurrent: ProfileDescription = initialDescription
@@ -58,30 +61,36 @@ internal class Profile internal constructor(
     get() = this.owner?.currentProfile()?.map { p -> p.id } == Option.some(this.id)
 
   override fun accountCurrent(): AccountType {
+    checkNotDeleted()
     synchronized(this.accountCurrentLock) {
       return this.accountCurrent
     }
   }
 
   override fun accounts(): SortedMap<AccountID, AccountType> {
+    checkNotDeleted()
     return this.accounts.accounts()
   }
 
   override fun accountsByProvider(): SortedMap<URI, AccountType> {
+    checkNotDeleted()
     return this.accounts.accountsByProvider()
   }
 
   @Throws(AccountsDatabaseNonexistentException::class)
   override fun account(accountId: AccountID): AccountType {
+    checkNotDeleted()
     return this.accounts()[accountId]
       ?: throw AccountsDatabaseNonexistentException("Nonexistent account: $accountId")
   }
 
   override fun accountsDatabase(): AccountsDatabaseType {
+    checkNotDeleted()
     return this.accounts
   }
 
   override fun setDescription(newDescription: ProfileDescription) {
+    checkNotDeleted()
     synchronized(this.descriptionLock) {
       val newNameNormal =
         this.normalizeDisplayName(newDescription.displayName)
@@ -113,11 +122,13 @@ internal class Profile internal constructor(
 
   @Throws(AccountsDatabaseException::class)
   override fun createAccount(accountProvider: AccountProviderType): AccountType {
+    checkNotDeleted()
     return this.accounts.createAccount(accountProvider)
   }
 
   @Throws(AccountsDatabaseException::class)
   override fun deleteAccountByProvider(accountProvider: URI): AccountID {
+    checkNotDeleted()
     val deleted = this.accounts.deleteAccountByProvider(accountProvider)
     synchronized(this.accountCurrentLock) {
       if (this.accountCurrent.id == deleted) {
@@ -129,6 +140,7 @@ internal class Profile internal constructor(
 
   @Throws(AccountsDatabaseNonexistentException::class)
   override fun selectAccount(accountProvider: URI): AccountType {
+    checkNotDeleted()
     val account = this.accounts.accountsByProvider()[accountProvider]
     if (account != null) {
       this.setAccountCurrent(account.id)
@@ -145,6 +157,7 @@ internal class Profile internal constructor(
 
   @Throws(AccountsDatabaseNonexistentException::class)
   internal fun setAccountCurrent(id: AccountID) {
+    checkNotDeleted()
     synchronized(this.accountCurrentLock) {
       val account = this.accounts.accounts()[id]
       if (account != null) {
@@ -156,9 +169,14 @@ internal class Profile internal constructor(
   }
 
   override fun description(): ProfileDescription {
+    checkNotDeleted()
     return synchronized(this.descriptionLock) {
       this.descriptionCurrent
     }
+  }
+
+  private fun checkNotDeleted() {
+    check(!this.deleted) { "The profile ${this.id.uuid} has been deleted!" }
   }
 
   override fun delete() {
@@ -170,6 +188,7 @@ internal class Profile internal constructor(
 
     this.logProfileDeleted()
     this.owner?.deleteProfile(this)
+    this.deleted = true
   }
 
   private fun logProfileDeleted() {

@@ -50,9 +50,16 @@ class ProfileTabFragment : Fragment() {
     }
 
     this.loggedInAs = layout.findViewById(R.id.profileLoggedInAs)
-    this.loggedInAs.text = context.getString(
-      R.string.profileLoggedInAs, this.profilesController.profileCurrent().displayName)
+    this.loggedInAs.text = context.getString(R.string.profileLoggedInAs, this.findDisplayName())
     return layout
+  }
+
+  private fun findDisplayName(): String {
+    return try {
+      this.profilesController.profileCurrent().displayName
+    } catch (e: Exception) {
+      "..."
+    }
   }
 
   @UiThread

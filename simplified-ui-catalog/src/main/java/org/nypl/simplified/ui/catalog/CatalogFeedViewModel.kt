@@ -6,15 +6,15 @@ import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
 import com.io7m.jfunctional.Option
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import org.joda.time.DateTime
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
@@ -27,8 +27,11 @@ import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
+import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.*
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
@@ -78,6 +81,8 @@ class CatalogFeedViewModel(
         this.doLoadRemoteFeed(arguments)
       is CatalogFeedArgumentsLocalBooks ->
         this.doLoadLocalFeed(arguments)
+      is CatalogFeedArgumentsRemoteAccountDefault ->
+        this.doLoadRemoteFeedAccountDefault(arguments)
     }
   }
 
@@ -90,8 +95,8 @@ class CatalogFeedViewModel(
   ): CatalogFeedState {
     this.logger.debug("[{}]: loading local feed {}", this.instanceId, arguments.selection)
 
-    val booksUri =
-      URI.create("Books")
+    val booksUri = URI.create("Books")
+    val account = this.profilesController.profileAccountCurrent()
 
     val showAllCollections =
       this.configurationService.showAllCollectionsInLocalFeeds
@@ -119,7 +124,20 @@ class CatalogFeedViewModel(
         .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
         .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
 
-    return this.createNewStatus(arguments, future)
+    return this.createNewStatus(arguments, future, account.id)
+  }
+
+  private fun doLoadRemoteFeedAccountDefault(
+    arguments: CatalogFeedArgumentsRemoteAccountDefault
+  ): CatalogFeedState {
+    this.logger.debug("[{}]: loading remote feed for account default", this.instanceId)
+    val age = this.currentAge()
+    val account = this.profilesController.profileAccountCurrent()
+    return doLoadRemoteFeed(CatalogFeedArgumentsRemote(
+      title = arguments.title,
+      feedURI = account.provider.catalogURIForAge(age),
+      isSearchResults = false
+    ))
   }
 
   /**
@@ -144,7 +162,7 @@ class CatalogFeedViewModel(
         val dateOfBirth = profile.preferences().dateOfBirth
         if (dateOfBirth == null) {
           this.logger.debug("[{}]: showing age gate", this.instanceId)
-          val newState = CatalogFeedState.CatalogFeedAgeGate(this.feedArguments)
+          val newState = CatalogFeedState.CatalogFeedAgeGate(account.id, this.feedArguments)
           synchronized(this.stateLock) {
             this.state = newState
           }
@@ -169,7 +187,11 @@ class CatalogFeedViewModel(
     val future =
       this.feedLoader.fetchURIWithBookRegistryEntries(arguments.feedURI, authentication)
 
-    return this.createNewStatus(arguments, future)
+    return this.createNewStatus(
+      arguments = arguments,
+      future = future,
+      accountID = account.id
+    )
   }
 
   /**
@@ -179,12 +201,14 @@ class CatalogFeedViewModel(
 
   private fun createNewStatus(
     arguments: CatalogFeedArguments,
-    future: FluentFuture<FeedLoaderResult>
+    future: FluentFuture<FeedLoaderResult>,
+    accountID: AccountID
   ): CatalogFeedState.CatalogFeedLoading {
     val newState =
       CatalogFeedState.CatalogFeedLoading(
         arguments = arguments,
-        future = future
+        future = future,
+        accountID = accountID
       )
 
     synchronized(this.stateLock) {
@@ -238,6 +262,7 @@ class CatalogFeedViewModel(
     result: FeedLoaderResult.FeedLoaderFailure
   ): CatalogFeedState.CatalogFeedLoadFailed {
     return CatalogFeedState.CatalogFeedLoadFailed(
+      accountID = state.accountID,
       arguments = state.arguments,
       failure = result
     )
@@ -249,6 +274,7 @@ class CatalogFeedViewModel(
   ): CatalogFeedLoaded {
     if (feed.size == 0) {
       return CatalogFeedEmpty(
+        accountID = state.accountID,
         arguments = state.arguments,
         search = feed.feedSearch,
         title = feed.feedTitle
@@ -256,6 +282,7 @@ class CatalogFeedViewModel(
     }
 
     return CatalogFeedWithGroups(
+      accountID = state.accountID,
       arguments = state.arguments,
       feed = feed
     )
@@ -268,6 +295,7 @@ class CatalogFeedViewModel(
 
     if (feed.entriesInOrder.isEmpty()) {
       return CatalogFeedEmpty(
+        accountID = state.accountID,
         arguments = state.arguments,
         search = feed.feedSearch,
         title = feed.feedTitle
@@ -298,6 +326,7 @@ class CatalogFeedViewModel(
         .build()
 
     return CatalogFeedWithoutGroups(
+      accountID = state.accountID,
       arguments = state.arguments,
       entries = pagedList,
       facetsInOrder = feed.facetsOrder,
@@ -344,21 +373,28 @@ class CatalogFeedViewModel(
     uri: URI,
     isSearchResults: Boolean
   ): CatalogFeedArguments {
+    val age = this.currentAge()
     return when (val arguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote ->
         CatalogFeedArgumentsRemote(
           title = title,
           feedURI = arguments.feedURI.resolve(uri).normalize(),
-          isSearchResults = isSearchResults,
-          accountId = arguments.accountId
+          isSearchResults = isSearchResults
         )
       is CatalogFeedArgumentsLocalBooks ->
         CatalogFeedArgumentsRemote(
           title = title,
           feedURI = uri,
-          isSearchResults = isSearchResults,
-          accountId = arguments.accountId
+          isSearchResults = isSearchResults
         )
+      is CatalogFeedArgumentsRemoteAccountDefault -> {
+        val account = profilesController.profileAccountCurrent()
+        CatalogFeedArgumentsRemote(
+          title = title,
+          feedURI = account.provider.catalogURIForAge(age).resolve(uri).normalize(),
+          isSearchResults = isSearchResults
+        )
+      }
     }
   }
 
@@ -372,6 +408,7 @@ class CatalogFeedViewModel(
   override fun resolveFacet(
     facet: FeedFacet
   ): CatalogFeedArguments {
+    val age = this.currentAge()
     return when (val currentArguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote ->
         when (facet) {
@@ -379,28 +416,40 @@ class CatalogFeedViewModel(
             CatalogFeedArgumentsRemote(
               title = facet.title,
               feedURI = currentArguments.feedURI.resolve(facet.opdsFacet.uri).normalize(),
-              isSearchResults = currentArguments.isSearchResults,
-              accountId = currentArguments.accountId
+              isSearchResults = currentArguments.isSearchResults
             )
           is FeedFacet.FeedFacetPseudo ->
             currentArguments
         }
+
+      is CatalogFeedArgumentsRemoteAccountDefault -> {
+        val account = profilesController.profileAccountCurrent()
+        when (facet) {
+          is FeedFacet.FeedFacetOPDS ->
+            CatalogFeedArgumentsRemote(
+              title = facet.title,
+              feedURI = account.provider.catalogURIForAge(age).resolve(facet.opdsFacet.uri).normalize(),
+              isSearchResults = currentArguments.isSearchResults
+            )
+          is FeedFacet.FeedFacetPseudo ->
+            currentArguments
+        }
+      }
+
       is CatalogFeedArgumentsLocalBooks -> {
         when (facet) {
           is FeedFacet.FeedFacetOPDS ->
             CatalogFeedArgumentsRemote(
               title = facet.title,
               feedURI = facet.opdsFacet.uri,
-              isSearchResults = currentArguments.isSearchResults,
-              accountId = currentArguments.accountId
+              isSearchResults = currentArguments.isSearchResults
             )
           is FeedFacet.FeedFacetPseudo ->
             CatalogFeedArgumentsLocalBooks(
               title = facet.title,
               facetType = facet.type,
               selection = currentArguments.selection,
-              searchTerms = currentArguments.searchTerms,
-              accountId = currentArguments.accountId
+              searchTerms = currentArguments.searchTerms
             )
         }
       }
@@ -427,27 +476,47 @@ class CatalogFeedViewModel(
     search: FeedSearch,
     query: String
   ): CatalogFeedArguments {
+    val age = this.currentAge()
     return when (val currentArguments = this.feedArguments) {
-      is CatalogFeedArgumentsRemote -> {
+      is CatalogFeedArgumentsRemoteAccountDefault -> {
+        val account = profilesController.profileAccountCurrent()
         when (search) {
           FeedSearch.FeedSearchLocal -> {
             CatalogFeedArgumentsRemote(
               title = currentArguments.title,
-              feedURI = currentArguments.feedURI,
-              isSearchResults = true,
-              accountId = currentArguments.accountId
+              feedURI = account.provider.catalogURIForAge(age),
+              isSearchResults = true
             )
           }
           is FeedSearch.FeedSearchOpen1_1 -> {
             CatalogFeedArgumentsRemote(
               title = currentArguments.title,
               feedURI = search.search.getQueryURIForTerms(query),
-              isSearchResults = true,
-              accountId = currentArguments.accountId
+              isSearchResults = true
             )
           }
         }
       }
+
+      is CatalogFeedArgumentsRemote -> {
+        when (search) {
+          FeedSearch.FeedSearchLocal -> {
+            CatalogFeedArgumentsRemote(
+              title = currentArguments.title,
+              feedURI = currentArguments.feedURI,
+              isSearchResults = true
+            )
+          }
+          is FeedSearch.FeedSearchOpen1_1 -> {
+            CatalogFeedArgumentsRemote(
+              title = currentArguments.title,
+              feedURI = search.search.getQueryURIForTerms(query),
+              isSearchResults = true
+            )
+          }
+        }
+      }
+
       is CatalogFeedArgumentsLocalBooks -> {
         when (search) {
           FeedSearch.FeedSearchLocal -> {
@@ -455,8 +524,7 @@ class CatalogFeedViewModel(
               title = currentArguments.title,
               facetType = currentArguments.facetType,
               searchTerms = query,
-              selection = currentArguments.selection,
-              accountId = currentArguments.accountId
+              selection = currentArguments.selection
             )
           }
           is FeedSearch.FeedSearchOpen1_1 -> {
@@ -464,12 +532,21 @@ class CatalogFeedViewModel(
               title = currentArguments.title,
               facetType = currentArguments.facetType,
               searchTerms = query,
-              selection = currentArguments.selection,
-              accountId = currentArguments.accountId
+              selection = currentArguments.selection
             )
           }
         }
       }
+    }
+  }
+
+  private fun currentAge(): Int {
+    return try {
+      val profile = profilesController.profileCurrent()
+      profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
+    } catch (e: Exception) {
+      this.logger.error("could not retrieve profile age: ", e)
+      1
     }
   }
 }

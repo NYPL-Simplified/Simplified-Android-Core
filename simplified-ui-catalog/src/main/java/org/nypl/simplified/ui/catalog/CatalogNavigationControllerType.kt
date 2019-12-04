@@ -42,4 +42,10 @@ interface CatalogNavigationControllerType : NavigationControllerType {
     book: Book,
     format: BookFormat
   )
+
+  /**
+   * Clear the history for the catalog.
+   */
+
+  fun clearHistory()
 }

@@ -211,7 +211,7 @@ internal class ProfilesDatabase internal constructor(
   internal fun deleteProfile(profile: Profile) {
     synchronized(this.profileCurrentLock) {
       this.profiles.remove(profile.id)
-      if (this.profileCurrent === profile.id) {
+      if (this.profileCurrent == profile.id) {
         this.profileCurrent = null
       }
 

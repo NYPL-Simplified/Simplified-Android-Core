@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.catalog
 
 import android.os.Parcelable
-import android.text.Editable
 import io.reactivex.Observable
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedSearch

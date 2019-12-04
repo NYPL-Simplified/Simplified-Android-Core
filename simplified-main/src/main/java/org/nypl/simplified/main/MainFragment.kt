@@ -7,9 +7,13 @@ import android.view.ViewGroup
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -27,6 +31,7 @@ import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
+import org.slf4j.LoggerFactory
 
 /**
  * The main application fragment.
@@ -37,14 +42,17 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 class MainFragment : Fragment() {
 
-  private var timeOutDialog: AlertDialog? = null
   private lateinit var bottomNavigator: TabbedNavigationController
   private lateinit var bottomView: BottomNavigationView
   private lateinit var catalogConfig: CatalogConfigurationServiceType
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
+  private lateinit var viewModel: MainFragmentViewModel
+  private val logger = LoggerFactory.getLogger(MainFragment::class.java)
+  private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
+  private var timeOutDialog: AlertDialog? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -87,7 +95,18 @@ class MainFragment : Fragment() {
      * the navigator here, we avoid this issue, but this does mean that code executing
      * in the onStart() methods of fragments within the tabs will not have guaranteed
      * access to a navigation controller.
+     *
+     * Additionally, because the BottomNavigator stores references to fragments and reuses
+     * them instead of instantiating them anew, it's necessary to aggressively clear the
+     * "root fragments" in case any of them are holding references to stale data such as
+     * profile and account identifiers. We use a view model to store a "clear history" flag
+     * so that we can avoid clearing the history due to device orientation changes and app
+     * foreground/background switches.
      */
+
+    this.viewModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(MainFragmentViewModel::class.java)
 
     this.uiThread.runOnUIThread {
       this.bottomNavigator =
@@ -97,6 +116,11 @@ class MainFragment : Fragment() {
           fragmentContainerId = R.id.tabbedFragmentHolder,
           navigationView = this.bottomView
         )
+
+      if (this.viewModel.clearHistory) {
+        this.bottomNavigator.clearHistory()
+        this.viewModel.clearHistory = false
+      }
     }
 
     /*
@@ -135,6 +159,10 @@ class MainFragment : Fragment() {
         NavigationControllerType::class.java, this.bottomNavigator)
     }
 
+    this.accountSubscription =
+      this.profilesController.accountEvents()
+        .subscribe(this::onAccountEvent)
+
     /*
      * If named profiles are enabled, subscribe to profile timer events so that users are
      * logged out after a period of inactivity.
@@ -150,6 +178,32 @@ class MainFragment : Fragment() {
             .subscribe(this::onProfileEvent)
 
         this.profilesController.profileIdleTimer().start()
+      }
+    }
+  }
+
+  private fun onAccountEvent(event: AccountEvent) {
+    return when (event) {
+
+      /*
+       * We don't know which fragments on the backstack might refer to accounts that
+       * have been deleted so we need to clear the history when an account is deleted.
+       * It would be better if we could eliminate specific items from the history, but
+       * this is Android...
+       */
+
+      is AccountEventDeletion.AccountEventDeletionSucceeded -> {
+        this.uiThread.runOnUIThread {
+          try {
+            this.bottomNavigator.clearHistory()
+          } catch (e: Throwable) {
+            this.logger.error("could not clear history: ", e)
+          }
+        }
+      }
+
+      else -> {
+
       }
     }
   }
@@ -205,6 +259,7 @@ class MainFragment : Fragment() {
     }
 
     this.profileSubscription?.dispose()
+    this.accountSubscription?.dispose()
 
     this.navigationControllerDirectory.removeNavigationController(
       CatalogNavigationControllerType::class.java)
