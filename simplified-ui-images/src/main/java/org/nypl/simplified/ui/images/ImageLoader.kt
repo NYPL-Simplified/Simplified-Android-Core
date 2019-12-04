@@ -25,7 +25,7 @@ class ImageLoader private constructor(
         Picasso.Builder(context)
           .indicatorsEnabled(false)
           .loggingEnabled(false)
-          .addRequestHandler(ImageAccountIconRequestHandler())
+          .addRequestHandler(ImageAccountIconRequestHandler(context))
           .build()
 
       return ImageLoader(localImageLoader)

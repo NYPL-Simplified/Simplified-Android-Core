@@ -331,7 +331,7 @@ internal object MainServices {
       Picasso.Builder(context)
         .indicatorsEnabled(false)
         .loggingEnabled(true)
-        .addRequestHandler(ImageAccountIconRequestHandler())
+        .addRequestHandler(ImageAccountIconRequestHandler(context))
         .build()
 
     return object : ImageLoaderType {
