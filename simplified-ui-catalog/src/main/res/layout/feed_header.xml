@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  xmlns:app="http://schemas.android.com/apk/res-auto">
+  android:layout_height="wrap_content">
 
   <RadioGroup
     android:id="@+id/feedHeaderTabs"
@@ -18,9 +18,12 @@
 
   <HorizontalScrollView
     android:id="@+id/feedHeaderFacetsScroll"
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginTop="16dp"
+    android:scrollbarAlwaysDrawHorizontalTrack="false"
+    android:scrollbarAlwaysDrawVerticalTrack="false"
+    android:scrollbars="none"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/feedHeaderTabs">
@@ -29,9 +32,40 @@
       android:id="@+id/feedHeaderFacets"
       android:layout_width="wrap_content"
       android:layout_height="32dp"
-      android:layout_gravity="center"
-      android:gravity="center"
+      android:layout_gravity="start"
+      android:gravity="start|center_vertical"
       android:orientation="horizontal">
+
+      <!-- These views are removed at runtime and are just present for the sake of the UI editor preview -->
+
+      <Space
+        android:layout_width="16dp"
+        android:layout_height="wrap_content" />
+
+      <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Placeholder" />
+
+      <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Placeholder" />
+
+      <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Placeholder" />
+
+      <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Placeholder" />
+
+      <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Placeholder" />
 
     </LinearLayout>
   </HorizontalScrollView>
@@ -41,8 +75,8 @@
     android:layout_height="1dp"
     android:layout_marginTop="16dp"
     android:background="?android:attr/listDivider"
-    app:layout_constraintTop_toBottomOf="@id/feedHeaderFacetsScroll"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/feedHeaderFacetsScroll" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
