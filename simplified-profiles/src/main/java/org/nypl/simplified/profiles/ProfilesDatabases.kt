@@ -392,6 +392,7 @@ object ProfilesDatabases {
         initialAccountCurrent = account
       )
     } catch (e: AccountsDatabaseException) {
+      this.logger.error("[{}]: error opening accounts: ", profileId.uuid, e)
       errors.add(e)
       return null
     }
@@ -459,8 +460,14 @@ object ProfilesDatabases {
           profile = id
         )
 
+        /*
+         * Do not create an account if the automatic accounts already caused it to be created.
+         */
+
         val account =
-          accounts.createAccount(accountProvider)
+          accounts.accountsByProvider()[accountProvider.id]
+            ?: accounts.createAccount(accountProvider)
+
         val profile =
           Profile(
             owner = null,
@@ -475,10 +482,12 @@ object ProfilesDatabases {
         this.writeDescription(profileDir, description)
         return profile
       } catch (e: AccountsDatabaseException) {
+        this.logger.error("[{}]: error initializing accounts: ", id.uuid, e)
         throw ProfileDatabaseAccountsException("Could not initialize accounts database", e)
       }
 
     } catch (e: IOException) {
+      this.logger.error("[{}]: error writing profile data: ", id.uuid, e)
       throw ProfileDatabaseIOException("Could not write profile data", e)
     }
   }
@@ -535,6 +544,7 @@ object ProfilesDatabases {
         }
       }
     } catch (e: Exception) {
+      this.logger.error("[{}]: error creating automatic accounts: ", pId, e)
       throw AccountsDatabaseOpenException(e.message, listOf(e))
     }
   }
