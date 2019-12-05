@@ -13,19 +13,18 @@
   <application
     android:name="org.nypl.simplified.main.MainApplication"
     android:allowBackup="true"
-    android:contentDescription="Simplified Vanilla (Profiles)"
-    android:icon="@drawable/main_icon"
-    android:label="Simplified Vanilla (Profiles)"
-    android:largeHeap="true"
+    android:contentDescription="Vanilla (Profiles)"
+    android:icon="@mipmap/ic_launcher"
+    android:label="Vanilla (Profiles)"
     android:theme="@style/VanillaTheme_NoActionBar_Orange"
     android:usesCleartextTraffic="true">
 
     <!-- Main entry point for the application. -->
     <activity
       android:name="org.nypl.simplified.main.MainActivity"
-      android:contentDescription="Simplified Vanilla (Profiles)"
+      android:contentDescription="Vanilla (Profiles)"
       android:exported="true"
-      android:label="Simplified Vanilla (Profiles)">
+      android:label="Vanilla (Profiles)">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -50,27 +49,27 @@
 
     <activity
       android:name="org.nypl.simplified.viewer.epub.readium1.ReaderActivity"
-      android:contentDescription="Simplified Vanilla (Profiles)"
+      android:contentDescription="Vanilla (Profiles)"
       android:exported="false"
-      android:label="Simplified Vanilla (Profiles)" />
+      android:label="Vanilla (Profiles)" />
 
     <activity
       android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
-      android:contentDescription="Simplified Vanilla (Profiles)"
+      android:contentDescription="Vanilla (Profiles)"
       android:exported="false"
-      android:label="Simplified Vanilla (Profiles)" />
+      android:label="Vanilla (Profiles)" />
 
     <activity
       android:name="org.nypl.simplified.viewer.pdf.PdfReaderActivity"
-      android:contentDescription="Simplified Vanilla (Profiles)"
+      android:contentDescription="Vanilla (Profiles)"
       android:exported="false"
-      android:label="Simplified Vanilla (Profiles)" />
+      android:label="Vanilla (Profiles)" />
 
     <activity
       android:name="org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity"
-      android:contentDescription="Simplified Vanilla (Profiles)"
+      android:contentDescription="Vanilla (Profiles)"
       android:exported="false"
-      android:label="Simplified Vanilla (Profiles)" />
+      android:label="Vanilla (Profiles)" />
 
   </application>
 
