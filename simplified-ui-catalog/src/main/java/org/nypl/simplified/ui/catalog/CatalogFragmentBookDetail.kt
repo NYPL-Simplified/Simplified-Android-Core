@@ -99,6 +99,8 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var metadata: TableLayout
   private lateinit var parameters: CatalogFragmentBookDetailParameters
   private lateinit var profilesController: ProfilesControllerType
+  private lateinit var related: TextView
+  private lateinit var report: TextView
   private lateinit var screenSize: ScreenSizeInformationType
   private lateinit var status: ViewGroup
   private lateinit var statusFailed: ViewGroup
@@ -110,7 +112,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var summary: TextView
   private lateinit var title: TextView
   private lateinit var uiThread: UIThreadServiceType
-  private val parametersId = org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail.Companion.PARAMETERS_ID
+  private val parametersId = PARAMETERS_ID
   private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
   private var bookRegistrySubscription: Disposable? = null
   private var debugService: CatalogDebuggingServiceType? = null
@@ -202,6 +204,10 @@ class CatalogFragmentBookDetail : Fragment() {
       layout.findViewById(R.id.bookDetailMetadataTable)
     this.buttons =
       layout.findViewById(R.id.bookDetailButtons)
+    this.related =
+      layout.findViewById(R.id.bookDetailRelated)
+    this.report =
+      layout.findViewById(R.id.bookDetailReport)
 
     this.debugStatus =
       layout.findViewById(R.id.bookDetailDebugStatus)
