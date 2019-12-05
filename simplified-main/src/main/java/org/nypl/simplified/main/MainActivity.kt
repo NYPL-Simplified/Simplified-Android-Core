@@ -25,7 +25,6 @@ import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
-import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
@@ -36,6 +35,7 @@ import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
+import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileModificationDefaultFragment
@@ -285,16 +285,32 @@ class MainActivity :
   }
 
   override fun onBackPressed() {
-    try {
-      val controller =
-        this.navigationControllerDirectory.navigationController(
-          NavigationControllerType::class.java)
-      if (!controller.popBackStack()) {
+    val mainController =
+      this.navigationControllerDirectory.navigationControllerIfAvailable(
+        CatalogNavigationControllerType::class.java)
+
+    if (mainController != null) {
+      this.logger.debug("delivering back press to catalog navigation controller")
+      if (!mainController.popBackStack()) {
         super.onBackPressed()
       }
-    } catch (e: Exception) {
-      this.logger.warn("back pressed, but no controller available")
+      return
     }
+
+    val profilesNavigationController =
+      this.navigationControllerDirectory.navigationControllerIfAvailable(
+        ProfilesNavigationControllerType::class.java)
+
+    if (profilesNavigationController != null) {
+      this.logger.debug("delivering back press to profiles navigation controller")
+      if (!profilesNavigationController.popBackStack()) {
+        super.onBackPressed()
+      }
+      return
+    }
+
+    this.logger.debug("delivering back press to activity")
+    super.onBackPressed()
   }
 
   override fun findToolbar(): Toolbar {

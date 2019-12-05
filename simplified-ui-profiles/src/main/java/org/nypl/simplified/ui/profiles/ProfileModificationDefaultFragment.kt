@@ -243,8 +243,7 @@ class ProfileModificationDefaultFragment : Fragment() {
     super.onStart()
 
     val fragmentActivity = this.requireActivity()
-
-    val toolbarHost = this.requireActivity() as ToolbarHostType
+    val toolbarHost = fragmentActivity as ToolbarHostType
     val toolbar = toolbarHost.findToolbar()
     toolbarHost.toolbarClearMenu()
     toolbarHost.toolbarUnsetArrow()

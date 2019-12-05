@@ -12,10 +12,10 @@ class NavigationControllerViewModel : ViewModel(), NavigationControllerDirectory
   private val navigationControllers =
     ConcurrentHashMap<Class<*>, NavigationControllerType>()
 
-  override fun <T : NavigationControllerType> navigationController(navigationClass: Class<T>): T {
+  override fun <T : NavigationControllerType> navigationControllerIfAvailable(
+    navigationClass: Class<T>
+  ): T? {
     return (this.navigationControllers[navigationClass] as T?)
-      ?: throw IllegalArgumentException(
-        "No navigation controllers of type $navigationClass are available")
   }
 
   override fun <T : NavigationControllerType> removeNavigationController(
