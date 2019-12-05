@@ -201,6 +201,7 @@ class MainActivity :
       this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
       this.supportFragmentManager.beginTransaction()
         .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
+        .addToBackStack(null)
         .commit()
     }
 
@@ -228,7 +229,7 @@ class MainActivity :
     override fun popBackStack(): Boolean {
       this.logger.debug("popBackStack")
       this.supportFragmentManager.popBackStack()
-      return true
+      return this.supportFragmentManager.backStackEntryCount > 0
     }
 
     override fun backStackSize(): Int {
