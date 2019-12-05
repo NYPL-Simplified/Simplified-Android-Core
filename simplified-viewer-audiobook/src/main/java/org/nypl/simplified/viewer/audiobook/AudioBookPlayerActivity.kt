@@ -492,8 +492,12 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      * book list, if necessary.
      */
 
-    val accountCurrent = this.profiles.profileAccountCurrent()
-    this.books.bookRevoke(accountCurrent, this.parameters.bookID)
+    try {
+      val accountCurrent = this.profiles.profileAccountCurrent()
+      this.books.bookRevoke(accountCurrent, this.parameters.bookID)
+    } catch (e: Exception) {
+      this.log.error("could not execute revocation: ", e)
+    }
   }
 
   private fun onLogPlayerError(event: PlayerEventError) {

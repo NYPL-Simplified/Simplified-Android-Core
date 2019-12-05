@@ -11,12 +11,15 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.images.ImageLoaderType
+import org.slf4j.LoggerFactory
 
 /**
  * Functions to open account selection dialogs.
  */
 
 object CatalogAccountsDialog {
+
+  private val logger = LoggerFactory.getLogger(CatalogAccountsDialog::class.java)
 
   @UiThread
   fun openAccountsDialog(
@@ -69,6 +72,12 @@ object CatalogAccountsDialog {
   private fun accountIsCurrent(
     profilesController: ProfilesControllerType,
     account: AccountType
-  ) =
-    profilesController.profileAccountCurrent().id == account.id
+  ): Boolean {
+    return try {
+      profilesController.profileAccountCurrent().id == account.id
+    } catch (e: Exception) {
+      this.logger.error("could not retrieve current account: ", e)
+      false
+    }
+  }
 }

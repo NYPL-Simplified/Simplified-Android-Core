@@ -803,16 +803,20 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun logSearchToAnalytics(query: String) {
-    val account = this.profilesController.profileAccountCurrent()
-    val profile = this.profilesController.profileCurrent()
-    this.analytics.publishEvent(AnalyticsEvent.CatalogSearched(
-      timestamp = LocalDateTime.now(),
-      credentials = account.loginState.credentials,
-      profileUUID = profile.id.uuid,
-      accountProvider = account.provider.id,
-      accountUUID = account.id.uuid,
-      searchQuery = query
-    ))
+    try {
+      val account = this.profilesController.profileAccountCurrent()
+      val profile = this.profilesController.profileCurrent()
+      this.analytics.publishEvent(AnalyticsEvent.CatalogSearched(
+        timestamp = LocalDateTime.now(),
+        credentials = account.loginState.credentials,
+        profileUUID = profile.id.uuid,
+        accountProvider = account.provider.id,
+        accountUUID = account.id.uuid,
+        searchQuery = query
+      ))
+    } catch (e: Exception) {
+      this.logger.error("could not log to analytics: ", e)
+    }
   }
 
   private fun searchText(editText: AppCompatEditText): String {
