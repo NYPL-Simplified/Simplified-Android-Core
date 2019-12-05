@@ -226,17 +226,14 @@ class Controller private constructor(
 
   override fun profileCreate(
     accountProvider: AccountProviderType,
-    displayName: String,
-    gender: String,
-    date: DateTime
+    description: ProfileDescription
   ): FluentFuture<ProfileCreationEvent> {
     return this.submitTask(ProfileCreationTask(
-      this.profiles,
-      this.profileEvents,
-      accountProvider,
-      displayName,
-      gender,
-      ProfileDateOfBirth(date = date, isSynthesized = false)))
+      profiles = this.profiles,
+      profileEvents = this.profileEvents,
+      accountProvider = accountProvider,
+      description = description
+    ))
   }
 
   override fun profileSelect(
