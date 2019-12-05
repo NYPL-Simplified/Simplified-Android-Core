@@ -180,8 +180,12 @@ class MainActivity :
           .optionalService(ProfileModificationFragmentServiceType::class.java)
 
       val fragment =
-        fragmentService?.createModificationFragment(parameters)
-          ?: ProfileModificationDefaultFragment.create(parameters)
+        if (fragmentService != null) {
+          this.logger.debug("found a profile modification fragment service: {}", fragmentService)
+          fragmentService.createModificationFragment(parameters)
+        } else {
+          ProfileModificationDefaultFragment.create(parameters)
+        }
 
       this.supportFragmentManager.beginTransaction()
         .replace(R.id.mainFragmentHolder, fragment, "MAIN")

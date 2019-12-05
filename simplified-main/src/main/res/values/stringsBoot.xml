@@ -28,11 +28,13 @@
   <string name="bootingFeedParser">Starting OPDS feed parser…</string>
   <string name="bootingHTTP">Starting HTTP client…</string>
   <string name="bootingHTTPServer">Booting HTTP server…</string>
+  <string name="bootingIdleTimerConfigurationService">Initializing idle timer configuration…</string>
   <string name="bootingInstabug">Initializing Instabug…</string>
   <string name="bootingLocalImageLoader">Starting local image loader…</string>
   <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
   <string name="bootingNotificationsService">Initializing Notifications Service…</string>
   <string name="bootingPatronProfileParsers">Initializing patron profile parsers…</string>
+  <string name="bootingProfileModificationFragmentService">Initializing profile modification fragment service…</string>
   <string name="bootingProfilesDatabase">Initializing profiles database…</string>
   <string name="bootingProfileTimer">Initializing profile idle timer…</string>
   <string name="bootingReaderBookmarkService">Starting reader bookmark service…</string>
@@ -44,5 +46,4 @@
   <string name="bootingUIBackgroundExecutor">Initializing UI background executor…</string>
   <string name="bootingUIThreadService">Initializing UI thread service…</string>
   <string name="bootStarted">Starting application…</string>
-  <string name="bootingIdleTimerConfigurationService">Initializing idle timer configuration...</string>
 </resources>

@@ -106,6 +106,7 @@ import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogCoverBadgeImages
 import org.nypl.simplified.ui.images.ImageAccountIconRequestHandler
 import org.nypl.simplified.ui.images.ImageLoaderType
+import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
@@ -885,6 +886,14 @@ internal object MainServices {
           http = http,
           exec = execDownloader,
           directory = directories.directoryStorageDocuments)
+      }
+    )
+
+    addServiceOptionally(
+      message = strings.bootingProfileModificationFragmentService,
+      interfaceType = ProfileModificationFragmentServiceType::class.java,
+      serviceConstructor = {
+        optionalFromServiceLoader(ProfileModificationFragmentServiceType::class.java)
       }
     )
 
