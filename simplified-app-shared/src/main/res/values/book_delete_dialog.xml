@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <dimen name="book_delete_dialog_width">280dp</dimen>
-  <dimen name="book_delete_dialog_height">150dp</dimen>
-</resources>
