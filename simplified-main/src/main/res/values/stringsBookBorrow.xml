@@ -6,6 +6,8 @@
   <string name="borrowBookBorrowForAvailability">Borrowing book with availability type %1$s.</string>
   <string name="borrowBookBundledCopy">Copying book from bundled collection…</string>
   <string name="borrowBookBundledCopyFailed">Failed to copy the book from the bundled collection</string>
+  <string name="borrowBookContentCopy">Copying book from an external content provider…</string>
+  <string name="borrowBookContentCopyFailed">Copying content from an external content provider failed.</string>
   <string name="borrowBookDatabaseCreateOrUpdate">Setting up book database entry…</string>
   <string name="borrowBookDatabaseFailed">Failed to update book database.</string>
   <string name="borrowBookDatabaseUpdated">Book database entry updated successfully.</string>

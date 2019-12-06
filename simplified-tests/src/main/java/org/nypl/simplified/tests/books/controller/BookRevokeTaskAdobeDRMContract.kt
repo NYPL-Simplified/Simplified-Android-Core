@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
@@ -89,6 +90,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
   protected abstract val logger: Logger
 
+  private lateinit var contentResolver: ContentResolver
   private lateinit var adobeExecutor: AdobeAdeptExecutorType
   private lateinit var adobeConnector: AdobeAdeptConnectorType
   private lateinit var executorFeeds: ListeningExecutorService
@@ -123,6 +125,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
@@ -158,7 +161,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
       searchParser = searchParser,
       transport = transport,
       bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent)
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver
+    )
   }
 
   /**

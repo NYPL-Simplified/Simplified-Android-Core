@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
@@ -95,6 +96,7 @@ abstract class ProfilesControllerContract {
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var cacheDirectory: File
+  private lateinit var contentResolver: ContentResolver
   private lateinit var credentialsStore: FakeAccountCredentialStorage
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
@@ -149,9 +151,11 @@ abstract class ProfilesControllerContract {
         bookRegistry = this.bookRegistry,
         bundledContent = bundledContent,
         exec = this.executorFeeds,
+        contentResolver = this.contentResolver,
         parser = parser,
         searchParser = OPDSSearchParser.newParser(),
-        transport = transport)
+        transport = transport
+      )
 
     val services = MutableServiceDirectory()
     services.putService(
@@ -197,6 +201,7 @@ abstract class ProfilesControllerContract {
 
     return Controller.createFromServiceDirectory(
       services = services,
+      contentResolver = this.contentResolver,
       executorService = this.executorBooks,
       accountEvents = accountEvents,
       profileEvents = profileEvents,
@@ -223,6 +228,7 @@ abstract class ProfilesControllerContract {
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.readerBookmarkEvents = PublishSubject.create()
     this.bookRegistry = BookRegistry.create()
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)

@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.controller
 
+import android.content.ContentResolver
 import org.joda.time.Duration
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.database.api.AccountType
@@ -23,6 +24,7 @@ class BookBorrowWithDefaultAcquisitionTask(
   private val bookId: BookID,
   private val borrowTimeoutDuration: Duration = Duration.standardMinutes(1L),
   private val cacheDirectory: File,
+  private val contentResolver: ContentResolver,
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
@@ -50,6 +52,7 @@ class BookBorrowWithDefaultAcquisitionTask(
       bookId = bookId,
       borrowTimeoutDuration = borrowTimeoutDuration,
       cacheDirectory = this.cacheDirectory,
+      contentResolver = this.contentResolver,
       downloads = this.downloads,
       downloadTimeoutDuration = downloadTimeoutDuration,
       entry = entry,

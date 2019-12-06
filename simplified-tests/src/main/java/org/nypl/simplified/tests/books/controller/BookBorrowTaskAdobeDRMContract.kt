@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import android.content.Context
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -114,6 +115,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
   private lateinit var clock: () -> Instant
+  private lateinit var contentResolver: ContentResolver
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
   private lateinit var downloader: DownloaderType
@@ -156,6 +158,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
 
@@ -216,7 +219,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
       searchParser = searchParser,
       transport = transport,
       bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent)
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver
+    )
   }
 
   /**
@@ -351,7 +356,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -447,7 +453,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -595,7 +602,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -712,7 +720,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -815,7 +824,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -938,7 +948,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1056,7 +1067,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)

@@ -78,5 +78,22 @@
     "supportsHelpCenter": false,
     "supportsReservations": false,
     "supportsSimplyESync": false
+  },
+
+  {
+    "@version": "20190708",
+    "addAutomatically": true,
+    "catalogURI": "content://au.org.libraryforall/cc745b6f-b0b0-4b08-aa1e-2761dee2542a/feeds/0131EF0BAC13737EB4D63EDE9AA9FDB69F921EA0BE86737D9E762E6D491F1F27.atom",
+    "displayName": "LFA Laos",
+    "idUUID": "urn:uuid:cc745b6f-b0b0-4b08-aa1e-2761dee2542a",
+    "logo": "simplified-asset:logos/papua_new_guinea.png",
+    "mainColor": "#ec1c24",
+    "subtitle": "LFA Laos",
+    "supportsBarcodeDisplay": false,
+    "supportsBarcodeScanner": false,
+    "supportsCardCreator": false,
+    "supportsHelpCenter": false,
+    "supportsReservations": false,
+    "supportsSimplyESync": false
   }
 ]

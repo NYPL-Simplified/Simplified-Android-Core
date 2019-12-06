@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
@@ -107,6 +108,7 @@ abstract class BooksControllerContract {
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var cacheDirectory: File
+  private lateinit var contentResolver: ContentResolver
   private lateinit var credentialsStore: FakeAccountCredentialStorage
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
@@ -175,7 +177,9 @@ abstract class BooksControllerContract {
         searchParser = OPDSSearchParser.newParser(),
         transport = transport,
         bookRegistry = books,
-        bundledContent = bundledContent)
+        bundledContent = bundledContent,
+        contentResolver = this.contentResolver
+      )
 
     val services = MutableServiceDirectory()
     services.putService(
@@ -224,7 +228,8 @@ abstract class BooksControllerContract {
       executorService = exec,
       accountEvents = accountEvents,
       profileEvents = profileEvents,
-      cacheDirectory = this.cacheDirectory
+      cacheDirectory = this.cacheDirectory,
+      contentResolver = this.contentResolver
     )
   }
 
@@ -247,6 +252,7 @@ abstract class BooksControllerContract {
     this.profiles = profilesDatabaseWithoutAnonymous(this.accountEvents, this.directoryProfiles)
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()

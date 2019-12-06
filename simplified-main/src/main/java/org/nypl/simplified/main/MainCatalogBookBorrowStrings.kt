@@ -143,6 +143,12 @@ class MainCatalogBookBorrowStrings(
   override val borrowBookBundledCopy: String
     get() = this.resources.getString(R.string.borrowBookBundledCopy)
 
+  override val borrowBookContentCopyFailed: String
+    get() = this.resources.getString(R.string.borrowBookContentCopyFailed)
+
+  override val borrowBookContentCopy: String
+    get() = this.resources.getString(R.string.borrowBookContentCopy)
+
   override val borrowBookBadBorrowFeed: String
     get() = this.resources.getString(R.string.borrowBookBadBorrowFeed)
 

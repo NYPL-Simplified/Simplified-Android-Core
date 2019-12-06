@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.controller
 
+import android.content.ContentResolver
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -87,6 +88,7 @@ import java.util.concurrent.ExecutorService
 
 class Controller private constructor(
   private val cacheDirectory: File,
+  private val contentResolver: ContentResolver,
   private val accountEvents: Subject<AccountEvent>,
   private val profileEvents: Subject<ProfileEvent>,
   private val services: ServiceDirectoryType,
@@ -463,6 +465,7 @@ class Controller private constructor(
       account = account,
       bookId = bookID,
       cacheDirectory = this.cacheDirectory,
+      contentResolver = this.contentResolver,
       downloads = this.downloads,
       entry = entry,
       services = this.services
@@ -504,6 +507,7 @@ class Controller private constructor(
       acquisition = acquisition,
       bookId = bookID,
       cacheDirectory = this.cacheDirectory,
+      contentResolver = this.contentResolver,
       downloads = this.downloads,
       entry = entry,
       services = this.services
@@ -685,11 +689,13 @@ class Controller private constructor(
       executorService: ExecutorService,
       accountEvents: Subject<AccountEvent>,
       profileEvents: Subject<ProfileEvent>,
-      cacheDirectory: File
+      cacheDirectory: File,
+      contentResolver: ContentResolver
     ): Controller {
       return Controller(
         services = services,
         cacheDirectory = cacheDirectory,
+        contentResolver = contentResolver,
         accountEvents = accountEvents,
         profileEvents = profileEvents,
         taskExecutor = MoreExecutors.listeningDecorator(executorService)

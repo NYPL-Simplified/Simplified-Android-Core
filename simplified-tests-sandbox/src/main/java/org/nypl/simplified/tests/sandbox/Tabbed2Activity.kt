@@ -168,7 +168,8 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
         searchParser = OPDSSearchParser.newParser(),
         transport = FeedHTTPTransport.newTransport(HTTP.newHTTP()),
         bookRegistry = bookRegistry,
-        bundledContent = BundledContentResolverType { null }
+        bundledContent = BundledContentResolverType { null },
+        contentResolver = this.applicationContext.contentResolver
       )
 
     val coverLoader =

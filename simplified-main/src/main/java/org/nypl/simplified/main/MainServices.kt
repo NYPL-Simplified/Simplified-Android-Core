@@ -509,6 +509,7 @@ internal object MainServices {
   }
 
   private fun createFeedLoader(
+    context: Context,
     http: HTTPType,
     opdsFeedParser: OPDSFeedParserType,
     bookRegistry: BookRegistryType,
@@ -521,12 +522,14 @@ internal object MainServices {
     val feedTransport =
       FeedHTTPTransport.newTransport(http)
     return FeedLoader.create(
+      bookRegistry = bookRegistry,
+      bundledContent = bundledContent,
+      contentResolver = context.contentResolver,
       exec = execCatalogFeeds,
       parser = opdsFeedParser,
       searchParser = feedSearchParser,
-      transport = feedTransport,
-      bookRegistry = bookRegistry,
-      bundledContent = bundledContent)
+      transport = feedTransport
+    )
   }
 
   private fun createFeedParser(): OPDSFeedParserType {
@@ -966,10 +969,11 @@ internal object MainServices {
       interfaceType = FeedLoaderType::class.java,
       serviceConstructor = {
         this.createFeedLoader(
-          http = http,
-          opdsFeedParser = opdsFeedParser,
           bookRegistry = bookRegistry,
-          bundledContent = bundledContent
+          bundledContent = bundledContent,
+          context = context,
+          http = http,
+          opdsFeedParser = opdsFeedParser
         )
       }
     )
@@ -998,6 +1002,7 @@ internal object MainServices {
         Controller.createFromServiceDirectory(
           services = services.build(),
           cacheDirectory = context.cacheDir,
+          contentResolver = context.contentResolver,
           profileEvents = profileEvents,
           accountEvents = accountEvents,
           executorService = execBooks

@@ -180,6 +180,11 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
     override val attributes: Map<String, String>)
     : BookStatusDownloadErrorDetails()
 
+  data class ContentCopyFailed(
+    override val message: String,
+    override val attributes: Map<String, String>)
+    : BookStatusDownloadErrorDetails()
+
   data class DownloadCancelled(
     override val message: String,
     override val attributes: Map<String, String>)

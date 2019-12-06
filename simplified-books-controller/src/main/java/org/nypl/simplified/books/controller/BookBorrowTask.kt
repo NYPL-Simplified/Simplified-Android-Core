@@ -1,5 +1,7 @@
 package org.nypl.simplified.books.controller
 
+import android.content.ContentResolver
+import android.net.Uri
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.SettableFuture
@@ -8,7 +10,6 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.Duration
-import org.joda.time.Instant
 import org.joda.time.LocalDateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
@@ -92,6 +93,7 @@ import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
@@ -112,6 +114,7 @@ class BookBorrowTask(
   private val bookId: BookID,
   private val borrowTimeoutDuration: Duration = Duration.standardMinutes(1L),
   private val cacheDirectory: File,
+  private val contentResolver: ContentResolver,
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
@@ -216,6 +219,17 @@ class BookBorrowTask(
 
       if (BundledURIs.isBundledURI(this.acquisition.uri)) {
         this.runAcquisitionBundled()
+        this.runFetchCover(this.entry, this.createHttpAuthIfRequired())
+        return this.steps.finishSuccess(Unit)
+      }
+
+      /*
+       * If the requested URI appears to be a content URI, serve the content from the resolver.
+       */
+
+      if (this.acquisition.uri.scheme == "content") {
+        this.runAcquisitionContentURI()
+        this.runFetchCover(this.entry, this.createHttpAuthIfRequired())
         return this.steps.finishSuccess(Unit)
       }
 
@@ -708,10 +722,13 @@ class BookBorrowTask(
       BookCoverFetchTask(
         bookRegistry = this.bookRegistry,
         borrowStrings = this.borrowStrings,
+        bundledContent = this.bundledContent,
+        contentResolver = this.contentResolver,
         databaseEntry = this.databaseEntry,
         feedEntry = opdsEntry,
         http = this.http,
-        httpAuth = httpAuth).call()) {
+        httpAuth = httpAuth
+      ).call()) {
       is TaskResult.Success -> {
         this.debug("fetched cover successfully")
         this.steps.addAll(result.steps)
@@ -1323,20 +1340,19 @@ class BookBorrowTask(
   private fun runFulfillACSMWithConnectorParse(acsmBytes: ByteArray): AdobeAdeptFulfillmentToken {
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillACSMParse)
 
-    val parsed = try {
+    return try {
       AdobeAdeptFulfillmentToken.parseFromBytes(acsmBytes)
     } catch (e: Exception) {
-      val message = this.borrowStrings.borrowBookFulfillACSMParseFailed
-      this.steps.currentStepFailed(
+      val message = borrowStrings.borrowBookFulfillACSMParseFailed
+      steps.currentStepFailed(
         message = message,
         errorValue = DRMUnparseableACSM(
-          system = this.adobeACS,
+          system = adobeACS,
           message = message
         ),
         exception = e)
       throw e
     }
-    return parsed
   }
 
   private fun runFulfillSimplifiedBearerToken(
@@ -1427,7 +1443,7 @@ class BookBorrowTask(
 
     this.fulfillURI = this.acquisition.uri
     val file = this.databaseEntry.temporaryFile()
-    val buffer = ByteArray(2048)
+    val buffer = ByteArray(8192)
 
     try {
       return FileOutputStream(file).use { output ->
@@ -1470,10 +1486,84 @@ class BookBorrowTask(
         this.publishBookStatus(BookStatus.fromBook(this.databaseEntry.book))
       }
     } catch (e: Exception) {
+      this.logger.error("could not copy content: ", e)
+
       val message = this.borrowStrings.borrowBookBundledCopyFailed
       this.steps.currentStepFailed(
         message = message,
         errorValue = BundledCopyFailed(message, this.currentAttributesWith()),
+        exception = e)
+      FileUtilities.fileDelete(file)
+      throw e
+    }
+  }
+
+  private fun runAcquisitionContentURI() {
+    this.debug("acquisition is content")
+    this.steps.beginNewStep(this.borrowStrings.borrowBookContentCopy)
+
+    this.publishBookStatus(BookStatus.RequestingLoan(
+      id = this.bookId,
+      detailMessage = this.borrowStrings.borrowBookContentCopy
+    ))
+
+    this.fulfillURI = this.acquisition.uri
+    val file = this.databaseEntry.temporaryFile()
+    val buffer = ByteArray(8192)
+
+    try {
+      return FileOutputStream(file).use { output ->
+        val uriText = this.acquisition.uri.toString()
+
+        val streamMaybe =
+          this.contentResolver.openInputStream(Uri.parse(uriText))
+            ?: throw FileNotFoundException(uriText)
+
+        streamMaybe.use { stream ->
+          val size = stream.available().toLong()
+          var consumed = 0L
+          this.downloadDataReceived(
+            detailMessage = this.borrowStrings.borrowBookContentCopy,
+            runningTotal = consumed,
+            expectedTotal = size,
+            unconditional = true)
+
+          while (true) {
+            val r = stream.read(buffer)
+            if (r == -1) {
+              break
+            }
+            consumed += r.toLong()
+            output.write(buffer, 0, r)
+
+            this.downloadDataReceived(
+              detailMessage = this.borrowStrings.borrowBookContentCopy,
+              runningTotal = consumed,
+              expectedTotal = size,
+              unconditional = false)
+          }
+          output.flush()
+        }
+
+        /*
+         * XXX: This implicitly encodes an assumption that only EPUB files will
+         * ever be bundled with the app.
+         */
+
+        this.saveFinalContent(
+          file = file,
+          expectedContentTypes = BookFormats.epubMimeTypes(),
+          receivedContentType = this.contentTypeOctetStream)
+
+        this.publishBookStatus(BookStatus.fromBook(this.databaseEntry.book))
+      }
+    } catch (e: Exception) {
+      this.logger.error("could not copy content: ", e)
+
+      val message = this.borrowStrings.borrowBookContentCopyFailed
+      this.steps.currentStepFailed(
+        message = message,
+        errorValue = ContentCopyFailed(message, this.currentAttributesWith()),
         exception = e)
       FileUtilities.fileDelete(file)
       throw e

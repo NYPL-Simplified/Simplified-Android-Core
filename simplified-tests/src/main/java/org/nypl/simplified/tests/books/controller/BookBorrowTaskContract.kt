@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
@@ -115,6 +116,7 @@ abstract class BookBorrowTaskContract {
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
   private lateinit var clock: () -> Instant
+  private lateinit var contentResolver: ContentResolver
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
   private lateinit var downloader: DownloaderType
@@ -142,6 +144,7 @@ abstract class BookBorrowTaskContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
 
     this.tempDirectory = TestDirectories.temporaryDirectory()
     this.cacheDirectory = File(this.tempDirectory, "cache")
@@ -197,7 +200,9 @@ abstract class BookBorrowTaskContract {
       searchParser = searchParser,
       transport = transport,
       bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent)
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver
+    )
   }
 
   /**
@@ -270,7 +275,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -376,7 +382,9 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services)
+        services = this.services,
+        contentResolver = this.contentResolver
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -478,7 +486,9 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services)
+        services = this.services,
+        contentResolver = this.contentResolver
+      )
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Success
@@ -580,7 +590,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -662,7 +673,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -773,7 +785,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -876,7 +889,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -992,7 +1006,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1076,7 +1091,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1167,7 +1183,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1284,7 +1301,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1372,7 +1390,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1489,7 +1508,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1567,7 +1587,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1649,7 +1670,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1745,7 +1767,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1846,7 +1869,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1964,7 +1988,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2060,7 +2085,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2179,7 +2205,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2296,7 +2323,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2401,7 +2429,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2517,7 +2546,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2595,7 +2625,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2675,7 +2706,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2794,7 +2826,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -2918,7 +2951,8 @@ abstract class BookBorrowTaskContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services
+        services = this.services,
+        contentResolver = this.contentResolver
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)

@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -84,20 +85,21 @@ abstract class BookRevokeTaskContract {
 
   protected abstract val logger: Logger
 
-  private lateinit var executorFeeds: ListeningExecutorService
-  private lateinit var executorDownloads: ListeningExecutorService
-  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookRegistry: BookRegistryType
+  private lateinit var bundledContent: BundledContentResolverType
+  private lateinit var cacheDirectory: File
+  private lateinit var clock: () -> Instant
+  private lateinit var contentResolver: ContentResolver
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
-  private lateinit var http: MockingHTTP
   private lateinit var downloader: DownloaderType
-  private lateinit var bookRegistry: BookRegistryType
-  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var executorDownloads: ListeningExecutorService
+  private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
-  private lateinit var bundledContent: BundledContentResolverType
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var clock: () -> Instant
-  private lateinit var cacheDirectory: File
+  private lateinit var http: MockingHTTP
 
   private val bookRevokeStrings = MockRevokeStringResources()
 
@@ -114,6 +116,7 @@ abstract class BookRevokeTaskContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
@@ -147,7 +150,9 @@ abstract class BookRevokeTaskContract {
       searchParser = searchParser,
       transport = transport,
       bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent)
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver
+    )
   }
 
   /**
