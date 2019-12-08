@@ -134,15 +134,6 @@ architecture distributed over the application modules. The _controller_ in the a
 task-based and executes all tasks on a background thread to avoid any possibility of blocking
 the Android UI thread.
 
-The following diagram provides a rough diagram of the application components:
-
-![outline](./src/site/resources/outline.png?raw=true)
-
-At the top of the diagram, the `app-shared` module contains all of the _view_ aspects of the
-architecture and typically has strong dependencies on the Android APIs. The _controller_ and
-_model_ sections are pure platform-independent Java/Kotlin code and try to avoid having any
-dependencies on the Android APIs, allowing for easy unit testing.
-
 #### API vs SPI
 
 The project makes various references to _APIs_ and _SPIs_. _API_ stands for _application
@@ -228,8 +219,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.adobe.extensions](simplified-adobe-extensions)|Adobe DRM convenience functions|
 |[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
-|[org.librarysimplified.analytics.lfa](simplified-analytics-lfa)|LibraryForAll analytics implementation|
-|[org.librarysimplified.app.shared](simplified-app-shared)|Shared application module|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.app.vanilla.with_profiles](simplified-app-vanilla-with-profiles)|Vanilla application [with profiles enabled]|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
@@ -254,6 +243,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
 |[org.librarysimplified.links](simplified-links)|Link types|
 |[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|
+|[org.librarysimplified.main](simplified-main)|Main application module|
 |[org.librarysimplified.migration.api](simplified-migration-api)|Data migration API|
 |[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
 |[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
@@ -294,13 +284,14 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.images](simplified-ui-images)|Image loader API for general image resources|
 |[org.librarysimplified.ui.navigation.api](simplified-ui-navigation-api)|Navigation API|
 |[org.librarysimplified.ui.tabs](simplified-ui-navigation-tabs)|Tabbed UI|
+|[org.librarysimplified.ui.profiles](simplified-ui-profiles)|Profiles UI|
 |[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
 |[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
 |[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
 |[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
 |[org.librarysimplified.ui.toolbar](simplified-ui-toolbar)|Sane toolbar handling|
-|[org.librarysimplified.viewer.pdf](simplified-viewer-api)|PDF reader|
+|[org.librarysimplified.viewer.api](simplified-viewer-api)|Viewer API|
 |[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|
 |[org.librarysimplified.viewer.epub.readium1](simplified-viewer-epub-readium1)|Readium 1 EPUB reader|
 |[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|

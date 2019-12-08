@@ -1,8 +1,5 @@
-Files
-=====
+org.librarysimplified.files
+===
 
-The `simplified-files` package implements a simple file I/O
-module that provides methods that actually check for I/O errors
-(unlike `java.io.File`), and provides convenience methods for
-copying streams and files.
-
+The `org.librarysimplified.files` module provides a set of classes
+for working with files and directories.

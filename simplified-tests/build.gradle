@@ -50,7 +50,6 @@ dependencies {
   api project(":simplified-reader-bookmarks")
   api project(":simplified-reader-bookmarks-api")
   api project(":simplified-services-api")
-  api project(":simplified-stack")
   api project(":simplified-tenprint")
   api project(":simplified-tests-strings")
   api project(":simplified-threads")
