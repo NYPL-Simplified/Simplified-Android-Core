@@ -29,6 +29,7 @@ $(document).ready(function()
   require(["readium_shared_js/globalsSetup"], function ()
   {
     console.log("globalsSetup READY");
+    ReadiumSDK.DEBUG_MODE = true;
 
     require(['readium_shared_js/views/reader_view'], function (ReaderView)
     {
