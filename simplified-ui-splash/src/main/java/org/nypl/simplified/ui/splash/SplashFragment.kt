@@ -73,7 +73,9 @@ class SplashFragment : Fragment() {
     val image: ImageView,
     val text: TextView,
     val progress: ProgressBar,
-    val error: ImageView)
+    val error: ImageView,
+    val sendError: Button
+  )
 
   private class ViewsEULA(
     val container: View,
@@ -126,7 +128,8 @@ class SplashFragment : Fragment() {
         container = imageView,
         image = imageView.findViewById(R.id.splashImage),
         progress = imageView.findViewById(R.id.splashProgress),
-        error = imageView.findViewById<ImageView>(R.id.splashImageError),
+        error = imageView.findViewById(R.id.splashImageError),
+        sendError = imageView.findViewById(R.id.splashSendError),
         text = imageView.findViewById(R.id.splashText))
 
     this.viewsForEULA =
@@ -174,6 +177,7 @@ class SplashFragment : Fragment() {
     this.viewsForImage.image.visibility = View.VISIBLE
     this.viewsForImage.progress.visibility = View.INVISIBLE
     this.viewsForImage.error.visibility = View.INVISIBLE
+    this.viewsForImage.sendError.visibility = View.INVISIBLE
     this.viewsForImage.text.visibility = View.INVISIBLE
     this.viewsForImage.text.text = ""
 
@@ -380,9 +384,18 @@ class SplashFragment : Fragment() {
     // Print a useful message rather than a raw exception message, and allow
     // the user to do something such as submitting a report.
     this.viewsForImage.error.visibility = View.VISIBLE
+    this.viewsForImage.sendError.visibility = View.VISIBLE
     this.viewsForImage.progress.isIndeterminate = false
     this.viewsForImage.progress.progress = 100
     this.viewsForImage.text.text = event.message
+
+    this.viewsForImage.sendError.setOnClickListener {
+      Reports.sendReportsDefault(
+        context = requireContext(),
+        address = this.parameters.splashMigrationReportEmail ?: "",
+        subject = "[application startup failure]",
+        body = event.message)
+    }
   }
 
   private fun onBootFinished() {

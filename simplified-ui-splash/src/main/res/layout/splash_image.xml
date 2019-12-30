@@ -39,4 +39,13 @@
     android:layout_above="@id/splashProgress"
     app:srcCompat="@drawable/migration_error" />
 
+  <Button
+    android:id="@+id/splashSendError"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/splashText"
+    android:layout_centerInParent="true"
+    android:text="@string/migrationSendReport"
+    android:visibility="invisible" />
+
 </RelativeLayout>
