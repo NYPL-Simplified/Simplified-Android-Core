@@ -1,0 +1,8 @@
+dependencies {
+  api project(":simplified-accounts-api")
+
+  api libraries.picasso
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

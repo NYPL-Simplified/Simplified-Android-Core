@@ -6,7 +6,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.documents.clock.ClockType;
+import org.nypl.simplified.clock.ClockType;
 import org.nypl.simplified.documents.eula.EULA;
 import org.nypl.simplified.documents.eula.EULAType;
 import org.nypl.simplified.documents.synced.SyncedDocument;

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.ProcedureType
+import io.reactivex.subjects.PublishSubject
 import junit.framework.Assert
 import org.joda.time.DateTime
 import org.junit.Before
@@ -17,10 +18,6 @@ import org.nypl.simplified.books.book_registry.*
 import org.nypl.simplified.notifications.NotificationResourcesType
 import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.notifications.NotificationsWrapper
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableSubscriptionType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
@@ -40,7 +37,7 @@ abstract class NotificationsServiceContract {
             LoggerFactory.getLogger(BookDatabaseContract::class.java)
 
     private lateinit var mockContext: Context
-    private lateinit var profileEvents: ObservableType<ProfileEvent>
+    private lateinit var profileEvents: PublishSubject<ProfileEvent>
     private lateinit var bookRegistry: BookRegistryType
     private lateinit var notificationsService: NotificationsService
     private lateinit var threadFactory: ThreadFactory
@@ -69,7 +66,7 @@ abstract class NotificationsServiceContract {
 
         threadFactory = ThreadFactory { Thread(it) }
         bookRegistry = BookRegistry.create()
-        profileEvents = Observable.create<ProfileEvent>()
+        profileEvents = PublishSubject.create<ProfileEvent>()
         notificationResources = NotificationResources()
 
         /**
@@ -129,27 +126,27 @@ abstract class NotificationsServiceContract {
                         entry = opdsEntry2,
                         formats = listOf())
 
-        val bookStatusHeld = Mockito.mock(BookStatusHeld::class.java)
+        val bookStatusHeld = Mockito.mock(BookStatus.Held.HeldInQueue::class.java)
         Mockito.`when`(bookStatusHeld.id).thenReturn(bookId)
 
-        val bookStatusHeldReady = Mockito.mock(BookStatusHeldReady::class.java)
+        val bookStatusHeldReady = Mockito.mock(BookStatus.Held.HeldReady::class.java)
         Mockito.`when`(bookStatusHeldReady.id).thenReturn(bookId)
 
-        val bookStatusHeldReady2 = Mockito.mock(BookStatusHeldReady::class.java)
+        val bookStatusHeldReady2 = Mockito.mock(BookStatus.Held.HeldReady::class.java)
         Mockito.`when`(bookStatusHeldReady.id).thenReturn(bookId2)
 
         // Populate book registry
-        bookWithStatusHeld = BookWithStatus.create(
+        bookWithStatusHeld = BookWithStatus(
                 book,
                 bookStatusHeld
         )
 
-        bookWithStatusHeldReady = BookWithStatus.create(
+        bookWithStatusHeldReady = BookWithStatus(
                 book,
                 bookStatusHeldReady
         )
 
-        bookWithStatusHeldReady2 = BookWithStatus.create(
+        bookWithStatusHeldReady2 = BookWithStatus(
                 book2,
                 bookStatusHeldReady2
         )
@@ -231,22 +228,10 @@ abstract class NotificationsServiceContract {
          * subscribes to it.
          */
 
-        val mockSubscription = object : ObservableSubscriptionType<BookStatusEvent> {
-            override fun unsubscribe() {
-                unsubscriptionLatch.countDown()
-            }
-        }
-
-        val mockObservable = object : ObservableReadableType<BookStatusEvent> {
-            override fun subscribe(receiver: ProcedureType<BookStatusEvent>?): ObservableSubscriptionType<BookStatusEvent> {
-                subscriptionLatch.countDown()
-                return mockSubscription
-            }
-
-            override fun count(): Int {
-                return 0
-            }
-        }
+        val mockObservable =
+          PublishSubject.create<BookStatusEvent>()
+            .doOnSubscribe { subscriptionLatch.countDown() }
+            .doOnDispose { unsubscriptionLatch.countDown() }
 
         val mockRegistry =
                 Mockito.mock(BookRegistryType::class.java)
@@ -261,7 +246,7 @@ abstract class NotificationsServiceContract {
         notificationsService =
                 NotificationsService(mockContext, threadFactory, profileEvents, mockRegistry, mockNotificationsWrapper, notificationResources)
 
-        profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+        profileEvents.onNext(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
 
         /**
          * Wait for the subscription latch to count down.
@@ -274,7 +259,7 @@ abstract class NotificationsServiceContract {
          * Test that we can unsubscribe.
          */
 
-        profileEvents.send(ProfileSelection.ProfileSelectionInProgress(ProfileID(UUID.randomUUID())))
+        profileEvents.onNext(ProfileSelection.ProfileSelectionInProgress(ProfileID(UUID.randomUUID())))
 
         unsubscriptionLatch.await()
     }
@@ -286,7 +271,7 @@ abstract class NotificationsServiceContract {
         /**
          * Register profile event completed so we subscribe to the events from books
          */
-        profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+        profileEvents.onNext(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
 
         Thread.sleep(300)
 
@@ -308,7 +293,7 @@ abstract class NotificationsServiceContract {
         /**
          * Register profile event completed so we subscribe to the events from books
          */
-        profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+        profileEvents.onNext(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
 
         Thread.sleep(300)
 
@@ -330,7 +315,7 @@ abstract class NotificationsServiceContract {
         /**
          * Register profile event completed so we subscribe to the events from books
          */
-        profileEvents.send(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
+        profileEvents.onNext(ProfileSelection.ProfileSelectionCompleted(ProfileID(UUID.randomUUID())))
 
         Thread.sleep(300)
 

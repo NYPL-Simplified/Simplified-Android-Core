@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-  <!-- If true, a Holds tab is shown. -->
-  <!-- This can be disabled for book collections that do not have holds. -->
-  <bool name="feature_holds_enabled">true</bool>
-
-</resources>

@@ -1,18 +1,8 @@
 package org.nypl.simplified.books.controller
 
 import com.io7m.jnull.NullCheck
-import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.book_registry.BookStatusHeld
-import org.nypl.simplified.books.book_registry.BookStatusHeldReady
-import org.nypl.simplified.books.book_registry.BookStatusHoldable
-import org.nypl.simplified.books.book_registry.BookStatusLoanable
-import org.nypl.simplified.books.book_registry.BookStatusLoanedType
-import org.nypl.simplified.books.book_registry.BookStatusMatcherType
-import org.nypl.simplified.books.book_registry.BookStatusRequestingLoan
-import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
-import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
-import org.nypl.simplified.books.book_registry.BookStatusRevoked
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedBooksSelection
@@ -29,7 +19,8 @@ import java.util.concurrent.Callable
 
 internal class ProfileFeedTask(
   val bookRegistry: BookRegistryReadableType,
-  val request: ProfileFeedRequest) : Callable<Feed.FeedWithoutGroups> {
+  val request: ProfileFeedRequest
+) : Callable<Feed.FeedWithoutGroups> {
 
   override fun call(): Feed.FeedWithoutGroups {
     LOG.debug("generating local feed")
@@ -64,7 +55,7 @@ internal class ProfileFeedTask(
       LOG.debug("after sorting, {} candidate books remain", books.size)
 
       for (book in books) {
-        feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(book.book().entry))
+        feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(book.book.entry))
       }
 
       return feed
@@ -124,16 +115,16 @@ internal class ProfileFeedTask(
 
   private fun sortBooksByTitle(books: ArrayList<BookWithStatus>) {
     Collections.sort(books) { book0, book1 ->
-      val entry0 = book0.book().entry
-      val entry1 = book1.book().entry
+      val entry0 = book0.book.entry
+      val entry1 = book1.book.entry
       entry0.title.compareTo(entry1.title)
     }
   }
 
   private fun sortBooksByAuthor(books: ArrayList<BookWithStatus>) {
     Collections.sort(books) { book0, book1 ->
-      val entry0 = book0.book().entry
-      val entry1 = book1.book().entry
+      val entry0 = book0.book.entry
+      val entry1 = book1.book.entry
       val authors1 = entry0.authors
       val authors2 = entry1.authors
       val e0 = authors1.isEmpty()
@@ -157,13 +148,13 @@ internal class ProfileFeedTask(
    */
 
   private fun filterBooks(
-    filter: BookStatusMatcherType<Boolean, UnreachableCodeException>,
+    filter: (BookStatus) -> Boolean,
     books: ArrayList<BookWithStatus>) {
 
     val iter = books.iterator()
     while (iter.hasNext()) {
       val book = iter.next()
-      if (!book.status().matchBookStatus(filter)) {
+      if (!filter.invoke(book.status)) {
         iter.remove()
       }
     }
@@ -173,101 +164,56 @@ internal class ProfileFeedTask(
     val accountID = this.request.filterByAccountID
     val values = book_registry.books().values
     return ArrayList(if (accountID != null) {
-      values.filter { book -> book.book().account == accountID }
+      values.filter { book -> book.book.account == accountID }
     } else {
       values
     })
   }
 
-  /**
-   * A status matcher that indicates if a book should be shown for "My Books" feeds.
-   */
-
-  private class UsableForBooksFeed internal constructor() : BookStatusMatcherType<Boolean, UnreachableCodeException> {
-
-    override fun onBookStatusHoldable(s: BookStatusHoldable): Boolean {
-      return false
-    }
-
-    override fun onBookStatusHeld(s: BookStatusHeld): Boolean {
-      return false
-    }
-
-    override fun onBookStatusHeldReady(s: BookStatusHeldReady): Boolean {
-      return false
-    }
-
-    override fun onBookStatusLoanedType(s: BookStatusLoanedType): Boolean {
-      return true
-    }
-
-    override fun onBookStatusRequestingLoan(s: BookStatusRequestingLoan): Boolean {
-      return true
-    }
-
-    override fun onBookStatusRequestingRevoke(s: BookStatusRequestingRevoke): Boolean {
-      return true
-    }
-
-    override fun onBookStatusLoanable(s: BookStatusLoanable): Boolean {
-      return false
-    }
-
-    override fun onBookStatusRevokeFailed(s: BookStatusRevokeFailed): Boolean {
-      return true
-    }
-
-    override fun onBookStatusRevoked(s: BookStatusRevoked): Boolean {
-      return false
-    }
-  }
-
-  /**
-   * A status matcher that indicates if a book should be shown for "Holds" feeds.
-   */
-
-  private class UsableForHoldsFeed internal constructor() : BookStatusMatcherType<Boolean, UnreachableCodeException> {
-
-    override fun onBookStatusHoldable(s: BookStatusHoldable): Boolean {
-      return true
-    }
-
-    override fun onBookStatusHeld(s: BookStatusHeld): Boolean {
-      return true
-    }
-
-    override fun onBookStatusHeldReady(s: BookStatusHeldReady): Boolean {
-      return true
-    }
-
-    override fun onBookStatusLoanedType(s: BookStatusLoanedType): Boolean {
-      return false
-    }
-
-    override fun onBookStatusRequestingLoan(s: BookStatusRequestingLoan): Boolean {
-      return false
-    }
-
-    override fun onBookStatusRequestingRevoke(s: BookStatusRequestingRevoke): Boolean {
-      return false
-    }
-
-    override fun onBookStatusLoanable(s: BookStatusLoanable): Boolean {
-      return false
-    }
-
-    override fun onBookStatusRevokeFailed(s: BookStatusRevokeFailed): Boolean {
-      return false
-    }
-
-    override fun onBookStatusRevoked(s: BookStatusRevoked): Boolean {
-      return false
-    }
-  }
 
   companion object {
 
     private val LOG = LoggerFactory.getLogger(ProfileFeedTask::class.java)
+
+    private fun usableForBooksFeed(status: BookStatus): Boolean {
+      return when (status) {
+        is BookStatus.Held,
+        is BookStatus.Holdable,
+        is BookStatus.Loanable,
+        is BookStatus.Revoked ->
+          false
+
+        is BookStatus.Downloading,
+        is BookStatus.FailedDownload,
+        is BookStatus.FailedLoan,
+        is BookStatus.FailedRevoke,
+        is BookStatus.Loaned,
+        is BookStatus.RequestingDownload,
+        is BookStatus.RequestingLoan,
+        is BookStatus.RequestingRevoke ->
+          true
+      }
+    }
+
+    private fun usableForHoldsFeed(status: BookStatus): Boolean {
+      return when (status) {
+        is BookStatus.Held,
+        is BookStatus.Holdable ->
+          true
+
+        is BookStatus.Downloading,
+        is BookStatus.FailedDownload,
+        is BookStatus.FailedLoan,
+        is BookStatus.FailedRevoke,
+        is BookStatus.Loanable,
+        is BookStatus.Loaned,
+        is BookStatus.RequestingDownload,
+        is BookStatus.RequestingLoan,
+        is BookStatus.RequestingRevoke,
+        is BookStatus.Revoked ->
+          false
+      }
+    }
 
     private fun facets(
       request: ProfileFeedRequest,
@@ -297,7 +243,7 @@ internal class ProfileFeedTask(
 
       for (index in terms_upper.indices) {
         val term_upper = terms_upper[index]
-        val ee = book.book().entry
+        val ee = book.book.entry
         val e_title = ee.title.toUpperCase()
         if (e_title.contains(term_upper)) {
           return true
@@ -316,10 +262,10 @@ internal class ProfileFeedTask(
 
     private fun selectFeedFilter(
       request: ProfileFeedRequest
-    ): BookStatusMatcherType<Boolean, UnreachableCodeException> {
+    ): (BookStatus) -> Boolean {
       return when (request.feedSelection) {
-        FeedBooksSelection.BOOKS_FEED_LOANED -> UsableForBooksFeed()
-        FeedBooksSelection.BOOKS_FEED_HOLDS -> UsableForHoldsFeed()
+        FeedBooksSelection.BOOKS_FEED_LOANED -> ::usableForBooksFeed
+        FeedBooksSelection.BOOKS_FEED_HOLDS -> ::usableForHoldsFeed
       }
     }
   }

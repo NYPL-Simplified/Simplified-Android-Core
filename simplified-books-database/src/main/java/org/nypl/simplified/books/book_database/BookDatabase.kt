@@ -155,7 +155,8 @@ class BookDatabase private constructor(
       parser: OPDSJSONParserType,
       serializer: OPDSJSONSerializerType,
       owner: AccountID,
-      directory: File): BookDatabaseType {
+      directory: File
+    ): BookDatabaseType {
 
       LOG.debug("opening book database: {}", directory)
       val maps = BookMaps()

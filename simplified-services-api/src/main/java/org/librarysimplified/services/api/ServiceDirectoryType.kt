@@ -71,4 +71,9 @@ interface ServiceDirectoryType {
     serviceClass: Class<T>
   ): List<T>
 
+  /**
+   * Create a new builder based on the current directory.
+   */
+
+  fun toBuilder(): ServiceDirectoryBuilderType
 }

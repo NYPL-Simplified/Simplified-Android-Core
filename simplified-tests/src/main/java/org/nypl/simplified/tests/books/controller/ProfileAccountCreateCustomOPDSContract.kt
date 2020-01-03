@@ -1,9 +1,11 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
+import io.reactivex.subjects.PublishSubject
 import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.junit.After
@@ -35,8 +37,6 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
@@ -79,29 +79,30 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
   protected abstract val logger: Logger
 
-  private lateinit var profileAccountCreationStrings: MockAccountCreationStringResources
-  private lateinit var accountProviderResolutionStrings: MockAccountProviderResolutionStrings
-  private lateinit var profilesDatabase: ProfilesDatabaseType
-  private lateinit var opdsFeedParser: OPDSFeedParserType
-  private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
+  private lateinit var accountEvents: PublishSubject<AccountEvent>
   private lateinit var accountProviderRegistry: AccountProviderRegistryType
-  private lateinit var defaultProvider: AccountProviderImmutable
+  private lateinit var accountProviderResolutionStrings: MockAccountProviderResolutionStrings
+  private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
+  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookRegistry: BookRegistryType
+  private lateinit var bundledContent: BundledContentResolverType
+  private lateinit var cacheDirectory: File
+  private lateinit var clock: () -> Instant
+  private lateinit var contentResolver: ContentResolver
   private lateinit var context: Context
-  private lateinit var accountEvents: ObservableType<AccountEvent>
-  private lateinit var executorFeeds: ListeningExecutorService
-  private lateinit var executorDownloads: ListeningExecutorService
-  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var defaultProvider: AccountProviderImmutable
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
-  private lateinit var http: MockingHTTP
   private lateinit var downloader: DownloaderType
-  private lateinit var bookRegistry: BookRegistryType
-  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var executorDownloads: ListeningExecutorService
+  private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
-  private lateinit var bundledContent: BundledContentResolverType
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var clock: () -> Instant
-  private lateinit var cacheDirectory: File
+  private lateinit var http: MockingHTTP
+  private lateinit var opdsFeedParser: OPDSFeedParserType
+  private lateinit var profileAccountCreationStrings: MockAccountCreationStringResources
+  private lateinit var profilesDatabase: ProfilesDatabaseType
 
   private val bookBorrowStrings = MockBorrowStringResources()
 
@@ -112,7 +113,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     this.context = Mockito.mock(Context::class.java)
     this.defaultProvider = MockAccountProviders.fakeProvider("urn:fake:0")
     this.accountProviderRegistry = AccountProviderRegistry.createFrom(this.context, listOf(), this.defaultProvider)
-    this.accountEvents = Observable.create()
+    this.accountEvents = PublishSubject.create()
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
     this.executorDownloads = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorBooks = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
@@ -123,6 +124,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
@@ -430,14 +432,16 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       searchParser = searchParser,
       transport = transport,
       bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent)
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver
+    )
   }
 
 
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }
 
-  private fun logBookEventsFor(bookId: BookID?) {
+  private fun logBookEventsFor(bookId: BookID) {
     this.bookRegistry.bookEvents().subscribe {
       this.bookRegistry.bookStatus(bookId).map_ { status ->
         this.logger.debug("status: {}", status)

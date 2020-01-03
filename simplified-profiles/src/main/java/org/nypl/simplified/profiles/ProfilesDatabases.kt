@@ -4,20 +4,27 @@ import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Some
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
+import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
+import org.nypl.simplified.accounts.api.AccountCreateErrorDetails.AccountProviderResolutionFailed
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
+import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationInProgress
 import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
-import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileDatabaseAccountsException
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileDatabaseIOException
@@ -27,6 +34,10 @@ import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
+import org.nypl.simplified.reader.api.ReaderPreferences
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -59,12 +70,14 @@ object ProfilesDatabases {
   @Throws(ProfileDatabaseException::class)
   fun openWithAnonymousProfileDisabled(
     context: Context,
-    accountEvents: ObservableType<AccountEvent>,
+    analytics: AnalyticsType,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
-    directory: File): ProfilesDatabaseType {
+    directory: File
+  ): ProfilesDatabaseType {
 
     this.logger.debug("opening profile database: {}", directory)
 
@@ -74,6 +87,7 @@ object ProfilesDatabases {
     val errors = ArrayList<Exception>()
     this.openAllProfiles(
       context = context,
+      analytics = analytics,
       accountEvents = accountEvents,
       accountProviders = accountProviders,
       accountBundledCredentials = accountBundledCredentials,
@@ -96,6 +110,7 @@ object ProfilesDatabases {
     }
 
     return ProfilesDatabase(
+      analytics = analytics,
       accountBundledCredentials = accountBundledCredentials,
       accountEvents = accountEvents,
       accountProviders = accountProviders,
@@ -109,7 +124,8 @@ object ProfilesDatabases {
 
   private fun openAllProfiles(
     context: Context,
-    accountEvents: ObservableType<AccountEvent>,
+    analytics: AnalyticsType,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
@@ -117,7 +133,8 @@ object ProfilesDatabases {
     directory: File,
     profiles: SortedMap<ProfileID, Profile>,
     jom: ObjectMapper,
-    errors: MutableList<Exception>) {
+    errors: MutableList<Exception>
+  ) {
 
     if (!directory.exists()) {
       directory.mkdirs()
@@ -134,6 +151,7 @@ object ProfilesDatabases {
         val profile =
           this.openOneProfile(
             context = context,
+            analytics = analytics,
             accountEvents = accountEvents,
             accountProviders = accountProviders,
             accountsDatabases = accountsDatabases,
@@ -158,12 +176,14 @@ object ProfilesDatabases {
   @Throws(ProfileDatabaseException::class)
   fun openWithAnonymousProfileEnabled(
     context: Context,
-    accountEvents: ObservableType<AccountEvent>,
+    analytics: AnalyticsType,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
-    directory: File): ProfilesDatabaseType {
+    directory: File
+  ): ProfilesDatabaseType {
 
     this.logger.debug("opening profile database: {}", directory)
 
@@ -173,6 +193,7 @@ object ProfilesDatabases {
     val errors = ArrayList<Exception>()
     this.openAllProfiles(
       context = context,
+      analytics = analytics,
       accountEvents = accountEvents,
       accountProviders = accountProviders,
       accountBundledCredentials = accountBundledCredentials,
@@ -187,6 +208,7 @@ object ProfilesDatabases {
       val anon =
         this.createProfileActual(
           context = context,
+          analytics = analytics,
           accountBundledCredentials = accountBundledCredentials,
           accountEvents = accountEvents,
           accountProviders = accountProviders,
@@ -206,6 +228,7 @@ object ProfilesDatabases {
 
     val database =
       ProfilesDatabase(
+        analytics = analytics,
         accountBundledCredentials = accountBundledCredentials,
         accountEvents = accountEvents,
         accountProviders = accountProviders,
@@ -223,7 +246,8 @@ object ProfilesDatabases {
   private fun openOneProfileDirectory(
     errors: MutableList<Exception>,
     directory: File,
-    profileIdName: String): ProfileID? {
+    profileIdName: String
+  ): ProfileID? {
 
     /*
      * If the profile directory is not a directory, then give up.
@@ -259,7 +283,8 @@ object ProfilesDatabases {
   private fun openOneProfileDirectoryDoMigration(
     ownerDirectory: File,
     existingDirectory: File,
-    profileIdName: String): ProfileID? {
+    profileIdName: String
+  ): ProfileID? {
 
     this.logger.debug("attempting to migrate {} directory", existingDirectory)
 
@@ -299,7 +324,8 @@ object ProfilesDatabases {
 
   private fun openOneProfile(
     context: Context,
-    accountEvents: ObservableType<AccountEvent>,
+    analytics: AnalyticsType,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountsDatabases: AccountsDatabaseFactoryType,
     accountBundledCredentials: AccountBundledCredentialsType,
@@ -307,7 +333,8 @@ object ProfilesDatabases {
     jom: ObjectMapper,
     directory: File,
     errors: MutableList<Exception>,
-    profileIdName: String): Profile? {
+    profileIdName: String
+  ): Profile? {
 
     val profileId =
       this.openOneProfileDirectory(errors, directory, profileIdName) ?: return null
@@ -340,6 +367,7 @@ object ProfilesDatabases {
 
       this.createAutomaticAccounts(
         accounts = accounts,
+        accountEvents = accountEvents,
         accountBundledCredentials = accountBundledCredentials,
         accountProviders = accountProviders,
         profile = profileId)
@@ -354,8 +382,17 @@ object ProfilesDatabases {
         "Accounts database must not be empty")
 
       val account = accounts.accounts()[accounts.accounts().firstKey()]!!
-      return Profile(null, profileId, profileDir, accounts, desc, account)
+      return Profile(
+        owner = null,
+        id = profileId,
+        directory = profileDir,
+        analytics = analytics,
+        accounts = accounts,
+        initialDescription = desc,
+        initialAccountCurrent = account
+      )
     } catch (e: AccountsDatabaseException) {
+      this.logger.error("[{}]: error opening accounts: ", profileId.uuid, e)
       errors.add(e)
       return null
     }
@@ -376,25 +413,34 @@ object ProfilesDatabases {
   @Throws(ProfileDatabaseException::class)
   internal fun createProfileActual(
     context: Context,
+    analytics: AnalyticsType,
     accountBundledCredentials: AccountBundledCredentialsType,
-    accountEvents: ObservableType<AccountEvent>,
+    accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     accountsDatabases: AccountsDatabaseFactoryType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountProvider: AccountProviderType,
     directory: File,
     displayName: String,
-    id: ProfileID): Profile {
+    id: ProfileID
+  ): Profile {
 
     try {
       val profileDir =
         File(directory, id.uuid.toString())
       val profileAccountsDir =
         File(profileDir, "accounts")
-      val prefs =
-        ProfilePreferences.builder().build()
-      val desc =
-        ProfileDescription.builder(displayName, prefs).build()
+
+      val description =
+        ProfileDescription(
+          displayName = displayName,
+          preferences = ProfilePreferences(
+            dateOfBirth = null,
+            showTestingLibraries = false,
+            readerPreferences = ReaderPreferences.builder().build()
+          ),
+          attributes = ProfileAttributes(sortedMapOf())
+        )
 
       try {
         val accounts =
@@ -403,26 +449,45 @@ object ProfilesDatabases {
             accountEvents = accountEvents,
             accountProviders = accountProviders,
             context = context,
-            directory = profileAccountsDir)
+            directory = profileAccountsDir
+          )
 
         this.createAutomaticAccounts(
           accounts = accounts,
+          accountEvents = accountEvents,
           accountBundledCredentials = accountBundledCredentials,
           accountProviders = accountProviders,
-          profile = id)
+          profile = id
+        )
+
+        /*
+         * Do not create an account if the automatic accounts already caused it to be created.
+         */
 
         val account =
-          accounts.createAccount(accountProvider)
-        val profile =
-          Profile(null, id, profileDir, accounts, desc, account)
+          accounts.accountsByProvider()[accountProvider.id]
+            ?: accounts.createAccount(accountProvider)
 
-        this.writeDescription(profileDir, desc)
+        val profile =
+          Profile(
+            owner = null,
+            id = id,
+            directory = profileDir,
+            analytics = analytics,
+            accounts = accounts,
+            initialDescription = description,
+            initialAccountCurrent = account
+          )
+
+        this.writeDescription(profileDir, description)
         return profile
       } catch (e: AccountsDatabaseException) {
+        this.logger.error("[{}]: error initializing accounts: ", id.uuid, e)
         throw ProfileDatabaseAccountsException("Could not initialize accounts database", e)
       }
 
     } catch (e: IOException) {
+      this.logger.error("[{}]: error writing profile data: ", id.uuid, e)
       throw ProfileDatabaseIOException("Could not write profile data", e)
     }
   }
@@ -434,16 +499,22 @@ object ProfilesDatabases {
   @Throws(AccountsDatabaseException::class)
   private fun createAutomaticAccounts(
     accounts: AccountsDatabaseType,
+    accountEvents: Subject<AccountEvent>,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountProviders: AccountProviderRegistryType,
-    profile: ProfileID) {
+    profile: ProfileID
+  ) {
 
     val pId = profile.uuid
     this.logger.debug("[{}]: creating automatic accounts", pId)
 
     try {
       val autoProviders =
-        accountProviders.resolvedProviders.values.filter(AccountProviderType::addAutomatically)
+        this.findAndResolveAutomaticProviders(
+          profile = profile,
+          accountEvents = accountEvents,
+          accountProviders = accountProviders
+        )
 
       this.logger.debug("[{}]: {} automatic account providers available", pId, autoProviders.size)
 
@@ -473,14 +544,85 @@ object ProfilesDatabases {
         }
       }
     } catch (e: Exception) {
+      this.logger.error("[{}]: error creating automatic accounts: ", pId, e)
       throw AccountsDatabaseOpenException(e.message, listOf(e))
     }
+  }
+
+  private fun findAndResolveAutomaticProviders(
+    profile: ProfileID,
+    accountEvents: Subject<AccountEvent>,
+    accountProviders: AccountProviderRegistryType
+  ): List<AccountProviderType> {
+    this.logger.debug("[{}]: resolving automatic account providers", profile.uuid)
+
+    val resolvedProviders = mutableListOf<AccountProviderType>()
+    for (entry in accountProviders.accountProviderDescriptions()) {
+      val description = entry.value
+      if (description.metadata.isAutomatic) {
+        this.logger.debug("[{}]: resolving automatic account provider {}",
+          profile.uuid, description.metadata.id)
+
+        val resolutionResult =
+          description.resolve { _, message ->
+            accountEvents.onNext(AccountEventCreationInProgress(message))
+          }
+
+        when (resolutionResult) {
+          is TaskResult.Success -> {
+            this.logger.debug("[{}]: resolved automatic account provider {}",
+              profile.uuid, description.metadata.id)
+            resolvedProviders.add(resolutionResult.result)
+          }
+          is TaskResult.Failure -> {
+            this.logger.error("[{}]: failed to resolve automatic account provider {}",
+              profile.uuid, description.metadata.id)
+            publishResolutionError(accountEvents, resolutionResult)
+          }
+        }
+      } else {
+        this.logger.debug("[{}]: account provider {} is not automatic",
+          profile.uuid, description.metadata.id)
+      }
+    }
+
+    this.logger.debug("[{}]: resolved {} account providers", profile.uuid, resolvedProviders.size)
+    return resolvedProviders
+  }
+
+  private fun publishResolutionError(
+    accountEvents: Subject<AccountEvent>,
+    resolutionResult: TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType>
+  ) {
+    val error =
+      AccountProviderResolutionFailed(resolutionResult.errors())
+
+    val failure =
+      TaskResult.Failure<AccountCreateErrorDetails, Any>(
+        listOf(
+          TaskStep<AccountCreateErrorDetails>(
+            description = "",
+            resolution = TaskStepResolution.TaskStepFailed(
+              error.message, error, error.exception
+            )
+          )
+        )
+      )
+
+    val accountEvent =
+      AccountEventCreationFailed(
+        message = resolutionResult.steps.last().resolution.message,
+        taskResult = failure
+      )
+
+    accountEvents.onNext(accountEvent)
   }
 
   @Throws(IOException::class)
   internal fun writeDescription(
     directory: File,
-    newDescription: ProfileDescription) {
+    newDescription: ProfileDescription
+  ) {
 
     val profileLock =
       File(directory, "lock")

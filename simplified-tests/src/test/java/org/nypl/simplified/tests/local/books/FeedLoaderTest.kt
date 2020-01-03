@@ -1,9 +1,12 @@
 package org.nypl.simplified.tests.local.books
 
+import android.content.ContentResolver
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.OptionType
+import org.mockito.Mockito
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
+import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -31,7 +34,16 @@ class FeedLoaderTest : FeedLoaderContract() {
       throw FileNotFoundException(uri.toASCIIString())
     }
 
-    return org.nypl.simplified.feeds.api.FeedLoader.create(exec, parser, searchParser, transport, bookRegistry, bundledContent)
+    val contentResolver = Mockito.mock(ContentResolver::class.java)
+    return FeedLoader.create(
+      contentResolver = contentResolver,
+      exec = exec,
+      parser = parser,
+      searchParser = searchParser,
+      transport = transport,
+      bookRegistry = bookRegistry,
+      bundledContent = bundledContent
+    )
   }
 
   override fun resource(name: String): URI {

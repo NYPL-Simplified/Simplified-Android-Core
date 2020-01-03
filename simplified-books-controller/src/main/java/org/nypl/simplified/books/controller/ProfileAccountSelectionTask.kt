@@ -1,9 +1,9 @@
 package org.nypl.simplified.books.controller
 
 import com.io7m.jfunctional.Option
+import io.reactivex.subjects.Subject
 
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectFailed
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectFailed.ErrorCode
@@ -16,7 +16,7 @@ import java.util.concurrent.Callable
 
 class ProfileAccountSelectionTask(
   private val profiles: ProfilesDatabaseType,
-  private val profileEvents: ObservableType<ProfileEvent>,
+  private val profileEvents: Subject<ProfileEvent>,
   private val accountProvider: URI) : Callable<ProfileAccountSelectEvent> {
 
   private fun run(): ProfileAccountSelectEvent {
@@ -35,7 +35,7 @@ class ProfileAccountSelectionTask(
   @Throws(Exception::class)
   override fun call(): ProfileAccountSelectEvent {
     val event = run()
-    this.profileEvents.send(event)
+    this.profileEvents.onNext(event)
     return event
   }
 }

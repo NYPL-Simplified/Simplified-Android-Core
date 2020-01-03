@@ -1,5 +1,7 @@
 package org.nypl.simplified.feeds.api
 
+import android.content.ContentResolver
+import android.net.Uri
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -22,6 +24,7 @@ import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import org.nypl.simplified.opds.core.OPDSSearchLink
 import org.nypl.simplified.opds.core.OPDSSearchParserType
 import org.slf4j.LoggerFactory
+import java.io.FileNotFoundException
 import java.net.URI
 import java.util.SortedMap
 import java.util.concurrent.Callable
@@ -36,12 +39,14 @@ import java.util.concurrent.TimeUnit
 
 class FeedLoader private constructor(
   private val cache: ExpiringMap<URI, Feed>,
+  private val contentResolver: ContentResolver,
   private val exec: ListeningExecutorService,
   private val parser: OPDSFeedParserType,
   private val searchParser: OPDSSearchParserType,
   private val transport: OPDSFeedTransportType<OptionType<HTTPAuthType>>,
   private val bookRegistry: BookRegistryReadableType,
-  private val bundledContent: BundledContentResolverType) : FeedLoaderType, ExpirationListener<URI, Feed> {
+  private val bundledContent: BundledContentResolverType
+) : FeedLoaderType, ExpirationListener<URI, Feed> {
 
   init {
     this.cache.addExpirationListener(this)
@@ -53,7 +58,8 @@ class FeedLoader private constructor(
   private fun fetchURICore(
     uri: URI,
     auth: OptionType<HTTPAuthType>,
-    updateFromRegistry: Boolean): FluentFuture<FeedLoaderResult> {
+    updateFromRegistry: Boolean
+  ): FluentFuture<FeedLoaderResult> {
 
     if (this.cache.containsKey(uri)) {
       return FluentFuture.from(Futures.immediateFuture(
@@ -67,21 +73,24 @@ class FeedLoader private constructor(
 
   override fun fetchURI(
     uri: URI,
-    auth: OptionType<HTTPAuthType>): FluentFuture<FeedLoaderResult> {
+    auth: OptionType<HTTPAuthType>
+  ): FluentFuture<FeedLoaderResult> {
     return this.fetchURICore(uri, auth, updateFromRegistry = false)
   }
 
   override fun fetchURIRefreshing(
     uri: URI,
     auth: OptionType<HTTPAuthType>,
-    method: String): FluentFuture<FeedLoaderResult> {
+    method: String
+  ): FluentFuture<FeedLoaderResult> {
     this.invalidate(uri)
     return this.fetchURICore(uri, auth, updateFromRegistry = false)
   }
 
   override fun fetchURIWithBookRegistryEntries(
     uri: URI,
-    auth: OptionType<HTTPAuthType>): FluentFuture<FeedLoaderResult> {
+    auth: OptionType<HTTPAuthType>
+  ): FluentFuture<FeedLoaderResult> {
     return this.fetchURICore(uri, auth, updateFromRegistry = true)
   }
 
@@ -97,7 +106,8 @@ class FeedLoader private constructor(
     uri: URI,
     auth: OptionType<HTTPAuthType>,
     method: String,
-    updateFromRegistry: Boolean): FeedLoaderResult {
+    updateFromRegistry: Boolean
+  ): FeedLoaderResult {
 
     try {
 
@@ -108,6 +118,15 @@ class FeedLoader private constructor(
 
       if (BundledURIs.isBundledURI(uri)) {
         return this.parseFromBundledContent(uri)
+      }
+
+      /*
+       * If the URI has a scheme that indicates that it must go through the Android
+       * content resolver... do that.
+       */
+
+      if (uri.scheme == "content") {
+        return this.parseFromContentResolver(uri)
       }
 
       /*
@@ -159,7 +178,30 @@ class FeedLoader private constructor(
     }
   }
 
-  private fun errorAttributesOf(uri: URI, method: String): SortedMap<String, String> {
+  private fun parseFromContentResolver(
+    uri: URI
+  ): FeedLoaderResult {
+    val streamMaybe = this.contentResolver.openInputStream(Uri.parse(uri.toString()))
+    return if (streamMaybe != null) {
+      streamMaybe.use { stream ->
+        FeedLoaderSuccess(Feed.fromAcquisitionFeed(this.parser.parse(uri, stream), null))
+      }
+    } else {
+      FeedLoaderFailure.FeedLoaderFailedGeneral(
+        problemReport = null,
+        exception = FileNotFoundException(),
+        message = "File not found!",
+        attributesInitial = mapOf(
+          Pair("URI", uri.toASCIIString())
+        )
+      )
+    }
+  }
+
+  private fun errorAttributesOf(
+    uri: URI,
+    method: String
+  ): SortedMap<String, String> {
     return sortedMapOf(
       Pair("Feed", uri.toString()),
       Pair("Method", method)
@@ -184,7 +226,8 @@ class FeedLoader private constructor(
     opdsFeed: OPDSAcquisitionFeed,
     auth: OptionType<HTTPAuthType>,
     method: String,
-    uri: URI): OPDSOpenSearch1_1? {
+    uri: URI
+  ): OPDSOpenSearch1_1? {
     val searchLinkOpt = opdsFeed.feedSearchURI
     return if (searchLinkOpt is Some<OPDSSearchLink>) {
       val searchLink = searchLinkOpt.get()
@@ -206,7 +249,7 @@ class FeedLoader private constructor(
           val bookWithStatus = this.bookRegistry.books().get(id)
           if (bookWithStatus != null) {
             this.log.debug("updating entry {} from book registry", id)
-            val en = FeedEntry.FeedEntryOPDS(bookWithStatus.book().entry)
+            val en = FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry)
             feed.entriesInOrder.set(index, en)
           }
         }
@@ -222,7 +265,7 @@ class FeedLoader private constructor(
             val bookWithStatus = this.bookRegistry.books().get(id)
             if (bookWithStatus != null) {
               this.log.debug("updating entry {} from book registry", id)
-              entries.set(gi, FeedEntry.FeedEntryOPDS(bookWithStatus.book().entry))
+              entries.set(gi, FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry))
             }
           }
         }
@@ -237,12 +280,14 @@ class FeedLoader private constructor(
      */
 
     fun create(
+      contentResolver: ContentResolver,
       exec: ListeningExecutorService,
       parser: OPDSFeedParserType,
       searchParser: OPDSSearchParserType,
       transport: OPDSFeedTransportType<OptionType<HTTPAuthType>>,
       bookRegistry: BookRegistryReadableType,
-      bundledContent: BundledContentResolverType): FeedLoaderType {
+      bundledContent: BundledContentResolverType
+    ): FeedLoaderType {
 
       val cache =
         ExpiringMap.builder()
@@ -252,6 +297,7 @@ class FeedLoader private constructor(
 
       return FeedLoader(
         cache = cache,
+        contentResolver = contentResolver,
         exec = exec,
         parser = parser,
         searchParser = searchParser,

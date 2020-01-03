@@ -134,15 +134,6 @@ architecture distributed over the application modules. The _controller_ in the a
 task-based and executes all tasks on a background thread to avoid any possibility of blocking
 the Android UI thread.
 
-The following diagram provides a rough diagram of the application components:
-
-![outline](./src/site/resources/outline.png?raw=true)
-
-At the top of the diagram, the `app-shared` module contains all of the _view_ aspects of the
-architecture and typically has strong dependencies on the Android APIs. The _controller_ and
-_model_ sections are pure platform-independent Java/Kotlin code and try to avoid having any
-dependencies on the Android APIs, allowing for easy unit testing.
-
 #### API vs SPI
 
 The project makes various references to _APIs_ and _SPIs_. _API_ stands for _application
@@ -225,10 +216,9 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.accounts.source.nyplregistry](simplified-accounts-source-nyplregistry)|NYPL registry client implementation|
 |[org.librarysimplified.accounts.source.resolution](simplified-accounts-source-resolution)|Standard account provider resolution logic|
 |[org.librarysimplified.accounts.source.spi](simplified-accounts-source-spi)|Account provider source SPI|
+|[org.librarysimplified.adobe.extensions](simplified-adobe-extensions)|Adobe DRM convenience functions|
 |[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
-|[org.librarysimplified.analytics.lfa](simplified-analytics-lfa)|LibraryForAll analytics implementation|
-|[org.librarysimplified.app.shared](simplified-app-shared)|Shared application module|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.app.vanilla.with_profiles](simplified-app-vanilla-with-profiles)|Vanilla application [with profiles enabled]|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
@@ -241,7 +231,9 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.books.registry.api](simplified-books-registry-api)|Book registry API|
 |[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
 |[org.librarysimplified.bugsnag](simplified-bugsnag)|Bugsnag functionality|
+|[org.librarysimplified.buildconfig.api](simplified-buildconfig-api)|Build-time configuration API|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
+|[org.librarysimplified.clock](simplified-clock)|Clock API|
 |[org.librarysimplified.documents](simplified-documents)|Documents API|
 |[org.librarysimplified.downloader.core](simplified-downloader-core)|Downloader|
 |[org.librarysimplified.feeds.api](simplified-feeds-api)|Feed API|
@@ -251,13 +243,15 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
 |[org.librarysimplified.links](simplified-links)|Link types|
 |[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|
+|[org.librarysimplified.main](simplified-main)|Main application module|
 |[org.librarysimplified.migration.api](simplified-migration-api)|Data migration API|
 |[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
 |[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
 |[org.librarysimplified.migration.spi](simplified-migration-spi)|Data migration SPI|
 |[org.librarysimplified.mime](simplified-mime)|MIME type handling|
+|[org.librarysimplified.networkconnectivity](simplified-networkconnectivity)|Network connectivity|
+|[org.librarysimplified.networkconnectivity.api](simplified-networkconnectivity-api)|Network connectivity API|
 |[org.librarysimplified.notifications](simplified-notifications)|Notification service|
-|[org.librarysimplified.observable](simplified-observable)|Lightweight, type-safe Observable implementation|
 |[org.librarysimplified.opds.auth_document](simplified-opds-auth-document)|OPDS authentication document parser implementation|
 |[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
 |[org.librarysimplified.opds.core](simplified-opds-core)|OPDS feed parser|
@@ -283,11 +277,25 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.tests.strings](simplified-tests-strings)|Mock strings for test suites|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
+|[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
 |[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
 |[org.librarysimplified.ui.datepicker.demo](simplified-ui-datepicker-demo)|Date picker UI component demo|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
+|[org.librarysimplified.ui.images](simplified-ui-images)|Image loader API for general image resources|
+|[org.librarysimplified.ui.navigation.api](simplified-ui-navigation-api)|Navigation API|
+|[org.librarysimplified.ui.tabs](simplified-ui-navigation-tabs)|Tabbed UI|
+|[org.librarysimplified.ui.profiles](simplified-ui-profiles)|Profiles UI|
+|[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
+|[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
 |[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
+|[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
+|[org.librarysimplified.ui.toolbar](simplified-ui-toolbar)|Sane toolbar handling|
+|[org.librarysimplified.viewer.api](simplified-viewer-api)|Viewer API|
+|[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|
+|[org.librarysimplified.viewer.epub.readium1](simplified-viewer-epub-readium1)|Readium 1 EPUB reader|
+|[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|
+|[org.librarysimplified.viewer.spi](simplified-viewer-spi)|Viewer SPI|
 
 _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
 

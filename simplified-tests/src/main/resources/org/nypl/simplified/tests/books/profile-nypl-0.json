@@ -1,0 +1,11 @@
+{
+  "display_name" : "",
+  "preferences" : {
+    "show-testing-libraries" : false,
+    "reader-preferences" : {
+      "font_scale" : 100.0,
+      "font_family" : "READER_FONT_SANS_SERIF",
+      "color_scheme" : "SCHEME_BLACK_ON_WHITE"
+    }
+  }
+}

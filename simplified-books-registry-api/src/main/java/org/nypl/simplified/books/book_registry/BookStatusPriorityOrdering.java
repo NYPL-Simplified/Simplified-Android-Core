@@ -16,73 +16,73 @@ package org.nypl.simplified.books.book_registry;
 public enum BookStatusPriorityOrdering
 {
   /**
-   * {@link BookStatusRevokeFailed}
+   * {@link BookStatus.Loaned.LoanRevokeFailed}
    */
 
   BOOK_STATUS_REVOKE_FAILED(90),
 
   /**
-   * {@link BookStatusDownloadFailed}
+   * {@link BookStatus.Loaned.Downloading.DownloadFailed}
    */
 
   BOOK_STATUS_DOWNLOAD_FAILED(90),
 
   /**
-   * {@link BookStatusDownloadInProgress}
+   * {@link BookStatus.Loaned.Downloading.DownloadInProgress}
    */
 
   BOOK_STATUS_DOWNLOAD_IN_PROGRESS(60),
 
   /**
-   * {@link BookStatusRequestingDownload}
+   * {@link BookStatus.Loaned.Downloading.RequestingDownload}
    */
 
   BOOK_STATUS_DOWNLOAD_REQUESTING(50),
 
   /**
-   * {@link BookStatusDownloaded}
+   * {@link BookStatus.Loaned.LoanedDownloaded}
    */
 
   BOOK_STATUS_DOWNLOADED(100),
 
   /**
-   * {@link BookStatusLoanable}
+   * {@link BookStatus.Loanable}
    */
 
   BOOK_STATUS_LOANABLE(15),
 
   /**
-   * {@link BookStatusHeldReady}
+   * {@link BookStatus.Held.HeldReady}
    */
 
   BOOK_STATUS_HELD_READY(12),
 
   /**
-   * {@link BookStatusHeld}
+   * {@link BookStatus.Held}
    */
 
   BOOK_STATUS_HELD(10),
 
   /**
-   * {@link BookStatusHoldable}
+   * {@link BookStatus.Holdable}
    */
 
   BOOK_STATUS_HOLDABLE(0),
 
   /**
-   * {@link BookStatusRequestingLoan}
+   * {@link BookStatus.RequestingLoan}
    */
 
   BOOK_STATUS_LOAN_IN_PROGRESS(20),
 
   /**
-   * {@link BookStatusLoaned}
+   * {@link BookStatus.Loaned}
    */
 
   BOOK_STATUS_LOANED(30),
 
   /**
-   * {@link BookStatusRequestingRevoke}
+   * {@link BookStatus.Held.RevokingHold}
    */
 
   BOOK_STATUS_REVOKE_IN_PROGRESS(20);

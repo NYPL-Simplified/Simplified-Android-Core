@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.android.opds.auth_document
 
-import android.support.test.filters.SmallTest
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import org.junit.runner.RunWith
 import org.nypl.simplified.opds.auth_document.AuthenticationDocumentParsers
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType

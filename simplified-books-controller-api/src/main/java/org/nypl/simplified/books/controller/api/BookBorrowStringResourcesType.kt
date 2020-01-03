@@ -63,6 +63,12 @@ interface BookBorrowStringResourcesType {
   fun borrowBookFulfillACSMConnectorFailed(errorCode: String): String
 
   /**
+   * Selecting an acquisition...
+   */
+
+  val borrowBookSelectingAcquisition: String
+
+  /**
    * An unexpected exception occurred whilst fetching the book cover.
    */
 
@@ -235,6 +241,18 @@ interface BookBorrowStringResourcesType {
    */
 
   val borrowBookFulfill: String
+
+  /**
+   * Copying a book from a content provider failed.
+   */
+
+  val borrowBookContentCopyFailed: String
+
+  /**
+   * Copying book from a content provider.
+   */
+
+  val borrowBookContentCopy: String
 
   /**
    * Copying a book from bundled content failed.

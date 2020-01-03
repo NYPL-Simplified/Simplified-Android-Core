@@ -1,0 +1,25 @@
+dependencies {
+  implementation project(":simplified-accounts-api")
+  implementation project(":simplified-books-api")
+  implementation project(":simplified-books-controller-api")
+  implementation project(":simplified-books-covers")
+  implementation project(":simplified-books-database-api")
+  implementation project(":simplified-downloader-core")
+  implementation project(":simplified-files")
+  implementation project(":simplified-networkconnectivity-api")
+  implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-services-api")
+  implementation project(":simplified-threads")
+  implementation project(":simplified-ui-screen")
+  implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-viewer-spi")
+
+  api libraries.nyplAudioBookAPI
+  api libraries.nyplAudioBookDownloads
+  api libraries.nyplAudioBookManifestNYPL
+  api libraries.nyplAudioBookOpenAccess
+  api libraries.nyplAudioBookViews
+
+  implementation libraries.androidXAppCompat
+  implementation libraries.kotlinStdlib
+}

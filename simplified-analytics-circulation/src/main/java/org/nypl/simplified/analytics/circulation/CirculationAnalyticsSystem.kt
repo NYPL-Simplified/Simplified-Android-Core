@@ -31,6 +31,9 @@ class CirculationAnalyticsSystem(
       is AnalyticsEvent.ApplicationOpened,
       is AnalyticsEvent.ProfileLoggedIn,
       is AnalyticsEvent.ProfileLoggedOut,
+      is AnalyticsEvent.ProfileCreated,
+      is AnalyticsEvent.ProfileDeleted,
+      is AnalyticsEvent.ProfileUpdated,
       is AnalyticsEvent.CatalogSearched -> {
 
         /*

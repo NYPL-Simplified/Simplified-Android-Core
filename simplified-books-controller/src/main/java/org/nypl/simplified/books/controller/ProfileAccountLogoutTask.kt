@@ -17,6 +17,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.profiles.api.ProfileReadableType

@@ -6,7 +6,18 @@
   <uses-permission android:name="android.permission.WAKE_LOCK" />
 
   <application android:allowBackup="false">
-    <activity android:name="org.nypl.simplified.tests.android.splash.SplashTest$MockSplashActivity" android:exported="true"/>
+    <activity
+      android:name="org.nypl.simplified.tests.android.splash.SplashTest$MockSplashActivity"
+      android:exported="true" />
+    <activity
+      android:name="org.nypl.simplified.tests.android.ui.settings.SettingsFragmentAccountsActivity"
+      android:exported="true" />
+    <activity
+      android:name="org.nypl.simplified.tests.android.ui.settings.SettingsFragmentMainActivity"
+      android:exported="true" />
+    <activity
+      android:name="org.nypl.simplified.tests.android.ui.settings.SettingsFragmentAccountActivity"
+      android:exported="true" />
   </application>
 
 </manifest>

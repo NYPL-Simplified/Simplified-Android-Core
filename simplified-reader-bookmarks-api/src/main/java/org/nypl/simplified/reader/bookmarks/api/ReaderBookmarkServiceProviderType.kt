@@ -1,6 +1,6 @@
 package org.nypl.simplified.reader.bookmarks.api
 
-import org.nypl.simplified.observable.ObservableType
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 
 /**
@@ -25,7 +25,7 @@ interface ReaderBookmarkServiceProviderType {
      * An observable value to which reader bookmark events can be published.
      */
 
-    val events: ObservableType<ReaderBookmarkEvent>,
+    val events: Subject<ReaderBookmarkEvent>,
 
     /**
      * An interface through which to make HTTP calls to manage remote bookmarks.

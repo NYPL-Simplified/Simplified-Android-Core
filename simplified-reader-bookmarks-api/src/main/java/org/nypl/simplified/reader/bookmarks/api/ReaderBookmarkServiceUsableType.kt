@@ -1,10 +1,10 @@
 package org.nypl.simplified.reader.bookmarks.api
 
 import com.google.common.util.concurrent.FluentFuture
+import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.Bookmark
-import org.nypl.simplified.observable.ObservableReadableType
 
 /**
  * The "usable" reader bookmark service interface. Usable, in this sense, refers to the
@@ -17,7 +17,7 @@ interface ReaderBookmarkServiceUsableType {
    * An observable that publishes events about bookmarks.
    */
 
-  val bookmarkEvents: ObservableReadableType<ReaderBookmarkEvent>
+  val bookmarkEvents: Observable<ReaderBookmarkEvent>
 
   /**
    * The user wants their current bookmarks.

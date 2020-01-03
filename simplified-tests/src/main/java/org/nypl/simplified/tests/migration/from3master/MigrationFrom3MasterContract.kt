@@ -1,6 +1,7 @@
 package org.nypl.simplified.tests.migration.from3master
 
 import android.content.Context
+import io.reactivex.subjects.PublishSubject
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
@@ -27,8 +28,6 @@ import org.nypl.simplified.migration.spi.MigrationEvent.MigrationStepError
 import org.nypl.simplified.migration.spi.MigrationEvent.MigrationStepSucceeded
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -42,7 +41,7 @@ import kotlin.random.Random
 
 abstract class MigrationFrom3MasterContract {
 
-  private lateinit var accountEvents: ObservableType<AccountEvent>
+  private lateinit var accountEvents: PublishSubject<AccountEvent>
   private lateinit var tempBookDatabaseDir: File
   private lateinit var services: MigrationServiceDependencies
   private lateinit var tempDir: File
@@ -68,7 +67,7 @@ abstract class MigrationFrom3MasterContract {
     this.migrations.setStrings(MockStrings())
 
     this.accountEvents =
-      Observable.create()
+      PublishSubject.create()
 
     this.services =
       MigrationServiceDependencies(

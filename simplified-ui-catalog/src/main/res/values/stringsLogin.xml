@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resources>
+  <string name="loginEULA">I agree to the terms of the End User License Agreement.</string>
+  <string name="loginLibraryCard">Library Card</string>
+  <string name="loginLogin">Log in</string>
+  <string name="loginPassword">Password</string>
+  <string name="loginUserName">User Name</string>
+</resources>

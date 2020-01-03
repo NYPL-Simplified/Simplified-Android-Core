@@ -1,0 +1,24 @@
+dependencies {
+  api project(":simplified-ui-errorpage")
+
+  api libraries.androidXAppCompat
+  api libraries.androidXConstraintLayout
+  api libraries.androidXPreference
+  api libraries.androidXRecyclerView
+
+  implementation project(":simplified-adobe-extensions")
+  implementation project(":simplified-boot-api")
+  implementation project(":simplified-buildconfig-api")
+  implementation project(":simplified-documents")
+  implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-reports")
+  implementation project(":simplified-services-api")
+  implementation project(":simplified-ui-images")
+  implementation project(":simplified-ui-navigation-api")
+  implementation project(":simplified-ui-theme")
+  implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-ui-toolbar")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

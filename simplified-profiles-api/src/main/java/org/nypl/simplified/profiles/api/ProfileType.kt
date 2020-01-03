@@ -33,13 +33,13 @@ interface ProfileType : ProfileReadableType {
   fun accountsDatabase(): AccountsDatabaseType
 
   /**
-   * Set the profile's preferences to the given value.
+   * Set the profile's description to the given value.
    *
-   * @param preferences The new preferences
+   * @param newDescription The new description
    */
 
   @Throws(IOException::class)
-  fun preferencesUpdate(preferences: ProfilePreferences)
+  fun setDescription(newDescription: ProfileDescription)
 
   /**
    * Create an account using the given provider.
@@ -70,4 +70,14 @@ interface ProfileType : ProfileReadableType {
 
   @Throws(AccountsDatabaseNonexistentException::class)
   fun selectAccount(accountProvider: URI): AccountType
+
+  /**
+   * Delete the profile.
+   *
+   * @throws ProfileDatabaseException On errors
+   * @throws IOException              On I/O errors
+   */
+
+  @Throws(ProfileDatabaseException::class, IOException::class)
+  fun delete()
 }

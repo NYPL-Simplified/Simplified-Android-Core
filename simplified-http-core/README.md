@@ -1,8 +1,6 @@
-HTTP Core
-=========
+org.librarysimplified.http.core
+===
 
-The `simplified-http-core` package implements a simple synchronous
-API for making HTTP `GET` and `HEAD` requests with optional
-authentication. It is built upon `java.net.HttpURLConnection` and
-provides a slightly more pleasant interface.
+The `org.librarysimplified.http.core` module provides an easily-mocked
+API for making synchronous HTTP requests.
 

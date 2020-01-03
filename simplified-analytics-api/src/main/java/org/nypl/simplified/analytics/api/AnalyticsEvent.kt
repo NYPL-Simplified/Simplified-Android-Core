@@ -3,6 +3,7 @@ package org.nypl.simplified.analytics.api
 import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import java.net.URI
+import java.util.SortedMap
 import java.util.UUID
 
 /**
@@ -47,8 +48,8 @@ sealed class AnalyticsEvent {
      * The application version code.
      */
 
-    val packageVersionCode: Int)
-    : AnalyticsEvent()
+    val packageVersionCode: Int
+  ) : AnalyticsEvent()
 
   /**
    * A user logged in to their profile.
@@ -68,20 +69,119 @@ sealed class AnalyticsEvent {
      * The current display name of the profile.
      */
 
-    val displayName: String?,
-
-    /**
-     * The gender of the profile owner.
-     */
-
-    val gender: String?,
+    val displayName: String,
 
     /**
      * The birth date of the profile owner.
      */
 
-    val birthDate: String?)
-    : AnalyticsEvent()
+    val birthDate: String?,
+
+    /**
+     * The attributes of the profile owner
+     */
+
+    val attributes: SortedMap<String, String>
+  ) : AnalyticsEvent()
+
+  /**
+   * A profile was created
+   */
+
+  data class ProfileCreated(
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
+    override val credentials: AccountAuthenticationCredentials? = null,
+
+    /**
+     * The UUID of the profile.
+     */
+
+    val profileUUID: UUID,
+
+    /**
+     * The current display name of the profile.
+     */
+
+    val displayName: String,
+
+    /**
+     * The birth date of the profile owner.
+     */
+
+    val birthDate: String?,
+
+    /**
+     * The attributes of the profile owner
+     */
+
+    val attributes: SortedMap<String, String>
+  ) : AnalyticsEvent()
+
+  /**
+   * A profile was deleted
+   */
+
+  data class ProfileDeleted(
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
+    override val credentials: AccountAuthenticationCredentials? = null,
+
+    /**
+     * The UUID of the profile.
+     */
+
+    val profileUUID: UUID,
+
+    /**
+     * The current display name of the profile.
+     */
+
+    val displayName: String,
+
+    /**
+     * The birth date of the profile owner.
+     */
+
+    val birthDate: String?,
+
+    /**
+     * The attributes of the profile owner
+     */
+
+    val attributes: SortedMap<String, String>
+  ) : AnalyticsEvent()
+
+  /**
+   * A profile was updated
+   */
+
+  data class ProfileUpdated(
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
+    override val credentials: AccountAuthenticationCredentials? = null,
+
+    /**
+     * The UUID of the profile.
+     */
+
+    val profileUUID: UUID,
+
+    /**
+     * The current display name of the profile.
+     */
+
+    val displayName: String,
+
+    /**
+     * The birth date of the profile owner.
+     */
+
+    val birthDate: String?,
+
+    /**
+     * The attributes of the profile owner
+     */
+
+    val attributes: SortedMap<String, String>
+  ) : AnalyticsEvent()
 
   /**
    * A user logged out of their profile.
@@ -101,8 +201,8 @@ sealed class AnalyticsEvent {
      * The current display name of the profile.
      */
 
-    val displayName: String)
-    : AnalyticsEvent()
+    val displayName: String
+  ) : AnalyticsEvent()
 
   /**
    * The user searched for something in the catalog.
@@ -134,8 +234,8 @@ sealed class AnalyticsEvent {
      * The search string query used.
      */
 
-    val searchQuery: String)
-    : AnalyticsEvent()
+    val searchQuery: String
+  ) : AnalyticsEvent()
 
   /**
    * The user opened a book.
@@ -185,8 +285,8 @@ sealed class AnalyticsEvent {
      * A URI that should be used for submitting "book opened" events.
      */
 
-    val targetURI: URI?)
-    : AnalyticsEvent()
+    val targetURI: URI?
+  ) : AnalyticsEvent()
 
   /**
    * The user turned a page in a book.
@@ -242,8 +342,8 @@ sealed class AnalyticsEvent {
      * The title of the page.
      */
 
-    val bookPageTitle: String)
-    : AnalyticsEvent()
+    val bookPageTitle: String
+  ) : AnalyticsEvent()
 
   /**
    * The user closed a book.
@@ -281,7 +381,7 @@ sealed class AnalyticsEvent {
      * The title of the book.
      */
 
-    val bookTitle: String)
-    : AnalyticsEvent()
+    val bookTitle: String
+  ) : AnalyticsEvent()
 
 }

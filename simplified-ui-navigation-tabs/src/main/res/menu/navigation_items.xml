@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item
+    android:id="@+id/tabCatalog"
+    android:icon="@drawable/tab_catalog"
+    android:title="@string/tabCatalog" />
+
+  <item
+    android:id="@+id/tabBooks"
+    android:icon="@drawable/tab_books"
+    android:title="@string/tabBooks" />
+
+  <item
+    android:id="@+id/tabHolds"
+    android:icon="@drawable/tab_holds"
+    android:title="@string/tabHolds" />
+
+  <item
+    android:id="@+id/tabSettings"
+    android:icon="@drawable/tab_settings"
+    android:title="@string/tabSettings" />
+
+  <item
+    android:id="@+id/tabProfile"
+    android:icon="@drawable/tab_profile"
+    android:title="@string/tabProfile" />
+
+</menu>

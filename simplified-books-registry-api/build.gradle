@@ -1,8 +1,9 @@
 dependencies {
   api project(":simplified-books-api")
   api project(":simplified-http-core")
-  api project(":simplified-observable")
   api project(":simplified-taskrecorder-api")
+
+  api libraries.rxjava2
 
   implementation libraries.slf4j
 

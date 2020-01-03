@@ -1,8 +1,9 @@
 dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-books-api")
-  api project(":simplified-observable")
   api project(":simplified-profiles-controller-api")
+
+  api libraries.rxjava2
 
   implementation libraries.kotlinStdlib
 

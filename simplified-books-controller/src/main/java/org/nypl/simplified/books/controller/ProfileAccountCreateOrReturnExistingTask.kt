@@ -1,12 +1,12 @@
 package org.nypl.simplified.books.controller
 
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationSucceeded
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -17,7 +17,7 @@ import java.net.URI
 import java.util.concurrent.Callable
 
 class ProfileAccountCreateOrReturnExistingTask(
-  private val accountEvents: ObservableType<AccountEvent>,
+  private val accountEvents: Subject<AccountEvent>,
   private val accountProviderID: URI,
   private val accountProviders: AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
@@ -62,9 +62,10 @@ class ProfileAccountCreateOrReturnExistingTask(
   }
 
   private fun publishSuccessEvent(account: AccountType) =
-    this.accountEvents.send(AccountEventCreationSucceeded(this.strings.creatingAccountSucceeded, account.id))
+    this.accountEvents.onNext(AccountEventCreationSucceeded(
+      this.strings.creatingAccountSucceeded, account.id))
 
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.send(AccountEventCreationFailed(
+    this.accountEvents.onNext(AccountEventCreationFailed(
       step.resolution.message, this.taskRecorder.finishFailure<AccountType>()))
 }

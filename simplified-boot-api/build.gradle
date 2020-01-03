@@ -1,8 +1,8 @@
 dependencies {
-  api project(":simplified-observable")
   api project(":simplified-presentableerror-api")
 
   api libraries.googleGuava
+  api libraries.rxjava2
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

@@ -1,13 +1,15 @@
 package org.nypl.simplified.books.controller
 
+import android.content.ContentResolver
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Some
-import com.io7m.jfunctional.Unit
-import com.io7m.jnull.NullCheck
-import org.joda.time.Instant
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+import io.reactivex.subjects.Subject
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
@@ -28,6 +30,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
@@ -35,6 +38,7 @@ import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.Feed
@@ -44,9 +48,6 @@ import org.nypl.simplified.futures.FluentFutureExtensions
 import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.http.core.HTTPType
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableSubscriptionType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -55,13 +56,15 @@ import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDeletionEvent
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
@@ -85,8 +88,9 @@ import java.util.concurrent.ExecutorService
 
 class Controller private constructor(
   private val cacheDirectory: File,
-  private val accountEvents: ObservableType<AccountEvent>,
-  private val profileEvents: ObservableType<ProfileEvent>,
+  private val contentResolver: ContentResolver,
+  private val accountEvents: Subject<AccountEvent>,
+  private val profileEvents: Subject<ProfileEvent>,
   private val services: ServiceDirectoryType,
   private val taskExecutor: ListeningExecutorService
 ) : BooksControllerType, ProfilesControllerType {
@@ -109,6 +113,8 @@ class Controller private constructor(
     this.services.requireService(BookBorrowStringResourcesType::class.java)
   private val bundledContent =
     this.services.requireService(BundledContentResolverType::class.java)
+  private val clock =
+    this.services.requireService(ClockType::class.java)
   private val downloader =
     this.services.requireService(DownloaderType::class.java)
   private val feedLoader =
@@ -130,7 +136,7 @@ class Controller private constructor(
   private val profileIdleTimer =
     this.services.requireService(ProfileIdleTimerType::class.java)
 
-  private val accountRegistrySubscription: ObservableSubscriptionType<AccountProviderRegistryEvent>
+  private val accountRegistrySubscription: Disposable
   private val downloads: ConcurrentHashMap<BookID, DownloadType> =
     ConcurrentHashMap(32)
 
@@ -185,8 +191,16 @@ class Controller private constructor(
     }
   }
 
+  private fun <A> submitTask(task: () -> A): FluentFuture<A> {
+    return FluentFuture.from(this.taskExecutor.submit(task))
+  }
+
+  private fun <A> submitTask(task: Callable<A>): FluentFuture<A> {
+    return FluentFuture.from(this.taskExecutor.submit(task))
+  }
+
   override fun profiles(): SortedMap<ProfileID, ProfileReadableType> {
-    return org.nypl.simplified.books.controller.Controller.Companion.castMap(this.profiles.profiles())
+    return this.castMap(this.profiles.profiles())
   }
 
   override fun profileAnonymousEnabled(): AnonymousProfileEnabled {
@@ -198,31 +212,41 @@ class Controller private constructor(
     return this.profiles.currentProfileUnsafe()
   }
 
-  override fun profileEvents(): ObservableReadableType<ProfileEvent> {
+  override fun profileEvents(): Observable<ProfileEvent> {
     return this.profileEvents
+  }
+
+  override fun profileDelete(
+    profileID: ProfileID
+  ): FluentFuture<ProfileDeletionEvent> {
+    return this.submitTask(ProfileDeletionTask(
+      this.profiles,
+      this.profileEvents,
+      profileID
+    ))
   }
 
   override fun profileCreate(
     accountProvider: AccountProviderType,
-    displayName: String,
-    gender: String,
-    date: LocalDate): FluentFuture<ProfileCreationEvent> {
-    return FluentFuture.from(this.taskExecutor.submit(ProfileCreationTask(
-      this.profiles,
-      this.profileEvents,
-      accountProvider,
-      displayName,
-      gender,
-      ProfileDateOfBirth(date = date, isSynthesized = false))))
+    description: ProfileDescription
+  ): FluentFuture<ProfileCreationEvent> {
+    return this.submitTask(ProfileCreationTask(
+      profiles = this.profiles,
+      profileEvents = this.profileEvents,
+      accountProvider = accountProvider,
+      description = description
+    ))
   }
 
-  override fun profileSelect(id: ProfileID): FluentFuture<kotlin.Unit> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileSelectionTask(
-        profiles = this.profiles,
-        bookRegistry = this.bookRegistry,
-        events = this.profileEvents,
-        id = id)))
+  override fun profileSelect(
+    profileID: ProfileID
+  ): FluentFuture<Unit> {
+    return this.submitTask(ProfileSelectionTask(
+      profiles = this.profiles,
+      bookRegistry = this.bookRegistry,
+      events = this.profileEvents,
+      id = profileID
+    ))
   }
 
   @Throws(ProfileNoneCurrentException::class)
@@ -233,17 +257,16 @@ class Controller private constructor(
 
   override fun profileAccountLogin(
     accountID: AccountID,
-    credentials: AccountAuthenticationCredentials): FluentFuture<TaskResult<AccountLoginErrorData, kotlin.Unit>> {
-
-    return FluentFuture.from(
-      this.taskExecutor.submit(Callable { this.runProfileAccountLogin(accountID, credentials) }))
+    credentials: AccountAuthenticationCredentials
+  ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>> {
+    return this.submitTask { this.runProfileAccountLogin(accountID, credentials) }
       .flatMap { result -> this.runSyncIfLoginSucceeded(result, accountID) }
   }
 
   private fun runProfileAccountLogin(
     accountID: AccountID,
     credentials: AccountAuthenticationCredentials
-  ): TaskResult<AccountLoginErrorData, kotlin.Unit> {
+  ): TaskResult<AccountLoginErrorData, Unit> {
     val profile = this.profileCurrent()
     val account = profile.account(accountID)
     return ProfileAccountLoginTask(
@@ -258,9 +281,9 @@ class Controller private constructor(
   }
 
   private fun runSyncIfLoginSucceeded(
-    result: TaskResult<AccountLoginErrorData, kotlin.Unit>,
+    result: TaskResult<AccountLoginErrorData, Unit>,
     accountID: AccountID
-  ): FluentFuture<TaskResult<AccountLoginErrorData, kotlin.Unit>> {
+  ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>> {
     return when (result) {
       is TaskResult.Success -> {
         this.logger.debug("logging in succeeded: syncing account")
@@ -275,56 +298,66 @@ class Controller private constructor(
     }
   }
 
-  override fun profileAccountCreateOrReturnExisting(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileAccountCreateOrReturnExistingTask(
-        this.accountEvents,
-        provider,
-        this.accountProviders,
-        this.profiles,
-        this.profileAccountCreationStringResources)))
+  override fun profileAccountCreateOrReturnExisting(
+    provider: URI
+  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+    return this.submitTask(ProfileAccountCreateOrReturnExistingTask(
+      accountEvents = this.accountEvents,
+      accountProviderID = provider,
+      accountProviders = this.accountProviders,
+      profiles = this.profiles,
+      strings = this.profileAccountCreationStringResources
+    ))
   }
 
-  override fun profileAccountCreateCustomOPDS(opdsFeed: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileAccountCreateCustomOPDSTask(
-        accountEvents = this.accountEvents,
-        accountProviderRegistry = this.accountProviders,
-        authDocumentParsers = this.authDocumentParsers,
-        http = this.http,
-        opdsURI = opdsFeed,
-        opdsFeedParser = this.feedParser,
-        profiles = this.profiles,
-        resolutionStrings = this.accountProviderResolutionStrings,
-        strings = this.profileAccountCreationStringResources)))
+  override fun profileAccountCreateCustomOPDS(
+    opdsFeed: URI
+  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+    return this.submitTask(ProfileAccountCreateCustomOPDSTask(
+      accountEvents = this.accountEvents,
+      accountProviderRegistry = this.accountProviders,
+      authDocumentParsers = this.authDocumentParsers,
+      http = this.http,
+      opdsURI = opdsFeed,
+      opdsFeedParser = this.feedParser,
+      profiles = this.profiles,
+      resolutionStrings = this.accountProviderResolutionStrings,
+      strings = this.profileAccountCreationStringResources
+    ))
   }
 
-  override fun profileAccountCreate(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileAccountCreateTask(
-        this.accountEvents,
-        provider,
-        this.accountProviders,
-        this.profiles,
-        this.profileAccountCreationStringResources)))
+  override fun profileAccountCreate(
+    provider: URI
+  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+    return this.submitTask(ProfileAccountCreateTask(
+      accountEvents = this.accountEvents,
+      accountProviderID = provider,
+      accountProviders = this.accountProviders,
+      profiles = this.profiles,
+      strings = this.profileAccountCreationStringResources
+    ))
   }
 
-  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<TaskResult<AccountDeleteErrorDetails, kotlin.Unit>> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileAccountDeleteTask(
-        this.accountEvents,
-        provider,
-        this.profiles,
-        this.profileEvents,
-        this.profileAccountDeletionStringResources)))
+  override fun profileAccountDeleteByProvider(
+    provider: URI
+  ): FluentFuture<TaskResult<AccountDeleteErrorDetails, Unit>> {
+    return this.submitTask(ProfileAccountDeleteTask(
+      accountEvents = this.accountEvents,
+      accountProviderID = provider,
+      profiles = this.profiles,
+      profileEvents = this.profileEvents,
+      strings = this.profileAccountDeletionStringResources
+    ))
   }
 
-  override fun profileAccountSelectByProvider(provider: URI): FluentFuture<ProfileAccountSelectEvent> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileAccountSelectionTask(
-        this.profiles,
-        this.profileEvents,
-        provider)))
+  override fun profileAccountSelectByProvider(
+    provider: URI
+  ): FluentFuture<ProfileAccountSelectEvent> {
+    return this.submitTask(ProfileAccountSelectionTask(
+      profiles = this.profiles,
+      profileEvents = this.profileEvents,
+      accountProvider = provider
+    ))
   }
 
   @Throws(ProfileNoneCurrentException::class, AccountsDatabaseNonexistentException::class)
@@ -334,7 +367,7 @@ class Controller private constructor(
       ?: throw AccountsDatabaseNonexistentException("No account with provider: $provider")
   }
 
-  override fun accountEvents(): ObservableReadableType<AccountEvent> {
+  override fun accountEvents(): Observable<AccountEvent> {
     return this.accountEvents
   }
 
@@ -347,49 +380,68 @@ class Controller private constructor(
         .map { account -> account.provider })
   }
 
-  override fun profileAccountLogout(account: AccountID): FluentFuture<TaskResult<AccountLogoutErrorData, kotlin.Unit>> {
-    return FluentFuture.from(
-      this.taskExecutor.submit(Callable {
-        val profile = this.profileCurrent()
-        val account = profile.account(account)
-        ProfileAccountLogoutTask(
-          adeptExecutor = this.adobeDrm,
-          account = account,
-          bookRegistry = this.bookRegistry,
-          http = this.http,
-          logoutStrings = this.accountLogoutStringResources,
-          profile = profile
-        ).call()
-      }))
+  override fun profileAccountLogout(
+    accountID: AccountID
+  ): FluentFuture<TaskResult<AccountLogoutErrorData, Unit>> {
+    return this.submitTask {
+      val profile = this.profileCurrent()
+      val account = profile.account(accountID)
+      ProfileAccountLogoutTask(
+        adeptExecutor = this.adobeDrm,
+        account = account,
+        bookRegistry = this.bookRegistry,
+        http = this.http,
+        logoutStrings = this.accountLogoutStringResources,
+        profile = profile
+      ).call()
+    }
   }
 
-  @Throws(ProfileNoneCurrentException::class)
-  override fun profilePreferencesUpdate(preferences: ProfilePreferences): FluentFuture<Unit> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfilePreferencesUpdateTask(
+  override fun profileUpdate(
+    update: (ProfileDescription) -> ProfileDescription
+  ): FluentFuture<ProfileUpdated> {
+    return this.submitTask(
+      ProfileUpdateTask(
         this.profileEvents,
-        this.profiles.currentProfileUnsafe(),
-        preferences)))
+        requestedProfileId = null,
+        profiles = this.profiles,
+        update = update
+      )
+    )
+  }
+
+  override fun profileUpdateFor(
+    profile: ProfileID,
+    update: (ProfileDescription) -> ProfileDescription
+  ): FluentFuture<ProfileUpdated> {
+    return this.submitTask(
+      ProfileUpdateTask(
+        this.profileEvents,
+        requestedProfileId = profile,
+        profiles = this.profiles,
+        update = update
+      )
+    )
   }
 
   @Throws(ProfileNoneCurrentException::class)
-  override fun profileFeed(request: ProfileFeedRequest): FluentFuture<Feed.FeedWithoutGroups> {
-
-    NullCheck.notNull(request, "Request")
-    return FluentFuture.from(this.taskExecutor.submit(ProfileFeedTask(this.bookRegistry, request)))
+  override fun profileFeed(
+    request: ProfileFeedRequest
+  ): FluentFuture<Feed.FeedWithoutGroups> {
+    return this.submitTask(ProfileFeedTask(
+      bookRegistry = this.bookRegistry,
+      request = request
+    ))
   }
 
   @Throws(ProfileNoneCurrentException::class, AccountsDatabaseNonexistentException::class)
-  override fun profileAccountForBook(id: BookID): AccountType {
-    NullCheck.notNull(id, "Book ID")
-
-    val bookWithStatus = this.bookRegistry.book(id)
-
-    if (bookWithStatus.isSome) {
-      val accountId = (bookWithStatus as Some<BookWithStatus>).get().book().account
-      return this.profileCurrent().account(accountId)
+  override fun profileAccountForBook(
+    bookID: BookID
+  ): AccountType {
+    val bookWithStatus = this.bookRegistry.bookOrNull(bookID)
+    if (bookWithStatus != null) {
+      return this.profileCurrent().account(bookWithStatus.book.account)
     }
-
     return this.profileAccountCurrent()
   }
 
@@ -397,138 +449,257 @@ class Controller private constructor(
     return this.profileIdleTimer
   }
 
+  private fun accountFor(
+    accountID: AccountID
+  ): FluentFuture<AccountType> {
+    return this.submitTask { this.profileCurrent().account(accountID) }
+  }
+
+  override fun bookBorrowWithDefaultAcquisition(
+    account: AccountType,
+    bookID: BookID,
+    entry: OPDSAcquisitionFeedEntry
+  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+    this.publishRequestingDownload(bookID)
+    return this.submitTask(BookBorrowWithDefaultAcquisitionTask(
+      account = account,
+      bookId = bookID,
+      cacheDirectory = this.cacheDirectory,
+      contentResolver = this.contentResolver,
+      downloads = this.downloads,
+      entry = entry,
+      services = this.services
+    ))
+  }
+
+  override fun bookBorrowWithDefaultAcquisition(
+    accountID: AccountID,
+    bookID: BookID,
+    entry: OPDSAcquisitionFeedEntry
+  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+    this.publishRequestingDownload(bookID)
+    return this.accountFor(accountID).flatMap { account ->
+      this.bookBorrowWithDefaultAcquisition(account, bookID, entry)
+    }
+  }
+
+  override fun bookBorrow(
+    accountID: AccountID,
+    bookID: BookID,
+    acquisition: OPDSAcquisition,
+    entry: OPDSAcquisitionFeedEntry
+  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+    this.publishRequestingDownload(bookID)
+    return this.accountFor(accountID).flatMap { account ->
+      this.bookBorrow(account, bookID, acquisition, entry)
+    }
+  }
+
   override fun bookBorrow(
     account: AccountType,
-    id: BookID,
+    bookID: BookID,
     acquisition: OPDSAcquisition,
-    entry: OPDSAcquisitionFeedEntry): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, kotlin.Unit>> {
-
-    return FluentFuture.from(this.taskExecutor.submit(BookBorrowTask(
+    entry: OPDSAcquisitionFeedEntry
+  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+    this.publishRequestingDownload(bookID)
+    return this.submitTask(BookBorrowTask(
       account = account,
       acquisition = acquisition,
-      adobeDRM = this.adobeDrm,
-      bookId = id,
-      bookRegistry = this.bookRegistry,
-      borrowStrings = this.borrowStrings,
-      bundledContent = this.bundledContent,
+      bookId = bookID,
       cacheDirectory = this.cacheDirectory,
-      clock = { Instant.now() },
-      downloader = this.downloader,
+      contentResolver = this.contentResolver,
       downloads = this.downloads,
-      feedLoader = this.feedLoader,
-      http = this.http,
-      entry = entry)))
+      entry = entry,
+      services = this.services
+    ))
+  }
+
+  private fun publishRequestingDownload(bookID: BookID) {
+    this.bookRegistry.bookOrNull(bookID)?.let { bookWithStatus ->
+      this.bookRegistry.update(BookWithStatus(
+        book = bookWithStatus.book,
+        status = BookStatus.RequestingDownload(bookID)))
+    }
   }
 
   override fun bookBorrowFailedDismiss(
     account: AccountType,
-    id: BookID) {
+    bookID: BookID
+  ) {
+    this.submitTask(BookBorrowFailedDismissTask(
+      bookDatabase = account.bookDatabase,
+      bookRegistry = this.bookRegistry,
+      id = bookID
+    ))
+  }
 
-    NullCheck.notNull(account, "Account")
-    NullCheck.notNull(id, "Book ID")
+  override fun bookBorrowFailedDismiss(
+    accountID: AccountID,
+    bookID: BookID
+  ) {
+    this.accountFor(accountID).map { account ->
+      this.bookBorrowFailedDismiss(account, bookID)
+    }
+  }
 
-    this.taskExecutor.submit(BookBorrowFailedDismissTask(
-      this.downloader,
-      this.downloads,
-      account.bookDatabase,
-      this.bookRegistry,
-      id))
+  private fun downloadCancel(bookID: BookID) {
+    this.logger.debug("[{}] download cancel", bookID.brief())
+    val existingDownload = this.downloads[bookID]
+    if (existingDownload != null) {
+      this.logger.debug("[{}] cancelling download {}", existingDownload)
+      existingDownload.cancel()
+      this.downloads.remove(bookID)
+    }
   }
 
   override fun bookDownloadCancel(
     account: AccountType,
-    id: BookID) {
+    bookID: BookID
+  ) {
+    this.downloadCancel(bookID)
+  }
 
-    NullCheck.notNull(account, "Account")
-    NullCheck.notNull(id, "Book ID")
-
-    this.logger.debug("[{}] download cancel", id.brief())
-    val d = this.downloads[id]
-    if (d != null) {
-      this.logger.debug("[{}] cancelling download {}", d)
-      d.cancel()
-      this.downloads.remove(id)
-    }
+  override fun bookDownloadCancel(
+    accountID: AccountID,
+    bookID: BookID
+  ) {
+    this.downloadCancel(bookID)
   }
 
   override fun bookReport(
     account: AccountType,
     feedEntry: FeedEntry.FeedEntryOPDS,
-    reportType: String): FluentFuture<Unit> {
-    return FluentFuture.from(this.taskExecutor.submit(BookReportTask(
+    reportType: String
+  ): FluentFuture<Unit> {
+    return this.submitTask(BookReportTask(
       http = this.http,
       account = account,
       feedEntry = feedEntry,
-      reportType = reportType)))
+      reportType = reportType
+    ))
   }
 
-  override fun booksSync(account: AccountType): FluentFuture<Unit> {
-    return FluentFuture.from(this.taskExecutor.submit(BookSyncTask(
-      this,
-      account,
-      this.bookRegistry,
-      this.http,
-      this.feedParser)))
+  override fun booksSync(
+    account: AccountType
+  ): FluentFuture<Unit> {
+    return this.submitTask(BookSyncTask(
+      booksController = this,
+      account = account,
+      bookRegistry = this.bookRegistry,
+      http = this.http,
+      feedParser = this.feedParser
+    ))
   }
 
   override fun bookRevoke(
     account: AccountType,
-    bookId: BookID): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, kotlin.Unit>> {
-    return FluentFuture.from(this.taskExecutor.submit(BookRevokeTask(
-      account,
-      this.adobeDrm,
-      bookId,
-      this.bookRegistry,
-      this.feedLoader,
-      this.revokeStrings)))
+    bookId: BookID
+  ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
+    this.publishRequestingDelete(bookId)
+    return this.submitTask(BookRevokeTask(
+      account = account,
+      adobeDRM = this.adobeDrm,
+      bookID = bookId,
+      bookRegistry = this.bookRegistry,
+      feedLoader = this.feedLoader,
+      revokeStrings = this.revokeStrings
+    ))
+  }
+
+  override fun bookRevoke(
+    accountID: AccountID,
+    bookId: BookID
+  ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
+    this.publishRequestingDelete(bookId)
+    return this.accountFor(accountID).flatMap { account ->
+      this.bookRevoke(account, bookId)
+    }
+  }
+
+  override fun bookDelete(
+    account: AccountID,
+    bookId: BookID
+  ): FluentFuture<Unit> {
+    this.publishRequestingDelete(bookId)
+    return this.submitTask(BookDeleteTask(
+      accountId = account,
+      bookRegistry = this.bookRegistry,
+      bookId = bookId,
+      profiles = this.profiles
+    ))
   }
 
   override fun bookDelete(
     account: AccountType,
-    bookId: BookID): FluentFuture<Unit> {
-    return FluentFuture.from(this.taskExecutor.submit(BookDeleteTask(
-      account,
-      this.bookRegistry,
-      bookId)))
+    bookId: BookID
+  ): FluentFuture<Unit> {
+    this.publishRequestingDelete(bookId)
+    return this.submitTask(BookDeleteTask(
+      accountId = account.id,
+      bookRegistry = this.bookRegistry,
+      bookId = bookId,
+      profiles = this.profiles
+    ))
+  }
+
+  private fun publishRequestingDelete(bookId: BookID) {
+    this.bookRegistry.bookOrNull(bookId)?.let { bookWithStatus ->
+      this.bookRegistry.update(BookWithStatus(
+        book = bookWithStatus.book,
+        status = BookStatus.RequestingRevoke(bookId)))
+    }
+  }
+
+  override fun bookRevokeFailedDismiss(
+    accountID: AccountID,
+    bookID: BookID
+  ): FluentFuture<Unit> {
+    return this.accountFor(accountID).flatMap { account ->
+      this.bookRevokeFailedDismiss(account, bookID)
+    }
   }
 
   override fun bookRevokeFailedDismiss(
     account: AccountType,
-    bookId: BookID): FluentFuture<Unit> {
-    return FluentFuture.from(this.taskExecutor.submit(BookRevokeFailedDismissTask(
-      account.bookDatabase,
-      this.bookRegistry,
-      bookId)))
+    bookId: BookID
+  ): FluentFuture<Unit> {
+    return this.submitTask(BookRevokeFailedDismissTask(
+      bookDatabase = account.bookDatabase,
+      bookRegistry = this.bookRegistry,
+      bookId = bookId
+    ))
   }
 
   override fun profileAnyIsCurrent(): Boolean =
     this.profiles.currentProfile().isSome
+
+  /**
+   * Perform an unchecked (but safe) cast of the given map type. The cast is safe because
+   * `V <: VB`.
+   */
+
+  private fun <K, VB, V : VB> castMap(m: SortedMap<K, V>): SortedMap<K, VB> {
+    return m as SortedMap<K, VB>
+  }
 
   companion object {
 
     fun createFromServiceDirectory(
       services: ServiceDirectoryType,
       executorService: ExecutorService,
-      accountEvents: ObservableType<AccountEvent>,
-      profileEvents: ObservableType<ProfileEvent>,
-      cacheDirectory: File
+      accountEvents: Subject<AccountEvent>,
+      profileEvents: Subject<ProfileEvent>,
+      cacheDirectory: File,
+      contentResolver: ContentResolver
     ): Controller {
       return Controller(
         services = services,
         cacheDirectory = cacheDirectory,
+        contentResolver = contentResolver,
         accountEvents = accountEvents,
         profileEvents = profileEvents,
         taskExecutor = MoreExecutors.listeningDecorator(executorService)
       )
-    }
-
-    /**
-     * Perform an unchecked (but safe) cast of the given map type. The cast is safe because
-     * `V <: VB`.
-     */
-
-    private fun <K, VB, V : VB> castMap(m: SortedMap<K, V>): SortedMap<K, VB> {
-      return m as SortedMap<K, VB>
     }
   }
 }
