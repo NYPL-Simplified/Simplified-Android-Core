@@ -1,6 +1,8 @@
 package org.nypl.simplified.ui.splash
 
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -50,7 +52,7 @@ class SplashFragment : Fragment() {
 
     fun newInstance(parameters: SplashParameters): SplashFragment {
       val args = Bundle()
-      args.putSerializable(parametersKey, parameters)
+      args.putSerializable(this.parametersKey, parameters)
       val fragment = SplashFragment()
       fragment.arguments = args
       return fragment
@@ -74,7 +76,9 @@ class SplashFragment : Fragment() {
     val text: TextView,
     val progress: ProgressBar,
     val error: ImageView,
-    val sendError: Button
+    val sendError: Button,
+    val version: TextView,
+    val exception: TextView
   )
 
   private class ViewsEULA(
@@ -98,7 +102,7 @@ class SplashFragment : Fragment() {
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
     this.retainInstance = true
-    this.parameters = this.arguments!!.getSerializable(parametersKey) as SplashParameters
+    this.parameters = this.arguments!!.getSerializable(org.nypl.simplified.ui.splash.SplashFragment.Companion.parametersKey) as SplashParameters
   }
 
   override fun onAttach(context: Context) {
@@ -110,7 +114,8 @@ class SplashFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    state: Bundle?): View? {
+    state: Bundle?
+  ): View? {
 
     val stackView =
       inflater.inflate(R.layout.splash_stack, container, false) as ViewGroup
@@ -130,6 +135,8 @@ class SplashFragment : Fragment() {
         progress = imageView.findViewById(R.id.splashProgress),
         error = imageView.findViewById(R.id.splashImageError),
         sendError = imageView.findViewById(R.id.splashSendError),
+        version = imageView.findViewById(R.id.splashVersion),
+        exception = imageView.findViewById(R.id.splashException),
         text = imageView.findViewById(R.id.splashText))
 
     this.viewsForEULA =
@@ -178,6 +185,9 @@ class SplashFragment : Fragment() {
     this.viewsForImage.progress.visibility = View.INVISIBLE
     this.viewsForImage.error.visibility = View.INVISIBLE
     this.viewsForImage.sendError.visibility = View.INVISIBLE
+    this.viewsForImage.exception.text = ""
+    this.viewsForImage.version.text = this.versionText(this.requireContext())
+    this.viewsForImage.version.visibility = View.INVISIBLE
     this.viewsForImage.text.visibility = View.INVISIBLE
     this.viewsForImage.text.text = ""
 
@@ -191,10 +201,21 @@ class SplashFragment : Fragment() {
     }
   }
 
+  private fun versionText(context: Context): String {
+    return try {
+      val pkgManager = context.packageManager
+      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
+      "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+    } catch (e: PackageManager.NameNotFoundException) {
+      "Unavailable"
+    }
+  }
+
   private fun popImageView() {
     this.viewsForImage.progress.visibility = View.VISIBLE
     this.viewsForImage.text.visibility = View.VISIBLE
     this.viewsForImage.image.animation = AnimationUtils.loadAnimation(this.context, R.anim.zoom_fade)
+    this.viewsForImage.version.visibility = View.VISIBLE
   }
 
   private fun configureViewsForEULA(eula: EULAType) {
@@ -283,10 +304,10 @@ class SplashFragment : Fragment() {
     if (reportEmail != null) {
       this.viewsForMigrationReport.sendButton.setOnClickListener {
         Reports.sendReportsDefault(
-          context = requireContext(),
+          context = this.requireContext(),
           address = reportEmail,
-          subject = reportEmailSubject(report),
-          body = reportEmailBody(report))
+          subject = this.reportEmailSubject(report),
+          body = this.reportEmailBody(report))
       }
     } else {
       this.viewsForMigrationReport.sendButton.visibility = View.INVISIBLE
@@ -376,6 +397,8 @@ class SplashFragment : Fragment() {
 
   @UiThread
   private fun onBootEventFailedUI(event: BootEvent.BootFailed) {
+    this.logger.error("boot failed: ", event.exception)
+
     if (this.viewsForImage.image.alpha > 0.0) {
       this.popImageView()
     }
@@ -387,15 +410,20 @@ class SplashFragment : Fragment() {
     this.viewsForImage.sendError.visibility = View.VISIBLE
     this.viewsForImage.progress.isIndeterminate = false
     this.viewsForImage.progress.progress = 100
+    this.viewsForImage.exception.text = exceptionBrief(event.exception)
     this.viewsForImage.text.text = event.message
 
     this.viewsForImage.sendError.setOnClickListener {
       Reports.sendReportsDefault(
-        context = requireContext(),
+        context = this.requireContext(),
         address = this.parameters.splashMigrationReportEmail ?: "",
         subject = "[application startup failure]",
         body = event.message)
     }
+  }
+
+  private fun exceptionBrief(exception: Exception): String {
+    return "${exception.message}"
   }
 
   private fun onBootFinished() {
