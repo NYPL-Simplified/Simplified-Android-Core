@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
 
   <Preference
     android:key="settingsAccounts"
@@ -38,7 +39,8 @@
     <Preference
       android:key="settingsVersion"
       android:title="@string/settingsVersion"
-      android:summary="@string/settingsVersionSummary" />
+      android:summary="@string/settingsVersionSummary"
+      tools:summary="4.3.1 (5001)" />
   </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>
