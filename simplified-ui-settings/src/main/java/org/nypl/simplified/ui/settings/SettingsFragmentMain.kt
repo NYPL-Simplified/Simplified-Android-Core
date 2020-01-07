@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.settings
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -87,6 +88,14 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureVersion(preference: Preference) {
+    try {
+      val context = requireContext()
+      val pkgManager = context.packageManager
+      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
+      preference.summary = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+    } catch (e: PackageManager.NameNotFoundException) {
+      //  Pass
+    }
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
         this.findNavigationController().openSettingsVersion()

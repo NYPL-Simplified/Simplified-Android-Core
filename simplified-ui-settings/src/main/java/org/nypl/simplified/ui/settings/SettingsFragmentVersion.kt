@@ -160,7 +160,7 @@ class SettingsFragmentVersion : Fragment() {
 
     try {
       val context = this.requireContext()
-      val pkgManager = context.getPackageManager()
+      val pkgManager = context.packageManager
       val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
       this.versionText.text = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
     } catch (e: PackageManager.NameNotFoundException) {
