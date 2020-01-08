@@ -121,10 +121,10 @@ public final class AccountBundledCredentialsJSON {
       final ObjectNode node_creds = mapper.createObjectNode();
       node_creds.put("userName", creds.barcode().value());
       node_creds.put("passWord", creds.pin().value());
-      node_by_provider.put(name.toString(), node_creds);
+      node_by_provider.set(name.toString(), node_creds);
     }
 
-    node_root.put("credentialsByProvider", node_by_provider);
+    node_root.set("credentialsByProvider", node_by_provider);
     return node_root;
   }
 

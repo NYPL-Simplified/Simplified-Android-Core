@@ -52,6 +52,7 @@ import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
+import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -131,7 +132,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     super.onCreate(null)
 
     val i = this.intent!!
-    val a = i.extras
+    val a = i.extras!!
 
     this.parameters = a.getSerializable(PARAMETER_ID) as AudioBookPlayerParameters
 
@@ -140,7 +141,11 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.log.debug("book id:       {}", this.parameters.bookID)
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
 
-    this.setTheme(this.parameters.theme)
+    this.setTheme(Services.serviceDirectory()
+      .requireService(ThemeServiceType::class.java)
+      .findCurrentTheme()
+      .themeWithActionBar
+    )
     this.setContentView(R.layout.audio_book_player_base)
     this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
 
@@ -260,10 +265,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      * Cancel the manifest download if one is still happening.
      */
 
-    val down = this.download
-    if (down != null) {
-      down.cancel()
-    }
+    this.download?.cancel()
 
     /*
      * Cancel downloads, shut down the player, and close the book.

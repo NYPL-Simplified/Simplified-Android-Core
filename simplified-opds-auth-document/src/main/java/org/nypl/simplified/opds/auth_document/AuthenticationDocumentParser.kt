@@ -227,7 +227,6 @@ internal class AuthenticationDocumentParser(
         }
       } catch (e: Exception) {
         this.publishErrorForException(e)
-        null
       }
     }
     return values.toMap()
@@ -259,7 +258,6 @@ internal class AuthenticationDocumentParser(
         values[key.toUpperCase()] = JSONParserUtilities.getString(root, key)
       } catch (e: Exception) {
         this.publishErrorForException(e)
-        null
       }
     }
     return values.toMap()

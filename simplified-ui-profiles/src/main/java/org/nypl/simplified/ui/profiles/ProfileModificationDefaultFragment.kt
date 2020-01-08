@@ -50,6 +50,7 @@ class ProfileModificationDefaultFragment : Fragment() {
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   @UiThread
   private fun onNameChanged(
     text: CharSequence,

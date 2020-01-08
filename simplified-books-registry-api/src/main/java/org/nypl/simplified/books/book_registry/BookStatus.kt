@@ -354,13 +354,12 @@ sealed class BookStatus {
           }
 
           override fun onRevoked(a: OPDSAvailabilityRevoked): BookStatus {
-            return this@Companion.onIsRevoked(a, book)
+            return this@Companion.onIsRevoked(book)
           }
         })
     }
 
     private fun onIsRevoked(
-      a: OPDSAvailabilityRevoked,
       book: Book
     ): BookStatus {
       return Revoked(book.id)

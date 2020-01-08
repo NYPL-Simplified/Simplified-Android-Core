@@ -691,7 +691,7 @@ class AccountsDatabase private constructor(
     ) {
 
       FileLocking.withFileThreadLocked<Unit, IOException>(
-        accountLock, 1000L) { ignored ->
+        accountLock, 1000L) {
         FileUtilities.fileWriteUTF8Atomically(
           accountFile,
           accountFileTemp,

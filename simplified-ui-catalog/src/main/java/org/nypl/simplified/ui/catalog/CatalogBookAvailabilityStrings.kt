@@ -33,7 +33,6 @@ object CatalogBookAvailabilityStrings {
    *
    * @return A descriptive string
    */
-
   fun opdsAvailabilityString(
     resources: Resources,
     availability: OPDSAvailabilityType
@@ -270,8 +269,8 @@ object CatalogBookAvailabilityStrings {
     val months = days / 30
     val years = days / 365
 
-    var unit = ""
-    var value: Long = 0
+    val unit: String
+    val value: Long
 
     if (years > 0) {
       unit = resources.getString(R.string.catalogBookIntervalYearsShort)

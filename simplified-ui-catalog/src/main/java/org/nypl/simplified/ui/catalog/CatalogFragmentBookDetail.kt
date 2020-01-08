@@ -389,6 +389,7 @@ class CatalogFragmentBookDetail : Fragment() {
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
       this.summary.text = Html.fromHtml(opds.summary, Html.FROM_HTML_MODE_LEGACY)
     } else {
+      @Suppress("DEPRECATION")
       this.summary.text = Html.fromHtml(opds.summary)
     }
 
@@ -670,7 +671,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
     if (this.shouldShowDeleteButton(book)) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
-      this.buttons.addView(this.buttonCreator.createDeleteButton { button ->
+      this.buttons.addView(this.buttonCreator.createDeleteButton {
         this.tryDelete(book.id)
       })
     }
@@ -881,7 +882,7 @@ class CatalogFragmentBookDetail : Fragment() {
         this.profilesController.profileCurrent()
           .account(this.parameters.accountId)
       val requiresLogin = account.requiresCredentials
-      val isNotLoggedIn = !(account.loginState is AccountLoginState.AccountLoggedIn)
+      val isNotLoggedIn = account.loginState !is AccountLoginState.AccountLoggedIn
       requiresLogin && isNotLoggedIn
     } catch (e: Exception) {
       this.logger.error("could not retrieve account: ", e)

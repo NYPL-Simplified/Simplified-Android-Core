@@ -237,6 +237,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   @UiThread
   private fun onFieldChanged(
     text: CharSequence,

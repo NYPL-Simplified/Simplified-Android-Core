@@ -167,16 +167,14 @@ class ProfileAccountLogoutTask(
 
     this.steps.currentStepSucceeded(this.logoutStrings.logoutDeactivatingDeviceAdobeDeactivated)
 
-    val deviceManagerURI = adobeCredentials.deviceManagerURI
-    if (deviceManagerURI != null) {
-      this.runDeviceDeactivationAdobeSendDeviceManagerRequest(
-        deviceManagerURI, postActivation.deviceID)
+    adobeCredentials.deviceManagerURI?.let { uri ->
+      this.runDeviceDeactivationAdobeSendDeviceManagerRequest(uri)
     }
   }
 
   private fun runDeviceDeactivationAdobeSendDeviceManagerRequest(
-    deviceManagerURI: URI,
-    deviceID: AdobeDeviceID) {
+    deviceManagerURI: URI
+  ) {
     this.debug("runDeviceDeactivationAdobeSendDeviceManagerRequest: posting device ID")
 
     this.steps.beginNewStep(this.logoutStrings.logoutDeviceDeactivationPostDeviceManager)

@@ -69,7 +69,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
     this.adapter =
       ArrayAdapter(
-        this.context,
+        requireContext(),
         0,
         this.parameters.bookmarks.bookmarks.sortedBy { bookmark ->
           bookmark.bookProgress
@@ -127,9 +127,8 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
       layoutView.findViewById<TextView>(R.id.toc_bookmark_element_title)
     val detailTextView =
       layoutView.findViewById<TextView>(R.id.toc_bookmark_element_subtitle)
-    val bookmark =
-      this.adapter.getItem(position)
 
+    val bookmark = this.adapter.getItem(position)!!
     textView.text = bookmark.chapterTitle
     detailTextView.text = this.detailTextFrom(bookmark)
 

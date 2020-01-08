@@ -388,14 +388,14 @@ internal object MainServices {
 
     try {
       val stream = assets.open("eula.html")
-      documentsBuilder.enableEULA { x -> stream }
+      documentsBuilder.enableEULA { stream }
     } catch (e: IOException) {
       this.logger.debug("No EULA defined: ", e)
     }
 
     try {
       val stream = assets.open("software-licenses.html")
-      documentsBuilder.enableLicenses { x -> stream }
+      documentsBuilder.enableLicenses { stream }
     } catch (e: IOException) {
       this.logger.debug("No licenses defined: ", e)
     }

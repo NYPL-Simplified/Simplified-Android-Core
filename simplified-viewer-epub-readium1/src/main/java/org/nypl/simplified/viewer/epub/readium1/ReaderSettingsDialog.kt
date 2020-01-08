@@ -199,12 +199,13 @@ class ReaderSettingsDialog : DialogFragment() {
         .profileEvents()
         .subscribe(this::onProfileEvent)
 
-    val dialog = this.dialog!!
-    dialog.window!!.setLayout(
-      this.screen.dpToPixels(300).toInt(),
-      ViewGroup.LayoutParams.WRAP_CONTENT)
-    dialog.window.setGravity(Gravity.CENTER)
-    dialog.setCanceledOnTouchOutside(true)
+    this.dialog!!.window!!.let { window ->
+      window.setLayout(
+        this.screen.dpToPixels(300).toInt(),
+        ViewGroup.LayoutParams.WRAP_CONTENT)
+      window.setGravity(Gravity.CENTER)
+    }
+    this.dialog!!.setCanceledOnTouchOutside(true)
   }
 
   override fun onStop() {

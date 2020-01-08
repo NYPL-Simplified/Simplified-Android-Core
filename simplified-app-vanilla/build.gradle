@@ -58,5 +58,5 @@ dependencies {
   implementation project(":simplified-main")
   implementation project(":simplified-accounts-source-nyplregistry")
 
-  annotationProcessor libraries.googleAutoValue
+  annotationProcessor libraries.autoValueProcessor
 }

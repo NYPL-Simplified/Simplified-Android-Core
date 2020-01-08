@@ -13,9 +13,9 @@ dependencies {
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-spi")
 
-  annotationProcessor libraries.googleAutoValue
+  annotationProcessor libraries.autoValueProcessor
 
-  compileOnly libraries.googleAutoValue
+  compileOnly libraries.autoValue
 
   implementation libraries.androidAsync
   implementation libraries.androidXAppCompat
