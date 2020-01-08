@@ -581,6 +581,7 @@ class BookRevokeTask(
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun revokeFormatHandleAudioBook(handle: BookDatabaseEntryFormatHandleAudioBook) {
     this.debug("revoking via AudioBook format handle")
     this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("AudioBook"))
@@ -589,6 +590,7 @@ class BookRevokeTask(
     this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun revokeFormatHandlePDF(handle: BookDatabaseEntryFormatHandlePDF) {
     this.debug("revoking via PDF format handle")
     this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("PDF"))

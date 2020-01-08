@@ -569,6 +569,7 @@ class CatalogFragmentFeed : Fragment() {
     })
   }
 
+  @Suppress("UNUSED_PARAMETER")
   @UiThread
   private fun onCatalogFeedWithGroupsUI(
     activity: FragmentActivity,
@@ -693,7 +694,7 @@ class CatalogFragmentFeed : Fragment() {
 
     if (this.hasOtherAccounts()) {
       menuAccounts.title = context.getString(R.string.catalogAccounts)
-      menuAccounts.setOnMenuItemClickListener { item ->
+      menuAccounts.setOnMenuItemClickListener {
         CatalogAccountsDialog.openAccountsDialog(
           context = context,
           toolbar = toolbar,
@@ -793,7 +794,7 @@ class CatalogFragmentFeed : Fragment() {
     val alertBuilder = AlertDialog.Builder(context)
     alertBuilder.setTitle(R.string.catalogSearch)
     alertBuilder.setView(dialogView)
-    alertBuilder.setPositiveButton(R.string.catalogSearch) { dialog, which ->
+    alertBuilder.setPositiveButton(R.string.catalogSearch) { dialog, _ ->
       val query = searchText(editText)
       this.logSearchToAnalytics(query)
       this.findNavigationController().openFeed(this.feedModel.resolveSearch(search, query))
@@ -891,7 +892,7 @@ class CatalogFragmentFeed : Fragment() {
 
     facetLayout.removeAllViews()
     sortedNames.forEach { groupName ->
-      val group = remainingGroups[groupName]!!
+      val group = remainingGroups.getValue(groupName)
       if (FeedFacets.facetGroupIsEntryPointTyped(group)) {
         return@forEach
       }
@@ -986,7 +987,7 @@ class CatalogFragmentFeed : Fragment() {
 
       button.text = facet.title
       button.setTextColor(this.colorStateListForFacetTabs())
-      button.setOnClickListener { ignored ->
+      button.setOnClickListener {
         this.logger.debug("selected entry point facet: {}", facet.title)
         this.findNavigationController().openFeed(this.feedModel.resolveFacet(facet))
       }

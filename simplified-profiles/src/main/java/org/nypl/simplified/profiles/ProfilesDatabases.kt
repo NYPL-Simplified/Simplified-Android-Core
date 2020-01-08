@@ -634,7 +634,7 @@ object ProfilesDatabases {
     FileLocking.withFileThreadLocked<Unit, IOException>(
       profileLock,
       1000L
-    ) { ignored ->
+    ) {
 
       /*
        * Ignore the return value here; the write call will immediately fail if this

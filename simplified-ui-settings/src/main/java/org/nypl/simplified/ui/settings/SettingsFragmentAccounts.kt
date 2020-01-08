@@ -75,7 +75,7 @@ class SettingsFragmentAccounts : Fragment() {
     AlertDialog.Builder(context)
       .setTitle(R.string.settingsAccountDeleteConfirmTitle)
       .setMessage(context.getString(R.string.settingsAccountDeleteConfirm, account.provider.displayName))
-      .setPositiveButton(R.string.settingsAccountDelete) { dialog, which ->
+      .setPositiveButton(R.string.settingsAccountDelete) { dialog, _ ->
         this.profilesController.profileAccountDeleteByProvider(account.provider.id)
         dialog.dismiss()
       }
@@ -201,7 +201,7 @@ class SettingsFragmentAccounts : Fragment() {
     AlertDialog.Builder(this.requireContext())
       .setTitle(R.string.settingsAccountDeletionFailed)
       .setMessage(R.string.settingsAccountDeletionFailedMessage)
-      .setPositiveButton(R.string.settingsDetails) { dialog, which ->
+      .setPositiveButton(R.string.settingsDetails) { _, _ ->
         showErrorPage(accountEvent)
       }
       .create()

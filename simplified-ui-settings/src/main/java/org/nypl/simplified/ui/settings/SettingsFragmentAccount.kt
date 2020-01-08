@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
@@ -78,9 +77,6 @@ class SettingsFragmentAccount : Fragment() {
   private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
 
-  private val parametersId =
-    org.nypl.simplified.ui.settings.SettingsFragmentAccount.Companion.PARAMETERS_ID
-
   companion object {
 
     private const val PARAMETERS_ID =
@@ -92,7 +88,7 @@ class SettingsFragmentAccount : Fragment() {
 
     fun create(parameters: SettingsFragmentAccountParameters): SettingsFragmentAccount {
       val arguments = Bundle()
-      arguments.putSerializable(this.PARAMETERS_ID, parameters)
+      arguments.putSerializable(PARAMETERS_ID, parameters)
       val fragment = SettingsFragmentAccount()
       fragment.arguments = arguments
       return fragment
@@ -101,7 +97,7 @@ class SettingsFragmentAccount : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    this.parameters = this.arguments!![this.parametersId] as SettingsFragmentAccountParameters
+    this.parameters = this.arguments!![PARAMETERS_ID] as SettingsFragmentAccountParameters
 
     val services = Services.serviceDirectory()
     
@@ -175,6 +171,7 @@ class SettingsFragmentAccount : Fragment() {
     return layout
   }
 
+  @Suppress("UNUSED_PARAMETER")
   @UiThread
   private fun onBasicUserChanged(
     sequence: CharSequence,
@@ -213,6 +210,7 @@ class SettingsFragmentAccount : Fragment() {
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   @UiThread
   private fun onBasicPasswordChanged(
     sequence: CharSequence,

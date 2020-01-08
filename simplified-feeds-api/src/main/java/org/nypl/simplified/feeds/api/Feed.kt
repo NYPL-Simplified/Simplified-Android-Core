@@ -397,16 +397,14 @@ sealed class Feed {
     }
 
     private fun priority(acquisition: OPDSAcquisition): Int {
-      when (acquisition.relation) {
-        ACQUISITION_BORROW -> return 6
-        ACQUISITION_OPEN_ACCESS -> return 5
-        ACQUISITION_GENERIC -> return 4
-        ACQUISITION_SAMPLE -> return 3
-        ACQUISITION_BUY -> return 2
-        ACQUISITION_SUBSCRIBE -> return 1
+      return when (acquisition.relation) {
+        ACQUISITION_BORROW -> 6
+        ACQUISITION_OPEN_ACCESS -> 5
+        ACQUISITION_GENERIC -> 4
+        ACQUISITION_SAMPLE -> 3
+        ACQUISITION_BUY -> 2
+        ACQUISITION_SUBSCRIBE -> 1
       }
-
-      return 0
     }
   }
 }

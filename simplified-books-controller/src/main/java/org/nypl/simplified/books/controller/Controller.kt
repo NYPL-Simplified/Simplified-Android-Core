@@ -9,8 +9,6 @@ import com.io7m.jfunctional.Some
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.Subject
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -55,7 +53,6 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
-import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -661,12 +658,12 @@ class Controller private constructor(
 
   override fun bookRevokeFailedDismiss(
     account: AccountType,
-    bookId: BookID
+    bookID: BookID
   ): FluentFuture<Unit> {
     return this.submitTask(BookRevokeFailedDismissTask(
       bookDatabase = account.bookDatabase,
       bookRegistry = this.bookRegistry,
-      bookId = bookId
+      bookId = bookID
     ))
   }
 

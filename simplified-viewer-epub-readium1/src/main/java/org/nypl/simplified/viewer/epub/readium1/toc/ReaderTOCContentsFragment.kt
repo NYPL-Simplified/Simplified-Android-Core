@@ -80,7 +80,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
     this.readerTOCListView =
       this.readerTOCLayout.findViewById(R.id.reader_toc_list)
 
-    this.adapter = ArrayAdapter(this.context, 0, this.parameters.tocElements)
+    this.adapter = ArrayAdapter(requireContext(), 0, this.parameters.tocElements)
     this.readerTOCListView.adapter = this
 
     this.applyColorScheme(
@@ -172,7 +172,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
       itemView.findViewById<ViewGroup>(R.id.toc_bookmark_element)
 
     bookmarkLayout.visibility = View.GONE
-    val element = this.adapter.getItem(position)
+    val element = this.adapter.getItem(position)!!
     textView.text = element.title
 
     val layoutParams =
@@ -181,13 +181,9 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
         ViewGroup.LayoutParams.WRAP_CONTENT)
 
     // Set the left margin based on the desired indentation level.
-    val leftIndent = if (element != null) {
-      Services.serviceDirectory()
+    val leftIndent = Services.serviceDirectory()
         .requireService(ScreenSizeInformationType::class.java)
         .dpToPixels(element.indent * 16)
-    } else {
-      0.0
-    }
 
     layoutParams.setMargins(leftIndent.toInt(), 0, 0, 0)
     textView.layoutParams = layoutParams

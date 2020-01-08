@@ -481,6 +481,7 @@ class CatalogPagedViewHolder(
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
+  @Suppress("UNUSED_PARAMETER")
   @UiThread
   private fun onBookStatusRevoked(book: BookWithStatus) {
     this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)

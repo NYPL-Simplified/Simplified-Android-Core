@@ -309,7 +309,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
     AlertDialog.Builder(this.requireContext())
       .setTitle(R.string.settingsAccountCreationFailed)
       .setMessage(R.string.settingsAccountCreationFailedMessage)
-      .setPositiveButton(R.string.settingsDetails) { dialog, which ->
+      .setPositiveButton(R.string.settingsDetails) { _, _ ->
         showErrorPage(accountEvent)
       }
       .create()

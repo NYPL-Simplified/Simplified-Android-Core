@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TableLayout
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -52,7 +51,6 @@ class ErrorPageFragment : Fragment() {
   private lateinit var listener: ErrorPageListenerType
   private lateinit var parameters: ErrorPageParameters<PresentableErrorType>
   private lateinit var sendButton: Button
-  private lateinit var toolbar: Toolbar
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

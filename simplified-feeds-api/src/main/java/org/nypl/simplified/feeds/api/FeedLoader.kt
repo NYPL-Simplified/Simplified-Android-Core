@@ -136,7 +136,7 @@ class FeedLoader private constructor(
       val opdsFeed =
         this.transport.getStream(auth, uri, method).use { stream -> this.parser.parse(uri, stream) }
       val search =
-        this.fetchSearchLink(opdsFeed, auth, method, uri)
+        this.fetchSearchLink(opdsFeed, auth, method)
 
       val feed = Feed.fromAcquisitionFeed(opdsFeed, search)
 
@@ -225,8 +225,7 @@ class FeedLoader private constructor(
   private fun fetchSearchLink(
     opdsFeed: OPDSAcquisitionFeed,
     auth: OptionType<HTTPAuthType>,
-    method: String,
-    uri: URI
+    method: String
   ): OPDSOpenSearch1_1? {
     val searchLinkOpt = opdsFeed.feedSearchURI
     return if (searchLinkOpt is Some<OPDSSearchLink>) {

@@ -383,6 +383,7 @@ class ProfileAccountLoginTask(
     this.adobeDRM = drm
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun onPatronProfileRequestHTTPException(
     patronSettingsURI: URI,
     result: HTTPResultException<InputStream>) {

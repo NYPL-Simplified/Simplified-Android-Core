@@ -20,23 +20,6 @@ class MainApplication : MultiDexApplication() {
     @JvmStatic
     val application: MainApplication
       get() = this.INSTANCE
-
-    /**
-     * Checks if Simplified singleton has been initialized already.
-     *
-     * @return the one singleton instance of Simplified
-     * @throws IllegalStateException if Simplified is not yet initialized
-     */
-
-    @JvmStatic
-    fun checkInitialized(): MainApplication {
-      val i = MainApplication()
-      if (i == null) {
-        throw IllegalStateException("Application is not yet initialized")
-      } else {
-        return i
-      }
-    }
   }
 
   private lateinit var bootFuture: ListenableFuture<ServiceDirectoryType>
@@ -68,7 +51,7 @@ class MainApplication : MultiDexApplication() {
   private fun configureLogging() {
     try {
       val context = LoggerFactory.getILoggerFactory() as LoggerContext
-      for (logger in context.getLoggerList()) {
+      for (logger in context.loggerList) {
         val index = logger.iteratorForAppenders()
         while (index.hasNext()) {
           val appender = index.next()

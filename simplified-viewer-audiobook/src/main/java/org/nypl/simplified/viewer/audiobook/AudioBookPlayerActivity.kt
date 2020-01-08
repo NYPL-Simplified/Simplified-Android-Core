@@ -131,7 +131,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     super.onCreate(null)
 
     val i = this.intent!!
-    val a = i.extras
+    val a = i.extras!!
 
     this.parameters = a.getSerializable(PARAMETER_ID) as AudioBookPlayerParameters
 
@@ -260,10 +260,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      * Cancel the manifest download if one is still happening.
      */
 
-    val down = this.download
-    if (down != null) {
-      down.cancel()
-    }
+    this.download?.cancel()
 
     /*
      * Cancel downloads, shut down the player, and close the book.

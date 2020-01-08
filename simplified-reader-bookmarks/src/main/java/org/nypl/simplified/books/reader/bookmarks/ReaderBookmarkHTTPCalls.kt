@@ -110,7 +110,7 @@ class ReaderBookmarkHTTPCalls(
   private fun <T> logAndFail(uri: URI, error: HTTPResultError<InputStream>): T {
     HTTPProblemReportLogging.logError(
       this.logger, uri, error.message, error.status, error.problemReport)
-    throw IOException("${uri} received ${error.status} ${error.message}")
+    throw IOException("$uri received ${error.status} ${error.message}")
   }
 
   private fun deserializeBookmarksFromStream(value: InputStream): List<BookmarkAnnotation> {
@@ -145,7 +145,6 @@ class ReaderBookmarkHTTPCalls(
     settingsNode.put("simplified:synchronize_annotations", enabled)
     val node = this.objectMapper.createObjectNode()
     node.put("settings", settingsNode)
-    val data = this.objectMapper.writeValueAsBytes(node)
-    return data
+    return this.objectMapper.writeValueAsBytes(node)
   }
 }
