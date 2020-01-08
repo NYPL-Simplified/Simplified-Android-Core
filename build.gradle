@@ -151,18 +151,6 @@ subprojects { project ->
 
 subprojects { project ->
 
-  /*
-   * Do not PGP sign snapshot releases.
-   */
-
-  def versionName = project.ext["VERSION_NAME"]
-  def isReleaseVersion = !versionName.endsWith("SNAPSHOT")
-  if (isReleaseVersion) {
-    logger.warn("${POM_NAME}: ${versionName} appears to be a release version; artifacts will be PGP signed")
-  } else {
-    logger.warn("${POM_NAME}: ${versionName} appears to be a snapshot version; artifacts will not be PGP signed")
-  }
-
   switch (POM_PACKAGING) {
     case "jar":
       logger.info("Configuring ${project} (${POM_PACKAGING}) as jar project")
@@ -367,14 +355,21 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
   }
 
   signing {
-    required {
-      isReleaseVersion
-    }
-
     useGpgCmd()
+    sign publishing.publications.basicJar
+  }
 
-    if (required) {
-      sign publishing.publications.basicJar
+  tasks.withType(Sign) { task ->
+    def isSnapshot = version.endsWith("SNAPSHOT")
+
+    // Sign release versions only; not snapshots
+    onlyIf {
+      if (isSnapshot) {
+        logger.warn("$POM_NAME: '$version' is a snapshot version; artifacts will not be signed")
+      } else {
+        logger.info("$POM_NAME: '$version' is a release version; artifacts will be signed")
+      }
+      return !isSnapshot
     }
   }
 
