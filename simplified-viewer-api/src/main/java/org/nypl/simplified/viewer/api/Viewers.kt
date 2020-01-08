@@ -7,9 +7,19 @@ import org.nypl.simplified.viewer.spi.ViewerProviderType
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 
+/**
+ * A simple API to find and use a viewer provider for a given book.
+ *
+ * @see [ViewerProviderType]
+ */
+
 object Viewers {
 
   private val logger = LoggerFactory.getLogger(Viewers::class.java)
+
+  /**
+   * Attempt to open a viewer for a given book.
+   */
 
   fun openViewer(
     activity: Activity,
