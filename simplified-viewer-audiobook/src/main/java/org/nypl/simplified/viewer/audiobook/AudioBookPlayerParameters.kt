@@ -1,6 +1,5 @@
 package org.nypl.simplified.viewer.audiobook
 
-import androidx.annotation.StyleRes
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
@@ -35,12 +34,5 @@ data class AudioBookPlayerParameters(
    * The OPDS entry for the book.
    */
 
-  val opdsEntry: OPDSAcquisitionFeedEntry,
-
-  /**
-   * The theme to use for the activity.
-   */
-
-  @StyleRes
-  val theme: Int
+  val opdsEntry: OPDSAcquisitionFeedEntry
 ) : Serializable
