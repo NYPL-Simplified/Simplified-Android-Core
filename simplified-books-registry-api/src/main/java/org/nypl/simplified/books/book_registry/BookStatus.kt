@@ -307,8 +307,6 @@ sealed class BookStatus {
       get() = BookStatusPriorityOrdering.BOOK_STATUS_DOWNLOAD_IN_PROGRESS
   }
 
-
-
   /**
    * The given book is revoked, but has not yet been removed from the database. A given
    * book is expected to spend very little time in this state.

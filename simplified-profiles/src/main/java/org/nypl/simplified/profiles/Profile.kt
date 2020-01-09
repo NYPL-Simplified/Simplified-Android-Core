@@ -108,7 +108,6 @@ internal class Profile internal constructor(
         }
       }
 
-
       ProfilesDatabases.writeDescription(this.directory, newDescription)
       this.descriptionCurrent = newDescription
     }

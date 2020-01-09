@@ -12,8 +12,8 @@ import java.io.IOException
  */
 
 internal class DatabaseFormatHandlePDF internal constructor(
-  private val parameters: DatabaseFormatHandleParameters)
-  : BookDatabaseEntryFormatHandlePDF() {
+  private val parameters: DatabaseFormatHandleParameters
+) : BookDatabaseEntryFormatHandlePDF() {
 
   private val fileBook: File =
     File(this.parameters.directory, "pdf-book.pdf")
@@ -78,8 +78,9 @@ internal class DatabaseFormatHandlePDF internal constructor(
 
     @Throws(IOException::class)
     private fun loadInitial(
-            fileBook: File,
-            fileLastRead: File): BookFormat.BookFormatPDF {
+      fileBook: File,
+      fileLastRead: File
+    ): BookFormat.BookFormatPDF {
             return BookFormat.BookFormatPDF(
               file = if (fileBook.isFile) fileBook else null,
               lastReadLocation = loadLastReadLocationIfPresent(fileLastRead))
@@ -93,7 +94,8 @@ internal class DatabaseFormatHandlePDF internal constructor(
 
     @Throws(IOException::class)
     private fun loadLastReadLocationIfPresent(
-            fileLastRead: File): Int? {
+      fileLastRead: File
+    ): Int? {
       return if (fileLastRead.isFile) {
         loadLastReadLocation(fileLastRead)
       } else {

@@ -67,5 +67,4 @@ interface TaskRecorderType<E : Serializable> {
    */
 
   fun addAll(steps: List<TaskStep<E>>)
-
 }

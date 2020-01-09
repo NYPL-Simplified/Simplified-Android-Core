@@ -6,13 +6,10 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
 import org.mockito.Mockito
-import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParser
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult.SourceSucceeded
-import org.nypl.simplified.accounts.source.filebased.AccountProviderSourceFileBased
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistry
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.http.core.HTTPResultOK
@@ -39,8 +36,7 @@ abstract class AccountProviderNYPLRegistryContract {
   }
 
   @Before
-  fun testSetup()
-  {
+  fun testSetup() {
     this.resources = Mockito.mock(Resources::class.java)
     this.context = Mockito.mock(Context::class.java)
 
@@ -57,8 +53,7 @@ abstract class AccountProviderNYPLRegistryContract {
   }
 
   @After
-  fun testTearDown()
-  {
+  fun testTearDown() {
     this.cacheDir.deleteRecursively()
   }
 
@@ -67,8 +62,7 @@ abstract class AccountProviderNYPLRegistryContract {
    */
 
   @Test
-  fun testProvidersFromServerOK()
-  {
+  fun testProvidersFromServerOK() {
     val mockHTTP = MockingHTTP()
 
     mockHTTP.addResponse(
@@ -118,8 +112,7 @@ abstract class AccountProviderNYPLRegistryContract {
    */
 
   @Test
-  fun testProvidersFromDiskCacheOK()
-  {
+  fun testProvidersFromDiskCacheOK() {
     val cacheFile = File(this.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json")
     cacheFile.outputStream().use { output ->
       readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
@@ -147,8 +140,7 @@ abstract class AccountProviderNYPLRegistryContract {
    */
 
   @Test
-  fun testProvidersFromServerOKBadDiskCache()
-  {
+  fun testProvidersFromServerOKBadDiskCache() {
     val cacheFile = File(this.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json")
     cacheFile.outputStream().use { output -> output.write("Nonsense!".toByteArray()) }
 
@@ -203,8 +195,7 @@ abstract class AccountProviderNYPLRegistryContract {
    */
 
   @Test
-  fun testProvidersBadEverywhere()
-  {
+  fun testProvidersBadEverywhere() {
     val mockHTTP = MockingHTTP()
 
     mockHTTP.addResponse(
@@ -247,8 +238,7 @@ abstract class AccountProviderNYPLRegistryContract {
    */
 
   @Test
-  fun testProvidersRefreshOK()
-  {
+  fun testProvidersRefreshOK() {
     val cacheFile = File(this.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json")
     cacheFile.outputStream().use { output ->
       readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }

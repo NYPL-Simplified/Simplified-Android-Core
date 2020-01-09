@@ -27,5 +27,4 @@ class AccountProviderDescriptionCollectionSerializers : AccountProviderDescripti
       document = document,
       serializers = this.serializers)
   }
-
 }

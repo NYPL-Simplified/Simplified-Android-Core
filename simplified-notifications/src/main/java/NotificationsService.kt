@@ -19,13 +19,13 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.ThreadFactory
 
 class NotificationsService(
-        val context: Context,
-        val threadFactory: ThreadFactory,
-        val profileEvents: Observable<ProfileEvent>,
-        val bookRegistry: BookRegistryReadableType,
-        private val notificationsWrapper: NotificationsWrapper,
-        val notificationResourcesType: NotificationResourcesType) {
-
+  val context: Context,
+  val threadFactory: ThreadFactory,
+  val profileEvents: Observable<ProfileEvent>,
+  val bookRegistry: BookRegistryReadableType,
+  private val notificationsWrapper: NotificationsWrapper,
+  val notificationResourcesType: NotificationResourcesType
+) {
 
     companion object {
         const val NOTIFICATION_PRIMARY_CHANNEL_ID = "simplified_notification_channel_primary"

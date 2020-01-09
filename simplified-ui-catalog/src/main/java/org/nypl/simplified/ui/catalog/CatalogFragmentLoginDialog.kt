@@ -232,7 +232,6 @@ class CatalogFragmentLoginDialog : DialogFragment() {
           this.reconfigureUI()
         }
       else -> {
-
       }
     }
   }

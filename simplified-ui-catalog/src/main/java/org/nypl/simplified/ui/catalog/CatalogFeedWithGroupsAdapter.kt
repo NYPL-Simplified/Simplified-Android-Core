@@ -32,7 +32,7 @@ class CatalogFeedWithGroupsAdapter(
     viewType: Int
   ): CatalogFeedWithGroupsLaneViewHolder {
     ++this.viewHolders
-    this.logger.trace("creating view holder (${viewHolders})")
+    this.logger.trace("creating view holder ($viewHolders)")
 
     val inflater =
       LayoutInflater.from(parent.context)

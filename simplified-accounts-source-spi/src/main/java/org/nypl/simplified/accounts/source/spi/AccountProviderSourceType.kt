@@ -26,8 +26,8 @@ interface AccountProviderSourceType {
      */
 
     data class SourceSucceeded(
-      val results: Map<URI, AccountProviderDescriptionType>)
-      : SourceResult()
+      val results: Map<URI, AccountProviderDescriptionType>
+    ) : SourceResult()
 
     /**
      * Querying the source failed. Sources are permitted to result partial results
@@ -36,8 +36,8 @@ interface AccountProviderSourceType {
 
     data class SourceFailed(
       val results: Map<URI, AccountProviderDescriptionType>,
-      val exception: Exception)
-      : SourceResult()
+      val exception: Exception
+    ) : SourceResult()
   }
 
   /**
@@ -45,5 +45,4 @@ interface AccountProviderSourceType {
    */
 
   fun load(context: Context): SourceResult
-
 }

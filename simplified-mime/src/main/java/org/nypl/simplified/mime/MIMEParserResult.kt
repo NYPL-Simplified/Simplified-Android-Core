@@ -18,9 +18,8 @@ sealed class MIMEParserResult {
 
   data class Success(
     override val position: Int,
-    val type: MIMEType)
-    : MIMEParserResult() {
-  }
+    val type: MIMEType
+  ) : MIMEParserResult()
 
   /**
    * Parsing failed. The given exception describes the error.
@@ -28,7 +27,6 @@ sealed class MIMEParserResult {
 
   data class Failure(
     override val position: Int,
-    val exception: Exception)
-    : MIMEParserResult()
-
+    val exception: Exception
+  ) : MIMEParserResult()
 }

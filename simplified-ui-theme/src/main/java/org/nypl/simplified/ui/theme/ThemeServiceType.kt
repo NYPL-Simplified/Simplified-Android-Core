@@ -14,5 +14,4 @@ interface ThemeServiceType {
    */
 
   fun findCurrentTheme(): ThemeValue
-
 }

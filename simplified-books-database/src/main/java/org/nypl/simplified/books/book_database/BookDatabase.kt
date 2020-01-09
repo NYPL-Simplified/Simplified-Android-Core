@@ -33,7 +33,8 @@ class BookDatabase private constructor(
   private val owner: AccountID,
   private val directory: File,
   private val maps: BookMaps,
-  private val serializer: OPDSJSONSerializerType) : BookDatabaseType {
+  private val serializer: OPDSJSONSerializerType
+) : BookDatabaseType {
 
   /**
    * A thread-safe map exposing read-only snapshots of database entries.
@@ -92,7 +93,8 @@ class BookDatabase private constructor(
   @Throws(BookDatabaseException::class)
   override fun createOrUpdate(
     id: BookID,
-    entry: OPDSAcquisitionFeedEntry): BookDatabaseEntryType {
+    entry: OPDSAcquisitionFeedEntry
+  ): BookDatabaseEntryType {
 
     synchronized(this.maps.mapsLock) {
       try {
@@ -174,7 +176,8 @@ class BookDatabase private constructor(
       account: AccountID,
       directory: File,
       maps: BookMaps,
-      errors: MutableList<Exception>) {
+      errors: MutableList<Exception>
+    ) {
 
       if (!directory.exists()) {
         directory.mkdirs()
@@ -213,7 +216,8 @@ class BookDatabase private constructor(
       directory: File,
       maps: BookMaps,
       errors: MutableList<Exception>,
-      name: String): BookDatabaseEntry? {
+      name: String
+    ): BookDatabaseEntry? {
 
       try {
         LOG.debug("open: {}", directory)
@@ -263,5 +267,4 @@ class BookDatabase private constructor(
       }
     }
   }
-
 }

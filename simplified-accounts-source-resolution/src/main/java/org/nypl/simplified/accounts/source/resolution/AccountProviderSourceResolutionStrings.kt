@@ -8,7 +8,8 @@ import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
  */
 
 class AccountProviderSourceResolutionStrings(
-  private val resources: Resources) : AccountProviderResolutionStringsType {
+  private val resources: Resources
+) : AccountProviderResolutionStringsType {
 
   override val resolvingAuthDocumentUnusableLink: String
     get() = this.resources.getString(R.string.resolvingAuthDocumentUnusableLink)
@@ -39,5 +40,4 @@ class AccountProviderSourceResolutionStrings(
 
   override val resolvingAuthDocument: String
     get() = this.resources.getString(R.string.resolvingAuthDocument)
-
 }

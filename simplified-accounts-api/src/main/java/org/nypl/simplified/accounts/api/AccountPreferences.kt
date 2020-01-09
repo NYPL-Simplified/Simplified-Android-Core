@@ -10,7 +10,8 @@ data class AccountPreferences(
    * `true` if the user has permitted bookmarks to be synced to the server for the current account.
    */
 
-  val bookmarkSyncingPermitted: Boolean) {
+  val bookmarkSyncingPermitted: Boolean
+) {
 
   companion object {
 

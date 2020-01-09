@@ -18,16 +18,15 @@ import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 
 @RunWith(AndroidJUnit4::class)
-class SettingsFragmentAccountsTest
-  : FragmentBaseTest<SettingsFragmentAccountsActivity>(SettingsFragmentAccountsActivity::class.java) {
+class SettingsFragmentAccountsTest :
+  FragmentBaseTest<SettingsFragmentAccountsActivity>(SettingsFragmentAccountsActivity::class.java) {
 
   /**
    * Check that the accounts view has a basic set of properties.
    */
 
   @Test(timeout = 20_000L)
-  fun testVisualProperties()
-  {
+  fun testVisualProperties() {
     val profilesController =
       MockProfilesController
     val navigation =
@@ -37,7 +36,7 @@ class SettingsFragmentAccountsTest
     services.clear()
     services.putService(ProfilesControllerType::class.java, profilesController)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     val profile =
       profilesController.profileCurrent()
@@ -58,6 +57,5 @@ class SettingsFragmentAccountsTest
           profile.accounts().size - 1
         )
       }
-
   }
 }

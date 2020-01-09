@@ -10,7 +10,8 @@ import java.util.ServiceLoader
 
 class Analytics private constructor(
   private val logger: Logger,
-  private val consumers: List<AnalyticsSystem>) : AnalyticsType {
+  private val consumers: List<AnalyticsSystem>
+) : AnalyticsType {
 
   init {
     this.logger.debug("initialized {} analytics systems", this.consumers.size)
@@ -38,7 +39,8 @@ class Analytics private constructor(
 
     private fun startProvider(
       provider: AnalyticsSystemProvider,
-      configuration: AnalyticsConfiguration): AnalyticsSystem? {
+      configuration: AnalyticsConfiguration
+    ): AnalyticsSystem? {
       return try {
         provider.create(configuration)
       } catch (e: Exception) {
@@ -57,5 +59,4 @@ class Analytics private constructor(
         this.logger.error("failed to publish analytics event: ", e)
       }
     }
-
 }

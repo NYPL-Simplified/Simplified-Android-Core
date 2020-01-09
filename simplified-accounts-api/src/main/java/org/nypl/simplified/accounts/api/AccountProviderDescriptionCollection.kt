@@ -25,7 +25,8 @@ data class AccountProviderDescriptionCollection(
    * The metadata associated with the collection.
    */
 
-  val metadata: Metadata) {
+  val metadata: Metadata
+) {
 
   /**
    * The metadata associated with the collection.
@@ -43,5 +44,6 @@ data class AccountProviderDescriptionCollection(
      * The title of the collection.
      */
 
-    val title: String)
+    val title: String
+  )
 }

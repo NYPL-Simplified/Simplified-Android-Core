@@ -14,5 +14,4 @@ interface AccountProviderFallbackType {
    */
 
   fun get(): AccountProviderType
-
 }

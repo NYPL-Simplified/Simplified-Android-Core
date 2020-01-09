@@ -55,7 +55,8 @@ class ProfileAccountLoginTask(
   private val loginStrings: AccountLoginStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType,
-  initialCredentials: AccountAuthenticationCredentials) : Callable<TaskResult<AccountLoginErrorData, Unit>> {
+  initialCredentials: AccountAuthenticationCredentials
+) : Callable<TaskResult<AccountLoginErrorData, Unit>> {
 
   init {
     Preconditions.checkState(
@@ -80,13 +81,13 @@ class ProfileAccountLoginTask(
     this.run()
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.debug("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.error("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun warn(message: String, vararg arguments: Any?) =
-    this.logger.warn("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.warn("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun run(): TaskResult<AccountLoginErrorData, Unit> {
     return try {
@@ -308,7 +309,8 @@ class ProfileAccountLoginTask(
 
   private fun onPatronProfileRequestOK(
     patronSettingsURI: URI,
-    result: HTTPResultOKType<InputStream>) {
+    result: HTTPResultOKType<InputStream>
+  ) {
     this.debug("requested patron profile successfully")
     return this.patronParsers.createParser(patronSettingsURI, result.value).use { parser ->
       when (val parseResult = parser.parse()) {
@@ -373,7 +375,6 @@ class ProfileAccountLoginTask(
     return when (drm) {
       is PatronDRMAdobe -> this.onPatronProfileRequestHandleDRMAdobe(drm)
       else -> {
-
       }
     }
   }
@@ -386,7 +387,8 @@ class ProfileAccountLoginTask(
   @Suppress("UNUSED_PARAMETER")
   private fun onPatronProfileRequestHTTPException(
     patronSettingsURI: URI,
-    result: HTTPResultException<InputStream>) {
+    result: HTTPResultException<InputStream>
+  ) {
     val message = this.loginStrings.loginPatronSettingsConnectionFailed
     this.steps.currentStepFailed(
       message = message,
@@ -397,7 +399,8 @@ class ProfileAccountLoginTask(
 
   private fun onPatronProfileRequestHTTPError(
     patronSettingsURI: URI,
-    result: HTTPResultError<InputStream>) {
+    result: HTTPResultError<InputStream>
+  ) {
     this.error("received http error: {}: {}: {}", patronSettingsURI, result.message, result.status)
 
     when (result.status) {

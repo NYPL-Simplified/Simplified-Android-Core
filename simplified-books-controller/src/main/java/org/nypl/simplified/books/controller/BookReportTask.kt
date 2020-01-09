@@ -76,7 +76,6 @@ class BookReportTask(
           ok.message)
         Unit
       })
-
     } catch (e: Exception) {
       this.logger.error(
         "[{}]: failed for {}: ",

@@ -10,7 +10,7 @@ import androidx.core.app.NotificationCompat
 import org.slf4j.LoggerFactory
 
 class NotificationsWrapper(
-        private val context: Context
+  private val context: Context
 ) {
     private val logger = LoggerFactory.getLogger(NotificationsService::class.java)
 
@@ -36,7 +36,6 @@ class NotificationsWrapper(
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
 
-
         if (notificationResourcesType.intentClass != null) {
             val intent = Intent(context, notificationResourcesType.intentClass)
             val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
@@ -50,9 +49,11 @@ class NotificationsWrapper(
      * Creates and adds a [NotificationChannel] to the provided [NotificationManager]
      * with passed in [channelName] and [channelDescription].
      */
-    private fun createNotificationChannel(notificationManager: NotificationManager,
-                                          channelName: String,
-                                          channelDescription: String) {
+    private fun createNotificationChannel(
+      notificationManager: NotificationManager,
+      channelName: String,
+      channelDescription: String
+    ) {
         logger.debug("NotificationsService::createNotificationChannel " +
                 "with channel name $channelName and description $channelDescription")
 

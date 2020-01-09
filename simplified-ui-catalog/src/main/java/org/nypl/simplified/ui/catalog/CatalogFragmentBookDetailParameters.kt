@@ -27,5 +27,4 @@ data class CatalogFragmentBookDetailParameters(
 
   val bookID: BookID
     get() = this.feedEntry.bookID
-
 }

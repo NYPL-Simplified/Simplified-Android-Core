@@ -79,7 +79,7 @@ class SettingsFragmentVersion : Fragment() {
     this.adeptExecutor =
       services.optionalService(AdobeAdeptExecutorType::class.java)
   }
-  
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,

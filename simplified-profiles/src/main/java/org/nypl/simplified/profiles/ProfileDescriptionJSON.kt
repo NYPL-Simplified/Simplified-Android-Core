@@ -43,7 +43,7 @@ object ProfileDescriptionJSON {
   /**
    * Deserialize profile preferences from the given file.
    *
-   * @param jom  A JSON object mapper
+   * @param jom A JSON object mapper
    * @param file A file
    * @return A parsed description
    * @throws IOException On I/O and/or parse errors
@@ -60,7 +60,7 @@ object ProfileDescriptionJSON {
   /**
    * Deserialize profile preferences from the given text.
    *
-   * @param jom  A JSON object mapper
+   * @param jom A JSON object mapper
    * @param text A JSON string
    * @return A parsed description
    * @throws IOException On I/O and/or parse errors
@@ -77,7 +77,7 @@ object ProfileDescriptionJSON {
   /**
    * Deserialize profile preferences from the given JSON node.
    *
-   * @param objectMapper  A JSON object mapper
+   * @param objectMapper A JSON object mapper
    * @param node A JSON node
    * @return A parsed description
    * @throws JSONParseException On parse errors

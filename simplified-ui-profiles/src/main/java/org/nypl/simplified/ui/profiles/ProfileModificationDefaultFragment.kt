@@ -29,7 +29,6 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import android.os.IBinder
 import android.view.inputmethod.InputMethodManager
 
-
 class ProfileModificationDefaultFragment : Fragment() {
 
   companion object {
@@ -133,7 +132,6 @@ class ProfileModificationDefaultFragment : Fragment() {
         }
       }
       else -> {
-
       }
     }
   }

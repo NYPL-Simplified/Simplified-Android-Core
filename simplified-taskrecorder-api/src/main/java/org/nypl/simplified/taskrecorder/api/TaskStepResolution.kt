@@ -17,8 +17,8 @@ sealed class TaskStepResolution<E : Serializable> : Serializable {
    */
 
   data class TaskStepSucceeded<E : Serializable>(
-    override val message: String)
-    : TaskStepResolution<E>() {
+    override val message: String
+  ) : TaskStepResolution<E>() {
     override val exception: Throwable? = null
   }
 
@@ -29,7 +29,6 @@ sealed class TaskStepResolution<E : Serializable> : Serializable {
   data class TaskStepFailed<E : Serializable>(
     override val message: String,
     val errorValue: E,
-    override val exception: Throwable?)
-    : TaskStepResolution<E>()
-
+    override val exception: Throwable?
+  ) : TaskStepResolution<E>()
 }

@@ -14,4 +14,4 @@ data class SettingsFragmentAccountParameters(
    */
 
   val accountId: AccountID
-): Serializable
+) : Serializable

@@ -42,6 +42,4 @@ class MockAccountCreationStringResources : ProfileAccountCreationStringResources
 
   override val resolvingAccountProvider: String
     get() = "resolvingAccountProvider"
-
-
 }

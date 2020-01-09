@@ -645,7 +645,6 @@ abstract class BooksControllerContract {
     } catch (e: NoSuchElementException) {
       // Correctly raised
     }
-
   }
 
   /**
@@ -821,7 +820,8 @@ abstract class BooksControllerContract {
 
   private fun onAccountResolution(
     id: URI,
-    message: String) {
+    message: String
+  ) {
     this.logger.debug("resolution: {}: {}", id, message)
   }
 }

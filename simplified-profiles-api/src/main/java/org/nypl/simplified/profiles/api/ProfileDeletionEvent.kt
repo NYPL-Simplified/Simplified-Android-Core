@@ -17,8 +17,8 @@ sealed class ProfileDeletionEvent : ProfileEvent() {
    */
 
   data class ProfileDeletionSucceeded(
-    override val profileID: ProfileID)
-    : ProfileDeletionEvent()
+    override val profileID: ProfileID
+  ) : ProfileDeletionEvent()
 
   /**
    * A profile could not be deleted.
@@ -31,7 +31,6 @@ sealed class ProfileDeletionEvent : ProfileEvent() {
      * The exception raised.
      */
 
-    val exception: Exception)
-    : ProfileDeletionEvent()
-
+    val exception: Exception
+  ) : ProfileDeletionEvent()
 }

@@ -37,5 +37,4 @@ interface ScreenSizeInformationType {
    */
 
   val widthPixels: Int
-
 }

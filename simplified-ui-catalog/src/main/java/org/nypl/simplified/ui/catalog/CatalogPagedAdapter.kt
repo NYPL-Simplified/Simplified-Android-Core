@@ -39,7 +39,7 @@ class CatalogPagedAdapter(
     viewType: Int
   ): CatalogPagedViewHolder {
     ++this.viewHolders
-    this.logger.trace("creating view holder (${viewHolders})")
+    this.logger.trace("creating view holder ($viewHolders)")
 
     return CatalogPagedViewHolder(
       buttonCreator = this.buttonCreator,

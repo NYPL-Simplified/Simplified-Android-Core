@@ -99,7 +99,6 @@ abstract class ProfileAccountLoginTaskContract {
 
   @After
   fun testTearDown() {
-
   }
 
   /**
@@ -884,7 +883,7 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(
-      AccountLoginDRMNotSupported("loginDeviceDRMNotSupported","Adobe ACS"),
+      AccountLoginDRMNotSupported("loginDeviceDRMNotSupported", "Adobe ACS"),
       state.taskResult.errors().last())
   }
 
@@ -1120,7 +1119,7 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(
-      AccountLoginDRMFailure("loginDeviceActivationFailed","E_FAIL_OFTEN_AND_LOUDLY"),
+      AccountLoginDRMFailure("loginDeviceActivationFailed", "E_FAIL_OFTEN_AND_LOUDLY"),
       state.taskResult.errors().last())
   }
 

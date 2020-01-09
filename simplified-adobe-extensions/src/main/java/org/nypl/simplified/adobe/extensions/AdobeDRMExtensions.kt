@@ -39,8 +39,8 @@ object AdobeDRMExtensions {
     error: (String) -> Unit,
     debug: (String) -> Unit,
     vendorID: AdobeVendorID,
-    clientToken: AccountAuthenticationAdobeClientToken)
-    : ListenableFuture<List<AccountAuthenticationAdobePostActivationCredentials>> {
+    clientToken: AccountAuthenticationAdobeClientToken
+  ): ListenableFuture<List<AccountAuthenticationAdobePostActivationCredentials>> {
 
     val future =
       SettableFuture.create<List<AccountAuthenticationAdobePostActivationCredentials>>()
@@ -78,22 +78,21 @@ object AdobeDRMExtensions {
    */
 
   data class AdobeDRMLoginConnectorException(
-    val errorCode: String)
-    : Exception(errorCode)
+    val errorCode: String
+  ) : Exception(errorCode)
 
   /**
    * The connector did not return any activations
    */
 
-  class AdobeDRMLoginNoActivationsException
-    : Exception()
+  class AdobeDRMLoginNoActivationsException : Exception()
 
   private class ActivationReceiver(
     val error: (String) -> Unit,
     val debug: (String) -> Unit,
     val future: SettableFuture<List<AccountAuthenticationAdobePostActivationCredentials>>,
-    val results: MutableList<AccountAuthenticationAdobePostActivationCredentials>)
-    : AdobeAdeptActivationReceiverType {
+    val results: MutableList<AccountAuthenticationAdobePostActivationCredentials>
+  ) : AdobeAdeptActivationReceiverType {
 
     var failed = false
 
@@ -113,7 +112,8 @@ object AdobeDRMExtensions {
       device: AdobeDeviceID,
       userName: String,
       userId: AdobeUserID,
-      expiry: String?) {
+      expiry: String?
+    ) {
       this.debug("onActivation: $index")
       this.results.add(AccountAuthenticationAdobePostActivationCredentials(device, userId))
     }
@@ -135,8 +135,8 @@ object AdobeDRMExtensions {
     debug: (String) -> Unit,
     vendorID: AdobeVendorID,
     userID: AdobeUserID,
-    clientToken: AccountAuthenticationAdobeClientToken)
-    : ListenableFuture<Unit> {
+    clientToken: AccountAuthenticationAdobeClientToken
+  ): ListenableFuture<Unit> {
 
     val adeptFuture = SettableFuture.create<Unit>()
     executor.execute { connector ->
@@ -179,8 +179,8 @@ object AdobeDRMExtensions {
    */
 
   data class AdobeDRMLogoutConnectorException(
-    val errorCode: String)
-    : Exception(errorCode)
+    val errorCode: String
+  ) : Exception(errorCode)
 
   /**
    * Retrieve activations for a device.
@@ -193,8 +193,8 @@ object AdobeDRMExtensions {
   fun getDeviceActivations(
     executor: AdobeAdeptExecutorType,
     error: (String) -> Unit,
-    debug: (String) -> Unit)
-    : ListenableFuture<List<Activation>> {
+    debug: (String) -> Unit
+  ): ListenableFuture<List<Activation>> {
 
     val adeptFuture = SettableFuture.create<List<Activation>>()
     executor.execute { connector ->
@@ -224,14 +224,15 @@ object AdobeDRMExtensions {
     val device: AdobeDeviceID,
     val userName: String,
     val userID: AdobeUserID,
-    val expiry: String?)
+    val expiry: String?
+  )
 
   private class ActivationRawReceiver(
     val error: (String) -> Unit,
     val debug: (String) -> Unit,
     val future: SettableFuture<List<Activation>>,
-    val results: MutableList<Activation>)
-    : AdobeAdeptActivationReceiverType {
+    val results: MutableList<Activation>
+  ) : AdobeAdeptActivationReceiverType {
 
     var failed = false
 
@@ -251,7 +252,8 @@ object AdobeDRMExtensions {
       device: AdobeDeviceID,
       userName: String,
       userId: AdobeUserID,
-      expiry: String?) {
+      expiry: String?
+    ) {
       this.debug("onActivation: $index")
       this.results.add(Activation(index, vendor, device, userName, userId, expiry))
     }
@@ -277,8 +279,8 @@ object AdobeDRMExtensions {
     progress: (Double) -> Unit,
     outputFile: File,
     data: ByteArray,
-    userId: AdobeUserID)
-    : ListenableFuture<Fulfillment> {
+    userId: AdobeUserID
+  ): ListenableFuture<Fulfillment> {
 
     val adeptFuture = SettableFuture.create<Fulfillment>()
     executor.execute { connector ->
@@ -302,15 +304,16 @@ object AdobeDRMExtensions {
 
   data class Fulfillment(
     val file: File,
-    val loan: AdobeAdeptLoan)
+    val loan: AdobeAdeptLoan
+  )
 
   /**
    * The connector raised some sort of error code.
    */
 
   data class AdobeDRMFulfillmentException(
-    val errorCode: String)
-    : Exception(errorCode)
+    val errorCode: String
+  ) : Exception(errorCode)
 
   private class FulfillmentReceiver(
     private val error: (String) -> Unit,
@@ -357,8 +360,8 @@ object AdobeDRMExtensions {
   fun revoke(
     executor: AdobeAdeptExecutorType,
     loan: AdobeAdeptLoan,
-    userId: AdobeUserID)
-    : ListenableFuture<Unit> {
+    userId: AdobeUserID
+  ): ListenableFuture<Unit> {
 
     val adeptFuture = SettableFuture.create<Unit>()
     executor.execute { connector ->
@@ -381,12 +384,12 @@ object AdobeDRMExtensions {
    */
 
   data class AdobeDRMRevokeException(
-    val errorCode: String)
-    : Exception(errorCode)
+    val errorCode: String
+  ) : Exception(errorCode)
 
   private class RevokeReceiver(
-    private val adeptFuture: SettableFuture<Unit>)
-    : AdobeAdeptLoanReturnListenerType {
+    private val adeptFuture: SettableFuture<Unit>
+  ) : AdobeAdeptLoanReturnListenerType {
 
     override fun onLoanReturnSuccess() {
       this.adeptFuture.set(Unit)

@@ -13,4 +13,5 @@ import java.io.Serializable
 
 data class ReaderBookmarks(
   val lastRead: Bookmark?,
-  val bookmarks: List<Bookmark>): Serializable
+  val bookmarks: List<Bookmark>
+) : Serializable

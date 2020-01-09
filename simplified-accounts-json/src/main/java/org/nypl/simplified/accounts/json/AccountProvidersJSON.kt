@@ -27,8 +27,7 @@ object AccountProvidersJSON {
 
   private val logger = LoggerFactory.getLogger(AccountProvidersJSON::class.java)
 
-  private fun <T> putConditionally(node: ObjectNode, name: String, value: T?)
-  {
+  private fun <T> putConditionally(node: ObjectNode, name: String, value: T?) {
     value?.let { v -> node.put(name, v.toString()) }
   }
 
@@ -83,7 +82,6 @@ object AccountProvidersJSON {
         node.set<ObjectNode>("authentication", authObject)
       }
       null -> {
-
       }
     }
 
@@ -92,7 +90,8 @@ object AccountProvidersJSON {
 
   private fun mapToObject(
     mapper: ObjectMapper,
-    labels: Map<String, String>): ObjectNode {
+    labels: Map<String, String>
+  ): ObjectNode {
     val node = mapper.createObjectNode()
     for (key in labels.keys) {
       node.put(key, labels[key])
@@ -103,7 +102,7 @@ object AccountProvidersJSON {
   /**
    * Deserialize an account provider from the given JSON node.
    *
-   * @param jom  A JSON object mapper
+   * @param jom A JSON object mapper
    * @param node A JSON node
    * @return A parsed account provider
    * @throws JSONParseException On parse errors
@@ -243,7 +242,7 @@ object AccountProvidersJSON {
   /**
    * Deserialize a set of account providers from the given JSON array node.
    *
-   * @param jom  A JSON object mapper
+   * @param jom A JSON object mapper
    * @param node A JSON node
    * @return A parsed account provider collection
    * @throws JSONParseException On parse errors
@@ -273,7 +272,6 @@ object AccountProvidersJSON {
           ex.addSuppressed(e)
         }
       }
-
     }
 
     if (ex != null) {

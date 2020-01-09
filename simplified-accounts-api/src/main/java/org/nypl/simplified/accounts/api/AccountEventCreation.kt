@@ -16,8 +16,8 @@ sealed class AccountEventCreation : AccountEvent(), PresentableType {
    */
 
   data class AccountEventCreationInProgress(
-    override val message: String)
-    : AccountEventCreation()
+    override val message: String
+  ) : AccountEventCreation()
 
   /**
    * Creating an account succeeded.
@@ -25,8 +25,8 @@ sealed class AccountEventCreation : AccountEvent(), PresentableType {
 
   data class AccountEventCreationSucceeded(
     override val message: String,
-    val id: AccountID)
-    : AccountEventCreation()
+    val id: AccountID
+  ) : AccountEventCreation()
 
   /**
    * Creating an account failed.
@@ -34,11 +34,10 @@ sealed class AccountEventCreation : AccountEvent(), PresentableType {
 
   data class AccountEventCreationFailed(
     override val message: String,
-    val taskResult: TaskResult.Failure<AccountCreateErrorDetails, *>)
-    : AccountEventCreation(), PresentableErrorType {
+    val taskResult: TaskResult.Failure<AccountCreateErrorDetails, *>
+  ) : AccountEventCreation(), PresentableErrorType {
 
     override val attributes: Map<String, String>
       get() = Presentables.collectAttributes(this.taskResult.errors())
   }
-
 }

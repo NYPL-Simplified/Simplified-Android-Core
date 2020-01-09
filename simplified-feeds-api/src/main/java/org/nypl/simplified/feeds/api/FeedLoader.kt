@@ -54,7 +54,6 @@ class FeedLoader private constructor(
 
   private val log = LoggerFactory.getLogger(FeedLoader::class.java)
 
-
   private fun fetchURICore(
     uri: URI,
     auth: OptionType<HTTPAuthType>,

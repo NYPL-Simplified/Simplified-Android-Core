@@ -82,5 +82,4 @@ class MainApplication : MultiDexApplication() {
 
   val servicesBooting: ListenableFuture<ServiceDirectoryType>
     get() = this.bootFuture
-
 }

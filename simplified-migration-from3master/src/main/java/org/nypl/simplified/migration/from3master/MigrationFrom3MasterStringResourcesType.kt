@@ -1,7 +1,5 @@
 package org.nypl.simplified.migration.from3master
 
-import org.nypl.simplified.migration.spi.MigrationEvent
-
 /**
  * The strings published during migration.
  */

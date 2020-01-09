@@ -49,5 +49,4 @@ class FeedLoaderTest : FeedLoaderContract() {
   override fun resource(name: String): URI {
     return FeedLoaderContract::class.java.getResource(name).toURI()
   }
-
 }

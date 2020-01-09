@@ -26,7 +26,8 @@ object BookmarkAnnotationsJSON {
 
   fun serializeSelectorNodeToJSON(
     mapper: ObjectMapper,
-    selector: BookmarkAnnotationSelectorNode): ObjectNode {
+    selector: BookmarkAnnotationSelectorNode
+  ): ObjectNode {
 
     val node = mapper.createObjectNode()
     node.put("type", selector.type)
@@ -36,7 +37,8 @@ object BookmarkAnnotationsJSON {
 
   fun serializeTargetNodeToJSON(
     mapper: ObjectMapper,
-    target: BookmarkAnnotationTargetNode): ObjectNode {
+    target: BookmarkAnnotationTargetNode
+  ): ObjectNode {
 
     val node = mapper.createObjectNode()
     node.put("source", target.source)
@@ -53,7 +55,8 @@ object BookmarkAnnotationsJSON {
 
   fun serializeBodyNodeToJSON(
     mapper: ObjectMapper,
-    target: BookmarkAnnotationBodyNode): ObjectNode {
+    target: BookmarkAnnotationBodyNode
+  ): ObjectNode {
 
     val node = mapper.createObjectNode()
     node.put("http://librarysimplified.org/terms/time", target.timestamp)
@@ -101,7 +104,8 @@ object BookmarkAnnotationsJSON {
 
   fun serializeBookmarkAnnotationToJSON(
     mapper: ObjectMapper,
-    annotation: BookmarkAnnotation): ObjectNode {
+    annotation: BookmarkAnnotation
+  ): ObjectNode {
 
     val node = mapper.createObjectNode()
     if (annotation.context != null) { node.put("@context", annotation.context) }
@@ -115,7 +119,8 @@ object BookmarkAnnotationsJSON {
 
   fun serializeBookmarkAnnotationToBytes(
     mapper: ObjectMapper,
-    annotation: BookmarkAnnotation): ByteArray {
+    annotation: BookmarkAnnotation
+  ): ByteArray {
     return mapper.writeValueAsBytes(serializeBookmarkAnnotationToJSON(mapper, annotation))
   }
 
@@ -138,7 +143,8 @@ object BookmarkAnnotationsJSON {
 
   fun serializeBookmarkAnnotationFirstNodeToJSON(
     mapper: ObjectMapper,
-    annotation: BookmarkAnnotationFirstNode): ObjectNode {
+    annotation: BookmarkAnnotationFirstNode
+  ): ObjectNode {
 
     val nodes = mapper.createArrayNode()
     annotation.items.forEach { mark -> nodes.add(serializeBookmarkAnnotationToJSON(mapper, mark)) }
@@ -162,7 +168,8 @@ object BookmarkAnnotationsJSON {
 
   fun serializeBookmarkAnnotationResponseToJSON(
     mapper: ObjectMapper,
-    annotation: BookmarkAnnotationResponse): ObjectNode {
+    annotation: BookmarkAnnotationResponse
+  ): ObjectNode {
 
     val node = mapper.createObjectNode()
     node.put("total", annotation.total)
@@ -175,7 +182,8 @@ object BookmarkAnnotationsJSON {
 
   private fun serializeStringArray(
     mapper: ObjectMapper,
-    context: List<String>): ArrayNode {
+    context: List<String>
+  ): ArrayNode {
     val array = mapper.createArrayNode()
     context.forEach { text -> array.add(text) }
     return array

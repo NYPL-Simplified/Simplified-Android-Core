@@ -12,5 +12,4 @@ interface AnalyticsType {
    */
 
   fun publishEvent(event: AnalyticsEvent)
-
 }

@@ -17,5 +17,4 @@ sealed class AccountProviderRegistryStatus {
    */
 
   object Refreshing : AccountProviderRegistryStatus()
-
 }

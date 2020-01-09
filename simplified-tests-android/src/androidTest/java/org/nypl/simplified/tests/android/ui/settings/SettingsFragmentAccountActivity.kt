@@ -8,7 +8,7 @@ import org.nypl.simplified.ui.settings.SettingsFragmentAccountParameters
 class SettingsFragmentAccountActivity : NavigationHostActivity<SettingsFragmentAccount>() {
 
   companion object {
-    lateinit var initialAccountId : AccountID
+    lateinit var initialAccountId: AccountID
   }
 
   override fun createFragment(): SettingsFragmentAccount =

@@ -11,8 +11,9 @@ interface AccountLogoutStringResourcesType {
    */
 
   fun logoutDeactivatingDeviceAdobeFailed(
-    errorCode:String,
-    e: Throwable): String
+    errorCode: String,
+    e: Throwable
+  ): String
 
   /**
    * An unexpected exception occurred.
@@ -91,5 +92,4 @@ interface AccountLogoutStringResourcesType {
    */
 
   val logoutStarted: String
-
 }

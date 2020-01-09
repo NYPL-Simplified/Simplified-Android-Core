@@ -33,5 +33,4 @@ class MockAccountProviderResolutionStrings : AccountProviderResolutionStringsTyp
 
   override val resolvingAuthDocument: String
     get() = "resolvingAuthDocument"
-
 }

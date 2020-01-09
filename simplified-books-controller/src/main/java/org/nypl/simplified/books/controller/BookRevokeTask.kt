@@ -83,13 +83,13 @@ class BookRevokeTask(
   private var databaseEntryInitialized: Boolean = false
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}] ${message}", this.bookID.brief(), *arguments)
+    this.logger.debug("[{}] $message", this.bookID.brief(), *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}] ${message}", this.bookID.brief(), *arguments)
+    this.logger.error("[{}] $message", this.bookID.brief(), *arguments)
 
   private fun warn(message: String, vararg arguments: Any?) =
-    this.logger.warn("[{}] ${message}", this.bookID.brief(), *arguments)
+    this.logger.warn("[{}] $message", this.bookID.brief(), *arguments)
 
   private fun publishBookStatus(status: BookStatus) {
     val book =
@@ -159,7 +159,6 @@ class BookRevokeTask(
       this.debug("finished")
     }
   }
-
 
   private fun revokeNotifyServer() {
     this.debug("notifying server of revocation")
@@ -428,7 +427,8 @@ class BookRevokeTask(
 
   private fun revokeFormatHandleEPUBAdobe(
     handle: BookDatabaseEntryFormatHandleEPUB,
-    adobeRights: AdobeAdeptLoan) {
+    adobeRights: AdobeAdeptLoan
+  ) {
     this.debug("revoking Adobe ACS loan")
     this.steps.beginNewStep(this.revokeStrings.revokeACSLoan)
     this.publishRequestingRevokeStatus()
@@ -468,7 +468,8 @@ class BookRevokeTask(
 
   private fun revokeFormatHandleEPUBAdobeExecute(
     adobeDRM: AdobeAdeptExecutorType,
-    adobeRights: AdobeAdeptLoan) {
+    adobeRights: AdobeAdeptLoan
+  ) {
 
     val credentials =
       this.revokeFormatHandleEPUBAdobeWithConnectorGetCredentials()

@@ -2,10 +2,10 @@ package org.librarysimplified.services.api
 
 import com.google.common.base.Preconditions
 import org.slf4j.LoggerFactory
-import java.util.concurrent.ConcurrentHashMap
 
 internal class ServiceDirectoryBuilder(
-  private val services: MutableMap<Class<*>, MutableList<Any>>) : ServiceDirectoryBuilderType {
+  private val services: MutableMap<Class<*>, MutableList<Any>>
+) : ServiceDirectoryBuilderType {
 
   private val logger =
     LoggerFactory.getLogger(ServiceDirectoryBuilder::class.java)

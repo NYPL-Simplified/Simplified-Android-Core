@@ -41,4 +41,5 @@ class MigrationFrom3MasterAccount(
 
   @JvmField
   @JsonProperty("adobe-vendor")
-  val adobe_vendor: String?)
+  val adobe_vendor: String?
+)

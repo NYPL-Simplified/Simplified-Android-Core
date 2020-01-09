@@ -8,5 +8,4 @@ class MigrationFrom3MasterTest : MigrationFrom3MasterContract() {
 
   override val logger: Logger
     get() = LoggerFactory.getLogger(MigrationFrom3MasterTest::class.java)
-
 }

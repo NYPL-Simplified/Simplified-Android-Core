@@ -29,4 +29,5 @@ data class ProfilePreferences(
    * @return The reader-specific preferences
    */
 
-  val readerPreferences: ReaderPreferences)
+  val readerPreferences: ReaderPreferences
+)

@@ -169,7 +169,6 @@ class Controller private constructor(
         this.onAccountRegistryProviderUpdatedEvent(event)
       is AccountProviderRegistryEvent.SourceFailed,
       AccountProviderRegistryEvent.StatusChanged -> {
-
       }
     }
   }
@@ -184,7 +183,6 @@ class Controller private constructor(
         accountProviders = this.accountProviders))
       Unit
     } else {
-
     }
   }
 

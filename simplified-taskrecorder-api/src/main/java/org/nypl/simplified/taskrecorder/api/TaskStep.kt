@@ -20,6 +20,5 @@ data class TaskStep<E : Serializable>(
    * A humanly-readable, localized description of the resolution task step.
    */
 
-  var resolution: TaskStepResolution<E> = TaskStepResolution.TaskStepSucceeded(""))
-  : Serializable
-
+  var resolution: TaskStepResolution<E> = TaskStepResolution.TaskStepSucceeded("")
+) : Serializable

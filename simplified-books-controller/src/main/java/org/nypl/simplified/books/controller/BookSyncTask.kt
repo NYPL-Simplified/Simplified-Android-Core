@@ -73,17 +73,17 @@ class BookSyncTask(
     return result.matchResult(
       object : HTTPResultMatcherType<InputStream, Unit, Exception> {
         @Throws(Exception::class)
-        override fun onHTTPError(e: HTTPResultError<InputStream>): Unit {
+        override fun onHTTPError(e: HTTPResultError<InputStream>) {
           return this@BookSyncTask.onHTTPError(e, provider)
         }
 
         @Throws(Exception::class)
-        override fun onHTTPException(e: HTTPResultException<InputStream>): Unit {
+        override fun onHTTPException(e: HTTPResultException<InputStream>) {
           throw e.error
         }
 
         @Throws(Exception::class)
-        override fun onHTTPOK(e: HTTPResultOKType<InputStream>): Unit {
+        override fun onHTTPOK(e: HTTPResultOKType<InputStream>) {
           return this@BookSyncTask.onHTTPOK(e, provider)
         }
       })
@@ -135,7 +135,6 @@ class BookSyncTask(
       } catch (e: BookDatabaseException) {
         this.logger.error("[{}] unable to update database entry: ", bookId.brief(), e)
       }
-
     }
 
     /*
@@ -165,7 +164,6 @@ class BookSyncTask(
       } catch (x: Throwable) {
         this.logger.error("[{}]: unable to delete entry: ", existingId.value(), x)
       }
-
     }
 
     /*

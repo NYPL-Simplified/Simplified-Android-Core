@@ -14,5 +14,4 @@ interface ProfileModificationFragmentServiceType {
   fun createModificationFragment(
     parameters: ProfileModificationFragmentParameters
   ): ProfileModificationAbstractFragment
-
 }

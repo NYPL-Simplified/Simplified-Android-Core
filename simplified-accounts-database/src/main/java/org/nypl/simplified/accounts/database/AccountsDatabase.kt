@@ -62,7 +62,8 @@ class AccountsDatabase private constructor(
   @GuardedBy("accountsLock")
   private val accountsByProvider: SortedMap<URI, Account>,
   private val credentials: AccountAuthenticationCredentialsStoreType,
-  private val bookDatabases: BookDatabaseFactoryType) : AccountsDatabaseType {
+  private val bookDatabases: BookDatabaseFactoryType
+) : AccountsDatabaseType {
 
   private val logger =
     LoggerFactory.getLogger(AccountsDatabase::class.java)
@@ -217,7 +218,6 @@ class AccountsDatabase private constructor(
     init {
       this.description =
         Objects.requireNonNull(this.description, "description")
-
     }
 
     override fun setAccountProvider(accountProvider: AccountProviderType) {
@@ -243,7 +243,6 @@ class AccountsDatabase private constructor(
       get() = synchronized(this.descriptionLock) {
         return this.providerActual
       }
-
 
     fun id(): AccountID {
       return this.id
@@ -354,7 +353,8 @@ class AccountsDatabase private constructor(
 
     private fun accumulateOrSuppress(
       exception: Exception?,
-      next: Exception): Exception {
+      next: Exception
+    ): Exception {
       val result: Exception
       if (exception != null) {
         result = exception
@@ -593,7 +593,6 @@ class AccountsDatabase private constructor(
           this.logger.error("could not migrate directory {} -> {}", existingDirectory, accountDirNew)
           return null
         }
-
       }
 
       this.logger.error("could not migrate directory {} after multiple attempts, aborting!", existingDirectory)

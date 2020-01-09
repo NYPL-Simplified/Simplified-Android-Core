@@ -18,11 +18,9 @@ class MockAccount(override val id: AccountID) : AccountType {
   private val providerId = UUID.randomUUID()
 
   override val bookDatabase: BookDatabaseType
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-
+    get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
   override fun setPreferences(preferences: AccountPreferences) {
-
   }
 
   private var accountProviderCurrent: AccountProviderType =
@@ -67,7 +65,7 @@ class MockAccount(override val id: AccountID) : AccountType {
   }
 
   override val directory: File
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
   override val provider: AccountProviderType
     get() = accountProviderCurrent
@@ -84,5 +82,4 @@ class MockAccount(override val id: AccountID) : AccountType {
 
   override val preferences: AccountPreferences
     get() = AccountPreferences(bookmarkSyncingPermitted = true)
-
 }

@@ -34,12 +34,10 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
@@ -228,7 +226,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
    * Borrowing an epub via an ACSM works if the connector says it has.
    */
 
-  @Test//(timeout = 5_000L)
+  @Test // (timeout = 5_000L)
   fun testBorrowFeedACSMForEPUB() {
 
     val account =

@@ -29,7 +29,8 @@ class BootLoader<T>(
    * A function that sets up services.
    */
 
-  private val bootProcess: BootProcessType<T>) : BootLoaderType<T> {
+  private val bootProcess: BootProcessType<T>
+) : BootLoaderType<T> {
 
   private val logger = LoggerFactory.getLogger(BootLoader::class.java)
 
@@ -59,7 +60,8 @@ class BootLoader<T>(
 
   private class PresentableException(
     override val message: String,
-    override val cause: Throwable) : Exception(message, cause), PresentableErrorType
+    override val cause: Throwable
+  ) : Exception(message, cause), PresentableErrorType
 
   private fun runBoot(context: Context): FluentFuture<T> {
     val future = SettableFuture.create<T>()

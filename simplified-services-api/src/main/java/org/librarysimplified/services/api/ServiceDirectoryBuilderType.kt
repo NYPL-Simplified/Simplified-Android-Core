@@ -14,5 +14,4 @@ interface ServiceDirectoryBuilderType {
     this.addService(listOf(interfaceType), service)
 
   fun build(): ServiceDirectoryType
-
 }

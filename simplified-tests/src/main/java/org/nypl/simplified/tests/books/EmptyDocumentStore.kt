@@ -2,13 +2,9 @@ package org.nypl.simplified.tests.books
 
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
-import org.nypl.simplified.documents.authentication.AuthenticationDocumentType
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.documents.synced.SyncedDocumentType
-
-
-import java.io.InputStream
 
 /**
  * A document store implementation that contains no documents.

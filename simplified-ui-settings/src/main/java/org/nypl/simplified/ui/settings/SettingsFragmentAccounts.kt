@@ -189,7 +189,6 @@ class SettingsFragmentAccounts : Fragment() {
       }
 
       else -> {
-
       }
     }
   }

@@ -10,5 +10,4 @@ class VanillaSettingsConfigurationService : SettingsConfigurationServiceType {
 
   override val allowAccountsAccess: Boolean
     get() = false
-
 }

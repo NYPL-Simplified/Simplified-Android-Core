@@ -37,14 +37,14 @@ interface ReaderBookmarkServiceProviderType {
      * A profile controller.
      */
 
-    val profilesController: ProfilesControllerType)
+    val profilesController: ProfilesControllerType
+  )
 
   /**
    * Create a new bookmark service.
    */
 
   fun createService(
-    requirements: Requirements)
-    : ReaderBookmarkServiceType
-
+    requirements: Requirements
+  ): ReaderBookmarkServiceType
 }

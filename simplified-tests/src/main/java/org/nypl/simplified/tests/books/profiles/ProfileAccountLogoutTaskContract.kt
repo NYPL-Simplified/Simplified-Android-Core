@@ -87,7 +87,6 @@ abstract class ProfileAccountLogoutTaskContract {
 
   @After
   fun testTearDown() {
-
   }
 
   /**

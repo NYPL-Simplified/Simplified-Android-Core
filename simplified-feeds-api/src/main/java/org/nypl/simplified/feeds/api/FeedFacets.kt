@@ -1,7 +1,6 @@
 package org.nypl.simplified.feeds.api
 
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetOPDS.Companion.ENTRYPOINT_FACET_GROUP_TYPE
 
 /**

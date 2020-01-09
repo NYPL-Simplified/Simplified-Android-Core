@@ -63,8 +63,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkLocalCreatedRemoteNotEnabled()
-  {
+  fun testBookmarkLocalCreatedRemoteNotEnabled() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -91,8 +90,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkLocalCreatedRemoteNotPermitted()
-  {
+  fun testBookmarkLocalCreatedRemoteNotPermitted() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -119,8 +117,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkLocalCreatedRemoteNotSupported()
-  {
+  fun testBookmarkLocalCreatedRemoteNotSupported() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -147,8 +144,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkLocalCreatedRemoteOK()
-  {
+  fun testBookmarkLocalCreatedRemoteOK() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -177,8 +173,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkRemoteReceivedSyncMissing()
-  {
+  fun testBookmarkRemoteReceivedSyncMissing() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(Pair(accountID, setOf(bookmark1))),
@@ -206,8 +201,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkLocalCreatedTwice()
-  {
+  fun testBookmarkLocalCreatedTwice() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -230,8 +224,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkLocalCreatedIdleExplicit()
-  {
+  fun testBookmarkLocalCreatedIdleExplicit() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -254,8 +247,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkSyncingRemotelyEnabled()
-  {
+  fun testBookmarkSyncingRemotelyEnabled() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -279,8 +271,7 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testBookmarkSyncingAccountLoggedIn()
-  {
+  fun testBookmarkSyncingAccountLoggedIn() {
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -305,13 +296,12 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testMonadLeftIdentity()
-  {
+  fun testMonadLeftIdentity() {
     val state =
       ReaderBookmarkPolicyState.empty()
 
     val random = Random()
-    val values  = (1..100).map { random.nextInt() }
+    val values = (1..100).map { random.nextInt() }
     val f = { z: Int -> ReaderBookmarkPolicy.unit(z * 2) }
 
     for (x in values) {
@@ -327,18 +317,17 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testMonadRightIdentity()
-  {
+  fun testMonadRightIdentity() {
     val state =
       ReaderBookmarkPolicyState.empty()
 
     val random = Random()
-    val values  = (1..100).map { random.nextInt() }
+    val values = (1..100).map { random.nextInt() }
 
     for (x in values) {
       val m = ReaderBookmarkPolicy.unit(x)
       Assert.assertEquals(
-        ReaderBookmarkPolicy.evaluatePolicy(m.flatMap({ n -> ReaderBookmarkPolicy.unit (n)}), state),
+        ReaderBookmarkPolicy.evaluatePolicy(m.flatMap({ n -> ReaderBookmarkPolicy.unit(n) }), state),
         ReaderBookmarkPolicy.evaluatePolicy(m, state))
     }
   }
@@ -348,13 +337,12 @@ open class ReaderBookmarkPolicyContract {
    */
 
   @Test
-  fun testMonadAssociativity()
-  {
+  fun testMonadAssociativity() {
     val state =
       ReaderBookmarkPolicyState.empty()
 
     val random = Random()
-    val values  = (1..100).map { random.nextInt() }
+    val values = (1..100).map { random.nextInt() }
 
     for (x in values) {
       val f = { z: Int -> ReaderBookmarkPolicy.unit(z + 1) }

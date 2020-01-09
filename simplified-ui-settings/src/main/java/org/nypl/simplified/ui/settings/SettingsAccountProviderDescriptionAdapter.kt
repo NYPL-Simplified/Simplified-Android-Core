@@ -60,5 +60,4 @@ class SettingsAccountProviderDescriptionAdapter(
     val accountSubtitleView =
       parent.findViewById<TextView>(R.id.accountCellSubtitle)
   }
-
 }

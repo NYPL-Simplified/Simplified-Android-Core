@@ -13,8 +13,7 @@ class BooksControllerTest : BooksControllerContract() {
 
   private var instrumentationContext: Context? = null
 
-  private fun initContext(): Context
-  {
+  private fun initContext(): Context {
     return if (this.instrumentationContext == null) {
       val context = InstrumentationRegistry.getContext()!!
       this.instrumentationContext = context

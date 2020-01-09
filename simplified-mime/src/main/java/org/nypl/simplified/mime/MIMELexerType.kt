@@ -17,5 +17,4 @@ interface MIMELexerType {
    */
 
   fun token(): MIMELexerResult
-
 }

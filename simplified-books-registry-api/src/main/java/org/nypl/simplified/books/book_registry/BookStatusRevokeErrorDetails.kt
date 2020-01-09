@@ -17,32 +17,32 @@ sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
    */
 
   data class NotRevocable(
-    override val message: String)
-    : BookStatusRevokeErrorDetails()
+    override val message: String
+  ) : BookStatusRevokeErrorDetails()
 
   /**
    * Credentials are required, but none are available.
    */
 
   data class NoCredentialsAvailable(
-    override val message: String)
-    : BookStatusRevokeErrorDetails()
+    override val message: String
+  ) : BookStatusRevokeErrorDetails()
 
   /**
    * Timed out waiting for an operation to complete.
    */
 
   data class TimedOut(
-    override val message: String)
-    : BookStatusRevokeErrorDetails()
+    override val message: String
+  ) : BookStatusRevokeErrorDetails()
 
   /**
    * An operation was cancelled.
    */
 
   data class Cancelled(
-    override val message: String)
-    : BookStatusRevokeErrorDetails()
+    override val message: String
+  ) : BookStatusRevokeErrorDetails()
 
   /**
    * Attempting to load the feed for a revoke URI failed.
@@ -51,8 +51,8 @@ sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
   data class FeedLoaderFailed(
     override val message: String,
     override val problemReport: HTTPProblemReport?,
-    override val exception: Throwable?)
-    : BookStatusRevokeErrorDetails(), HTTPHasProblemReportType {
+    override val exception: Throwable?
+  ) : BookStatusRevokeErrorDetails(), HTTPHasProblemReportType {
     override val attributes: Map<String, String>
       get() = Presentables.mergeProblemReportOptional(super.attributes, this.problemReport)
   }
@@ -62,8 +62,8 @@ sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
    */
 
   data class FeedCorrupted(
-    override val exception: Throwable)
-    : BookStatusRevokeErrorDetails() {
+    override val exception: Throwable
+  ) : BookStatusRevokeErrorDetails() {
     override val message: String
       get() = this.exception.localizedMessage
   }
@@ -73,8 +73,8 @@ sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
    */
 
   data class FeedUnusable(
-    override val message: String)
-    : BookStatusRevokeErrorDetails()
+    override val message: String
+  ) : BookStatusRevokeErrorDetails()
 
   /**
    * Errors related to DRM.
@@ -95,8 +95,8 @@ sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
     data class DRMFailure(
       override val system: String,
       val errorCode: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
 
     /**
      * A DRM system returned a content type that cannot be supported.
@@ -105,8 +105,8 @@ sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
     data class DRMUnsupportedContentType(
       override val system: String,
       val contentType: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
 
     /**
      * A device is not active and therefore can't be used for DRM operations.
@@ -114,8 +114,8 @@ sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
 
     data class DRMDeviceNotActive(
       override val system: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
   }
 
   /**
@@ -123,10 +123,9 @@ sealed class BookStatusRevokeErrorDetails : PresentableErrorType, Serializable {
    */
 
   data class UnexpectedException(
-    override val exception: Throwable)
-    : BookStatusRevokeErrorDetails() {
+    override val exception: Throwable
+  ) : BookStatusRevokeErrorDetails() {
     override val message: String
       get() = this.exception.localizedMessage
   }
-
 }

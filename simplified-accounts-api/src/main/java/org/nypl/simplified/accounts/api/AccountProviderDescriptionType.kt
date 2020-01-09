@@ -21,10 +21,9 @@ interface AccountProviderDescriptionType : Comparable<AccountProviderDescription
    * resolution.
    */
 
-  fun resolve(onProgress: AccountProviderResolutionListenerType)
-    : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType>
+  fun resolve(onProgress: AccountProviderResolutionListenerType):
+    TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType>
 
   override fun compareTo(other: AccountProviderDescriptionType): Int =
     this.metadata.compareTo(other.metadata)
-
 }

@@ -162,5 +162,4 @@ class BookCoverFetchTask(
     if (x is Some<T>) {
       x.get()
     } else null
-
 }

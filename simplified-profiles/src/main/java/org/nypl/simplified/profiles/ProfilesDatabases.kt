@@ -401,13 +401,13 @@ object ProfilesDatabases {
   /**
    * Do the actual work of creating the account.
    *
-   * @param context            The Android context
-   * @param accountProviders  The available account providers
+   * @param context The Android context
+   * @param accountProviders The available account providers
    * @param accountsDatabases A factory for account databases
-   * @param accountProvider   The account provider that will be used for the default account
-   * @param directory          The profile directory
-   * @param displayName       The display name for the account
-   * @param id                 The account ID
+   * @param accountProvider The account provider that will be used for the default account
+   * @param directory The profile directory
+   * @param displayName The display name for the account
+   * @param id The account ID
    */
 
   @Throws(ProfileDatabaseException::class)
@@ -485,7 +485,6 @@ object ProfilesDatabases {
         this.logger.error("[{}]: error initializing accounts: ", id.uuid, e)
         throw ProfileDatabaseAccountsException("Could not initialize accounts database", e)
       }
-
     } catch (e: IOException) {
       this.logger.error("[{}]: error writing profile data: ", id.uuid, e)
       throw ProfileDatabaseIOException("Could not write profile data", e)

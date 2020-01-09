@@ -24,12 +24,12 @@ class ReaderBookmarkServiceTest : ReaderBookmarkServiceContract() {
     threads: (Runnable) -> Thread,
     events: Subject<ReaderBookmarkEvent>,
     httpCalls: ReaderBookmarkHTTPCallsType,
-    profilesController: ProfilesControllerType): ReaderBookmarkServiceType {
+    profilesController: ProfilesControllerType
+  ): ReaderBookmarkServiceType {
     return ReaderBookmarkService.Companion.createService(ReaderBookmarkServiceProviderType.Requirements(
       threads = threads,
       events = events,
       httpCalls = httpCalls,
       profilesController = profilesController))
   }
-
 }

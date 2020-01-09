@@ -12,21 +12,19 @@ import java.util.concurrent.Executors
 
 abstract class FeedLoaderContract {
 
-  abstract fun createFeedLoader(exec: ListeningExecutorService) : org.nypl.simplified.feeds.api.FeedLoaderType
+  abstract fun createFeedLoader(exec: ListeningExecutorService): org.nypl.simplified.feeds.api.FeedLoaderType
 
   abstract fun resource(name: String): URI
 
   private lateinit var exec: ListeningExecutorService
 
   @Before
-  fun setup()
-  {
+  fun setup() {
     this.exec = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1))
   }
 
   @After
-  fun tearDown()
-  {
+  fun tearDown() {
     this.exec.shutdown()
   }
 
@@ -35,8 +33,7 @@ abstract class FeedLoaderContract {
    */
 
   @Test
-  fun testFeedWithZeroAcquisitions()
-  {
+  fun testFeedWithZeroAcquisitions() {
     val loader =
       this.createFeedLoader(this.exec)
     val future =

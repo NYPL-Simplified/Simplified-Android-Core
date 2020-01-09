@@ -188,5 +188,4 @@ object MigrationFrom3MasterProviders {
     Pair(1263, URI("urn:uuid:5278562c-d642-4fda-ad7e-1613077cfb8d")),
     Pair(1264, URI("urn:uuid:0f9295ed-c74c-4cd2-b38b-c193c0ed15ba"))
   )
-
 }

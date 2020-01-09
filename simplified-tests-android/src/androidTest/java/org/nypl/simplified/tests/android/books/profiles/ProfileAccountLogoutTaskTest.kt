@@ -13,5 +13,4 @@ class ProfileAccountLogoutTaskTest : ProfileAccountLogoutTaskContract() {
 
   override val logger: Logger
     get() = LoggerFactory.getLogger(ProfileAccountLogoutTaskTest::class.java)
-
 }

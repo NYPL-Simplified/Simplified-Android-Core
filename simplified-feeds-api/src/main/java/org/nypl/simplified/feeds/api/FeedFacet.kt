@@ -32,7 +32,8 @@ sealed class FeedFacet : Serializable {
   data class FeedFacetPseudo(
     override val title: String,
     override val isActive: Boolean,
-    val type: FacetType) : FeedFacet() {
+    val type: FacetType
+  ) : FeedFacet() {
 
     /**
      * The type of facets.

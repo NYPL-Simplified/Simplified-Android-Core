@@ -11,7 +11,7 @@ sealed class MIMEToken {
 
   abstract val position: Int
 
-  abstract val description : String
+  abstract val description: String
 
   /**
    * The type of text tokens.
@@ -19,7 +19,7 @@ sealed class MIMEToken {
 
   sealed class MIMETextToken : MIMEToken() {
 
-    abstract val text : String
+    abstract val text: String
 
     /**
      * A simple text identifier.
@@ -27,8 +27,8 @@ sealed class MIMEToken {
 
     data class Text(
       override val position: Int,
-      override val text: String)
-      : MIMETextToken() {
+      override val text: String
+    ) : MIMETextToken() {
 
       override val description: String
         get() = "A text token"
@@ -40,8 +40,8 @@ sealed class MIMEToken {
 
     data class Quoted(
       override val position: Int,
-      override val text: String)
-      : MIMETextToken() {
+      override val text: String
+    ) : MIMETextToken() {
 
       override val description: String
         get() = "A quoted string"
@@ -53,8 +53,8 @@ sealed class MIMEToken {
    */
 
   data class Slash(
-    override val position: Int)
-    : MIMEToken() {
+    override val position: Int
+  ) : MIMEToken() {
 
     override val description: String
       get() = "A forward slash: '/'"
@@ -65,8 +65,8 @@ sealed class MIMEToken {
    */
 
   data class Semicolon(
-    override val position: Int)
-    : MIMEToken() {
+    override val position: Int
+  ) : MIMEToken() {
 
     override val description: String
       get() = "A semicolon: ';'"
@@ -77,8 +77,8 @@ sealed class MIMEToken {
    */
 
   data class Equals(
-    override val position: Int)
-    : MIMEToken() {
+    override val position: Int
+  ) : MIMEToken() {
 
     override val description: String
       get() = "An equals symbol: '='"
@@ -89,8 +89,8 @@ sealed class MIMEToken {
    */
 
   data class EOF(
-    override val position: Int)
-    : MIMEToken() {
+    override val position: Int
+  ) : MIMEToken() {
 
     override val description: String
       get() = "End-of-stream"
@@ -121,5 +121,4 @@ sealed class MIMEToken {
       }
     }
   }
-
 }

@@ -14,6 +14,6 @@ interface AccountProviderDescriptionParsersType : ParserProviderType<AccountProv
   fun createParserForObject(
     uri: URI,
     objectNode: ObjectNode,
-    warningsAsErrors: Boolean = false): ParserType<AccountProviderDescriptionMetadata>
-
+    warningsAsErrors: Boolean = false
+  ): ParserType<AccountProviderDescriptionMetadata>
 }

@@ -70,7 +70,8 @@ internal class ProfileFeedTask(
 
   private fun searchBooks(
     search: String?,
-    books: ArrayList<BookWithStatus>) {
+    books: ArrayList<BookWithStatus>
+  ) {
 
     if (search == null) {
       return
@@ -105,7 +106,8 @@ internal class ProfileFeedTask(
 
   private fun sortBooks(
     facet: FacetType,
-    books: ArrayList<BookWithStatus>) {
+    books: ArrayList<BookWithStatus>
+  ) {
 
     when (facet) {
       FacetType.SORT_BY_AUTHOR -> sortBooksByAuthor(books)
@@ -149,7 +151,8 @@ internal class ProfileFeedTask(
 
   private fun filterBooks(
     filter: (BookStatus) -> Boolean,
-    books: ArrayList<BookWithStatus>) {
+    books: ArrayList<BookWithStatus>
+  ) {
 
     val iter = books.iterator()
     while (iter.hasNext()) {
@@ -169,7 +172,6 @@ internal class ProfileFeedTask(
       values
     })
   }
-
 
   companion object {
 
@@ -218,7 +220,8 @@ internal class ProfileFeedTask(
     private fun facets(
       request: ProfileFeedRequest,
       facet_groups: HashMap<String, List<FeedFacet>>,
-      facets: ArrayList<FeedFacet>) {
+      facets: ArrayList<FeedFacet>
+    ) {
       val values = FacetType.values()
       for (v in values) {
         val active = v == request.facetActive
@@ -235,7 +238,8 @@ internal class ProfileFeedTask(
 
     private fun searchMatches(
       terms_upper: List<String>,
-      book: BookWithStatus): Boolean {
+      book: BookWithStatus
+    ): Boolean {
 
       if (terms_upper.isEmpty()) {
         return true

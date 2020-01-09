@@ -43,7 +43,7 @@ object MigrationReportXML : MigrationReportXMLType {
     var index = 0
     for (event in report.events) {
       val eventElement = document.createElement("event")
-      eventElement.setAttribute("index", "${index}")
+      eventElement.setAttribute("index", "$index")
       events.appendChild(eventElement)
 
       when (event) {
@@ -152,5 +152,4 @@ object MigrationReportXML : MigrationReportXMLType {
     }
     return attributesElement
   }
-
 }

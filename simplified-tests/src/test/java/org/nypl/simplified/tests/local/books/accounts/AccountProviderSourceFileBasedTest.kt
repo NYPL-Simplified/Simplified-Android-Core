@@ -13,5 +13,4 @@ class AccountProviderSourceFileBasedTest : AccountProviderSourceFileBasedContrac
 
   override val context: Context
     get() = Mockito.mock(Context::class.java)
-
 }

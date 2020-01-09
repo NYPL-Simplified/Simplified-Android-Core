@@ -18,5 +18,4 @@ class AuthenticationDocumentTest : AuthenticationDocumentContract() {
 
   override val parsers: AuthenticationDocumentParsersType
     get() = AuthenticationDocumentParsers()
-
 }

@@ -143,8 +143,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     this.executorTimer.shutdown()
   }
 
-
-
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
     val entryParser =
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
@@ -844,7 +842,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     result as TaskResult.Failure
 
     Assert.assertEquals(
-      DRMFailure(system =  "Adobe ACS", errorCode =  "E_DEFECTIVE", message = "revokeBookACSConnectorFailed"),
+      DRMFailure(system = "Adobe ACS", errorCode = "E_DEFECTIVE", message = "revokeBookACSConnectorFailed"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()

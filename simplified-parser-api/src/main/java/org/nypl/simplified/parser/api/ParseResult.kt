@@ -12,8 +12,8 @@ sealed class ParseResult<T> {
 
   data class Success<T>(
     val warnings: List<ParseWarning>,
-    val result: T)
-    : ParseResult<T>()
+    val result: T
+  ) : ParseResult<T>()
 
   /**
    * The parse failed.
@@ -21,6 +21,6 @@ sealed class ParseResult<T> {
 
   data class Failure<T>(
     val warnings: List<ParseWarning>,
-    val errors: List<ParseError>)
-    : ParseResult<T>()
+    val errors: List<ParseError>
+  ) : ParseResult<T>()
 }

@@ -59,5 +59,4 @@ class BookBorrowWithDefaultAcquisitionTask(
       services = this.services
     ).call()
   }
-
 }

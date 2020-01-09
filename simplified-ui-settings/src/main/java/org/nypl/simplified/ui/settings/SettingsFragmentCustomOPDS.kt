@@ -11,7 +11,6 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
@@ -52,7 +51,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    
+
     val services = Services.serviceDirectory()
 
     this.profilesController =
@@ -60,7 +59,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
   }
-  
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,

@@ -12,5 +12,4 @@ interface BrandingSplashServiceType {
 
   @androidx.annotation.DrawableRes
   fun splashImageResource(): Int
-
 }

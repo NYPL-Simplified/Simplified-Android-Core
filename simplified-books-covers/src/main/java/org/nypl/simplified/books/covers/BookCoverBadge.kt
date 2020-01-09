@@ -15,4 +15,5 @@ data class BookCoverBadge(
    * A function that, when evaluated, returns an RGB color.
    */
 
-  val backgroundColorRGBA: () -> Int)
+  val backgroundColorRGBA: () -> Int
+)

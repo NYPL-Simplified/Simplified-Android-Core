@@ -29,5 +29,4 @@ interface MigrationsType {
    */
 
   fun runMigrations(): MigrationReport?
-
 }

@@ -18,6 +18,4 @@ sealed class ProfileUpdated : ProfileEvent() {
     override val profileID: ProfileID,
     val exception: Exception
   ) : ProfileUpdated()
-
 }
-

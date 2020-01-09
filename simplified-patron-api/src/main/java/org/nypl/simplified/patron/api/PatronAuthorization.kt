@@ -10,4 +10,5 @@ import org.joda.time.Instant
 
 data class PatronAuthorization(
   val identifier: String,
-  val expires: Instant?)
+  val expires: Instant?
+)

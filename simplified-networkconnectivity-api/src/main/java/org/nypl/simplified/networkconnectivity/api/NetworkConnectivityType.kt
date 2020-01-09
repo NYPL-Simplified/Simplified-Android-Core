@@ -17,5 +17,4 @@ interface NetworkConnectivityType {
    */
 
   val isWifiAvailable: Boolean
-
 }

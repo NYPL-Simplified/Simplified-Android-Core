@@ -4,7 +4,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.ProcedureType
 import io.reactivex.subjects.PublishSubject
 import junit.framework.Assert
 import org.joda.time.DateTime
@@ -157,7 +156,6 @@ abstract class NotificationsServiceContract {
 
         bookRegistry.update(bookWithStatusHeld)
 
-
         /**
          * Reset notification counter for each test
          */
@@ -281,7 +279,6 @@ abstract class NotificationsServiceContract {
 
         bookRegistry.update(bookWithStatusHeld)
 
-
         Thread.sleep(300)
         Assert.assertEquals(0, notificationCounter)
     }
@@ -303,7 +300,6 @@ abstract class NotificationsServiceContract {
 
         bookRegistry.update(bookWithStatusHeldReady)
 
-
         Thread.sleep(300)
         Assert.assertEquals(1, notificationCounter)
     }
@@ -324,7 +320,6 @@ abstract class NotificationsServiceContract {
          */
 
         bookRegistry.update(bookWithStatusHeldReady2)
-
 
         Thread.sleep(300)
         Assert.assertEquals(0, notificationCounter)

@@ -80,5 +80,4 @@ interface SplashListenerType {
    */
 
   fun onSplashMigrationReport(report: MigrationReport)
-
 }

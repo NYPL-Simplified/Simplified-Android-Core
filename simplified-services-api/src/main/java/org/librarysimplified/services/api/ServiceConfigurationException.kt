@@ -6,5 +6,5 @@ package org.librarysimplified.services.api
 
 class ServiceConfigurationException(
   override val message: String,
-  override val cause: Exception? = null)
-  : RuntimeException(message, cause)
+  override val cause: Exception? = null
+) : RuntimeException(message, cause)

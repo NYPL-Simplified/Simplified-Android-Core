@@ -18,14 +18,16 @@ interface AccountAuthenticationCredentialsStoreType {
 
   fun put(
     account: AccountID,
-    credentials: AccountAuthenticationCredentials)
+    credentials: AccountAuthenticationCredentials
+  )
 
   /**
    * Delete the credentials for the given account, if any.
    */
 
   fun delete(
-    account: AccountID)
+    account: AccountID
+  )
 
   /**
    * The number of entries in the store

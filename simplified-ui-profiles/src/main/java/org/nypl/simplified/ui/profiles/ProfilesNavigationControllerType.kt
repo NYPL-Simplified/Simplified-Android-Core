@@ -34,5 +34,4 @@ interface ProfilesNavigationControllerType : NavigationControllerType {
    */
 
   fun openProfileSelect()
-
 }

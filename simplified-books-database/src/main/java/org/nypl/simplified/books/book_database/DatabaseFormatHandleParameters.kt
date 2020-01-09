@@ -41,4 +41,5 @@ internal data class DatabaseFormatHandleParameters(
    * The database entry that owns the format handle.
    */
 
-  val entry: org.nypl.simplified.books.book_database.api.BookDatabaseEntryType)
+  val entry: org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+)

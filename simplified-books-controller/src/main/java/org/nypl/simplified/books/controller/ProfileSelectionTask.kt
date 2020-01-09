@@ -17,7 +17,8 @@ class ProfileSelectionTask(
   private val profiles: ProfilesDatabaseType,
   private val bookRegistry: BookRegistryType,
   private val events: Subject<ProfileEvent>,
-  private val id: ProfileID) : Callable<Unit> {
+  private val id: ProfileID
+) : Callable<Unit> {
 
   private val logger = LoggerFactory.getLogger(ProfileSelectionTask::class.java)
 

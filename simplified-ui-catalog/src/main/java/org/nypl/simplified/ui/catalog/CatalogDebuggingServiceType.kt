@@ -11,5 +11,4 @@ interface CatalogDebuggingServiceType {
    */
 
   val showBookDetailStatus: Boolean
-
 }

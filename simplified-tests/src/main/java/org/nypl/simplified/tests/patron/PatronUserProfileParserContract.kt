@@ -163,7 +163,7 @@ abstract class PatronUserProfileParserContract {
   }
 
   private fun resource(file: String): InputStream {
-    val path = "/org/nypl/simplified/tests/patron/${file}"
+    val path = "/org/nypl/simplified/tests/patron/$file"
     return PatronUserProfileParserContract::class.java.getResourceAsStream(path)
   }
 

@@ -164,7 +164,6 @@ class TabbedNavigationController private constructor(
   }
 
   override fun openSettingsAbout() {
-
   }
 
   override fun openSettingsAccount(id: AccountID) {
@@ -182,19 +181,15 @@ class TabbedNavigationController private constructor(
   }
 
   override fun openSettingsAcknowledgements() {
-
   }
 
   override fun openSettingsEULA() {
-
   }
 
   override fun openSettingsFaq() {
-
   }
 
   override fun openSettingsLicense() {
-
   }
 
   override fun openSettingsVersion() {

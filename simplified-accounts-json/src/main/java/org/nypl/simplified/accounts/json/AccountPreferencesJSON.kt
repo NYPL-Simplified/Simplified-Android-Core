@@ -18,7 +18,8 @@ object AccountPreferencesJSON {
 
   fun serializeToJSON(
     objectMapper: ObjectMapper,
-    preferences: org.nypl.simplified.accounts.api.AccountPreferences): ObjectNode {
+    preferences: org.nypl.simplified.accounts.api.AccountPreferences
+  ): ObjectNode {
 
     val node = objectMapper.createObjectNode()
     node.put("bookmarkSyncingPermitted", preferences.bookmarkSyncingPermitted)
@@ -43,5 +44,4 @@ object AccountPreferencesJSON {
   fun deserializeFromJSON(node: JsonNode): org.nypl.simplified.accounts.api.AccountPreferences {
     return deserializeFromJSON(JSONParserUtilities.checkObject(null, node))
   }
-
 }

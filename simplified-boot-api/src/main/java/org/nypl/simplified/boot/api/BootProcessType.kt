@@ -13,6 +13,4 @@ interface BootProcessType<T> {
    */
 
   fun execute(onProgress: (BootEvent) -> Unit): T
-
 }
-

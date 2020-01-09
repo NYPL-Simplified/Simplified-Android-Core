@@ -18,9 +18,10 @@ object MockAccountProviders {
 
   private val logger = LoggerFactory.getLogger(MockAccountProviders::class.java)
 
-  fun findAccountProviderDangerously (
+  fun findAccountProviderDangerously(
     registry: AccountProviderRegistryType,
-    id: URI): AccountProviderType {
+    id: URI
+  ): AccountProviderType {
     val accountProviderDescription =
       registry.findAccountProviderDescription(id)
 
@@ -37,7 +38,8 @@ object MockAccountProviders {
 
   fun findAccountProviderDangerously(
     registry: AccountProviderRegistryType,
-    id: String): AccountProviderType =
+    id: String
+  ): AccountProviderType =
     this.findAccountProviderDangerously(registry, URI.create(id))
 
   fun fakeProvider(providerId: String): AccountProviderImmutable {

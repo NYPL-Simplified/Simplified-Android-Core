@@ -26,13 +26,12 @@ class MockAccountProviderRegistry : AccountProviderRegistryType {
     get() = AccountProviderRegistryStatus.Idle
 
   override fun refresh() {
-
   }
 
   override fun accountProviderDescriptions(): Map<URI, AccountProviderDescriptionType> {
     return IntRange(0, 30)
       .toList()
-      .map { index -> MockAccountProviders.fakeAuthProvider("urn:${index}") }
+      .map { index -> MockAccountProviders.fakeAuthProvider("urn:$index") }
       .map { prov -> prov.toDescription() }
       .map { prov -> Pair(prov.metadata.id, prov) }
       .toMap()

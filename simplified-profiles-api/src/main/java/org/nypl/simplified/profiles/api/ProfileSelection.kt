@@ -13,14 +13,14 @@ sealed class ProfileSelection : ProfileEvent() {
    */
 
   data class ProfileSelectionInProgress(
-    val id: ProfileID)
-    : ProfileSelection()
+    val id: ProfileID
+  ) : ProfileSelection()
 
   /**
    * A profile has finished being selected.
    */
 
   data class ProfileSelectionCompleted(
-    val id: ProfileID)
-    : ProfileSelection()
+    val id: ProfileID
+  ) : ProfileSelection()
 }

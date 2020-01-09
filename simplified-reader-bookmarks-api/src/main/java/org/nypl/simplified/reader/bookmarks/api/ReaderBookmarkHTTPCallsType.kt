@@ -13,7 +13,8 @@ interface ReaderBookmarkHTTPCallsType {
   @Throws(IOException::class)
   fun syncingIsEnabled(
     settingsURI: URI,
-    credentials: AccountAuthenticationCredentials): Boolean
+    credentials: AccountAuthenticationCredentials
+  ): Boolean
 
   /**
    * Enable or disable annotation syncing for the given account.
@@ -23,7 +24,8 @@ interface ReaderBookmarkHTTPCallsType {
   fun syncingEnable(
     settingsURI: URI,
     credentials: AccountAuthenticationCredentials,
-    enabled: Boolean)
+    enabled: Boolean
+  )
 
   /**
    * Retrieve the list of bookmarks for the given account. This call will fail
@@ -36,7 +38,8 @@ interface ReaderBookmarkHTTPCallsType {
   @Throws(IOException::class)
   fun bookmarksGet(
     annotationsURI: URI,
-    credentials: AccountAuthenticationCredentials): List<BookmarkAnnotation>
+    credentials: AccountAuthenticationCredentials
+  ): List<BookmarkAnnotation>
 
   /**
    * Add a bookmark for the given account. This call will fail with an exception if
@@ -50,7 +53,8 @@ interface ReaderBookmarkHTTPCallsType {
   fun bookmarkAdd(
     annotationsURI: URI,
     credentials: AccountAuthenticationCredentials,
-    bookmark: BookmarkAnnotation)
+    bookmark: BookmarkAnnotation
+  )
 
   /**
    * Delete a bookmark for the given account. This call will fail with an exception if
@@ -63,5 +67,6 @@ interface ReaderBookmarkHTTPCallsType {
   @Throws(IOException::class)
   fun bookmarkDelete(
     bookmarkURI: URI,
-    credentials: AccountAuthenticationCredentials)
+    credentials: AccountAuthenticationCredentials
+  )
 }

@@ -22,5 +22,4 @@ class CatalogLoginViewModel : ViewModel() {
    */
 
   val loginDialogCompleted = PublishSubject.create<Unit>()
-
 }

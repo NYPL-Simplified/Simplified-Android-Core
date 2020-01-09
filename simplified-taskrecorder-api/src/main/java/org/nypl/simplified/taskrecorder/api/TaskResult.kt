@@ -17,8 +17,8 @@ sealed class TaskResult<E : Serializable, A> {
 
   data class Success<E : Serializable, A>(
     val result: A,
-    override val steps: List<TaskStep<E>>)
-    : TaskResult<E, A>() {
+    override val steps: List<TaskStep<E>>
+  ) : TaskResult<E, A>() {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
@@ -31,8 +31,8 @@ sealed class TaskResult<E : Serializable, A> {
    */
 
   data class Failure<E : Serializable, A>(
-    override val steps: List<TaskStep<E>>)
-    : TaskResult<E, A>() {
+    override val steps: List<TaskStep<E>>
+  ) : TaskResult<E, A>() {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),

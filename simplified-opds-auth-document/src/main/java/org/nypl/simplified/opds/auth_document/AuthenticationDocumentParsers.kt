@@ -16,5 +16,4 @@ class AuthenticationDocumentParsers : AuthenticationDocumentParsersType {
     warningsAsErrors: Boolean
   ): AuthenticationDocumentParserType =
     AuthenticationDocumentParser(this.mapper, uri, stream, warningsAsErrors)
-
 }

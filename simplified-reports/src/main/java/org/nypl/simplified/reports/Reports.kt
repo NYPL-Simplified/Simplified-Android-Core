@@ -44,7 +44,8 @@ object Reports {
      */
 
     data class RaisedException(
-      val exception: Exception) : Result()
+      val exception: Exception
+    ) : Result()
   }
 
   /**
@@ -56,7 +57,8 @@ object Reports {
     context: Context,
     address: String,
     subject: String,
-    body: String): Result {
+    body: String
+  ): Result {
 
     val directories = mutableListOf<File>()
     context.externalCacheDir?.let { directories.add(it) }
@@ -90,7 +92,8 @@ object Reports {
     address: String,
     subject: String,
     body: String,
-    includeFile: (String) -> Boolean): Result {
+    includeFile: (String) -> Boolean
+  ): Result {
 
     this.logger.debug("preparing report")
 
@@ -174,5 +177,4 @@ object Reports {
       null
     }
   }
-
 }

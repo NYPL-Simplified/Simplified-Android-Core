@@ -23,7 +23,7 @@ class MockProfile(
 ) : ProfileType {
 
   override fun setDescription(newDescription: ProfileDescription) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
   override fun description(): ProfileDescription {
@@ -35,7 +35,6 @@ class MockProfile(
   }
 
   override fun delete() {
-
   }
 
   private val accountList =
@@ -50,29 +49,29 @@ class MockProfile(
       .toSortedMap()
 
   override fun accountsDatabase(): AccountsDatabaseType {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
   override fun createAccount(accountProvider: AccountProviderType): AccountType {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
   override fun deleteAccountByProvider(accountProvider: URI): AccountID {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
   override fun selectAccount(accountProvider: URI): AccountType {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
   override val isAnonymous: Boolean
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
   override val isCurrent: Boolean
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
   override val directory: File
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
   override val displayName: String
     get() = "Profile ${id.uuid}"
@@ -86,7 +85,7 @@ class MockProfile(
   }
 
   override fun accountsByProvider(): SortedMap<URI, AccountType> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
   override fun account(accountId: AccountID): AccountType {

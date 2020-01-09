@@ -230,10 +230,10 @@ class CatalogPagedViewHolder(
 
   private fun checkSomethingIsVisible() {
     Preconditions.checkState(
-      this.idle.visibility == View.VISIBLE
-        || this.progress.visibility == View.VISIBLE
-        || this.corrupt.visibility == View.VISIBLE
-        || this.error.visibility == View.VISIBLE,
+      this.idle.visibility == View.VISIBLE ||
+        this.progress.visibility == View.VISIBLE ||
+        this.corrupt.visibility == View.VISIBLE ||
+        this.error.visibility == View.VISIBLE,
       "Something must be visible!")
   }
 
@@ -707,7 +707,6 @@ class CatalogPagedViewHolder(
     for (step in result.steps) {
       when (val resolution = step.resolution) {
         is TaskStepResolution.TaskStepSucceeded -> {
-
         }
         is TaskStepResolution.TaskStepFailed -> {
           attributes.putAll(resolution.errorValue.attributes)

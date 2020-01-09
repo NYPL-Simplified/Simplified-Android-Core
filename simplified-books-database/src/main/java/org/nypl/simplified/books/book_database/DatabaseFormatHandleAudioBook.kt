@@ -25,8 +25,8 @@ import java.net.URI
  */
 
 internal class DatabaseFormatHandleAudioBook internal constructor(
-  private val parameters: DatabaseFormatHandleParameters)
-  : BookDatabaseEntryFormatHandleAudioBook() {
+  private val parameters: DatabaseFormatHandleParameters
+) : BookDatabaseEntryFormatHandleAudioBook() {
 
   private val log = LoggerFactory.getLogger(DatabaseFormatHandleAudioBook::class.java)
 
@@ -170,14 +170,16 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
     private fun loadInitial(
       fileManifest: File,
       fileManifestURI: File,
-      filePosition: File): BookFormat.BookFormatAudioBook {
+      filePosition: File
+    ): BookFormat.BookFormatAudioBook {
       return BookFormat.BookFormatAudioBook(
         manifest = loadManifestIfNecessary(fileManifest, fileManifestURI),
         position = loadPositionIfNecessary(filePosition))
     }
 
     private fun loadPositionIfNecessary(
-      filePosition: File): PlayerPosition? {
+      filePosition: File
+    ): PlayerPosition? {
       return if (filePosition.isFile) {
         loadPosition(filePosition)
       } else {
@@ -207,7 +209,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
 
     private fun loadManifestIfNecessary(
       fileManifest: File,
-      fileManifestURI: File): BookFormat.AudioBookManifestReference? {
+      fileManifestURI: File
+    ): BookFormat.AudioBookManifestReference? {
       return if (fileManifest.isFile) {
         loadManifest(fileManifest, fileManifestURI)
       } else {
@@ -217,11 +220,11 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
 
     private fun loadManifest(
       fileManifest: File,
-      fileManifestURI: File): BookFormat.AudioBookManifestReference {
+      fileManifestURI: File
+    ): BookFormat.AudioBookManifestReference {
       return BookFormat.AudioBookManifestReference(
         manifestFile = fileManifest,
         manifestURI = URI.create(FileUtilities.fileReadUTF8(fileManifestURI)))
     }
   }
-
 }

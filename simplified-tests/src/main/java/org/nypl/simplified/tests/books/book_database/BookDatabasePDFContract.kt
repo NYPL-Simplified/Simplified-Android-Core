@@ -61,7 +61,6 @@ abstract class BookDatabasePDFContract {
             formatHandle.setLastReadLocation(null)
             Assert.assertEquals(null, formatHandle.format.lastReadLocation)
         }
-
     }
 
     private fun acquisitionFeedEntryWithPDF(): OPDSAcquisitionFeedEntry {

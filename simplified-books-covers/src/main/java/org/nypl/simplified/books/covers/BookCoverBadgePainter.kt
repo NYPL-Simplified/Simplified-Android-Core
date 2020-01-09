@@ -13,7 +13,8 @@ import org.nypl.simplified.feeds.api.FeedEntry
 
 class BookCoverBadgePainter(
   val entry: FeedEntry.FeedEntryOPDS,
-  val badges: BookCoverBadgeLookupType) : Transformation {
+  val badges: BookCoverBadgeLookupType
+) : Transformation {
 
   override fun key(): String {
     return "org.nypl.simplified.books.covers.BookCoverBadgePainter"

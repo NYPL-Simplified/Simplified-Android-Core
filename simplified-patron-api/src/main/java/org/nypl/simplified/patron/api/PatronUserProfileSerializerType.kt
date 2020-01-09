@@ -7,4 +7,3 @@ import org.nypl.simplified.parser.api.SerializerType
  */
 
 interface PatronUserProfileSerializerType : SerializerType
-

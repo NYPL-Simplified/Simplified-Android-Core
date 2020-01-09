@@ -278,7 +278,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
     val status =
       this.bookRegistry.bookOrNull(this.parameters.bookID)
-        ?:  this.synthesizeBookWithStatus()
+        ?: this.synthesizeBookWithStatus()
 
     this.onBookStatusUI(status)
     this.onOPDSFeedEntryUI(this.parameters.feedEntry)
@@ -1005,7 +1005,6 @@ class CatalogFragmentBookDetail : Fragment() {
     for (step in result.steps) {
       when (val resolution = step.resolution) {
         is TaskStepResolution.TaskStepSucceeded -> {
-
         }
         is TaskStepResolution.TaskStepFailed -> {
           attributes.putAll(resolution.errorValue.attributes)

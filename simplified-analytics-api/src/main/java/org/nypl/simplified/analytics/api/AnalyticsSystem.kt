@@ -13,6 +13,6 @@ interface AnalyticsSystem {
    */
 
   fun onAnalyticsEvent(
-    event: AnalyticsEvent)
-
+    event: AnalyticsEvent
+  )
 }

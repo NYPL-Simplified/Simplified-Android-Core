@@ -15,16 +15,16 @@ sealed class BootEvent {
 
   data class BootInProgress(
     override val message: String,
-    override val attributes: Map<String, String> = mapOf())
-    : BootEvent(), PresentableType
+    override val attributes: Map<String, String> = mapOf()
+  ) : BootEvent(), PresentableType
 
   /**
    * Booting has completed.
    */
 
   data class BootCompleted(
-    override val message: String)
-    : BootEvent(), PresentableType
+    override val message: String
+  ) : BootEvent(), PresentableType
 
   /**
    * Booting has failed.
@@ -34,6 +34,6 @@ sealed class BootEvent {
     override val message: String,
     override val exception: Exception,
     override val causes: List<PresentableErrorType> = listOf(),
-    override val attributes: Map<String, String> = mapOf())
-    : BootEvent(), PresentableErrorType
+    override val attributes: Map<String, String> = mapOf()
+  ) : BootEvent(), PresentableErrorType
 }

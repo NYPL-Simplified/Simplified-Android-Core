@@ -33,7 +33,7 @@ object ImageAccountIcons {
   ) {
 
     val request: RequestCreator
-    val logoURI : URI? = account.metadata.logoURI?.hrefURI
+    val logoURI: URI? = account.metadata.logoURI?.hrefURI
     if (logoURI != null) {
       LOG.debug("configuring account logo: {}", logoURI)
       request = loader.load(logoURI.toString())
