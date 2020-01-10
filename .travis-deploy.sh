@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#------------------------------------------------------------------------
+# Utility methods
+
 fatal()
 {
   echo "fatal: $1" 1>&2
@@ -10,6 +13,29 @@ info()
 {
   echo "info: $1" 1>&2
 }
+
+#------------------------------------------------------------------------
+# Clone binaries repos
+
+info "cloning binaries"
+
+git clone \
+  --depth 1 \
+  --single-branch \
+  --branch develop \
+  "https://${NYPL_GITHUB_ACCESS_TOKEN}@github.com/NYPL-Simplified/android-binaries" \
+  ".travis/binaries" \
+  >> .travis/pre.txt 2>&1 \
+  || fatal "could not clone binaries"
+
+./.travis-git-props.sh > ".travis/build.properties" ||
+  fatal "could not save build properties"
+./.travis-git-message.sh > ".travis/commit-message.txt" ||
+  fatal "could not save commit message"
+
+
+#------------------------------------------------------------------------
+# Archive the build artifacts
 
 WORKING_DIRECTORY=$(pwd) ||
   fatal "could not save working directory"
