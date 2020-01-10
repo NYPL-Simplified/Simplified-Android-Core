@@ -27,7 +27,5 @@ data class BookmarkID(val value: String) : Serializable {
      */
 
     var VALID_BOOKMARK_ID: Pattern = Pattern.compile("[a-z0-9]+")
-
   }
-
 }

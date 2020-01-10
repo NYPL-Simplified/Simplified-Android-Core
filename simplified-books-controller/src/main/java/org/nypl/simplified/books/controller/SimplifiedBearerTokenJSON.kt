@@ -20,7 +20,8 @@ object SimplifiedBearerTokenJSON {
   fun serializeToJSON(
     objectMapper: ObjectMapper,
     now: LocalDateTime,
-    token: SimplifiedBearerToken): ObjectNode {
+    token: SimplifiedBearerToken
+  ): ObjectNode {
 
     val expires = Seconds.secondsBetween(now, token.expiration).seconds
     val node = objectMapper.createObjectNode()
@@ -33,7 +34,8 @@ object SimplifiedBearerTokenJSON {
   fun serializeToText(
     objectMapper: ObjectMapper,
     now: LocalDateTime,
-    token: SimplifiedBearerToken): String {
+    token: SimplifiedBearerToken
+  ): String {
 
     return ByteArrayOutputStream().use { stream ->
       val writer = objectMapper.writerWithDefaultPrettyPrinter()
@@ -46,7 +48,8 @@ object SimplifiedBearerTokenJSON {
     objectMapper: ObjectMapper,
     now: LocalDateTime,
     token: SimplifiedBearerToken,
-    file: File) {
+    file: File
+  ) {
 
     FileOutputStream(file).use { stream ->
       val writer = objectMapper.writerWithDefaultPrettyPrinter()
@@ -56,7 +59,8 @@ object SimplifiedBearerTokenJSON {
 
   fun deserializeFromJSON(
     now: LocalDateTime,
-    node: ObjectNode): SimplifiedBearerToken {
+    node: ObjectNode
+  ): SimplifiedBearerToken {
 
     return SimplifiedBearerToken(
       accessToken = JSONParserUtilities.getString(node, "access_token"),
@@ -66,21 +70,24 @@ object SimplifiedBearerTokenJSON {
 
   fun deserializeFromJSON(
     now: LocalDateTime,
-    node: JsonNode): SimplifiedBearerToken {
+    node: JsonNode
+  ): SimplifiedBearerToken {
     return deserializeFromJSON(now, JSONParserUtilities.checkObject(null, node))
   }
 
   fun deserializeFromText(
     objectMapper: ObjectMapper,
     now: LocalDateTime,
-    text: String): SimplifiedBearerToken {
+    text: String
+  ): SimplifiedBearerToken {
     return deserializeFromJSON(now, objectMapper.readTree(text))
   }
 
   fun deserializeFromFile(
     objectMapper: ObjectMapper,
     now: LocalDateTime,
-    file: File): SimplifiedBearerToken {
+    file: File
+  ): SimplifiedBearerToken {
     return deserializeFromText(objectMapper, now, FileUtilities.fileReadUTF8(file))
   }
 }

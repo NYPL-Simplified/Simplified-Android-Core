@@ -13,13 +13,14 @@ import java.io.Serializable
 data class MIMEType(
   val type: String,
   val subtype: String,
-  val parameters: Map<String, String>): Serializable {
+  val parameters: Map<String, String>
+) : Serializable {
 
   /**
    * The combined type and subtype (not including parameters)
    */
 
-  val fullType : String = "${this.type}/${this.subtype}"
+  val fullType: String = "${this.type}/${this.subtype}"
 
   override fun toString(): String {
     return this.fullType

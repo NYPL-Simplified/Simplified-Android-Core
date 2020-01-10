@@ -17,5 +17,4 @@ interface BuildConfigurationServiceType {
    */
 
   val errorReportEmail: String
-
 }

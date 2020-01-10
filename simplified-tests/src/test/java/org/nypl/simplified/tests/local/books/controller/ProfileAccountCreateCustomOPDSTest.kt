@@ -8,5 +8,4 @@ class ProfileAccountCreateCustomOPDSTest : ProfileAccountCreateCustomOPDSContrac
 
   override val logger: Logger
     get() = LoggerFactory.getLogger(ProfileAccountCreateCustomOPDSTest::class.java)
-
 }

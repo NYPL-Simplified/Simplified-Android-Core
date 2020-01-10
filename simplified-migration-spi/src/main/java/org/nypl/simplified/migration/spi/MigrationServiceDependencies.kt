@@ -51,4 +51,5 @@ data class MigrationServiceDependencies(
    * The Android application context.
    */
 
-  val context: Context)
+  val context: Context
+)

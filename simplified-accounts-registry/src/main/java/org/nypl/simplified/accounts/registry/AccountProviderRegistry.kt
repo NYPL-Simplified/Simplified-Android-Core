@@ -28,13 +28,14 @@ import java.util.concurrent.ConcurrentHashMap
 class AccountProviderRegistry private constructor(
   private val context: Context,
   private val sources: List<AccountProviderSourceType>,
-  override val defaultProvider: AccountProviderType) : AccountProviderRegistryType {
+  override val defaultProvider: AccountProviderType
+) : AccountProviderRegistryType {
 
   @Volatile
   private var initialized = false
 
   @Volatile
-  private var statusRef : AccountProviderRegistryStatus = Idle
+  private var statusRef: AccountProviderRegistryStatus = Idle
 
   private val descriptions = ConcurrentHashMap<URI, AccountProviderDescriptionType>()
   private val descriptionsReadOnly = Collections.unmodifiableMap(this.descriptions)
@@ -115,7 +116,8 @@ class AccountProviderRegistry private constructor(
   }
 
   override fun updateDescription(
-    description: AccountProviderDescriptionType): AccountProviderDescriptionType {
+    description: AccountProviderDescriptionType
+  ): AccountProviderDescriptionType {
 
     val id = description.metadata.id
     val existing = this.descriptions[id]
@@ -158,8 +160,7 @@ class AccountProviderRegistry private constructor(
     fun createFrom(
       context: Context,
       sources: List<AccountProviderSourceType>,
-      defaultProvider: AccountProviderType): AccountProviderRegistry =
-      AccountProviderRegistry(context, sources, defaultProvider)
+      defaultProvider: AccountProviderType
+    ): AccountProviderRegistry = AccountProviderRegistry(context, sources, defaultProvider)
   }
 }
-

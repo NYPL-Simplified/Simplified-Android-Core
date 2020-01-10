@@ -309,6 +309,5 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
   }
 
   override fun onErrorPageSendReport(parameters: ErrorPageParameters<*>) {
-
   }
 }

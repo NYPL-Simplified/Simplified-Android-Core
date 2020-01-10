@@ -13,5 +13,4 @@ class EnvironmentQueriesDefault : EnvironmentQueriesType {
 
   override fun isExternalStorageRemovable(): Boolean =
     Environment.isExternalStorageRemovable()
-
 }

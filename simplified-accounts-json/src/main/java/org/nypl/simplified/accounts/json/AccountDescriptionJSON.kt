@@ -27,7 +27,7 @@ object AccountDescriptionJSON {
   /**
    * Deserialize a account description from the given file.
    *
-   * @param objectMapper  A JSON object mapper
+   * @param objectMapper A JSON object mapper
    * @param accountProviders A function use to look up account providers
    * @param file A file
    * @return A parsed description
@@ -50,7 +50,7 @@ object AccountDescriptionJSON {
   /**
    * Deserialize a account description from the given text.
    *
-   * @param objectMapper  A JSON object mapper
+   * @param objectMapper A JSON object mapper
    * @param accountProviders A function use to look up account providers
    * @param text A JSON string
    * @return A parsed description

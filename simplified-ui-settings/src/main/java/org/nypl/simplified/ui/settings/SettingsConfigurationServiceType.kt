@@ -13,5 +13,4 @@ interface SettingsConfigurationServiceType {
    */
 
   val allowAccountsAccess: Boolean
-
 }

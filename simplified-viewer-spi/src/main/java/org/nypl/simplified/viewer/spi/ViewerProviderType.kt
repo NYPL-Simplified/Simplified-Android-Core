@@ -44,5 +44,4 @@ interface ViewerProviderType {
     book: Book,
     format: BookFormat
   )
-
 }

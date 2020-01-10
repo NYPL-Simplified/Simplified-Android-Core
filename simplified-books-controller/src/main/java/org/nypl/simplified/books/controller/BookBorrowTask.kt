@@ -35,13 +35,26 @@ import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.*
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.BookDatabaseFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.BundledCopyFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.ContentCopyFailed
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMDeviceNotActive
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMFailure
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnparseableACSM
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnreadableACSM
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedContentType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedSystem
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedCorrupted
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedLoaderFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedUnusable
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.HTTPRequestFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.TimedOut
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnexpectedException
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnparseableBearerToken
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnusableAcquisitions
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.WrongAvailability
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
@@ -488,7 +501,8 @@ class BookBorrowTask(
 
   private fun checkFeedHasGroups(
     uri: URI,
-    groups: List<FeedGroup>): List<FeedGroup> {
+    groups: List<FeedGroup>
+  ): List<FeedGroup> {
 
     val attribute =
       Pair("Feed URI", this.acquisition.uri.toASCIIString())
@@ -514,7 +528,8 @@ class BookBorrowTask(
 
   private fun checkFeedHasEntries(
     uri: URI,
-    entries: List<FeedEntry>): List<FeedEntry> {
+    entries: List<FeedEntry>
+  ): List<FeedEntry> {
 
     val attribute =
       Pair("Feed URI", this.acquisition.uri.toASCIIString())
@@ -697,7 +712,6 @@ class BookBorrowTask(
         ACQUISITION_BUY,
         ACQUISITION_SAMPLE,
         ACQUISITION_SUBSCRIBE -> {
-
         }
       }
     }
@@ -752,8 +766,8 @@ class BookBorrowTask(
 
     data class DownloadOK(
       val uri: URI,
-      val file: File)
-      : DownloadResult()
+      val file: File
+    ) : DownloadResult()
 
     /**
      * Downloading failed.
@@ -763,15 +777,14 @@ class BookBorrowTask(
       val uri: URI,
       val status: Int,
       val problemReport: OptionType<HTTPProblemReport>,
-      val exception: OptionType<Throwable>)
-      : DownloadResult()
+      val exception: OptionType<Throwable>
+    ) : DownloadResult()
 
     /**
      * Downloading was cancelled.
      */
 
-    object DownloadCancelled
-      : DownloadResult()
+    object DownloadCancelled : DownloadResult()
   }
 
   /**
@@ -781,18 +794,21 @@ class BookBorrowTask(
 
   private class DownloadListener(
     val downloadFuture: SettableFuture<DownloadResult>,
-    val onDownloadProgress: (Long, Long, unconditional: Boolean) -> Unit) : DownloadListenerType {
+    val onDownloadProgress: (Long, Long, unconditional: Boolean) -> Unit
+  ) : DownloadListenerType {
 
     override fun onDownloadStarted(
       download: DownloadType,
-      expectedTotal: Long) {
+      expectedTotal: Long
+    ) {
       this.onDownloadProgress.invoke(0L, expectedTotal, true)
     }
 
     override fun onDownloadDataReceived(
       download: DownloadType,
       runningTotal: Long,
-      expectedTotal: Long) {
+      expectedTotal: Long
+    ) {
       this.onDownloadProgress.invoke(runningTotal, expectedTotal, false)
     }
 
@@ -805,7 +821,8 @@ class BookBorrowTask(
       status: Int,
       runningTotal: Long,
       problemReport: OptionType<HTTPProblemReport>,
-      exception: OptionType<Throwable>) {
+      exception: OptionType<Throwable>
+    ) {
       this.downloadFuture.set(DownloadFailed(
         uri = download.uri(),
         status = status,
@@ -816,7 +833,8 @@ class BookBorrowTask(
 
     override fun onDownloadCompleted(
       download: DownloadType,
-      file: File) {
+      file: File
+    ) {
       this.downloadFuture.set(DownloadOK(
         uri = download.uri(),
         file = file
@@ -924,7 +942,7 @@ class BookBorrowTask(
         val message = this.borrowStrings.borrowBookFulfillCancelled
         this.steps.currentStepFailed(
           message = message,
-          errorValue = DownloadCancelled(message, this.currentAttributesWith()),
+          errorValue = BookStatusDownloadErrorDetails.DownloadCancelled(message, this.currentAttributesWith()),
           exception = exception
         )
         throw exception
@@ -943,7 +961,8 @@ class BookBorrowTask(
   private fun saveFinalContent(
     file: File,
     expectedContentTypes: Set<String>,
-    receivedContentType: String) {
+    receivedContentType: String
+  ) {
 
     this.steps.beginNewStep(
       this.borrowStrings.borrowBookSaving(receivedContentType, expectedContentTypes))
@@ -1002,7 +1021,8 @@ class BookBorrowTask(
 
   private fun checkExpectedContentType(
     expectedContentTypes: Set<String>,
-    receivedContentType: String): String {
+    receivedContentType: String
+  ): String {
 
     this.steps.beginNewStep(
       this.borrowStrings.borrowBookSavingCheckingContentType(
@@ -1194,7 +1214,7 @@ class BookBorrowTask(
             val message = this.borrowStrings.borrowBookFulfillCancelled
             this.steps.currentStepFailed(
               message = message,
-              errorValue = DownloadCancelled(message, this.currentAttributesWith()),
+              errorValue = BookStatusDownloadErrorDetails.DownloadCancelled(message, this.currentAttributesWith()),
               exception = cause)
             cause
           }
@@ -1357,7 +1377,8 @@ class BookBorrowTask(
 
   private fun runFulfillSimplifiedBearerToken(
     acquisition: OPDSAcquisition,
-    file: File) {
+    file: File
+  ) {
     this.debug("fulfilling Simplified bearer token file")
 
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillBearerToken)

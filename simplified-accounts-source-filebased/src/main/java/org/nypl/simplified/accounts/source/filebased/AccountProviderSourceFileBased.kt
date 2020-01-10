@@ -14,7 +14,8 @@ import java.net.URI
  */
 
 class AccountProviderSourceFileBased(
-  private val getFile: (Context) -> InputStream) : AccountProviderSourceType {
+  private val getFile: (Context) -> InputStream
+) : AccountProviderSourceType {
 
   private val logger = LoggerFactory.getLogger(AccountProviderSourceFileBased::class.java)
 

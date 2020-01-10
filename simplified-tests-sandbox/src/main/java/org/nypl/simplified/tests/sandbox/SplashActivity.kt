@@ -40,7 +40,6 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
   }
 
   override fun onSplashMigrationReport(report: MigrationReport) {
-
   }
 
   private val migrationExecutor =
@@ -79,7 +78,6 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
       }
 
       override fun documentSetLatestURL(u: URL?) {
-
       }
 
       override fun documentGetReadableURL(): URL {
@@ -87,13 +85,11 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
       }
 
       override fun eulaSetHasAgreed(t: Boolean) {
-
       }
     }
   }
 
   override fun onSplashOpenProfileAnonymous() {
-
   }
 
   override fun onSplashWantProfilesMode(): ProfilesDatabaseType.AnonymousProfileEnabled {
@@ -113,7 +109,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
           taskRecorder.beginNewStep("OK")
           taskRecorder.finishFailure()
         },
-        loginAccount = { _,_->
+        loginAccount = { _, _ ->
           val taskRecorder =
             TaskRecorder.create<AccountLoginErrorData>()
           taskRecorder.beginNewStep("OK")
@@ -145,5 +141,4 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
       .replace(R.id.splashHolder, this.splashMainFragment, "SPLASH_MAIN")
       .commit()
   }
-
 }

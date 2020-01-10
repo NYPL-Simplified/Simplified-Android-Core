@@ -70,7 +70,8 @@ data class Bookmark(
    * The URI of this bookmark, if the bookmark exists on a remote server.
    */
 
-  val uri: URI?): Serializable {
+  val uri: URI?
+) : Serializable {
 
   /**
    * The ID of the book to which the bookmark belongs.
@@ -97,7 +98,7 @@ data class Bookmark(
    */
 
   fun toExplicit(): Bookmark {
-    return this.copy(kind =  BookmarkKind.ReaderBookmarkExplicit)
+    return this.copy(kind = BookmarkKind.ReaderBookmarkExplicit)
   }
 
   companion object {
@@ -109,7 +110,8 @@ data class Bookmark(
     fun createBookmarkID(
       book: BookID,
       location: BookLocation,
-      kind: BookmarkKind): BookmarkID {
+      kind: BookmarkKind
+    ): BookmarkID {
       try {
         val messageDigest = MessageDigest.getInstance("SHA-256")
         val utf8 = Charset.forName("UTF-8")
@@ -134,5 +136,4 @@ data class Bookmark(
       }
     }
   }
-
 }

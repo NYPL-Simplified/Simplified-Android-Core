@@ -92,22 +92,22 @@ data class AccountProviderImmutable(
     this.annotationsURI?.let { uri ->
       addLink(links, uri, "http://www.w3.org/ns/oa#annotationService")
     }
-    this.cardCreatorURI?.let {uri ->
+    this.cardCreatorURI?.let { uri ->
       addLink(links, uri, "register")
     }
-    this.eula?.let {uri ->
+    this.eula?.let { uri ->
       addLink(links, uri, "terms-of-service")
     }
-    this.license?.let {uri ->
+    this.license?.let { uri ->
       addLink(links, uri, "license")
     }
-    this.loansURI?.let {uri ->
+    this.loansURI?.let { uri ->
       addLink(links, uri, "http://opds-spec.org/shelf")
     }
-    this.patronSettingsURI?.let {uri ->
+    this.patronSettingsURI?.let { uri ->
       addLink(links, uri, "http://librarysimplified.org/terms/rel/user-profile")
     }
-    this.privacyPolicy?.let {uri ->
+    this.privacyPolicy?.let { uri ->
       addLink(links, uri, "privacy-policy")
     }
 
@@ -124,8 +124,8 @@ data class AccountProviderImmutable(
     return object : AccountProviderDescriptionType {
       override val metadata: AccountProviderDescriptionMetadata = meta
 
-      override fun resolve(onProgress: AccountProviderResolutionListenerType)
-        : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+      override fun resolve(onProgress: AccountProviderResolutionListenerType):
+        TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
         onProgress.invoke(this.metadata.id, "")
 
         val taskRecorder =

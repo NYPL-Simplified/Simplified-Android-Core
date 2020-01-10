@@ -7,4 +7,4 @@ import org.nypl.simplified.tests.books.reader.bookmarks.ReaderBookmarkPolicyCont
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class ReaderBookmarkPolicyTest: ReaderBookmarkPolicyContract()
+class ReaderBookmarkPolicyTest : ReaderBookmarkPolicyContract()

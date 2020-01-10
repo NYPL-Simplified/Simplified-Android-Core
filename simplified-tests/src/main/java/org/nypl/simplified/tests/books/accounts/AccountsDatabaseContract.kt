@@ -61,7 +61,8 @@ abstract class AccountsDatabaseContract {
 
   private class CausesContains<T : Exception> internal constructor(
     private val exception_type: Class<T>,
-    private val message: String) : BaseMatcher<AccountsDatabaseException>() {
+    private val message: String
+  ) : BaseMatcher<AccountsDatabaseException>() {
 
     private val logger = LoggerFactory.getLogger(CausesContains::class.java)
 
@@ -115,7 +116,8 @@ abstract class AccountsDatabaseContract {
 
   private fun onAccountResolutionStatus(
     accountProvider: URI,
-    message: String) {
+    message: String
+  ) {
     this.logger.debug("onAccountResolutionStatus: {}: {}", accountProvider, message)
   }
 

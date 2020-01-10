@@ -45,7 +45,8 @@ object AccountAuthenticationCredentialsStoreJSON {
 
   @Throws(IOException::class)
   fun serializeToText(
-    credentials: Map<AccountID, AccountAuthenticationCredentials>): String {
+    credentials: Map<AccountID, AccountAuthenticationCredentials>
+  ): String {
     val jo = serializeToJSON(credentials)
     val bao = ByteArrayOutputStream(1024)
     JSONSerializerUtilities.serialize(jo, bao)
@@ -113,7 +114,8 @@ object AccountAuthenticationCredentialsStoreJSON {
   }
 
   private fun deserializeFromJSONV20190424(
-    obj: ObjectNode): Map<AccountID, AccountAuthenticationCredentials> {
+    obj: ObjectNode
+  ): Map<AccountID, AccountAuthenticationCredentials> {
 
     val credentials =
       JSONParserUtilities.getObject(obj, "credentials")

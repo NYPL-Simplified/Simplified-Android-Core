@@ -4,17 +4,20 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.ProcedureType
 import io.reactivex.subjects.PublishSubject
-import junit.framework.Assert
 import org.joda.time.DateTime
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.*
+import org.nypl.simplified.books.book_registry.BookRegistry
+import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatusEvent
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.notifications.NotificationResourcesType
 import org.nypl.simplified.notifications.NotificationsService
 import org.nypl.simplified.notifications.NotificationsWrapper
@@ -157,7 +160,6 @@ abstract class NotificationsServiceContract {
 
         bookRegistry.update(bookWithStatusHeld)
 
-
         /**
          * Reset notification counter for each test
          */
@@ -281,7 +283,6 @@ abstract class NotificationsServiceContract {
 
         bookRegistry.update(bookWithStatusHeld)
 
-
         Thread.sleep(300)
         Assert.assertEquals(0, notificationCounter)
     }
@@ -303,7 +304,6 @@ abstract class NotificationsServiceContract {
 
         bookRegistry.update(bookWithStatusHeldReady)
 
-
         Thread.sleep(300)
         Assert.assertEquals(1, notificationCounter)
     }
@@ -324,7 +324,6 @@ abstract class NotificationsServiceContract {
          */
 
         bookRegistry.update(bookWithStatusHeldReady2)
-
 
         Thread.sleep(300)
         Assert.assertEquals(0, notificationCounter)

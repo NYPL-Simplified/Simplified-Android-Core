@@ -51,14 +51,12 @@ class MockBooksController : BooksControllerType {
     accountID: AccountID,
     bookID: BookID
   ) {
-
   }
 
   override fun bookDownloadCancel(
     account: AccountID,
     id: BookID
   ) {
-
   }
 
   override fun bookRevoke(
@@ -88,14 +86,12 @@ class MockBooksController : BooksControllerType {
     account: AccountType,
     bookID: BookID
   ) {
-
   }
 
   override fun bookDownloadCancel(
     account: AccountType,
     bookID: BookID
   ) {
-
   }
 
   override fun bookReport(
@@ -130,5 +126,4 @@ class MockBooksController : BooksControllerType {
   ): FluentFuture<Unit> {
     return FluentFuture.from(SettableFuture.create())
   }
-
 }

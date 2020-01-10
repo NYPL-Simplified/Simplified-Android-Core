@@ -20,5 +20,4 @@ class AccountProviderDescriptionCollectionParsers : AccountProviderDescriptionCo
   ): AccountProviderDescriptionCollectionParserType {
     return AccountProviderDescriptionCollectionParser(uri, stream, warningsAsErrors)
   }
-
 }

@@ -9,4 +9,5 @@ package org.nypl.simplified.patron.api
 data class PatronUserProfile(
   val settings: PatronSettings,
   val drm: List<PatronDRM>,
-  val authorization: PatronAuthorization?)
+  val authorization: PatronAuthorization?
+)

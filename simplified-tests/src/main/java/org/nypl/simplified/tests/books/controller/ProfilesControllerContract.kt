@@ -444,7 +444,8 @@ abstract class ProfilesControllerContract {
 
   private fun onAccountResolution(
     id: URI,
-    message: String) {
+    message: String
+  ) {
     this.logger.debug("resolution: {}: {}", id, message)
   }
 }

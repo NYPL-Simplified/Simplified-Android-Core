@@ -10,4 +10,5 @@ import java.net.URI
 data class SimplifiedBearerToken(
   val accessToken: String,
   val expiration: LocalDateTime,
-  val location: URI)
+  val location: URI
+)

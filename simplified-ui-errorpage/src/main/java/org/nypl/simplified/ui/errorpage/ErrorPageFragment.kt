@@ -34,7 +34,8 @@ class ErrorPageFragment : Fragment() {
      */
 
     fun <E : PresentableErrorType> create(
-      parameters: ErrorPageParameters<E>): ErrorPageFragment {
+      parameters: ErrorPageParameters<E>
+    ): ErrorPageFragment {
       val args = Bundle()
       args.putSerializable(this.PARAMETERS_ID, parameters)
 
@@ -64,7 +65,7 @@ class ErrorPageFragment : Fragment() {
         this.listener = activity
       } else {
         throw IllegalStateException(
-          "The activity hosting this fragment must implement ${className}")
+          "The activity hosting this fragment must implement $className")
       }
     }
   }
@@ -72,7 +73,8 @@ class ErrorPageFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?): View? {
+    savedInstanceState: Bundle?
+  ): View? {
 
     val viewRoot =
       inflater.inflate(R.layout.error_page, container, false)
@@ -116,7 +118,7 @@ class ErrorPageFragment : Fragment() {
 
     this.errorStepsList.setHasFixedSize(false)
     this.errorStepsList.layoutManager =
-      LinearLayoutManager(context);
+      LinearLayoutManager(context)
     this.errorStepsList.adapter =
       ErrorPageStepsListAdapter(parameters.taskSteps)
     (this.errorStepsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -137,7 +139,7 @@ class ErrorPageFragment : Fragment() {
         toolbar.subtitle = ""
       } else {
         throw IllegalStateException(
-          "The activity hosting this fragment must implement ${className}")
+          "The activity hosting this fragment must implement $className")
       }
     }
 

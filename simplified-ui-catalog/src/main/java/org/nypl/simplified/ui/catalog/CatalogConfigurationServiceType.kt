@@ -53,5 +53,4 @@ interface CatalogConfigurationServiceType {
    */
 
   val supportErrorReportSubject: String
-
 }

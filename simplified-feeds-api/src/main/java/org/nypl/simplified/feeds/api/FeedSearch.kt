@@ -13,15 +13,13 @@ sealed class FeedSearch : Serializable {
    * The search should be performed locally.
    */
 
-  object FeedSearchLocal
-    : FeedSearch()
+  object FeedSearchLocal : FeedSearch()
 
   /**
    * The search should be performed via an OpenSearch 1.1 REST API.
    */
 
   data class FeedSearchOpen1_1(
-    val search: OPDSOpenSearch1_1)
-    : FeedSearch()
-
+    val search: OPDSOpenSearch1_1
+  ) : FeedSearch()
 }

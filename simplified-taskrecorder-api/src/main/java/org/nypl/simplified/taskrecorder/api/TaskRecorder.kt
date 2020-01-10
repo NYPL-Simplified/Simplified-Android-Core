@@ -55,7 +55,8 @@ class TaskRecorder<E : Serializable> private constructor() : TaskRecorderType<E>
   override fun currentStepFailedAppending(
     message: String,
     errorValue: E,
-    exception: Throwable): TaskStep<E> {
+    exception: Throwable
+  ): TaskStep<E> {
     Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
 
     val step = this.steps.last()

@@ -57,7 +57,8 @@ data class AuthenticationDocument(
    * @see "https://drafts.opds.io/authentication-for-opds-1.0.html#232-links"
    */
 
-  val links: List<Link>) {
+  val links: List<Link>
+) {
 
   val loansURI: URI? =
     this.links.find { link -> link.relation == "http://opds-spec.org/shelf" }?.hrefURI
@@ -68,21 +69,21 @@ data class AuthenticationDocument(
   val startURI: URI? =
     this.links.find { link -> link.relation == "start" }?.hrefURI
 
-  val logoURI : URI? =
+  val logoURI: URI? =
     this.links.find { link -> link.relation == "logo" }?.hrefURI
 
   val patronSettingsURI: URI? =
     this.links.find { link -> link.relation == "http://librarysimplified.org/terms/rel/user-profile" }?.hrefURI
 
-  val eulaURI : URI? =
+  val eulaURI: URI? =
     this.links.find { link -> link.relation == "terms-of-service" }?.hrefURI
 
-  val privacyPolicyURI : URI? =
+  val privacyPolicyURI: URI? =
     this.links.find { link -> link.relation == "privacy-policy" }?.hrefURI
 
-  val licenseURI : URI? =
+  val licenseURI: URI? =
     this.links.find { link -> link.relation == "license" }?.hrefURI
 
-  val supportURI : URI? =
+  val supportURI: URI? =
     this.links.find { link -> link.relation == "help" }?.hrefURI
 }

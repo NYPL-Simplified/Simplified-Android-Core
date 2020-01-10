@@ -4,7 +4,6 @@ import android.content.Context
 import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
@@ -12,7 +11,6 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
 import java.io.File
-import java.net.URI
 
 /**
  * The default implementation of the {@link AccountsDatabaseFactoryType} interface.

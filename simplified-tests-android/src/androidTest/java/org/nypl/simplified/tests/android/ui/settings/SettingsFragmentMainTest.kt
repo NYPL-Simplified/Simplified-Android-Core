@@ -21,18 +21,16 @@ import org.nypl.simplified.tests.android.ui.FragmentBaseTest
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 
-
 @RunWith(AndroidJUnit4::class)
-class SettingsFragmentMainTest
-  : FragmentBaseTest<SettingsFragmentMainActivity>(SettingsFragmentMainActivity::class.java) {
+class SettingsFragmentMainTest :
+  FragmentBaseTest<SettingsFragmentMainActivity>(SettingsFragmentMainActivity::class.java) {
 
   /**
    * If no documents are present, then all of the information links are disabled.
    */
 
   @Test
-  fun testDocumentLinksNotPresent()
-  {
+  fun testDocumentLinksNotPresent() {
     val navigation =
       Mockito.mock(SettingsNavigationControllerType::class.java)
     val documents =
@@ -53,7 +51,7 @@ class SettingsFragmentMainTest
     services.clear()
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     val activity = this.launchActivity()
 
@@ -79,8 +77,7 @@ class SettingsFragmentMainTest
    */
 
   @Test
-  fun testDocumentLinksPresent()
-  {
+  fun testDocumentLinksPresent() {
     val navigation =
       Mockito.mock(SettingsNavigationControllerType::class.java)
     val document =
@@ -105,7 +102,7 @@ class SettingsFragmentMainTest
     services.clear()
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     val activity = this.launchActivity()
 
@@ -130,8 +127,7 @@ class SettingsFragmentMainTest
    */
 
   @Test
-  fun testAccounts()
-  {
+  fun testAccounts() {
     val navigation =
       Mockito.mock(SettingsNavigationControllerType::class.java)
     val documents =
@@ -141,7 +137,7 @@ class SettingsFragmentMainTest
     services.clear()
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     this.launchActivity()
 
@@ -160,8 +156,7 @@ class SettingsFragmentMainTest
    */
 
   @Test
-  fun testVersion()
-  {
+  fun testVersion() {
     val navigation =
       Mockito.mock(SettingsNavigationControllerType::class.java)
     val documents =
@@ -171,7 +166,7 @@ class SettingsFragmentMainTest
     services.clear()
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     this.launchActivity()
 

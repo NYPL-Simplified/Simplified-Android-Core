@@ -97,5 +97,4 @@ abstract class ProfileDescriptionJSONContract {
     this.logger.debug("{}: {}", name, text)
     return text
   }
-
 }

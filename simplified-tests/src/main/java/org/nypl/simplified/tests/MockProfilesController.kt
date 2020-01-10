@@ -6,7 +6,6 @@ import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
@@ -97,7 +96,7 @@ class MockProfilesController(
   }
 
   override fun profileEvents(): Observable<ProfileEvent> {
-    return this.profileEventSource;
+    return this.profileEventSource
   }
 
   override fun profileSelect(id: ProfileID): FluentFuture<Unit> {
@@ -110,7 +109,8 @@ class MockProfilesController(
 
   data class ProfileAccountLogin(
     val account: AccountID,
-    val credentials: AccountAuthenticationCredentials)
+    val credentials: AccountAuthenticationCredentials
+  )
 
   var profileAccountLogins =
     mutableListOf<ProfileAccountLogin>()

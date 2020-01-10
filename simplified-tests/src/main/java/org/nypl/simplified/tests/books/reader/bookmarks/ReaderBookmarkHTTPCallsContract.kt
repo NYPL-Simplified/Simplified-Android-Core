@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
@@ -52,7 +52,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
 
   private fun checkGetBookmarks(
     expectedBookmarks: List<BookmarkAnnotation>,
-    serverResponseText: String) {
+    serverResponseText: String
+  ) {
     val objectMapper = ObjectMapper()
     val http = JSONParsingHTTP(objectMapper)
     val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
@@ -72,7 +73,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
 
   private fun httpOKOfData(
     objectMapper: ObjectMapper,
-    jsonText: String): HTTPResultType<InputStream> {
+    jsonText: String
+  ): HTTPResultType<InputStream> {
 
     val node = objectMapper.readTree(jsonText)
     val data = objectMapper.writeValueAsBytes(node)
@@ -95,13 +97,15 @@ abstract class ReaderBookmarkHTTPCallsContract {
     override fun get(
       auth: OptionType<HTTPAuthType>,
       uri: URI,
-      offset: Long): HTTPResultType<InputStream> {
+      offset: Long
+    ): HTTPResultType<InputStream> {
       return (this.responses[uri] as HTTPResultType<InputStream>)
     }
 
     override fun put(
       auth: OptionType<HTTPAuthType>,
-      uri: URI): HTTPResultType<InputStream> {
+      uri: URI
+    ): HTTPResultType<InputStream> {
       return (this.responses[uri] as HTTPResultType<InputStream>)
     }
 
@@ -109,7 +113,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
       auth: OptionType<HTTPAuthType>,
       uri: URI,
       data: ByteArray,
-      content_type: String): HTTPResultType<InputStream> {
+      content_type: String
+    ): HTTPResultType<InputStream> {
       this.mostRecentlyParsed = this.objectMapper.readTree(data) as ObjectNode
       return (this.responses[uri] as HTTPResultType<InputStream>)
     }
@@ -118,7 +123,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
       auth: OptionType<HTTPAuthType>,
       uri: URI,
       data: ByteArray,
-      content_type: String): HTTPResultType<InputStream> {
+      content_type: String
+    ): HTTPResultType<InputStream> {
       this.mostRecentlyParsed = this.objectMapper.readTree(data) as ObjectNode
       return (this.responses[uri] as HTTPResultType<InputStream>)
     }
@@ -126,13 +132,15 @@ abstract class ReaderBookmarkHTTPCallsContract {
     override fun delete(
       auth: OptionType<HTTPAuthType>,
       uri: URI,
-      content_type: String): HTTPResultType<InputStream> {
+      content_type: String
+    ): HTTPResultType<InputStream> {
       return (this.responses[uri] as HTTPResultType<InputStream>)
     }
 
     override fun head(
       auth: OptionType<HTTPAuthType>,
-      uri: URI): HTTPResultType<InputStream> {
+      uri: URI
+    ): HTTPResultType<InputStream> {
       return (this.responses[uri] as HTTPResultType<InputStream>)
     }
   }

@@ -181,7 +181,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
    * @return `true` if the authentication settings imply that barcode scanning and display is supported
    */
 
-  val supportsBarcodeDisplay : Boolean
+  val supportsBarcodeDisplay: Boolean
     get() = when (val auth = this.authentication) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate -> false
       is AccountProviderAuthenticationDescription.Basic -> {

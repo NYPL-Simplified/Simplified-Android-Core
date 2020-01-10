@@ -388,7 +388,6 @@ class MainActivity :
   }
 
   override fun onSplashMigrationReport(report: MigrationReport) {
-
   }
 
   override fun onErrorPageSendReport(parameters: ErrorPageParameters<*>) {

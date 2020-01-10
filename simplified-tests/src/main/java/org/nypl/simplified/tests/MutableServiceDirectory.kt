@@ -78,5 +78,4 @@ class MutableServiceDirectory : ServiceDirectoryType {
       this.services.remove(interfaceType)
     }
   }
-
 }

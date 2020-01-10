@@ -17,7 +17,8 @@ import java.util.concurrent.Callable
 class ProfileAccountSelectionTask(
   private val profiles: ProfilesDatabaseType,
   private val profileEvents: Subject<ProfileEvent>,
-  private val accountProvider: URI) : Callable<ProfileAccountSelectEvent> {
+  private val accountProvider: URI
+) : Callable<ProfileAccountSelectEvent> {
 
   private fun run(): ProfileAccountSelectEvent {
     return try {

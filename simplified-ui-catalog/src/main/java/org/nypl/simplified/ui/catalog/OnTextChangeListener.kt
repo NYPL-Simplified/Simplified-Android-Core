@@ -8,13 +8,14 @@ import android.text.TextWatcher
  */
 
 internal class OnTextChangeListener(
-  private val onChanged: (sequence: CharSequence,
-                          start: Int,
-                          before: Int,
-                          count: Int) -> Unit
+  private val onChanged: (
+    sequence: CharSequence,
+    start: Int,
+    before: Int,
+    count: Int
+  ) -> Unit
 ) : TextWatcher {
   override fun afterTextChanged(sequence: Editable) {
-
   }
 
   override fun beforeTextChanged(
@@ -23,7 +24,6 @@ internal class OnTextChangeListener(
     count: Int,
     after: Int
   ) {
-
   }
 
   override fun onTextChanged(

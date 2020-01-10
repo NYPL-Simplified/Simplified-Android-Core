@@ -100,7 +100,7 @@ class SettingsFragmentAccount : Fragment() {
     this.parameters = this.arguments!![PARAMETERS_ID] as SettingsFragmentAccountParameters
 
     val services = Services.serviceDirectory()
-    
+
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
     this.documents =
@@ -346,7 +346,6 @@ class SettingsFragmentAccount : Fragment() {
         })
       }
       else -> {
-
       }
     }
   }
@@ -483,10 +482,8 @@ class SettingsFragmentAccount : Fragment() {
             this.reconfigureAccountUI()
           })
         } else {
-
         }
       else -> {
-
       }
     }
   }

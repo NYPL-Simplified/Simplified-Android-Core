@@ -16,7 +16,8 @@ import java.util.ServiceLoader
 
 class Migrations(
   private val serviceDependencies: MigrationServiceDependencies,
-  private val services: () -> List<MigrationProviderType>) : MigrationsType {
+  private val services: () -> List<MigrationProviderType>
+) : MigrationsType {
 
   private var migrationServices: List<MigrationType>
 
@@ -53,7 +54,7 @@ class Migrations(
       val subscription =
         migrationService.events.subscribe(this.eventsObservable::onNext)
 
-       try {
+      try {
         this.logger.debug("running migration service {}", migrationService.javaClass.canonicalName)
         service.run()
       } finally {

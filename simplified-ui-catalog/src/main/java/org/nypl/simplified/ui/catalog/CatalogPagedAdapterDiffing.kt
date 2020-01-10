@@ -25,5 +25,4 @@ object CatalogPagedAdapterDiffing {
         return oldItem == newItem
       }
     }
-
 }

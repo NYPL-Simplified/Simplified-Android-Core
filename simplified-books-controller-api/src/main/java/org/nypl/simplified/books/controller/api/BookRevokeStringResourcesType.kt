@@ -241,5 +241,4 @@ interface BookRevokeStringResourcesType {
    */
 
   val revokeStarted: String
-
 }

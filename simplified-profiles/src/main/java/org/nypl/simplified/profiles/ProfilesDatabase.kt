@@ -104,7 +104,8 @@ internal class ProfilesDatabase internal constructor(
   @Throws(ProfileDatabaseException::class)
   override fun createProfile(
     accountProvider: AccountProviderType,
-    displayName: String): ProfileType {
+    displayName: String
+  ): ProfileType {
 
     if (displayName.isEmpty()) {
       throw ProfileCreateInvalidException("Display name cannot be empty")

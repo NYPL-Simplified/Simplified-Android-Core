@@ -1,15 +1,6 @@
 package org.nypl.simplified.books.book_database.api
 
-import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
-import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
-import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
-import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
-import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import java.util.Collections
 import java.util.HashSet
 
@@ -51,7 +42,8 @@ object BookFormats {
   private fun makeSupportedBookMimeTypes(
     epub: Set<String>,
     audioBook: Set<String>,
-    pdf: Set<String>): Set<String> {
+    pdf: Set<String>
+  ): Set<String> {
     val types = HashSet<String>(epub.size)
     types.addAll(epub)
     types.addAll(audioBook)

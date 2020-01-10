@@ -20,7 +20,8 @@ data class OPDSIndirectAcquisition(
    * Zero or more nested indirect acquisitions.
    */
 
-  val indirectAcquisitions: List<OPDSIndirectAcquisition>) : Serializable {
+  val indirectAcquisitions: List<OPDSIndirectAcquisition>
+) : Serializable {
 
   /**
    * Find an indirect acquisition with the given type.
@@ -61,7 +62,8 @@ data class OPDSIndirectAcquisition(
 
     fun findTypeIn(
       wantType: String,
-      indirects: List<OPDSIndirectAcquisition>): OPDSIndirectAcquisition? {
+      indirects: List<OPDSIndirectAcquisition>
+    ): OPDSIndirectAcquisition? {
       return indirects.find { indirect -> indirect.findType(wantType) != null }
     }
 
@@ -73,7 +75,8 @@ data class OPDSIndirectAcquisition(
 
     fun findTypeInOptional(
       wantType: String,
-      indirects: List<OPDSIndirectAcquisition>): OptionType<OPDSIndirectAcquisition> {
+      indirects: List<OPDSIndirectAcquisition>
+    ): OptionType<OPDSIndirectAcquisition> {
       return Option.of(this.findTypeIn(wantType, indirects))
     }
 

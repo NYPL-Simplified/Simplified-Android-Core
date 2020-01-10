@@ -12,6 +12,6 @@ interface ParserProviderType<T> {
   fun createParser(
     uri: URI,
     stream: InputStream,
-    warningsAsErrors: Boolean = false): ParserType<T>
-
+    warningsAsErrors: Boolean = false
+  ): ParserType<T>
 }

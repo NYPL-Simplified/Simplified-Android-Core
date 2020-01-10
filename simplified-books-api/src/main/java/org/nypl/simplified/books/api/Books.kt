@@ -7,7 +7,6 @@ import org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
-import java.io.Serializable
 import java.net.URI
 
 /**
@@ -156,7 +155,8 @@ sealed class BookFormat {
      * The most recent copy of the audio book manifest, if any has been fetched.
      */
 
-    val manifestFile: File)
+    val manifestFile: File
+  )
 
   /**
    * An audio book format.

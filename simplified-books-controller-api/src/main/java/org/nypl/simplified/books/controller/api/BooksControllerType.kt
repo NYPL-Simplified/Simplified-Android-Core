@@ -21,10 +21,10 @@ interface BooksControllerType {
   /**
    * Attempt to borrow the given book.
    *
-   * @param account     The account that will receive the book
-   * @param id          The ID of the book
+   * @param account The account that will receive the book
+   * @param id The ID of the book
    * @param acquisition The acquisition entry for the book
-   * @param entry       The OPDS feed entry for the book
+   * @param entry The OPDS feed entry for the book
    */
 
   fun bookBorrow(
@@ -37,10 +37,10 @@ interface BooksControllerType {
   /**
    * Attempt to borrow the given book.
    *
-   * @param accountID     The account that will receive the book
-   * @param id          The ID of the book
+   * @param accountID The account that will receive the book
+   * @param id The ID of the book
    * @param acquisition The acquisition entry for the book
-   * @param entry       The OPDS feed entry for the book
+   * @param entry The OPDS feed entry for the book
    */
 
   fun bookBorrow(
@@ -54,8 +54,8 @@ interface BooksControllerType {
    * Attempt to borrow the given book. The controller will pick the acquisition.
    *
    * @param account The account that will receive the book
-   * @param id      The ID of the book
-   * @param entry   The OPDS feed entry for the book
+   * @param id The ID of the book
+   * @param entry The OPDS feed entry for the book
    * @see org.nypl.simplified.books.book_database.api.BookAcquisitionSelection.preferredAcquisition
    */
 
@@ -69,8 +69,8 @@ interface BooksControllerType {
    * Attempt to borrow the given book. The controller will pick the acquisition.
    *
    * @param accountID The account that will receive the book
-   * @param id      The ID of the book
-   * @param entry   The OPDS feed entry for the book
+   * @param id The ID of the book
+   * @param entry The OPDS feed entry for the book
    * @see org.nypl.simplified.books.book_database.api.BookAcquisitionSelection.preferredAcquisition
    */
 
@@ -84,7 +84,7 @@ interface BooksControllerType {
    * Dismiss a failed book borrowing.
    *
    * @param account The account that failed to receive the book
-   * @param id      The ID of the book
+   * @param id The ID of the book
    */
 
   fun bookBorrowFailedDismiss(
@@ -96,7 +96,7 @@ interface BooksControllerType {
    * Dismiss a failed book borrowing.
    *
    * @param accountID The account that failed to receive the book
-   * @param bookID      The ID of the book
+   * @param bookID The ID of the book
    */
 
   fun bookBorrowFailedDismiss(
@@ -108,7 +108,7 @@ interface BooksControllerType {
    * Cancel a book download.
    *
    * @param account The account that would be receiving the book
-   * @param bookID      The ID of the book
+   * @param bookID The ID of the book
    */
 
   fun bookDownloadCancel(
@@ -120,7 +120,7 @@ interface BooksControllerType {
    * Cancel a book download.
    *
    * @param accountID The account that would be receiving the book
-   * @param bookID      The ID of the book
+   * @param bookID The ID of the book
    */
 
   fun bookDownloadCancel(
@@ -131,8 +131,8 @@ interface BooksControllerType {
   /**
    * Submit a problem report for a book
    *
-   * @param account     The account that owns the book
-   * @param feedEntry  Feed entry, used to get the URI to submit to
+   * @param account The account that owns the book
+   * @param feedEntry Feed entry, used to get the URI to submit to
    * @param reportType Type of report to submit
    */
 
@@ -204,7 +204,7 @@ interface BooksControllerType {
    * Dismiss a failed book revocation.
    *
    * @param account The account that failed to revoke the book
-   * @param id      The ID of the book
+   * @param id The ID of the book
    */
 
   fun bookRevokeFailedDismiss(
@@ -216,7 +216,7 @@ interface BooksControllerType {
    * Dismiss a failed book revocation.
    *
    * @param accountID The account that failed to revoke the book
-   * @param id      The ID of the book
+   * @param id The ID of the book
    */
 
   fun bookRevokeFailedDismiss(

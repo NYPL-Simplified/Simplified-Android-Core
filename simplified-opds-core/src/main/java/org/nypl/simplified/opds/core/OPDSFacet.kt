@@ -40,7 +40,8 @@ data class OPDSFacet(
    * The group type
    */
 
-  val groupType: OptionType<String>) : Serializable {
+  val groupType: OptionType<String>
+) : Serializable {
 
   companion object {
     private const val serialVersionUID = 1L

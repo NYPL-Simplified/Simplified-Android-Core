@@ -6,7 +6,6 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.StyleRes
-import org.nypl.simplified.ui.theme.R
 
 class ThemeControl {
 
@@ -164,11 +163,11 @@ class ThemeControl {
     @ColorInt
     fun resolveColorAttribute(
       theme: Resources.Theme,
-      @AttrRes attribute: Int): Int {
+      @AttrRes attribute: Int
+    ): Int {
       val typedValue = TypedValue()
       theme.resolveAttribute(attribute, typedValue, true)
       return typedValue.data
     }
   }
-
 }

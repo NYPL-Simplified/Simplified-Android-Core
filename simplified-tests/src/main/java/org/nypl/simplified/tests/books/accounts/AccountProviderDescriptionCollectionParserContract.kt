@@ -14,7 +14,7 @@ import java.net.URI
 
 abstract class AccountProviderDescriptionCollectionParserContract {
 
-  protected abstract val logger : Logger
+  protected abstract val logger: Logger
 
   @Throws(Exception::class)
   private fun resource(name: String): InputStream {
@@ -28,8 +28,7 @@ abstract class AccountProviderDescriptionCollectionParserContract {
    */
 
   @Test
-  fun testLibraryRegistry()
-  {
+  fun testLibraryRegistry() {
     val parsers = AccountProviderDescriptionCollectionParsers()
 
     resource("libraryregistry-qa.json").use { stream ->
@@ -52,8 +51,7 @@ abstract class AccountProviderDescriptionCollectionParserContract {
    */
 
   @Test
-  fun testLibraryRegistryRoundTrip()
-  {
+  fun testLibraryRegistryRoundTrip() {
     val parsers = AccountProviderDescriptionCollectionParsers()
     val serializers = AccountProviderDescriptionCollectionSerializers()
 

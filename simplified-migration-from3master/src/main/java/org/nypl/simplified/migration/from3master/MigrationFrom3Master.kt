@@ -152,7 +152,8 @@ class MigrationFrom3Master(
     val baseDirectory: File,
     val adobeDeviceXML: File?,
     val idURI: URI,
-    val idNumeric: Int)
+    val idNumeric: Int
+  )
 
   data class LoadedAccount(
     val enumeratedAccount: EnumeratedAccount,
@@ -160,11 +161,13 @@ class MigrationFrom3Master(
     val booksDataDirectory: File,
     val account: MigrationFrom3MasterAccount?,
     val accountSubDirectory: File,
-    val accountFile: File)
+    val accountFile: File
+  )
 
   data class CreatedAccount(
     val loadedAccount: LoadedAccount,
-    val account: AccountType)
+    val account: AccountType
+  )
 
   data class LoadedBook(
     val owner: CreatedAccount,
@@ -175,10 +178,12 @@ class MigrationFrom3Master(
     val epubAdobeLoan: AdobeAdeptLoan?,
     val epubBookmarks: List<Bookmark>?,
     val audioBookPosition: PlayerPosition?,
-    val audioBookManifest: BookFormat.AudioBookManifestReference?)
+    val audioBookManifest: BookFormat.AudioBookManifestReference?
+  )
 
   data class CopiedBook(
-    val loadedBook: LoadedBook)
+    val loadedBook: LoadedBook
+  )
 
   override fun run(): MigrationReport {
     val subscription =
@@ -276,7 +281,6 @@ class MigrationFrom3Master(
           return
         }
         is AccountProviderAuthenticationDescription.Basic -> {
-
         }
       }
 
@@ -618,7 +622,6 @@ class MigrationFrom3Master(
     val mapper = ObjectMapper()
     val jsonObj: Map<String, List<BookmarkAnnotation>> =
       mapper.readValue(stream, object : TypeReference<Map<String, List<BookmarkAnnotation>>>() {
-
       })
     return jsonObj["bookmarks"] ?: listOf()
   }

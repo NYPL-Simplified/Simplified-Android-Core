@@ -18,5 +18,4 @@ interface ProfileIdleTimerConfigurationServiceType {
    */
 
   val logOutAfterSeconds: Int
-
 }

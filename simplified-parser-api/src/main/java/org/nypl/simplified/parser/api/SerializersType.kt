@@ -12,6 +12,6 @@ interface SerializersType<T> {
   fun createSerializer(
     uri: URI,
     stream: OutputStream,
-    document: T): SerializerType
-
+    document: T
+  ): SerializerType
 }

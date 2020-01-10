@@ -36,7 +36,7 @@ class MockAccountLoginStringResources : AccountLoginStringResourcesType {
     get() = "loginPatronSettingsInvalidCredentials"
 
   override fun loginServerError(status: Int, message: String): String {
-    return "loginServerError ${status} ${message}"
+    return "loginServerError $status $message"
   }
 
   override val loginCheckAuthRequired: String
@@ -56,5 +56,4 @@ class MockAccountLoginStringResources : AccountLoginStringResourcesType {
 
   override fun loginPatronSettingsRequestParseFailed(errors: List<String>): String =
     "loginPatronSettingsRequestParseFailed"
-
 }

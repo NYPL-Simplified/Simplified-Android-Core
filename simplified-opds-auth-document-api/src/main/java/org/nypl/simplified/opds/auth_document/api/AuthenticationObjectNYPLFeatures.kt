@@ -18,4 +18,5 @@ data class AuthenticationObjectNYPLFeatures(
    * The disabled feature flags.
    */
 
-  val disabled: Set<String>)
+  val disabled: Set<String>
+)

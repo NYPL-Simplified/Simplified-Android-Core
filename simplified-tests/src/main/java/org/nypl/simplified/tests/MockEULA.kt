@@ -16,7 +16,6 @@ class MockEULA : EULAType {
   }
 
   override fun documentSetLatestURL(u: URL?) {
-
   }
 
   override fun documentGetReadableURL(): URL {

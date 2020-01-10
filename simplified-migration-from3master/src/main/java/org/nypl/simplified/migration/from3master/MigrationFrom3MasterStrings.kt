@@ -3,7 +3,8 @@ package org.nypl.simplified.migration.from3master
 import android.content.res.Resources
 
 class MigrationFrom3MasterStrings(
-  private val resources: Resources) : MigrationFrom3MasterStringResourcesType {
+  private val resources: Resources
+) : MigrationFrom3MasterStringResourcesType {
 
   override fun progressLoadingAccount(idNumeric: Int): String =
     this.resources.getString(R.string.progressLoadingAccount, idNumeric)

@@ -36,5 +36,4 @@ class NetworkConnectivity private constructor(
       return NetworkConnectivity(context)
     }
   }
-
 }

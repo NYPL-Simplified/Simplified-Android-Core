@@ -9,5 +9,4 @@ class VanillaIdleTimerConfigurationService : ProfileIdleTimerConfigurationServic
 
   override val logOutAfterSeconds: Int
     get() = 10 * 60
-
 }

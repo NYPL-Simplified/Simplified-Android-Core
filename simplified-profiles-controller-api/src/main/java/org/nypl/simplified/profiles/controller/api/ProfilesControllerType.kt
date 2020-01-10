@@ -80,9 +80,9 @@ interface ProfilesControllerType {
    * Create a profile, asynchronously, and return a profile event.
    *
    * @param accountProvider The account provider used to create the default account
-   * @param displayName     The profile display name
-   * @param gender           The gender for the profile
-   * @param date             The date of birth for the profile
+   * @param displayName The profile display name
+   * @param gender The gender for the profile
+   * @param date The date of birth for the profile
    * @return A future that returns a status value
    */
 
@@ -167,7 +167,7 @@ interface ProfilesControllerType {
    * Attempt to login using the given account of the current profile. The login is attempted
    * using the given credentials.
    *
-   * @param accountID     The account ID
+   * @param accountID The account ID
    * @param credentials The credentials
    * @return A future that returns the result of logging in
    */
@@ -240,7 +240,7 @@ interface ProfilesControllerType {
    * Find an account int the current profile using the given provider.
    *
    * @param provider The account provider ID
-   * @throws ProfileNoneCurrentException          If the anonymous profile is disabled and no profile has been selected
+   * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
    * @throws AccountsDatabaseNonexistentException If no account exists with the given provider
    * @see .profileSelect
    * @see .profileAnonymousEnabled
@@ -259,7 +259,7 @@ interface ProfilesControllerType {
 
   /**
    * @return A list of all of the account providers used by the current profile
-   * @throws ProfileNoneCurrentException                If the anonymous profile is disabled and no profile has been selected
+   * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
    * @throws ProfileNonexistentAccountProviderException If the current account refers to an account provider that is not in the current set of known account providers
    * @see .profileSelect
    * @see .profileAnonymousEnabled
@@ -295,7 +295,7 @@ interface ProfilesControllerType {
   /**
    * Update values for the given profile.
    *
-   * @param profile     The target profile
+   * @param profile The target profile
    * @param update A function that transforms the profile's current description
    * @see .profileSelect
    * @see .profileAnonymousEnabled

@@ -21,15 +21,12 @@ abstract class FragmentBaseTest<T : AppCompatActivity>(activityClass: Class<T>) 
   private var wakeLock: PowerManager.WakeLock? = null
 
   open fun setupExtra() {
-
   }
 
   open fun tearDownExtra() {
-
   }
 
-  fun launchActivity(): T
-  {
+  fun launchActivity(): T {
     this.log.debug("waking up device")
 
     val activity =

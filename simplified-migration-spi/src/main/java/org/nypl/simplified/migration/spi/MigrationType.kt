@@ -27,5 +27,4 @@ interface MigrationType {
    */
 
   fun run(): MigrationReport
-
 }

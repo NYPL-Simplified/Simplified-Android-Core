@@ -75,7 +75,7 @@ interface ProfileType : ProfileReadableType {
    * Delete the profile.
    *
    * @throws ProfileDatabaseException On errors
-   * @throws IOException              On I/O errors
+   * @throws IOException On I/O errors
    */
 
   @Throws(ProfileDatabaseException::class, IOException::class)

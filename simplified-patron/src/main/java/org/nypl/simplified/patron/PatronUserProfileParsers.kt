@@ -20,5 +20,4 @@ class PatronUserProfileParsers : PatronUserProfileParsersType {
     warningsAsErrors: Boolean
   ): PatronUserProfileParserType =
     PatronUserProfileParser(this.mapper, uri, stream, warningsAsErrors)
-
 }

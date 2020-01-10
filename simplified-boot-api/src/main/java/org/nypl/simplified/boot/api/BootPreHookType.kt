@@ -16,5 +16,4 @@ interface BootPreHookType {
    */
 
   fun execute(context: Context)
-
 }

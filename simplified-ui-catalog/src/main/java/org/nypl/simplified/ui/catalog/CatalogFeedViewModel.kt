@@ -172,7 +172,6 @@ class CatalogFeedViewModel(
       }
       is AccountProviderAuthenticationDescription.Basic,
       null -> {
-
       }
     }
 

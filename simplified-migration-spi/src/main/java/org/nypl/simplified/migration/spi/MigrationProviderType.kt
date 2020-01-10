@@ -11,5 +11,4 @@ interface MigrationProviderType {
    */
 
   fun create(services: MigrationServiceDependencies): MigrationType
-
 }

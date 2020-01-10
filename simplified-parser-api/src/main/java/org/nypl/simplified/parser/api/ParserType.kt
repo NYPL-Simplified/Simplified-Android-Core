@@ -13,5 +13,4 @@ interface ParserType<T> : Closeable {
    */
 
   fun parse(): ParseResult<T>
-
 }

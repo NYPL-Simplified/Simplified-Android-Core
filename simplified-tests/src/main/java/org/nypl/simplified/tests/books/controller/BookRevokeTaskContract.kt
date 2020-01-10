@@ -24,7 +24,8 @@ import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.*
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
@@ -1981,7 +1982,7 @@ abstract class BookRevokeTaskContract {
     }
   }
 
-  private fun resource(file: String): InputStream {
+  private fun resource(file: String): InputStream? {
     return BookRevokeTaskContract::class.java.getResourceAsStream(file)
   }
 
@@ -1989,7 +1990,7 @@ abstract class BookRevokeTaskContract {
   private fun resourceSize(file: String): Long {
     var total = 0L
     val buffer = ByteArray(8192)
-    this.resource(file).use { stream ->
+    this.resource(file)?.use { stream ->
       while (true) {
         val r = stream.read(buffer)
         if (r <= 0) {

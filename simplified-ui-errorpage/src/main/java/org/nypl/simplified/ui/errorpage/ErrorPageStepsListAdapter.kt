@@ -13,8 +13,8 @@ import org.nypl.simplified.taskrecorder.api.TaskStepResolution
  * An adapter for the task steps recycler view.
  */
 
-class ErrorPageStepsListAdapter(private val steps: List<TaskStep<*>>)
-  : RecyclerView.Adapter<ErrorPageStepsListAdapter.ViewHolder>() {
+class ErrorPageStepsListAdapter(private val steps: List<TaskStep<*>>) :
+  RecyclerView.Adapter<ErrorPageStepsListAdapter.ViewHolder>() {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
     val inflater =

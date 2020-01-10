@@ -8,4 +8,5 @@ import org.nypl.simplified.books.api.Book
 
 data class BookWithStatus(
   val book: Book,
-  val status: BookStatus)
+  val status: BookStatus
+)

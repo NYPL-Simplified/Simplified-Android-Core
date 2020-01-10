@@ -21,8 +21,8 @@ sealed class ReaderBookmarkPolicyOutput {
 
     data class LocallySaveBookmark(
       val accountID: AccountID,
-      val bookmark: Bookmark)
-      : Command()
+      val bookmark: Bookmark
+    ) : Command()
 
     /**
      * The given bookmark should be sent to the server.
@@ -30,8 +30,8 @@ sealed class ReaderBookmarkPolicyOutput {
 
     data class RemotelySendBookmark(
       val accountID: AccountID,
-      val bookmark: Bookmark)
-      : Command()
+      val bookmark: Bookmark
+    ) : Command()
 
     /**
      * The given bookmark should be deleted from the server.
@@ -39,16 +39,16 @@ sealed class ReaderBookmarkPolicyOutput {
 
     data class RemotelyDeleteBookmark(
       val accountID: AccountID,
-      val bookmark: Bookmark)
-      : Command()
+      val bookmark: Bookmark
+    ) : Command()
 
     /**
      * Bookmarks should be fetched from the server for the given account.
      */
 
     data class RemotelyFetchBookmarks(
-      val accountID: AccountID)
-      : Command()
+      val accountID: AccountID
+    ) : Command()
   }
 
   /**
@@ -63,9 +63,7 @@ sealed class ReaderBookmarkPolicyOutput {
 
     data class LocalBookmarkAlreadyExists(
       val accountID: AccountID,
-      val bookmark: Bookmark)
-      : Event()
-
+      val bookmark: Bookmark
+    ) : Event()
   }
-
 }

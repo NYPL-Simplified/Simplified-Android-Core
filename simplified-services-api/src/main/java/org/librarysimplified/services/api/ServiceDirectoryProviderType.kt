@@ -11,5 +11,4 @@ interface ServiceDirectoryProviderType {
    */
 
   fun serviceDirectory(): ServiceDirectoryType
-
 }

@@ -14,11 +14,13 @@ import java.net.URI
 
 class MappedHTTP(
   val logger: Logger,
-  val content: MutableMap<String, HTTPResultType<InputStream>> = mutableMapOf()) : HTTPType {
+  val content: MutableMap<String, HTTPResultType<InputStream>> = mutableMapOf()
+) : HTTPType {
 
   data class MappedResource(
-    val stream : InputStream,
-    val size: Long)
+    val stream: InputStream,
+    val size: Long
+  )
 
   fun addResource(uri: String, resource: MappedResource, contentType: String = "application/octet-stream") {
     this.content[uri] =
@@ -51,7 +53,8 @@ class MappedHTTP(
     auth: OptionType<HTTPAuthType>,
     uri: URI,
     data: ByteArray,
-    content_type: String): HTTPResultType<InputStream> {
+    content_type: String
+  ): HTTPResultType<InputStream> {
     this.logger.debug("put: {} {} {} {}", auth, uri, data, content_type)
     return this.content[uri.toASCIIString()] ?: this.notFound(uri)
   }
@@ -75,5 +78,4 @@ class MappedHTTP(
     this.logger.debug("head: {} {} {}", auth, uri)
     return this.content[uri.toASCIIString()] ?: this.notFound(uri)
   }
-
 }

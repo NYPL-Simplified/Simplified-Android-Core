@@ -18,5 +18,4 @@ class MockAccountDeletionStringResources : ProfileAccountDeletionStringResources
 
   override val deletingAccount: String
     get() = "deletingAccount"
-
 }

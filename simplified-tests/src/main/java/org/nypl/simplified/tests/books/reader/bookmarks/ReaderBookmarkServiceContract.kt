@@ -2,7 +2,6 @@ package org.nypl.simplified.tests.books.reader.bookmarks
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.io7m.jfunctional.Option
-import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import org.joda.time.LocalDateTime
 import org.junit.After
@@ -52,7 +51,8 @@ abstract class ReaderBookmarkServiceContract {
     threads: (Runnable) -> Thread,
     events: Subject<ReaderBookmarkEvent>,
     httpCalls: ReaderBookmarkHTTPCallsType,
-    profilesController: ProfilesControllerType): ReaderBookmarkServiceType
+    profilesController: ProfilesControllerType
+  ): ReaderBookmarkServiceType
 
   private val objectMapper = ObjectMapper()
   private var readerBookmarkService: ReaderBookmarkServiceType? = null

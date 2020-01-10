@@ -92,8 +92,8 @@ class ProfileAccountCreateCustomOPDSTask(
   }
 
   private fun accountResolutionFailed(
-    resolutionResult: TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType>)
-    : TaskResult.Failure<AccountCreateErrorDetails, AccountType> {
+    resolutionResult: TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType>
+  ): TaskResult.Failure<AccountCreateErrorDetails, AccountType> {
     this.logger.error("could not resolve an account provider description")
     this.taskRecorder.currentStepFailed(
       this.strings.resolvingAccountProviderFailed,
@@ -102,8 +102,8 @@ class ProfileAccountCreateCustomOPDSTask(
   }
 
   private fun createAccount(
-    accountProviderDescription: AccountProviderSourceStandardDescription)
-    : TaskResult<AccountCreateErrorDetails, AccountType> {
+    accountProviderDescription: AccountProviderSourceStandardDescription
+  ): TaskResult<AccountCreateErrorDetails, AccountType> {
 
     val createResult =
       ProfileAccountCreateTask(
@@ -293,5 +293,4 @@ class ProfileAccountCreateCustomOPDSTask(
 
   private fun publishProgressEvent(step: TaskStep<AccountCreateErrorDetails>) =
     this.accountEvents.onNext(AccountEventCreationInProgress(step.description))
-
 }

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 
 object Services : ServiceDirectoryProviderType {
 
-  private val servicesLock : Any = Any()
+  private val servicesLock: Any = Any()
   private var servicesDirectory: ServiceDirectoryType? = null
   private val servicesFuture: SettableFuture<ServiceDirectoryType> = SettableFuture.create()
 

@@ -35,13 +35,11 @@ class ProfileActivity : FragmentActivity(), ToolbarHostType {
       NavigationControllers.findDirectory(this)
         .updateNavigationController(
           ProfilesNavigationControllerType::class.java,
-          object: ProfilesNavigationControllerType{
+          object : ProfilesNavigationControllerType {
             override fun openProfileSelect() {
-
             }
 
             override fun openMain() {
-
             }
 
             override fun openProfileModify(id: ProfileID) {
@@ -80,7 +78,7 @@ class ProfileActivity : FragmentActivity(), ToolbarHostType {
 
   private fun createServices(): ServiceDirectoryType {
     val services = ServiceDirectory.builder()
-    services.addService(UIThreadServiceType::class.java, object: UIThreadServiceType{})
+    services.addService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
     services.addService(ProfilesControllerType::class.java, MockProfilesController(16, 3))
     return services.build()
   }

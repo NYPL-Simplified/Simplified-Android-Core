@@ -36,16 +36,15 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import java.net.URI
 
 @RunWith(AndroidJUnit4::class)
-class SettingsFragmentAccountTest
-  : FragmentBaseTest<SettingsFragmentAccountActivity>(SettingsFragmentAccountActivity::class.java) {
+class SettingsFragmentAccountTest :
+  FragmentBaseTest<SettingsFragmentAccountActivity>(SettingsFragmentAccountActivity::class.java) {
 
   /**
    * A basic-auth account that isn't logged in has the correct view configuration.
    */
 
   @Test(timeout = 20_000L)
-  fun testBasicNotLoggedInNoEULA()
-  {
+  fun testBasicNotLoggedInNoEULA() {
     val profilesController =
       MockProfilesController
     val documents =
@@ -58,7 +57,7 @@ class SettingsFragmentAccountTest
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(ProfilesControllerType::class.java, profilesController)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     val accountCurrent = profilesController.profileAccountCurrent()
     accountCurrent.loginState as AccountLoginState.AccountNotLoggedIn
@@ -156,8 +155,7 @@ class SettingsFragmentAccountTest
    */
 
   @Test(timeout = 20_000L)
-  fun testBasicNotLoggedInWithEULA()
-  {
+  fun testBasicNotLoggedInWithEULA() {
     val profilesController =
       MockProfilesController
     val documents =
@@ -175,7 +173,7 @@ class SettingsFragmentAccountTest
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(ProfilesControllerType::class.java, profilesController)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     val accountCurrent = profilesController.profileAccountCurrent()
     accountCurrent.loginState as AccountLoginState.AccountNotLoggedIn
@@ -285,8 +283,7 @@ class SettingsFragmentAccountTest
    */
 
   @Test(timeout = 20_000L)
-  fun testBasicLogOut()
-  {
+  fun testBasicLogOut() {
     val profilesController =
       MockProfilesController
     val documents =
@@ -304,7 +301,7 @@ class SettingsFragmentAccountTest
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(ProfilesControllerType::class.java, profilesController)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     val accountCurrent = profilesController.profileAccountCurrent()
     accountCurrent.setLoginState(
@@ -415,8 +412,7 @@ class SettingsFragmentAccountTest
    */
 
   @Test(timeout = 20_000L)
-  fun testCOPPALogin()
-  {
+  fun testCOPPALogin() {
     val profilesController =
       MockProfilesController
     val documents =
@@ -429,7 +425,7 @@ class SettingsFragmentAccountTest
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(ProfilesControllerType::class.java, profilesController)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     val accountCurrent = profilesController.profileAccountCurrent()
     accountCurrent.loginState as AccountLoginState.AccountNotLoggedIn
@@ -476,8 +472,7 @@ class SettingsFragmentAccountTest
    */
 
   @Test(timeout = 20_000L)
-  fun testCOPPAAgeChange()
-  {
+  fun testCOPPAAgeChange() {
     val profilesController =
       MockProfilesController
     val documents =
@@ -490,7 +485,7 @@ class SettingsFragmentAccountTest
     services.putService(DocumentStoreType::class.java, documents)
     services.putService(ProfilesControllerType::class.java, profilesController)
     services.putService(SettingsNavigationControllerType::class.java, navigation)
-    services.putService(UIThreadServiceType::class.java, object: UIThreadServiceType {})
+    services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
 
     val accountCurrent = profilesController.profileAccountCurrent()
     accountCurrent.loginState as AccountLoginState.AccountNotLoggedIn

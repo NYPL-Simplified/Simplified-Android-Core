@@ -12,10 +12,10 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 
 class NullReaderBookmarkService(
-  val events: Observable<ReaderBookmarkEvent>) : ReaderBookmarkServiceType {
+  val events: Observable<ReaderBookmarkEvent>
+) : ReaderBookmarkServiceType {
 
   override fun close() {
-
   }
 
   override val bookmarkEvents: Observable<ReaderBookmarkEvent>
@@ -38,7 +38,8 @@ class NullReaderBookmarkService(
 
   companion object : ReaderBookmarkServiceProviderType {
     override fun createService(
-      requirements: ReaderBookmarkServiceProviderType.Requirements): ReaderBookmarkServiceType {
+      requirements: ReaderBookmarkServiceProviderType.Requirements
+    ): ReaderBookmarkServiceType {
       return NullReaderBookmarkService(requirements.events)
     }
   }

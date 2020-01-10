@@ -72,7 +72,6 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
-
 /**
  * The base type of feed fragments. This class is abstract purely because the AndroidX
  * ViewModel API requires that we fetch view models by class, and we need to store separate view
@@ -309,14 +308,12 @@ class CatalogFragmentFeed : Fragment() {
         when (this.parameters) {
           is CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault,
           is CatalogFeedArguments.CatalogFeedArgumentsRemote -> {
-
           }
           is CatalogFeedArguments.CatalogFeedArgumentsLocalBooks ->
             this.feedModel.reloadFeed(this.parameters)
         }
       }
       else -> {
-
       }
     }
   }

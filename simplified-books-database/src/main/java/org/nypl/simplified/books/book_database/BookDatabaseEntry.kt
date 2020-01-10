@@ -32,7 +32,8 @@ internal class BookDatabaseEntry internal constructor(
   private val serializer: OPDSJSONSerializerType,
   @GuardedBy("bookLock")
   private var bookRef: Book,
-  private val onDelete: Runnable) : BookDatabaseEntryType {
+  private val onDelete: Runnable
+) : BookDatabaseEntryType {
 
   private val LOG = LoggerFactory.getLogger(BookDatabaseEntry::class.java)
 
@@ -230,7 +231,8 @@ internal class BookDatabaseEntry internal constructor(
       owner: BookDatabaseEntryType,
       onUpdate: (BookFormat) -> Unit,
       existingFormats: MutableMap<Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle>,
-      contentTypes: Set<String>) {
+      contentTypes: Set<String>
+    ) {
 
       val params =
         DatabaseFormatHandleParameters(

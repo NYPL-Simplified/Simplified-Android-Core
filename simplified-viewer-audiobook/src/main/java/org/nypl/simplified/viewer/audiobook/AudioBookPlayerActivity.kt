@@ -628,7 +628,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerAccessibilityEvent(event: PlayerAccessibilityEvent) {
-
   }
 
   private fun showErrorWithRunnable(
@@ -648,5 +647,4 @@ class AudioBookPlayerActivity : AppCompatActivity(),
         }
     }
   }
-
 }

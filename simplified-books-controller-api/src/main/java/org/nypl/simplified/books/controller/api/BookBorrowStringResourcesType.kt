@@ -34,7 +34,8 @@ interface BookBorrowStringResourcesType {
 
   fun borrowBookSaving(
     receivedContentType: String,
-    expectedContentTypes: Set<String>): String
+    expectedContentTypes: Set<String>
+  ): String
 
   /**
    * Checking that the content type of the downloaded book is correct.
@@ -42,7 +43,8 @@ interface BookBorrowStringResourcesType {
 
   fun borrowBookSavingCheckingContentType(
     receivedContentType: String,
-    expectedContentTypes: Set<String>): String
+    expectedContentTypes: Set<String>
+  ): String
 
   /**
    * A book had the wrong availability type to borrow.

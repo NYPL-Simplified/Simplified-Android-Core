@@ -25,7 +25,8 @@ interface ReaderBookmarkServiceUsableType {
 
   fun bookmarkLoad(
     accountID: AccountID,
-    book: BookID): FluentFuture<ReaderBookmarks>
+    book: BookID
+  ): FluentFuture<ReaderBookmarks>
 
   /**
    * The user has created a bookmark.
@@ -33,7 +34,8 @@ interface ReaderBookmarkServiceUsableType {
 
   fun bookmarkCreate(
     accountID: AccountID,
-    bookmark: Bookmark): FluentFuture<Unit>
+    bookmark: Bookmark
+  ): FluentFuture<Unit>
 
   /**
    * The user has requested that a bookmark be deleted.
@@ -41,5 +43,6 @@ interface ReaderBookmarkServiceUsableType {
 
   fun bookmarkDelete(
     accountID: AccountID,
-    bookmark: Bookmark): FluentFuture<Unit>
+    bookmark: Bookmark
+  ): FluentFuture<Unit>
 }

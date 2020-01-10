@@ -49,5 +49,4 @@ class AudioBookViewer : ViewerProviderType {
     )
     AudioBookPlayerActivity.startActivity(activity, params)
   }
-
 }

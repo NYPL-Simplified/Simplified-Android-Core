@@ -139,7 +139,7 @@ internal class PatronUserProfileParser(
           parseDRMAdobe(root, vendor, scheme, links)
         }
         else -> {
-          this.publishWarningMessage("Unrecognized DRM scheme: ${scheme}")
+          this.publishWarningMessage("Unrecognized DRM scheme: $scheme")
           null
         }
       }
@@ -172,7 +172,8 @@ internal class PatronUserProfileParser(
 
   private data class Link(
     val href: URI,
-    val rel: String?)
+    val rel: String?
+  )
 
   private fun parseLink(node: JsonNode): Link? {
     return try {

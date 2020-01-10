@@ -4,7 +4,7 @@ import java.net.URL
 
 class MockEULA : org.nypl.simplified.documents.eula.EULAType {
   var agreed = false
-  var url : URL? = URL("http://example.com")
+  var url: URL? = URL("http://example.com")
 
   override fun eulaHasAgreed(): Boolean {
     return this.agreed

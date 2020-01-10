@@ -29,11 +29,11 @@ interface BookCoverProviderType {
    *
    * Must only be called from the UI thread.
    *
-   * @param entry     The feed entry
+   * @param entry The feed entry
    * @param imageView The image view
-   * @param width     The width
-   * @param height    The height
-   * @param badges    A function that will be consulted for badge images
+   * @param width The width
+   * @param height The height
+   * @param badges A function that will be consulted for badge images
    */
 
   fun loadThumbnailInto(
@@ -49,11 +49,11 @@ interface BookCoverProviderType {
    *
    * Must only be called from the UI thread.
    *
-   * @param entry     The feed entry
+   * @param entry The feed entry
    * @param imageView The image view
-   * @param width     The width
-   * @param height    The height
-   * @param badges    A function that will be consulted for badge images
+   * @param width The width
+   * @param height The height
+   * @param badges A function that will be consulted for badge images
    */
 
   fun loadCoverInto(

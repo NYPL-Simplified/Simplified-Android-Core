@@ -8,5 +8,4 @@ class AccountProviderNYPLRegistryTest : AccountProviderNYPLRegistryContract() {
 
   override val logger: Logger
     get() = LoggerFactory.getLogger(AccountProviderNYPLRegistryTest::class.java)
-
 }

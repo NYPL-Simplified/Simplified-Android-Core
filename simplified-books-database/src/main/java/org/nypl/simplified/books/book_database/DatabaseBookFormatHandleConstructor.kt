@@ -25,4 +25,5 @@ internal data class DatabaseBookFormatHandleConstructor(
    * A function to construct a format given an existing database entry.
    */
 
-  val constructor: (DatabaseFormatHandleParameters) -> BookDatabaseEntryFormatHandle)
+  val constructor: (DatabaseFormatHandleParameters) -> BookDatabaseEntryFormatHandle
+)

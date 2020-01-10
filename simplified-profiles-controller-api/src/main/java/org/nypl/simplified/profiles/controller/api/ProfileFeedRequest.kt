@@ -73,4 +73,5 @@ data class ProfileFeedRequest(
    * If an account ID is specified, only books on the respective account will be shown.
    */
 
-  val filterByAccountID: AccountID? = null)
+  val filterByAccountID: AccountID? = null
+)

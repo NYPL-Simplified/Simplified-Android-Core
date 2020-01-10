@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
 import org.nypl.drm.core.AdobeAdeptExecutorType
-import org.nypl.drm.core.AdobeDeviceID
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -39,7 +38,8 @@ class ProfileAccountLogoutTask(
   private val bookRegistry: BookRegistryType,
   private val http: HTTPType,
   private val logoutStrings: AccountLogoutStringResourcesType,
-  private val profile: ProfileReadableType) : Callable<TaskResult<AccountLogoutErrorData, Unit>> {
+  private val profile: ProfileReadableType
+) : Callable<TaskResult<AccountLogoutErrorData, Unit>> {
 
   init {
     Preconditions.checkState(
@@ -56,13 +56,13 @@ class ProfileAccountLogoutTask(
     TaskRecorder.create<AccountLogoutErrorData>()
 
   private fun warn(message: String, vararg arguments: Any?) =
-    this.logger.warn("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.warn("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.debug("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.error("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   override fun call(): TaskResult<AccountLogoutErrorData, Unit> {
     this.steps.beginNewStep(this.logoutStrings.logoutStarted)
@@ -113,7 +113,8 @@ class ProfileAccountLogoutTask(
   }
 
   private fun runDeviceDeactivationAdobe(
-    adobeCredentials: AccountAuthenticationAdobePreActivationCredentials) {
+    adobeCredentials: AccountAuthenticationAdobePreActivationCredentials
+  ) {
     val postActivation = adobeCredentials.postActivationCredentials
 
     if (postActivation == null) {

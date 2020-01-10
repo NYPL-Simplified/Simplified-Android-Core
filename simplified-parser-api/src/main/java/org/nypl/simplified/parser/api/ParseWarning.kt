@@ -13,7 +13,8 @@ data class ParseWarning(
   val message: String,
   val line: Int = 0,
   val column: Int = 0,
-  val exception: Exception? = null): Serializable {
+  val exception: Exception? = null
+) : Serializable {
 
   /**
    * Convert a parse warning to an error.
@@ -26,5 +27,4 @@ data class ParseWarning(
       line = this.line,
       column = this.column,
       exception = this.exception)
-
 }

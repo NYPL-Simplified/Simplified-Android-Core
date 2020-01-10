@@ -17,7 +17,6 @@ import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
-import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
@@ -159,7 +158,6 @@ class SettingsFragmentAccountRegistry : Fragment() {
         })
 
       else -> {
-
       }
     }
   }
@@ -243,10 +241,8 @@ class SettingsFragmentAccountRegistry : Fragment() {
         })
       }
       is AccountProviderRegistryEvent.Updated -> {
-
       }
       is AccountProviderRegistryEvent.SourceFailed -> {
-
       }
     }
   }

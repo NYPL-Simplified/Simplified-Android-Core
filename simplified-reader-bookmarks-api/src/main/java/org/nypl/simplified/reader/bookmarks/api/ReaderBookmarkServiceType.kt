@@ -7,6 +7,4 @@ package org.nypl.simplified.reader.bookmarks.api
 interface ReaderBookmarkServiceType : AutoCloseable, ReaderBookmarkServiceUsableType {
 
   override fun close()
-
 }
-

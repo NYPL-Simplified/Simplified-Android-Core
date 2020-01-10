@@ -21,26 +21,30 @@ open class CrashingHTTP : HTTPType {
     auth: OptionType<HTTPAuthType>,
     uri: URI,
     data: ByteArray,
-    content_type: String): HTTPResultType<InputStream> {
+    content_type: String
+  ): HTTPResultType<InputStream> {
     return HTTPResultException(uri, IOException())
   }
 
   override fun get(
     auth: OptionType<HTTPAuthType>,
     uri: URI,
-    offset: Long): HTTPResultType<InputStream> {
+    offset: Long
+  ): HTTPResultType<InputStream> {
     return HTTPResultException(uri, IOException())
   }
 
   override fun put(
     auth: OptionType<HTTPAuthType>,
-    uri: URI): HTTPResultType<InputStream> {
+    uri: URI
+  ): HTTPResultType<InputStream> {
     return HTTPResultException(uri, IOException())
   }
 
   override fun head(
     auth: OptionType<HTTPAuthType>,
-    uri: URI): HTTPResultType<InputStream> {
+    uri: URI
+  ): HTTPResultType<InputStream> {
     return HTTPResultException(uri, IOException())
   }
 
@@ -48,14 +52,16 @@ open class CrashingHTTP : HTTPType {
     auth: OptionType<HTTPAuthType>,
     uri: URI,
     data: ByteArray,
-    content_type: String): HTTPResultType<InputStream> {
+    content_type: String
+  ): HTTPResultType<InputStream> {
     return HTTPResultException(uri, IOException())
   }
 
   override fun delete(
     auth: OptionType<HTTPAuthType>,
     uri: URI,
-    content_type: String): HTTPResultType<InputStream> {
+    content_type: String
+  ): HTTPResultType<InputStream> {
     return HTTPResultException(uri, IOException())
   }
 }

@@ -185,5 +185,4 @@ abstract class BookReportTaskAdobeDRMContract {
       "Responses have been consumed",
       http.responsesNow()[issuesURI]!!.isEmpty())
   }
-
 }

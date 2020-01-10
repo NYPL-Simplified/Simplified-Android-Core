@@ -2,7 +2,7 @@ package org.nypl.simplified.tests.migration.from3master
 
 import android.content.Context
 import io.reactivex.subjects.PublishSubject
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito

@@ -16,5 +16,4 @@ class CirculationAnalyticsSystems : AnalyticsSystemProvider {
 
   override fun create(configuration: AnalyticsConfiguration): AnalyticsSystem =
     CirculationAnalyticsSystem(configuration, this.executor)
-
 }

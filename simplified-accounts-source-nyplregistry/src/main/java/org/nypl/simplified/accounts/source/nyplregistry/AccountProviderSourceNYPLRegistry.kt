@@ -42,7 +42,8 @@ class AccountProviderSourceNYPLRegistry(
   private val http: HTTPType,
   private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val parsers: AccountProviderDescriptionCollectionParsersType,
-  private val serializers: AccountProviderDescriptionCollectionSerializersType) : AccountProviderSourceType {
+  private val serializers: AccountProviderDescriptionCollectionSerializersType
+) : AccountProviderSourceType {
 
   companion object {
     private fun findAuthenticationDocumentParsers(): AuthenticationDocumentParsersType {
@@ -56,12 +57,12 @@ class AccountProviderSourceNYPLRegistry(
    * Secondary no-arg constructor for use in [java.util.ServiceLoader].
    */
 
-  constructor()
-    : this(
+  constructor() : this(
     http = HTTP.newHTTP(),
     authDocumentParsers = findAuthenticationDocumentParsers(),
     parsers = AccountProviderDescriptionCollectionParsers(),
-    serializers = AccountProviderDescriptionCollectionSerializers())
+    serializers = AccountProviderDescriptionCollectionSerializers()
+  )
 
   private val logger =
     LoggerFactory.getLogger(AccountProviderSourceNYPLRegistry::class.java)
@@ -85,7 +86,8 @@ class AccountProviderSourceNYPLRegistry(
 
   private data class CacheFiles(
     val file: File,
-    val fileTemp: File)
+    val fileTemp: File
+  )
 
   override fun load(context: Context): SourceResult {
     if (this.stringResources == null) {
@@ -136,7 +138,8 @@ class AccountProviderSourceNYPLRegistry(
 
   private fun cacheServerResults(
     cacheFiles: CacheFiles,
-    mergedResults: Map<URI, AccountProviderDescriptionType>) {
+    mergedResults: Map<URI, AccountProviderDescriptionType>
+  ) {
 
     try {
       this.logger.debug("serializing cache: {}", cacheFiles.fileTemp)
@@ -293,7 +296,8 @@ class AccountProviderSourceNYPLRegistry(
 
   private fun logParseFailure(
     source: String,
-    parseResult: ParseResult.Failure<AccountProviderDescriptionCollection>) {
+    parseResult: ParseResult.Failure<AccountProviderDescriptionCollection>
+  ) {
     this.logger.debug("failed to parse providers from $source ({} errors, {} warnings)",
       parseResult.errors.size,
       parseResult.warnings.size)

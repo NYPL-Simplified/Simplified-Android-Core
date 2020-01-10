@@ -405,7 +405,7 @@ abstract class AuthenticationDocumentContract {
   }
 
   private fun resource(file: String): InputStream {
-    val path = "/org/nypl/simplified/tests/opds/auth_document/${file}"
+    val path = "/org/nypl/simplified/tests/opds/auth_document/$file"
     return AuthenticationDocumentContract::class.java.getResourceAsStream(path)
   }
 

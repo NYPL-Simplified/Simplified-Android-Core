@@ -57,7 +57,7 @@ class ProfileAccountCreateTask(
 
   private fun createAccount(accountProvider: AccountProviderType): AccountType {
     this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.creatingAccount))
-    
+
     return try {
       val profile = this.profiles.currentProfileUnsafe()
       profile.createAccount(accountProvider)

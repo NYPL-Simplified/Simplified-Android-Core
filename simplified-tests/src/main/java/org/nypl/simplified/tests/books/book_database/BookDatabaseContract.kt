@@ -31,7 +31,7 @@ abstract class BookDatabaseContract {
     LoggerFactory.getLogger(BookDatabaseContract::class.java)
   private val accountID =
     org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
-  
+
   protected abstract fun context(): Context
 
   /**
@@ -646,7 +646,8 @@ abstract class BookDatabaseContract {
 
   private fun <T : org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle> checkOtherFormatsAreNotPresent(
     entry: org.nypl.simplified.books.book_database.api.BookDatabaseEntryType,
-    clazz: Class<T>) {
+    clazz: Class<T>
+  ) {
 
     val others =
       entry.formatHandles
@@ -707,7 +708,8 @@ abstract class BookDatabaseContract {
 
   @Throws(IOException::class)
   private fun copyToTempFile(
-    name: String): File {
+    name: String
+  ): File {
     val file = File.createTempFile("simplified-book-database-", ".bin")
     logger.debug("copyToTempFile: {} -> {}", name, file)
     FileOutputStream(file).use { output ->

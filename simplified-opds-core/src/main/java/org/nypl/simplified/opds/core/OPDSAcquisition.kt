@@ -35,7 +35,8 @@ data class OPDSAcquisition(
    * The set of indirect acquisitions
    */
 
-  val indirectAcquisitions: List<OPDSIndirectAcquisition>) : Serializable {
+  val indirectAcquisitions: List<OPDSIndirectAcquisition>
+) : Serializable {
 
   init {
     if (this.type.isNone) {

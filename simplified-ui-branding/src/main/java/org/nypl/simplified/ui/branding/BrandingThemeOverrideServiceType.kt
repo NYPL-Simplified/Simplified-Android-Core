@@ -14,5 +14,4 @@ interface BrandingThemeOverrideServiceType {
    */
 
   fun overrideTheme(): ThemeValue
-
 }

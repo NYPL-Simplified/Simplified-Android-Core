@@ -437,7 +437,6 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     )
   }
 
-
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }
 

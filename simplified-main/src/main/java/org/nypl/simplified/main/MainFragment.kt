@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.Disposable
@@ -170,7 +169,6 @@ class MainFragment : Fragment() {
 
     when (this.profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
-
       }
       ANONYMOUS_PROFILE_DISABLED -> {
         this.profileSubscription =
@@ -203,7 +201,6 @@ class MainFragment : Fragment() {
       }
 
       else -> {
-
       }
     }
   }
@@ -219,7 +216,6 @@ class MainFragment : Fragment() {
           this.onIdleTimedOut()
         }
       else -> {
-
       }
     }
   }
@@ -251,7 +247,6 @@ class MainFragment : Fragment() {
 
     when (this.profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
-
       }
       ANONYMOUS_PROFILE_DISABLED -> {
         this.profilesController.profileIdleTimer().stop()

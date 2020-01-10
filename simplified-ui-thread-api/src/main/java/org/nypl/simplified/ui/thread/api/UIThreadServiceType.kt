@@ -55,7 +55,7 @@ interface UIThreadServiceType {
   /**
    * Run the given Runnable on the UI thread after the specified delay.
    *
-   * @param r  The runnable
+   * @param r The runnable
    * @param ms The delay in milliseconds
    */
 

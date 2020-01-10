@@ -49,7 +49,7 @@ class LaneActivity : AppCompatActivity() {
       imageView.scaleType = ImageView.ScaleType.FIT_XY
       imageView.setImageResource(R.drawable.cover)
       imageView.layoutParams = coverLayoutParams
-      imageView.setColorFilter(this.randomColor(), android.graphics.PorterDuff.Mode.MULTIPLY);
+      imageView.setColorFilter(this.randomColor(), android.graphics.PorterDuff.Mode.MULTIPLY)
 
       lane.addView(imageView)
     }

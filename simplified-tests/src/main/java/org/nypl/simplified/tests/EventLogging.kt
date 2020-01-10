@@ -9,7 +9,8 @@ class EventLogging<T>(
   val logger: Logger,
   val events: Subject<T>,
   val latch: CountDownLatch,
-  val eventLog: MutableList<T>) {
+  val eventLog: MutableList<T>
+) {
 
   init {
     this.events.subscribe { event ->
@@ -28,7 +29,5 @@ class EventLogging<T>(
         latch = CountDownLatch(requiredEventCount),
         eventLog = mutableListOf())
     }
-
   }
 }
-

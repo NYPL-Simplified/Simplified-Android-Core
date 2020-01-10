@@ -7,7 +7,6 @@ import org.hamcrest.BaseMatcher
 import org.hamcrest.Description
 import org.hamcrest.core.StringContains
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -73,7 +72,8 @@ abstract class ProfilesDatabaseContract {
 
   private class CausesContains<T : Exception> internal constructor(
     private val exception_type: Class<T>,
-    private val message: String) : BaseMatcher<ProfileDatabaseException>() {
+    private val message: String
+  ) : BaseMatcher<ProfileDatabaseException>() {
 
     private val logger = LoggerFactory.getLogger(CausesContains::class.java)
 
@@ -98,7 +98,8 @@ abstract class ProfilesDatabaseContract {
 
   private fun onAccountResolution(
     id: URI,
-    message: String) {
+    message: String
+  ) {
     this.logger.debug("resolution: {}: {}", id, message)
   }
 

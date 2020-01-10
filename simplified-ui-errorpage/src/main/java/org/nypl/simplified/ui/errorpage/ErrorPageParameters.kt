@@ -40,5 +40,6 @@ data class ErrorPageParameters<E : PresentableErrorType>(
    * The steps that lead up to the current error.
    */
 
-  val taskSteps: List<TaskStep<E>>)
-  : Serializable
+  val taskSteps: List<TaskStep<E>>
+) :
+  Serializable

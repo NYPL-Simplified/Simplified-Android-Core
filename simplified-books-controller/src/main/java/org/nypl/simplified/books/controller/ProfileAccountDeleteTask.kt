@@ -24,8 +24,8 @@ class ProfileAccountDeleteTask(
   private val accountProviderID: URI,
   private val profiles: ProfilesDatabaseType,
   private val profileEvents: Subject<ProfileEvent>,
-  private val strings: ProfileAccountDeletionStringResourcesType)
-  : Callable<TaskResult<AccountDeleteErrorDetails, Unit>> {
+  private val strings: ProfileAccountDeletionStringResourcesType
+) : Callable<TaskResult<AccountDeleteErrorDetails, Unit>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountDeleteTask::class.java)
   private val taskRecorder = TaskRecorder.create<AccountDeleteErrorDetails>()

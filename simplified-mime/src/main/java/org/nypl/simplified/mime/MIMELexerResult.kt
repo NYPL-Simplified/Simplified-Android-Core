@@ -17,8 +17,8 @@ sealed class MIMELexerResult {
    */
 
   data class Success(
-    val token: MIMEToken)
-    : MIMELexerResult() {
+    val token: MIMEToken
+  ) : MIMELexerResult() {
     override val position = this.token.position
   }
 
@@ -28,7 +28,6 @@ sealed class MIMELexerResult {
 
   data class Failure(
     override val position: Int,
-    val exception: Exception)
-    : MIMELexerResult()
-
+    val exception: Exception
+  ) : MIMELexerResult()
 }

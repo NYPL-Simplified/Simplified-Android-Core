@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.splash
 
 import android.content.Context
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
@@ -85,19 +84,22 @@ class SplashFragment : Fragment() {
     val container: View,
     val eulaAgree: Button,
     val eulaDisagree: Button,
-    val eulaWebView: WebView)
+    val eulaWebView: WebView
+  )
 
   private class ViewsMigrationRunning(
     val container: View,
     val text: TextView,
-    val progress: ProgressBar)
+    val progress: ProgressBar
+  )
 
   private class ViewsMigrationReport(
-      val container: View,
-      val text: TextView,
-      val list: RecyclerView,
-      val sendButton: Button,
-      val okButton: Button)
+    val container: View,
+    val text: TextView,
+    val list: RecyclerView,
+    val sendButton: Button,
+    val okButton: Button
+  )
 
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
@@ -244,7 +246,8 @@ class SplashFragment : Fragment() {
         view: WebView?,
         errorCode: Int,
         description: String?,
-        failingUrl: String?) {
+        failingUrl: String?
+      ) {
         super.onReceivedError(view, errorCode, description, failingUrl)
         this@SplashFragment.logger.error("onReceivedError: {} {} {}", errorCode, description, failingUrl)
       }
@@ -252,7 +255,8 @@ class SplashFragment : Fragment() {
       override fun onReceivedError(
         view: WebView?,
         request: WebResourceRequest?,
-        error: WebResourceError?) {
+        error: WebResourceError?
+      ) {
         super.onReceivedError(view, request, error)
         this@SplashFragment.logger.error("onReceivedError: {}", error)
       }
@@ -290,7 +294,7 @@ class SplashFragment : Fragment() {
 
     this.viewsForMigrationReport.list.adapter = SplashMigrationReportListAdapter(eventsToShow)
     this.viewsForMigrationReport.list.setHasFixedSize(false)
-    this.viewsForMigrationReport.list.layoutManager = LinearLayoutManager(this.context);
+    this.viewsForMigrationReport.list.layoutManager = LinearLayoutManager(this.context)
     (this.viewsForMigrationReport.list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
     this.viewsForMigrationReport.list.adapter!!.notifyDataSetChanged()
 
@@ -324,7 +328,7 @@ class SplashFragment : Fragment() {
     return StringBuilder(128)
       .append("On ${report.timestamp}, a migration of ${report.application} occurred.")
       .append("\n")
-      .append("There were ${errors} errors.")
+      .append("There were $errors errors.")
       .append("\n")
       .append("The attached log files give details of the migration.")
       .append("\n")
@@ -333,7 +337,7 @@ class SplashFragment : Fragment() {
 
   private fun reportEmailSubject(report: MigrationReport): String {
     val errors =
-      report.events.any { e -> e is MigrationEvent.MigrationStepError}
+      report.events.any { e -> e is MigrationEvent.MigrationStepError }
     val outcome =
       if (errors) {
         "error"
@@ -341,7 +345,7 @@ class SplashFragment : Fragment() {
         "success"
       }
 
-    return "[simplye-android-migration] ${report.application} ${outcome}"
+    return "[simplye-android-migration] ${report.application} $outcome"
   }
 
   override fun onStart() {
@@ -462,7 +466,6 @@ class SplashFragment : Fragment() {
         this.listener.onSplashOpenProfileAnonymous()
       }
       ANONYMOUS_PROFILE_DISABLED -> {
-
       }
     }
 
@@ -553,7 +556,7 @@ class SplashFragment : Fragment() {
       val reportsDir =
         File(cacheDir, "migrations")
       val reportFile =
-        File(reportsDir, "report-${timestamp}.xml")
+        File(reportsDir, "report-$timestamp.xml")
 
       reportsDir.mkdirs()
       FileOutputStream(reportFile).use { stream ->

@@ -383,5 +383,4 @@ sealed class AnalyticsEvent {
 
     val bookTitle: String
   ) : AnalyticsEvent()
-
 }

@@ -196,11 +196,11 @@ class BookCoverProvider private constructor(
     /**
      * Create a new cover provider.
      *
-     * @param context         The application context
-     * @param badgeLookup     A function used to look up badge images
-     * @param bookRegistry    The book registry
-     * @param coverGenerator  A cover generator
-     * @param executor        An executor
+     * @param context The application context
+     * @param badgeLookup A function used to look up badge images
+     * @param bookRegistry The book registry
+     * @param coverGenerator A cover generator
+     * @param executor An executor
      *
      * @return A new cover provider
      */

@@ -8,7 +8,8 @@ import java.util.UUID
  */
 
 data class AccountID(
-  val uuid: UUID) : Serializable, Comparable<AccountID> {
+  val uuid: UUID
+) : Serializable, Comparable<AccountID> {
 
   override fun compareTo(other: AccountID): Int =
     this.uuid.compareTo(other.uuid)
@@ -24,6 +25,5 @@ data class AccountID(
 
     fun generate(): AccountID =
       AccountID(UUID.randomUUID())
-
   }
 }

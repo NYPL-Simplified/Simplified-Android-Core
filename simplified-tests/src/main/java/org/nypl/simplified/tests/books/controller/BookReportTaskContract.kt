@@ -185,5 +185,4 @@ abstract class BookReportTaskContract {
       "Responses have been consumed",
       http.responsesNow()[issuesURI]!!.isEmpty())
   }
-
 }

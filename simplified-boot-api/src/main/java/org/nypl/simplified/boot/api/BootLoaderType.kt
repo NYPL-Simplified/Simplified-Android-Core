@@ -25,5 +25,4 @@ interface BootLoaderType<T> {
    */
 
   fun start(context: Context): FluentFuture<T>
-
 }

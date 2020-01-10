@@ -13,6 +13,6 @@ interface BookCoverBadgeLookupType {
    */
 
   fun badgeForEntry(
-    entry: FeedEntry.FeedEntryOPDS): BookCoverBadge?
-
+    entry: FeedEntry.FeedEntryOPDS
+  ): BookCoverBadge?
 }

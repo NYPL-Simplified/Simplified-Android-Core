@@ -110,5 +110,4 @@ interface AccountLoginStringResourcesType {
    */
 
   fun loginPatronSettingsRequestParseFailed(errors: List<String>): String
-
 }
