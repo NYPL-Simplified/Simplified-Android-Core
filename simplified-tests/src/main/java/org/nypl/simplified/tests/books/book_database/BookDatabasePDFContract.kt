@@ -9,15 +9,16 @@ import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.opds.core.*
-import org.slf4j.LoggerFactory
+import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
+import org.nypl.simplified.opds.core.OPDSJSONParser
+import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import java.net.URI
 import java.util.UUID
 
 abstract class BookDatabasePDFContract {
-
-    private val logger =
-            LoggerFactory.getLogger(BookDatabasePDFContract::class.java)
 
     private val accountID =
             org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
@@ -69,14 +70,17 @@ abstract class BookDatabasePDFContract {
                 "abcd",
                 "Title",
                 DateTime.now(),
-                OPDSAvailabilityOpenAccess.get(revoke))
+                OPDSAvailabilityOpenAccess.get(revoke)
+        )
 
         eb.addAcquisition(
                 OPDSAcquisition(
-                        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+                        ACQUISITION_BORROW,
                         URI.create("http://example.com"),
                         Option.some("application/pdf"),
-                        emptyList()))
+                        emptyList()
+                )
+        )
         return eb.build()
     }
 }

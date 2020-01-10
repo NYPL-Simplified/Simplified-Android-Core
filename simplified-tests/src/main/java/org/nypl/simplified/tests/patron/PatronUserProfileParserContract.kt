@@ -4,7 +4,8 @@ import org.hamcrest.core.IsInstanceOf
 import org.junit.Assert
 import org.junit.Test
 import org.nypl.simplified.parser.api.ParseResult
-import org.nypl.simplified.parser.api.ParseResult.*
+import org.nypl.simplified.parser.api.ParseResult.Failure
+import org.nypl.simplified.parser.api.ParseResult.Success
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfile
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
@@ -164,7 +165,7 @@ abstract class PatronUserProfileParserContract {
 
   private fun resource(file: String): InputStream {
     val path = "/org/nypl/simplified/tests/patron/$file"
-    return PatronUserProfileParserContract::class.java.getResourceAsStream(path)
+    return PatronUserProfileParserContract::class.java.getResourceAsStream(path)!!
   }
 
   private fun dump(result: ParseResult<PatronUserProfile>) {

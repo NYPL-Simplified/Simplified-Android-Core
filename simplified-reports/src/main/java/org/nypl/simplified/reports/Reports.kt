@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
-import org.nypl.simplified.reports.Reports.Result.*
+import org.nypl.simplified.reports.Reports.Result.NoFiles
+import org.nypl.simplified.reports.Reports.Result.RaisedException
+import org.nypl.simplified.reports.Reports.Result.Sent
 import org.slf4j.LoggerFactory
 import java.io.BufferedOutputStream
 import java.io.File

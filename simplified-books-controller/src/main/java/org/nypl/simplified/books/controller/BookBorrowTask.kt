@@ -35,13 +35,26 @@ import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.*
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.BookDatabaseFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.BundledCopyFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.ContentCopyFailed
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMDeviceNotActive
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMFailure
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnparseableACSM
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnreadableACSM
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedContentType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedSystem
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedCorrupted
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedLoaderFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.FeedUnusable
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.HTTPRequestFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.TimedOut
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnexpectedException
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnparseableBearerToken
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnusableAcquisitions
+import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.WrongAvailability
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
@@ -929,7 +942,7 @@ class BookBorrowTask(
         val message = this.borrowStrings.borrowBookFulfillCancelled
         this.steps.currentStepFailed(
           message = message,
-          errorValue = DownloadCancelled(message, this.currentAttributesWith()),
+          errorValue = BookStatusDownloadErrorDetails.DownloadCancelled(message, this.currentAttributesWith()),
           exception = exception
         )
         throw exception
@@ -1201,7 +1214,7 @@ class BookBorrowTask(
             val message = this.borrowStrings.borrowBookFulfillCancelled
             this.steps.currentStepFailed(
               message = message,
-              errorValue = DownloadCancelled(message, this.currentAttributesWith()),
+              errorValue = BookStatusDownloadErrorDetails.DownloadCancelled(message, this.currentAttributesWith()),
               exception = cause)
             cause
           }

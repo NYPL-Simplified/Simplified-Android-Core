@@ -45,8 +45,9 @@ import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.*
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.*
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.DRMDeviceNotActive
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.DRMFailure
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NoCredentialsAvailable
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
 import org.nypl.simplified.downloader.core.DownloaderHTTP
@@ -1204,7 +1205,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     }
   }
 
-  private fun resource(file: String): InputStream {
+  private fun resource(file: String): InputStream? {
     return BookRevokeTaskAdobeDRMContract::class.java.getResourceAsStream(file)
   }
 
@@ -1212,7 +1213,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
   private fun resourceSize(file: String): Long {
     var total = 0L
     val buffer = ByteArray(8192)
-    this.resource(file).use { stream ->
+    this.resource(file)?.use { stream ->
       while (true) {
         val r = stream.read(buffer)
         if (r <= 0) {
