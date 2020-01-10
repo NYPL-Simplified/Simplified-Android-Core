@@ -2,7 +2,7 @@ package org.nypl.simplified.tests.bundled_content;
 
 import com.io7m.jnull.NullCheck;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Rule;
 import org.junit.Test;

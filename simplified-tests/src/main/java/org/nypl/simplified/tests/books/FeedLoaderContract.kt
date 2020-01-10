@@ -3,7 +3,7 @@ package org.nypl.simplified.tests.books
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
