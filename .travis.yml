@@ -18,7 +18,8 @@ script: ./.travis-build.sh
 # https://docs.travis-ci.com/user/deployment/releases/
 deploy:
   provider: script
-  script: ./.travis-publish.sh
+  install: skip
+  script: ./.travis-deploy.sh
   skip_cleanup: true
   on:
     all_branches: true
