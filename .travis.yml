@@ -19,6 +19,7 @@ script: ./.travis-build.sh
 deploy:
   provider: script
   script: ./.travis-publish.sh
+  skip_cleanup: true
   on:
     all_branches: true
     condition: $TRAVIS_BRANCH =~ ^(master|develop)$
