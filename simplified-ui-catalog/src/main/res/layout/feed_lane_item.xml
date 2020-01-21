@@ -5,4 +5,4 @@
   android:layout_height="@dimen/catalogFeedCoversHeight"
   android:contentDescription="@null"
   android:scaleType="fitXY"
-  app:srcCompat="@drawable/cover" />
+  app:srcCompat="@drawable/cover_loading" />
