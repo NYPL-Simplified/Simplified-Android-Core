@@ -107,6 +107,7 @@ class BookCoverProvider private constructor(
 
       this.picasso.load(uriSpecified.toString())
         .tag(tag)
+        .error(R.drawable.cover_error)
         .placeholder(R.drawable.cover_loading)
         .resize(width, height)
         .transform(badgePainter)
@@ -116,6 +117,7 @@ class BookCoverProvider private constructor(
 
       this.picasso.load(uriGenerated.toString())
         .tag(tag)
+        .error(R.drawable.cover_error)
         .placeholder(R.drawable.cover_loading)
         .resize(width, height)
         .transform(badgePainter)
