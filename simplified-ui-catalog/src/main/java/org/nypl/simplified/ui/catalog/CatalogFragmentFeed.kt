@@ -267,7 +267,6 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroupsAdapter =
       CatalogFeedWithGroupsAdapter(
         groups = this.feedWithGroupsData,
-        uiThread = this.uiThread,
         coverLoader = this.bookCovers,
         onFeedSelected = this::onFeedSelected,
         onBookSelected = this::onBookSelected

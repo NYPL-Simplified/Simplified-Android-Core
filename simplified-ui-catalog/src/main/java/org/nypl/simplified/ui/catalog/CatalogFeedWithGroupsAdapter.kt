@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedGroup
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -16,7 +15,6 @@ import java.net.URI
 
 class CatalogFeedWithGroupsAdapter(
   private val groups: List<FeedGroup>,
-  private val uiThread: UIThreadServiceType,
   private val coverLoader: BookCoverProviderType,
   private val onFeedSelected: (title: String, uri: URI) -> Unit,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit
@@ -41,7 +39,6 @@ class CatalogFeedWithGroupsAdapter(
 
     return CatalogFeedWithGroupsLaneViewHolder(
       parent = item,
-      uiThread = this.uiThread,
       coverLoader = this.coverLoader,
       onFeedSelected = this.onFeedSelected,
       onBookSelected = this.onBookSelected
