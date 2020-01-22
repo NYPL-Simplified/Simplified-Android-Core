@@ -202,12 +202,12 @@ class CatalogPagedViewHolder(
     this.idleAuthor.text = item.feedEntry.authorsCommaSeparated
     this.errorTitle.text = item.feedEntry.title
 
+    val targetHeight =
+      parent.resources.getDimensionPixelSize(R.dimen.cover_thumbnail_height)
+    val targetWidth = 0
     this.thumbnailLoading =
       this.bookCovers.loadThumbnailInto(
-        item,
-        this.idleCover,
-        this.idleCover.layoutParams.width,
-        this.idleCover.layoutParams.height
+        item, this.idleCover, targetWidth, targetHeight
       ).map {
         this.uiThread.runOnUIThread {
           this.setVisibilityIfNecessary(this.idleProgress, View.INVISIBLE)

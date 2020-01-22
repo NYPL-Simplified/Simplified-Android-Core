@@ -31,9 +31,8 @@ interface BookCoverProviderType {
    *
    * @param entry The feed entry
    * @param imageView The image view
-   * @param width The width
-   * @param height The height
-   * @param badges A function that will be consulted for badge images
+   * @param width Use 0 as desired dimension to resize keeping aspect ratio.
+   * @param height Use 0 as desired dimension to resize keeping aspect ratio.
    */
 
   fun loadThumbnailInto(
@@ -51,9 +50,8 @@ interface BookCoverProviderType {
    *
    * @param entry The feed entry
    * @param imageView The image view
-   * @param width The width
-   * @param height The height
-   * @param badges A function that will be consulted for badge images
+   * @param width Use 0 as desired dimension to resize keeping aspect ratio.
+   * @param height Use 0 as desired dimension to resize keeping aspect ratio.
    */
 
   fun loadCoverInto(

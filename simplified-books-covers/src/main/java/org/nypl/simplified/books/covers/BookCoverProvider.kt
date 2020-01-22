@@ -36,16 +36,15 @@ class BookCoverProvider private constructor(
   private fun generateCoverURI(entry: FeedEntry.FeedEntryOPDS): URI {
     val feedEntry = entry.feedEntry
     val title = feedEntry.title
-    val author: String
     val authors = feedEntry.authors
-    if (authors.isEmpty()) {
-      author = ""
-    } else {
-      author = authors[0]
-    }
+    val author = authors.firstOrNull() ?: ""
     return this.coverGenerator.generateURIForTitleAuthor(title, author)
   }
 
+  /**
+   * @param width Use 0 as desired dimension to resize keeping aspect ratio.
+   * @param height Use 0 as desired dimension to resize keeping aspect ratio.
+   */
   private fun doLoad(
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
