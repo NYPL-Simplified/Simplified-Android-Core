@@ -34,10 +34,6 @@
   </appender>
 
   <logger
-    name="org.nypl.simplified.books.covers.BookCoverProvider"
-    level="ERROR" />
-
-  <logger
     name="org.nypl.drm"
     level="DEBUG" />
 

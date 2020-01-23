@@ -3,7 +3,7 @@ package org.nypl.simplified.ui.catalog
 import android.view.View
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import org.nypl.simplified.books.covers.BookCoverProviderType
+import com.bumptech.glide.Glide
 import org.nypl.simplified.feeds.api.FeedEntry
 
 /**
@@ -13,7 +13,6 @@ import org.nypl.simplified.feeds.api.FeedEntry
  */
 class CatalogLaneItemViewHolder(
   private val parent: View,
-  private val coverLoader: BookCoverProviderType,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit
 ) : RecyclerView.ViewHolder(parent) {
 
@@ -31,11 +30,10 @@ class CatalogLaneItemViewHolder(
       onBookSelected.invoke(entry)
     }
 
-    coverLoader.loadThumbnailInto(
-      entry = entry,
-      imageView = imageView,
-      width = imageWidth,
-      height = imageHeight
-    )
+    Glide.with(parent)
+      .load(entry.feedEntry.cover)
+      .placeholder(R.drawable.cover_loading)
+      .error(R.drawable.cover_error)
+      .into(imageView)
   }
 }

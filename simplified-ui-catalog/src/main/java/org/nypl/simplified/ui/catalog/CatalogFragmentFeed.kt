@@ -40,7 +40,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacets
@@ -99,7 +98,6 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private lateinit var analytics: AnalyticsType
-  private lateinit var bookCovers: BookCoverProviderType
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var configurationService: CatalogConfigurationServiceType
@@ -128,7 +126,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var feedWithoutGroupsFacetsScroll: ViewGroup
   private lateinit var feedWithoutGroupsHeader: ViewGroup
   private lateinit var feedWithoutGroupsList: RecyclerView
-  private lateinit var feedWithoutGroupsScrollListener: RecyclerView.OnScrollListener
   private lateinit var feedWithoutGroupsTabs: RadioGroup
   private lateinit var imageLoader: ImageLoaderType
   private lateinit var loginDialogModel: CatalogLoginViewModel
@@ -153,8 +150,6 @@ class CatalogFragmentFeed : Fragment() {
 
     this.analytics =
       services.requireService(AnalyticsType::class.java)
-    this.bookCovers =
-      services.requireService(BookCoverProviderType::class.java)
     this.bookRegistry =
       services.requireService(BookRegistryReadableType::class.java)
     this.screenInformation =
@@ -267,7 +262,6 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroupsAdapter =
       CatalogFeedWithGroupsAdapter(
         groups = this.feedWithGroupsData,
-        coverLoader = this.bookCovers,
         onFeedSelected = this::onFeedSelected,
         onBookSelected = this::onBookSelected
       )
@@ -285,8 +279,6 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithoutGroupsList.layoutManager!!.onRestoreInstanceState(
       this.feedModel.restoreFeedWithoutGroupsViewState())
 
-    this.feedWithoutGroupsScrollListener = CatalogScrollListener(this.bookCovers)
-    this.feedWithoutGroupsList.addOnScrollListener(this.feedWithoutGroupsScrollListener)
     this.reconfigureUI(this.feedModel.feedState())
 
     this.accountSubscription =
@@ -379,7 +371,6 @@ class CatalogFragmentFeed : Fragment() {
      * of views from the book registry.
      */
 
-    this.feedWithoutGroupsList.removeOnScrollListener(this.feedWithoutGroupsScrollListener)
     this.feedWithoutGroupsList.adapter = null
     this.feedWithGroupsList.adapter = null
     this.feedStatusSubscription?.dispose()

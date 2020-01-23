@@ -17,6 +17,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.bumptech.glide.Glide
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
@@ -33,9 +34,7 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
@@ -91,8 +90,6 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var buttons: LinearLayout
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var cover: ImageView
-  private lateinit var coverProgress: ProgressBar
-  private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
   private lateinit var format: TextView
   private lateinit var loginDialogModel: CatalogLoginViewModel
@@ -162,8 +159,6 @@ class CatalogFragmentBookDetail : Fragment() {
       services.requireService(ProfilesControllerType::class.java)
     this.booksController =
       services.requireService(BooksControllerType::class.java)
-    this.covers =
-      services.requireService(BookCoverProviderType::class.java)
   }
 
   override fun onCreateView(
@@ -188,8 +183,6 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.cover =
       layout.findViewById(R.id.bookDetailCover)
-    this.coverProgress =
-      layout.findViewById(R.id.bookDetailCoverProgress)
     this.title =
       layout.findViewById(R.id.bookDetailTitle)
     this.format =
@@ -246,29 +239,12 @@ class CatalogFragmentBookDetail : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    val shortAnimationDuration =
-      this.requireContext().resources.getInteger(android.R.integer.config_shortAnimTime)
-
-    this.cover.visibility = View.INVISIBLE
-    this.coverProgress.visibility = View.VISIBLE
-
-    this.covers.loadCoverInto(
-      this.parameters.feedEntry,
-      this.cover,
-      this.cover.layoutParams.width,
-      this.cover.layoutParams.height
-    ).map {
-      this.uiThread.runOnUIThread {
-        this.coverProgress.visibility = View.INVISIBLE
-
-        this.cover.visibility = View.VISIBLE
-        this.cover.alpha = 0.0f
-        this.cover.animate()
-          .alpha(1f)
-          .setDuration(shortAnimationDuration.toLong())
-          .setListener(null)
-      }
-    }
+    val entry = this.parameters.feedEntry.feedEntry
+    Glide.with(this)
+      .load(entry.cover)
+      .placeholder(R.drawable.cover_loading)
+      .error(R.drawable.cover_error)
+      .into(this.cover)
 
     /*
      * Retrieve the current status of the book, or synthesize a status value based on the

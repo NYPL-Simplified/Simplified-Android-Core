@@ -122,6 +122,7 @@ ext.libraries = [
   nyplPDFAPI                 : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.api:0.1.0",
   nyplPDFViewer              : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer:0.1.0",
   picasso                    : "com.squareup.picasso:picasso:2.71828",
+  glide                      : "com.github.bumptech.glide:glide:4.11.0",
   readium                    : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
   readiumSharedJS            : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",
   rxjava2                    : "io.reactivex.rxjava2:rxjava:2.1.13",

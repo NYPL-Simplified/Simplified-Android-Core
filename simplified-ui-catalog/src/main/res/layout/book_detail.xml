@@ -26,16 +26,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-      <ProgressBar
-        android:id="@+id/bookDetailCoverProgress"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        app:layout_constraintBottom_toBottomOf="@id/bookDetailCover"
-        app:layout_constraintEnd_toEndOf="@id/bookDetailCover"
-        app:layout_constraintStart_toStartOf="@id/bookDetailCover"
-        app:layout_constraintTop_toTopOf="@id/bookDetailCover" />
-
       <TextView
         android:id="@+id/bookDetailTitle"
         android:layout_width="0dp"

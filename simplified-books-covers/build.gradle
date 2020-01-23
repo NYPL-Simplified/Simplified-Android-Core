@@ -4,7 +4,7 @@ dependencies {
   api project(':simplified-opds-core')
   api project(':simplified-tenprint')
 
-  api libraries.picasso
+  api libraries.glide
 
   implementation libraries.io7mJFunctional
   implementation libraries.kotlinStdlib

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import org.librarysimplified.audiobook.api.PlayerAudioBookType
@@ -41,7 +42,6 @@ import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
@@ -103,7 +103,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   private lateinit var bookAuthor: String
   private lateinit var books: BooksControllerType
   private lateinit var bookTitle: String
-  private lateinit var covers: BookCoverProviderType
   private lateinit var downloader: DownloaderType
   private lateinit var downloaderDir: File
   private lateinit var downloadExecutor: ListeningExecutorService
@@ -166,8 +165,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       services.requireService(ScreenSizeInformationType::class.java)
     this.books =
       services.requireService(BooksControllerType::class.java)
-    this.covers =
-      services.requireService(BookCoverProviderType::class.java)
     this.networkConnectivity =
       services.requireService(NetworkConnectivityType::class.java)
 
@@ -596,19 +593,12 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerWantsCoverImage(view: ImageView) {
-
-    /*
-     * Use the cover provider to load a cover image into the image view. The width and height
-     * are essentially hints; the target image view almost certainly won't have a usable size
-     * before this method is called, so we pass in a width/height hint that should give something
-     * reasonably close to the expected 3:4 cover image size ratio.
-     */
-
-    this.covers.loadCoverInto(
-      FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
-      view,
-      screenSize.dpToPixels(300).toInt(),
-      screenSize.dpToPixels(400).toInt())
+    val entry = FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry).feedEntry
+    Glide.with(this)
+      .load(entry.cover)
+      .placeholder(R.drawable.cover_loading)
+      .error(R.drawable.cover_error)
+      .into(view)
   }
 
   override fun onPlayerWantsPlayer(): PlayerType {

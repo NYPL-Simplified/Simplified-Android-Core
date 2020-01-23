@@ -10,8 +10,8 @@ import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.common.base.Preconditions
-import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.ServiceDirectoryType
@@ -23,11 +23,9 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
-import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -57,8 +55,6 @@ class CatalogPagedViewHolder(
   private val logger =
     LoggerFactory.getLogger(CatalogPagedViewHolder::class.java)
 
-  private val bookCovers: BookCoverProviderType =
-    this.services.requireService(BookCoverProviderType::class.java)
   private val bookRegistry: BookRegistryReadableType =
     this.services.requireService(BookRegistryReadableType::class.java)
   private val booksController: BooksControllerType =
@@ -70,7 +66,6 @@ class CatalogPagedViewHolder(
   private val uiThread: UIThreadServiceType =
     this.services.requireService(UIThreadServiceType::class.java)
 
-  private var thumbnailLoading: FluentFuture<Unit>? = null
   private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
 
   private val idle =
@@ -202,18 +197,11 @@ class CatalogPagedViewHolder(
     this.idleAuthor.text = item.feedEntry.authorsCommaSeparated
     this.errorTitle.text = item.feedEntry.title
 
-    this.thumbnailLoading =
-      this.bookCovers.loadThumbnailInto(
-        item,
-        this.idleCover,
-        this.idleCover.layoutParams.width,
-        this.idleCover.layoutParams.height
-      ).map {
-        this.uiThread.runOnUIThread {
-          this.setVisibilityIfNecessary(this.idleProgress, View.INVISIBLE)
-          this.setVisibilityIfNecessary(this.idleCover, View.VISIBLE)
-        }
-      }
+    Glide.with(this.parent)
+      .load(item.feedEntry.cover)
+      .placeholder(R.drawable.cover_loading)
+      .error(R.drawable.cover_error)
+      .into(this.idleCover)
 
     val onClick: (View) -> Unit = { this.onBookSelected.invoke(item) }
     this.idle.setOnClickListener(onClick)
@@ -531,11 +519,6 @@ class CatalogPagedViewHolder(
     this.idleTitle.text = null
     this.progress.setOnClickListener(null)
     this.progressText.setOnClickListener(null)
-
-    this.thumbnailLoading = this.thumbnailLoading?.let { loading ->
-      loading.cancel(true)
-      null
-    }
   }
 
   private fun unsubscribeFromLogin() {

@@ -21,8 +21,6 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverBadge
 import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
 import org.nypl.simplified.books.covers.BookCoverGenerator
-import org.nypl.simplified.books.covers.BookCoverProvider
-import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -172,20 +170,20 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
         contentResolver = this.applicationContext.contentResolver
       )
 
-    val coverLoader =
-      BookCoverProvider.newCoverProvider(
-        context = this.applicationContext,
-        bookRegistry = bookRegistry,
-        coverGenerator = BookCoverGenerator(TenPrintGenerator.newGenerator()),
-        badgeLookup = object : BookCoverBadgeLookupType {
-          override fun badgeForEntry(entry: FeedEntry.FeedEntryOPDS): BookCoverBadge? {
-            return null
-          }
-        },
-        executor = executor,
-        debugCacheIndicators = true,
-        debugLogging = false
-      )
+//    val coverLoader =
+//      BookCoverProvider.newCoverProvider(
+//        context = this.applicationContext,
+//        bookRegistry = bookRegistry,
+//        coverGenerator = BookCoverGenerator(TenPrintGenerator.newGenerator()),
+//        badgeLookup = object : BookCoverBadgeLookupType {
+//          override fun badgeForEntry(entry: FeedEntry.FeedEntryOPDS): BookCoverBadge? {
+//            return null
+//          }
+//        },
+//        executor = executor,
+//        debugCacheIndicators = true,
+//        debugLogging = false
+//      )
 
     val buildConfig =
       object : BuildConfigurationServiceType {
@@ -209,10 +207,6 @@ class Tabbed2Activity : AppCompatActivity(), ToolbarHostType, ErrorPageListenerT
     newServices.addService(
       interfaceType = DocumentStoreType::class.java,
       service = documentStore
-    )
-    newServices.addService(
-      interfaceType = BookCoverProviderType::class.java,
-      service = coverLoader
     )
     newServices.addService(
       interfaceType = FeedLoaderType::class.java,

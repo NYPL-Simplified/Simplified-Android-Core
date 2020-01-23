@@ -42,10 +42,6 @@
     level="INFO" />
 
   <logger
-    name="org.nypl.simplified.app.BookCoverProvider"
-    level="INFO" />
-
-  <logger
     name="org.nypl.drm"
     level="DEBUG" />
 

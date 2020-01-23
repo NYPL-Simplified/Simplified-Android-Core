@@ -52,8 +52,6 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
 import org.nypl.simplified.books.covers.BookCoverGenerator
 import org.nypl.simplified.books.covers.BookCoverGeneratorType
-import org.nypl.simplified.books.covers.BookCoverProvider
-import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
@@ -568,24 +566,6 @@ internal object MainServices {
       ))
   }
 
-  private fun createCoverProvider(
-    context: Context,
-    bookRegistry: BookRegistryReadableType,
-    coverGenerator: BookCoverGeneratorType,
-    badgeLookup: BookCoverBadgeLookupType
-  ): BookCoverProviderType {
-    val execCovers =
-      NamedThreadPools.namedThreadPool(2, "cover", 19)
-    return BookCoverProvider.newCoverProvider(
-      context = context,
-      bookRegistry = bookRegistry,
-      coverGenerator = coverGenerator,
-      badgeLookup = badgeLookup,
-      executor = execCovers,
-      debugCacheIndicators = false,
-      debugLogging = false)
-  }
-
   private fun createBookCoverBadgeLookup(
     context: Context,
     screenSize: ScreenSizeInformationType
@@ -1042,19 +1022,6 @@ internal object MainServices {
           )
         }
       )
-
-    addService(
-      message = strings.bootingCoverProvider,
-      interfaceType = BookCoverProviderType::class.java,
-      serviceConstructor = {
-        this.createCoverProvider(
-          context = context,
-          bookRegistry = bookRegistry,
-          coverGenerator = coverGenerator,
-          badgeLookup = badgeLookup
-        )
-      }
-    )
 
     addService(
       message = strings.bootingScreenSize,

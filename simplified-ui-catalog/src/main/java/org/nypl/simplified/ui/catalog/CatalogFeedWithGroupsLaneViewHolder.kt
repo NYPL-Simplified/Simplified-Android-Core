@@ -4,7 +4,6 @@ import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedGroup
 import java.net.URI
@@ -14,7 +13,6 @@ import java.net.URI
  */
 class CatalogFeedWithGroupsLaneViewHolder(
   private val parent: View,
-  private val coverLoader: BookCoverProviderType,
   private val onFeedSelected: (title: String, uri: URI) -> Unit,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit
 ) : RecyclerView.ViewHolder(parent) {
@@ -56,9 +54,7 @@ class CatalogFeedWithGroupsLaneViewHolder(
      */
 
     val filtered = group.groupEntries.filterIsInstance<FeedEntry.FeedEntryOPDS>()
-    this.scrollView.adapter = CatalogLaneAdapter(
-      filtered, coverLoader, onBookSelected
-    )
+    this.scrollView.adapter = CatalogLaneAdapter(filtered, onBookSelected)
   }
 
   fun unbind() {
