@@ -99,6 +99,8 @@ class BookCoverProvider private constructor(
 
           this@BookCoverProvider.picasso.load(uriGenerated.toString())
             .tag(tag)
+            .error(R.drawable.cover_error)
+            .placeholder(R.drawable.cover_loading)
             .resize(width, height)
             .transform(badgePainter)
             .into(imageView, callbackFinal)
