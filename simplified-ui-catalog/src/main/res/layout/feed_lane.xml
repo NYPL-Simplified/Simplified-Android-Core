@@ -1,77 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
-  android:layout_height="wrap_content">
+  android:layout_height="wrap_content"
+  android:orientation="vertical">
 
   <TextView
     android:id="@+id/feedLaneTitle"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="16dp"
-    android:layout_marginEnd="16dp"
+    android:layout_margin="16dp"
     android:ellipsize="end"
     android:maxLines="1"
     android:text="@string/catalogPlaceholder"
     android:textColor="?attr/simplifiedColorPrimaryDark"
     android:textSize="18sp"
-    android:textStyle="bold"
-    app:layout_constraintEnd_toStartOf="@id/feedLaneProgress"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    android:textStyle="bold" />
 
-  <ProgressBar
-    android:id="@+id/feedLaneProgress"
-    style="?android:attr/progressBarStyle"
-    android:layout_width="24dp"
-    android:layout_height="24dp"
-    android:layout_marginEnd="16dp"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/feedLaneTitle"
-    app:layout_constraintTop_toTopOf="@id/feedLaneTitle" />
-
-  <HorizontalScrollView
+  <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/feedLaneCoversScroll"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="@dimen/catalogFeedCoversHeight"
-    android:layout_marginTop="16dp"
-    android:scrollbars="none"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/feedLaneTitle">
-
-    <LinearLayout
-      android:id="@+id/feedLaneCovers"
-      android:layout_width="wrap_content"
-      android:layout_height="@dimen/catalogFeedCoversHeight"
-      android:layout_gravity="start|center_vertical"
-      android:orientation="horizontal">
-
-      <!-- These views are removed and replaced at runtime, they are present here -->
-      <!-- for use in the layout editor. -->
-
-      <Space
-        android:layout_width="@dimen/catalogFeedCoversEndSpace"
-        android:layout_height="@dimen/catalogFeedCoversHeight" />
-
-      <ImageView
-        android:layout_width="@dimen/catalogFeedCoversWidth"
-        android:layout_height="@dimen/catalogFeedCoversHeight"
-        android:scaleType="fitXY"
-        app:srcCompat="@drawable/cover" />
-
-      <Space
-        android:layout_width="@dimen/catalogFeedCoversSpace"
-        android:layout_height="@dimen/catalogFeedCoversHeight" />
-
-      <ImageView
-        android:layout_width="@dimen/catalogFeedCoversWidth"
-        android:layout_height="@dimen/catalogFeedCoversHeight"
-        android:scaleType="fitXY"
-        app:srcCompat="@drawable/cover" />
-
-    </LinearLayout>
-  </HorizontalScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    android:clipToPadding="false"
+    android:paddingStart="@dimen/catalogFeedCoversEndSpace"
+    android:paddingEnd="@dimen/catalogFeedCoversEndSpace" />
+</LinearLayout>

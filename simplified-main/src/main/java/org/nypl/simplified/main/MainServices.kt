@@ -575,7 +575,7 @@ internal object MainServices {
     badgeLookup: BookCoverBadgeLookupType
   ): BookCoverProviderType {
     val execCovers =
-      NamedThreadPools.namedThreadPool(1, "cover", 19)
+      NamedThreadPools.namedThreadPool(2, "cover", 19)
     return BookCoverProvider.newCoverProvider(
       context = context,
       bookRegistry = bookRegistry,

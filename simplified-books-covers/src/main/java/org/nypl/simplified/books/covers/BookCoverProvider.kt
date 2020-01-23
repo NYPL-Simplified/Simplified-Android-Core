@@ -97,31 +97,33 @@ class BookCoverProvider private constructor(
             uriSpecified,
             e)
 
-          val fallbackRequest =
-            this@BookCoverProvider.picasso.load(uriGenerated.toString())
-          fallbackRequest.tag(tag)
-          fallbackRequest.resize(width, height)
-          fallbackRequest.transform(badgePainter)
-          fallbackRequest.into(imageView, callbackFinal)
-          fallbackRequest.noFade()
+          this@BookCoverProvider.picasso.load(uriGenerated.toString())
+            .tag(tag)
+            .error(R.drawable.cover_error)
+            .placeholder(R.drawable.cover_loading)
+            .resize(width, height)
+            .transform(badgePainter)
+            .into(imageView, callbackFinal)
         }
       }
 
-      val request = this.picasso.load(uriSpecified.toString())
-      request.tag(tag)
-      request.resize(width, height)
-      request.transform(badgePainter)
-      request.into(imageView, fallbackToGeneration)
-      request.noFade()
+      this.picasso.load(uriSpecified.toString())
+        .tag(tag)
+        .error(R.drawable.cover_error)
+        .placeholder(R.drawable.cover_loading)
+        .resize(width, height)
+        .transform(badgePainter)
+        .into(imageView, fallbackToGeneration)
     } else {
       this.log.debug("{}: {}: loading generated uri {}", tag, entry.bookID, uriGenerated)
 
-      val request = this.picasso.load(uriGenerated.toString())
-      request.tag(tag)
-      request.resize(width, height)
-      request.transform(badgePainter)
-      request.into(imageView, callbackFinal)
-      request.noFade()
+      this.picasso.load(uriGenerated.toString())
+        .tag(tag)
+        .error(R.drawable.cover_error)
+        .placeholder(R.drawable.cover_loading)
+        .resize(width, height)
+        .transform(badgePainter)
+        .into(imageView, callbackFinal)
     }
 
     return FluentFuture.from(future)
