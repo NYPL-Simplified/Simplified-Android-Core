@@ -76,7 +76,7 @@ ext.libraries = [
   androidXMultidex           : "androidx.multidex:multidex:2.0.0",
   androidXPaging             : "androidx.paging:paging-runtime-ktx:2.1.0",
   androidXPreference         : "androidx.preference:preference-ktx:1.1.0",
-  androidXRecyclerView       : "androidx.recyclerview:recyclerview:1.1.0-beta05",
+  androidXRecyclerView       : "androidx.recyclerview:recyclerview:1.1.0",
   androidXTestEspressoCore   : "androidx.test.espresso:espresso-core:3.1.0",
   androidXTestExtensions     : "androidx.test.ext:junit:1.1.1",
   androidXTestOrchestrator   : "androidx.test:orchestrator:1.1.0",
