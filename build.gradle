@@ -64,9 +64,20 @@ ext {
   nyplAudioBookAPIVersion = "3.0.0-beta004"
 }
 
+subprojects {
+  // Force version 1.0.2 of appcompat. A bug in 1.1.0 causes a crash on API 21.
+  //
+  // https://issuetracker.google.com/issues/141132133#comment42
+  //
+  // TODO: Remove once appcompat:1.2.0 is available.
+  configurations.all {
+    resolutionStrategy.force 'androidx.appcompat:appcompat:1.0.2'
+  }
+}
+
 ext.libraries = [
   androidAsync               : "com.koushikdutta.async:androidasync:2.2.1",
-  androidXAppCompat          : "androidx.appcompat:appcompat:1.1.0",
+  androidXAppCompat          : "androidx.appcompat:appcompat:1.0.2",
   androidXConstraintLayout   : "androidx.constraintlayout:constraintlayout:1.1.3",
   androidXCore               : "androidx.core:core:1.1.0",
   androidXFragmentTesting    : "androidx.fragment:fragment-testing:1.1.0",
@@ -76,7 +87,7 @@ ext.libraries = [
   androidXMultidex           : "androidx.multidex:multidex:2.0.0",
   androidXPaging             : "androidx.paging:paging-runtime-ktx:2.1.0",
   androidXPreference         : "androidx.preference:preference-ktx:1.1.0",
-  androidXRecyclerView       : "androidx.recyclerview:recyclerview:1.1.0-beta05",
+  androidXRecyclerView       : "androidx.recyclerview:recyclerview:1.1.0",
   androidXTestEspressoCore   : "androidx.test.espresso:espresso-core:3.1.0",
   androidXTestExtensions     : "androidx.test.ext:junit:1.1.1",
   androidXTestOrchestrator   : "androidx.test:orchestrator:1.1.0",
@@ -106,7 +117,7 @@ ext.libraries = [
   journeyappsZXing           : "com.journeyapps:zxing-android-embedded:3.2.0@aar",
   junit                      : "junit:junit:4.12",
   kotlinStdlib               : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
-  leakCanary                 : "com.squareup.leakcanary:leakcanary-android:2.0-beta-4",
+  leakCanary                 : "com.squareup.leakcanary:leakcanary-android:2.1",
   logbackAndroidClassic      : "com.github.tony19:logback-android-classic:1.1.1-6",
   logbackAndroidCore         : "com.github.tony19:logback-android-core:1.1.1-6",
   logbackClassic             : "ch.qos.logback:logback-classic:1.2.3",
