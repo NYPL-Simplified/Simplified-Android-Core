@@ -12,30 +12,25 @@ import org.nypl.simplified.feeds.api.FeedEntry
  * @see CatalogLaneItemViewHolder
  */
 class CatalogLaneItemViewHolder(
-  private val parent: View,
+  private val view: View,
   private val coverLoader: BookCoverProviderType,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit
-) : RecyclerView.ViewHolder(parent) {
+) : RecyclerView.ViewHolder(view) {
 
-  private val imageView = parent as ImageView
-  private val imageWidth =
-    parent.resources.getDimensionPixelSize(R.dimen.catalogFeedCoversWidth)
-  private val imageHeight =
-    parent.resources.getDimensionPixelSize(R.dimen.catalogFeedCoversHeight)
+  private val imageView = view.findViewById<ImageView>(R.id.coverImage)
+  private val targetHeight =
+    view.resources.getDimensionPixelSize(org.nypl.simplified.books.covers.R.dimen.cover_thumbnail_height)
 
   fun bindTo(entry: FeedEntry.FeedEntryOPDS) {
-    imageView.contentDescription =
-      CatalogBookAccessibilityStrings.coverDescription(parent.resources, entry)
+    view.contentDescription =
+      CatalogBookAccessibilityStrings.coverDescription(view.resources, entry)
 
-    imageView.setOnClickListener {
+    view.setOnClickListener {
       onBookSelected.invoke(entry)
     }
 
     coverLoader.loadThumbnailInto(
-      entry = entry,
-      imageView = imageView,
-      width = imageWidth,
-      height = imageHeight
+      entry, imageView, 0, targetHeight
     )
   }
 }

@@ -35,7 +35,6 @@ import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
@@ -91,7 +90,6 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var buttons: LinearLayout
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var cover: ImageView
-  private lateinit var coverProgress: ProgressBar
   private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
   private lateinit var format: TextView
@@ -187,9 +185,7 @@ class CatalogFragmentBookDetail : Fragment() {
       inflater.inflate(R.layout.book_detail, container, false)
 
     this.cover =
-      layout.findViewById(R.id.bookDetailCover)
-    this.coverProgress =
-      layout.findViewById(R.id.bookDetailCoverProgress)
+      layout.findViewById(R.id.bookDetailCoverImage)
     this.title =
       layout.findViewById(R.id.bookDetailTitle)
     this.format =
@@ -246,29 +242,11 @@ class CatalogFragmentBookDetail : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    val shortAnimationDuration =
-      this.requireContext().resources.getInteger(android.R.integer.config_shortAnimTime)
-
-    this.cover.visibility = View.INVISIBLE
-    this.coverProgress.visibility = View.VISIBLE
-
+    val targetHeight =
+      resources.getDimensionPixelSize(R.dimen.cover_detail_height)
     this.covers.loadCoverInto(
-      this.parameters.feedEntry,
-      this.cover,
-      this.cover.layoutParams.width,
-      this.cover.layoutParams.height
-    ).map {
-      this.uiThread.runOnUIThread {
-        this.coverProgress.visibility = View.INVISIBLE
-
-        this.cover.visibility = View.VISIBLE
-        this.cover.alpha = 0.0f
-        this.cover.animate()
-          .alpha(1f)
-          .setDuration(shortAnimationDuration.toLong())
-          .setListener(null)
-      }
-    }
+      this.parameters.feedEntry, this.cover, 0, targetHeight
+    )
 
     /*
      * Retrieve the current status of the book, or synthesize a status value based on the

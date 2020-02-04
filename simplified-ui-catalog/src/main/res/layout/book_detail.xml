@@ -13,28 +13,30 @@
     <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp">
+      android:layout_marginBottom="16dp"
+      android:clipChildren="false"
+      android:clipToPadding="false">
 
-      <ImageView
+      <androidx.cardview.widget.CardView
         android:id="@+id/bookDetailCover"
-        android:layout_width="120dp"
-        android:layout_height="160dp"
-        android:layout_marginStart="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/cover_thumbnail_height"
         android:layout_marginTop="16dp"
-        android:contentDescription="@string/catalogBookCoverDescription"
-        android:src="@drawable/cover"
+        android:layout_marginStart="16dp"
+        app:cardCornerRadius="@dimen/cover_corner_radius"
+        app:cardElevation="2dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-      <ProgressBar
-        android:id="@+id/bookDetailCoverProgress"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        app:layout_constraintBottom_toBottomOf="@id/bookDetailCover"
-        app:layout_constraintEnd_toEndOf="@id/bookDetailCover"
-        app:layout_constraintStart_toStartOf="@id/bookDetailCover"
-        app:layout_constraintTop_toTopOf="@id/bookDetailCover" />
+        <ImageView
+          android:id="@+id/bookDetailCoverImage"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:adjustViewBounds="true"
+          android:contentDescription="@null"
+          android:scaleType="fitXY"
+          app:srcCompat="@drawable/cover_loading" />
+      </androidx.cardview.widget.CardView>
 
       <TextView
         android:id="@+id/bookDetailTitle"
@@ -79,7 +81,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/bookDetailCover"
         app:layout_constraintTop_toBottomOf="@id/bookDetailFormat" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View

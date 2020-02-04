@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="cover_corner_radius">2dp</dimen>
+  <dimen name="cover_thumbnail_height">120dp</dimen>
+  <dimen name="cover_thumbnail_width">90dp</dimen>
+  <dimen name="cover_detail_height">160dp</dimen>
+  <dimen name="cover_detail_width">120dp</dimen>
+</resources>

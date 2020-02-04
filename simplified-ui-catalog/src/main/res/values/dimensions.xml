@@ -3,15 +3,10 @@
 <resources>
   <dimen name="catalogBookDetailStatusHeight">64dp</dimen>
   <dimen name="catalogBookDetailButtonsHeight">64dp</dimen>
-  <dimen name="catalogFeedCoversHeight">96dp</dimen>
-  <dimen name="catalogFeedCoversWidth">80dp</dimen>
-  <dimen name="catalogFeedCoversEndSpace">16dp</dimen>
   <dimen name="catalogFeedCoversSpace">8dp</dimen>
-
   <dimen name="catalogFeedCellImageWidth">80dp</dimen>
   <dimen name="catalogFeedCellHeight">128dp</dimen>
   <dimen name="catalogFeedCellButtonsHeight">32dp</dimen>
-
   <dimen name="catalogFacetTabStroke">1dp</dimen>
   <dimen name="catalogFacetTabCornerRadius">3dp</dimen>
   <dimen name="catalogFacetTabPaddingLeft">32dp</dimen>

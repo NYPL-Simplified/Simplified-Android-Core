@@ -1,10 +1,6 @@
 package org.nypl.simplified.books.covers;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 
 import com.io7m.jnull.NullCheck;
 
@@ -67,8 +63,8 @@ public final class BookCoverGenerator implements BookCoverGeneratorType
 
   @Override public Bitmap generateImage(
     final URI u,
-    final int width,
-    final int height)
+    int width,
+    int height)
     throws IOException
   {
     try {
@@ -81,19 +77,20 @@ public final class BookCoverGenerator implements BookCoverGeneratorType
       final String author_maybe = params.get("author");
       final String author = author_maybe == null ? "" : NullCheck.notNull(author_maybe);
 
+      if (width == 0) {
+        width = (int) Math.round(height * .75);
+      }
+      if (height == 0) {
+        height = (int) Math.round(width / .75);
+      }
+
       final TenPrintInputBuilderType ib = TenPrintInput.newBuilder();
       ib.setAuthor(author);
       ib.setTitle(title);
       ib.setCoverHeight(height);
       final TenPrintInput i = ib.build();
       final Bitmap cover = this.generator.generate(i);
-      final Bitmap container = Bitmap.createBitmap(width, height, Config.RGB_565);
-      final Canvas c = new Canvas(container);
-      final Paint white = new Paint();
-      white.setColor(Color.WHITE);
-      c.drawRect(0.0F, 0.0F, (float) width, (float) height, white);
-      c.drawBitmap(cover, (float) ((width - cover.getWidth()) / 2), 0.0F, null);
-      return NullCheck.notNull(container);
+      return NullCheck.notNull(cover);
     } catch (final Throwable e) {
       LOG.error("error generating image for {}: ", u, e);
       throw new IOException(e);

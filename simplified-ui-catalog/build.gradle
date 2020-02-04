@@ -20,6 +20,7 @@ dependencies {
   implementation project(":simplified-ui-toolbar")
 
   implementation libraries.androidXAppCompat
+  implementation libraries.androidXCardView
   implementation libraries.androidXConstraintLayout
   implementation libraries.androidXLifecycle
   implementation libraries.androidXPaging
