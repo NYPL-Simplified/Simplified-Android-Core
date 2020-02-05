@@ -8,5 +8,6 @@ exec ./gradlew clean test assemble \
   -Porg.librarysimplified.keyPassword=${NYPL_SIGNING_KEY_PASSWORD} \
   -Porg.librarysimplified.storePassword=${NYPL_SIGNING_STORE_PASSWORD} \
   -Porg.gradle.configureondemand=true \
-  -Porg.gradle.jvmargs="-Xmx4g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError"
+  -Porg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError" \
+  -Porg.gradle.parallel=false
 
