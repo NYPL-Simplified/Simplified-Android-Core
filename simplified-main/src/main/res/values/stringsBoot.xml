@@ -9,7 +9,6 @@
   <string name="bootingBookController">Initializing book controller…</string>
   <string name="bootingBookRegistry">Starting book registry…</string>
   <string name="bootingBrandingServices">Initializing branding services…</string>
-  <string name="bootingBugSnag">Starting BugSnag…</string>
   <string name="bootingBuildConfigurationService">Initializing build configuration service…</string>
   <string name="bootingBundledContent">Initializing bundled content…</string>
   <string name="bootingBundledCredentials">Initializing bundled credentials…</string>

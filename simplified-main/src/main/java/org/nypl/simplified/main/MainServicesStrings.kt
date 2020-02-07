@@ -133,9 +133,6 @@ internal class MainServicesStrings(
   val bootingAdobeDRM: String =
     this.resources.getString(R.string.bootingAdobeDRM)
 
-  val bootingBugsnag =
-    this.resources.getString(R.string.bootingBugSnag)
-
   val bootingNotificationsService =
     this.resources.getString(R.string.bootingNotificationsService)
 

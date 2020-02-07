@@ -4,10 +4,6 @@
   <property name="EXT_FILES_DIR" value="${EXT_DIR:-/sdcard}/Android/data/${PACKAGE_NAME}/files"/>
   <property name="EXT_CACHE_DIR" value="${EXT_DIR:-/sdcard}/Android/data/${PACKAGE_NAME}/cache"/>
 
-  <appender
-    name="BUGSNAG"
-    class="org.nypl.simplified.bugsnag.BugsnagLogbackAppender"/>
-
   <!-- Create a logcat appender -->
   <appender
     name="LOG_CAT"
@@ -36,7 +32,6 @@
   <root level="DEBUG">
     <appender-ref ref="LOG_CAT" />
     <appender-ref ref="ASYNC_FILE" />
-    <appender-ref ref="BUGSNAG" />
   </root>
 
 </configuration>

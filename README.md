@@ -90,18 +90,6 @@ org.librarysimplified.nexus.password=PASSWORD
 org.librarysimplified.nexus.depend=true
 ~~~
 
-#### Bugsnag Support
-
-The core application provides support for error reporting via [Bugsnag](https://www.bugsnag.com/).
-This requires that a configuration file be placed at `src/main/assets/bugsnag.conf` containing
-your Bugsnag API token:
-
-~~~
-bugsnag.api_token = 1234123412341234
-~~~
-
-If you do not provide this configuration file, Bugsnag support will be disabled at run-time.
-
 #### APK signing
 
 If you wish to generate a signed APK for publishing the Vanilla application, you will need to copy
@@ -230,7 +218,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.books.database.api](simplified-books-database-api)|Book database API|
 |[org.librarysimplified.books.registry.api](simplified-books-registry-api)|Book registry API|
 |[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
-|[org.librarysimplified.bugsnag](simplified-bugsnag)|Bugsnag functionality|
 |[org.librarysimplified.buildconfig.api](simplified-buildconfig-api)|Build-time configuration API|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
 |[org.librarysimplified.clock](simplified-clock)|Clock API|

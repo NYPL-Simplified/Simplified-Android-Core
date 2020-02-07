@@ -95,7 +95,6 @@ ext.libraries = [
   androidXTestRules          : "androidx.test:rules:1.1.0",
   androidXTestRunner         : "androidx.test:runner:1.1.0",
   bottomNavigator            : "com.pandora.bottomnavigator:bottom-navigator:1.4",
-  bugsnag                    : "com.bugsnag:bugsnag-android:4.3.3",
   commonsLang                : "commons-lang:commons-lang:2.6",
   googleAndroidMaterial      : "com.google.android.material:material:1.0.0",
   autoValue                  : "com.google.auto.value:auto-value-annotations:1.7",
