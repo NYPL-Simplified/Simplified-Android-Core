@@ -58,6 +58,10 @@
       android:exported="false" />
 
     <activity
+      android:name="org.nypl.simplified.viewer.epub.readium2.ReaderActivity"
+      android:exported="false" />
+
+    <activity
       android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
       android:exported="false" />
 
