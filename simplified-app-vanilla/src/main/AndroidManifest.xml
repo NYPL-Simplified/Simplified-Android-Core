@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.simplified.vanilla">
 
   <uses-permission android:name="android.permission.INTERNET" />
@@ -12,13 +13,16 @@
 
   <application
     android:name="org.nypl.simplified.main.MainApplication"
-    android:allowBackup="true"
+    android:allowBackup="false"
     android:contentDescription="Simplified Vanilla"
     android:icon="@drawable/main_icon"
     android:label="Simplified Vanilla"
     android:largeHeap="true"
     android:theme="@style/VanillaTheme_NoActionBar_DeepPurple"
-    android:usesCleartextTraffic="true">
+    android:usesCleartextTraffic="true"
+    tools:ignore="GoogleAppIndexingWarning"
+    tools:replace="android:label,android:allowBackup"
+    tools:targetApi="m">
 
     <!-- Main entry point for the application. -->
     <activity
@@ -51,27 +55,26 @@
     <activity
       android:name="org.nypl.simplified.viewer.epub.readium1.ReaderActivity"
       android:contentDescription="Simplified Vanilla"
-      android:exported="false"
-      android:label="Simplified Vanilla" />
+      android:exported="false" />
+
+    <activity
+      android:name="org.nypl.simplified.viewer.epub.readium2.ReaderActivity"
+      android:contentDescription="Simplified Vanilla"
+      android:exported="false" />
 
     <activity
       android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
       android:contentDescription="Simplified Vanilla"
-      android:exported="false"
-      android:label="Simplified Vanilla" />
+      android:exported="false" />
 
     <activity
       android:name="org.nypl.simplified.viewer.pdf.PdfReaderActivity"
       android:contentDescription="Simplified Vanilla"
-      android:exported="false"
-      android:label="Simplified Vanilla" />
+      android:exported="false" />
 
     <activity
       android:name="org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity"
       android:contentDescription="Simplified Vanilla"
-      android:exported="false"
-      android:label="Simplified Vanilla" />
-
+      android:exported="false" />
   </application>
-
 </manifest>
