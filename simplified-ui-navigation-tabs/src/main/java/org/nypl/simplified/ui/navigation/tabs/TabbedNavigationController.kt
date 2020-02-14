@@ -221,11 +221,15 @@ class TabbedNavigationController private constructor(
     return this.navigator.stackSize(this.navigator.currentTab())
   }
 
-  override fun openBookDetail(entry: FeedEntry.FeedEntryOPDS) {
+  override fun openBookDetail(
+    feedArguments: CatalogFeedArguments,
+    entry: FeedEntry.FeedEntryOPDS
+  ) {
     val parameters =
       CatalogFragmentBookDetailParameters(
         accountId = this.profilesController.profileAccountCurrent().id,
-        feedEntry = entry
+        feedEntry = entry,
+        feedArguments = feedArguments
       )
 
     this.navigator.addFragment(

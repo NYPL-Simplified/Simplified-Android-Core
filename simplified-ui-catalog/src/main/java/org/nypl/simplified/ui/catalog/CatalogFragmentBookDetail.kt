@@ -54,6 +54,7 @@ import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.util.SortedMap
 import java.util.concurrent.atomic.AtomicReference
 
@@ -372,6 +373,47 @@ class CatalogFragmentBookDetail : Fragment() {
     }
 
     this.configureMetadataTable(opds)
+
+    /*
+     * If there's a related feed, enable the "Related books..." item and open the feed
+     * on demand.
+     */
+
+    val feedRelatedOpt = this.parameters.feedEntry.feedEntry.related
+    if (feedRelatedOpt is Some<URI>) {
+      val feedRelated = feedRelatedOpt.get()
+      this.related.setOnClickListener {
+        this.openRelatedFeed(feedRelated)
+      }
+      this.related.isEnabled = true
+    } else {
+      this.related.isEnabled = false
+    }
+  }
+
+  private fun openRelatedFeed(feedRelated: URI) {
+    val context = this.requireContext()
+    val feedModel = this.createOrGetFeedModel(context)
+    val targetFeed =
+      feedModel.resolveFeed(
+        title = context.resources.getString(R.string.catalogRelatedBooks),
+        uri = feedRelated,
+        isSearchResults = false
+      )
+    this.findNavigationController().openFeed(targetFeed)
+  }
+
+  private fun createOrGetFeedModel(
+    context: Context
+  ): CatalogFeedViewModel {
+    return ViewModelProviders.of(
+      this,
+      CatalogFeedViewModelFactory(
+        context = context,
+        services = Services.serviceDirectory(),
+        feedArguments = this.parameters.feedArguments
+      )
+    ).get(CatalogFeedViewModel::class.java)
   }
 
   private val genreUriScheme =
@@ -586,7 +628,8 @@ class CatalogFragmentBookDetail : Fragment() {
           this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
         } else {
           this.buttons.addView(
-            this.buttonCreator.createCenteredTextForButtons(R.string.catalogHoldCannotCancel))
+            this.buttonCreator.createCenteredTextForButtons(R.string.catalogHoldCannotCancel)
+          )
         }
 
       is BookStatus.Held.HeldReady -> {
@@ -820,7 +863,8 @@ class CatalogFragmentBookDetail : Fragment() {
   private fun checkButtonViewCount() {
     Preconditions.checkState(
       this.buttons.childCount > 0,
-      "At least one button must be present (existing ${this.buttons.childCount})")
+      "At least one button must be present (existing ${this.buttons.childCount})"
+    )
   }
 
   override fun onStop() {
@@ -940,7 +984,8 @@ class CatalogFragmentBookDetail : Fragment() {
   private fun tryReserveAuthenticated(book: Book) {
     this.logger.debug("reserving: {}", book.id)
     this.booksController.bookBorrowWithDefaultAcquisition(
-      this.parameters.accountId, book.id, book.entry)
+      this.parameters.accountId, book.id, book.entry
+    )
   }
 
   private fun tryRevokeAuthenticated(book: Book) {
@@ -951,7 +996,8 @@ class CatalogFragmentBookDetail : Fragment() {
   private fun tryBorrowAuthenticated(book: Book) {
     this.logger.debug("borrowing: {}", book.id)
     this.booksController.bookBorrowWithDefaultAcquisition(
-      this.parameters.accountId, book.id, book.entry)
+      this.parameters.accountId, book.id, book.entry
+    )
   }
 
   private fun <E : PresentableErrorType> tryShowError(
