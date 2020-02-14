@@ -18,7 +18,10 @@ interface CatalogNavigationControllerType : NavigationControllerType {
    * The catalog wants to open a book detail page.
    */
 
-  fun openBookDetail(entry: FeedEntryOPDS)
+  fun openBookDetail(
+    feedArguments: CatalogFeedArguments,
+    entry: FeedEntryOPDS
+  )
 
   /**
    * A catalog screen wants to open the error page.

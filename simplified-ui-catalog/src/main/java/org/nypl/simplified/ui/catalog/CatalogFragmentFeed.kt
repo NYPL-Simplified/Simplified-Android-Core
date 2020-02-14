@@ -330,7 +330,7 @@ class CatalogFragmentFeed : Fragment() {
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
     this.findNavigationController()
-      .openBookDetail(opdsEntry)
+      .openBookDetail(this.parameters, opdsEntry)
   }
 
   private fun onFeedSelected(title: String, uri: URI) {

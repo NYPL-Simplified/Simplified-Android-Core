@@ -30,11 +30,13 @@ import org.nypl.simplified.tests.MockBooksController
 import org.nypl.simplified.tests.MockDocumentStore
 import org.nypl.simplified.tests.MockProfilesController
 import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import java.net.URI
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -272,7 +274,12 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
       CatalogFragmentBookDetail.create(
         CatalogFragmentBookDetailParameters(
           accountId = profiles.profileAccountCurrent().id,
-          feedEntry = feedEntry
+          feedEntry = feedEntry,
+          feedArguments = CatalogFeedArguments.CatalogFeedArgumentsRemote(
+            title = "Some books",
+            feedURI = URI.create("urn:fake"),
+            isSearchResults = false
+          )
         ))
 
     this.registry.update(

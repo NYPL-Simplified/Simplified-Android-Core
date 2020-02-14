@@ -21,7 +21,13 @@ data class CatalogFragmentBookDetailParameters(
    * The OPDS feed entry.
    */
 
-  val feedEntry: FeedEntry.FeedEntryOPDS
+  val feedEntry: FeedEntry.FeedEntryOPDS,
+
+  /**
+   * The parameters of the feed that lead to this book detail page.
+   */
+
+  val feedArguments: CatalogFeedArguments
 
 ) : Serializable {
 
