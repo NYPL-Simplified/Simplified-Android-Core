@@ -26,7 +26,6 @@ dependencies {
   api project(":simplified-books-controller")
   api project(":simplified-books-controller-api")
   api project(":simplified-boot-api")
-  api project(":simplified-bugsnag")
   api project(":simplified-buildconfig-api")
   api project(":simplified-clock")
   api project(":simplified-documents")
@@ -63,7 +62,6 @@ dependencies {
   api libraries.androidAsync
   api libraries.androidXAppCompat
   api libraries.androidXMultidex
-  api libraries.bugsnag
   api libraries.kotlinStdlib
   api libraries.slf4j
 

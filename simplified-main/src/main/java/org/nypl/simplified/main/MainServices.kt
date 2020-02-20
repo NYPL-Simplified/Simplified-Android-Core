@@ -58,7 +58,6 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.boot.api.BootFailureTesting
-import org.nypl.simplified.bugsnag.IfBugsnag
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
@@ -281,20 +280,6 @@ internal object MainServices {
     }
 
     return Option.none()
-  }
-
-  private fun initBugsnag(
-    context: Context,
-    apiTokenOpt: OptionType<String>
-  ) {
-    if (apiTokenOpt.isSome) {
-      val apiToken = (apiTokenOpt as Some<String>).get()
-      this.logger.debug("IfBugsnag: init live interface")
-      IfBugsnag.init(context, apiToken)
-    } else {
-      this.logger.debug("IfBugsnag: init no-op interface")
-      IfBugsnag.init()
-    }
   }
 
   private fun findAdobeConfiguration(
@@ -800,9 +785,6 @@ internal object MainServices {
 
     publishEvent(strings.bootingDirectories)
     val directories = this.initializeDirectories(context)
-
-    publishEvent(strings.bootingBugsnag)
-    this.initBugsnag(context, MainBugsnag.getApiToken(assets))
 
     val adobeConfiguration = this.findAdobeConfiguration(context.resources)
     addServiceOptionally(

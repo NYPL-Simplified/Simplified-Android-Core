@@ -22,11 +22,6 @@ dependencies {
   api project(":simplified-books-registry-api")
   api project(":simplified-boot-api")
 
-  api(project(":simplified-bugsnag")) {
-    exclude group: "com.github.tony19", module: "logback-android-core"
-    exclude group: "com.github.tony19", module: "logback-android-classic"
-  }
-
   api project(":simplified-clock")
   api project(":simplified-documents")
   api project(":simplified-downloader-core")

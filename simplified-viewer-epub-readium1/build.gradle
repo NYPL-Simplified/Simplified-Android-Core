@@ -2,7 +2,6 @@ dependencies {
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-api")
-  implementation project(":simplified-bugsnag")
   implementation project(":simplified-files")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-reader-bookmarks-api")
