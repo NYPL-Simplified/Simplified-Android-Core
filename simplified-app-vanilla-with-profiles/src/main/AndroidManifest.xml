@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.simplified.vanilla.with_profiles">
 
   <uses-permission android:name="android.permission.INTERNET" />
@@ -17,9 +18,10 @@
     android:icon="@mipmap/ic_launcher"
     android:label="Vanilla (Profiles)"
     android:theme="@style/VanillaTheme_NoActionBar_Orange"
-    android:usesCleartextTraffic="true">
+    android:usesCleartextTraffic="true"
+    tools:replace="android:label,android:allowBackup">
 
-    <!-- Main entry point for the application. -->
+  <!-- Main entry point for the application. -->
     <activity
       android:name="org.nypl.simplified.main.MainActivity"
       android:contentDescription="Vanilla (Profiles)"
