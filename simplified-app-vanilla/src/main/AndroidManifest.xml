@@ -60,7 +60,9 @@
     <activity
       android:name="org.nypl.simplified.viewer.epub.readium2.ReaderActivity"
       android:contentDescription="Simplified Vanilla"
-      android:exported="false" />
+      android:exported="false"
+      android:parentActivityName="org.nypl.simplified.main.MainActivity"
+      android:theme="@style/VanillaTheme_ActionBar_DeepPurple" />
 
     <activity
       android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
