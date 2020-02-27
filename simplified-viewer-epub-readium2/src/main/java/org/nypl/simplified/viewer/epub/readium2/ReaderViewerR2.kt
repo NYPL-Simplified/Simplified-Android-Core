@@ -28,5 +28,4 @@ class ReaderViewerR2 : ViewerProviderType {
 
     ReaderActivity.startActivity(activity, bookId, file, entry)
   }
-
 }
