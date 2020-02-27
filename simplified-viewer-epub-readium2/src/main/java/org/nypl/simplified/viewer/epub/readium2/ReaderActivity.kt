@@ -76,6 +76,8 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
     val entry = intent?.extras?.getSerializable(ARG_ENTRY) as FeedEntry.FeedEntryOPDS
 
     if (savedInstanceState == null) {
+      setContentView(R.layout.reader2)
+
       supportActionBar?.apply {
         title = entry.feedEntry.title
         setDisplayHomeAsUpEnabled(true)
@@ -89,7 +91,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
       supportFragmentManager
         .beginTransaction()
-        .replace(android.R.id.content, fragment)
+        .replace(R.id.reader_container, fragment)
         .commit()
     }
   }
