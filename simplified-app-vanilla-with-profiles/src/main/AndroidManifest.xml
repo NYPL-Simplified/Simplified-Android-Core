@@ -21,7 +21,7 @@
     android:usesCleartextTraffic="true"
     tools:replace="android:label,android:allowBackup">
 
-  <!-- Main entry point for the application. -->
+    <!-- Main entry point for the application. -->
     <activity
       android:name="org.nypl.simplified.main.MainActivity"
       android:contentDescription="Vanilla (Profiles)"
@@ -72,7 +72,5 @@
       android:contentDescription="Vanilla (Profiles)"
       android:exported="false"
       android:label="Vanilla (Profiles)" />
-
   </application>
-
 </manifest>
