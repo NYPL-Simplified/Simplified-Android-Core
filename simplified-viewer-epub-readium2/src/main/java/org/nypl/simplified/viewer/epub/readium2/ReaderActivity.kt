@@ -166,7 +166,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         UIThread.runOnUIThread {
           val percent = event.progress * 100.0
           val percentText = String.format("%.2f", percent)
-          Toast.makeText(this, "Chapter ${event.chapterIndex}, ${percentText}%", Toast.LENGTH_SHORT).show()
+          Toast.makeText(this, "Chapter ${event.chapterIndex}, $percentText%", Toast.LENGTH_SHORT).show()
         }
       }
     }
