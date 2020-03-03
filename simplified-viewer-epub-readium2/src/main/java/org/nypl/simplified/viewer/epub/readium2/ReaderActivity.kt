@@ -24,6 +24,7 @@ import org.librarysimplified.r2.views.SR2ReaderFragment
 import org.librarysimplified.r2.views.SR2ReaderFragmentParameters
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.Executors
 
@@ -60,6 +61,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
     }
   }
 
+  private val logger = LoggerFactory.getLogger(ReaderActivity::class.java)
   private val handler = Handler(Looper.getMainLooper())
   private val ioExecutor =
     MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1) { runnable ->
@@ -79,6 +81,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
     if (savedInstanceState == null) {
       setContentView(R.layout.reader2)
+      showSystemUi()  // Init the window with the proper flags
 
       supportActionBar?.apply {
         title = entry.feedEntry.title
@@ -170,11 +173,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       }
 
       is SR2Event.SR2ReadingPositionChanged -> {
-        UIThread.runOnUIThread {
-          val percent = event.progress * 100.0
-          val percentText = String.format("%.2f", percent)
-          Toast.makeText(this, "Chapter ${event.chapterIndex}, $percentText%", Toast.LENGTH_SHORT).show()
-        }
+        logger.debug("SR2ReadingPositionChanged")
       }
     }
   }
