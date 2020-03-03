@@ -2,10 +2,12 @@ package org.nypl.simplified.viewer.epub.readium2
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -93,6 +95,11 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         .beginTransaction()
         .replace(R.id.reader_container, fragment)
         .commit()
+    }
+
+    // Enable webview debugging for debug builds
+    if ((applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+      WebView.setWebContentsDebuggingEnabled(true)
     }
   }
 
