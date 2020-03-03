@@ -81,7 +81,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
     if (savedInstanceState == null) {
       setContentView(R.layout.reader2)
-      showSystemUi()  // Init the window with the proper flags
+      showSystemUi() // Init the window with the proper flags
 
       supportActionBar?.apply {
         title = entry.feedEntry.title
