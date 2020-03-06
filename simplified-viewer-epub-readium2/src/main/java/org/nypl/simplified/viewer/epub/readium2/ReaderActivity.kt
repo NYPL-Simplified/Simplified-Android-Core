@@ -1,12 +1,14 @@
 package org.nypl.simplified.viewer.epub.readium2
 
 import android.app.Activity
+import android.content.Context.ACCESSIBILITY_SERVICE
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.accessibility.AccessibilityManager
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +29,7 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.Executors
+
 
 /**
  * The main reader activity for reading an EPUB using Readium 2.
@@ -81,7 +84,11 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
     if (savedInstanceState == null) {
       setContentView(R.layout.reader2)
-      showSystemUi() // Init the window with the proper flags
+
+      if (!isScreenReaderEnabled()) {
+        // Init the window with the proper flags
+        showSystemUi()
+      }
 
       supportActionBar?.apply {
         title = entry.feedEntry.title
@@ -108,7 +115,9 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
   override fun onResumeFragments() {
     super.onResumeFragments()
-    hideSystemUiDelayed()
+    if (!isScreenReaderEnabled()) {
+      hideSystemUiDelayed()
+    }
   }
 
   override fun onStop() {
@@ -167,8 +176,9 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
       is SR2Event.SR2OnCenterTapped -> {
         UIThread.runOnUIThread {
-          toggleSystemUi()
-          hideSystemUiDelayed()
+          if (!isScreenReaderEnabled()) {
+            toggleSystemUi()
+          }
         }
       }
 
@@ -177,6 +187,12 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       }
     }
   }
+}
+
+/** Returns `true` if accessibility services are enabled. */
+private fun Activity.isScreenReaderEnabled(): Boolean {
+  val am = getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
+  return am.isEnabled || am.isTouchExplorationEnabled
 }
 
 /** Returns `true` if fullscreen or immersive mode is not set. */
