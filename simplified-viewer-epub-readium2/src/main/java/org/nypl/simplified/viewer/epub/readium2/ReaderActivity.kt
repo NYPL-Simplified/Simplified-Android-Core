@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.Executors
 
-
 /**
  * The main reader activity for reading an EPUB using Readium 2.
  */
