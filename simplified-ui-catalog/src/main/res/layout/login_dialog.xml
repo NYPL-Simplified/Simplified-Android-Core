@@ -79,32 +79,6 @@
       </TableRow>
     </TableLayout>
 
-    <TextView
-      android:id="@+id/loginProgressText"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"
-      android:ellipsize="end"
-      android:gravity="center_horizontal"
-      android:maxLines="1"
-      android:text="@string/catalogPlaceholder"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/loginTable"
-      app:layout_constraintVertical_bias="1.0" />
-
-    <ProgressBar
-      android:id="@+id/loginProgressBar"
-      style="?android:attr/progressBarStyleHorizontal"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="16dp"
-      android:layout_marginBottom="16dp"
-      android:indeterminate="true"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/loginProgressText" />
-
     <CheckBox
       android:id="@+id/loginEULA"
       android:layout_width="0dp"
@@ -136,6 +110,32 @@
       android:background="@color/lock_form_overlay"
       android:visibility="gone"
       app:layout_constraintTop_toBottomOf="@id/loginTitle" />
+
+    <TextView
+        android:id="@+id/loginProgressText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="1"
+        android:text="@string/catalogPlaceholder"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loginTable"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <ProgressBar
+        android:id="@+id/loginProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:indeterminate="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loginProgressText" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
