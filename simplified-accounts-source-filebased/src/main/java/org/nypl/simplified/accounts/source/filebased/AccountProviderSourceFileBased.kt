@@ -14,7 +14,8 @@ import java.net.URI
  */
 
 class AccountProviderSourceFileBased(
-  private val getFile: (Context) -> InputStream) : AccountProviderSourceType {
+  private val getFile: (Context) -> InputStream
+) : AccountProviderSourceType {
 
   private val logger = LoggerFactory.getLogger(AccountProviderSourceFileBased::class.java)
 
@@ -38,10 +39,12 @@ class AccountProviderSourceFileBased(
       this.logger.debug("loading providers from file")
       this.getFile.invoke(context).use { stream ->
         val newResult = AccountProvidersJSON.deserializeCollectionFromStream(stream)
+        this.logger.debug("loaded {} providers from file", newResult.size)
         this.cache = newResult
         SourceResult.SourceSucceeded(mapResult(newResult))
       }
     } catch (e: Exception) {
+      this.logger.error("failed to load providers from file: ", e)
       SourceResult.SourceFailed(mapOf(), e)
     }
   }

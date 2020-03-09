@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
-import org.nypl.simplified.reports.Reports.Result.*
+import org.nypl.simplified.reports.Reports.Result.NoFiles
+import org.nypl.simplified.reports.Reports.Result.RaisedException
+import org.nypl.simplified.reports.Reports.Result.Sent
 import org.slf4j.LoggerFactory
 import java.io.BufferedOutputStream
 import java.io.File
@@ -44,7 +46,8 @@ object Reports {
      */
 
     data class RaisedException(
-      val exception: Exception) : Result()
+      val exception: Exception
+    ) : Result()
   }
 
   /**
@@ -56,7 +59,8 @@ object Reports {
     context: Context,
     address: String,
     subject: String,
-    body: String): Result {
+    body: String
+  ): Result {
 
     val directories = mutableListOf<File>()
     context.externalCacheDir?.let { directories.add(it) }
@@ -90,7 +94,8 @@ object Reports {
     address: String,
     subject: String,
     body: String,
-    includeFile: (String) -> Boolean): Result {
+    includeFile: (String) -> Boolean
+  ): Result {
 
     this.logger.debug("preparing report")
 
@@ -174,5 +179,4 @@ object Reports {
       null
     }
   }
-
 }

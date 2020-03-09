@@ -12,7 +12,8 @@ import kotlin.reflect.KClass
 
 class MIMEParser private constructor(
   private val text: String,
-  private val lexer: MIMELexerType) : MIMEParserType {
+  private val lexer: MIMELexerType
+) : MIMEParserType {
 
   override fun parse(): MIMEParserResult {
     try {
@@ -47,7 +48,6 @@ class MIMEParser private constructor(
             MIMEType(type = type.text, subtype = subtype.text, parameters = parameters.toMap()))
         }
       }
-
     } catch (e: Exception) {
       return MIMEParserResult.Failure(this.lexer.position, e)
     }
@@ -58,7 +58,8 @@ class MIMEParser private constructor(
       fun <T : MIMEToken> expectedExactly(
         expected: KClass<T>,
         received: MIMEToken,
-        fullText: String): ParseException {
+        fullText: String
+      ): ParseException {
         return ParseException(
           StringBuilder(128)
             .append("Parse error")

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Build-time feature flags. -->
+<resources>
+  <!-- True if the Adobe DRM should use (excessive) debug logging. -->
+  <bool name="featureAdobeDRMDebugLogging">false</bool>
+
+  <!-- If non-empty, the given package name will be used to override the name supplied to the Adobe DRM -->
+  <!-- If you need to do this, you'll know. You almost certainly don't need to use this. -->
+  <string name="featureAdobeDRMPackageOverride" translatable="false" />
+
+  <!-- If set to false, the profile system will be started in anonymous mode. This means that -->
+  <!-- there will be one always-present unnamed profile and the features to switch profiles will -->
+  <!-- be disabled and/or hidden. -->
+  <bool name="featureProfilesEnabled">false</bool>
+
+  <!-- If non-empty, the given email address will receive error reports. -->
+  <string name="featureErrorEmail" translatable="false" />
+</resources>

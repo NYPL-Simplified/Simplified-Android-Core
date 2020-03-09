@@ -31,13 +31,14 @@ class MockingHTTP : HTTPType {
   /**
    * Set that the next request made for `uri` will receive `result`.
    *
-   * @param uri    The request
+   * @param uri The request
    * @param result The result
    */
 
   fun addResponse(
     uri: URI,
-    result: HTTPResultType<InputStream>) {
+    result: HTTPResultType<InputStream>
+  ) {
 
     synchronized(this.responses) {
       val xs: MutableList<HTTPResultType<InputStream>>
@@ -54,20 +55,22 @@ class MockingHTTP : HTTPType {
   /**
    * Set that the next request made for `uri` will receive `result`.
    *
-   * @param uri    The request
+   * @param uri The request
    * @param result The result
    */
 
   fun addResponse(
     uri: String,
-    result: HTTPResultType<InputStream>) {
+    result: HTTPResultType<InputStream>
+  ) {
     addResponse(URI.create(uri), result)
   }
 
   override fun get(
     auth: OptionType<HTTPAuthType>,
     uri: URI,
-    offset: Long): HTTPResultType<InputStream> {
+    offset: Long
+  ): HTTPResultType<InputStream> {
 
     LOG.debug("get: {} {} {}", auth, uri, offset)
     return response(uri)
@@ -85,7 +88,8 @@ class MockingHTTP : HTTPType {
 
   override fun put(
     auth: OptionType<HTTPAuthType>,
-    uri: URI): HTTPResultType<InputStream> {
+    uri: URI
+  ): HTTPResultType<InputStream> {
 
     LOG.debug("put: {} {}", auth, uri)
     return response(uri)
@@ -95,7 +99,8 @@ class MockingHTTP : HTTPType {
     auth: OptionType<HTTPAuthType>,
     uri: URI,
     data: ByteArray,
-    content_type: String): HTTPResultType<InputStream> {
+    content_type: String
+  ): HTTPResultType<InputStream> {
     LOG.debug("put: {} {} {} {}", auth, uri, data, content_type)
     return response(uri)
   }
@@ -104,7 +109,8 @@ class MockingHTTP : HTTPType {
     auth: OptionType<HTTPAuthType>,
     uri: URI,
     data: ByteArray,
-    content_type: String): HTTPResultType<InputStream> {
+    content_type: String
+  ): HTTPResultType<InputStream> {
 
     LOG.debug("post: {} {} {} {}", auth, uri, data, content_type)
     return response(uri)
@@ -113,7 +119,8 @@ class MockingHTTP : HTTPType {
   override fun delete(
     auth: OptionType<HTTPAuthType>,
     uri: URI,
-    content_type: String): HTTPResultType<InputStream> {
+    content_type: String
+  ): HTTPResultType<InputStream> {
 
     LOG.debug("delete: {} {} {}", auth, uri, content_type)
     return response(uri)
@@ -121,7 +128,8 @@ class MockingHTTP : HTTPType {
 
   override fun head(
     auth: OptionType<HTTPAuthType>,
-    uri: URI): HTTPResultType<InputStream> {
+    uri: URI
+  ): HTTPResultType<InputStream> {
 
     LOG.debug("head: {} {}", auth, uri)
     return response(uri)

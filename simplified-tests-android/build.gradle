@@ -1,24 +1,33 @@
 dependencies {
   implementation project(":simplified-tests")
+  implementation project(":simplified-ui-settings")
   implementation project(":simplified-ui-splash")
+  implementation project(":simplified-ui-thread-api")
 
   implementation libraries.androidXAppCompat
+  implementation libraries.androidXFragmentTesting
   implementation libraries.androidXLegacySupport
   implementation libraries.androidXTestEspressoCore
+  implementation libraries.androidXTestExtensions
   implementation libraries.androidXTestRules
   implementation libraries.androidXTestRunner
   implementation libraries.kotlinStdlib
   implementation libraries.logbackAndroidCore
   implementation libraries.mockitoAndroid
   implementation libraries.slf4j
+
   implementation(libraries.logbackAndroidClassic) {
     // https://github.com/tony19/logback-android/issues/73
     exclude group: "com.google.android", module: "android"
   }
 
   androidTestImplementation libraries.androidXAppCompat
+  androidTestImplementation libraries.androidXFragmentTesting
   androidTestImplementation libraries.androidXLegacySupport
+  androidTestImplementation libraries.androidXPreference
+  androidTestImplementation libraries.androidXRecyclerView
   androidTestImplementation libraries.androidXTestEspressoCore
+  androidTestImplementation libraries.androidXTestExtensions
   androidTestImplementation libraries.androidXTestRules
   androidTestImplementation libraries.androidXTestRunner
   androidTestImplementation libraries.mockitoAndroid

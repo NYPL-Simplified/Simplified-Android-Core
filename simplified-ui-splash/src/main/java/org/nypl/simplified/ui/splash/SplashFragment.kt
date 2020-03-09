@@ -1,6 +1,7 @@
 package org.nypl.simplified.ui.splash
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -24,21 +25,19 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import io.reactivex.disposables.Disposable
 import org.joda.time.format.DateTimeFormat
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.migration.api.MigrationReportXML
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
-import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.reports.Reports
-import org.nypl.simplified.ui.splash.R
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.StringBuilder
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -52,7 +51,7 @@ class SplashFragment : Fragment() {
 
     fun newInstance(parameters: SplashParameters): SplashFragment {
       val args = Bundle()
-      args.putSerializable(parametersKey, parameters)
+      args.putSerializable(this.parametersKey, parameters)
       val fragment = SplashFragment()
       fragment.arguments = args
       return fragment
@@ -61,13 +60,13 @@ class SplashFragment : Fragment() {
 
   private lateinit var listener: SplashListenerType
   private lateinit var parameters: SplashParameters
-  private lateinit var bootSubscription: ObservableSubscriptionType<BootEvent>
+  private lateinit var bootSubscription: Disposable
   private lateinit var viewsForImage: ViewsImage
   private lateinit var viewsForEULA: ViewsEULA
   private lateinit var viewsForMigrationRunning: ViewsMigrationRunning
   private lateinit var viewsForMigrationReport: ViewsMigrationReport
   private lateinit var bootFuture: ListenableFuture<*>
-  private var migrationSubscription: ObservableSubscriptionType<MigrationEvent>? = null
+  private var migrationSubscription: Disposable? = null
   private var migrationTried = false
 
   private class ViewsImage(
@@ -75,30 +74,37 @@ class SplashFragment : Fragment() {
     val image: ImageView,
     val text: TextView,
     val progress: ProgressBar,
-    val error: ImageView)
+    val error: ImageView,
+    val sendError: Button,
+    val version: TextView,
+    val exception: TextView
+  )
 
   private class ViewsEULA(
     val container: View,
     val eulaAgree: Button,
     val eulaDisagree: Button,
-    val eulaWebView: WebView)
+    val eulaWebView: WebView
+  )
 
   private class ViewsMigrationRunning(
     val container: View,
     val text: TextView,
-    val progress: ProgressBar)
+    val progress: ProgressBar
+  )
 
   private class ViewsMigrationReport(
-      val container: View,
-      val text: TextView,
-      val list: RecyclerView,
-      val sendButton: Button,
-      val okButton: Button)
+    val container: View,
+    val text: TextView,
+    val list: RecyclerView,
+    val sendButton: Button,
+    val okButton: Button
+  )
 
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
     this.retainInstance = true
-    this.parameters = this.arguments!!.getSerializable(parametersKey) as SplashParameters
+    this.parameters = this.arguments!!.getSerializable(org.nypl.simplified.ui.splash.SplashFragment.Companion.parametersKey) as SplashParameters
   }
 
   override fun onAttach(context: Context) {
@@ -110,7 +116,8 @@ class SplashFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    state: Bundle?): View? {
+    state: Bundle?
+  ): View? {
 
     val stackView =
       inflater.inflate(R.layout.splash_stack, container, false) as ViewGroup
@@ -128,7 +135,10 @@ class SplashFragment : Fragment() {
         container = imageView,
         image = imageView.findViewById(R.id.splashImage),
         progress = imageView.findViewById(R.id.splashProgress),
-        error = imageView.findViewById<ImageView>(R.id.splashImageError),
+        error = imageView.findViewById(R.id.splashImageError),
+        sendError = imageView.findViewById(R.id.splashSendError),
+        version = imageView.findViewById(R.id.splashVersion),
+        exception = imageView.findViewById(R.id.splashException),
         text = imageView.findViewById(R.id.splashText))
 
     this.viewsForEULA =
@@ -176,6 +186,10 @@ class SplashFragment : Fragment() {
     this.viewsForImage.image.visibility = View.VISIBLE
     this.viewsForImage.progress.visibility = View.INVISIBLE
     this.viewsForImage.error.visibility = View.INVISIBLE
+    this.viewsForImage.sendError.visibility = View.INVISIBLE
+    this.viewsForImage.exception.text = ""
+    this.viewsForImage.version.text = this.versionText(this.requireContext())
+    this.viewsForImage.version.visibility = View.INVISIBLE
     this.viewsForImage.text.visibility = View.INVISIBLE
     this.viewsForImage.text.text = ""
 
@@ -189,10 +203,21 @@ class SplashFragment : Fragment() {
     }
   }
 
+  private fun versionText(context: Context): String {
+    return try {
+      val pkgManager = context.packageManager
+      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
+      "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+    } catch (e: PackageManager.NameNotFoundException) {
+      "Unavailable"
+    }
+  }
+
   private fun popImageView() {
     this.viewsForImage.progress.visibility = View.VISIBLE
     this.viewsForImage.text.visibility = View.VISIBLE
     this.viewsForImage.image.animation = AnimationUtils.loadAnimation(this.context, R.anim.zoom_fade)
+    this.viewsForImage.version.visibility = View.VISIBLE
   }
 
   private fun configureViewsForEULA(eula: EULAType) {
@@ -221,7 +246,8 @@ class SplashFragment : Fragment() {
         view: WebView?,
         errorCode: Int,
         description: String?,
-        failingUrl: String?) {
+        failingUrl: String?
+      ) {
         super.onReceivedError(view, errorCode, description, failingUrl)
         this@SplashFragment.logger.error("onReceivedError: {} {} {}", errorCode, description, failingUrl)
       }
@@ -229,7 +255,8 @@ class SplashFragment : Fragment() {
       override fun onReceivedError(
         view: WebView?,
         request: WebResourceRequest?,
-        error: WebResourceError?) {
+        error: WebResourceError?
+      ) {
         super.onReceivedError(view, request, error)
         this@SplashFragment.logger.error("onReceivedError: {}", error)
       }
@@ -267,7 +294,7 @@ class SplashFragment : Fragment() {
 
     this.viewsForMigrationReport.list.adapter = SplashMigrationReportListAdapter(eventsToShow)
     this.viewsForMigrationReport.list.setHasFixedSize(false)
-    this.viewsForMigrationReport.list.layoutManager = LinearLayoutManager(this.context);
+    this.viewsForMigrationReport.list.layoutManager = LinearLayoutManager(this.context)
     (this.viewsForMigrationReport.list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
     this.viewsForMigrationReport.list.adapter!!.notifyDataSetChanged()
 
@@ -281,10 +308,10 @@ class SplashFragment : Fragment() {
     if (reportEmail != null) {
       this.viewsForMigrationReport.sendButton.setOnClickListener {
         Reports.sendReportsDefault(
-          context = requireContext(),
+          context = this.requireContext(),
           address = reportEmail,
-          subject = reportEmailSubject(report),
-          body = reportEmailBody(report))
+          subject = this.reportEmailSubject(report),
+          body = this.reportEmailBody(report))
       }
     } else {
       this.viewsForMigrationReport.sendButton.visibility = View.INVISIBLE
@@ -301,7 +328,7 @@ class SplashFragment : Fragment() {
     return StringBuilder(128)
       .append("On ${report.timestamp}, a migration of ${report.application} occurred.")
       .append("\n")
-      .append("There were ${errors} errors.")
+      .append("There were $errors errors.")
       .append("\n")
       .append("The attached log files give details of the migration.")
       .append("\n")
@@ -310,7 +337,7 @@ class SplashFragment : Fragment() {
 
   private fun reportEmailSubject(report: MigrationReport): String {
     val errors =
-      report.events.any { e -> e is MigrationEvent.MigrationStepError}
+      report.events.any { e -> e is MigrationEvent.MigrationStepError }
     val outcome =
       if (errors) {
         "error"
@@ -318,7 +345,7 @@ class SplashFragment : Fragment() {
         "success"
       }
 
-    return "[simplye-android-migration] ${report.application} ${outcome}"
+    return "[simplye-android-migration] ${report.application} $outcome"
   }
 
   override fun onStart() {
@@ -326,7 +353,7 @@ class SplashFragment : Fragment() {
 
     this.bootSubscription =
       this.listener.onSplashWantBootEvents()
-        .subscribe { event -> this.onBootEvent(event) }
+        .subscribe(this::onBootEvent)
 
     /*
      * Subscribe to the boot future specifically so that we don't risk missing the delivery
@@ -346,8 +373,8 @@ class SplashFragment : Fragment() {
 
   override fun onStop() {
     super.onStop()
-    this.bootSubscription.unsubscribe()
-    this.migrationSubscription?.unsubscribe()
+    this.bootSubscription.dispose()
+    this.migrationSubscription?.dispose()
   }
 
   private fun onBootEvent(event: BootEvent) {
@@ -374,6 +401,8 @@ class SplashFragment : Fragment() {
 
   @UiThread
   private fun onBootEventFailedUI(event: BootEvent.BootFailed) {
+    this.logger.error("boot failed: ", event.exception)
+
     if (this.viewsForImage.image.alpha > 0.0) {
       this.popImageView()
     }
@@ -382,9 +411,23 @@ class SplashFragment : Fragment() {
     // Print a useful message rather than a raw exception message, and allow
     // the user to do something such as submitting a report.
     this.viewsForImage.error.visibility = View.VISIBLE
+    this.viewsForImage.sendError.visibility = View.VISIBLE
     this.viewsForImage.progress.isIndeterminate = false
     this.viewsForImage.progress.progress = 100
+    this.viewsForImage.exception.text = exceptionBrief(event.exception)
     this.viewsForImage.text.text = event.message
+
+    this.viewsForImage.sendError.setOnClickListener {
+      Reports.sendReportsDefault(
+        context = this.requireContext(),
+        address = this.parameters.splashMigrationReportEmail ?: "",
+        subject = "[application startup failure]",
+        body = event.message)
+    }
+  }
+
+  private fun exceptionBrief(exception: Exception): String {
+    return "${exception.message}"
   }
 
   private fun onBootFinished() {
@@ -423,7 +466,6 @@ class SplashFragment : Fragment() {
         this.listener.onSplashOpenProfileAnonymous()
       }
       ANONYMOUS_PROFILE_DISABLED -> {
-
       }
     }
 
@@ -514,7 +556,7 @@ class SplashFragment : Fragment() {
       val reportsDir =
         File(cacheDir, "migrations")
       val reportFile =
-        File(reportsDir, "report-${timestamp}.xml")
+        File(reportsDir, "report-$timestamp.xml")
 
       reportsDir.mkdirs()
       FileOutputStream(reportFile).use { stream ->

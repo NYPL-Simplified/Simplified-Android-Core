@@ -5,6 +5,5 @@ import org.nypl.simplified.analytics.api.AnalyticsType
 
 class MockAnalytics : AnalyticsType {
   override fun publishEvent(event: AnalyticsEvent) {
-
   }
 }

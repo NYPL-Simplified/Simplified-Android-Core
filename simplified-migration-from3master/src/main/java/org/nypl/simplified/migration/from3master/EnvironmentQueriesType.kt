@@ -17,5 +17,4 @@ interface EnvironmentQueriesType {
    */
 
   fun isExternalStorageRemovable(): Boolean
-
 }

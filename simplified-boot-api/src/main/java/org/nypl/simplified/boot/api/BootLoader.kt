@@ -5,10 +5,11 @@ import android.content.res.Resources
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.slf4j.LoggerFactory
+import java.util.ServiceLoader
 import java.util.concurrent.Executors
 
 /**
@@ -28,7 +29,8 @@ class BootLoader<T>(
    * A function that sets up services.
    */
 
-  private val bootProcess: BootProcessType<T>) : BootLoaderType<T> {
+  private val bootProcess: BootProcessType<T>
+) : BootLoaderType<T> {
 
   private val logger = LoggerFactory.getLogger(BootLoader::class.java)
 
@@ -40,11 +42,11 @@ class BootLoader<T>(
         thread
       })
 
-  private val eventsActual = Observable.create<BootEvent>()
+  private val eventsActual = PublishSubject.create<BootEvent>()
   private val bootLock: Any = Any()
   private var boot: FluentFuture<T>? = null
 
-  override val events: ObservableReadableType<BootEvent> =
+  override val events: Observable<BootEvent> =
     this.eventsActual
 
   override fun start(context: Context): FluentFuture<T> {
@@ -58,15 +60,18 @@ class BootLoader<T>(
 
   private class PresentableException(
     override val message: String,
-    override val cause: Throwable) : Exception(message, cause), PresentableErrorType
+    override val cause: Throwable
+  ) : Exception(message, cause), PresentableErrorType
 
   private fun runBoot(context: Context): FluentFuture<T> {
     val future = SettableFuture.create<T>()
     this.executor.execute {
       val strings = this.bootStringResources.invoke(context.resources)
 
+      this.executeBootPreHooks(context)
+
       try {
-        future.set(this.bootProcess.execute { event -> this.eventsActual.send(event) })
+        future.set(this.bootProcess.execute { event -> this.eventsActual.onNext(event) })
         this.logger.debug("finished executing boot")
       } catch (e: Throwable) {
         this.logger.error("boot failed: ", e)
@@ -82,10 +87,27 @@ class BootLoader<T>(
             exception = PresentableException(strings.bootFailedGeneric, e))
         }
 
-        this.eventsActual.send(event)
+        this.eventsActual.onNext(event)
         future.setException(event.exception)
       }
     }
     return FluentFuture.from(future)
+  }
+
+  private fun executeBootPreHooks(context: Context) {
+    try {
+      val hooks = ServiceLoader.load(BootPreHookType::class.java).toList()
+      this.logger.debug("executing {} boot pre-hooks", hooks.size)
+
+      for (hook in hooks) {
+        try {
+          hook.execute(context)
+        } catch (e: Throwable) {
+          this.logger.error("failed to execute boot pre-hook {}: ", hook, e)
+        }
+      }
+    } catch (e: Throwable) {
+      this.logger.error("failed to execute boot pre-hook: ", e)
+    }
   }
 }

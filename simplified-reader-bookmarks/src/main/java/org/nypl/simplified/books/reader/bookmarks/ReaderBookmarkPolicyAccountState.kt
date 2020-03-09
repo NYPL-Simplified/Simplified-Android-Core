@@ -25,7 +25,8 @@ data class ReaderBookmarkPolicyAccountState(
    * `true` if the user permits bookmark syncing on this device.
    */
 
-  val syncPermittedByUser: Boolean) {
+  val syncPermittedByUser: Boolean
+) {
 
   val canSync =
     this.syncSupportedByAccount && this.syncEnabledOnServer && this.syncPermittedByUser

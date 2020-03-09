@@ -32,7 +32,8 @@ data class AuthenticationObjectNYPLInput(
    * The barcode format, such as "CODABAR".
    */
 
-  val barcodeFormat: String?) {
+  val barcodeFormat: String?
+) {
 
   init {
     Preconditions.checkArgument(

@@ -22,7 +22,7 @@ object BookmarkJSON {
   /**
    * Deserialize bookmarks from the given JSON node.
    *
-   * @param objectMapper  A JSON object mapper
+   * @param objectMapper A JSON object mapper
    * @param kind The kind of bookmark
    * @param node A JSON node
    * @return A parsed description
@@ -34,7 +34,8 @@ object BookmarkJSON {
   fun deserializeFromJSON(
     objectMapper: ObjectMapper,
     kind: BookmarkKind,
-    node: JsonNode): Bookmark {
+    node: JsonNode
+  ): Bookmark {
     return deserializeFromJSON(
       objectMapper = objectMapper,
       kind = kind,
@@ -44,7 +45,7 @@ object BookmarkJSON {
   /**
    * Deserialize bookmarks from the given JSON node.
    *
-   * @param objectMapper  A JSON object mapper
+   * @param objectMapper A JSON object mapper
    * @param kind The kind of bookmark
    * @param node A JSON node
    * @return A parsed description
@@ -56,7 +57,8 @@ object BookmarkJSON {
   fun deserializeFromJSON(
     objectMapper: ObjectMapper,
     kind: BookmarkKind,
-    node: ObjectNode): Bookmark {
+    node: ObjectNode
+  ): Bookmark {
 
     return Bookmark(
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
@@ -88,7 +90,8 @@ object BookmarkJSON {
   @JvmStatic
   fun serializeToJSON(
     objectMapper: ObjectMapper,
-    description: Bookmark): ObjectNode {
+    description: Bookmark
+  ): ObjectNode {
 
     val node = objectMapper.createObjectNode()
     node.put("opdsId", description.opdsId)
@@ -112,7 +115,8 @@ object BookmarkJSON {
   @JvmStatic
   fun serializeToJSON(
     objectMapper: ObjectMapper,
-    bookmarks: List<Bookmark>): ArrayNode {
+    bookmarks: List<Bookmark>
+  ): ArrayNode {
 
     val node = objectMapper.createArrayNode()
     bookmarks.forEach { bookmark -> node.add(serializeToJSON(objectMapper, bookmark)) }
@@ -131,7 +135,8 @@ object BookmarkJSON {
   @Throws(IOException::class)
   fun serializeToString(
     objectMapper: ObjectMapper,
-    description: Bookmark): String {
+    description: Bookmark
+  ): String {
 
     val json = serializeToJSON(objectMapper, description)
     val output = ByteArrayOutputStream(1024)
@@ -151,7 +156,8 @@ object BookmarkJSON {
   @Throws(IOException::class)
   fun serializeToString(
     objectMapper: ObjectMapper,
-    bookmarks: List<Bookmark>): String {
+    bookmarks: List<Bookmark>
+  ): String {
 
     val json = serializeToJSON(objectMapper, bookmarks)
     val output = ByteArrayOutputStream(1024)
@@ -175,7 +181,8 @@ object BookmarkJSON {
   fun deserializeFromString(
     objectMapper: ObjectMapper,
     kind: BookmarkKind,
-    serialized: String): Bookmark {
+    serialized: String
+  ): Bookmark {
     return deserializeFromJSON(
       objectMapper = objectMapper,
       kind = kind,

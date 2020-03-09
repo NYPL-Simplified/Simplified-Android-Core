@@ -13,5 +13,4 @@ interface AnalyticsSystemProvider {
    */
 
   fun create(configuration: AnalyticsConfiguration): AnalyticsSystem
-
 }

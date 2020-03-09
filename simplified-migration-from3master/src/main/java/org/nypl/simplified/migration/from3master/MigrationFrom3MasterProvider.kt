@@ -11,7 +11,8 @@ import org.nypl.simplified.migration.spi.MigrationType
  */
 
 class MigrationFrom3MasterProvider(
-  val environment: EnvironmentQueriesType) : MigrationProviderType {
+  val environment: EnvironmentQueriesType
+) : MigrationProviderType {
 
   /**
    * ServiceLoader constructor.

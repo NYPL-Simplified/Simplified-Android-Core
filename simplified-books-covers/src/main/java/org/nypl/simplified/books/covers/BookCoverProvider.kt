@@ -36,23 +36,23 @@ class BookCoverProvider private constructor(
   private fun generateCoverURI(entry: FeedEntry.FeedEntryOPDS): URI {
     val feedEntry = entry.feedEntry
     val title = feedEntry.title
-    val author: String
     val authors = feedEntry.authors
-    if (authors.isEmpty()) {
-      author = ""
-    } else {
-      author = authors[0]
-    }
+    val author = authors.firstOrNull() ?: ""
     return this.coverGenerator.generateURIForTitleAuthor(title, author)
   }
 
+  /**
+   * @param width Use 0 as desired dimension to resize keeping aspect ratio.
+   * @param height Use 0 as desired dimension to resize keeping aspect ratio.
+   */
   private fun doLoad(
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
     height: Int,
     tag: String,
-    uriSpecified: URI?): FluentFuture<Unit> {
+    uriSpecified: URI?
+  ): FluentFuture<Unit> {
 
     val future = SettableFuture.create<Unit>()
     val uriGenerated = this.generateCoverURI(entry)
@@ -62,9 +62,9 @@ class BookCoverProvider private constructor(
         future.set(Unit)
       }
 
-      override fun onError() {
-        future.setException(IOException(
-          StringBuilder(128)
+      override fun onError(e: Exception) {
+        val ioException =
+          IOException(StringBuilder(128)
             .append("Failed to load image.\n")
             .append("  URI (specified): ")
             .append(uriSpecified)
@@ -72,7 +72,10 @@ class BookCoverProvider private constructor(
             .append("  URI (generated): ")
             .append(uriGenerated)
             .append('\n')
-            .toString()))
+            .toString(),
+            e)
+
+        future.setException(ioException)
       }
     }
 
@@ -85,32 +88,41 @@ class BookCoverProvider private constructor(
           future.set(Unit)
         }
 
-        override fun onError() {
+        override fun onError(e: Exception) {
           this@BookCoverProvider.log.debug(
-            "{}: {}: failed to load uri {}, falling back to generation",
-            tag, entry.bookID, uriSpecified)
+            "{}: {}: failed to load uri {}, falling back to generation: ",
+            tag,
+            entry.bookID,
+            uriSpecified,
+            e)
 
-          val fallbackRequest = this@BookCoverProvider.picasso.load(uriGenerated.toString())
-          fallbackRequest.tag(tag)
-          fallbackRequest.resize(width, height)
-          fallbackRequest.transform(badgePainter)
-          fallbackRequest.into(imageView, callbackFinal)
+          this@BookCoverProvider.picasso.load(uriGenerated.toString())
+            .tag(tag)
+            .error(R.drawable.cover_error)
+            .placeholder(R.drawable.cover_loading)
+            .resize(width, height)
+            .transform(badgePainter)
+            .into(imageView, callbackFinal)
         }
       }
 
-      val request = this.picasso.load(uriSpecified.toString())
-      request.tag(tag)
-      request.resize(width, height)
-      request.transform(badgePainter)
-      request.into(imageView, fallbackToGeneration)
+      this.picasso.load(uriSpecified.toString())
+        .tag(tag)
+        .error(R.drawable.cover_error)
+        .placeholder(R.drawable.cover_loading)
+        .resize(width, height)
+        .transform(badgePainter)
+        .into(imageView, fallbackToGeneration)
     } else {
       this.log.debug("{}: {}: loading generated uri {}", tag, entry.bookID, uriGenerated)
 
-      val request = this.picasso.load(uriGenerated.toString())
-      request.tag(tag)
-      request.resize(width, height)
-      request.transform(badgePainter)
-      request.into(imageView, callbackFinal)
+      this.picasso.load(uriGenerated.toString())
+        .tag(tag)
+        .error(R.drawable.cover_error)
+        .placeholder(R.drawable.cover_loading)
+        .resize(width, height)
+        .transform(badgePainter)
+        .into(imageView, callbackFinal)
     }
 
     return FluentFuture.from(future)
@@ -120,7 +132,7 @@ class BookCoverProvider private constructor(
     val bookOpt = this.bookRegistry.book(entry.bookID)
     if (bookOpt is Some<BookWithStatus>) {
       val book = bookOpt.get()
-      return book.book().cover?.toURI()
+      return book.book.cover?.toURI()
     }
     return mapOptionToNull(entry.feedEntry.cover)
   }
@@ -129,7 +141,7 @@ class BookCoverProvider private constructor(
     val bookOpt = this.bookRegistry.book(entry.bookID)
     if (bookOpt is Some<BookWithStatus>) {
       val book = bookOpt.get()
-      return book.book().cover?.toURI()
+      return book.book.cover?.toURI()
     }
     return mapOptionToNull(entry.feedEntry.thumbnail)
   }
@@ -138,8 +150,8 @@ class BookCoverProvider private constructor(
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
-    height: Int): FluentFuture<Unit> {
-
+    height: Int
+  ): FluentFuture<Unit> {
     return doLoad(
       entry = entry,
       imageView = imageView,
@@ -153,8 +165,8 @@ class BookCoverProvider private constructor(
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
-    height: Int): FluentFuture<Unit> {
-
+    height: Int
+  ): FluentFuture<Unit> {
     return doLoad(
       entry = entry,
       imageView = imageView,
@@ -172,7 +184,7 @@ class BookCoverProvider private constructor(
     }
   }
 
-  override fun loadingThumbailsPause() {
+  override fun loadingThumbnailsPause() {
     this.picasso.pauseTag(this.thumbnailTag)
   }
 
@@ -185,11 +197,11 @@ class BookCoverProvider private constructor(
     /**
      * Create a new cover provider.
      *
-     * @param context         The application context
-     * @param badgeLookup     A function used to look up badge images
-     * @param bookRegistry    The book registry
-     * @param coverGenerator  A cover generator
-     * @param executor        An executor
+     * @param context The application context
+     * @param badgeLookup A function used to look up badge images
+     * @param bookRegistry The book registry
+     * @param coverGenerator A cover generator
+     * @param executor An executor
      *
      * @return A new cover provider
      */
@@ -201,7 +213,8 @@ class BookCoverProvider private constructor(
       badgeLookup: BookCoverBadgeLookupType,
       executor: ExecutorService,
       debugCacheIndicators: Boolean,
-      debugLogging: Boolean): BookCoverProviderType {
+      debugLogging: Boolean
+    ): BookCoverProviderType {
 
       val picassoBuilder = Picasso.Builder(context)
       picassoBuilder.defaultBitmapConfig(Bitmap.Config.RGB_565)

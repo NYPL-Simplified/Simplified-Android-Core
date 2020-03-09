@@ -14,10 +14,10 @@ interface BookCoverProviderType {
    * Pause loading of any covers. Loading will continue upon calling [loadingThumbnailsContinue].
    */
 
-  fun loadingThumbailsPause()
+  fun loadingThumbnailsPause()
 
   /**
-   * Continue loading of covers after having been paused with [loadingThumbailsPause].
+   * Continue loading of covers after having been paused with [loadingThumbnailsPause].
    * Has no effect if loading is not paused.
    */
 
@@ -29,18 +29,18 @@ interface BookCoverProviderType {
    *
    * Must only be called from the UI thread.
    *
-   * @param entry     The feed entry
+   * @param entry The feed entry
    * @param imageView The image view
-   * @param width     The width
-   * @param height    The height
-   * @param badges    A function that will be consulted for badge images
+   * @param width Use 0 as desired dimension to resize keeping aspect ratio.
+   * @param height Use 0 as desired dimension to resize keeping aspect ratio.
    */
 
   fun loadThumbnailInto(
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
-    height: Int): FluentFuture<Unit>
+    height: Int
+  ): FluentFuture<Unit>
 
   /**
    * Load or generate a cover based on `entry` into the image view
@@ -48,16 +48,16 @@ interface BookCoverProviderType {
    *
    * Must only be called from the UI thread.
    *
-   * @param entry     The feed entry
+   * @param entry The feed entry
    * @param imageView The image view
-   * @param width     The width
-   * @param height    The height
-   * @param badges    A function that will be consulted for badge images
+   * @param width Use 0 as desired dimension to resize keeping aspect ratio.
+   * @param height Use 0 as desired dimension to resize keeping aspect ratio.
    */
 
   fun loadCoverInto(
     entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
-    height: Int): FluentFuture<Unit>
+    height: Int
+  ): FluentFuture<Unit>
 }

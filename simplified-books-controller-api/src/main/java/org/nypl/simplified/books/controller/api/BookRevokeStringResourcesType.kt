@@ -27,6 +27,12 @@ interface BookRevokeStringResourcesType {
   fun revokeServerNotifyURI(targetURI: URI): String
 
   /**
+   * Tried to revoke something that isn't revocable.
+   */
+
+  val revokeNotRevocable: String
+
+  /**
    * An unexpected exception occurred.
    */
 
@@ -235,5 +241,4 @@ interface BookRevokeStringResourcesType {
    */
 
   val revokeStarted: String
-
 }

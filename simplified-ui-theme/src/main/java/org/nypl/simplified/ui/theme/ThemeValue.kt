@@ -48,4 +48,5 @@ data class ThemeValue(
    */
 
   @StyleRes
-  val themeWithNoActionBar: Int)
+  val themeWithNoActionBar: Int
+)

@@ -13,8 +13,8 @@ class SelectorNode(
 
   @JvmField
   @JsonProperty("value")
-  val value: String)
-  : Serializable
+  val value: String
+) : Serializable
 
 @JsonDeserialize
 class TargetNode(
@@ -24,8 +24,8 @@ class TargetNode(
 
   @JvmField
   @JsonProperty("selector")
-  val selector: SelectorNode)
-  : Serializable
+  val selector: SelectorNode
+) : Serializable
 
 @JsonDeserialize
 class BodyNode(
@@ -47,8 +47,8 @@ class BodyNode(
 
   @JvmField
   @JsonProperty("http://librarysimplified.org/terms/progressWithinBook")
-  val bookProgress: Float?)
-  : Serializable
+  val bookProgress: Float?
+) : Serializable
 
 @JsonDeserialize
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -75,8 +75,8 @@ class BookmarkAnnotation(
 
   @JvmField
   @JsonProperty("target")
-  val target: TargetNode)
-  : Serializable {
+  val target: TargetNode
+) : Serializable {
 
   override fun equals(other: Any?): Boolean =
     this.target.selector.value == (other as BookmarkAnnotation).target.selector.value
@@ -96,4 +96,5 @@ class FirstNode(
 
   @JvmField
   @JsonProperty("id")
-  val id: String)
+  val id: String
+)

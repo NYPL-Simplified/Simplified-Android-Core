@@ -38,7 +38,8 @@ data class AuthenticationObject(
    * Links for the object.
    */
 
-  val links: List<Link> = listOf()) {
+  val links: List<Link> = listOf()
+) {
 
   init {
     Preconditions.checkArgument(
@@ -66,7 +67,5 @@ data class AuthenticationObject(
      */
 
     const val LABEL_PASSWORD = "PASSWORD"
-
   }
-
 }

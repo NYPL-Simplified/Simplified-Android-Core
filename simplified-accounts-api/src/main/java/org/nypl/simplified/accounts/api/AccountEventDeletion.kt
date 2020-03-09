@@ -16,8 +16,8 @@ sealed class AccountEventDeletion : AccountEvent(), PresentableType {
    */
 
   data class AccountEventDeletionInProgress(
-    override val message: String)
-    : AccountEventDeletion()
+    override val message: String
+  ) : AccountEventDeletion()
 
   /**
    * Deleting an account succeeded.
@@ -25,8 +25,8 @@ sealed class AccountEventDeletion : AccountEvent(), PresentableType {
 
   data class AccountEventDeletionSucceeded(
     override val message: String,
-    val id: AccountID)
-    : AccountEventDeletion()
+    val id: AccountID
+  ) : AccountEventDeletion()
 
   /**
    * Deleting an account failed.
@@ -34,11 +34,10 @@ sealed class AccountEventDeletion : AccountEvent(), PresentableType {
 
   data class AccountEventDeletionFailed(
     override val message: String,
-    val taskResult: TaskResult.Failure<AccountDeleteErrorDetails, *>)
-    : AccountEventDeletion(), PresentableErrorType {
+    val taskResult: TaskResult.Failure<AccountDeleteErrorDetails, *>
+  ) : AccountEventDeletion(), PresentableErrorType {
 
     override val attributes: Map<String, String>
       get() = Presentables.collectAttributes(this.causes)
   }
-
 }

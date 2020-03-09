@@ -1,10 +1,12 @@
 package org.nypl.simplified.feeds.api;
 
+import java.io.Serializable;
+
 /**
  * A selector for generated feeds.
  */
 
-public enum FeedBooksSelection
+public enum FeedBooksSelection implements Serializable
 {
   /**
    * Generate a feed of loaned books.

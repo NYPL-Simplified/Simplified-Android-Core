@@ -1,7 +1,5 @@
 package org.nypl.simplified.books.book_database.api
 
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
@@ -24,7 +22,7 @@ object BookAcquisitionSelection {
    * @return A preferred acquisition, or nothing if none of the acquisitions were suitable
    */
 
-  fun preferredAcquisition(acquisitions: List<OPDSAcquisition>): OptionType<OPDSAcquisition> {
+  fun preferredAcquisition(acquisitions: List<OPDSAcquisition>): OPDSAcquisition? {
 
     val onlySupportedRelations: List<OPDSAcquisition> =
       acquisitions.filter { acquisition -> relationIsSupported(acquisition) }
@@ -34,12 +32,12 @@ object BookAcquisitionSelection {
       val availableContentTypes = acquisition.availableFinalContentTypes()
       for (contentType in supportedContentTypes) {
         if (availableContentTypes.contains(contentType)) {
-          return Option.some(acquisition)
+          return acquisition
         }
       }
     }
 
-    return Option.none()
+    return null
   }
 
   private fun relationIsSupported(acquisition: OPDSAcquisition): Boolean {

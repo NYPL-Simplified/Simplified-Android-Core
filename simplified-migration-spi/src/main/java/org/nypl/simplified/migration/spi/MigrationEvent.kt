@@ -28,8 +28,8 @@ sealed class MigrationEvent : PresentableType {
 
   data class MigrationStepInProgress(
     override val message: String,
-    override val subject: Subject? = null)
-    : MigrationEvent()
+    override val subject: Subject? = null
+  ) : MigrationEvent()
 
   /**
    * An informative event.
@@ -39,8 +39,8 @@ sealed class MigrationEvent : PresentableType {
     override val message: String,
     override val attributes: Map<String, String> = mapOf(),
     val causes: List<PresentableType> = listOf(),
-    override val subject: Subject? = null)
-    : MigrationEvent()
+    override val subject: Subject? = null
+  ) : MigrationEvent()
 
   /**
    * An error that occurred during migration.
@@ -51,7 +51,6 @@ sealed class MigrationEvent : PresentableType {
     override val exception: Exception? = null,
     override val attributes: Map<String, String> = mapOf(),
     override val causes: List<PresentableErrorType> = listOf(),
-    override val subject: Subject? = null)
-    : MigrationEvent(), PresentableErrorType
-
+    override val subject: Subject? = null
+  ) : MigrationEvent(), PresentableErrorType
 }

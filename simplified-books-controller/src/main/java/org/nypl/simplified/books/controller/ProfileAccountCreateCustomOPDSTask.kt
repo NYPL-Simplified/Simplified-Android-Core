@@ -4,6 +4,7 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
+import io.reactivex.subjects.Subject
 import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -23,7 +24,6 @@ import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.links.Link
 import org.nypl.simplified.mime.MIMEType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSFeedConstants
@@ -44,7 +44,7 @@ import java.util.concurrent.Callable
  */
 
 class ProfileAccountCreateCustomOPDSTask(
-  private val accountEvents: ObservableType<AccountEvent>,
+  private val accountEvents: Subject<AccountEvent>,
   private val accountProviderRegistry: AccountProviderRegistryType,
   private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val http: HTTPType,
@@ -92,8 +92,8 @@ class ProfileAccountCreateCustomOPDSTask(
   }
 
   private fun accountResolutionFailed(
-    resolutionResult: TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType>)
-    : TaskResult.Failure<AccountCreateErrorDetails, AccountType> {
+    resolutionResult: TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType>
+  ): TaskResult.Failure<AccountCreateErrorDetails, AccountType> {
     this.logger.error("could not resolve an account provider description")
     this.taskRecorder.currentStepFailed(
       this.strings.resolvingAccountProviderFailed,
@@ -102,8 +102,8 @@ class ProfileAccountCreateCustomOPDSTask(
   }
 
   private fun createAccount(
-    accountProviderDescription: AccountProviderSourceStandardDescription)
-    : TaskResult<AccountCreateErrorDetails, AccountType> {
+    accountProviderDescription: AccountProviderSourceStandardDescription
+  ): TaskResult<AccountCreateErrorDetails, AccountType> {
 
     val createResult =
       ProfileAccountCreateTask(
@@ -288,10 +288,9 @@ class ProfileAccountCreateCustomOPDSTask(
   }
 
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.send(AccountEventCreationFailed(
+    this.accountEvents.onNext(AccountEventCreationFailed(
       step.resolution.message, this.taskRecorder.finishFailure<AccountType>()))
 
   private fun publishProgressEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.send(AccountEventCreationInProgress(step.description))
-
+    this.accountEvents.onNext(AccountEventCreationInProgress(step.description))
 }

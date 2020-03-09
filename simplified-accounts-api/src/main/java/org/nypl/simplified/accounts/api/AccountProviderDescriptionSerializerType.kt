@@ -14,5 +14,4 @@ interface AccountProviderDescriptionSerializerType : SerializerType {
    */
 
   fun serializeToObject(): ObjectNode
-
 }

@@ -23,16 +23,16 @@ sealed class FeedEntry : Serializable {
 
   data class FeedEntryCorrupt(
     override val bookID: BookID,
-    val error: Throwable)
-    : FeedEntry()
+    val error: Throwable
+  ) : FeedEntry()
 
   /**
    * An entry from an OPDS feed.
    */
 
   data class FeedEntryOPDS(
-    val feedEntry: OPDSAcquisitionFeedEntry)
-    : FeedEntry() {
+    val feedEntry: OPDSAcquisitionFeedEntry
+  ) : FeedEntry() {
 
     override val bookID: BookID
       get() = newFromText(feedEntry.id)
@@ -40,5 +40,4 @@ sealed class FeedEntry : Serializable {
     val probableFormat: BookFormats.BookFormatDefinition? =
       BookFormats.inferFormat(feedEntry)
   }
-
 }

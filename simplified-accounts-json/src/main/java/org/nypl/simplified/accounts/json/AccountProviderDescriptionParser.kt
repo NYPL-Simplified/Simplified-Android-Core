@@ -1,7 +1,6 @@
 package org.nypl.simplified.accounts.json
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.google.common.base.Preconditions
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
@@ -17,7 +16,8 @@ import java.net.URI
 class AccountProviderDescriptionParser internal constructor(
   private val uri: URI,
   private val objectNode: () -> ObjectNode,
-  private val warningsAsErrors: Boolean) : AccountProviderDescriptionParserType {
+  private val warningsAsErrors: Boolean
+) : AccountProviderDescriptionParserType {
 
   private val logger = LoggerFactory.getLogger(AccountProviderDescriptionParser::class.java)
 
@@ -72,7 +72,8 @@ class AccountProviderDescriptionParser internal constructor(
     val id: URI,
     val title: String,
     val isAutomatic: Boolean,
-    val isProduction: Boolean)
+    val isProduction: Boolean
+  )
 
   override fun parse(): ParseResult<AccountProviderDescriptionMetadata> {
     return try {
@@ -106,7 +107,6 @@ class AccountProviderDescriptionParser internal constructor(
   }
 
   override fun close() {
-
   }
 
   private fun parseMetadata(root: ObjectNode): Metadata {

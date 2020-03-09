@@ -42,7 +42,7 @@ interface BookDatabaseType {
   /**
    * Create a new, or update an existing, database entry for the given book ID.
    *
-   * @param id    The book ID
+   * @param id The book ID
    * @param entry The current OPDS entry for the book
    * @return A database entry
    * @throws BookDatabaseException On errors
@@ -51,7 +51,8 @@ interface BookDatabaseType {
   @Throws(BookDatabaseException::class)
   fun createOrUpdate(
     id: org.nypl.simplified.books.api.BookID,
-    entry: OPDSAcquisitionFeedEntry): BookDatabaseEntryType
+    entry: OPDSAcquisitionFeedEntry
+  ): BookDatabaseEntryType
 
   /**
    * Find an existing database entry for the given book ID.

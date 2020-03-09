@@ -12,7 +12,8 @@ import java.lang.IllegalArgumentException
  */
 
 sealed class BookmarkKind(
-  val motivationURI: String): Serializable {
+  val motivationURI: String
+) : Serializable {
 
   /**
    * The bookmark represents a last-read location.
@@ -45,6 +46,5 @@ sealed class BookmarkKind(
         else -> throw IllegalArgumentException("Unrecognized motivation: $motivationURI")
       }
     }
-
   }
 }

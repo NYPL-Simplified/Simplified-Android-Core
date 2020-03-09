@@ -7,6 +7,15 @@ import java.io.File
 
 class MockBorrowStringResources : BookBorrowStringResourcesType {
 
+  override val borrowBookContentCopyFailed: String =
+    "borrowBookContentCopyFailed"
+
+  override val borrowBookContentCopy: String =
+    "borrowBookContentCopy"
+
+  override val borrowBookSelectingAcquisition: String =
+    "borrowBookSelectingAcquisition"
+
   override fun borrowBookFeedLoadingFailed(cause: String): String {
     return "borrowBookFeedLoadingFailed"
   }

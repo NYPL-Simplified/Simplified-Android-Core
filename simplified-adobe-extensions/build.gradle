@@ -1,0 +1,11 @@
+dependencies {
+  api project(":simplified-accounts-api")
+  api project(":simplified-files")
+
+  api libraries.nyplDRMCore
+
+  implementation project(":simplified-json-core")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

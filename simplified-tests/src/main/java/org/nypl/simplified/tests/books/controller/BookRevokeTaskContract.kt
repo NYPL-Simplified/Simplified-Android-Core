@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -23,15 +24,15 @@ import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.*
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
-import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
 import org.nypl.simplified.downloader.core.DownloaderHTTP
@@ -85,20 +86,21 @@ abstract class BookRevokeTaskContract {
 
   protected abstract val logger: Logger
 
-  private lateinit var executorFeeds: ListeningExecutorService
-  private lateinit var executorDownloads: ListeningExecutorService
-  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookRegistry: BookRegistryType
+  private lateinit var bundledContent: BundledContentResolverType
+  private lateinit var cacheDirectory: File
+  private lateinit var clock: () -> Instant
+  private lateinit var contentResolver: ContentResolver
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
-  private lateinit var http: MockingHTTP
   private lateinit var downloader: DownloaderType
-  private lateinit var bookRegistry: BookRegistryType
-  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var executorDownloads: ListeningExecutorService
+  private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
-  private lateinit var bundledContent: BundledContentResolverType
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var clock: () -> Instant
-  private lateinit var cacheDirectory: File
+  private lateinit var http: MockingHTTP
 
   private val bookRevokeStrings = MockRevokeStringResources()
 
@@ -115,6 +117,7 @@ abstract class BookRevokeTaskContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
@@ -148,7 +151,9 @@ abstract class BookRevokeTaskContract {
       searchParser = searchParser,
       transport = transport,
       bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent)
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver
+    )
   }
 
   /**
@@ -217,7 +222,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -296,8 +301,8 @@ abstract class BookRevokeTaskContract {
       "I/O error",
       result.steps.last().resolution.exception!!.message)
     Assert.assertEquals(
-      BookStatusRevokeFailed::class.java,
-      this.bookRegistry.bookOrException(bookId).status().javaClass)
+      BookStatus.FailedRevoke::class.java,
+      this.bookRegistry.bookOrException(bookId).status.javaClass)
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -521,7 +526,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -613,7 +618,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -689,7 +694,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -783,7 +788,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -877,7 +882,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -970,7 +975,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -1047,7 +1052,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -1137,7 +1142,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -1228,8 +1233,8 @@ abstract class BookRevokeTaskContract {
 
     result as TaskResult.Failure
     Assert.assertEquals(
-      BookStatusRevokeFailed::class.java,
-      this.bookRegistry.bookOrException(bookId).status().javaClass)
+      BookStatus.FailedRevoke::class.java,
+      this.bookRegistry.bookOrException(bookId).status.javaClass)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -1315,8 +1320,8 @@ abstract class BookRevokeTaskContract {
 
     result as TaskResult.Failure
     Assert.assertEquals(
-      BookStatusRevokeFailed::class.java,
-      this.bookRegistry.bookOrException(bookId).status().javaClass)
+      BookStatus.FailedRevoke::class.java,
+      this.bookRegistry.bookOrException(bookId).status.javaClass)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -1395,8 +1400,8 @@ abstract class BookRevokeTaskContract {
 
     result as TaskResult.Failure
     Assert.assertEquals(
-      BookStatusRevokeFailed::class.java,
-      this.bookRegistry.bookOrException(bookId).status().javaClass)
+      BookStatus.FailedRevoke::class.java,
+      this.bookRegistry.bookOrException(bookId).status.javaClass)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -1477,8 +1482,8 @@ abstract class BookRevokeTaskContract {
 
     result as TaskResult.Failure
     Assert.assertEquals(
-      BookStatusRevokeFailed::class.java,
-      this.bookRegistry.bookOrException(bookId).status().javaClass)
+      BookStatus.FailedRevoke::class.java,
+      this.bookRegistry.bookOrException(bookId).status.javaClass)
     Assert.assertEquals(
       UniqueException::class.java,
       result.steps.last().resolution.exception!!.javaClass)
@@ -1594,8 +1599,8 @@ abstract class BookRevokeTaskContract {
 
     result as TaskResult.Failure
     Assert.assertEquals(
-      BookStatusRevokeFailed::class.java,
-      this.bookRegistry.bookOrException(bookId).status().javaClass)
+      BookStatus.FailedRevoke::class.java,
+      this.bookRegistry.bookOrException(bookId).status.javaClass)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -1674,8 +1679,8 @@ abstract class BookRevokeTaskContract {
 
     result as TaskResult.Failure
     Assert.assertEquals(
-      BookStatusRevokeFailed::class.java,
-      this.bookRegistry.bookOrException(bookId).status().javaClass)
+      BookStatus.FailedRevoke::class.java,
+      this.bookRegistry.bookOrException(bookId).status.javaClass)
     Assert.assertEquals(
       BookStatusRevokeErrorDetails.NotRevocable("revokeServerNotifyNotRevocable"),
       result.errors().last())
@@ -1757,8 +1762,8 @@ abstract class BookRevokeTaskContract {
 
     result as TaskResult.Failure
     Assert.assertEquals(
-      BookStatusRevokeFailed::class.java,
-      this.bookRegistry.bookOrException(bookId).status().javaClass)
+      BookStatus.FailedRevoke::class.java,
+      this.bookRegistry.bookOrException(bookId).status.javaClass)
     Assert.assertEquals(
       BookStatusRevokeErrorDetails.NotRevocable("revokeServerNotifyNotRevocable"),
       result.errors().last())
@@ -1861,7 +1866,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -1961,7 +1966,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -1969,7 +1974,7 @@ abstract class BookRevokeTaskContract {
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }
 
-  private fun logBookEventsFor(bookId: BookID?) {
+  private fun logBookEventsFor(bookId: BookID) {
     this.bookRegistry.bookEvents().subscribe {
       this.bookRegistry.bookStatus(bookId).map_ { status ->
         this.logger.debug("status: {}", status)
@@ -1977,7 +1982,7 @@ abstract class BookRevokeTaskContract {
     }
   }
 
-  private fun resource(file: String): InputStream {
+  private fun resource(file: String): InputStream? {
     return BookRevokeTaskContract::class.java.getResourceAsStream(file)
   }
 
@@ -1985,7 +1990,7 @@ abstract class BookRevokeTaskContract {
   private fun resourceSize(file: String): Long {
     var total = 0L
     val buffer = ByteArray(8192)
-    this.resource(file).use { stream ->
+    this.resource(file)?.use { stream ->
       while (true) {
         val r = stream.read(buffer)
         if (r <= 0) {

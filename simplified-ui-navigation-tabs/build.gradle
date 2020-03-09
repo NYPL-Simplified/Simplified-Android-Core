@@ -1,0 +1,14 @@
+dependencies {
+  api project(":simplified-ui-catalog")
+  api project(":simplified-ui-navigation-api")
+  api project(":simplified-ui-profiles")
+  api project(":simplified-ui-settings")
+  api project(":simplified-ui-theme")
+
+  implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-viewer-api")
+
+  api libraries.bottomNavigator
+
+  implementation libraries.kotlinStdlib
+}

@@ -58,7 +58,6 @@ class AccountProviderDescriptionCollectionSerializer internal constructor(
 
   private class IgnoreStream : OutputStream() {
     override fun write(b: Int) {
-
     }
   }
 }

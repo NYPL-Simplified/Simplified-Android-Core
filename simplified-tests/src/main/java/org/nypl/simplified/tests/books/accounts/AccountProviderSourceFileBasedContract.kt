@@ -22,8 +22,7 @@ abstract class AccountProviderSourceFileBasedContract {
   }
 
   @Test
-  fun testProvidersAll()
-  {
+  fun testProvidersAll() {
     val provider = AccountProviderSourceFileBased(getFile = {
       this.readAllFromResource("providers-all.json")
     })
@@ -33,5 +32,4 @@ abstract class AccountProviderSourceFileBasedContract {
     val success = result as SourceSucceeded
     Assert.assertEquals(172, success.results.size)
   }
-
 }

@@ -16,7 +16,8 @@ import java.util.concurrent.ExecutorService
 
 class CirculationAnalyticsSystem(
   private val configuration: AnalyticsConfiguration,
-  private val executor: ExecutorService) : AnalyticsSystem {
+  private val executor: ExecutorService
+) : AnalyticsSystem {
 
   private val logger =
     LoggerFactory.getLogger(CirculationAnalyticsSystem::class.java)
@@ -31,12 +32,14 @@ class CirculationAnalyticsSystem(
       is AnalyticsEvent.ApplicationOpened,
       is AnalyticsEvent.ProfileLoggedIn,
       is AnalyticsEvent.ProfileLoggedOut,
+      is AnalyticsEvent.ProfileCreated,
+      is AnalyticsEvent.ProfileDeleted,
+      is AnalyticsEvent.ProfileUpdated,
       is AnalyticsEvent.CatalogSearched -> {
 
         /*
          * All of these event types are ignored.
          */
-
       }
 
       is AnalyticsEvent.BookOpened -> {
@@ -59,7 +62,8 @@ class CirculationAnalyticsSystem(
 
   private fun postURI(
     event: AnalyticsEvent,
-    targetURI: URI) {
+    targetURI: URI
+  ) {
     val credentials = event.credentials
     val httpAuth =
       if (credentials != null) {
@@ -86,8 +90,6 @@ class CirculationAnalyticsSystem(
           exception.error)
       },
       {
-
       })
   }
-
 }

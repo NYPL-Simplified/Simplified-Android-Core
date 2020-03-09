@@ -14,16 +14,16 @@ sealed class ReaderBookmarkEvent {
    */
 
   data class ReaderBookmarkSyncStarted(
-    val accountID: AccountID)
-    : ReaderBookmarkEvent()
+    val accountID: AccountID
+  ) : ReaderBookmarkEvent()
 
   /**
    * Synchronizing bookmarks for the given account has finished.
    */
 
   data class ReaderBookmarkSyncFinished(
-    val accountID: AccountID)
-    : ReaderBookmarkEvent()
+    val accountID: AccountID
+  ) : ReaderBookmarkEvent()
 
   /**
    * A bookmark was saved for the given account.
@@ -31,6 +31,6 @@ sealed class ReaderBookmarkEvent {
 
   data class ReaderBookmarkSaved(
     val accountID: AccountID,
-    val bookmark: Bookmark)
-    : ReaderBookmarkEvent()
+    val bookmark: Bookmark
+  ) : ReaderBookmarkEvent()
 }

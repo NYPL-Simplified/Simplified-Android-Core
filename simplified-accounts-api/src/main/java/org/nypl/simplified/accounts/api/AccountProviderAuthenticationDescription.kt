@@ -47,8 +47,8 @@ sealed class AccountProviderAuthenticationDescription {
      * The feed URI for < 13.
      */
 
-    val under13: URI)
-    : AccountProviderAuthenticationDescription() {
+    val under13: URI
+  ) : AccountProviderAuthenticationDescription() {
     init {
       Preconditions.checkState(
         this.greaterEqual13 != this.under13,
@@ -102,8 +102,8 @@ sealed class AccountProviderAuthenticationDescription {
      * ```
      */
 
-    val labels: Map<String, String>)
-    : AccountProviderAuthenticationDescription() {
+    val labels: Map<String, String>
+  ) : AccountProviderAuthenticationDescription() {
 
     init {
       Preconditions.checkArgument(
@@ -117,5 +117,4 @@ sealed class AccountProviderAuthenticationDescription {
         "Password keyboard ${this.passwordKeyboard} must be uppercase")
     }
   }
-
 }

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<resources>
-  <dimen name="bookDialogDownloadingHeight">64dp</dimen>
-  <dimen name="bookCellHeight">110dp</dimen>
-</resources>

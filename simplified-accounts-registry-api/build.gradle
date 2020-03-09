@@ -1,15 +1,15 @@
 dependencies {
   api project(':simplified-accounts-api')
-  api project(':simplified-observable')
 
   api libraries.googleGuava
   api libraries.io7mJFunctional
   api libraries.jodaTime
   api libraries.nyplDRMCore
+  api libraries.rxjava2
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 
-  compileOnly libraries.googleAutoValue
-  annotationProcessor libraries.googleAutoValue
+  compileOnly libraries.autoValue
+  annotationProcessor libraries.autoValueProcessor
 }

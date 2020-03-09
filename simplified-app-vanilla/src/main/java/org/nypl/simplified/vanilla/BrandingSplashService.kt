@@ -8,6 +8,6 @@ import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 
 class BrandingSplashService : BrandingSplashServiceType {
   override fun splashImageResource(): Int {
-    return R.drawable.vanilla_splash
+    return R.drawable.main_splash
   }
 }

@@ -27,5 +27,5 @@ data class AccountAuthenticationAdobePostActivationCredentials(
    * @return The device token
    */
 
-  val userID: AdobeUserID)
-
+  val userID: AdobeUserID
+)

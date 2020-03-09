@@ -24,6 +24,6 @@ interface MigrationReportXMLType {
 
   fun serializeToXML(
     report: MigrationReport,
-    outputStream: OutputStream)
-
+    outputStream: OutputStream
+  )
 }

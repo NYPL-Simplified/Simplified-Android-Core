@@ -23,5 +23,4 @@ interface BootStringResourcesType {
    */
 
   val bootCompleted: String
-
 }

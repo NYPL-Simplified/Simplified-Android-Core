@@ -1,8 +1,8 @@
 package org.nypl.simplified.migration.api
 
+import io.reactivex.Observable
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
-import org.nypl.simplified.observable.ObservableReadableType
 
 /**
  * An interface that runs one or more migrations.
@@ -14,7 +14,7 @@ interface MigrationsType {
    * An observable that publishes migration events.
    */
 
-  val events: ObservableReadableType<MigrationEvent>
+  val events: Observable<MigrationEvent>
 
   /**
    * @return A future that returns `true` if any migration needs to occur
@@ -29,5 +29,4 @@ interface MigrationsType {
    */
 
   fun runMigrations(): MigrationReport?
-
 }

@@ -7,7 +7,6 @@ import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStep
 import java.io.Serializable
 import java.net.URI
 
@@ -43,7 +42,8 @@ sealed class AccountLoginState {
      * @see AccountLoginStringResourcesType
      */
 
-    val status: String) : AccountLoginState() {
+    val status: String
+  ) : AccountLoginState() {
 
     override val credentials: AccountAuthenticationCredentials?
       get() = null
@@ -60,7 +60,8 @@ sealed class AccountLoginState {
      */
 
     data class AccountLoginCredentialsIncorrect(
-      override val message: String) : AccountLoginErrorData() {
+      override val message: String
+    ) : AccountLoginErrorData() {
       override fun toString(): String =
         this.javaClass.simpleName
     }
@@ -70,7 +71,8 @@ sealed class AccountLoginState {
      */
 
     data class AccountLoginNotRequired(
-      override val message: String) : AccountLoginErrorData() {
+      override val message: String
+    ) : AccountLoginErrorData() {
       override fun toString(): String =
         this.javaClass.simpleName
     }
@@ -80,7 +82,8 @@ sealed class AccountLoginState {
      */
 
     data class AccountLoginConnectionFailure(
-      override val message: String) : AccountLoginErrorData() {
+      override val message: String
+    ) : AccountLoginErrorData() {
       override fun toString(): String =
         this.javaClass.simpleName
     }
@@ -92,8 +95,8 @@ sealed class AccountLoginState {
     data class AccountLoginServerParseError(
       override val message: String,
       val warnings: List<ParseWarning>,
-      val errors: List<ParseError>)
-      : AccountLoginErrorData() {
+      val errors: List<ParseError>
+    ) : AccountLoginErrorData() {
       override fun toString(): String =
         this.javaClass.simpleName
     }
@@ -107,8 +110,8 @@ sealed class AccountLoginState {
       val uri: URI,
       val statusCode: Int,
       val errorMessage: String,
-      override val problemReport: HTTPProblemReport?)
-      : AccountLoginErrorData(), HTTPHasProblemReportType {
+      override val problemReport: HTTPProblemReport?
+    ) : AccountLoginErrorData(), HTTPHasProblemReportType {
 
       override val attributes: Map<String, String>
         get() = Presentables.mergeProblemReportOptional(super.attributes, this.problemReport)
@@ -120,8 +123,8 @@ sealed class AccountLoginState {
 
     data class AccountLoginDRMNotSupported(
       override val message: String,
-      val system: String)
-      : AccountLoginErrorData()
+      val system: String
+    ) : AccountLoginErrorData()
 
     /**
      * A DRM system failed with an (opaque) error code.
@@ -129,16 +132,16 @@ sealed class AccountLoginState {
 
     data class AccountLoginDRMFailure(
       override val message: String,
-      val errorCode: String)
-      : AccountLoginErrorData()
+      val errorCode: String
+    ) : AccountLoginErrorData()
 
     /**
      * A DRM system failed due to having too many device activations.
      */
 
     data class AccountLoginDRMTooManyActivations(
-      override val message: String)
-      : AccountLoginErrorData()
+      override val message: String
+    ) : AccountLoginErrorData()
 
     /**
      * An unexpected exception occurred.
@@ -146,16 +149,16 @@ sealed class AccountLoginState {
 
     data class AccountLoginUnexpectedException(
       override val message: String,
-      override val exception: Throwable)
-      : AccountLoginErrorData()
+      override val exception: Throwable
+    ) : AccountLoginErrorData()
 
     /**
      * Logging in failed due to some missing information.
      */
 
     data class AccountLoginMissingInformation(
-      override val message: String)
-      : AccountLoginErrorData()
+      override val message: String
+    ) : AccountLoginErrorData()
   }
 
   /**
@@ -163,8 +166,8 @@ sealed class AccountLoginState {
    */
 
   data class AccountLoginFailed(
-    val taskResult: TaskResult.Failure<AccountLoginErrorData, *>)
-    : AccountLoginState() {
+    val taskResult: TaskResult.Failure<AccountLoginErrorData, *>
+  ) : AccountLoginState() {
 
     override val credentials: AccountAuthenticationCredentials?
       get() = null
@@ -175,8 +178,8 @@ sealed class AccountLoginState {
    */
 
   data class AccountLoggedIn(
-    override val credentials: AccountAuthenticationCredentials)
-    : AccountLoginState()
+    override val credentials: AccountAuthenticationCredentials
+  ) : AccountLoginState()
 
   /**
    * The account is currently logging out.
@@ -191,8 +194,8 @@ sealed class AccountLoginState {
      * @see AccountLogoutStringResourcesType
      */
 
-    val status: String)
-    : AccountLoginState()
+    val status: String
+  ) : AccountLoginState()
 
   /**
    * Data associated with failed logout attempts.
@@ -205,8 +208,8 @@ sealed class AccountLoginState {
      */
 
     data class AccountLogoutDRMFailure(
-      val errorCode: String)
-      : AccountLogoutErrorData() {
+      val errorCode: String
+    ) : AccountLogoutErrorData() {
 
       override val message: String
         get() = this.errorCode
@@ -217,8 +220,8 @@ sealed class AccountLoginState {
      */
 
     data class AccountLogoutUnexpectedException(
-      override val exception: Throwable)
-      : AccountLogoutErrorData() {
+      override val exception: Throwable
+    ) : AccountLogoutErrorData() {
       override val message: String
         get() = this.exception.localizedMessage
     }
@@ -230,7 +233,6 @@ sealed class AccountLoginState {
 
   data class AccountLogoutFailed(
     val taskResult: TaskResult.Failure<AccountLogoutErrorData, *>,
-    override val credentials: AccountAuthenticationCredentials)
-    : AccountLoginState()
-
+    override val credentials: AccountAuthenticationCredentials
+  ) : AccountLoginState()
 }

@@ -17,8 +17,8 @@ sealed class TaskResult<E : Serializable, A> {
 
   data class Success<E : Serializable, A>(
     val result: A,
-    override val steps: List<TaskStep<E>>)
-    : TaskResult<E, A>() {
+    override val steps: List<TaskStep<E>>
+  ) : TaskResult<E, A>() {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
@@ -31,8 +31,8 @@ sealed class TaskResult<E : Serializable, A> {
    */
 
   data class Failure<E : Serializable, A>(
-    override val steps: List<TaskStep<E>>)
-    : TaskResult<E, A>() {
+    override val steps: List<TaskStep<E>>
+  ) : TaskResult<E, A>() {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
@@ -88,6 +88,33 @@ sealed class TaskResult<E : Serializable, A> {
       }
       is Failure ->
         Failure(this.steps)
+    }
+  }
+
+  companion object {
+
+    /**
+     * Create a task result that indicates that a task immediately failed with the
+     * given error.
+     */
+
+    fun <E : Serializable, A> fail(
+      description: String,
+      resolution: String,
+      errorValue: E
+    ): TaskResult<E, A> {
+      return Failure(
+        steps = listOf(
+          TaskStep(
+            description = description,
+            resolution = TaskStepResolution.TaskStepFailed(
+              message = resolution,
+              errorValue = errorValue,
+              exception = null
+            )
+          )
+        )
+      )
     }
   }
 }

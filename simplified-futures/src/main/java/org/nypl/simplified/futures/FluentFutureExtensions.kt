@@ -34,7 +34,8 @@ object FluentFutureExtensions {
 
   fun <E : Throwable, A> FluentFuture<A>.onError(
     clazz: Class<E>,
-    f: (E) -> A): FluentFuture<A> {
+    f: (E) -> A
+  ): FluentFuture<A> {
     return this.catching(clazz, Function<E, A> { x -> f.invoke(x!!) }, MoreExecutors.directExecutor())
   }
 
@@ -44,7 +45,8 @@ object FluentFutureExtensions {
 
   fun <E : Exception, A> FluentFuture<A>.onException(
     clazz: Class<E>,
-    f: (E) -> A): FluentFuture<A> {
+    f: (E) -> A
+  ): FluentFuture<A> {
     return this.catching(clazz, Function<E, A> { x -> f.invoke(x!!) }, MoreExecutors.directExecutor())
   }
 
@@ -69,5 +71,4 @@ object FluentFutureExtensions {
 
   fun <A> fluentFutureOfValue(x: A) =
     FluentFuture.from(Futures.immediateFuture(x))
-
 }

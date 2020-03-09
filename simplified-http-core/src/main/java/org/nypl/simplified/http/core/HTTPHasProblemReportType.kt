@@ -11,5 +11,4 @@ interface HTTPHasProblemReportType {
    */
 
   val problemReport: HTTPProblemReport?
-
 }

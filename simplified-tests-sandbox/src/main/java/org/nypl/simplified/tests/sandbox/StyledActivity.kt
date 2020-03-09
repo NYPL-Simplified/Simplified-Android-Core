@@ -38,8 +38,8 @@ class StyledActivity : AppCompatActivity() {
     button0.setOnClickListener {
       AlertDialog.Builder(this)
         .setMessage("Hello!")
-        .setNegativeButton("Negative", { _, _ ->  })
-        .setPositiveButton("Positive", { _, _ ->  })
+        .setNegativeButton("Negative", { _, _ -> })
+        .setPositiveButton("Positive", { _, _ -> })
         .create()
         .show()
     }
@@ -103,5 +103,4 @@ class StyledActivity : AppCompatActivity() {
     layout.addView(div2)
     layout.addView(progress)
   }
-
 }

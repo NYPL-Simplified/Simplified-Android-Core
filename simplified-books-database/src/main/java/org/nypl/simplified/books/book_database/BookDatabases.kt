@@ -19,7 +19,8 @@ object BookDatabases : BookDatabaseFactoryType {
     parser: OPDSJSONParserType,
     serializer: OPDSJSONSerializerType,
     owner: AccountID,
-    directory: File): BookDatabaseType {
+    directory: File
+  ): BookDatabaseType {
     return BookDatabase.open(
       context = context,
       parser = parser,
@@ -32,7 +33,8 @@ object BookDatabases : BookDatabaseFactoryType {
   override fun openDatabase(
     context: Context,
     owner: AccountID,
-    directory: File): BookDatabaseType {
+    directory: File
+  ): BookDatabaseType {
 
     return BookDatabase.open(
       context = context,

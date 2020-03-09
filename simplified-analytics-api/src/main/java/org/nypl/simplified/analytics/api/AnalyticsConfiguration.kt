@@ -19,4 +19,5 @@ data class AnalyticsConfiguration(
    * The HTTP interface used for analytics requests, if necessary.
    */
 
-  val http: HTTPType)
+  val http: HTTPType
+)

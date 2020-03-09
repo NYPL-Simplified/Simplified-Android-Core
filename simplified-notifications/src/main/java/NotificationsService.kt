@@ -2,11 +2,15 @@ package org.nypl.simplified.notifications
 
 import android.content.Context
 import com.io7m.jfunctional.Some
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.*
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableSubscriptionType
+import org.nypl.simplified.books.book_registry.BookRegistry
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatusEvent
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.threads.NamedThreadPools
@@ -15,13 +19,13 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.ThreadFactory
 
 class NotificationsService(
-        val context: Context,
-        val threadFactory: ThreadFactory,
-        val profileEvents: ObservableReadableType<ProfileEvent>,
-        val bookRegistry: BookRegistryReadableType,
-        private val notificationsWrapper: NotificationsWrapper,
-        val notificationResourcesType: NotificationResourcesType) {
-
+  val context: Context,
+  val threadFactory: ThreadFactory,
+  val profileEvents: Observable<ProfileEvent>,
+  val bookRegistry: BookRegistryReadableType,
+  private val notificationsWrapper: NotificationsWrapper,
+  val notificationResourcesType: NotificationResourcesType
+) {
 
     companion object {
         const val NOTIFICATION_PRIMARY_CHANNEL_ID = "simplified_notification_channel_primary"
@@ -31,13 +35,13 @@ class NotificationsService(
 
     private val executor: ExecutorService = NamedThreadPools.namedThreadPoolOf(1, threadFactory)
 
-    private val profileSubscription: ObservableSubscriptionType<ProfileEvent>? =
+    private val profileSubscription: Disposable? =
             profileEvents.subscribe(::onProfileEvent)
 
     private var registryCache: Map<BookID, BookWithStatus> = mapOf()
 
     // Start null until we have a profile selected event
-    var bookRegistrySubscription: ObservableSubscriptionType<BookStatusEvent>? = null
+    var bookRegistrySubscription: Disposable? = null
 
     /**
      * Method for handling [ProfileEvent]s the service is subscribed to.
@@ -81,7 +85,7 @@ class NotificationsService(
      * Method for handling [BookEvent]s the service is subscribed to.
      */
     private fun onBookEvent(event: BookEvent) {
-        logger.debug("NotificationsService::onBookEvent $event")
+        logger.trace("NotificationsService::onBookEvent $event")
         executor.execute {
             if (event is BookStatusEvent) {
                 /*
@@ -101,8 +105,8 @@ class NotificationsService(
      * posts a notification if it satisfies the rules for doing so.
      */
     private fun compareToCache(bookStatus: BookWithStatus?) {
-        logger.debug("NotificationsService::compareToCache ${bookStatus?.status()}")
-        var cachedBookStatus = registryCache[bookStatus?.book()?.id]
+        logger.trace("NotificationsService::compareToCache ${bookStatus?.status}")
+        var cachedBookStatus = registryCache[bookStatus?.book?.id]
         if (statusChangedSufficiently(cachedBookStatus, bookStatus)) {
             publishNotification(notificationResourcesType.titleReadyNotificationTitle,
                     notificationResourcesType.titleReadyNotificationContent)
@@ -142,7 +146,7 @@ class NotificationsService(
      */
     private fun unsubscribeFromBookEvents() {
         logger.debug("NotificationsService::unsubscribeFromBookEvents")
-        bookRegistrySubscription?.unsubscribe()
+        bookRegistrySubscription?.dispose()
     }
 
     /**
@@ -150,10 +154,10 @@ class NotificationsService(
      */
     private fun statusChangedSufficiently(statusBefore: BookWithStatus?, statusNow: BookWithStatus?): Boolean {
         // Compare statusBefore and statusNow, only return true if statusNow is actually [BookStatusHeldReady]
-        logger.debug("NotificationsService::statusChangedSufficiently comparing ${statusBefore?.status()} to ${statusNow?.status()}")
+        logger.debug("NotificationsService::statusChangedSufficiently comparing ${statusBefore?.status} to ${statusNow?.status}")
         if (statusBefore != null && statusNow != null) {
-            return statusBefore.status() is BookStatusHeld &&
-                    statusNow.status() is BookStatusHeldReady
+            return statusBefore.status is BookStatus.Held.HeldInQueue &&
+                    statusNow.status is BookStatus.Held.HeldReady
         }
 
         // No status change met criteria

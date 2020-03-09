@@ -18,8 +18,8 @@ sealed class AccountCreateErrorDetails : PresentableErrorType {
    */
 
   data class AccountProviderResolutionFailed(
-    val errorValues: List<AccountProviderResolutionErrorDetails>)
-    : AccountCreateErrorDetails() {
+    val errorValues: List<AccountProviderResolutionErrorDetails>
+  ) : AccountCreateErrorDetails() {
 
     init {
       Preconditions.checkArgument(
@@ -41,8 +41,8 @@ sealed class AccountCreateErrorDetails : PresentableErrorType {
 
   data class UnexpectedException(
     override val message: String,
-    override val exception: Throwable)
-    : AccountCreateErrorDetails()
+    override val exception: Throwable
+  ) : AccountCreateErrorDetails()
 
   /**
    * An HTTP request could not be made.
@@ -52,8 +52,8 @@ sealed class AccountCreateErrorDetails : PresentableErrorType {
     override val message: String,
     val opdsURI: URI,
     val status: Int,
-    override val problemReport: HTTPProblemReport?)
-    : AccountCreateErrorDetails(), HTTPHasProblemReportType {
+    override val problemReport: HTTPProblemReport?
+  ) : AccountCreateErrorDetails(), HTTPHasProblemReportType {
 
     override val attributes: Map<String, String>
       get() = Presentables.mergeProblemReportOptional(super.attributes, this.problemReport)

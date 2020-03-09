@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.librarysimplified.audiobook.api.PlayerPosition
@@ -44,8 +46,6 @@ import org.nypl.simplified.migration.spi.MigrationEvent.Subject.BOOKMARK
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.migration.spi.MigrationType
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.presentableerror.api.PresentableType
@@ -66,7 +66,8 @@ import java.nio.ByteBuffer
 class MigrationFrom3Master(
   private val environment: EnvironmentQueriesType,
   private val strings: MigrationFrom3MasterStringResourcesType,
-  private val services: MigrationServiceDependencies) : MigrationType {
+  private val services: MigrationServiceDependencies
+) : MigrationType {
 
   private val logger =
     LoggerFactory.getLogger(MigrationFrom3Master::class.java)
@@ -85,7 +86,7 @@ class MigrationFrom3Master(
 
   private val objectMapper = ObjectMapper()
   private val noticesLog = mutableListOf<MigrationEvent>()
-  private val noticesObservable = Observable.create<MigrationEvent>()
+  private val noticesObservable = PublishSubject.create<MigrationEvent>()
   private val filesToDelete = mutableListOf<File>()
 
   /**
@@ -100,18 +101,18 @@ class MigrationFrom3Master(
     this.noticesObservable.subscribe { notice -> this.noticesLog.add(notice) }
   }
 
-  override val events: ObservableReadableType<MigrationEvent> =
+  override val events: Observable<MigrationEvent> =
     this.noticesObservable
 
   private fun publishStepSucceeded(subject: Subject, message: String) {
-    this.noticesObservable.send(MigrationStepSucceeded(
+    this.noticesObservable.onNext(MigrationStepSucceeded(
       message = message,
       subject = subject
     ))
   }
 
   private fun publishStepSucceeded(subject: Subject, message: String, steps: List<PresentableType>) {
-    this.noticesObservable.send(MigrationStepSucceeded(
+    this.noticesObservable.onNext(MigrationStepSucceeded(
       message = message,
       subject = subject,
       causes = steps
@@ -119,15 +120,15 @@ class MigrationFrom3Master(
   }
 
   private fun publishStepSucceeded(message: String) {
-    this.noticesObservable.send(MigrationStepSucceeded(message))
+    this.noticesObservable.onNext(MigrationStepSucceeded(message))
   }
 
   private fun publishStepProgress(subject: Subject, message: String) {
-    this.noticesObservable.send(MigrationStepInProgress(message, subject))
+    this.noticesObservable.onNext(MigrationStepInProgress(message, subject))
   }
 
   private fun publishStepError(error: MigrationStepError) {
-    this.noticesObservable.send(error)
+    this.noticesObservable.onNext(error)
   }
 
   override fun needsToRun(): Boolean {
@@ -151,7 +152,8 @@ class MigrationFrom3Master(
     val baseDirectory: File,
     val adobeDeviceXML: File?,
     val idURI: URI,
-    val idNumeric: Int)
+    val idNumeric: Int
+  )
 
   data class LoadedAccount(
     val enumeratedAccount: EnumeratedAccount,
@@ -159,11 +161,13 @@ class MigrationFrom3Master(
     val booksDataDirectory: File,
     val account: MigrationFrom3MasterAccount?,
     val accountSubDirectory: File,
-    val accountFile: File)
+    val accountFile: File
+  )
 
   data class CreatedAccount(
     val loadedAccount: LoadedAccount,
-    val account: AccountType)
+    val account: AccountType
+  )
 
   data class LoadedBook(
     val owner: CreatedAccount,
@@ -174,10 +178,12 @@ class MigrationFrom3Master(
     val epubAdobeLoan: AdobeAdeptLoan?,
     val epubBookmarks: List<Bookmark>?,
     val audioBookPosition: PlayerPosition?,
-    val audioBookManifest: BookFormat.AudioBookManifestReference?)
+    val audioBookManifest: BookFormat.AudioBookManifestReference?
+  )
 
   data class CopiedBook(
-    val loadedBook: LoadedBook)
+    val loadedBook: LoadedBook
+  )
 
   override fun run(): MigrationReport {
     val subscription =
@@ -246,7 +252,7 @@ class MigrationFrom3Master(
         time,
         this.noticesLog.toList())
     } finally {
-      subscription.unsubscribe()
+      subscription.dispose()
     }
   }
 
@@ -275,7 +281,6 @@ class MigrationFrom3Master(
           return
         }
         is AccountProviderAuthenticationDescription.Basic -> {
-
         }
       }
 
@@ -617,7 +622,6 @@ class MigrationFrom3Master(
     val mapper = ObjectMapper()
     val jsonObj: Map<String, List<BookmarkAnnotation>> =
       mapper.readValue(stream, object : TypeReference<Map<String, List<BookmarkAnnotation>>>() {
-
       })
     return jsonObj["bookmarks"] ?: listOf()
   }

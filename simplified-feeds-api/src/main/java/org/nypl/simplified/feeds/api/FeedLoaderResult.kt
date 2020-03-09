@@ -17,8 +17,8 @@ sealed class FeedLoaderResult {
    */
 
   data class FeedLoaderSuccess(
-    val feed: Feed)
-    : FeedLoaderResult()
+    val feed: Feed
+  ) : FeedLoaderResult()
 
   /**
    * The feed failed to load.
@@ -34,8 +34,8 @@ sealed class FeedLoaderResult {
       override val problemReport: HTTPProblemReport?,
       override val exception: Exception,
       override val message: String,
-      private val attributesInitial: Map<String, String>)
-      : FeedLoaderFailure() {
+      private val attributesInitial: Map<String, String>
+    ) : FeedLoaderFailure() {
       override val attributes: Map<String, String>
         get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
     }
@@ -48,12 +48,11 @@ sealed class FeedLoaderResult {
       override val problemReport: HTTPProblemReport?,
       override val exception: Exception,
       override val message: String,
-      private val attributesInitial: Map<String, String>)
-      : FeedLoaderFailure() {
+      private val attributesInitial: Map<String, String>
+    ) : FeedLoaderFailure() {
       override val attributes: Map<String, String>
         get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
     }
-
   }
 
   companion object {
@@ -71,9 +70,8 @@ sealed class FeedLoaderResult {
         exception =
         if (exception is java.lang.Exception) exception
         else java.lang.Exception(exception),
-        message = exception.localizedMessage,
+        message = exception.localizedMessage ?: "",
         attributesInitial = sortedMapOf(Pair("Feed URI", uri.toASCIIString())))
     }
-
   }
 }

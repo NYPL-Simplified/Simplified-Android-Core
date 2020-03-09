@@ -11,4 +11,5 @@ data class ReaderBookmarkState(
   val account: AccountID,
   val bookmark: Bookmark,
   val localState: ReaderBookmarkLocalState,
-  val remoteState: ReaderBookmarkRemoteState)
+  val remoteState: ReaderBookmarkRemoteState
+)

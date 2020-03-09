@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.books.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import junit.framework.Assert
+import org.junit.Assert
 import org.joda.time.LocalDateTime
 import org.junit.Rule
 import org.junit.Test

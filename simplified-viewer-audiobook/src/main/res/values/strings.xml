@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resources>
+  <string name="audio_book_player">Audiobook Player</string>
+  <string name="audio_book_player_do_keep">Keep</string>
+  <string name="audio_book_player_do_return">Return</string>
+  <string name="audio_book_player_error_book_open">Unable to open audio book</string>
+  <string name="audio_book_player_error_engine_open">Unable to initialize audio engine</string>
+  <string name="audio_book_player_return_question">Would you like to return it?</string>
+  <string name="audio_book_player_return_title">Your Audiobook Has Finished</string>
+</resources>

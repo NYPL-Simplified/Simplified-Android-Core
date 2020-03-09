@@ -19,8 +19,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.ArrayList
-import java.util.Collections
-import java.util.SortedMap
 import java.util.SortedSet
 import java.util.TreeSet
 import java.util.concurrent.ConcurrentSkipListMap
@@ -35,7 +33,8 @@ class BookDatabase private constructor(
   private val owner: AccountID,
   private val directory: File,
   private val maps: BookMaps,
-  private val serializer: OPDSJSONSerializerType) : BookDatabaseType {
+  private val serializer: OPDSJSONSerializerType
+) : BookDatabaseType {
 
   /**
    * A thread-safe map exposing read-only snapshots of database entries.
@@ -47,9 +46,6 @@ class BookDatabase private constructor(
     @GuardedBy("mapsLock")
     internal val entries: ConcurrentSkipListMap<BookID, BookDatabaseEntry> =
       ConcurrentSkipListMap()
-    @GuardedBy("mapsLock")
-    internal val entriesRead: SortedMap<BookID, BookDatabaseEntryType> =
-      Collections.unmodifiableSortedMap(this.entries)
 
     internal fun clear() {
       synchronized(this.mapsLock) {
@@ -97,7 +93,8 @@ class BookDatabase private constructor(
   @Throws(BookDatabaseException::class)
   override fun createOrUpdate(
     id: BookID,
-    newEntry: OPDSAcquisitionFeedEntry): BookDatabaseEntryType {
+    entry: OPDSAcquisitionFeedEntry
+  ): BookDatabaseEntryType {
 
     synchronized(this.maps.mapsLock) {
       try {
@@ -110,7 +107,7 @@ class BookDatabase private constructor(
         FileUtilities.fileWriteUTF8Atomically(
           fileMeta,
           fileMetaTmp,
-          JSONSerializerUtilities.serializeToString(this.serializer.serializeFeedEntry(newEntry)))
+          JSONSerializerUtilities.serializeToString(this.serializer.serializeFeedEntry(entry)))
 
         val book =
           Book(
@@ -118,10 +115,10 @@ class BookDatabase private constructor(
             account = this.owner,
             cover = null,
             thumbnail = null,
-            entry = newEntry,
+            entry = entry,
             formats = listOf())
 
-        val entry =
+        val dbEntry =
           BookDatabaseEntry(
             context = this.context,
             bookDir = bookDir,
@@ -129,8 +126,8 @@ class BookDatabase private constructor(
             bookRef = book,
             onDelete = Runnable { this.maps.delete(id) })
 
-        this.maps.addEntry(entry)
-        return entry
+        this.maps.addEntry(dbEntry)
+        return dbEntry
       } catch (e: IOException) {
         throw BookDatabaseException(e.message, listOf<Exception>(e))
       }
@@ -155,14 +152,15 @@ class BookDatabase private constructor(
       parser: OPDSJSONParserType,
       serializer: OPDSJSONSerializerType,
       owner: AccountID,
-      directory: File): BookDatabaseType {
+      directory: File
+    ): BookDatabaseType {
 
       LOG.debug("opening book database: {}", directory)
       val maps = BookMaps()
       val errors = ArrayList<Exception>()
       openAllBooks(context, parser, serializer, owner, directory, maps, errors)
 
-      if (!errors.isEmpty()) {
+      if (errors.isNotEmpty()) {
         errors.forEach { exception -> LOG.error("error opening book database: ", exception) }
         throw BookDatabaseException(
           "One or more errors occurred whilst trying to open a book database.", errors)
@@ -178,7 +176,8 @@ class BookDatabase private constructor(
       account: AccountID,
       directory: File,
       maps: BookMaps,
-      errors: MutableList<Exception>) {
+      errors: MutableList<Exception>
+    ) {
 
       if (!directory.exists()) {
         directory.mkdirs()
@@ -217,7 +216,8 @@ class BookDatabase private constructor(
       directory: File,
       maps: BookMaps,
       errors: MutableList<Exception>,
-      name: String): BookDatabaseEntry? {
+      name: String
+    ): BookDatabaseEntry? {
 
       try {
         LOG.debug("open: {}", directory)
@@ -267,5 +267,4 @@ class BookDatabase private constructor(
       }
     }
   }
-
 }

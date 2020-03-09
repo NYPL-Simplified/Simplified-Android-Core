@@ -2,11 +2,11 @@ package org.nypl.simplified.ui.splash
 
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
+import io.reactivex.Observable
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.migration.spi.MigrationReport
-import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 
 /**
@@ -30,7 +30,7 @@ interface SplashListenerType {
    * The splash screen wants access to an observable that publishes application startup events.
    */
 
-  fun onSplashWantBootEvents(): ObservableReadableType<BootEvent>
+  fun onSplashWantBootEvents(): Observable<BootEvent>
 
   /**
    * @return `true` if a EULA document is bundled into the application
@@ -80,5 +80,4 @@ interface SplashListenerType {
    */
 
   fun onSplashMigrationReport(report: MigrationReport)
-
 }

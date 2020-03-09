@@ -1,6 +1,5 @@
 package org.nypl.simplified.threads
 
-import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.Executors
@@ -26,18 +25,22 @@ object NamedThreadPools {
   fun namedThreadPool(
     count: Int,
     base: String,
-    priority: Int): ListeningScheduledExecutorService =
+    priority: Int
+  ): ListeningScheduledExecutorService =
     this.namedThreadPoolOf(count, this.namedThreadPoolFactory(base, priority))
 
   @JvmStatic
   fun namedThreadPoolOf(
     count: Int,
-    factory: ThreadFactory): ListeningScheduledExecutorService =
+    factory: ThreadFactory
+  ): ListeningScheduledExecutorService =
     MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(count, factory))
 
   @JvmStatic
-  fun namedThreadPoolFactory(base: String,
-                             priority: Int): ThreadFactory {
+  fun namedThreadPoolFactory(
+    base: String,
+    priority: Int
+  ): ThreadFactory {
     val delegate = Executors.defaultThreadFactory()
     return object : ThreadFactory {
       private var id: Int = 0

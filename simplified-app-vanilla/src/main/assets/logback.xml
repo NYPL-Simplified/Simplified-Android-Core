@@ -4,10 +4,6 @@
   <property name="EXT_FILES_DIR" value="${EXT_DIR:-/sdcard}/Android/data/${PACKAGE_NAME}/files"/>
   <property name="EXT_CACHE_DIR" value="${EXT_DIR:-/sdcard}/Android/data/${PACKAGE_NAME}/cache"/>
 
-  <appender
-    name="BUGSNAG"
-    class="org.nypl.simplified.bugsnag.BugsnagLogbackAppender"/>
-
   <!-- Create a logcat appender -->
   <appender
     name="LOG_CAT"
@@ -33,26 +29,9 @@
     <appender-ref ref="FILE" />
   </appender>
 
-  <logger
-    name="org.nypl.simplified.app.catalog.CatalogFeedBookCellView"
-    level="INFO" />
-
-  <logger
-    name="org.nypl.simplified.app.catalog.CatalogFeedLane"
-    level="INFO" />
-
-  <logger
-    name="org.nypl.simplified.app.BookCoverProvider"
-    level="DEBUG" />
-
-  <logger
-    name="org.nypl.drm"
-    level="DEBUG" />
-
   <root level="DEBUG">
     <appender-ref ref="LOG_CAT" />
     <appender-ref ref="ASYNC_FILE" />
-    <appender-ref ref="BUGSNAG" />
   </root>
 
 </configuration>

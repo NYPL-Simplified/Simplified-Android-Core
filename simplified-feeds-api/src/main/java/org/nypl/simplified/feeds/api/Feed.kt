@@ -17,7 +17,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import java.net.URI
 import java.util.ArrayList
-import java.util.Calendar
 import java.util.Collections
 import java.util.HashMap
 
@@ -91,7 +90,6 @@ sealed class Feed {
 
     val feedAbout: URI?,
 
-
     /**
      * @return A link to the licenses, if any
      */
@@ -105,8 +103,8 @@ sealed class Feed {
     val feedNext: URI?,
 
     private val facetsByGroupData: MutableMap<String, MutableList<FeedFacet>>,
-    private val facetsOrderData: MutableList<FeedFacet>)
-    : Feed() {
+    private val facetsOrderData: MutableList<FeedFacet>
+  ) : Feed() {
 
     private val entriesData: MutableMap<BookID, FeedEntry> = mutableMapOf()
     private val entriesOrderData: MutableList<BookID> = mutableListOf()
@@ -195,8 +193,8 @@ sealed class Feed {
     private val facetsByGroupData: MutableMap<String, MutableList<FeedFacet>>,
     private val facetsOrderData: MutableList<FeedFacet>,
     private val feedGroupsData: MutableMap<String, FeedGroup>,
-    private val feedGroupsOrderData: MutableList<String>)
-    : Feed() {
+    private val feedGroupsOrderData: MutableList<String>
+  ) : Feed() {
 
     val facetsByGroup: Map<String, List<FeedFacet>> =
       Collections.unmodifiableMap(this.facetsByGroupData)
@@ -248,7 +246,8 @@ sealed class Feed {
       feedID: String,
       feedSearch: FeedSearch?,
       feedTitle: String,
-      feedURI: URI): FeedWithoutGroups {
+      feedURI: URI
+    ): FeedWithoutGroups {
 
       return FeedWithoutGroups(
         feedID = feedID,
@@ -268,14 +267,15 @@ sealed class Feed {
     /**
      * Construct a feed from the given acquisition feed.
      *
-     * @param feed   The feed
+     * @param feed The feed
      * @param search The search document
      * @return A new feed
      */
 
     fun fromAcquisitionFeed(
       feed: OPDSAcquisitionFeed,
-      search: OPDSOpenSearch1_1?): Feed {
+      search: OPDSOpenSearch1_1?
+    ): Feed {
 
       return if (feed.feedGroups.isEmpty()) {
         withoutGroups(feed, search)
@@ -294,7 +294,8 @@ sealed class Feed {
 
     private fun withoutGroups(
       feed: OPDSAcquisitionFeed,
-      search: OPDSOpenSearch1_1?): FeedWithoutGroups {
+      search: OPDSOpenSearch1_1?
+    ): FeedWithoutGroups {
 
       val facetsByGroup =
         constructFacetGroups(feed)
@@ -343,7 +344,8 @@ sealed class Feed {
 
     private fun withGroups(
       feed: OPDSAcquisitionFeed,
-      search: OPDSOpenSearch1_1?): FeedWithGroups {
+      search: OPDSOpenSearch1_1?
+    ): FeedWithGroups {
 
       val facetsByGroup =
         constructFacetGroups(feed)
@@ -397,16 +399,14 @@ sealed class Feed {
     }
 
     private fun priority(acquisition: OPDSAcquisition): Int {
-      when (acquisition.relation) {
-        ACQUISITION_BORROW -> return 6
-        ACQUISITION_OPEN_ACCESS -> return 5
-        ACQUISITION_GENERIC -> return 4
-        ACQUISITION_SAMPLE -> return 3
-        ACQUISITION_BUY -> return 2
-        ACQUISITION_SUBSCRIBE -> return 1
+      return when (acquisition.relation) {
+        ACQUISITION_BORROW -> 6
+        ACQUISITION_OPEN_ACCESS -> 5
+        ACQUISITION_GENERIC -> 4
+        ACQUISITION_SAMPLE -> 3
+        ACQUISITION_BUY -> 2
+        ACQUISITION_SUBSCRIBE -> 1
       }
-
-      return 0
     }
   }
 }

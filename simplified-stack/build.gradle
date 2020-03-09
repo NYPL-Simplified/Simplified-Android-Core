@@ -1,4 +1,0 @@
-dependencies {
-  implementation libraries.io7mJFunctional
-  implementation libraries.io7mJNull
-}

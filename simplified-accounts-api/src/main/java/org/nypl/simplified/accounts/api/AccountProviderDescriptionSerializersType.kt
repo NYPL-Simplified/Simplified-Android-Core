@@ -15,5 +15,4 @@ interface AccountProviderDescriptionSerializersType : SerializersType<AccountPro
     stream: OutputStream,
     document: AccountProviderDescriptionMetadata
   ): AccountProviderDescriptionSerializerType
-
 }

@@ -48,13 +48,14 @@ class AccountProviderSourceStandardDescription(
   private val stringResources: AccountProviderResolutionStringsType,
   private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val http: HTTPType,
-  override val metadata: AccountProviderDescriptionMetadata) : AccountProviderDescriptionType {
+  override val metadata: AccountProviderDescriptionMetadata
+) : AccountProviderDescriptionType {
 
   private val logger =
     LoggerFactory.getLogger(AccountProviderSourceStandardDescription::class.java)
 
-  override fun resolve(onProgress: AccountProviderResolutionListenerType)
-    : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+  override fun resolve(onProgress: AccountProviderResolutionListenerType):
+    TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
     val taskRecorder =
       TaskRecorder.create<AccountProviderResolutionErrorDetails>()
 
@@ -188,7 +189,8 @@ class AccountProviderSourceStandardDescription(
   }
 
   private fun extractAuthenticationDescriptionBasic(
-    authObject: AuthenticationObject): AccountProviderAuthenticationDescription.Basic {
+    authObject: AuthenticationObject
+  ): AccountProviderAuthenticationDescription.Basic {
 
     val loginRestrictions =
       authObject.inputs[LABEL_LOGIN]
@@ -206,7 +208,8 @@ class AccountProviderSourceStandardDescription(
 
   private fun extractAuthenticationDescriptionCOPPA(
     taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>,
-    authObject: AuthenticationObject): AccountProviderAuthenticationDescription.COPPAAgeGate {
+    authObject: AuthenticationObject
+  ): AccountProviderAuthenticationDescription.COPPAAgeGate {
     val under13 = authObject.links.find { link ->
       link.relation == "http://librarysimplified.org/terms/rel/authentication/restriction-not-met"
     }?.hrefURI

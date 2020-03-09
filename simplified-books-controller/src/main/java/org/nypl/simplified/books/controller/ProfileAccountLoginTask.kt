@@ -15,10 +15,20 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.*
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMNotSupported
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMTooManyActivations
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginMissingInformation
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOKType
@@ -54,12 +64,14 @@ class ProfileAccountLoginTask(
   private val loginStrings: AccountLoginStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType,
-  initialCredentials: AccountAuthenticationCredentials) : Callable<TaskResult<AccountLoginErrorData, Unit>> {
+  initialCredentials: AccountAuthenticationCredentials
+) : Callable<TaskResult<AccountLoginErrorData, Unit>> {
 
   init {
     Preconditions.checkState(
       this.profile.accounts().containsKey(this.account.id),
-      "Profile must contain the given account")
+      "Profile must contain the given account"
+    )
   }
 
   @Volatile
@@ -79,13 +91,13 @@ class ProfileAccountLoginTask(
     this.run()
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.debug("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.error("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun warn(message: String, vararg arguments: Any?) =
-    this.logger.warn("[{}][{}] ${message}", this.profile.id.uuid, this.account.id, *arguments)
+    this.logger.warn("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun run(): TaskResult<AccountLoginErrorData, Unit> {
     return try {
@@ -109,7 +121,8 @@ class ProfileAccountLoginTask(
       this.steps.currentStepFailedAppending(
         message = this.loginStrings.loginUnexpectedException,
         errorValue = AccountLoginUnexpectedException(this.loginStrings.loginUnexpectedException, e),
-        exception = e)
+        exception = e
+      )
 
       val failure = this.steps.finishFailure<Unit>()
       this.account.setLoginState(AccountLoginFailed(failure))
@@ -137,7 +150,8 @@ class ProfileAccountLoginTask(
         AdobeVendorID(adobeDRM.vendor),
         AccountAuthenticationAdobeClientToken.create(adobeDRM.clientToken),
         deviceManagerURI,
-        null)
+        null
+      )
 
     val newCredentials =
       this.credentials.toBuilder()
@@ -152,7 +166,9 @@ class ProfileAccountLoginTask(
         this.loginStrings.loginDeviceDRMNotSupported,
         AccountLoginDRMNotSupported(
           message = this.loginStrings.loginDeviceDRMNotSupported,
-          system = "Adobe ACS"))
+          system = "Adobe ACS"
+        )
+      )
       throw DRMUnsupportedException("Adobe ACS")
     }
 
@@ -162,7 +178,8 @@ class ProfileAccountLoginTask(
         error = { message -> this.error("{}", message) },
         debug = { message -> this.debug("{}", message) },
         vendorID = adobePreCredentials.vendorID,
-        clientToken = adobePreCredentials.clientToken)
+        clientToken = adobePreCredentials.clientToken
+      )
 
     try {
       val postCredentials =
@@ -170,7 +187,8 @@ class ProfileAccountLoginTask(
 
       Preconditions.checkState(
         postCredentials.isNotEmpty(),
-        "Must have returned at least one activation")
+        "Must have returned at least one activation"
+      )
 
       val newPostCredentials =
         this.credentials.toBuilder()
@@ -202,19 +220,22 @@ class ProfileAccountLoginTask(
         this.steps.currentStepFailed(
           text,
           AccountLoginDRMTooManyActivations(text),
-          ex)
+          ex
+        )
       }
       is AdobeDRMExtensions.AdobeDRMLoginConnectorException -> {
         this.steps.currentStepFailed(
           text,
           AccountLoginDRMFailure(text, ex.errorCode),
-          ex)
+          ex
+        )
       }
       else -> {
         this.steps.currentStepFailed(
           text,
           AccountLoginUnexpectedException(text, ex),
-          ex)
+          ex
+        )
       }
     }
   }
@@ -226,10 +247,12 @@ class ProfileAccountLoginTask(
 
     Preconditions.checkState(
       this.credentials.adobeCredentials().isSome,
-      "Adobe credentials must be present")
+      "Adobe credentials must be present"
+    )
     Preconditions.checkState(
       this.credentials.adobePostActivationCredentials().isSome,
-      "Adobe post-activation credentials must be present")
+      "Adobe post-activation credentials must be present"
+    )
 
     val adobePreCredentials =
       (this.credentials.adobeCredentials() as Some<AccountAuthenticationAdobePreActivationCredentials>).get()
@@ -252,7 +275,8 @@ class ProfileAccountLoginTask(
       Option.some(httpAuthentication),
       deviceManagerURI,
       textBytes,
-      "vnd.librarysimplified/drm-device-id-list")
+      "vnd.librarysimplified/drm-device-id-list"
+    )
 
     this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivationPostDeviceManagerDone)
   }
@@ -279,7 +303,8 @@ class ProfileAccountLoginTask(
     if (patronSettingsURI == null) {
       this.steps.currentStepFailed(
         this.loginStrings.loginPatronSettingsRequestNoURI,
-        AccountLoginMissingInformation(this.loginStrings.loginPatronSettingsRequestNoURI))
+        AccountLoginMissingInformation(this.loginStrings.loginPatronSettingsRequestNoURI)
+      )
       throw Exception()
     }
 
@@ -307,7 +332,8 @@ class ProfileAccountLoginTask(
 
   private fun onPatronProfileRequestOK(
     patronSettingsURI: URI,
-    result: HTTPResultOKType<InputStream>) {
+    result: HTTPResultOKType<InputStream>
+  ) {
     this.debug("requested patron profile successfully")
     return this.patronParsers.createParser(patronSettingsURI, result.value).use { parser ->
       when (val parseResult = parser.parse()) {
@@ -321,14 +347,16 @@ class ProfileAccountLoginTask(
           this.error("failed to parse patron profile")
           val message =
             this.loginStrings.loginPatronSettingsRequestParseFailed(
-              parseResult.errors.map(this::showParseError))
+              parseResult.errors.map(this::showParseError)
+            )
           this.steps.currentStepFailed(
             message = message,
             errorValue = AccountLoginServerParseError(
               message = message,
               warnings = parseResult.warnings,
               errors = parseResult.errors
-            ))
+            )
+          )
           throw Exception()
         }
       }
@@ -346,7 +374,8 @@ class ProfileAccountLoginTask(
       error.line,
       error.column,
       error.message,
-      error.exception)
+      error.exception
+    )
 
     return buildString {
       this.append(error.line)
@@ -372,7 +401,6 @@ class ProfileAccountLoginTask(
     return when (drm) {
       is PatronDRMAdobe -> this.onPatronProfileRequestHandleDRMAdobe(drm)
       else -> {
-
       }
     }
   }
@@ -382,20 +410,24 @@ class ProfileAccountLoginTask(
     this.adobeDRM = drm
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun onPatronProfileRequestHTTPException(
     patronSettingsURI: URI,
-    result: HTTPResultException<InputStream>) {
+    result: HTTPResultException<InputStream>
+  ) {
     val message = this.loginStrings.loginPatronSettingsConnectionFailed
     this.steps.currentStepFailed(
       message = message,
       errorValue = AccountLoginConnectionFailure(message),
-      exception = result.error)
+      exception = result.error
+    )
     throw result.error
   }
 
   private fun onPatronProfileRequestHTTPError(
     patronSettingsURI: URI,
-    result: HTTPResultError<InputStream>) {
+    result: HTTPResultError<InputStream>
+  ) {
     this.error("received http error: {}: {}: {}", patronSettingsURI, result.message, result.status)
 
     when (result.status) {
@@ -403,7 +435,8 @@ class ProfileAccountLoginTask(
         val message = this.loginStrings.loginPatronSettingsInvalidCredentials
         this.steps.currentStepFailed(
           message = message,
-          errorValue = AccountLoginCredentialsIncorrect(message))
+          errorValue = AccountLoginCredentialsIncorrect(message)
+        )
         throw Exception()
       }
       else -> {
@@ -415,7 +448,9 @@ class ProfileAccountLoginTask(
             uri = patronSettingsURI,
             statusCode = result.status,
             errorMessage = result.message,
-            problemReport = this.someOrNull(result.problemReport)))
+            problemReport = this.someOrNull(result.problemReport)
+          )
+        )
         throw Exception()
       }
     }
@@ -432,6 +467,7 @@ class ProfileAccountLoginTask(
       warning.line,
       warning.column,
       warning.message,
-      warning.exception)
+      warning.exception
+    )
   }
 }

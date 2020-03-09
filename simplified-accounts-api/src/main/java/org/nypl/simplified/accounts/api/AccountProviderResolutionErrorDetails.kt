@@ -39,8 +39,8 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
   data class AuthDocumentUnusableLink(
     override val message: String,
     override val accountProviderID: String,
-    override val accountProviderTitle: String)
-    : AccountProviderResolutionErrorDetails()
+    override val accountProviderTitle: String
+  ) : AccountProviderResolutionErrorDetails()
 
   /**
    * An HTTP request failed.
@@ -51,8 +51,8 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
     val errorCode: Int,
     override val problemReport: HTTPProblemReport?,
     override val accountProviderID: String,
-    override val accountProviderTitle: String)
-    : AccountProviderResolutionErrorDetails(), HTTPHasProblemReportType {
+    override val accountProviderTitle: String
+  ) : AccountProviderResolutionErrorDetails(), HTTPHasProblemReportType {
 
     override val attributes: Map<String, String>
       get() = Presentables.mergeProblemReportOptional(super.attributes.toMutableMap().apply {
@@ -69,8 +69,8 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
     override val message: String,
     override val exception: Throwable,
     override val accountProviderID: String,
-    override val accountProviderTitle: String)
-    : AccountProviderResolutionErrorDetails()
+    override val accountProviderTitle: String
+  ) : AccountProviderResolutionErrorDetails()
 
   /**
    * The authentication document was well-formed but was in some way unusable.
@@ -79,8 +79,8 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
   data class AuthDocumentUnusable(
     override val message: String,
     override val accountProviderID: String,
-    override val accountProviderTitle: String)
-    : AccountProviderResolutionErrorDetails()
+    override val accountProviderTitle: String
+  ) : AccountProviderResolutionErrorDetails()
 
   /**
    * The authentication document was invalid.
@@ -91,7 +91,6 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
     val errors: List<ParseError>,
     override val message: String,
     override val accountProviderID: String,
-    override val accountProviderTitle: String)
-    : AccountProviderResolutionErrorDetails()
-
+    override val accountProviderTitle: String
+  ) : AccountProviderResolutionErrorDetails()
 }

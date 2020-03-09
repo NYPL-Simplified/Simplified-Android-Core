@@ -2,24 +2,23 @@ package org.nypl.simplified.tests.books.reader.bookmarks
 
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
+import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.Bookmark
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 
 class NullReaderBookmarkService(
-  val events: ObservableType<ReaderBookmarkEvent>) : ReaderBookmarkServiceType {
+  val events: Observable<ReaderBookmarkEvent>
+) : ReaderBookmarkServiceType {
 
   override fun close() {
-
   }
 
-  override val bookmarkEvents: ObservableReadableType<ReaderBookmarkEvent>
+  override val bookmarkEvents: Observable<ReaderBookmarkEvent>
     get() = this.events
 
   override fun bookmarkCreate(accountID: AccountID, bookmark: Bookmark): FluentFuture<Unit> {
@@ -39,7 +38,8 @@ class NullReaderBookmarkService(
 
   companion object : ReaderBookmarkServiceProviderType {
     override fun createService(
-      requirements: ReaderBookmarkServiceProviderType.Requirements): ReaderBookmarkServiceType {
+      requirements: ReaderBookmarkServiceProviderType.Requirements
+    ): ReaderBookmarkServiceType {
       return NullReaderBookmarkService(requirements.events)
     }
   }

@@ -10,7 +10,8 @@ import org.nypl.simplified.books.api.BookmarkID
 
 data class ReaderBookmarkPolicyState(
   val accountState: Map<AccountID, ReaderBookmarkPolicyAccountState>,
-  val bookmarksByAccount: Map<AccountID, Map<BookmarkID, ReaderBookmarkState>>) {
+  val bookmarksByAccount: Map<AccountID, Map<BookmarkID, ReaderBookmarkState>>
+) {
 
   /**
    * The set of all bookmarks by bookmark ID. Note that this value is lossy; there may be
@@ -19,7 +20,7 @@ data class ReaderBookmarkPolicyState(
    * check if a bookmark exists or not.
    */
 
-  val bookmarksAll : Lazy<Map<BookmarkID, ReaderBookmarkState>> = lazy {
+  val bookmarksAll: Lazy<Map<BookmarkID, ReaderBookmarkState>> = lazy {
     this.bookmarksByAccount.values.fold(mapOf<BookmarkID, ReaderBookmarkState>()) {
       accumulated, current -> accumulated.plus(current)
     }
@@ -46,7 +47,8 @@ data class ReaderBookmarkPolicyState(
 
     fun create(
       initialAccounts: Set<ReaderBookmarkPolicyAccountState>,
-      locallySaved: Map<AccountID, Set<Bookmark>>): ReaderBookmarkPolicyState {
+      locallySaved: Map<AccountID, Set<Bookmark>>
+    ): ReaderBookmarkPolicyState {
 
       val states: Map<AccountID, Map<BookmarkID, ReaderBookmarkState>> =
         locallySaved.mapValues { savedEntry ->

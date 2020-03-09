@@ -12,15 +12,15 @@ sealed class AccountProviderRegistryEvent {
    * The status of the registry changed.
    */
 
-  object StatusChanged: AccountProviderRegistryEvent()
+  object StatusChanged : AccountProviderRegistryEvent()
 
   /**
    * An account provider was updated.
    */
 
   data class Updated(
-    val id: URI)
-    : AccountProviderRegistryEvent()
+    val id: URI
+  ) : AccountProviderRegistryEvent()
 
   /**
    * An account provider source failed.
@@ -28,7 +28,6 @@ sealed class AccountProviderRegistryEvent {
 
   data class SourceFailed(
     val clazz: Class<*>,
-    val exception: Exception)
-    : AccountProviderRegistryEvent()
-
+    val exception: Exception
+  ) : AccountProviderRegistryEvent()
 }

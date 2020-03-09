@@ -85,8 +85,8 @@ data class AccountProviderDescriptionMetadata(
     get() = this.links.find { link ->
       when (link) {
         is Link.LinkBasic ->
-          link.type == this.authenticationDocumentType
-            || link.relation == AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
+          link.type == this.authenticationDocumentType ||
+            link.relation == AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
         is Link.LinkTemplated -> false
       }
     }

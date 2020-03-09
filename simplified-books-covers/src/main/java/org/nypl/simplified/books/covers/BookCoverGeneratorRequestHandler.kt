@@ -16,7 +16,8 @@ import java.net.URI
  */
 
 class BookCoverGeneratorRequestHandler(
-  private val generator: BookCoverGeneratorType) : RequestHandler() {
+  private val generator: BookCoverGeneratorType
+) : RequestHandler() {
 
   override fun canHandleRequest(@Nullable requestNullable: Request): Boolean {
     val data = NullCheck.notNull(requestNullable)
@@ -27,7 +28,8 @@ class BookCoverGeneratorRequestHandler(
   @Throws(IOException::class)
   override fun load(
     @Nullable requestNullable: Request,
-    networkPolicy: Int): Result {
+    networkPolicy: Int
+  ): Result {
     try {
       val request = NullCheck.notNull(requestNullable)
       val bitmap = this.generator.generateImage(

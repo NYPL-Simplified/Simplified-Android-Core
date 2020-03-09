@@ -2,17 +2,19 @@ package org.nypl.simplified.accounts.registry
 
 import android.content.Context
 import com.google.common.base.Preconditions
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.*
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.StatusChanged
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.Updated
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.*
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.Idle
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.Refreshing
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableReadableType
-import org.nypl.simplified.observable.ObservableType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.Collections
@@ -26,13 +28,14 @@ import java.util.concurrent.ConcurrentHashMap
 class AccountProviderRegistry private constructor(
   private val context: Context,
   private val sources: List<AccountProviderSourceType>,
-  override val defaultProvider: AccountProviderType) : AccountProviderRegistryType {
+  override val defaultProvider: AccountProviderType
+) : AccountProviderRegistryType {
 
   @Volatile
   private var initialized = false
 
   @Volatile
-  private var statusRef : AccountProviderRegistryStatus = Idle
+  private var statusRef: AccountProviderRegistryStatus = Idle
 
   private val descriptions = ConcurrentHashMap<URI, AccountProviderDescriptionType>()
   private val descriptionsReadOnly = Collections.unmodifiableMap(this.descriptions)
@@ -42,10 +45,10 @@ class AccountProviderRegistry private constructor(
   private val logger =
     LoggerFactory.getLogger(AccountProviderRegistry::class.java)
 
-  private val eventsActual: ObservableType<AccountProviderRegistryEvent> =
-    Observable.create()
+  private val eventsActual: PublishSubject<AccountProviderRegistryEvent> =
+    PublishSubject.create()
 
-  override val events: ObservableReadableType<AccountProviderRegistryEvent> =
+  override val events: Observable<AccountProviderRegistryEvent> =
     this.eventsActual
 
   override val status: AccountProviderRegistryStatus
@@ -65,7 +68,7 @@ class AccountProviderRegistry private constructor(
     this.logger.debug("refreshing account provider descriptions")
 
     this.statusRef = Refreshing
-    this.eventsActual.send(StatusChanged)
+    this.eventsActual.onNext(StatusChanged)
 
     try {
       for (source in this.sources) {
@@ -78,17 +81,17 @@ class AccountProviderRegistry private constructor(
               }
             }
             is AccountProviderSourceType.SourceResult.SourceFailed -> {
-              this.eventsActual.send(SourceFailed(source.javaClass, result.exception))
+              this.eventsActual.onNext(SourceFailed(source.javaClass, result.exception))
             }
           }
         } catch (e: Exception) {
-          this.eventsActual.send(SourceFailed(source.javaClass, e))
+          this.eventsActual.onNext(SourceFailed(source.javaClass, e))
         }
       }
     } finally {
       this.initialized = true
       this.statusRef = Idle
-      this.eventsActual.send(StatusChanged)
+      this.eventsActual.onNext(StatusChanged)
     }
   }
 
@@ -106,14 +109,15 @@ class AccountProviderRegistry private constructor(
 
     this.logger.debug("received updated version of resolved provider {}", id)
     this.resolved[id] = accountProvider
-    this.eventsActual.send(Updated(id))
+    this.eventsActual.onNext(Updated(id))
 
     this.updateDescription(accountProvider.toDescription())
     return accountProvider
   }
 
   override fun updateDescription(
-    description: AccountProviderDescriptionType): AccountProviderDescriptionType {
+    description: AccountProviderDescriptionType
+  ): AccountProviderDescriptionType {
 
     val id = description.metadata.id
     val existing = this.descriptions[id]
@@ -128,7 +132,7 @@ class AccountProviderRegistry private constructor(
 
     this.logger.debug("received updated version of description {}", id)
     this.descriptions[id] = description
-    this.eventsActual.send(Updated(id))
+    this.eventsActual.onNext(Updated(id))
     return description
   }
 
@@ -156,8 +160,7 @@ class AccountProviderRegistry private constructor(
     fun createFrom(
       context: Context,
       sources: List<AccountProviderSourceType>,
-      defaultProvider: AccountProviderType): AccountProviderRegistry =
-      AccountProviderRegistry(context, sources, defaultProvider)
+      defaultProvider: AccountProviderType
+    ): AccountProviderRegistry = AccountProviderRegistry(context, sources, defaultProvider)
   }
 }
-

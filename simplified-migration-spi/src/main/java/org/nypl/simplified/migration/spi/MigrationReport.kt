@@ -30,4 +30,5 @@ data class MigrationReport(
    * The events that occurred, if any.
    */
 
-  val events: List<MigrationEvent>)
+  val events: List<MigrationEvent>
+)

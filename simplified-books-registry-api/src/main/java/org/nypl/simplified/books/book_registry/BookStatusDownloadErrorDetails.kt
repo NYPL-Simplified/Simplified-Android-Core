@@ -21,8 +21,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
     val status: Int,
     override val problemReport: HTTPProblemReport?,
     override val message: String,
-    val attributesInitial: Map<String, String>)
-    : BookStatusDownloadErrorDetails(), HTTPHasProblemReportType {
+    val attributesInitial: Map<String, String>
+  ) : BookStatusDownloadErrorDetails(), HTTPHasProblemReportType {
     override val attributes: Map<String, String>
       get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
   }
@@ -35,8 +35,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
     override val message: String,
     override val problemReport: HTTPProblemReport?,
     override val exception: Throwable?,
-    val attributesInitial: Map<String, String>)
-    : BookStatusDownloadErrorDetails(), HTTPHasProblemReportType {
+    val attributesInitial: Map<String, String>
+  ) : BookStatusDownloadErrorDetails(), HTTPHasProblemReportType {
     override val attributes: Map<String, String>
       get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
   }
@@ -47,8 +47,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
 
   data class FeedCorrupted(
     override val exception: Throwable,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails() {
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails() {
     override val message: String
       get() = this.exception.localizedMessage
   }
@@ -59,8 +59,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
 
   data class FeedUnusable(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   /**
    * A problem occurred with the book database.
@@ -68,8 +68,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
 
   data class BookDatabaseFailed(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   /**
    * An acquisition relation is not supported.
@@ -78,8 +78,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
   data class UnsupportedAcquisition(
     override val message: String,
     val type: OPDSAcquisition.Relation,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   /**
    * Errors related to DRM.
@@ -99,8 +99,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
 
     data class DRMUnsupportedSystem(
       override val system: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
 
     /**
      * A DRM system failed with an opaque error code.
@@ -109,8 +109,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
     data class DRMFailure(
       override val system: String,
       val errorCode: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
 
     /**
      * A DRM system returned a content type that cannot be supported.
@@ -119,8 +119,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
     data class DRMUnsupportedContentType(
       override val system: String,
       val contentType: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
 
     /**
      * A device is not active and therefore can't be used for DRM operations.
@@ -128,8 +128,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
 
     data class DRMDeviceNotActive(
       override val system: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
 
     /**
      * An ACSM file was unparseable.
@@ -137,8 +137,8 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
 
     data class DRMUnparseableACSM(
       override val system: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
 
     /**
      * An ACSM file was unreadable.
@@ -146,49 +146,54 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
 
     data class DRMUnreadableACSM(
       override val system: String,
-      override val message: String)
-      : DRMError()
+      override val message: String
+    ) : DRMError()
   }
 
   data class UnusableAcquisitions(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   data class WrongAvailability(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   data class TimedOut(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   data class UnsupportedType(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   data class UnparseableBearerToken(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   data class BundledCopyFailed(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
+
+  data class ContentCopyFailed(
+    override val message: String,
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   data class DownloadCancelled(
     override val message: String,
-    override val attributes: Map<String, String>)
-    : BookStatusDownloadErrorDetails()
+    override val attributes: Map<String, String>
+  ) : BookStatusDownloadErrorDetails()
 
   data class UnexpectedException(
     override val exception: Throwable,
-    override val attributes: Map<String, String> = mapOf())
-    : BookStatusDownloadErrorDetails() {
+    override val attributes: Map<String, String> = mapOf()
+  ) : BookStatusDownloadErrorDetails() {
     override val message: String
       get() = this.exception.localizedMessage
   }

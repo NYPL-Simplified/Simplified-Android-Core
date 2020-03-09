@@ -1,4 +1,4 @@
 [*.kt]
-# possible values: number (e.g. 2), "unset" (makes ktlint ignore indentation completely)
 indent_size=2
-disabled_rules=no-unit-return,import-ordering
+insert_final_newline=true
+disabled_rules=import-ordering

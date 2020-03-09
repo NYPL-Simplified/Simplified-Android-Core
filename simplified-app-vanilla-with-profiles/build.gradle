@@ -1,21 +1,18 @@
 def versionValues() {
-  def propsFile = file("version.properties")
-  def Properties props = new Properties()
-  def name
-  def code
-  if (propsFile.canRead()) {
-    props.load(new FileInputStream(propsFile))
-    name = props["versionName"]
-    code = props["versionCode"].toInteger()
-  } else {
-    throw new FileNotFoundException("Could not read version.properties!")
+  def props = new Properties()
+  file("version.properties").withInputStream { props.load(it) }
+
+  // Load properties
+  def versionName = props.getProperty("versionName")
+  def versionCode = props.getProperty("versionCode").toInteger()
+
+  // Increment version using the build number, if on Travis CI
+  def buildNumber = (System.getenv('TRAVIS_BUILD_NUMBER') ?: "0").toInteger()
+  if (buildNumber > 0) {
+    logger.info("Incrementing version code: $versionCode + $buildNumber = ${versionCode + buildNumber}")
+    versionCode += buildNumber
   }
-
-  props["versionCode"] = (code + 1).toString()
-  props.save(new FileOutputStream(propsFile), "")
-
-  logger.info("incrementing build version ${code} -> ${code + 1}")
-  return new Tuple(name, code)
+  return new Tuple(versionName, versionCode)
 }
 
 android {
@@ -55,11 +52,9 @@ android {
 }
 
 dependencies {
-  implementation project(":simplified-app-shared")
+  implementation project(":simplified-main")
+  implementation project(":simplified-accounts-source-filebased")
   implementation project(":simplified-accounts-source-nyplregistry")
 
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXLegacySupport
-
-  annotationProcessor libraries.googleAutoValue
+  annotationProcessor libraries.autoValueProcessor
 }

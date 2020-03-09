@@ -19,8 +19,8 @@ class AccountProviderDescriptionRegistryTest : AccountProviderDescriptionRegistr
 
   override fun createRegistry(
     defaultProvider: AccountProviderType,
-    sources: List<AccountProviderSourceType>): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
+    sources: List<AccountProviderSourceType>
+  ): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType {
     return AccountProviderRegistry.createFrom(this.context, sources, defaultProvider)
   }
-
 }

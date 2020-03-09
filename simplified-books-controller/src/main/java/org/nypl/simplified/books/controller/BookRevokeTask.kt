@@ -12,6 +12,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -19,7 +20,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.Cancelled
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError
@@ -30,9 +31,6 @@ import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NoCr
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NotRevocable
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.TimedOut
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.UnexpectedException
-import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
-import org.nypl.simplified.books.book_registry.BookStatusRevoked
-import org.nypl.simplified.books.book_registry.BookStatusType
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionBadFeed
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionDeviceNotActivated
@@ -74,27 +72,26 @@ class BookRevokeTask(
   private val feedLoader: FeedLoaderType,
   private val revokeStrings: BookRevokeStringResourcesType,
   private val revokeACSTimeoutDuration: Duration = Duration.standardMinutes(1L),
-  private val revokeServerTimeoutDuration: Duration = Duration.standardMinutes(3L))
-  : Callable<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
-
-  private val adobeACS = "Adobe ACS"
+  private val revokeServerTimeoutDuration: Duration = Duration.standardMinutes(3L)
+) : Callable<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
 
   private lateinit var databaseEntry: BookDatabaseEntryType
-  private var databaseEntryInitialized: Boolean = false
 
+  private val adobeACS = "Adobe ACS"
   private val logger = LoggerFactory.getLogger(BookRevokeTask::class.java)
   private val steps = TaskRecorder.create<BookStatusRevokeErrorDetails>()
+  private var databaseEntryInitialized: Boolean = false
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}] ${message}", this.bookID.brief(), *arguments)
+    this.logger.debug("[{}] $message", this.bookID.brief(), *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}] ${message}", this.bookID.brief(), *arguments)
+    this.logger.error("[{}] $message", this.bookID.brief(), *arguments)
 
   private fun warn(message: String, vararg arguments: Any?) =
-    this.logger.warn("[{}] ${message}", this.bookID.brief(), *arguments)
+    this.logger.warn("[{}] $message", this.bookID.brief(), *arguments)
 
-  private fun publishBookStatus(status: BookStatusType) {
+  private fun publishBookStatus(status: BookStatus) {
     val book =
       if (this.databaseEntryInitialized) {
         this.databaseEntry.book
@@ -125,16 +122,15 @@ class BookRevokeTask(
           listOf())
       }
 
-    this.bookRegistry.update(BookWithStatus.create(book, status))
+    this.bookRegistry.update(BookWithStatus(book, status))
   }
 
   private fun publishRequestingRevokeStatus() {
-    this.publishBookStatus(BookStatusRequestingRevoke(this.bookID, this.steps.currentStep()!!.description))
+    this.publishBookStatus(BookStatus.RequestingRevoke(this.bookID))
   }
 
   private fun publishRevokedStatus() {
-    this.publishBookStatus(BookStatusRevoked(this.bookID))
-
+    this.publishBookStatus(BookStatus.Revoked(this.bookID))
   }
 
   override fun call(): TaskResult<BookStatusRevokeErrorDetails, Unit> {
@@ -142,6 +138,7 @@ class BookRevokeTask(
       this.steps.beginNewStep(this.revokeStrings.revokeStarted)
       this.debug("revoke")
 
+      this.publishRequestingRevokeStatus()
       this.setupBookDatabaseEntry()
       this.revokeFormatHandle()
       this.revokeNotifyServer()
@@ -156,7 +153,7 @@ class BookRevokeTask(
         this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e)
 
       val failure = this.steps.finishFailure<Unit>()
-      this.publishBookStatus(BookStatusRevokeFailed(this.bookID, failure))
+      this.publishBookStatus(BookStatus.FailedRevoke(this.bookID, failure))
       failure
     } finally {
       this.debug("finished")
@@ -248,7 +245,8 @@ class BookRevokeTask(
 
   private fun revokeNotifyServerURI(
     targetURI: URI,
-    revokeType: RevokeType) {
+    revokeType: RevokeType
+  ) {
     this.debug("notifying server of {} revocation via {}", revokeType, targetURI)
     this.steps.beginNewStep(this.revokeStrings.revokeServerNotifyURI(targetURI))
     this.publishRequestingRevokeStatus()
@@ -429,7 +427,8 @@ class BookRevokeTask(
 
   private fun revokeFormatHandleEPUBAdobe(
     handle: BookDatabaseEntryFormatHandleEPUB,
-    adobeRights: AdobeAdeptLoan) {
+    adobeRights: AdobeAdeptLoan
+  ) {
     this.debug("revoking Adobe ACS loan")
     this.steps.beginNewStep(this.revokeStrings.revokeACSLoan)
     this.publishRequestingRevokeStatus()
@@ -469,7 +468,8 @@ class BookRevokeTask(
 
   private fun revokeFormatHandleEPUBAdobeExecute(
     adobeDRM: AdobeAdeptExecutorType,
-    adobeRights: AdobeAdeptLoan) {
+    adobeRights: AdobeAdeptLoan
+  ) {
 
     val credentials =
       this.revokeFormatHandleEPUBAdobeWithConnectorGetCredentials()
@@ -582,6 +582,7 @@ class BookRevokeTask(
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun revokeFormatHandleAudioBook(handle: BookDatabaseEntryFormatHandleAudioBook) {
     this.debug("revoking via AudioBook format handle")
     this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("AudioBook"))
@@ -590,6 +591,7 @@ class BookRevokeTask(
     this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun revokeFormatHandlePDF(handle: BookDatabaseEntryFormatHandlePDF) {
     this.debug("revoking via PDF format handle")
     this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("PDF"))

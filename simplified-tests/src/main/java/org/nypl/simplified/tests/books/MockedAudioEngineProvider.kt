@@ -39,6 +39,5 @@ class MockedAudioEngineProvider : PlayerAudioEngineProviderType {
   companion object {
 
     var onNextRequest: ((PlayerAudioEngineRequest) -> PlayerAudioBookProviderType?)? = null
-
   }
 }

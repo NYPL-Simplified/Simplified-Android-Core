@@ -13,13 +13,13 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 class ErrorPageActivity : AppCompatActivity(), ErrorPageListenerType {
 
   override fun onErrorPageSendReport(parameters: ErrorPageParameters<*>) {
-
   }
 
   private lateinit var errorFragment: ErrorPageFragment
 
   data class ExampleError(
-    override val message: String) : PresentableErrorType
+    override val message: String
+  ) : PresentableErrorType
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -68,5 +68,4 @@ class ErrorPageActivity : AppCompatActivity(), ErrorPageListenerType {
       .replace(R.id.errorHolder, this.errorFragment, "ERROR_MAIN")
       .commit()
   }
-
 }

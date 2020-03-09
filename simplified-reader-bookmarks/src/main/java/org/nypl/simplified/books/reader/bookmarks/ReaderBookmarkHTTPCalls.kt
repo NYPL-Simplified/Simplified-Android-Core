@@ -22,13 +22,15 @@ import java.net.URI
 
 class ReaderBookmarkHTTPCalls(
   private val objectMapper: ObjectMapper,
-  private val http: HTTPType) : org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType {
+  private val http: HTTPType
+) : org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType {
 
   private val logger = LoggerFactory.getLogger(ReaderBookmarkHTTPCalls::class.java)
 
   override fun bookmarksGet(
     annotationsURI: URI,
-    credentials: AccountAuthenticationCredentials): List<BookmarkAnnotation> {
+    credentials: AccountAuthenticationCredentials
+  ): List<BookmarkAnnotation> {
 
     val auth =
       createAuthenticatedHTTP(credentials)
@@ -43,7 +45,8 @@ class ReaderBookmarkHTTPCalls(
 
   override fun bookmarkDelete(
     bookmarkURI: URI,
-    credentials: AccountAuthenticationCredentials) {
+    credentials: AccountAuthenticationCredentials
+  ) {
 
     val auth =
       createAuthenticatedHTTP(credentials)
@@ -59,7 +62,8 @@ class ReaderBookmarkHTTPCalls(
   override fun bookmarkAdd(
     annotationsURI: URI,
     credentials: AccountAuthenticationCredentials,
-    bookmark: BookmarkAnnotation) {
+    bookmark: BookmarkAnnotation
+  ) {
 
     val data =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationToBytes(this.objectMapper, bookmark)
@@ -77,7 +81,8 @@ class ReaderBookmarkHTTPCalls(
   override fun syncingEnable(
     settingsURI: URI,
     credentials: AccountAuthenticationCredentials,
-    enabled: Boolean) {
+    enabled: Boolean
+  ) {
 
     val data =
       serializeSynchronizeEnableData(enabled)
@@ -94,7 +99,8 @@ class ReaderBookmarkHTTPCalls(
 
   override fun syncingIsEnabled(
     settingsURI: URI,
-    credentials: AccountAuthenticationCredentials): Boolean {
+    credentials: AccountAuthenticationCredentials
+  ): Boolean {
 
     val auth =
       createAuthenticatedHTTP(credentials)
@@ -110,7 +116,7 @@ class ReaderBookmarkHTTPCalls(
   private fun <T> logAndFail(uri: URI, error: HTTPResultError<InputStream>): T {
     HTTPProblemReportLogging.logError(
       this.logger, uri, error.message, error.status, error.problemReport)
-    throw IOException("${uri} received ${error.status} ${error.message}")
+    throw IOException("$uri received ${error.status} ${error.message}")
   }
 
   private fun deserializeBookmarksFromStream(value: InputStream): List<BookmarkAnnotation> {
@@ -133,7 +139,7 @@ class ReaderBookmarkHTTPCalls(
     val settings = JSONParserUtilities.getObject(node, "settings")
 
     return if (settings.has("simplified:synchronize_annotations")) {
-      val text : String? = settings.get("simplified:synchronize_annotations").asText()
+      val text: String? = settings.get("simplified:synchronize_annotations").asText()
       text == "true"
     } else {
       false
@@ -145,7 +151,6 @@ class ReaderBookmarkHTTPCalls(
     settingsNode.put("simplified:synchronize_annotations", enabled)
     val node = this.objectMapper.createObjectNode()
     node.put("settings", settingsNode)
-    val data = this.objectMapper.writeValueAsBytes(node)
-    return data
+    return this.objectMapper.writeValueAsBytes(node)
   }
 }

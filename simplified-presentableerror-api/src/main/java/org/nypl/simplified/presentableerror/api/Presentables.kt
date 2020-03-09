@@ -64,7 +64,7 @@ object Presentables {
     }
 
     for (i in 0..100) {
-      val incKey = "${key} ($i)"
+      val incKey = "$key ($i)"
       if (!attributes.containsKey(incKey)) {
         attributes[incKey] = value
         return

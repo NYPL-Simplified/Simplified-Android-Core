@@ -22,7 +22,8 @@ interface BookDatabaseFactoryType {
     parser: OPDSJSONParserType,
     serializer: OPDSJSONSerializerType,
     owner: AccountID,
-    directory: File): BookDatabaseType
+    directory: File
+  ): BookDatabaseType
 
   /**
    * Open a database, creating a new one if the database does not exist.
@@ -32,5 +33,6 @@ interface BookDatabaseFactoryType {
   fun openDatabase(
     context: Context,
     owner: AccountID,
-    directory: File): BookDatabaseType
+    directory: File
+  ): BookDatabaseType
 }

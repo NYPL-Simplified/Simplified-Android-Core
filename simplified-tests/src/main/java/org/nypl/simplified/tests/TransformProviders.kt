@@ -143,4 +143,3 @@ class Entry {
   @JvmField
   val updated: String = "2019-07-08T19:17:00+00:00"
 }
-

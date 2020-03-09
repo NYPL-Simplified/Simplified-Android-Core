@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <Preference
+    android:key="settingsAccounts"
+    android:title="@string/settingsAccounts"
+    android:summary="@string/settingsAccountsSummary" />
+
+  <PreferenceCategory android:title="@string/settingsDocumentation">
+    <Preference
+      android:key="settingsAcknowledgements"
+      android:title="@string/settingsAcknowledgements"
+      android:summary="@string/settingsAcknowledgementsSummary" />
+
+    <Preference
+      android:key="settingsAbout"
+      android:title="@string/settingsAbout"
+      android:summary="@string/settingsAboutSummary" />
+
+    <Preference
+      android:key="settingsEULA"
+      android:title="@string/settingsEULA"
+      android:summary="@string/settingsEULASummary" />
+
+    <Preference
+      android:key="settingsFaq"
+      android:title="@string/settingsFaq"
+      android:summary="@string/settingsFaqSummary" />
+
+    <Preference
+      android:key="settingsLicense"
+      android:title="@string/settingsLicense"
+      android:summary="@string/settingsLicenseSummary" />
+  </PreferenceCategory>
+
+  <PreferenceCategory android:title="@string/settingsInfo">
+    <Preference
+      android:key="settingsVersion"
+      android:title="@string/settingsVersion"
+      android:summary="@string/settingsVersionSummary"
+      tools:summary="4.3.1 (5001)" />
+  </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

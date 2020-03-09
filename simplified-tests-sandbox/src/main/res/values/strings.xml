@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+  <string name="html"><![CDATA[
+<p>
+Lorem ipsum dolor sit amet, consectetur <i>adipiscing</i> elit. Curabitur
+ultrices risus orci, nec rhoncus eros hendrerit sed. Curabitur
+sagittis tellus vitae gravida pharetra. Vivamus condimentum tellus
+orci, <u>venenatis</u> malesuada lacus cursus in. Maecenas et nunc a
+tortor convallis accumsan sed quis nunc. Cras commodo, diam lacinia
+porta luctus, lectus neque varius nisi, id ultrices urna lorem et
+ipsum. Nunc in massa leo. Nullam pharetra massa felis, at malesuada
+libero aliquet ut. Fusce tincidunt lectus a orci dapibus, lobortis
+consequat eros porta.
+</p>
+<p>
+Aenean suscipit tellus sit amet <b>volutpat</b> viverra. Duis fringilla
+porta cursus. Donec arcu mauris, dictum id mi ut, elementum semper
+diam. Mauris vitae venenatis libero. Proin nulla nisl, sagittis semper
+posuere vel, eleifend ac eros. Sed vitae dolor placerat, tincidunt
+elit aliquam, posuere nisi. Suspendisse potenti. Etiam facilisis a mi
+quis fermentum. Nam facilisis nisi congue, viverra neque volutpat,
+commodo orci. Mauris in ante mi. Aenean scelerisque id ligula id
+lacinia. Phasellus sed libero non ipsum porta mollis. Maecenas aliquam
+aliquet erat vel interdum. Nam ut ultrices mauris.
+</p>
+<p>
+Nunc luctus semper vehicula. Proin luctus iaculis enim eget
+tristique. Nulla congue suscipit imperdiet. Phasellus vitae dui
+ut lacus dictum dapibus vel in dui. Vestibulum tempor sagittis
+aliquet. Pellentesque suscipit libero lacus, quis sagittis dui semper
+a. Ut vitae nisl velit.
+</p>
+]]>
+  </string>
+</resources>

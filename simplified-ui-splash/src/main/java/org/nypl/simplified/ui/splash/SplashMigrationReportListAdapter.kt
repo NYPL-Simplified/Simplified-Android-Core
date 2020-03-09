@@ -8,15 +8,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.migration.spi.MigrationEvent
-import org.nypl.simplified.ui.splash.R
 
 /**
  * A recycler view adapter for migration reports.
  */
 
 class SplashMigrationReportListAdapter(
-  private val events: List<MigrationEvent>)
-  : RecyclerView.Adapter<SplashMigrationReportListAdapter.ViewHolder>() {
+  private val events: List<MigrationEvent>
+) :
+  RecyclerView.Adapter<SplashMigrationReportListAdapter.ViewHolder>() {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
     val inflater =

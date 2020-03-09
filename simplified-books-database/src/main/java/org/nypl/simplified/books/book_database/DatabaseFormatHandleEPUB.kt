@@ -24,8 +24,8 @@ import java.nio.ByteBuffer
  */
 
 internal class DatabaseFormatHandleEPUB internal constructor(
-  private val parameters: DatabaseFormatHandleParameters)
-  : BookDatabaseEntryFormatHandleEPUB() {
+  private val parameters: DatabaseFormatHandleParameters
+) : BookDatabaseEntryFormatHandleEPUB() {
 
   private val fileAdobeRightsTmp: File =
     File(this.parameters.directory, "epub-rights_adobe.xml.tmp")
@@ -174,7 +174,8 @@ internal class DatabaseFormatHandleEPUB internal constructor(
       fileAdobeMeta: File,
       fileBook: File,
       fileBookmarks: File,
-      fileLastRead: File): org.nypl.simplified.books.api.BookFormat.BookFormatEPUB {
+      fileLastRead: File
+    ): org.nypl.simplified.books.api.BookFormat.BookFormatEPUB {
       return org.nypl.simplified.books.api.BookFormat.BookFormatEPUB(
         adobeRightsFile = if (fileAdobeRights.isFile) fileAdobeRights else null,
         adobeRights = loadAdobeRightsInformationIfPresent(fileAdobeRights, fileAdobeMeta),
@@ -205,7 +206,8 @@ internal class DatabaseFormatHandleEPUB internal constructor(
 
     @Throws(IOException::class)
     private fun loadLastReadLocationIfPresent(
-      fileLastRead: File): Bookmark? {
+      fileLastRead: File
+    ): Bookmark? {
       return if (fileLastRead.isFile) {
         loadLastReadLocation(fileLastRead)
       } else {
@@ -223,7 +225,8 @@ internal class DatabaseFormatHandleEPUB internal constructor(
     @Throws(IOException::class)
     private fun loadAdobeRightsInformationIfPresent(
       fileAdobeRights: File,
-      fileAdobeMeta: File): AdobeAdeptLoan? {
+      fileAdobeMeta: File
+    ): AdobeAdeptLoan? {
       return if (fileAdobeRights.isFile) {
         loadAdobeRightsInformation(fileAdobeRights, fileAdobeMeta)
       } else {
@@ -234,7 +237,8 @@ internal class DatabaseFormatHandleEPUB internal constructor(
     @Throws(IOException::class)
     private fun loadAdobeRightsInformation(
       fileAdobeRights: File,
-      fileAdobeMeta: File): AdobeAdeptLoan? {
+      fileAdobeMeta: File
+    ): AdobeAdeptLoan? {
       val serialized = FileUtilities.fileReadBytes(fileAdobeRights)
       val jn = objectMapper.readTree(fileAdobeMeta)
       val o = JSONParserUtilities.checkObject(null, jn)

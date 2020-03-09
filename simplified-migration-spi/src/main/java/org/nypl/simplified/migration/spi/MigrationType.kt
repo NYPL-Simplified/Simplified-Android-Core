@@ -1,6 +1,6 @@
 package org.nypl.simplified.migration.spi
 
-import org.nypl.simplified.observable.ObservableReadableType
+import io.reactivex.Observable
 
 /**
  * A migration from one version of the app to another.
@@ -12,7 +12,7 @@ interface MigrationType {
    * Events published my the migration.
    */
 
-  val events: ObservableReadableType<MigrationEvent>
+  val events: Observable<MigrationEvent>
 
   /**
    * @return `true` if the migration detects that it needs to run
@@ -27,5 +27,4 @@ interface MigrationType {
    */
 
   fun run(): MigrationReport
-
 }

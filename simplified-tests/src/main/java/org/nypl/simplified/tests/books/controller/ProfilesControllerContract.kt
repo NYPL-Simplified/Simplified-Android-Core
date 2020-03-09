@@ -1,9 +1,11 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import org.joda.time.LocalDate
+import io.reactivex.subjects.PublishSubject
+import org.joda.time.DateTime
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -12,25 +14,34 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
+import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
+import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
+import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
+import org.nypl.simplified.clock.Clock
+import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
+import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
+import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabases
@@ -40,8 +51,11 @@ import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationSucc
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
-import org.nypl.simplified.profiles.api.ProfilePreferencesChanged
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.api.ReaderColorScheme
@@ -49,17 +63,19 @@ import org.nypl.simplified.reader.api.ReaderFontSelection
 import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.MockAnalytics
+import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
+import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
+import org.nypl.simplified.tests.http.MockingHTTP
 import org.nypl.simplified.tests.strings.MockAccountCreationStringResources
 import org.nypl.simplified.tests.strings.MockAccountDeletionStringResources
 import org.nypl.simplified.tests.strings.MockAccountLoginStringResources
 import org.nypl.simplified.tests.strings.MockAccountLogoutStringResources
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockAnalytics
+import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.strings.MockBorrowStringResources
 import org.nypl.simplified.tests.strings.MockRevokeStringResources
-import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
-import org.nypl.simplified.tests.http.MockingHTTP
-import org.nypl.simplified.tests.strings.MockAccountProviderResolutionStrings
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -75,11 +91,12 @@ abstract class ProfilesControllerContract {
   @Rule
   var expected = ExpectedException.none()
 
-  private lateinit var accountEvents: ObservableType<AccountEvent>
+  private lateinit var accountEvents: PublishSubject<AccountEvent>
   private lateinit var accountEventsReceived: MutableList<AccountEvent>
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var cacheDirectory: File
+  private lateinit var contentResolver: ContentResolver
   private lateinit var credentialsStore: FakeAccountCredentialStorage
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
@@ -90,9 +107,9 @@ abstract class ProfilesControllerContract {
   private lateinit var executorTimer: ExecutorService
   private lateinit var http: MockingHTTP
   private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
-  private lateinit var profileEvents: ObservableType<ProfileEvent>
+  private lateinit var profileEvents: PublishSubject<ProfileEvent>
   private lateinit var profileEventsReceived: MutableList<ProfileEvent>
-  private lateinit var readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>
+  private lateinit var readerBookmarkEvents: PublishSubject<ReaderBookmarkEvent>
 
   protected abstract val logger: Logger
 
@@ -112,6 +129,8 @@ abstract class ProfilesControllerContract {
     MockAccountDeletionStringResources()
   private val profileAccountCreationStringResources =
     MockAccountCreationStringResources()
+  private val analyticsLogger =
+    MockAnalytics()
 
   private fun controller(
     profiles: ProfilesDatabaseType,
@@ -132,39 +151,61 @@ abstract class ProfilesControllerContract {
         bookRegistry = this.bookRegistry,
         bundledContent = bundledContent,
         exec = this.executorFeeds,
+        contentResolver = this.contentResolver,
         parser = parser,
         searchParser = OPDSSearchParser.newParser(),
-        transport = transport)
+        transport = transport
+      )
 
-    val analyticsLogger =
-      MockAnalytics()
+    val services = MutableServiceDirectory()
+    services.putService(
+      AnalyticsType::class.java, analyticsLogger)
+    services.putService(
+      AccountLoginStringResourcesType::class.java, this.accountLoginStringResources)
+    services.putService(
+      AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources)
+    services.putService(
+      AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings)
+    services.putService(
+      AccountProviderRegistryType::class.java, accountProviders)
+    services.putService(
+      AuthenticationDocumentParsersType::class.java, this.authDocumentParsers)
+    services.putService(
+      BookRegistryType::class.java, this.bookRegistry)
+    services.putService(
+      BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources)
+    services.putService(
+      BundledContentResolverType::class.java, bundledContent)
+    services.putService(
+      DownloaderType::class.java, downloader)
+    services.putService(
+      FeedLoaderType::class.java, feedLoader)
+    services.putService(
+      OPDSFeedParserType::class.java, parser)
+    services.putService(
+      HTTPType::class.java, http)
+    services.putService(
+      PatronUserProfileParsersType::class.java, patronUserProfileParsers)
+    services.putService(
+      ProfileAccountCreationStringResourcesType::class.java, profileAccountCreationStringResources)
+    services.putService(
+      ProfileAccountDeletionStringResourcesType::class.java, profileAccountDeletionStringResources)
+    services.putService(
+      ProfilesDatabaseType::class.java, profiles)
+    services.putService(
+      BookRevokeStringResourcesType::class.java, bookRevokeStringResources)
+    services.putService(
+      ProfileIdleTimerType::class.java, InoperableIdleTimer())
+    services.putService(
+      ClockType::class.java, Clock)
 
-    return Controller.create(
-      accountEvents = this.accountEvents,
-      accountLoginStringResources = this.accountLoginStringResources,
-      accountLogoutStringResources = this.accountLogoutStringResources,
-      accountProviderResolutionStrings = this.accountProviderResolutionStrings,
-      accountProviders = accountProviders,
-      adobeDrm = null,
-      analytics = analyticsLogger,
-      authDocumentParsers = this.authDocumentParsers,
-      bookBorrowStrings = this.bookBorrowStringResources,
-      bookRegistry = this.bookRegistry,
-      bundledContent = bundledContent,
-      cacheDirectory = this.cacheDirectory,
-      downloader = this.downloader,
-      exec = this.executorBooks,
-      feedLoader = feedLoader,
-      feedParser = parser,
-      http = this.http,
-      patronUserProfileParsers = this.patronUserProfileParsers,
-      profileAccountCreationStringResources = this.profileAccountCreationStringResources,
-      profileAccountDeletionStringResources = this.profileAccountDeletionStringResources,
-      profileEvents = this.profileEvents,
-      profiles = profiles,
-      readerBookmarkEvents = this.readerBookmarkEvents,
-      revokeStrings = this.bookRevokeStringResources,
-      timerExecutor = this.executorTimer
+    return Controller.createFromServiceDirectory(
+      services = services,
+      contentResolver = this.contentResolver,
+      executorService = this.executorBooks,
+      accountEvents = accountEvents,
+      profileEvents = profileEvents,
+      cacheDirectory = this.cacheDirectory
     )
   }
 
@@ -180,14 +221,15 @@ abstract class ProfilesControllerContract {
     this.executorTimer = Executors.newCachedThreadPool()
     this.directoryDownloads = DirectoryUtilities.directoryCreateTemporary()
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
-    this.profileEvents = Observable.create<ProfileEvent>()
+    this.profileEvents = PublishSubject.create<ProfileEvent>()
     this.profileEventsReceived = Collections.synchronizedList(ArrayList())
-    this.accountEvents = Observable.create<AccountEvent>()
+    this.accountEvents = PublishSubject.create<AccountEvent>()
     this.accountEventsReceived = Collections.synchronizedList(ArrayList())
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
-    this.readerBookmarkEvents = Observable.create()
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
+    this.readerBookmarkEvents = PublishSubject.create()
     this.bookRegistry = BookRegistry.create()
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.patronUserProfileParsers = Mockito.mock(PatronUserProfileParsersType::class.java)
@@ -250,7 +292,7 @@ abstract class ProfilesControllerContract {
     val accountProvider =
       MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
 
-    controller.profileCreate(accountProvider, "Kermit", "Female", LocalDate.now()).get()
+    controller.profileCreate(accountProvider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
@@ -282,7 +324,7 @@ abstract class ProfilesControllerContract {
 
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
 
-    val date = LocalDate.now()
+    val date = DateTime.now()
 
     val accountProvider =
       MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
@@ -318,36 +360,34 @@ abstract class ProfilesControllerContract {
 
     val provider =
       MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
-    controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
+    controller.profileCreate(provider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(provider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
-    controller.profilePreferencesUpdate(profiles.currentProfileUnsafe().preferences()).get()
+    controller.profileUpdate { description -> description }.get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
-      Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences())
+    EventAssertions.isTypeAndMatches(ProfileUpdated.Succeeded::class.java, this.profileEventsReceived, 0) { e ->
+      Assert.assertTrue("Preferences must not have changed", e.oldDescription == e.newDescription)
     }
 
     this.profileEventsReceived.clear()
-    controller.profilePreferencesUpdate(
-      profiles.currentProfileUnsafe()
-        .preferences()
-        .toBuilder()
-        .setReaderPreferences(
-          ReaderPreferences.builder()
-            .setBrightness(0.2)
-            .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
-            .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
-            .setFontScale(2.0)
-            .build())
-        .build())
-      .get()
+    controller.profileUpdate { description ->
+      description.copy(preferences =
+      description.preferences.copy(
+        readerPreferences = ReaderPreferences.builder()
+          .setBrightness(0.2)
+          .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
+          .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
+          .setFontScale(2.0)
+          .build()
+      ))
+    }.get()
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
-      Assert.assertTrue("Preferences must have changed", e.changedReaderPreferences())
+    EventAssertions.isTypeAndMatches(ProfileUpdated.Succeeded::class.java, this.profileEventsReceived, 0) { e ->
+      Assert.assertTrue("Preferences must have changed", e.oldDescription != e.newDescription)
     }
   }
 
@@ -372,7 +412,7 @@ abstract class ProfilesControllerContract {
 
     val provider =
       MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
-    controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
+    controller.profileCreate(provider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(provider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
@@ -393,6 +433,7 @@ abstract class ProfilesControllerContract {
   private fun profilesDatabaseWithoutAnonymous(dir_profiles: File): ProfilesDatabaseType {
     return ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
+      this.analyticsLogger,
       this.accountEvents,
       MockAccountProviders.fakeAccountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
@@ -403,7 +444,8 @@ abstract class ProfilesControllerContract {
 
   private fun onAccountResolution(
     id: URI,
-    message: String) {
+    message: String
+  ) {
     this.logger.debug("resolution: {}: {}", id, message)
   }
 }

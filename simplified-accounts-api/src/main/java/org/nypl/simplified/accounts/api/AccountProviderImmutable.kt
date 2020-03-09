@@ -38,6 +38,45 @@ data class AccountProviderImmutable(
   override val updated: DateTime
 ) : AccountProviderType {
 
+  companion object {
+
+    /**
+     * Make an immutable copy of the given account provider. If the other account provider
+     * is already immutable, it will be returned directly.
+     */
+
+    fun copy(other: AccountProviderType): AccountProviderImmutable {
+      if (other is AccountProviderImmutable) {
+        return other
+      }
+
+      return AccountProviderImmutable(
+        addAutomatically = other.addAutomatically,
+        annotationsURI = other.annotationsURI,
+        authentication = other.authentication,
+        authenticationDocumentURI = other.authenticationDocumentURI,
+        cardCreatorURI = other.cardCreatorURI,
+        catalogURI = other.catalogURI,
+        displayName = other.displayName,
+        eula = other.eula,
+        id = other.id,
+        idNumeric = other.idNumeric,
+        isProduction = other.isProduction,
+        license = other.license,
+        loansURI = other.loansURI,
+        logo = other.logo,
+        mainColor = other.mainColor,
+        patronSettingsURI = other.patronSettingsURI,
+        privacyPolicy = other.privacyPolicy,
+        subtitle = other.subtitle,
+        supportEmail = other.supportEmail,
+        supportsReservations = other.supportsReservations,
+        supportsSimplyESynchronization = other.supportsSimplyESynchronization,
+        updated = other.updated
+      )
+    }
+  }
+
   override fun toDescription(): AccountProviderDescriptionType {
     val imageLinks = mutableListOf<Link>()
     this.logo?.let { uri ->
@@ -53,22 +92,22 @@ data class AccountProviderImmutable(
     this.annotationsURI?.let { uri ->
       addLink(links, uri, "http://www.w3.org/ns/oa#annotationService")
     }
-    this.cardCreatorURI?.let {uri ->
+    this.cardCreatorURI?.let { uri ->
       addLink(links, uri, "register")
     }
-    this.eula?.let {uri ->
+    this.eula?.let { uri ->
       addLink(links, uri, "terms-of-service")
     }
-    this.license?.let {uri ->
+    this.license?.let { uri ->
       addLink(links, uri, "license")
     }
-    this.loansURI?.let {uri ->
+    this.loansURI?.let { uri ->
       addLink(links, uri, "http://opds-spec.org/shelf")
     }
-    this.patronSettingsURI?.let {uri ->
+    this.patronSettingsURI?.let { uri ->
       addLink(links, uri, "http://librarysimplified.org/terms/rel/user-profile")
     }
-    this.privacyPolicy?.let {uri ->
+    this.privacyPolicy?.let { uri ->
       addLink(links, uri, "privacy-policy")
     }
 
@@ -85,8 +124,8 @@ data class AccountProviderImmutable(
     return object : AccountProviderDescriptionType {
       override val metadata: AccountProviderDescriptionMetadata = meta
 
-      override fun resolve(onProgress: AccountProviderResolutionListenerType)
-        : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+      override fun resolve(onProgress: AccountProviderResolutionListenerType):
+        TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
         onProgress.invoke(this.metadata.id, "")
 
         val taskRecorder =

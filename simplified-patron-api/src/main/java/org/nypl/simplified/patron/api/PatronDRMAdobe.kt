@@ -12,5 +12,5 @@ data class PatronDRMAdobe(
   override val vendor: String,
   override val scheme: URI,
   val clientToken: String,
-  val deviceManagerURI: URI?)
-  : PatronDRM()
+  val deviceManagerURI: URI?
+) : PatronDRM()

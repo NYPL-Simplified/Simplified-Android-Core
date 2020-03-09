@@ -1,6 +1,6 @@
-10 PRINT
-========
+org.librarysimplified.tenprint
+===
 
-The `simplified-tenprint` package provides an Android implementation
-of the [10 PRINT](https://github.com/mgiraldo/tenprintcover-p5) algorithm.
-
+The `org.librarysimplified.tenprint` module provides an implementation
+of the 10PRINT algorithm. This is used to generate attractive book
+cover images for books that do not otherwise provide images.

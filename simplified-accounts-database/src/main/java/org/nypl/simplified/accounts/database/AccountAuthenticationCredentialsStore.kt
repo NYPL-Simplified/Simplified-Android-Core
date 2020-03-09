@@ -15,8 +15,8 @@ import java.io.File
 class AccountAuthenticationCredentialsStore(
   private val file: File,
   private val fileTemp: File,
-  initialCredentials: Map<AccountID, AccountAuthenticationCredentials>)
-  : AccountAuthenticationCredentialsStoreType {
+  initialCredentials: Map<AccountID, AccountAuthenticationCredentials>
+) : AccountAuthenticationCredentialsStoreType {
 
   companion object {
 
@@ -26,7 +26,8 @@ class AccountAuthenticationCredentialsStore(
 
     fun open(
       file: File,
-      fileTemp: File): AccountAuthenticationCredentialsStoreType {
+      fileTemp: File
+    ): AccountAuthenticationCredentialsStoreType {
 
       val initialCredentials =
         if (file.isFile) {
@@ -71,7 +72,8 @@ class AccountAuthenticationCredentialsStore(
 
   override fun put(
     account: AccountID,
-    credentials: AccountAuthenticationCredentials) {
+    credentials: AccountAuthenticationCredentials
+  ) {
 
     synchronized(this.storeLock) {
       this.store = this.store.plus(Pair(account, credentials))

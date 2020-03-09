@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.ContentResolver
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
@@ -43,9 +44,10 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.*
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.*
-import org.nypl.simplified.books.book_registry.BookStatusType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.DRMDeviceNotActive
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.DRMFailure
+import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NoCredentialsAvailable
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
 import org.nypl.simplified.downloader.core.DownloaderHTTP
@@ -89,6 +91,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
   protected abstract val logger: Logger
 
+  private lateinit var contentResolver: ContentResolver
   private lateinit var adobeExecutor: AdobeAdeptExecutorType
   private lateinit var adobeConnector: AdobeAdeptConnectorType
   private lateinit var executorFeeds: ListeningExecutorService
@@ -123,6 +126,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
@@ -140,8 +144,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     this.executorTimer.shutdown()
   }
 
-
-
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
     val entryParser =
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
@@ -158,7 +160,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
       searchParser = searchParser,
       transport = transport,
       bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent)
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver
+    )
   }
 
   /**
@@ -248,7 +252,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(1))
@@ -339,7 +343,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(1))
@@ -467,7 +471,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatusType>(), this.bookRegistry.book(bookId))
+    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(1))
@@ -839,7 +843,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     result as TaskResult.Failure
 
     Assert.assertEquals(
-      DRMFailure(system =  "Adobe ACS", errorCode =  "E_DEFECTIVE", message = "revokeBookACSConnectorFailed"),
+      DRMFailure(system = "Adobe ACS", errorCode = "E_DEFECTIVE", message = "revokeBookACSConnectorFailed"),
       result.errors().last())
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
@@ -1193,7 +1197,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }
 
-  private fun logBookEventsFor(bookId: BookID?) {
+  private fun logBookEventsFor(bookId: BookID) {
     this.bookRegistry.bookEvents().subscribe {
       this.bookRegistry.bookStatus(bookId).map_ { status ->
         this.logger.debug("status: {}", status)
@@ -1201,7 +1205,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     }
   }
 
-  private fun resource(file: String): InputStream {
+  private fun resource(file: String): InputStream? {
     return BookRevokeTaskAdobeDRMContract::class.java.getResourceAsStream(file)
   }
 
@@ -1209,7 +1213,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
   private fun resourceSize(file: String): Long {
     var total = 0L
     val buffer = ByteArray(8192)
-    this.resource(file).use { stream ->
+    this.resource(file)?.use { stream ->
       while (true) {
         val r = stream.read(buffer)
         if (r <= 0) {

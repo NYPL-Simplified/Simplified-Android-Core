@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#------------------------------------------------------------------------
+# Utility methods
+
 fatal()
 {
   echo "fatal: $1" 1>&2
@@ -15,18 +18,27 @@ info()
   echo "info: $1" 1>&2
 }
 
+#------------------------------------------------------------------------
+# Check for required environment vars
+
 if [ -z "${NYPL_GITHUB_ACCESS_TOKEN}" ]
 then
   fatal "NYPL_GITHUB_ACCESS_TOKEN is not defined"
 fi
 
+if [ -z "${NYPL_SIGNING_KEY_PASSWORD}" ]
+then
+  echo "error: NYPL_SIGNING_KEY_PASSWORD is not defined" 1>&2
+  exit 1
+fi
+
+if [ -z "${NYPL_SIGNING_STORE_PASSWORD}" ]
+then
+  echo "error: NYPL_SIGNING_STORE_PASSWORD is not defined" 1>&2
+  exit 1
+fi
+
 mkdir -p .travis || fatal "could not create .travis"
-
-WORKING_DIRECTORY=$(pwd) || fatal "could not save working directory"
-
-info "dumping environment"
-export ANDROID_SDK_ROOT="${ANDROID_HOME}"
-env | sort -u
 
 #------------------------------------------------------------------------
 # Clone credentials repos
@@ -40,15 +52,10 @@ git clone \
   >> .travis/pre.txt 2>&1 \
   || fatal "could not clone credentials"
 
-info "installing certificate"
-
-cp -v .travis/credentials/SimplyE/Android/ReaderClientCert.sig \
-  simplified-app-simplye/src/main/assets/ReaderClientCert.sig
-
-info "installing bugsnag configuration"
-
-cp -v .travis/credentials/SimplyE/Android/bugsnag.conf \
-  simplified-app-simplye/src/main/assets/bugsnag.conf
+#info "installing certificate"
+#
+#cp -v .travis/credentials/SimplyE/Android/ReaderClientCert.sig \
+#  simplified-app-simplye/src/main/assets/ReaderClientCert.sig
 
 info "installing keystore"
 
@@ -56,64 +63,3 @@ cp -v ".travis/credentials/APK Signing/nypl-keystore.jks" \
   simplified-app-vanilla/keystore.jks
 cp -v ".travis/credentials/APK Signing/nypl-keystore.jks" \
   simplified-app-vanilla-with-profiles/keystore.jks
-
-#------------------------------------------------------------------------
-# Clone binaries repos
-
-info "cloning binaries"
-
-git clone \
-  --depth 1 \
-  --single-branch \
-  --branch develop \
-  "https://${NYPL_GITHUB_ACCESS_TOKEN}@github.com/NYPL-Simplified/android-binaries" \
-  ".travis/binaries" \
-  >> .travis/pre.txt 2>&1 \
-  || fatal "could not clone binaries"
-
-./.travis-git-props.sh > "${WORKING_DIRECTORY}/.travis/build.properties" ||
-  fatal "could not save build properties"
-./.travis-git-message.sh > "${WORKING_DIRECTORY}/.travis/commit-message.txt" ||
-  fatal "could not save commit message"
-
-#------------------------------------------------------------------------
-# Download avdmanager
-
-info "downloading avdmanager"
-
-SDKMANAGER="/usr/local/android-sdk/tools/bin/sdkmanager"
-
-yes | "${SDKMANAGER}" tools \
-  >> .travis/pre.txt 2>&1 \
-  || fatal "could not download avdmanager"
-
-info "avdmanager: $(which avdmanager)"
-
-COMPONENTS="
-build-tools;28.0.3
-platform-tools
-platforms;android-28
-tools
-"
-
-for COMPONENT in ${COMPONENTS}
-do
-  info "downloading ${COMPONENT}"
-
-  yes | "${SDKMANAGER}" "${COMPONENT}" \
-    >> .travis/pre.txt 2>&1 \
-    || fatal "could not download emulator"
-done
-
-info "updating all"
-
-yes | "${SDKMANAGER}" --update \
-  >> .travis/pre.txt 2>&1 \
-  || fatal "could not update platform"
-
-info "agreeing to licenses"
-
-yes | "${SDKMANAGER}" --licenses \
-  >> .travis/pre.txt 2>&1 \
-  || fatal "could not agree to licenses"
-

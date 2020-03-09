@@ -13,8 +13,8 @@ sealed class AccountDeleteErrorDetails : PresentableErrorType {
    */
 
   data class AccountCannotDeleteLastAccount(
-    override val message: String)
-    : AccountDeleteErrorDetails()
+    override val message: String
+  ) : AccountDeleteErrorDetails()
 
   /**
    * An unexpected exception occurred.
@@ -22,7 +22,6 @@ sealed class AccountDeleteErrorDetails : PresentableErrorType {
 
   data class AccountUnexpectedException(
     override val message: String,
-    override val exception: Throwable)
-    : AccountDeleteErrorDetails()
-
+    override val exception: Throwable
+  ) : AccountDeleteErrorDetails()
 }

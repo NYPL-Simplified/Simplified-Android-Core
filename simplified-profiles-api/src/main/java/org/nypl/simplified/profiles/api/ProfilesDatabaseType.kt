@@ -77,7 +77,7 @@ interface ProfilesDatabaseType {
    * Create a profile using the given account provider and display name.
    *
    * @param accountProvider The account provider for the default account
-   * @param displayName     The display name
+   * @param displayName The display name
    * @return A newly created profile
    * @throws ProfileDatabaseException On profile creation errors
    */
@@ -85,7 +85,8 @@ interface ProfilesDatabaseType {
   @Throws(ProfileDatabaseException::class)
   fun createProfile(
     accountProvider: AccountProviderType,
-    displayName: String): ProfileType
+    displayName: String
+  ): ProfileType
 
   /**
    * Find the profile with the given display name, if any.
@@ -101,7 +102,7 @@ interface ProfilesDatabaseType {
    * forbidden if the anonymous profile is enabled.
    *
    * @param profile The profile ID
-   * @throws ProfileNonexistentException      If no profile exists with the given ID
+   * @throws ProfileNonexistentException If no profile exists with the given ID
    * @throws ProfileAnonymousEnabledException If the anonymous profile is enabled
    * @see .anonymousProfileEnabled
    */

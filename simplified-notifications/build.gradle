@@ -1,6 +1,5 @@
 dependencies {
   api project(":simplified-books-registry-api")
-  api project(":simplified-observable")
   api project(":simplified-profiles-api")
   api project(":simplified-threads")
 

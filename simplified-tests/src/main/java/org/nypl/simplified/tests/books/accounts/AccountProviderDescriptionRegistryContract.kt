@@ -36,7 +36,8 @@ abstract class AccountProviderDescriptionRegistryContract {
 
   protected abstract fun createRegistry(
     defaultProvider: AccountProviderType,
-    sources: List<AccountProviderSourceType>): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+    sources: List<AccountProviderSourceType>
+  ): org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 
   @JvmField
   @Rule
@@ -399,8 +400,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMeta0
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType)
-          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+        override fun resolve(onProgress: AccountProviderResolutionListenerType):
+          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
           return fail()
         }
       }
@@ -435,8 +436,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMeta1
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType)
-          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+        override fun resolve(onProgress: AccountProviderResolutionListenerType):
+          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
           return fail()
         }
       }
@@ -455,8 +456,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMeta2
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType)
-          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+        override fun resolve(onProgress: AccountProviderResolutionListenerType):
+          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
           return fail()
         }
       }
@@ -475,8 +476,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld0
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType)
-          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+        override fun resolve(onProgress: AccountProviderResolutionListenerType):
+          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
           return fail()
         }
       }
@@ -495,8 +496,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld1
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType)
-          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+        override fun resolve(onProgress: AccountProviderResolutionListenerType):
+          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
           return fail()
         }
       }
@@ -515,8 +516,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       object : AccountProviderDescriptionType {
         override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld2
 
-        override fun resolve(onProgress: AccountProviderResolutionListenerType)
-          : TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+        override fun resolve(onProgress: AccountProviderResolutionListenerType):
+          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
           return fail()
         }
       }

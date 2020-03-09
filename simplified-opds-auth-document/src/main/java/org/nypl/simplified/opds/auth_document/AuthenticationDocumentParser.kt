@@ -227,7 +227,6 @@ internal class AuthenticationDocumentParser(
         }
       } catch (e: Exception) {
         this.publishErrorForException(e)
-        null
       }
     }
     return values.toMap()
@@ -238,14 +237,15 @@ internal class AuthenticationDocumentParser(
     root: ObjectNode?
   ): AuthenticationObjectNYPLInput? {
     return try {
-       AuthenticationObjectNYPLInput(
+      AuthenticationObjectNYPLInput(
         fieldName = fieldName,
         keyboardType =
         JSONParserUtilities.getStringOrNull(root, "keyboard")?.toUpperCase(),
         maximumLength =
         JSONParserUtilities.getIntegerDefault(root, "maximum_length", 0),
         barcodeFormat =
-        JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase())
+        JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase()
+      )
     } catch (e: Exception) {
       this.publishErrorForException(e)
       null
@@ -259,7 +259,6 @@ internal class AuthenticationDocumentParser(
         values[key.toUpperCase()] = JSONParserUtilities.getString(root, key)
       } catch (e: Exception) {
         this.publishErrorForException(e)
-        null
       }
     }
     return values.toMap()

@@ -12,7 +12,8 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Eve
 data class ReaderBookmarkPolicyEvaluation<T>(
   val result: T,
   val newState: ReaderBookmarkPolicyState,
-  val outputs: List<ReaderBookmarkPolicyOutput>)
+  val outputs: List<ReaderBookmarkPolicyOutput>
+)
 
 /**
  * A bookmark policy.
@@ -22,13 +23,15 @@ data class ReaderBookmarkPolicyEvaluation<T>(
  */
 
 data class ReaderBookmarkPolicy<T>(
-  val f: (ReaderBookmarkPolicyState) -> ReaderBookmarkPolicyEvaluation<T>) {
+  val f: (ReaderBookmarkPolicyState) -> ReaderBookmarkPolicyEvaluation<T>
+) {
 
   companion object {
 
     fun <A> evaluatePolicy(
       m: ReaderBookmarkPolicy<A>,
-      x: ReaderBookmarkPolicyState): ReaderBookmarkPolicyEvaluation<A> {
+      x: ReaderBookmarkPolicyState
+    ): ReaderBookmarkPolicyEvaluation<A> {
       return m.f.invoke(x)
     }
 
@@ -115,13 +118,15 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     fun getBookmarksState(
-      account: AccountID): ReaderBookmarkPolicy<Map<BookmarkID, ReaderBookmarkState>> {
+      account: AccountID
+    ): ReaderBookmarkPolicy<Map<BookmarkID, ReaderBookmarkState>> {
       return getState().map { state -> state.bookmarksByAccount[account] ?: mapOf() }
     }
 
     fun getBookmarkState(
       account: AccountID,
-      id: BookmarkID): ReaderBookmarkPolicy<ReaderBookmarkState?> {
+      id: BookmarkID
+    ): ReaderBookmarkPolicy<ReaderBookmarkState?> {
       return getBookmarksState(account).map { bookmarks -> bookmarks[id] }
     }
 
@@ -173,13 +178,15 @@ data class ReaderBookmarkPolicy<T>(
 
     private fun remoteDeleteBookmark(
       accountID: AccountID,
-      bookmark: ReaderBookmarkState): ReaderBookmarkPolicy<Unit> {
+      bookmark: ReaderBookmarkState
+    ): ReaderBookmarkPolicy<Unit> {
       return emitOutput(RemotelyDeleteBookmark(accountID, bookmark.bookmark))
     }
 
     private fun remoteDeleteBookmarkIfPossible(
       accountID: AccountID,
-      bookmark: ReaderBookmarkState): ReaderBookmarkPolicy<Unit> {
+      bookmark: ReaderBookmarkState
+    ): ReaderBookmarkPolicy<Unit> {
       return getAccountState(accountID)
         .andThen { account ->
           if (account != null && account.canSync) {
@@ -191,7 +198,8 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun remoteSendAllUnsentBookmarksIfPossible(
-      account: AccountID): ReaderBookmarkPolicy<Unit> {
+      account: AccountID
+    ): ReaderBookmarkPolicy<Unit> {
       return getAccountState(account)
         .andThen { accountState ->
           if (accountState != null && accountState.canSync) {
@@ -205,7 +213,8 @@ data class ReaderBookmarkPolicy<T>(
 
     private fun remoteSendAllUnsentBookmarks(
       accountID: AccountID,
-      bookmarksState: Map<BookmarkID, ReaderBookmarkState>): ReaderBookmarkPolicy<Unit> {
+      bookmarksState: Map<BookmarkID, ReaderBookmarkState>
+    ): ReaderBookmarkPolicy<Unit> {
       return sequenceDiscarding(bookmarksThatRequireSyncingInAccount(accountID, bookmarksState)
         .map { bookmark -> emitOutput(RemotelySendBookmark(accountID, bookmark.bookmark)) })
     }
@@ -228,14 +237,16 @@ data class ReaderBookmarkPolicy<T>(
 
     private fun remoteSyncAll(
       account: AccountID,
-      bookmarks: Map<BookmarkID, ReaderBookmarkState>): ReaderBookmarkPolicy<Unit> {
+      bookmarks: Map<BookmarkID, ReaderBookmarkState>
+    ): ReaderBookmarkPolicy<Unit> {
       return remoteSendAllUnsentBookmarks(account, bookmarks)
         .andThen { remoteFetchAllBookmarks(account) }
     }
 
     private fun bookmarksThatRequireSyncingInAccount(
       account: AccountID,
-      bookmarks: Map<BookmarkID, ReaderBookmarkState>): List<ReaderBookmarkState> {
+      bookmarks: Map<BookmarkID, ReaderBookmarkState>
+    ): List<ReaderBookmarkState> {
       return bookmarks.filterValues { bookmark -> bookmarkRequiresSyncing(account, bookmark) }
         .values
         .toList()
@@ -243,7 +254,8 @@ data class ReaderBookmarkPolicy<T>(
 
     private fun bookmarkRequiresSyncing(
       account: AccountID,
-      bookmark: ReaderBookmarkState): Boolean {
+      bookmark: ReaderBookmarkState
+    ): Boolean {
 
       return if (bookmark.account == account) {
         when (bookmark.remoteState) {
@@ -282,7 +294,8 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun onEventBookmarkLocalCreated(
-      event: Event.Local.BookmarkCreated): ReaderBookmarkPolicy<Unit> {
+      event: Event.Local.BookmarkCreated
+    ): ReaderBookmarkPolicy<Unit> {
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
@@ -333,7 +346,8 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun onEventBookmarkLocalDeleted(
-      event: Event.Local.BookmarkDeleteRequested): ReaderBookmarkPolicy<Unit> {
+      event: Event.Local.BookmarkDeleteRequested
+    ): ReaderBookmarkPolicy<Unit> {
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
@@ -373,7 +387,8 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun onEventBookmarkRemoteReceived(
-      event: Event.Remote.BookmarkReceived): ReaderBookmarkPolicy<Unit> {
+      event: Event.Remote.BookmarkReceived
+    ): ReaderBookmarkPolicy<Unit> {
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
@@ -431,7 +446,8 @@ data class ReaderBookmarkPolicy<T>(
     }
 
     private fun onEventBookmarkRemoteSaved(
-      event: Event.Remote.BookmarkSaved): ReaderBookmarkPolicy<Unit> {
+      event: Event.Remote.BookmarkSaved
+    ): ReaderBookmarkPolicy<Unit> {
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
 

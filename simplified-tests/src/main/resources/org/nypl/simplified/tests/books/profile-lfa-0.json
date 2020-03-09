@@ -1,0 +1,16 @@
+{
+  "display_name" : "Eggbert",
+  "preferences" : {
+    "gender" : "male",
+    "role" : "developer",
+    "date-of-birth" : "1970-09-23",
+    "reader-preferences" : {
+      "font_scale" : 100.0,
+      "font_family" : "READER_FONT_SANS_SERIF",
+      "color_scheme" : "SCHEME_BLACK_ON_WHITE"
+    },
+    "reader-bookmarks" : {
+      "locations-by-book-id" : { }
+    }
+  }
+}

@@ -2,6 +2,8 @@ Library Simplified
 ===
 
 [![Build Status](https://img.shields.io/travis/com/NYPL-Simplified/android?style=flat-square)](https://www.travis-ci.com/NYPL-Simplified/android)
+[![Maven Central](https://img.shields.io/maven-central/v/org.librarysimplified/org.librarysimplified.app.vanilla?style=flat-square)](https://repo2.maven.org/maven2/org/librarysimplified/)
+[![Maven Central (snapshot)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.librarysimplified/org.librarysimplified.app.vanilla.svg?style=flat-square)](https://oss.sonatype.org/content/repositories/snapshots/org.librarysimplified/)
 
 The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android client.
 
@@ -88,18 +90,6 @@ org.librarysimplified.nexus.password=PASSWORD
 org.librarysimplified.nexus.depend=true
 ~~~
 
-#### Bugsnag Support
-
-The core application provides support for error reporting via [Bugsnag](https://www.bugsnag.com/).
-This requires that a configuration file be placed at `src/main/assets/bugsnag.conf` containing
-your Bugsnag API token:
-
-~~~
-bugsnag.api_token = 1234123412341234
-~~~
-
-If you do not provide this configuration file, Bugsnag support will be disabled at run-time.
-
 #### APK signing
 
 If you wish to generate a signed APK for publishing the Vanilla application, you will need to copy
@@ -131,15 +121,6 @@ The project, as a whole, roughly follows an [MVC](https://en.wikipedia.org/wiki/
 architecture distributed over the application modules. The _controller_ in the application is
 task-based and executes all tasks on a background thread to avoid any possibility of blocking
 the Android UI thread.
-
-The following diagram provides a rough diagram of the application components:
-
-![outline](./src/site/resources/outline.png?raw=true)
-
-At the top of the diagram, the `app-shared` module contains all of the _view_ aspects of the
-architecture and typically has strong dependencies on the Android APIs. The _controller_ and
-_model_ sections are pure platform-independent Java/Kotlin code and try to avoid having any
-dependencies on the Android APIs, allowing for easy unit testing.
 
 #### API vs SPI
 
@@ -223,10 +204,9 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.accounts.source.nyplregistry](simplified-accounts-source-nyplregistry)|NYPL registry client implementation|
 |[org.librarysimplified.accounts.source.resolution](simplified-accounts-source-resolution)|Standard account provider resolution logic|
 |[org.librarysimplified.accounts.source.spi](simplified-accounts-source-spi)|Account provider source SPI|
+|[org.librarysimplified.adobe.extensions](simplified-adobe-extensions)|Adobe DRM convenience functions|
 |[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
-|[org.librarysimplified.analytics.lfa](simplified-analytics-lfa)|LibraryForAll analytics implementation|
-|[org.librarysimplified.app.shared](simplified-app-shared)|Shared application module|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.app.vanilla.with_profiles](simplified-app-vanilla-with-profiles)|Vanilla application [with profiles enabled]|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
@@ -238,8 +218,9 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.books.database.api](simplified-books-database-api)|Book database API|
 |[org.librarysimplified.books.registry.api](simplified-books-registry-api)|Book registry API|
 |[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
-|[org.librarysimplified.bugsnag](simplified-bugsnag)|Bugsnag functionality|
+|[org.librarysimplified.buildconfig.api](simplified-buildconfig-api)|Build-time configuration API|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
+|[org.librarysimplified.clock](simplified-clock)|Clock API|
 |[org.librarysimplified.documents](simplified-documents)|Documents API|
 |[org.librarysimplified.downloader.core](simplified-downloader-core)|Downloader|
 |[org.librarysimplified.feeds.api](simplified-feeds-api)|Feed API|
@@ -249,13 +230,15 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
 |[org.librarysimplified.links](simplified-links)|Link types|
 |[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|
+|[org.librarysimplified.main](simplified-main)|Main application module|
 |[org.librarysimplified.migration.api](simplified-migration-api)|Data migration API|
 |[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
 |[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
 |[org.librarysimplified.migration.spi](simplified-migration-spi)|Data migration SPI|
 |[org.librarysimplified.mime](simplified-mime)|MIME type handling|
+|[org.librarysimplified.networkconnectivity](simplified-networkconnectivity)|Network connectivity|
+|[org.librarysimplified.networkconnectivity.api](simplified-networkconnectivity-api)|Network connectivity API|
 |[org.librarysimplified.notifications](simplified-notifications)|Notification service|
-|[org.librarysimplified.observable](simplified-observable)|Lightweight, type-safe Observable implementation|
 |[org.librarysimplified.opds.auth_document](simplified-opds-auth-document)|OPDS authentication document parser implementation|
 |[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
 |[org.librarysimplified.opds.core](simplified-opds-core)|OPDS feed parser|
@@ -271,6 +254,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.reader.bookmarks](simplified-reader-bookmarks)|Reader bookmark service implementation|
 |[org.librarysimplified.reader.bookmarks.api](simplified-reader-bookmarks-api)|Reader bookmark service API|
 |[org.librarysimplified.reports](simplified-reports)|Error reporting|
+|[org.librarysimplified.services.api](simplified-services-api)|Application services API|
 |[org.librarysimplified.stack](simplified-stack)|Immutable stack data structure|
 |[org.librarysimplified.taskrecorder.api](simplified-taskrecorder-api)|Task recorder API|
 |[org.librarysimplified.tenprint](simplified-tenprint)|10PRINT implementation|
@@ -280,11 +264,25 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.tests.strings](simplified-tests-strings)|Mock strings for test suites|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
+|[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
 |[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
 |[org.librarysimplified.ui.datepicker.demo](simplified-ui-datepicker-demo)|Date picker UI component demo|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
+|[org.librarysimplified.ui.images](simplified-ui-images)|Image loader API for general image resources|
+|[org.librarysimplified.ui.navigation.api](simplified-ui-navigation-api)|Navigation API|
+|[org.librarysimplified.ui.tabs](simplified-ui-navigation-tabs)|Tabbed UI|
+|[org.librarysimplified.ui.profiles](simplified-ui-profiles)|Profiles UI|
+|[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
+|[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
 |[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
+|[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
+|[org.librarysimplified.ui.toolbar](simplified-ui-toolbar)|Sane toolbar handling|
+|[org.librarysimplified.viewer.api](simplified-viewer-api)|Viewer API|
+|[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|
+|[org.librarysimplified.viewer.epub.readium1](simplified-viewer-epub-readium1)|Readium 1 EPUB reader|
+|[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|
+|[org.librarysimplified.viewer.spi](simplified-viewer-spi)|Viewer SPI|
 
 _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
 

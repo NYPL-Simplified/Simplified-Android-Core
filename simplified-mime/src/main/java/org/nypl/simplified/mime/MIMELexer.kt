@@ -18,7 +18,8 @@ class MIMELexer private constructor(
   private var positionCurrent: Int = 0,
   private var positionStart: Int = 0,
   private val buffer: StringBuilder = java.lang.StringBuilder(64),
-  private var stateLexers: Deque<PartialLexerType> = LinkedList()) : MIMELexerType {
+  private var stateLexers: Deque<PartialLexerType> = LinkedList()
+) : MIMELexerType {
 
   override val position: Int
     get() = this.positionCurrent
@@ -44,7 +45,6 @@ class MIMELexer private constructor(
 
     @Throws(LexerException::class)
     fun handleCodePoint(code: Int?): MIMEToken?
-
   }
 
   private abstract class LexerException(message: String) : Exception(message)
@@ -277,6 +277,5 @@ class MIMELexer private constructor(
 
       return MIMELexer(codepoints = codepoints)
     }
-
   }
 }

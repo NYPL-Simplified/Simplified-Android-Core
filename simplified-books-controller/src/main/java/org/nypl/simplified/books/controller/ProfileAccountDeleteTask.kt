@@ -1,12 +1,13 @@
 package org.nypl.simplified.books.controller
 
+import io.reactivex.subjects.Subject
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
-import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails.*
+import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails.AccountCannotDeleteLastAccount
+import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails.AccountUnexpectedException
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException
-import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectSucceeded
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
@@ -19,25 +20,25 @@ import java.net.URI
 import java.util.concurrent.Callable
 
 class ProfileAccountDeleteTask(
-  private val accountEvents: ObservableType<AccountEvent>,
+  private val accountEvents: Subject<AccountEvent>,
   private val accountProviderID: URI,
   private val profiles: ProfilesDatabaseType,
-  private val profileEvents: ObservableType<ProfileEvent>,
-  private val strings: ProfileAccountDeletionStringResourcesType)
-  : Callable<TaskResult<AccountDeleteErrorDetails, Unit>> {
+  private val profileEvents: Subject<ProfileEvent>,
+  private val strings: ProfileAccountDeletionStringResourcesType
+) : Callable<TaskResult<AccountDeleteErrorDetails, Unit>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountDeleteTask::class.java)
   private val taskRecorder = TaskRecorder.create<AccountDeleteErrorDetails>()
 
   private fun publishFailureEvent(step: TaskStep<AccountDeleteErrorDetails>) =
-    this.accountEvents.send(AccountEventDeletion.AccountEventDeletionFailed(
+    this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionFailed(
       step.resolution.message, this.taskRecorder.finishFailure<Unit>()))
 
   private fun publishProgressEvent(step: TaskStep<AccountDeleteErrorDetails>) =
-    this.accountEvents.send(AccountEventDeletion.AccountEventDeletionInProgress(step.description))
+    this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionInProgress(step.description))
 
   private fun publishSuccessEvent(accountThen: AccountType) =
-    this.accountEvents.send(AccountEventDeletion.AccountEventDeletionSucceeded(
+    this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionSucceeded(
       strings.deletionSucceeded, accountThen.id))
 
   override fun call(): TaskResult<AccountDeleteErrorDetails, Unit> {
@@ -53,7 +54,7 @@ class ProfileAccountDeleteTask(
       val accountNow = profile.accountCurrent()
 
       if (accountNow.id != accountThen.id) {
-        this.profileEvents.send(ProfileAccountSelectSucceeded.of(accountThen.id, accountNow.id))
+        this.profileEvents.onNext(ProfileAccountSelectSucceeded.of(accountThen.id, accountNow.id))
       }
 
       this.publishSuccessEvent(accountThen)

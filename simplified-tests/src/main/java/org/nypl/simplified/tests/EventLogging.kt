@@ -1,15 +1,16 @@
 package org.nypl.simplified.tests
 
-import org.nypl.simplified.observable.Observable
-import org.nypl.simplified.observable.ObservableType
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import org.slf4j.Logger
 import java.util.concurrent.CountDownLatch
 
 class EventLogging<T>(
   val logger: Logger,
-  val events: ObservableType<T>,
+  val events: Subject<T>,
   val latch: CountDownLatch,
-  val eventLog: MutableList<T>) {
+  val eventLog: MutableList<T>
+) {
 
   init {
     this.events.subscribe { event ->
@@ -24,11 +25,9 @@ class EventLogging<T>(
     fun <T> create(logger: Logger, requiredEventCount: Int): EventLogging<T> {
       return EventLogging(
         logger = logger,
-        events = Observable.create(),
+        events = PublishSubject.create(),
         latch = CountDownLatch(requiredEventCount),
         eventLog = mutableListOf())
     }
-
   }
 }
-
