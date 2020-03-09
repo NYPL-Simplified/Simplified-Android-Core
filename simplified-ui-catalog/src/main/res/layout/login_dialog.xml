@@ -3,12 +3,14 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="wrap_content">
 
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="32dp">
+    android:layout_marginStart="32dp"
+    android:layout_marginTop="32dp"
+    android:layout_marginEnd="32dp">
 
     <TextView
       android:id="@+id/loginTitle"
@@ -88,45 +90,52 @@
       android:text="@string/loginEULA"
       app:layout_constraintEnd_toEndOf="@id/loginTable"
       app:layout_constraintStart_toStartOf="@id/loginTable"
-      app:layout_constraintTop_toBottomOf="@id/loginTable" />
-
-    <TextView
-      android:id="@+id/loginProgressText"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"
-      android:ellipsize="end"
-      android:maxLines="1"
-      android:text="@string/catalogPlaceholder"
-      app:layout_constraintBottom_toTopOf="@id/loginProgressBar"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/loginEULA"
-      app:layout_constraintVertical_bias="1.0" />
-
-    <ProgressBar
-      android:id="@+id/loginProgressBar"
-      style="?android:attr/progressBarStyleHorizontal"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="16dp"
-      android:layout_marginBottom="16dp"
-      android:indeterminate="true"
-      app:layout_constraintBottom_toTopOf="@id/loginButton"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
+      app:layout_constraintTop_toBottomOf="@id/loginProgressBar" />
 
     <Button
       android:id="@+id/loginButton"
-      android:layout_width="80dp"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_margin="16dp"
       android:layout_marginBottom="16dp"
       android:text="@string/loginLogin"
-      app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/loginEULA" />
+
+    <View
+      android:id="@+id/lockFormOverlay"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@color/lock_form_overlay"
+      android:visibility="gone"
+      app:layout_constraintTop_toBottomOf="@id/loginTitle" />
+
+    <TextView
+        android:id="@+id/loginProgressText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="1"
+        android:text="@string/catalogPlaceholder"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loginTable"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <ProgressBar
+        android:id="@+id/loginProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:indeterminate="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loginProgressText" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
-

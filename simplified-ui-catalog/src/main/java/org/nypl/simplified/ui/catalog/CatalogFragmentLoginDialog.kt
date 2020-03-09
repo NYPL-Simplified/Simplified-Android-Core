@@ -79,6 +79,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var userName: EditText
   private lateinit var userNameLabel: TextView
+  private lateinit var lockFormOverlay: View
   private val parametersId = PARAMETERS_ID
   private var accountEventSubscription: Disposable? = null
 
@@ -88,14 +89,10 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
     val services = Services.serviceDirectory()
 
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
-    this.documents =
-      services.requireService(DocumentStoreType::class.java)
-    this.screenSize =
-      services.requireService(ScreenSizeInformationType::class.java)
+    this.profilesController = services.requireService(ProfilesControllerType::class.java)
+    this.uiThread = services.requireService(UIThreadServiceType::class.java)
+    this.documents = services.requireService(DocumentStoreType::class.java)
+    this.screenSize = services.requireService(ScreenSizeInformationType::class.java)
   }
 
   override fun onCreateView(
@@ -106,25 +103,17 @@ class CatalogFragmentLoginDialog : DialogFragment() {
     val layout =
       inflater.inflate(R.layout.login_dialog, container, false)
 
-    this.action =
-      layout.findViewById(R.id.loginButton)
-    this.eula =
-      layout.findViewById(R.id.loginEULA)
-    this.password =
-      layout.findViewById(R.id.loginPassword)
-    this.passwordLabel =
-      layout.findViewById(R.id.loginPasswordLabel)
-    this.progress =
-      layout.findViewById(R.id.loginProgressBar)
-    this.progressText =
-      layout.findViewById(R.id.loginProgressText)
-    this.userName =
-      layout.findViewById(R.id.loginUserName)
-    this.userNameLabel =
-      layout.findViewById(R.id.loginUserNameLabel)
+    this.action = layout.findViewById(R.id.loginButton)
+    this.eula = layout.findViewById(R.id.loginEULA)
+    this.password = layout.findViewById(R.id.loginPassword)
+    this.passwordLabel = layout.findViewById(R.id.loginPasswordLabel)
+    this.progress = layout.findViewById(R.id.loginProgressBar)
+    this.progressText = layout.findViewById(R.id.loginProgressText)
+    this.userName = layout.findViewById(R.id.loginUserName)
+    this.userNameLabel = layout.findViewById(R.id.loginUserNameLabel)
+    this.lockFormOverlay = layout.findViewById(R.id.lockFormOverlay)
 
-    this.fieldListener =
-      OnTextChangeListener(this::onFieldChanged)
+    this.fieldListener = OnTextChangeListener(this::onFieldChanged)
 
     this.action.isEnabled = false
     this.progress.visibility = View.INVISIBLE
@@ -135,9 +124,8 @@ class CatalogFragmentLoginDialog : DialogFragment() {
   override fun onStart() {
     super.onStart()
 
-    this.dialogModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(CatalogLoginViewModel::class.java)
+    this.dialogModel = ViewModelProviders.of(this.requireActivity())
+      .get(CatalogLoginViewModel::class.java)
 
     this.resizeDialog()
 
@@ -148,8 +136,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
     try {
       this.account =
-        this.profilesController.profileCurrent()
-          .account(this.parameters.accountId)
+        this.profilesController.profileCurrent().account(this.parameters.accountId)
     } catch (e: AccountsDatabaseNonexistentException) {
       this.dismiss()
       return
@@ -209,7 +196,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
           )
           window.setLayout(
             (this.screenSize.widthPixels * 0.8).toInt(),
-            (this.screenSize.heightPixels * 0.4).toInt())
+            (this.screenSize.heightPixels * 0.475).toInt())
         } else {
           this.logger.debug(
             "screen landscape ({}x{})",
@@ -317,12 +304,14 @@ class CatalogFragmentLoginDialog : DialogFragment() {
   }
 
   private fun unlockForm() {
+    this.lockFormOverlay.visibility = View.GONE
     this.userName.isEnabled = true
     this.action.isEnabled = true
     this.password.isEnabled = true
   }
 
   private fun lockForm() {
+    this.lockFormOverlay.visibility = View.VISIBLE
     this.userName.isEnabled = false
     this.action.isEnabled = false
     this.password.isEnabled = false

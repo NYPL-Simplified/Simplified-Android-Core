@@ -196,7 +196,10 @@
   <color name="simplified_material_blue_grey_primary">#607d8b</color>
   <color name="simplified_material_blue_grey_primary_light">#8eacbb</color>
   <color name="simplified_material_blue_grey_primary_dark">#34515e</color>
-  
+
+  <!-- Login screen lock form overlay -->
+  <color name="lock_form_overlay">#b3ffffff</color>
+
   <!-- Predefined themes -->
   <!-- Automatically generated, see styles.sh -->
   <style name="SimplifiedTheme_NoActionBar_Red" parent="SimplifiedTheme.NoActionBar.Base">
