@@ -36,13 +36,13 @@ ext {
   androidMinimumSDKVersion = 21
   androidTargetSDKVersion = 28
 
-  if (!project.hasProperty("nexusUsername")) {
-    logger.warn("No nexusUsername property specified: Using an empty value")
-    nexusUsername = ""
+  if (!project.hasProperty("mavenCentralUsername")) {
+    logger.warn("No mavenCentralUsername property specified: Using an empty value")
+    mavenCentralUsername = ""
   }
-  if (!project.hasProperty("nexusPassword")) {
-    logger.warn("No nexusPassword property specified: Using an empty value")
-    nexusPassword = ""
+  if (!project.hasProperty("mavenCentralPassword")) {
+    logger.warn("No mavenCentralPassword property specified: Using an empty value")
+    mavenCentralPassword = ""
   }
 
   if (!project.hasProperty("org.librarysimplified.nexus.publish")) {
@@ -357,8 +357,8 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
           def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
           url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
           credentials(PasswordCredentials) {
-            username nexusUsername
-            password nexusPassword
+            username mavenCentralUsername
+            password mavenCentralPassword
           }
         }
       }
