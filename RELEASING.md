@@ -19,6 +19,15 @@ command-line. It is also possible to perform some of them via the
 [Sonatype Web Interface](https://oss.sonatype.org), but that is not
 covered here.
 
+#### Testing Repository
+
+New developers can try out the process detailed here by cloning the
+[Maven-Central-Testing](https://github.com/NYPL-Simplified/Maven-Central-Testing)
+project and performing the release instructions below. The `Maven-Central-Testing`
+project is configured identically to the `Simplified-Android-Core`
+repository, but contains only a single module and can be built and
+deployed/released very quickly.
+
 #### PGP
 
 Maven Central requires that all deployed artifacts are signed using
