@@ -26,7 +26,9 @@ New developers can try out the process detailed here by cloning the
 project and performing the release instructions below. The `Maven-Central-Testing`
 project is configured identically to the `Simplified-Android-Core`
 repository, but contains only a single module and can be built and
-deployed/released very quickly.
+deployed/released very quickly. This allows developers unfamiliar with
+Maven Central to run through the release process without actually having
+to do a real release of the application.
 
 #### PGP
 
