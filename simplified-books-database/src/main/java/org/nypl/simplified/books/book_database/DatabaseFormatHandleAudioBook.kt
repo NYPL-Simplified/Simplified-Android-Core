@@ -3,12 +3,14 @@ package org.nypl.simplified.books.book_database
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
 import org.librarysimplified.audiobook.api.PlayerAudioEngines
-import org.librarysimplified.audiobook.api.PlayerManifests
 import org.librarysimplified.audiobook.api.PlayerPosition
 import org.librarysimplified.audiobook.api.PlayerPositions
 import org.librarysimplified.audiobook.api.PlayerResult
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.librarysimplified.audiobook.manifest.api.PlayerManifest
+import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsers
+import org.librarysimplified.audiobook.parser.api.ParseResult
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
@@ -47,7 +49,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
       loadInitial(
         fileManifest = this.fileManifest,
         fileManifestURI = this.fileManifestURI,
-        filePosition = this.filePosition)
+        filePosition = this.filePosition
+      )
     }
 
   override val format: BookFormat.BookFormatAudioBook
@@ -80,31 +83,49 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
       FileInputStream(this.fileManifest).use { stream ->
         this.log.debug("[{}]: parsing audio book manifest", briefID)
 
-        val manifestResult = PlayerManifests.parse(stream)
+        val manifestResult: ParseResult<PlayerManifest> =
+          ManifestParsers.parse(fileManifest.toURI(), stream.readBytes())
+
         when (manifestResult) {
-          is PlayerResult.Failure -> throw manifestResult.failure
-          is PlayerResult.Success -> {
+          is ParseResult.Failure -> {
+            for (error in manifestResult.errors) {
+              this.log.debug(
+                "[{}]: parse error: {}:{}: {}",
+                briefID,
+                error.line,
+                error.column,
+                error.message
+              )
+            }
+            throw IOException("One or more manifest parse errors occurred")
+          }
+
+          is ParseResult.Success -> {
             this.log.debug("[{}]: selecting audio engine", briefID)
 
-            val engine = PlayerAudioEngines.findBestFor(
-              PlayerAudioEngineRequest(
-                manifest = manifestResult.result,
-                filter = { true },
-                downloadProvider = NullDownloadProvider()))
+            val engine =
+              PlayerAudioEngines.findBestFor(
+                PlayerAudioEngineRequest(
+                  manifest = manifestResult.result,
+                  filter = { true },
+                  downloadProvider = NullDownloadProvider()
+                )
+              )
 
             if (engine == null) {
               throw UnsupportedOperationException(
-                "No audio engine is available to process the given request")
+                "No audio engine is available to process the given request"
+              )
             }
 
             this.log.debug(
               "[{}]: selected audio engine: {} {}",
               briefID,
               engine.engineProvider.name(),
-              engine.engineProvider.version())
+              engine.engineProvider.version()
+            )
 
-            val bookResult = engine.bookProvider.create(this.parameters.context)
-            when (bookResult) {
+            when (val bookResult = engine.bookProvider.create(this.parameters.context)) {
               is PlayerResult.Success -> bookResult.result.wholeBookDownloadTask.delete()
               is PlayerResult.Failure -> throw bookResult.failure
             }
@@ -121,18 +142,25 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
     this.parameters.onUpdated.invoke(newFormat)
   }
 
-  override fun copyInManifestAndURI(file: File, manifestURI: URI) {
+  override fun copyInManifestAndURI(
+    data: ByteArray,
+    manifestURI: URI
+  ) {
     val newFormat = synchronized(this.formatLock) {
-      FileUtilities.fileCopy(
-        file, this.fileManifest)
+      FileUtilities.fileWriteBytes(
+        data, this.fileManifest
+      )
       FileUtilities.fileWriteUTF8Atomically(
-        this.fileManifestURI, this.fileManifestURITmp, manifestURI.toString())
+        this.fileManifestURI, this.fileManifestURITmp, manifestURI.toString()
+      )
 
       this.formatRef =
         this.formatRef.copy(
           manifest = BookFormat.AudioBookManifestReference(
             manifestURI = manifestURI,
-            manifestFile = this.fileManifest))
+            manifestFile = this.fileManifest
+          )
+        )
       this.formatRef
     }
 
@@ -174,7 +202,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
     ): BookFormat.BookFormatAudioBook {
       return BookFormat.BookFormatAudioBook(
         manifest = loadManifestIfNecessary(fileManifest, fileManifestURI),
-        position = loadPositionIfNecessary(filePosition))
+        position = loadPositionIfNecessary(filePosition)
+      )
     }
 
     private fun loadPositionIfNecessary(
@@ -193,7 +222,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
           val jom = ObjectMapper()
           val result =
             PlayerPositions.parseFromObjectNode(
-              JSONParserUtilities.checkObject(null, jom.readTree(stream)))
+              JSONParserUtilities.checkObject(null, jom.readTree(stream))
+            )
 
           when (result) {
             is PlayerResult.Success -> result.result
@@ -224,7 +254,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
     ): BookFormat.AudioBookManifestReference {
       return BookFormat.AudioBookManifestReference(
         manifestFile = fileManifest,
-        manifestURI = URI.create(FileUtilities.fileReadUTF8(fileManifestURI)))
+        manifestURI = URI.create(FileUtilities.fileReadUTF8(fileManifestURI))
+      )
     }
   }
 }

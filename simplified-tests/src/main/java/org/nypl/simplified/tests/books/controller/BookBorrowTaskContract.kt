@@ -499,7 +499,7 @@ abstract class BookBorrowTaskContract {
 
     Mockito.verify(formatHandle, Mockito.times(1))
       .copyInManifestAndURI(
-        File(this.directoryDownloads, "0000000000000001.data"),
+        File(this.directoryDownloads, "0000000000000001.data").readBytes(),
         URI.create("http://www.example.com/0.json"))
   }
 

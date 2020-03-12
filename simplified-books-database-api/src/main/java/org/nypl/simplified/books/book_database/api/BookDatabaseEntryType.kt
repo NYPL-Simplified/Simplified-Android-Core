@@ -234,7 +234,10 @@ sealed class BookDatabaseEntryFormatHandle {
      */
 
     @Throws(IOException::class)
-    abstract fun copyInManifestAndURI(file: File, manifestURI: URI)
+    abstract fun copyInManifestAndURI(
+      data: ByteArray,
+      manifestURI: URI
+    )
 
     /**
      * Save the given player position to the database.

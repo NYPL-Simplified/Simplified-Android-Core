@@ -23,13 +23,13 @@ import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineEleme
 import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackProgressUpdate
 import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStarted
 import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStopped
-import org.librarysimplified.audiobook.api.PlayerManifest
 import org.librarysimplified.audiobook.api.PlayerPosition
 import org.librarysimplified.audiobook.api.PlayerResult
 import org.librarysimplified.audiobook.api.PlayerSleepTimer
 import org.librarysimplified.audiobook.api.PlayerSleepTimerType
 import org.librarysimplified.audiobook.api.PlayerType
 import org.librarysimplified.audiobook.downloads.DownloadProvider
+import org.librarysimplified.audiobook.manifest.api.PlayerManifest
 import org.librarysimplified.audiobook.views.PlayerAccessibilityEvent
 import org.librarysimplified.audiobook.views.PlayerFragment
 import org.librarysimplified.audiobook.views.PlayerFragmentListenerType
@@ -43,22 +43,18 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.downloader.core.DownloadType
-import org.nypl.simplified.downloader.core.DownloaderHTTP
-import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
-import java.io.File
-import java.lang.IllegalStateException
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -104,8 +100,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   private lateinit var books: BooksControllerType
   private lateinit var bookTitle: String
   private lateinit var covers: BookCoverProviderType
-  private lateinit var downloader: DownloaderType
-  private lateinit var downloaderDir: File
   private lateinit var downloadExecutor: ListeningExecutorService
   private lateinit var downloadProvider: PlayerDownloadProviderType
   private lateinit var formatHandle: BookDatabaseEntryFormatHandleAudioBook
@@ -141,10 +135,11 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.log.debug("book id:       {}", this.parameters.bookID)
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
 
-    this.setTheme(Services.serviceDirectory()
-      .requireService(ThemeServiceType::class.java)
-      .findCurrentTheme()
-      .themeWithActionBar
+    this.setTheme(
+      Services.serviceDirectory()
+        .requireService(ThemeServiceType::class.java)
+        .findCurrentTheme()
+        .themeWithActionBar
     )
     this.setContentView(R.layout.audio_book_player_base)
     this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
@@ -201,16 +196,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
     this.downloadExecutor =
       MoreExecutors.listeningDecorator(
-        org.nypl.simplified.threads.NamedThreadPools.namedThreadPool(1, "audiobook-player", 19))
-
-    this.downloaderDir =
-      File(this.filesDir, "audiobook-player-downloads")
-    DirectoryUtilities.directoryCreate(this.downloaderDir)
-    this.downloader =
-      DownloaderHTTP.newDownloader(
-        this.downloadExecutor,
-        this.downloaderDir,
-        this.http)
+        NamedThreadPools.namedThreadPool(1, "audiobook-player", 19)
+      )
     this.downloadProvider =
       DownloadProvider.create(this.downloadExecutor)
 
@@ -305,8 +292,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     }
   }
 
-  override fun onLoadingFragmentWantsDownloader(): DownloaderType {
-    return this.downloader
+  override fun onLoadingFragmentWantsIOExecutor(): ListeningExecutorService {
+    return this.downloadExecutor
   }
 
   override fun onLoadingFragmentIsNetworkConnectivityAvailable(): Boolean {
@@ -337,7 +324,9 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       PlayerAudioEngineRequest(
         manifest = manifest,
         filter = { true },
-        downloadProvider = DownloadProvider.create(this.downloadExecutor)))
+        downloadProvider = DownloadProvider.create(this.downloadExecutor)
+      )
+    )
 
     if (engine == null) {
       val title =
@@ -354,7 +343,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.log.debug(
       "selected audio engine: {} {}",
       engine.engineProvider.name(),
-      engine.engineProvider.version())
+      engine.engineProvider.version()
+    )
 
     /*
      * Create the audio book.
@@ -452,6 +442,9 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       is PlayerEventPlaybackRateChanged -> Unit
       is PlayerEventError ->
         this.onLogPlayerError(event)
+
+      PlayerEvent.PlayerEventManifestUpdated ->
+        Unit
     }
   }
 
@@ -608,7 +601,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
       view,
       screenSize.dpToPixels(300).toInt(),
-      screenSize.dpToPixels(400).toInt())
+      screenSize.dpToPixels(400).toInt()
+    )
   }
 
   override fun onPlayerWantsPlayer(): PlayerType {

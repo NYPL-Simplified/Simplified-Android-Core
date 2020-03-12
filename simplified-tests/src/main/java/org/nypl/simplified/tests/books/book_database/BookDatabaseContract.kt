@@ -425,7 +425,7 @@ abstract class BookDatabaseContract {
       format!!
 
       val file = copyToTempFile("/org/nypl/simplified/tests/books/basic-manifest.json")
-      format.copyInManifestAndURI(file, URI.create("urn:invalid"))
+      format.copyInManifestAndURI(file.readBytes(), URI.create("urn:invalid"))
       format.deleteBookData()
     }
 
@@ -455,7 +455,7 @@ abstract class BookDatabaseContract {
     val format = databaseEntry.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
     format!!
     val file = copyToTempFile("/org/nypl/simplified/tests/books/basic-manifest.json")
-    format.copyInManifestAndURI(file, URI.create("urn:invalid"))
+    format.copyInManifestAndURI(file.readBytes(), URI.create("urn:invalid"))
 
     databaseEntry.delete()
   }

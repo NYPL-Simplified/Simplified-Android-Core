@@ -846,7 +846,6 @@ class BookBorrowTask(
     acquisition: OPDSAcquisition,
     httpAuth: OptionType<HTTPAuthType>
   ) {
-
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillDownload)
 
     this.fulfillURI = acquisition.uri
@@ -997,7 +996,7 @@ class BookBorrowTask(
           updateStatus()
         }
         is BookDatabaseEntryFormatHandleAudioBook -> {
-          formatHandle.copyInManifestAndURI(file, this.fulfillURI)
+          formatHandle.copyInManifestAndURI(file.readBytes(), this.fulfillURI)
           updateStatus()
         }
       }
