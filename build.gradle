@@ -152,8 +152,7 @@ ext.libraries = [
   readium                          : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
   readiumSharedJS                  : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",
   rxjava2                          : "io.reactivex.rxjava2:rxjava:2.1.13",
-  slf4j                            : "org.slf4j:slf4j-api:1.7.25",
-  viewPagerIndicator               : "com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4",
+  slf4j                            : "org.slf4j:slf4j-api:1.7.25"
 ]
 
 apply plugin: "io.codearte.nexus-staging"
