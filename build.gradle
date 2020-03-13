@@ -403,6 +403,11 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     mavenLocal()
     mavenCentral()
 
+    // Sonatype snapshots
+    maven {
+      url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+
     if (useNYPLNexusDepend) {
       maven {
         credentials {
