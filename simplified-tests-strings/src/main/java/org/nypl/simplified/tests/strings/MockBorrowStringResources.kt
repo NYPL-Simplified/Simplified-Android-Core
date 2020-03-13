@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.strings
 
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAvailabilityType
@@ -76,19 +77,19 @@ class MockBorrowStringResources : BookBorrowStringResourcesType {
     return "borrowBookBorrowForAvailability"
   }
 
-  override fun borrowBookFulfillDownloaded(file: File, contentType: String): String {
+  override fun borrowBookFulfillDownloaded(file: File, contentType: MIMEType): String {
     return "borrowBookFulfillDownloaded"
   }
 
-  override fun borrowBookFulfillACSMCheckContentTypeOK(contentType: String): String {
+  override fun borrowBookFulfillACSMCheckContentTypeOK(contentType: MIMEType): String {
     return "borrowBookFulfillACSMCheckContentTypeOK"
   }
 
-  override fun borrowBookSaving(receivedContentType: String, expectedContentTypes: Set<String>): String {
+  override fun borrowBookSaving(receivedContentType: MIMEType, expectedContentTypes: Set<MIMEType>): String {
     return "borrowBookSaving"
   }
 
-  override fun borrowBookSavingCheckingContentType(receivedContentType: String, expectedContentTypes: Set<String>): String {
+  override fun borrowBookSavingCheckingContentType(receivedContentType: MIMEType, expectedContentTypes: Set<MIMEType>): String {
     return "borrowBookSavingCheckingContentType"
   }
 

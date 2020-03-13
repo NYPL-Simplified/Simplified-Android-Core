@@ -2,6 +2,8 @@ package org.nypl.simplified.tests.books.book_database
 
 import android.content.Context
 import com.io7m.jfunctional.Option
+import one.irradia.mime.api.MIMEType
+import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.junit.Assert
 import org.junit.Test
@@ -197,10 +199,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType("application/epub+zip"))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
 
       databaseEntry0.book
     }
@@ -229,10 +231,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType("application/epub+zip"))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
 
       databaseEntry1.book
     }
@@ -278,10 +280,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType("application/pdf"))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/pdf")))
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
 
       databaseEntry0.book
     }
@@ -309,10 +311,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType("application/pdf"))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/pdf")))
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
 
       databaseEntry1.book
     }
@@ -358,10 +360,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType("application/audiobook+json"))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/audiobook+json")))
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
 
       databaseEntry0.book
     }
@@ -389,10 +391,10 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType("application/audiobook+json"))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/audiobook+json")))
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType("application/not-a-supported-format"))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
 
       databaseEntry1.book
     }
@@ -668,7 +670,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some("application/pdf"),
+        Option.some(mimeOf("application/pdf")),
         emptyList()))
     return eb.build()
   }
@@ -684,7 +686,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some("application/audiobook+json"),
+        Option.some(mimeOf("application/audiobook+json")),
         emptyList()))
     return eb.build()
   }
@@ -701,7 +703,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         emptyList()))
     return eb.build()
   }
@@ -725,5 +727,9 @@ abstract class BookDatabaseContract {
         return file
       }
     }
+  }
+
+  private fun mimeOf(name: String): MIMEType {
+    return MIMEParser.parseRaisingException(name)
   }
 }

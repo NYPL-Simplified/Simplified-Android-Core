@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.book_registry
 
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAcquisition
@@ -118,7 +119,7 @@ sealed class BookStatusDownloadErrorDetails : PresentableErrorType, Serializable
 
     data class DRMUnsupportedContentType(
       override val system: String,
-      val contentType: String,
+      val contentType: MIMEType,
       override val message: String
     ) : DRMError()
 

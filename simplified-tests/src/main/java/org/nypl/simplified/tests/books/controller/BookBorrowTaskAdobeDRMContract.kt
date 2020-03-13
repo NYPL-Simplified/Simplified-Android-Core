@@ -7,6 +7,8 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
+import one.irradia.mime.api.MIMEType
+import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.junit.After
@@ -313,8 +315,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
         URI.create("http://www.example.com/0.feed"),
         Option.none(),
         listOf(OPDSIndirectAcquisition(
-          "application/vnd.adobe.adept+xml",
-          listOf(OPDSIndirectAcquisition("application/epub+zip", listOf()))
+          mimeOf("application/vnd.adobe.adept+xml"),
+          listOf(OPDSIndirectAcquisition(mimeOf("application/epub+zip"), listOf()))
         )))
 
     val opdsEntryBuilder =
@@ -413,7 +415,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
+        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
         listOf())
 
     val opdsEntryBuilder =
@@ -560,7 +562,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
+        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
         listOf())
 
     val opdsEntryBuilder =
@@ -611,7 +613,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       results.errors().last() as DRMUnsupportedContentType
 
     Assert.assertEquals("Adobe ACS", error.system)
-    Assert.assertEquals("application/pdf", error.contentType)
+    Assert.assertEquals(mimeOf("application/pdf"), error.contentType)
 
     /*
      * Check that the download failed.
@@ -678,7 +680,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
+        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
         listOf())
 
     val opdsEntryBuilder =
@@ -782,7 +784,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
+        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
         listOf())
 
     val opdsEntryBuilder =
@@ -906,7 +908,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
+        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1025,7 +1027,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/vnd.adobe.adept+xml"),
+        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1115,5 +1117,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
       }
     }
     return total
+  }
+
+  private fun mimeOf(name: String): MIMEType {
+    return MIMEParser.parseRaisingException(name)
   }
 }

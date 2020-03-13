@@ -2,6 +2,7 @@ package org.nypl.simplified.opds.core
 
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
+import one.irradia.mime.api.MIMEType
 import java.io.Serializable
 
 /**
@@ -14,7 +15,7 @@ data class OPDSIndirectAcquisition(
    * The MIME type of the indirectly obtainable content.
    */
 
-  val type: String,
+  val type: MIMEType,
 
   /**
    * Zero or more nested indirect acquisitions.
@@ -29,11 +30,11 @@ data class OPDSIndirectAcquisition(
    * @return The acquisition, or null if no acquisition exists with the given type
    */
 
-  fun findType(wantType: String): OPDSIndirectAcquisition? {
-    if (type == wantType) {
+  fun findType(wantType: MIMEType): OPDSIndirectAcquisition? {
+    if (this.type.fullType == wantType.fullType) {
       return this
     }
-    for (child in indirectAcquisitions) {
+    for (child in this.indirectAcquisitions) {
       val target = child.findType(wantType)
       if (target != null) {
         return target
@@ -48,7 +49,7 @@ data class OPDSIndirectAcquisition(
    * @return The acquisition, or `None` if no acquisition exists with the given type
    */
 
-  fun findTypeOptional(wantType: String): OptionType<OPDSIndirectAcquisition> {
+  fun findTypeOptional(wantType: MIMEType): OptionType<OPDSIndirectAcquisition> {
     return Option.of(this.findType(wantType))
   }
 
@@ -61,7 +62,7 @@ data class OPDSIndirectAcquisition(
      */
 
     fun findTypeIn(
-      wantType: String,
+      wantType: MIMEType,
       indirects: List<OPDSIndirectAcquisition>
     ): OPDSIndirectAcquisition? {
       return indirects.find { indirect -> indirect.findType(wantType) != null }
@@ -74,7 +75,7 @@ data class OPDSIndirectAcquisition(
      */
 
     fun findTypeInOptional(
-      wantType: String,
+      wantType: MIMEType,
       indirects: List<OPDSIndirectAcquisition>
     ): OptionType<OPDSIndirectAcquisition> {
       return Option.of(this.findTypeIn(wantType, indirects))
@@ -85,14 +86,16 @@ data class OPDSIndirectAcquisition(
      * if all acquisitions are followed to their conclusions
      */
 
-    fun availableFinalContentTypesIn(indirects: List<OPDSIndirectAcquisition>): Collection<String> {
-      val types = mutableSetOf<String>()
+    fun availableFinalContentTypesIn(
+      indirects: List<OPDSIndirectAcquisition>
+    ): Collection<MIMEType> {
+      val types = mutableSetOf<MIMEType>()
 
       for (indirect in indirects) {
         if (indirect.indirectAcquisitions.isEmpty()) {
           types.add(indirect.type)
         } else {
-          types.addAll(availableFinalContentTypesIn(indirect.indirectAcquisitions))
+          types.addAll(this.availableFinalContentTypesIn(indirect.indirectAcquisitions))
         }
       }
 

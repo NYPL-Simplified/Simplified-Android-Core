@@ -1,4 +1,4 @@
-package org.nypl.simplified.accounts.json
+package org.nypl.simplified.links.json
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -17,7 +17,7 @@ object LinkSerialization {
    */
 
   fun serializeLink(link: Link): ObjectNode {
-    val node = this.mapper.createObjectNode()
+    val node = mapper.createObjectNode()
 
     link.bitrate?.let { node.put("bitrate", it) }
     link.duration?.let { node.put("duration", it) }

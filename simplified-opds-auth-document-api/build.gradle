@@ -1,10 +1,8 @@
 dependencies {
   api project(":simplified-links")
-  api project(":simplified-mime")
   api project(":simplified-parser-api")
 
-  api libraries.io7mJFunctional
-  api libraries.nyplDRMCore
+  api libraries.googleGuava
 
   implementation libraries.kotlinStdlib
 

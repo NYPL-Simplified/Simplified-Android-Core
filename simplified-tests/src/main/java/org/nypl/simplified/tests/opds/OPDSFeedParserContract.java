@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import one.irradia.mime.api.MIMEType;
+
 public abstract class OPDSFeedParserContract {
 
   private final Logger logger = LoggerFactory.getLogger(OPDSFeedParserContract.class);
@@ -464,5 +466,39 @@ public abstract class OPDSFeedParserContract {
     Assert.assertEquals(
       Option.some(URI.create("http://www.example.com/opensearch.xml")),
       f.getFeedSearchURI().map(OPDSSearchLink::getURI));
+  }
+
+  @Test
+  public void testDPLATestFeed()
+    throws Exception {
+    final URI uri = URI.create("http://www.example.com/");
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
+        BookFormats.INSTANCE.supportedBookMimeTypes()));
+    final InputStream d =
+      OPDSFeedParserContract.getResource("dpla-test-feed.xml");
+    final OPDSAcquisitionFeed f = p.parse(uri, d);
+
+    final Map.Entry<String, OPDSGroup> groupEntry =
+      f.getFeedGroups().entrySet().iterator().next();
+    final OPDSGroup group =
+      groupEntry.getValue();
+    final OPDSAcquisitionFeedEntry entry =
+      group.getGroupEntries().get(0);
+    final List<OPDSAcquisition> acquisitions =
+      entry.getAcquisitions();
+    final OPDSAcquisition acquisition =
+      acquisitions.get(0);
+
+    Assert.assertEquals(1, acquisition.availableFinalContentTypes().size());
+    final MIMEType finalType = acquisition.availableFinalContentTypes().iterator().next();
+    Assert.assertEquals("application", finalType.getType());
+    Assert.assertEquals("audiobook+json", finalType.getSubtype());
+    Assert.assertEquals(
+      "http://www.feedbooks.com/audiobooks/access-restriction",
+      finalType.getParameters().get("profile"));
+
+    Assert.assertEquals(1, acquisitions.size());
+    d.close();
   }
 }

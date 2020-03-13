@@ -3,6 +3,8 @@ dependencies {
   api project(":simplified-books-api")
   api project(":simplified-opds-core")
 
+  api libraries.irradiaMimeAPI
+  api libraries.irradiaMimeVanilla
   api libraries.nyplAudiobookAPI
 
   implementation libraries.kotlinStdlib

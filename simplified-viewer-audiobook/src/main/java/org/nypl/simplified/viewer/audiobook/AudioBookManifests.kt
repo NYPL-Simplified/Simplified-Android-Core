@@ -90,20 +90,20 @@ object AudioBookManifests {
         .entry(bookId)
         .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
-    val contentType = manifest.contentType.fullType
-    if (handle != null) {
-      if (handle.formatDefinition.supportedContentTypes().contains(contentType)) {
-        handle.copyInManifestAndURI(manifest.data, manifestURI)
-      } else {
-        this.logger.error(
-          "Server delivered an unsupported content type: {}: ", contentType, IOException()
-        )
-      }
-    } else {
+    val contentType = manifest.contentType
+    if (handle == null) {
       this.logger.error(
-        "Bug: Book database entry has no audio book format handle", IllegalStateException()
-      )
+        "Bug: Book database entry has no audio book format handle", IllegalStateException())
+      return
     }
+
+    if (!handle.formatDefinition.supports(contentType)) {
+      this.logger.error(
+        "Server delivered an unsupported content type: {}: ", contentType, IOException())
+      return
+    }
+
+    handle.copyInManifestAndURI(manifest.data, manifestURI)
   }
 
   /**

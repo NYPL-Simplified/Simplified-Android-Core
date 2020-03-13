@@ -2,6 +2,7 @@ package org.nypl.simplified.tests.books.book_database
 
 import android.content.Context
 import com.io7m.jfunctional.Option
+import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.junit.Assert
 import org.junit.Test
@@ -77,7 +78,7 @@ abstract class BookDatabasePDFContract {
                 OPDSAcquisition(
                         ACQUISITION_BORROW,
                         URI.create("http://example.com"),
-                        Option.some("application/pdf"),
+                        Option.some(MIMEParser.parseRaisingException("application/pdf")),
                         emptyList()
                 )
         )

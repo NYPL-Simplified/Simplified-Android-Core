@@ -10,6 +10,8 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
+import one.irradia.mime.api.MIMEType
+import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.junit.After
@@ -235,7 +237,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -327,7 +329,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.pdf"),
-        Option.some("application/pdf"),
+        Option.some(mimeOf("application/pdf")),
         listOf())
 
     val opdsEntryBuilder =
@@ -361,7 +363,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/pdf"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/pdf")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -431,7 +433,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.json"),
-        Option.some("application/audiobook+json"),
+        Option.some(mimeOf("application/audiobook+json")),
         listOf())
 
     val opdsEntryBuilder =
@@ -465,7 +467,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/audiobook+json"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/audiobook+json")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -531,7 +533,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("simplified-bundled:0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -569,7 +571,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -631,7 +633,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("simplified-bundled:0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -730,7 +732,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -764,7 +766,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -834,7 +836,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_GENERIC,
         URI.create("http://example.com/fulfill/0"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -868,7 +870,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -951,7 +953,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -985,7 +987,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -1051,7 +1053,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1143,7 +1145,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1261,7 +1263,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1350,7 +1352,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1468,7 +1470,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1547,7 +1549,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1630,7 +1632,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1727,7 +1729,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1825,7 +1827,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1933,7 +1935,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1967,7 +1969,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -2045,7 +2047,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2150,7 +2152,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2184,7 +2186,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -2268,7 +2270,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2302,7 +2304,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -2389,7 +2391,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2506,7 +2508,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2585,7 +2587,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BUY,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2666,7 +2668,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BUY,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2765,7 +2767,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2805,7 +2807,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempCoverFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -2890,7 +2892,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -2930,7 +2932,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempCoverFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
@@ -2999,5 +3001,9 @@ abstract class BookBorrowTaskContract {
       }
     }
     return total
+  }
+
+  private fun mimeOf(name: String): MIMEType {
+    return MIMEParser.parseRaisingException(name)
   }
 }
