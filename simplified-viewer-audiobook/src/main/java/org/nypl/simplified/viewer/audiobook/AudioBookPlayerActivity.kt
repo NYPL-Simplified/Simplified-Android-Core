@@ -28,7 +28,9 @@ import org.librarysimplified.audiobook.api.PlayerResult
 import org.librarysimplified.audiobook.api.PlayerSleepTimer
 import org.librarysimplified.audiobook.api.PlayerSleepTimerType
 import org.librarysimplified.audiobook.api.PlayerType
+import org.librarysimplified.audiobook.api.extensions.PlayerExtensionType
 import org.librarysimplified.audiobook.downloads.DownloadProvider
+import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtension
 import org.librarysimplified.audiobook.manifest.api.PlayerManifest
 import org.librarysimplified.audiobook.views.PlayerAccessibilityEvent
 import org.librarysimplified.audiobook.views.PlayerFragment
@@ -38,6 +40,7 @@ import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
 import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.controller.api.BooksControllerType
@@ -55,6 +58,7 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
+import java.util.ServiceLoader
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -128,7 +132,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     val i = this.intent!!
     val a = i.extras!!
 
-    this.parameters = a.getSerializable(PARAMETER_ID) as AudioBookPlayerParameters
+    this.parameters = a.getSerializable(org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity.Companion.PARAMETER_ID) as AudioBookPlayerParameters
 
     this.log.debug("manifest file: {}", this.parameters.manifestFile)
     this.log.debug("manifest uri:  {}", this.parameters.manifestURI)
@@ -347,10 +351,22 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     )
 
     /*
+     * Load extensions.
+     */
+
+    val extensions =
+      this.loadAndConfigureExtensions()
+
+    /*
      * Create the audio book.
      */
 
-    val bookResult = engine.bookProvider.create(this)
+    val bookResult =
+      engine.bookProvider.create(
+        context = this,
+        extensions = extensions
+      )
+
     if (bookResult is PlayerResult.Failure) {
       val title =
         this.resources.getString(R.string.audio_book_player_error_book_open)
@@ -382,6 +398,38 @@ class AudioBookPlayerActivity : AppCompatActivity(),
         .beginTransaction()
         .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
         .commit()
+    }
+  }
+
+  private fun loadAndConfigureExtensions(): List<PlayerExtensionType> {
+    val extensions =
+      ServiceLoader.load(PlayerExtensionType::class.java)
+        .toList()
+
+    val services = Services.serviceDirectory()
+    this.loadAndConfigureFeedbooks(services, extensions)
+    return extensions
+  }
+
+  private fun loadAndConfigureFeedbooks(
+    services: ServiceDirectoryType,
+    extensions: List<PlayerExtensionType>
+  ) {
+    val feedbooksConfigService =
+      services.optionalService(AudioBookFeedbooksServiceType::class.java)
+
+    if (feedbooksConfigService != null) {
+      this.log.debug("feedbooks configuration service is available; configuring extension")
+      val extension =
+        extensions.filter { ex -> ex is FeedbooksPlayerExtension }
+          .map { ex -> ex as FeedbooksPlayerExtension }
+          .firstOrNull()
+      if (extension != null) {
+        this.log.debug("feedbooks extension is available")
+        extension.configuration = feedbooksConfigService.configuration
+      } else {
+        this.log.debug("feedbooks extension is not available")
+      }
     }
   }
 
@@ -600,8 +648,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.covers.loadCoverInto(
       FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
       view,
-      screenSize.dpToPixels(300).toInt(),
-      screenSize.dpToPixels(400).toInt()
+      this.screenSize.dpToPixels(300).toInt(),
+      this.screenSize.dpToPixels(400).toInt()
     )
   }
 
