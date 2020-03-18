@@ -47,7 +47,7 @@ class BookBorrowWithDefaultAcquisitionTask(
    * The initial book value.
    */
 
-  private val bookInitial: Book =
+  private val bookInitial =
     Book(
       id = this.bookId,
       account = this.account.id,
