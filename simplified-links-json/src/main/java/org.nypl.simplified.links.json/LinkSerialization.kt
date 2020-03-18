@@ -17,7 +17,7 @@ object LinkSerialization {
    */
 
   fun serializeLink(link: Link): ObjectNode {
-    val node = mapper.createObjectNode()
+    val node = this.mapper.createObjectNode()
 
     link.bitrate?.let { node.put("bitrate", it) }
     link.duration?.let { node.put("duration", it) }
