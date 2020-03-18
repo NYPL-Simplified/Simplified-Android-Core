@@ -421,8 +421,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     if (feedbooksConfigService != null) {
       this.log.debug("feedbooks configuration service is available; configuring extension")
       val extension =
-        extensions.filter { ex -> ex is FeedbooksPlayerExtension }
-          .map { ex -> ex as FeedbooksPlayerExtension }
+        extensions.filterIsInstance<FeedbooksPlayerExtension>()
           .firstOrNull()
       if (extension != null) {
         this.log.debug("feedbooks extension is available")
