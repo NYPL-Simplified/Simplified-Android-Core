@@ -162,12 +162,9 @@ object BookFormats {
     fun supports(
       contentType: MIMEType
     ): Boolean {
-      for (supportedType in this.supportedContentTypes()) {
-        if (contentType.fullType == supportedType.fullType) {
-          return true
-        }
+      return this.supportedContentTypes().any { supportedType ->
+        contentType.fullType == supportedType.fullType
       }
-      return false
     }
   }
 }
