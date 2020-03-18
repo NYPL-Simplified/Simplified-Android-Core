@@ -45,13 +45,11 @@ object AudioBookManifests {
         ?: throw UnsupportedOperationException()
 
     val fulfillCredentials =
-      if (credentials != null) {
+      credentials?.let {
         ManifestFulfillmentBasicCredentials(
-          userName = credentials.barcode().value(),
-          password = credentials.pin().value()
+          userName = it.barcode().value(),
+          password = it.pin().value()
         )
-      } else {
-        null
       }
 
     val strategy =
