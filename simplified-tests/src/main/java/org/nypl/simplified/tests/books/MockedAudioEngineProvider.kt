@@ -3,7 +3,7 @@ package org.nypl.simplified.tests.books
 import org.librarysimplified.audiobook.api.PlayerAudioBookProviderType
 import org.librarysimplified.audiobook.api.PlayerAudioEngineProviderType
 import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
-import org.librarysimplified.audiobook.api.PlayerAudioEngineVersion
+import org.librarysimplified.audiobook.api.PlayerVersion
 import org.slf4j.LoggerFactory
 
 /**
@@ -32,8 +32,8 @@ class MockedAudioEngineProvider : PlayerAudioEngineProviderType {
     return null
   }
 
-  override fun version(): PlayerAudioEngineVersion {
-    return PlayerAudioEngineVersion(100, 0, 0)
+  override fun version(): PlayerVersion {
+    return PlayerVersion(100, 0, 0)
   }
 
   companion object {

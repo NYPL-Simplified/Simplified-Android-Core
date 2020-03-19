@@ -9,6 +9,8 @@ dependencies {
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJNull
   implementation libraries.io7mJUnreachable
+  implementation libraries.irradiaMimeAPI
+  implementation libraries.irradiaMimeVanilla
   implementation libraries.jacksonCore
   implementation libraries.jacksonDatabind
   implementation libraries.javaxAnnotationAPI

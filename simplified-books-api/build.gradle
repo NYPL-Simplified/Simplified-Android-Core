@@ -4,7 +4,7 @@ dependencies {
   api project(":simplified-json-core")
 
   api libraries.io7mJFunctional
-  api libraries.nyplAudioBookAPI
+  api libraries.nyplAudiobookAPI
 
   implementation libraries.jacksonDatabind
   implementation libraries.jcipAnnotations

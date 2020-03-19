@@ -1,5 +1,5 @@
 dependencies {
-  api project(":simplified-mime")
+  api libraries.irradiaMimeAPI
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

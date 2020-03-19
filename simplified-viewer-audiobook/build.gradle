@@ -15,12 +15,18 @@ dependencies {
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-spi")
 
-  api libraries.nyplAudioBookAPI
-  api libraries.nyplAudioBookDownloads
-  api libraries.nyplAudioBookManifestNYPL
-  api libraries.nyplAudioBookOpenAccess
-  api libraries.nyplAudioBookViews
+  api libraries.nyplAudiobookAPI
+  api libraries.nyplAudiobookDownloads
+  api libraries.nyplAudiobookFeedbooks
+  api libraries.nyplAudiobookLicenseCheckAPI
+  api libraries.nyplAudiobookManifestFulfillAPI
+  api libraries.nyplAudiobookManifestFulfillBasic
+  api libraries.nyplAudiobookManifestParserAPI
+  api libraries.nyplAudiobookManifestWebPub
+  api libraries.nyplAudiobookOpenAccess
+  api libraries.nyplAudiobookViews
 
+  implementation libraries.androidXActivity
   implementation libraries.androidXAppCompat
   implementation libraries.kotlinStdlib
 }

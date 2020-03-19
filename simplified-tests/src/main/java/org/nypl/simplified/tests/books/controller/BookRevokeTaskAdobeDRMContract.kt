@@ -6,6 +6,8 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
+import one.irradia.mime.api.MIMEType
+import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.junit.After
@@ -201,7 +203,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -292,7 +294,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -384,7 +386,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -511,7 +513,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -634,7 +636,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -756,7 +758,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -884,7 +886,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -990,7 +992,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1086,7 +1088,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some("application/epub+zip"),
+        Option.some(mimeOf("application/epub+zip")),
         listOf())
 
     val opdsEntryBuilder =
@@ -1223,5 +1225,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
       }
     }
     return total
+  }
+
+  private fun mimeOf(name: String): MIMEType {
+    return MIMEParser.parseRaisingException(name)
   }
 }

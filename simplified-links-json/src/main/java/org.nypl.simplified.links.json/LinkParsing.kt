@@ -1,10 +1,10 @@
-package org.nypl.simplified.accounts.json
+package org.nypl.simplified.links.json
 
 import com.fasterxml.jackson.databind.JsonNode
+import one.irradia.mime.vanilla.MIMEParser
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.links.Link
-import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.slf4j.LoggerFactory

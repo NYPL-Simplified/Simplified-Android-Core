@@ -1,6 +1,7 @@
 package org.nypl.simplified.tests.books.accounts
 
 import com.io7m.jfunctional.Option
+import one.irradia.mime.api.MIMEType
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.junit.Assert
@@ -17,7 +18,6 @@ import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.links.Link
-import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParserType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType

@@ -136,6 +136,9 @@ internal class MainServicesStrings(
   val bootingNotificationsService =
     this.resources.getString(R.string.bootingNotificationsService)
 
+  val bootingAudioBookExtensions =
+    this.resources.getString(R.string.bootingAudioBookExtensions)
+
   val initializingInstabug =
     this.resources.getString(R.string.bootingInstabug)
 }

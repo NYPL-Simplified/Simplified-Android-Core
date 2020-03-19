@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSerializerType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionSerializersType
+import org.nypl.simplified.links.json.LinkSerialization
 import java.io.OutputStream
 import java.net.URI
 

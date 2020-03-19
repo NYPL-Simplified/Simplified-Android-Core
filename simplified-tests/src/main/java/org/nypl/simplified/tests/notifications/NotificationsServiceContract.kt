@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import com.io7m.jfunctional.Option
 import io.reactivex.subjects.PublishSubject
+import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.junit.Assert
 import org.junit.Before
@@ -80,7 +81,7 @@ abstract class NotificationsServiceContract {
                 OPDSAcquisition(
                         OPDSAcquisition.Relation.ACQUISITION_BORROW,
                         URI.create("http://www.example.com/0.feed"),
-                        Option.some("application/vnd.adobe.adept+xml"),
+                        Option.some(MIMEParser.parseRaisingException("application/vnd.adobe.adept+xml")),
                         listOf())
 
         val opdsEntryBuilder =

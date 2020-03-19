@@ -53,10 +53,15 @@ dependencies {
   api project(":simplified-ui-splash")
   api project(":simplified-ui-theme")
 
-  api libraries.nyplAudioBookAPI
-  api libraries.nyplAudioBookManifestNYPL
-  api libraries.nyplAudioBookOpenAccess
-  api libraries.nyplAudioBookMocking
+  api libraries.nyplAudiobookAPI
+  api libraries.nyplAudiobookDownloads
+  api libraries.nyplAudiobookFeedbooks
+  api libraries.nyplAudiobookLicenseCheckAPI
+  api libraries.nyplAudiobookManifestFulfillAPI
+  api libraries.nyplAudiobookManifestFulfillBasic
+  api libraries.nyplAudiobookManifestWebPub
+  api libraries.nyplAudiobookOpenAccess
+  api libraries.nyplAudiobookViews
 
   implementation libraries.io7mJFunctional
   implementation libraries.io7mJNull

@@ -1,6 +1,0 @@
-dependencies {
-  api libraries.googleGuava
-
-  implementation libraries.kotlinStdlib
-  implementation libraries.slf4j
-}

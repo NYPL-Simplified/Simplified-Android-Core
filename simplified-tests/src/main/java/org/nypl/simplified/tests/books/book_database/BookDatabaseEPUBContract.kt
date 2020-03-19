@@ -2,6 +2,7 @@ package org.nypl.simplified.tests.books.book_database
 
 import android.content.Context
 import com.io7m.jfunctional.Option
+import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.junit.Assert
@@ -183,7 +184,7 @@ abstract class BookDatabaseEPUBContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some("application/epub+zip"),
+        Option.some(MIMEParser.parseRaisingException("application/epub+zip")),
         emptyList()))
     return eb.build()
   }

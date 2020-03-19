@@ -113,6 +113,7 @@ import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.viewer.audiobook.AudioBookFeedbooksServiceType
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPMimeMap
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerAAsync
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerType
@@ -1077,6 +1078,14 @@ internal object MainServices {
       interfaceType = NotificationsService::class.java,
       serviceConstructor = {
         this.createNotificationsService(context, profileEvents, bookRegistry)
+      }
+    )
+
+    addServiceOptionally(
+      message = strings.bootingAudioBookExtensions,
+      interfaceType = AudioBookFeedbooksServiceType::class.java,
+      serviceConstructor = {
+        optionalFromServiceLoader(AudioBookFeedbooksServiceType::class.java)
       }
     )
 

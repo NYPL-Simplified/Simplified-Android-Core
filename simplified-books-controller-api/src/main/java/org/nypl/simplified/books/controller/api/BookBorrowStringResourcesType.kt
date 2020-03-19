@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.controller.api
 
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAvailabilityType
 import java.io.File
@@ -20,21 +21,24 @@ interface BookBorrowStringResourcesType {
    * Downloaded something successfully.
    */
 
-  fun borrowBookFulfillDownloaded(file: File, contentType: String): String
+  fun borrowBookFulfillDownloaded(
+    file: File,
+    contentType: MIMEType
+  ): String
 
   /**
    * The given content type is supported for ACSM files.
    */
 
-  fun borrowBookFulfillACSMCheckContentTypeOK(contentType: String): String
+  fun borrowBookFulfillACSMCheckContentTypeOK(contentType: MIMEType): String
 
   /**
    * Saving a downloaded book.
    */
 
   fun borrowBookSaving(
-    receivedContentType: String,
-    expectedContentTypes: Set<String>
+    receivedContentType: MIMEType,
+    expectedContentTypes: Set<MIMEType>
   ): String
 
   /**
@@ -42,8 +46,8 @@ interface BookBorrowStringResourcesType {
    */
 
   fun borrowBookSavingCheckingContentType(
-    receivedContentType: String,
-    expectedContentTypes: Set<String>
+    receivedContentType: MIMEType,
+    expectedContentTypes: Set<MIMEType>
   ): String
 
   /**

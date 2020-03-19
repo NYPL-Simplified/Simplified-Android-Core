@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.book_database.api
 
+import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerPosition
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.books.api.Book
@@ -89,9 +90,13 @@ interface BookDatabaseEntryType {
    * @return A reference to a format handle that has content of the given type, if any
    */
 
-  fun findFormatHandleForContentType(contentType: String): BookDatabaseEntryFormatHandle? {
+  fun findFormatHandleForContentType(contentType: MIMEType): BookDatabaseEntryFormatHandle? {
     return this.formatHandles
-      .find { handle -> handle.formatDefinition.supportedContentTypes().contains(contentType) }
+      .find { handle ->
+        handle.formatDefinition.supportedContentTypes().any {
+          type -> type.fullType == contentType.fullType
+        }
+      }
   }
 
   /**
@@ -234,7 +239,10 @@ sealed class BookDatabaseEntryFormatHandle {
      */
 
     @Throws(IOException::class)
-    abstract fun copyInManifestAndURI(file: File, manifestURI: URI)
+    abstract fun copyInManifestAndURI(
+      data: ByteArray,
+      manifestURI: URI
+    )
 
     /**
      * Save the given player position to the database.

@@ -1,7 +1,6 @@
 dependencies {
   api project(":simplified-json-core")
   api project(":simplified-links")
-  api project(":simplified-mime")
   api project(":simplified-opds-auth-document-api")
 
   implementation project(":simplified-links-json")

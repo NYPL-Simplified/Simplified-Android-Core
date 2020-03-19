@@ -1,6 +1,6 @@
 package org.nypl.simplified.links
 
-import org.nypl.simplified.mime.MIMEType
+import one.irradia.mime.api.MIMEType
 import java.net.URI
 
 /**

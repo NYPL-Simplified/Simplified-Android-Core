@@ -7,7 +7,6 @@ import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeVendorID
-import org.nypl.drm.core.DRMUnsupportedException
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
@@ -18,7 +17,6 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMNotSupported
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMTooManyActivations
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginMissingInformation
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
@@ -160,16 +158,15 @@ class ProfileAccountLoginTask(
 
     this.credentials = newCredentials
 
+    /*
+     * We can only activate a device if there's a support Adept executor available.
+     * We don't treat lack of support as a hard error here.
+     */
+
     val adeptExecutor = this.adeptExecutor
     if (adeptExecutor == null) {
-      this.steps.currentStepFailed(
-        this.loginStrings.loginDeviceDRMNotSupported,
-        AccountLoginDRMNotSupported(
-          message = this.loginStrings.loginDeviceDRMNotSupported,
-          system = "Adobe ACS"
-        )
-      )
-      throw DRMUnsupportedException("Adobe ACS")
+      this.steps.currentStepSucceeded(this.loginStrings.loginDeviceDRMNotSupported)
+      return
     }
 
     val adeptFuture =

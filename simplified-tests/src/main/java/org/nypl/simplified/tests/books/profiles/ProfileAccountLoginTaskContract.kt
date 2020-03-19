@@ -24,7 +24,6 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMNotSupported
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
@@ -50,9 +49,9 @@ import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.strings.MockAccountLoginStringResources
 import org.nypl.simplified.tests.books.controller.TaskDumps
 import org.nypl.simplified.tests.http.MockingHTTP
+import org.nypl.simplified.tests.strings.MockAccountLoginStringResources
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -880,11 +879,19 @@ abstract class ProfileAccountLoginTaskContract {
     TaskDumps.dump(logger, result)
 
     val state =
-      this.account.loginState as AccountLoginFailed
+      this.account.loginState as AccountLoggedIn
 
-    Assert.assertEquals(
-      AccountLoginDRMNotSupported("loginDeviceDRMNotSupported", "Adobe ACS"),
-      state.taskResult.errors().last())
+    val newCredentials =
+      credentials.toBuilder()
+        .setAdobeCredentials(
+          AccountAuthenticationAdobePreActivationCredentials(
+            vendorID = AdobeVendorID("OmniConsumerProducts"),
+            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+            deviceManagerURI = URI("https://example.com/devices"),
+            postActivationCredentials = null))
+        .build()
+
+    Assert.assertEquals(newCredentials, state.credentials)
   }
 
   /**
