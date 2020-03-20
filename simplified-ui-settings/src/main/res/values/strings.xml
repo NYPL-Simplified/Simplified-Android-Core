@@ -4,7 +4,7 @@
   <string name="settings">Settings</string>
   <string name="settingsAbout">About</string>
   <string name="settingsAboutSummary" />
-  <string name="settingsAccountAdd">Add account…</string>
+  <string name="settingsAccountAdd">Add account&#8230;</string>
   <string name="settingsAccountCreationFailed">Account creation failed</string>
   <string name="settingsAccountCreationFailedMessage">The account \'%1$s\' could not be created.</string>
   <string name="settingsAccountCurrent">Current Account</string>
@@ -14,11 +14,11 @@
   <string name="settingsAccountDeletionFailed">Account deletion failed</string>
   <string name="settingsAccountDeletionFailedMessage">The account \'%1$s\' could not be deleted.</string>
   <string name="settingsAccountOthers">Other Accounts</string>
-  <string name="settingsAccountRegistryCreating">Creating an account…</string>
+  <string name="settingsAccountRegistryCreating">Creating an account&#8230;</string>
   <string name="settingsAccountRegistryEmpty">No accounts are available.</string>
   <string name="settingsAccountRegistryRefresh">Refresh</string>
-  <string name="settingsAccountRegistryRetrieving">Retrieving accounts from registry…</string>
-  <string name="settingsAccountRegistrySelect">Please select a library…</string>
+  <string name="settingsAccountRegistryRetrieving">Retrieving accounts from registry&#8230;</string>
+  <string name="settingsAccountRegistrySelect">Please select a library&#8230;</string>
   <string name="settingsAccounts">Accounts</string>
   <string name="settingsAccountsSummary">Add, remove, or configure accounts</string>
   <string name="settingsAcknowledgements">Acknowledgements</string>
@@ -32,7 +32,7 @@
   <string name="settingsCustomOPDS">Custom OPDS Feed</string>
   <string name="settingsCustomOPDSCreate">Create</string>
   <string name="settingsCustomOPDSInvalidURI">Not a valid URI.</string>
-  <string name="settingsCustomOPDSURL">Custom feed URL…</string>
+  <string name="settingsCustomOPDSURL">Custom feed URL&#8230;</string>
   <string name="settingsDelete">Delete</string>
   <string name="settingsDetails">Details</string>
   <string name="settingsDocumentation">Documentation</string>
@@ -50,7 +50,7 @@
   <string name="settingsPasswordHide">Hide password</string>
   <string name="settingsPasswordShow">Show password</string>
   <string name="settingsPlaceholder">Lorem ipsum dolor sit amet, probatus volutpat has at, vis adhuc iuvaret omittantur an, sadipscing conclusionemque his ad. Eam ut simul tempor. Primis consetetur appellantur vim eu, eum an iudico dolorum. Ad vis utamur honestatis, sanctus debitis referrentur an eam.</string>
-  <string name="settingsReportIssue">Report an issue…</string>
+  <string name="settingsReportIssue">Report an issue&#8230;</string>
   <string name="settingsSyncBookmarks">Sync bookmarks</string>
   <string name="settingsUserName">User Name</string>
   <string name="settingsVersion">App version</string>

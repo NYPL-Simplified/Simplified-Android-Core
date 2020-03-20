@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <resources>
-  <string name="revokeACSDeleteRights">Deleting Adobe ACS rights information…</string>
+  <string name="revokeACSDeleteRights">Deleting Adobe ACS rights information&#8230;</string>
   <string name="revokeACSDeleteRightsFailed">Failed to delete Adobe ACS rights information.</string>
-  <string name="revokeACSExecute">Executing Adobe ACS revocation commands…</string>
+  <string name="revokeACSExecute">Executing Adobe ACS revocation commands&#8230;</string>
   <string name="revokeACSExecuteOK">Executed Adobe ACS revocation commands successfully.</string>
-  <string name="revokeACSGettingDeviceCredentials">Retrieving Adobe ACS device credentials…</string>
+  <string name="revokeACSGettingDeviceCredentials">Retrieving Adobe ACS device credentials&#8230;</string>
   <string name="revokeACSGettingDeviceCredentialsNotActivated">Adobe ACS device is not activated.</string>
   <string name="revokeACSGettingDeviceCredentialsOK">Retrieved Adobe ACS device credentials.</string>
-  <string name="revokeACSLoan">Revoking loan via Adobe ACS…</string>
+  <string name="revokeACSLoan">Revoking loan via Adobe ACS&#8230;</string>
   <string name="revokeACSLoanNotReturnable">Adobe ACS believes that this loan is not returnable.</string>
   <string name="revokeACSLoanNotSupported">Adobe ACS is not supported.</string>
   <string name="revokeACSTimedOut">Timed out waiting for Adobe ACS.</string>
   <string name="revokeBookACSConnectorFailed">Adobe ACS commands failed with error code %1$s.</string>
   <string name="revokeBookACSFailed">Executing Adobe ACS commands failed with an exception.</string>
   <string name="revokeBookCancelled">Revocation was cancelled.</string>
-  <string name="revokeBookDatabaseLookup">Opening book database entry…</string>
+  <string name="revokeBookDatabaseLookup">Opening book database entry&#8230;</string>
   <string name="revokeBookDatabaseLookupFailed">Failed to open the book database entry.</string>
   <string name="revokeBookDatabaseLookupOK">Opened book database entry successfully.</string>
   <string name="revokeCredentialsRequired">Credentials are required, but none were provided.</string>
   <string name="revokeDeleteBook">Deleting book database entry.</string>
   <string name="revokeDeleteBookFailed">Failed to delete the book database entry.</string>
-  <string name="revokeFormat">Performing format-specific revocation…</string>
+  <string name="revokeFormat">Performing format-specific revocation&#8230;</string>
   <string name="revokeFormatNothingToDo">No specific operations needed for this format.</string>
-  <string name="revokeFormatSpecific">Performing revocation for format %1$s…</string>
+  <string name="revokeFormatSpecific">Performing revocation for format %1$s&#8230;</string>
   <string name="revokeNotRevocable">The book is not revocable!</string>
-  <string name="revokeServerNotify">Notifying server of revocation…</string>
+  <string name="revokeServerNotify">Notifying server of revocation&#8230;</string>
   <string name="revokeServerNotifyFeedCorrupt">Server returned a feed with a corrupted entry.</string>
   <string name="revokeServerNotifyFeedEmpty">Server returned an empty revocation feed.</string>
   <string name="revokeServerNotifyFeedFailed">Failed to process server revocation feed.</string>
@@ -34,9 +34,9 @@
   <string name="revokeServerNotifyFeedWithGroups">Server returned a revocation feed with groups.</string>
   <string name="revokeServerNotifyNotRevocable">A loan with availability %1$s is not revocable.</string>
   <string name="revokeServerNotifyNoURI">No URI was provided for server notification.</string>
-  <string name="revokeServerNotifyProcessingFeed">Processing server revocation feed…</string>
-  <string name="revokeServerNotifySavingEntry">Saving revocation feed entry…</string>
+  <string name="revokeServerNotifyProcessingFeed">Processing server revocation feed&#8230;</string>
+  <string name="revokeServerNotifySavingEntry">Saving revocation feed entry&#8230;</string>
   <string name="revokeServerNotifySavingEntryFailed">Failed to save the server revocation feed.</string>
   <string name="revokeServerNotifyURI">Notifying the server via %1$s.</string>
-  <string name="revokeStarted">Revocation started…</string>
+  <string name="revokeStarted">Revocation started&#8230;</string>
 </resources>

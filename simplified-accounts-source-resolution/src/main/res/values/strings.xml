@@ -6,8 +6,8 @@
   <string name="resolvingAuthDocumentNoStartURI">The authentication document did not provide a starting catalog URI.</string>
   <string name="resolvingAuthDocumentParseFailed">The authentication document was malformed and could not be parsed.</string>
   <string name="resolvingAuthDocumentMissingURI">No URI was provided for an authentication document.</string>
-  <string name="resolving">Resolving the account provider…</string>
-  <string name="resolvingAuthDocument">Resolving the authentication document…</string>
+  <string name="resolving">Resolving the account provider&#8230;</string>
+  <string name="resolvingAuthDocument">Resolving the authentication document&#8230;</string>
   <string name="resolvingAuthDocumentRetrievalFailed">The authentication document could not be retrieved from the server.</string>
   <string name="resolvingUnexpectedException">Received an unexpected exception during resolution!</string>
   <string name="resolvingAuthDocumentUnusableLink">We couldn\'t understand the authentication document link.</string>

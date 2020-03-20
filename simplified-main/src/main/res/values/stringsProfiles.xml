@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <resources>
-  <string name="profileAccountCreatingAnAccountProviderDescription">Creating an account provider description…</string>
-  <string name="profileAccountCreationCreatingAccount">Creating an account…</string>
+  <string name="profileAccountCreatingAnAccountProviderDescription">Creating an account provider description&#8230;</string>
+  <string name="profileAccountCreationCreatingAccount">Creating an account&#8230;</string>
   <string name="profileAccountCreationCreatingAccountFailed">Creating an account failed.</string>
-  <string name="profileAccountCreationResolvingAccountProvider">Resolving account provider…</string>
+  <string name="profileAccountCreationResolvingAccountProvider">Resolving account provider&#8230;</string>
   <string name="profileAccountCreationResolvingAccountProviderFailed">Resolving an account provider failed.</string>
   <string name="profileAccountCreationSucceeded">Creating the account succeeded.</string>
-  <string name="profileAccountDeleting">Deleting account…</string>
+  <string name="profileAccountDeleting">Deleting account&#8230;</string>
   <string name="profileAccountDeletionFailed">Deleting an account failed.</string>
   <string name="profileAccountDeletionOnlyOneAccountRemaining">Cannot delete the one remaining account; at least one account must be present.</string>
   <string name="profileAccountDeletionSucceeded">Deleting an account succeeded.</string>
-  <string name="profileAccountFetchingOPDSFeed">Fetching an OPDS feed…</string>
+  <string name="profileAccountFetchingOPDSFeed">Fetching an OPDS feed&#8230;</string>
   <string name="profileAccountFetchingOPDSFeedFailed">Fetching an OPDS feed failed!</string>
-  <string name="profileAccountFindingAuthDocumentURI">Finding an authentication document URI…</string>
-  <string name="profileAccountParsingOPDSFeed">Parsing an OPDS feed…</string>
+  <string name="profileAccountFindingAuthDocumentURI">Finding an authentication document URI&#8230;</string>
+  <string name="profileAccountParsingOPDSFeed">Parsing an OPDS feed&#8230;</string>
   <string name="profileAccountParsingOPDSFeedFailed">Parsing an OPDS feed failed!</string>
-  <string name="profileAccountSearchingFeedForAuthenticationDocument">Searching feed for authentication document…</string>
+  <string name="profileAccountSearchingFeedForAuthenticationDocument">Searching feed for authentication document&#8230;</string>
 </resources>
