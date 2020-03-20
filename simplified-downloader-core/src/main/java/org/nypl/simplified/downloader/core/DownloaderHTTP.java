@@ -223,7 +223,7 @@ public final class DownloaderHTTP implements DownloaderType
             this.log.debug("download cancelled");
             this.listener.onDownloadCancelled(this);
           } else {
-            if (this.total != expected) {
+            if (this.total < expected) {
               this.log.error(
                 "received {} bytes but expected {}",
                 Long.valueOf(this.total),
