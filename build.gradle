@@ -61,7 +61,7 @@ ext {
     useNYPLNexusDepend = true
   }
 
-  nyplAudioBookAPIVersion = "4.0.0-SNAPSHOT"
+  nyplAudioBookAPIVersion = "4.0.0"
 }
 
 subprojects {
