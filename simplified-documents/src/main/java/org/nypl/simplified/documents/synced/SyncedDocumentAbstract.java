@@ -103,7 +103,6 @@ public abstract class SyncedDocumentAbstract implements SyncedDocumentType
   protected abstract void documentOnReceipt(
     int status,
     InputStream data,
-    long length,
     String type,
     File output)
     throws IOException;
@@ -216,7 +215,7 @@ public abstract class SyncedDocumentAbstract implements SyncedDocumentType
   {
     final String type = this.getContentType(e.getResponseHeaders());
     this.documentOnReceipt(
-      e.getStatus(), e.getData(), e.getContentLength(), type, this.current_tmp);
+      e.getStatus(), e.getData(), type, this.current_tmp);
     this.saveResults(u);
   }
 
@@ -243,7 +242,6 @@ public abstract class SyncedDocumentAbstract implements SyncedDocumentType
     this.documentOnReceipt(
       e.getStatus(),
       e.getValue(),
-      e.getContentLength(),
       type,
       this.current_tmp);
 

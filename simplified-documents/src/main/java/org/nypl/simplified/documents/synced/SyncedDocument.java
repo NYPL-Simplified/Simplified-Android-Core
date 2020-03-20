@@ -122,7 +122,6 @@ public final class SyncedDocument extends SyncedDocumentAbstract
   @Override protected void documentOnReceipt(
     final int status,
     final InputStream data,
-    final long length,
     final String type,
     final File output)
     throws IOException
