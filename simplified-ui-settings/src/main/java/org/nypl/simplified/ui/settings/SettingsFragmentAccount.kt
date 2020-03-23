@@ -28,13 +28,17 @@ import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -64,11 +68,13 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var authenticationCOPPAOver13: Switch
   private lateinit var bookmarkSync: ViewGroup
   private lateinit var bookmarkSyncCheck: Switch
+  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var documents: DocumentStoreType
   private lateinit var eulaCheckbox: CheckBox
   private lateinit var imageLoader: ImageLoaderType
   private lateinit var login: ViewGroup
   private lateinit var loginButton: Button
+  private lateinit var loginButtonErrorDetails: Button
   private lateinit var loginProgress: ProgressBar
   private lateinit var loginProgressText: TextView
   private lateinit var parameters: SettingsFragmentAccountParameters
@@ -109,6 +115,8 @@ class SettingsFragmentAccount : Fragment() {
       services.requireService(ImageLoaderType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
+    this.buildConfig =
+      services.requireService(BuildConfigurationServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -162,9 +170,12 @@ class SettingsFragmentAccount : Fragment() {
       layout.findViewById(R.id.settingsLoginProgressText)
     this.loginButton =
       layout.findViewById(R.id.settingsLoginButton)
+    this.loginButtonErrorDetails =
+      layout.findViewById(R.id.settingsLoginButtonErrorDetails)
     this.eulaCheckbox =
       layout.findViewById(R.id.settingsEULACheckbox)
 
+    this.loginButtonErrorDetails.visibility = View.GONE
     this.loginButton.isEnabled = false
     this.loginProgress.visibility = View.INVISIBLE
     this.loginProgressText.text = ""
@@ -379,19 +390,21 @@ class SettingsFragmentAccount : Fragment() {
       AccountLoginState.AccountNotLoggedIn -> {
         this.authenticationBasicUser.setText("")
         this.authenticationBasicPass.setText("")
+        this.loginButtonErrorDetails.visibility = View.GONE
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = ""
         this.loginButton.setText(R.string.settingsLogin)
-        this.loginFormUnlock()
         this.loginButton.setOnClickListener {
           this.loginFormLock()
           this.tryLogin()
         }
+        this.loginFormUnlock()
       }
 
       is AccountLoginState.AccountLoggingIn -> {
         this.loginProgress.visibility = View.VISIBLE
         this.loginProgressText.text = loginState.status
+        this.loginButtonErrorDetails.visibility = View.GONE
         this.loginButton.setText(R.string.settingsLogin)
         this.loginFormLock()
       }
@@ -401,6 +414,15 @@ class SettingsFragmentAccount : Fragment() {
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginButton.setText(R.string.settingsLogin)
         this.loginFormUnlock()
+        this.loginButton.setOnClickListener {
+          this.loginFormLock()
+          this.tryLogin()
+        }
+
+        this.loginButtonErrorDetails.visibility = View.VISIBLE
+        this.loginButtonErrorDetails.setOnClickListener {
+          this.openErrorPage(loginState.taskResult.steps)
+        }
       }
 
       is AccountLoginState.AccountLoggedIn -> {
@@ -413,6 +435,7 @@ class SettingsFragmentAccount : Fragment() {
         this.loginProgressText.text = ""
 
         this.loginFormLock()
+        this.loginButtonErrorDetails.visibility = View.GONE
         this.loginButton.setText(R.string.settingsLogout)
         this.loginButton.isEnabled = true
         this.loginButton.setOnClickListener {
@@ -427,6 +450,7 @@ class SettingsFragmentAccount : Fragment() {
         this.authenticationBasicPass.setText(
           loginState.credentials.pin().value())
 
+        this.loginButtonErrorDetails.visibility = View.GONE
         this.loginProgress.visibility = View.VISIBLE
         this.loginProgressText.text = loginState.status
         this.loginButton.setText(R.string.settingsLogout)
@@ -444,8 +468,32 @@ class SettingsFragmentAccount : Fragment() {
         this.loginButton.setText(R.string.settingsLogout)
         this.loginFormLock()
         this.loginButton.isEnabled = true
+        this.loginButton.setOnClickListener {
+          this.loginFormLock()
+          this.tryLogout()
+        }
+
+        this.loginButtonErrorDetails.visibility = View.VISIBLE
+        this.loginButtonErrorDetails.setOnClickListener {
+          this.openErrorPage(loginState.taskResult.steps)
+        }
       }
     }
+  }
+
+  @UiThread
+  private fun <E : PresentableErrorType> openErrorPage(taskSteps: List<TaskStep<E>>) {
+    this.uiThread.checkIsUIThread()
+
+    val parameters =
+      ErrorPageParameters(
+        emailAddress = this.buildConfig.errorReportEmail,
+        body = "",
+        subject = "[simplye-error-report]",
+        attributes = sortedMapOf(),
+        taskSteps = taskSteps)
+
+    this.findNavigationController().openErrorPage(parameters)
   }
 
   private fun loginFormLock() {

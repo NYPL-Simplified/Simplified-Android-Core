@@ -62,20 +62,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settingsLoginProgress" />
 
-      <Button
-        android:id="@+id/settingsLoginButton"
+      <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/settingsLogin"
-        android:enabled="false"
+        android:layout_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settingsLoginProgressText" />
+        app:layout_constraintTop_toBottomOf="@id/settingsLoginProgressText">
+
+        <Button
+          android:id="@+id/settingsLoginButtonErrorDetails"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginRight="16dp"
+          android:text="@string/errorDetailsTitle"
+          android:layout_weight="1"
+          android:enabled="true" />
+
+        <Button
+          android:id="@+id/settingsLoginButton"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:text="@string/settingsLogin"
+          android:layout_weight="1"
+          android:enabled="false" />
+      </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
