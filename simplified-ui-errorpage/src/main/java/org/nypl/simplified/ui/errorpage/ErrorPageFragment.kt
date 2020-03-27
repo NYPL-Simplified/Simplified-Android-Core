@@ -1,11 +1,14 @@
 package org.nypl.simplified.ui.errorpage
 
+import android.graphics.Typeface
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TableLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,10 +48,8 @@ class ErrorPageFragment : Fragment() {
     }
   }
 
-  private lateinit var errorAttributesTable: TableLayout
-  private lateinit var errorAttributesTitle: TextView
+  private lateinit var errorDetails: TextView
   private lateinit var errorStepsList: RecyclerView
-  private lateinit var errorTitle: TextView
   private lateinit var listener: ErrorPageListenerType
   private lateinit var parameters: ErrorPageParameters<PresentableErrorType>
   private lateinit var sendButton: Button
@@ -79,12 +80,8 @@ class ErrorPageFragment : Fragment() {
     val viewRoot =
       inflater.inflate(R.layout.error_page, container, false)
 
-    this.errorTitle =
-      viewRoot.findViewById(R.id.errorTitle)
-    this.errorAttributesTitle =
-      viewRoot.findViewById(R.id.errorDetailsTitle)
-    this.errorAttributesTable =
-      viewRoot.findViewById(R.id.errorDetailsTable)
+    this.errorDetails =
+      viewRoot.findViewById(R.id.errorDetails)
     this.errorStepsList =
       viewRoot.findViewById(R.id.errorSteps)
     this.sendButton =
@@ -95,25 +92,24 @@ class ErrorPageFragment : Fragment() {
         as ErrorPageParameters<PresentableErrorType>
 
     if (parameters.attributes.isEmpty()) {
-      this.errorAttributesTable.visibility = View.GONE
-      this.errorAttributesTitle.visibility = View.GONE
+      this.errorDetails.visibility = View.GONE
     } else {
-      this.errorAttributesTable.removeAllViews()
+      this.errorDetails.text = ""
 
-      for (key in parameters.attributes.keys) {
-        val value =
-          parameters.attributes[key]
-        val tableRow =
-          inflater.inflate(R.layout.error_attribute_row, this.errorAttributesTable, false)
-        val tableCell0 =
-          tableRow.findViewById<TextView>(R.id.errorAttributeKey)
-        val tableCell1 =
-          tableRow.findViewById<TextView>(R.id.errorAttributeValue)
+      val ssb = SpannableStringBuilder()
+      parameters.attributes.entries.forEachIndexed { index, (key, value) ->
+        if (index > 0) { ssb.append("\n\n") }
+        ssb.append(key)
 
-        tableCell0.text = key
-        tableCell1.text = value
-        this.errorAttributesTable.addView(tableRow)
+        val styleSpan = StyleSpan(Typeface.BOLD)
+        val spanStart = ssb.length - key.length
+        val spanEnd = ssb.length
+        ssb.setSpan(styleSpan, spanStart, spanEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        ssb.append("\n")
+        ssb.append(value)
       }
+      this.errorDetails.text = ssb
     }
 
     this.errorStepsList.setHasFixedSize(false)

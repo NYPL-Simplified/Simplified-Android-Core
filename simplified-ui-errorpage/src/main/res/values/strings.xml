@@ -3,5 +3,4 @@
   <string name="errorDetailsTitle">Error Details</string>
   <string name="errorSendReport">Send To Support</string>
   <string name="errorStepsTitle">Steps</string>
-  <string name="errorTitle">Here is the error log created by your issue:</string>
 </resources>
