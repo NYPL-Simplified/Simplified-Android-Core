@@ -24,6 +24,12 @@ sealed class CatalogFeedArguments : Serializable {
   abstract val isSearchResults: Boolean
 
   /**
+   * `true` if the feed is a locally generated feed (such as the My Books or Holds view).
+   */
+
+  abstract val isLocallyGenerated: Boolean
+
+  /**
    * Arguments that specify a remote feed. Note that feeds consisting of books bundled into the
    * application are still considered to be "remote" because they consist of data that is effectively
    * external to the application.
@@ -33,7 +39,9 @@ sealed class CatalogFeedArguments : Serializable {
     override val title: String,
     val feedURI: URI,
     override val isSearchResults: Boolean
-  ) : CatalogFeedArguments()
+  ) : CatalogFeedArguments() {
+    override val isLocallyGenerated: Boolean = false
+  }
 
   /**
    * Arguments that specify whatever is the default remote feed for the account that is current
@@ -44,6 +52,7 @@ sealed class CatalogFeedArguments : Serializable {
     override val title: String
   ) : CatalogFeedArguments() {
     override val isSearchResults: Boolean = false
+    override val isLocallyGenerated: Boolean = false
   }
 
   /**
@@ -57,5 +66,6 @@ sealed class CatalogFeedArguments : Serializable {
     val selection: FeedBooksSelection
   ) : CatalogFeedArguments() {
     override val isSearchResults: Boolean = false
+    override val isLocallyGenerated: Boolean = true
   }
 }
