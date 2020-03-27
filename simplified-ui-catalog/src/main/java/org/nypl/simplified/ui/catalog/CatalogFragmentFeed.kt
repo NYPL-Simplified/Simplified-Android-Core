@@ -292,6 +292,14 @@ class CatalogFragmentFeed : Fragment() {
     this.accountSubscription =
       this.profilesController.accountEvents()
         .subscribe(this::onAccountEvent)
+
+    /*
+     * Refresh the feed if it is locally generated.
+     */
+
+    if (this.parameters.isLocallyGenerated) {
+      this.feedModel.reloadFeed(this.parameters)
+    }
   }
 
   private fun onAccountEvent(event: AccountEvent) {
@@ -304,12 +312,10 @@ class CatalogFragmentFeed : Fragment() {
     return when (event) {
       is AccountEventCreation.AccountEventCreationSucceeded,
       is AccountEventDeletion.AccountEventDeletionSucceeded -> {
-        when (this.parameters) {
-          is CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault,
-          is CatalogFeedArguments.CatalogFeedArgumentsRemote -> {
-          }
-          is CatalogFeedArguments.CatalogFeedArgumentsLocalBooks ->
-            this.feedModel.reloadFeed(this.parameters)
+        if (this.parameters.isLocallyGenerated) {
+          this.feedModel.reloadFeed(this.parameters)
+        } else {
+          // No reload necessary
         }
       }
       else -> {
