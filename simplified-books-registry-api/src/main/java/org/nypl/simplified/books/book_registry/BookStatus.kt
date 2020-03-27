@@ -7,6 +7,8 @@ import org.joda.time.DateTime
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.http.core.HTTPHasProblemReportType
+import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
@@ -18,6 +20,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
 
 sealed class BookStatus {
 
@@ -117,7 +120,7 @@ sealed class BookStatus {
      */
 
     val result: TaskResult.Failure<BookStatusRevokeErrorDetails, Unit>
-  ) : BookStatus(), PresentableErrorType {
+  ) : BookStatus(), PresentableErrorType, HTTPHasProblemReportType {
 
     override val priority: BookStatusPriorityOrdering
       get() = BookStatusPriorityOrdering.BOOK_STATUS_REVOKE_FAILED
@@ -127,6 +130,18 @@ sealed class BookStatus {
 
     override val message: String
       get() = this.result.steps.lastOrNull()?.resolution?.message ?: ""
+
+    override val problemReport: HTTPProblemReport?
+      get() {
+        val resolution = this.result.steps.lastOrNull()?.resolution
+        if (resolution is TaskStepFailed) {
+          val errorValue = resolution.errorValue
+          if (errorValue is HTTPHasProblemReportType) {
+            return errorValue.problemReport
+          }
+        }
+        return null
+      }
   }
 
   /**
@@ -162,13 +177,25 @@ sealed class BookStatus {
      */
 
     val result: TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
-  ) : BookStatus(), PresentableErrorType {
+  ) : BookStatus(), PresentableErrorType, HTTPHasProblemReportType {
 
     override val priority: BookStatusPriorityOrdering
       get() = BookStatusPriorityOrdering.BOOK_STATUS_DOWNLOAD_FAILED
 
     override val message: String
       get() = this.result.steps.lastOrNull()?.resolution?.message ?: ""
+
+    override val problemReport: HTTPProblemReport?
+      get() {
+        val resolution = this.result.steps.lastOrNull()?.resolution
+        if (resolution is TaskStepFailed) {
+          val errorValue = resolution.errorValue
+          if (errorValue is HTTPHasProblemReportType) {
+            return errorValue.problemReport
+          }
+        }
+        return null
+      }
   }
 
   /**

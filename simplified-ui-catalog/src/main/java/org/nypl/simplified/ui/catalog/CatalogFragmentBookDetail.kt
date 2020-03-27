@@ -49,6 +49,7 @@ import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -103,6 +104,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var screenSize: ScreenSizeInformationType
   private lateinit var status: ViewGroup
   private lateinit var statusFailed: ViewGroup
+  private lateinit var statusFailedText: TextView
   private lateinit var statusIdle: ViewGroup
   private lateinit var statusIdleText: TextView
   private lateinit var statusInProgress: ViewGroup
@@ -225,6 +227,8 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.statusFailed =
       this.status.findViewById(R.id.bookDetailStatusFailed)
+    this.statusFailedText =
+      this.status.findViewById(R.id.failedText)
 
     this.statusIdle.visibility = View.VISIBLE
     this.statusInProgress.visibility = View.INVISIBLE
@@ -527,6 +531,10 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
+
+    // Get the problem report message, if any.
+    this.statusFailedText.text =
+      bookStatus.problemReport?.problemDetail ?: getString(R.string.catalogOperationFailed)
   }
 
   @UiThread
@@ -831,6 +839,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
+    this.statusFailedText.text = getString(R.string.catalogOperationFailed)
   }
 
   @UiThread
@@ -857,6 +866,10 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
+
+    // Get the problem report message, if any.
+    this.statusFailedText.text =
+      bookStatus.problemReport?.problemDetail ?: getString(R.string.catalogOperationFailed)
   }
 
   @UiThread
