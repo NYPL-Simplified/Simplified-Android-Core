@@ -11,7 +11,7 @@
   <string name="borrowBookDatabaseCreateOrUpdate">Setting up book database entry…</string>
   <string name="borrowBookDatabaseFailed">Failed to update book database.</string>
   <string name="borrowBookDatabaseUpdated">Book database entry updated successfully.</string>
-  <string name="borrowBookFeedLoadingFailed">Failed to load a feed from the server (%1$s).</string>
+  <string name="borrowBookFeedLoadingFailed">Failed to load feed: %1$s</string>
   <string name="borrowBookFetchingCover">Fetching book cover…</string>
   <string name="borrowBookFulfill">Fulfilling loan…</string>
   <string name="borrowBookFulfillACSM">Fulfilling a book via an ACSM file…</string>
