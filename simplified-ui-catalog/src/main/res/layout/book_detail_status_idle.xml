@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/bookDetailStatusIdle"
-  tools:background="?attr/simplifiedColorPrimary"
-  tools:layout_height="@dimen/catalogBookDetailStatusHeight"
-  tools:layout_width="match_parent"
-  tools:parentTag="android.widget.FrameLayout">
+  android:layout_width="match_parent"
+  android:layout_height="@dimen/catalogBookDetailStatusHeight"
+  tools:background="?attr/simplifiedColorPrimary">
 
   <TextView
     android:id="@+id/idleText"
@@ -17,4 +16,4 @@
     android:maxLines="2"
     android:textColor="#fff"
     tools:text="@string/catalogPlaceholder" />
-</merge>
+</FrameLayout>
