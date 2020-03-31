@@ -107,6 +107,9 @@ public final class HTTPProblemReport implements Serializable
       if ("http://librarysimplified.org/terms/problem/loan-limit-reached".equals(type_value)) {
         return ProblemType.LoanLimitReached;
       }
+      if ("http://librarysimplified.org/terms/problem/hold-limit-reached".equals(type_value)) {
+        return ProblemType.HoldLimitReached;
+      }
     }
     return ProblemType.Unknown;
   }
@@ -125,35 +128,16 @@ public final class HTTPProblemReport implements Serializable
     return ProblemStatus.Unknown;
   }
 
-  /**
-   * Problem type enum.
-   */
   public enum ProblemType implements Serializable
   {
-    /**
-     * Loan limit reached problem.
-     */
     LoanLimitReached,
-    /**
-     * Unknown problem.
-     */
+    HoldLimitReached,
     Unknown
   }
 
-
-  /**
-   *
-   */
   public enum ProblemStatus implements Serializable
   {
-
-    /**
-     * Unauthorized problem
-     */
     Unauthorized,
-    /**
-     * Unknown problem.
-     */
     Unknown
   }
 }
