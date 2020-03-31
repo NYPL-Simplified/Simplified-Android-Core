@@ -42,9 +42,12 @@ interface AccountProviderRegistryType {
 
   /**
    * Refresh the available account providers from all sources.
+   *
+   * @param includeTestingLibraries A hint for providers indicating whether
+   * testing libraries should be loaded. May be ignored by some providers.
    */
 
-  fun refresh()
+  fun refresh(includeTestingLibraries: Boolean)
 
   /**
    * Return an immutable read-only of the account provider descriptions.

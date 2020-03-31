@@ -62,7 +62,47 @@ abstract class AccountProviderNYPLRegistryContract {
    */
 
   @Test
-  fun testProvidersFromServerOK() {
+  fun testProductionProvidersFromServerOK() {
+    val mockHTTP = MockingHTTP()
+
+    mockHTTP.addResponse(
+      "https://libraryregistry.librarysimplified.org/libraries",
+      HTTPResultOK(
+        "OK",
+        200,
+        readAllFromResource("libraryregistry.json"),
+        0L,
+        mapOf(),
+        0L))
+
+    val provider =
+      AccountProviderSourceNYPLRegistry(
+        http = mockHTTP,
+        authDocumentParsers = AuthenticationDocumentParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(),
+        serializers = AccountProviderDescriptionCollectionSerializers())
+
+    val result = provider.load(this.context, false)
+    this.logger.debug("status: {}", result)
+    val success = result as SourceSucceeded
+
+    Assert.assertEquals(43, success.results.size)
+    Assert.assertEquals(
+      "The correct number of providers are in production",
+      43,
+      success.results.values.filter { p -> p.metadata.isProduction }.size)
+    Assert.assertEquals(
+      "The correct number of providers are not in production",
+      0,
+      success.results.values.filter { p -> !p.metadata.isProduction }.size)
+  }
+
+  /**
+   * The correct providers are returned from the server.
+   */
+
+  @Test
+  fun testAllProvidersFromServerOK() {
     val mockHTTP = MockingHTTP()
 
     mockHTTP.addResponse(
@@ -92,7 +132,7 @@ abstract class AccountProviderNYPLRegistryContract {
         parsers = AccountProviderDescriptionCollectionParsers(),
         serializers = AccountProviderDescriptionCollectionSerializers())
 
-    val result = provider.load(this.context)
+    val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
@@ -127,7 +167,7 @@ abstract class AccountProviderNYPLRegistryContract {
         parsers = AccountProviderDescriptionCollectionParsers(),
         serializers = AccountProviderDescriptionCollectionSerializers())
 
-    val result = provider.load(this.context)
+    val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
@@ -173,7 +213,7 @@ abstract class AccountProviderNYPLRegistryContract {
         parsers = AccountProviderDescriptionCollectionParsers(),
         serializers = AccountProviderDescriptionCollectionSerializers())
 
-    val result = provider.load(this.context)
+    val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
@@ -225,7 +265,7 @@ abstract class AccountProviderNYPLRegistryContract {
         parsers = AccountProviderDescriptionCollectionParsers(),
         serializers = AccountProviderDescriptionCollectionSerializers())
 
-    val result = provider.load(this.context)
+    val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
     val failed = result as AccountProviderSourceType.SourceResult.SourceFailed
 
@@ -254,7 +294,7 @@ abstract class AccountProviderNYPLRegistryContract {
         serializers = AccountProviderDescriptionCollectionSerializers())
 
     run {
-      val result = provider.load(this.context)
+      val result = provider.load(this.context, true)
       this.logger.debug("status: {}", result)
       val success = result as SourceSucceeded
 
@@ -282,7 +322,7 @@ abstract class AccountProviderNYPLRegistryContract {
         0L))
 
     run {
-      val result = provider.load(this.context)
+      val result = provider.load(this.context, true)
       this.logger.debug("status: {}", result)
       val success = result as SourceSucceeded
 

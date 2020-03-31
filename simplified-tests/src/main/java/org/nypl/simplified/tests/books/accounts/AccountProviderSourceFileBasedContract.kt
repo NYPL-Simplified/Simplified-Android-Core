@@ -27,7 +27,7 @@ abstract class AccountProviderSourceFileBasedContract {
       this.readAllFromResource("providers-all.json")
     })
 
-    val result = provider.load(this.context)
+    val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
     Assert.assertEquals(172, success.results.size)
