@@ -2,7 +2,11 @@ package org.nypl.simplified.tests.books.profiles
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.joda.time.DateTime
+import org.joda.time.DateTimeUtils
+import org.joda.time.DateTimeZone
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.nypl.simplified.profiles.ProfileDescriptionJSON
 import org.nypl.simplified.profiles.api.ProfileAttributes
@@ -15,6 +19,19 @@ import org.slf4j.LoggerFactory
 abstract class ProfileDescriptionJSONContract {
 
   private val logger = LoggerFactory.getLogger(ProfileDescriptionJSONContract::class.java)
+  private val currentDateTimeZoneSystem = DateTimeZone.getDefault()
+
+  @Before
+  fun setUp() {
+    DateTimeUtils.setCurrentMillisFixed(0L)
+    DateTimeZone.setDefault(DateTimeZone.UTC)
+  }
+
+  @After
+  fun tearDown() {
+    DateTimeUtils.setCurrentMillisSystem()
+    DateTimeZone.setDefault(currentDateTimeZoneSystem)
+  }
 
   @Test
   fun testRoundTrip() {
