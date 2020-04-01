@@ -30,9 +30,9 @@ class TransformProviders {
           if (entry.needsAuth) {
             AccountProviderAuthenticationDescription.Basic(
               barcodeFormat = if (entry.supportsBarcodeDisplay) "CodaBar" else null,
-              keyboard = entry.loginKeyboard,
-              passwordMaximumLength = entry.authPasscodeLength.toInt(),
-              passwordKeyboard = entry.pinKeyboard,
+              keyboard = AccountProviderAuthenticationDescription.KeyboardInput.valueOf(entry.loginKeyboard ?: "DEFAULT"),
+              passwordMaximumLength = entry.authPasscodeLength,
+              passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.valueOf(entry.pinKeyboard ?: "DEFAULT"),
               description = "",
               labels = mapOf())
           } else {

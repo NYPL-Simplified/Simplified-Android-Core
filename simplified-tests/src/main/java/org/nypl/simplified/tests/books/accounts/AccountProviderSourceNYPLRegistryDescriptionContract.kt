@@ -355,9 +355,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Basic(
         "CODABAR",
-        "DEFAULT",
+        AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         20,
-        "DEFAULT",
+        AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         "Basic Auth",
         labels = mapOf(
           Pair("LOGIN", "LOGIN!"),

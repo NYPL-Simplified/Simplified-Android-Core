@@ -26,6 +26,7 @@ import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
@@ -60,9 +61,11 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var authentication: ViewGroup
   private lateinit var authenticationBasic: ViewGroup
   private lateinit var authenticationBasicPass: EditText
+  private lateinit var authenticationBasicPassLabel: View
   private lateinit var authenticationBasicPassListener: OnTextChangeListener
   private lateinit var authenticationBasicShowPass: CheckBox
   private lateinit var authenticationBasicUser: EditText
+  private lateinit var authenticationBasicUserLabel: View
   private lateinit var authenticationBasicUserListener: OnTextChangeListener
   private lateinit var authenticationCOPPA: ViewGroup
   private lateinit var authenticationCOPPAOver13: Switch
@@ -146,10 +149,14 @@ class SettingsFragmentAccount : Fragment() {
       this.authentication.findViewById(R.id.authBasic)
     this.authenticationBasicUser =
       this.authenticationBasic.findViewById(R.id.authBasicUserNameField)
+    this.authenticationBasicUserLabel =
+      this.authenticationBasic.findViewById(R.id.authBasicUserNameLabel)
     this.authenticationBasicUserListener =
       OnTextChangeListener(this::onBasicUserChanged)
     this.authenticationBasicPass =
       this.authenticationBasic.findViewById(R.id.authBasicPasswordField)
+    this.authenticationBasicPassLabel =
+      this.authenticationBasic.findViewById(R.id.authBasicPasswordLabel)
     this.authenticationBasicPassListener =
       OnTextChangeListener(this::onBasicPasswordChanged)
     this.authenticationBasicShowPass =
@@ -196,7 +203,7 @@ class SettingsFragmentAccount : Fragment() {
 
   @UiThread
   private fun determineLoginIsSatisfied(): Boolean {
-    return when (this.account.provider.authentication) {
+    return when (val auth = this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
         false
 
@@ -208,11 +215,16 @@ class SettingsFragmentAccount : Fragment() {
           true
         }
 
-        val userOk = this.authenticationBasicUser.text.isNotBlank()
-        val passOk = this.authenticationBasicPass.text.isNotBlank()
-        this.logger.debug("login: eula ok: {}", eulaOk)
-        this.logger.debug("login: user ok: {}", userOk)
-        this.logger.debug("login: pass ok: {}", passOk)
+        val noUserRequired =
+          auth.keyboard == KeyboardInput.NO_INPUT
+        val noPasswordRequired =
+          auth.passwordKeyboard == KeyboardInput.NO_INPUT
+        val userOk =
+          this.authenticationBasicUser.text.isNotBlank() || noUserRequired
+        val passOk =
+          this.authenticationBasicPass.text.isNotBlank() || noPasswordRequired
+
+        this.logger.debug("login: eula ok: {}, user ok: {}, pass ok: {}", eulaOk, userOk, passOk)
         userOk && passOk && eulaOk
       }
 
@@ -368,7 +380,7 @@ class SettingsFragmentAccount : Fragment() {
     this.bookmarkSyncCheck.isChecked = this.account.preferences.bookmarkSyncingPermitted
     this.bookmarkSyncCheck.isEnabled = this.account.provider.supportsSimplyESynchronization
 
-    when (this.account.provider.authentication) {
+    when (val auth = this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate -> {
         this.authentication.visibility = View.VISIBLE
         this.authenticationCOPPA.visibility = View.VISIBLE
@@ -378,6 +390,41 @@ class SettingsFragmentAccount : Fragment() {
         this.authentication.visibility = View.VISIBLE
         this.authenticationCOPPA.visibility = View.INVISIBLE
         this.authenticationBasic.visibility = View.VISIBLE
+
+        /*
+         * Configure the presence of the individual fields based on keyboard input values
+         * given in the authentication document.
+         *
+         * TODO: Add the extra input validation for the more precise types such as NUMBER_PAD.
+         */
+
+        when (auth.keyboard) {
+          KeyboardInput.NO_INPUT -> {
+            this.authenticationBasicUserLabel.visibility = View.GONE
+            this.authenticationBasicUser.visibility = View.GONE
+          }
+          KeyboardInput.DEFAULT,
+          KeyboardInput.EMAIL_ADDRESS,
+          KeyboardInput.NUMBER_PAD -> {
+            this.authenticationBasicUserLabel.visibility = View.VISIBLE
+            this.authenticationBasicUser.visibility = View.VISIBLE
+          }
+        }
+
+        when (auth.passwordKeyboard) {
+          KeyboardInput.NO_INPUT -> {
+            this.authenticationBasicPassLabel.visibility = View.GONE
+            this.authenticationBasicPass.visibility = View.GONE
+            this.authenticationBasicShowPass.visibility = View.GONE
+          }
+          KeyboardInput.DEFAULT,
+          KeyboardInput.EMAIL_ADDRESS,
+          KeyboardInput.NUMBER_PAD -> {
+            this.authenticationBasicPassLabel.visibility = View.VISIBLE
+            this.authenticationBasicPass.visibility = View.VISIBLE
+            this.authenticationBasicShowPass.visibility = View.VISIBLE
+          }
+        }
       }
       null -> {
         this.authentication.visibility = View.GONE

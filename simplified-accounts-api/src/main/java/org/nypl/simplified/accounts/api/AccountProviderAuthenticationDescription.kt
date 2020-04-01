@@ -52,8 +52,42 @@ sealed class AccountProviderAuthenticationDescription {
     init {
       Preconditions.checkState(
         this.greaterEqual13 != this.under13,
-        "URIs ${this.greaterEqual13} and ${this.under13} must differ")
+        "URIs ${this.greaterEqual13} and ${this.under13} must differ"
+      )
     }
+  }
+
+  /**
+   * Values used in the NYPL's "input" extension.
+   *
+   * @see "https://github.com/NYPL-Simplified/Simplified/wiki/Authentication-For-OPDS-Extensions#keyboard"
+   */
+
+  enum class KeyboardInput {
+
+    /**
+     * The default keyboard for the platform.
+     */
+
+    DEFAULT,
+
+    /**
+     * A keyboard optimized for entering email addresses.
+     */
+
+    EMAIL_ADDRESS,
+
+    /**
+     * A numeric keypad.
+     */
+
+    NUMBER_PAD,
+
+    /**
+     * This server does not expect this input to be provided at all, and the client should not collect it.
+     */
+
+    NO_INPUT
   }
 
   /**
@@ -71,9 +105,11 @@ sealed class AccountProviderAuthenticationDescription {
 
     /**
      * The keyboard type used for barcode entry, such as "DEFAULT".
+     *
+     * Note: If the keyboard extension is missing or null, the value assumed should be DEFAULT, not NO_INPUT.
      */
 
-    val keyboard: String?,
+    val keyboard: KeyboardInput,
 
     /**
      * The maximum length of the password.
@@ -83,9 +119,11 @@ sealed class AccountProviderAuthenticationDescription {
 
     /**
      * The keyboard type used for password entry, such as "DEFAULT".
+     *
+     * Note: If the keyboard extension is missing or null, the value assumed should be DEFAULT, not NO_INPUT.
      */
 
-    val passwordKeyboard: String?,
+    val passwordKeyboard: KeyboardInput,
 
     /**
      * The description of the login dialog.
@@ -109,12 +147,6 @@ sealed class AccountProviderAuthenticationDescription {
       Preconditions.checkArgument(
         this.barcodeFormat?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
         "Barcode format ${this.barcodeFormat} must be uppercase")
-      Preconditions.checkArgument(
-        this.keyboard?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
-        "Keyboard ${this.keyboard} must be uppercase")
-      Preconditions.checkArgument(
-        this.passwordKeyboard?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
-        "Password keyboard ${this.passwordKeyboard} must be uppercase")
     }
   }
 }
