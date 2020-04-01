@@ -176,9 +176,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -252,9 +252,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -334,9 +334,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -405,9 +405,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -474,9 +474,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -567,9 +567,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -660,9 +660,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -808,9 +808,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -915,9 +915,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 
@@ -1032,9 +1032,9 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(AccountProviderAuthenticationDescription.Basic(
         barcodeFormat = "CODABAR",
-        keyboard = "DEFAULT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         passwordMaximumLength = 10,
-        passwordKeyboard = "DEFAULT",
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
         labels = mapOf()))
 

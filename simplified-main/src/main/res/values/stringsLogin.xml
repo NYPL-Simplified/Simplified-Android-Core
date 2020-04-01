@@ -10,7 +10,7 @@
   <string name="loginErrorServer">Server returned an error: %1$d %2$s</string>
   <string name="loginErrorAuthNotRequired">Authentication is not required!</string>
   <string name="loginErrorNoPatronURI">No patron settings URI is defined!</string>
-  <string name="loginErrorInvalidCredentials">Your barcode and pin combination was not valid. Please try again.</string>
+  <string name="loginErrorInvalidCredentials">Your login is incorrect. Please try again.</string>
   <string name="loginErrorConnectionFailed">A network error occurred. Please check your connection or try again later.</string>
   <string name="loginErrorPatronSettingsParseError">Could not parse patron settings returned by server!</string>
   <string name="loginDeviceDRMNotSupported">This account requires Adobe ACS DRM, but this version of the application does not support it.</string>

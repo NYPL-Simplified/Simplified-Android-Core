@@ -24,6 +24,7 @@ import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.documents.eula.EULAType
@@ -237,7 +238,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
   @UiThread
   private fun determineLoginIsSatisfied(): Boolean {
-    return when (this.account.provider.authentication) {
+    return when (val auth = this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
         false
 
@@ -249,11 +250,16 @@ class CatalogFragmentLoginDialog : DialogFragment() {
           true
         }
 
-        val userOk = this.userName.text.isNotBlank()
-        val passOk = this.password.text.isNotBlank()
-        this.logger.debug("login: eula ok: {}", eulaOk)
-        this.logger.debug("login: user ok: {}", userOk)
-        this.logger.debug("login: pass ok: {}", passOk)
+        val noUserRequired =
+          auth.keyboard == KeyboardInput.NO_INPUT
+        val noPasswordRequired =
+          auth.passwordKeyboard == KeyboardInput.NO_INPUT
+        val userOk =
+          this.userName.text.isNotBlank() || noUserRequired
+        val passOk =
+          this.password.text.isNotBlank() || noPasswordRequired
+
+        this.logger.debug("login: eula ok: {}, user ok: {}, pass ok: {}", eulaOk, userOk, passOk)
         userOk && passOk && eulaOk
       }
 
@@ -265,6 +271,48 @@ class CatalogFragmentLoginDialog : DialogFragment() {
   @UiThread
   private fun reconfigureUI() {
     this.uiThread.checkIsUIThread()
+
+    when (val auth = this.account.provider.authentication) {
+      null,
+      is AccountProviderAuthenticationDescription.COPPAAgeGate -> {
+        // Technically unreachable code...
+      }
+
+      is AccountProviderAuthenticationDescription.Basic -> {
+        /*
+         * Configure the presence of the individual fields based on keyboard input values
+         * given in the authentication document.
+         *
+         * TODO: Add the extra input validation for the more precise types such as NUMBER_PAD.
+         */
+
+        when (auth.keyboard) {
+          KeyboardInput.NO_INPUT -> {
+            this.userNameLabel.visibility = View.GONE
+            this.userName.visibility = View.GONE
+          }
+          KeyboardInput.DEFAULT,
+          KeyboardInput.EMAIL_ADDRESS,
+          KeyboardInput.NUMBER_PAD -> {
+            this.userNameLabel.visibility = View.VISIBLE
+            this.userName.visibility = View.VISIBLE
+          }
+        }
+
+        when (auth.passwordKeyboard) {
+          KeyboardInput.NO_INPUT -> {
+            this.passwordLabel.visibility = View.GONE
+            this.password.visibility = View.GONE
+          }
+          KeyboardInput.DEFAULT,
+          KeyboardInput.EMAIL_ADDRESS,
+          KeyboardInput.NUMBER_PAD -> {
+            this.passwordLabel.visibility = View.VISIBLE
+            this.password.visibility = View.VISIBLE
+          }
+        }
+      }
+    }
 
     return when (val state = this.account.loginState) {
       AccountLoginState.AccountNotLoggedIn -> {

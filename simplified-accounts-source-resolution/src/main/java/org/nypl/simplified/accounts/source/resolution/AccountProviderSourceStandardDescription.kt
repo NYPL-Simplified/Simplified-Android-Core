@@ -9,6 +9,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.ANONYMOUS_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
+import java.util.Locale
 
 /**
  * An account provider description augmented with the logic needed to resolve the description
@@ -93,7 +95,7 @@ class AccountProviderSourceStandardDescription(
         authDocument?.startURI
           ?: this.metadata.catalogURI
             ?.hrefURI
-          ?: run {
+          ?: this.run {
             val message = this.stringResources.resolvingAuthDocumentNoStartURI
             taskRecorder.currentStepFailed(
               message = message,
@@ -199,11 +201,29 @@ class AccountProviderSourceStandardDescription(
 
     return AccountProviderAuthenticationDescription.Basic(
       barcodeFormat = loginRestrictions?.barcodeFormat,
-      keyboard = loginRestrictions?.keyboardType,
+      keyboard = parseKeyboardType(loginRestrictions?.keyboardType),
       passwordMaximumLength = passwordRestrictions?.maximumLength ?: 0,
-      passwordKeyboard = passwordRestrictions?.keyboardType,
+      passwordKeyboard = parseKeyboardType(passwordRestrictions?.keyboardType),
       description = authObject.description,
-      labels = authObject.labels)
+      labels = authObject.labels
+    )
+  }
+
+  private fun parseKeyboardType(
+    text: String?
+  ): KeyboardInput {
+    if (text == null) {
+      return KeyboardInput.DEFAULT
+    }
+
+    return try {
+      KeyboardInput.valueOf(
+        text.toUpperCase(Locale.ROOT).replace(' ', '_')
+      )
+    } catch (e: Exception) {
+      this.logger.error("unable to interpret keyboard type: {}", text)
+      KeyboardInput.DEFAULT
+    }
   }
 
   private fun extractAuthenticationDescriptionCOPPA(

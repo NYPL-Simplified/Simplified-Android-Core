@@ -83,12 +83,16 @@ abstract class MigrationFrom3MasterContract {
           val taskRecorder =
             TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed("FAILED!", AccountLoginUnexpectedException("Ouch", Exception()))
+          taskRecorder.currentStepFailed(
+            "FAILED!",
+            AccountLoginUnexpectedException("Ouch", Exception())
+          )
           taskRecorder.finishFailure()
         },
         accountEvents = this.accountEvents,
         applicationVersion = "test suite 0.0.1",
-        context = this.context)
+        context = this.context
+      )
 
     this.tempDir.delete()
     this.tempDir.mkdirs()
@@ -294,12 +298,16 @@ abstract class MigrationFrom3MasterContract {
           val taskRecorder =
             TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed("FAILED!", AccountLoginUnexpectedException("Ouch", Exception()))
+          taskRecorder.currentStepFailed(
+            "FAILED!",
+            AccountLoginUnexpectedException("Ouch", Exception())
+          )
           taskRecorder.finishFailure()
         },
         accountEvents = this.accountEvents,
         applicationVersion = "test suite 0.0.1",
-        context = this.context)
+        context = this.context
+      )
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
@@ -354,7 +362,16 @@ abstract class MigrationFrom3MasterContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(accountProvider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(null, null, 20, null, "Basic", mapOf()))
+      .thenReturn(
+        AccountProviderAuthenticationDescription.Basic(
+          null,
+          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          20,
+          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          "Basic",
+          mapOf()
+        )
+      )
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
@@ -381,7 +398,8 @@ abstract class MigrationFrom3MasterContract {
         },
         accountEvents = this.accountEvents,
         applicationVersion = "test suite 0.0.1",
-        context = this.context)
+        context = this.context
+      )
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
@@ -421,7 +439,8 @@ abstract class MigrationFrom3MasterContract {
       BookDatabases.openDatabase(
         context = this.context,
         owner = AccountID(UUID.randomUUID()),
-        directory = this.tempBookDatabaseDir)
+        directory = this.tempBookDatabaseDir
+      )
 
     val accountProvider =
       Mockito.mock(AccountProviderType::class.java)
@@ -429,7 +448,16 @@ abstract class MigrationFrom3MasterContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(accountProvider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(null, null, 20, null, "Basic", mapOf()))
+      .thenReturn(
+        AccountProviderAuthenticationDescription.Basic(
+          null,
+          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          20,
+          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          "Basic",
+          mapOf()
+        )
+      )
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
@@ -457,7 +485,8 @@ abstract class MigrationFrom3MasterContract {
         },
         accountEvents = this.accountEvents,
         applicationVersion = "test suite 0.0.1",
-        context = this.context)
+        context = this.context
+      )
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
@@ -466,7 +495,8 @@ abstract class MigrationFrom3MasterContract {
 
     val booksDir = File(acc, "books")
     val booksDataDir = File(booksDir, "data")
-    val bookDir = File(booksDataDir, "5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
+    val bookDir =
+      File(booksDataDir, "5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
     bookDir.mkdirs()
 
     val bookEPUBFile = File(bookDir, "book.epub")
@@ -566,7 +596,16 @@ abstract class MigrationFrom3MasterContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(accountProvider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(null, null, 20, null, "Basic", mapOf()))
+      .thenReturn(
+        AccountProviderAuthenticationDescription.Basic(
+          null,
+          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          20,
+          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          "Basic",
+          mapOf()
+        )
+      )
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
@@ -604,7 +643,8 @@ abstract class MigrationFrom3MasterContract {
         },
         accountEvents = this.accountEvents,
         applicationVersion = "test suite 0.0.1",
-        context = this.context)
+        context = this.context
+      )
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
@@ -613,7 +653,8 @@ abstract class MigrationFrom3MasterContract {
 
     val booksDir = File(acc, "books")
     val booksDataDir = File(booksDir, "data")
-    val bookDir = File(booksDataDir, "5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
+    val bookDir =
+      File(booksDataDir, "5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
     bookDir.mkdirs()
 
     val bookEPUBFile = File(bookDir, "book.epub")
@@ -668,7 +709,8 @@ abstract class MigrationFrom3MasterContract {
       BookDatabases.openDatabase(
         context = this.context,
         owner = AccountID(UUID.randomUUID()),
-        directory = this.tempBookDatabaseDir)
+        directory = this.tempBookDatabaseDir
+      )
 
     val accountProvider =
       Mockito.mock(AccountProviderType::class.java)
@@ -676,7 +718,16 @@ abstract class MigrationFrom3MasterContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(accountProvider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(null, null, 20, null, "Basic", mapOf()))
+      .thenReturn(
+        AccountProviderAuthenticationDescription.Basic(
+          null,
+          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          20,
+          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          "Basic",
+          mapOf()
+        )
+      )
     Mockito.`when`(accountProvider.displayName)
       .thenReturn("Account 0")
     Mockito.`when`(account.provider)
@@ -700,12 +751,16 @@ abstract class MigrationFrom3MasterContract {
           val taskRecorder =
             TaskRecorder.create<AccountLoginState.AccountLoginErrorData>()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed("FAILURE!", AccountLoginUnexpectedException("FAILURE!", Exception()))
+          taskRecorder.currentStepFailed(
+            "FAILURE!",
+            AccountLoginUnexpectedException("FAILURE!", Exception())
+          )
           taskRecorder.finishFailure()
         },
         accountEvents = this.accountEvents,
         applicationVersion = "test suite 0.0.1",
-        context = this.context)
+        context = this.context
+      )
 
     val acc = File(this.tempDir, "12")
     acc.mkdirs()
@@ -714,7 +769,8 @@ abstract class MigrationFrom3MasterContract {
 
     val booksDir = File(acc, "books")
     val booksDataDir = File(booksDir, "data")
-    val bookDir = File(booksDataDir, "5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
+    val bookDir =
+      File(booksDataDir, "5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
     bookDir.mkdirs()
 
     val bookEPUBFile = File(bookDir, "book.epub")
@@ -787,7 +843,8 @@ abstract class MigrationFrom3MasterContract {
 
   private fun resource(name: String): ByteArray {
     return MigrationFrom3MasterContract::class.java.getResource(
-      "/org/nypl/simplified/tests/migration/from3master/$name")
+        "/org/nypl/simplified/tests/migration/from3master/$name"
+      )
       .readBytes()
   }
 }
