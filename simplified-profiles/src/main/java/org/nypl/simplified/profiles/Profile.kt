@@ -50,6 +50,17 @@ internal class Profile internal constructor(
   @GuardedBy("accountCurrentLock")
   private var accountCurrent: AccountType = initialAccountCurrent
 
+  init {
+    val mostRecentAccount = initialDescription.preferences.mostRecentAccount
+    if (mostRecentAccount != null) {
+      try {
+        this.setAccountCurrent(mostRecentAccount)
+      } catch (e: AccountsDatabaseNonexistentException) {
+        this.logger.debug("unable to restore current account {}: ", mostRecentAccount.uuid, e)
+      }
+    }
+  }
+
   internal fun setOwner(owner: ProfilesDatabase) {
     this.owner = owner
   }
@@ -143,6 +154,13 @@ internal class Profile internal constructor(
     val account = this.accounts.accountsByProvider()[accountProvider]
     if (account != null) {
       this.setAccountCurrent(account.id)
+
+      val newPreferences =
+        this.descriptionCurrent.preferences.copy(mostRecentAccount = account.id)
+      val newDescription =
+        this.descriptionCurrent.copy(preferences = newPreferences)
+
+      this.setDescription(newDescription)
       return account
     }
 
