@@ -18,6 +18,7 @@ import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
@@ -43,6 +44,7 @@ class SettingsFragmentVersion : Fragment() {
   private val logger =
     LoggerFactory.getLogger(SettingsFragmentVersion::class.java)
 
+  private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var adobeDRMActivationTable: TableLayout
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var buildText: TextView
@@ -72,6 +74,8 @@ class SettingsFragmentVersion : Fragment() {
 
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
+    this.accountRegistry =
+      services.requireService(AccountProviderRegistryType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
     this.buildConfig =
@@ -288,12 +292,15 @@ class SettingsFragmentVersion : Fragment() {
 
   private fun onProfileEvent(event: ProfileEvent) {
     if (event is ProfileUpdated) {
+      val showTestingLibraries = this.profilesController
+        .profileCurrent()
+        .preferences()
+        .showTestingLibraries
+      if (showTestingLibraries) {
+        this.accountRegistry.refresh(includeTestingLibraries = true)
+      }
       this.uiThread.runOnUIThread(Runnable {
-        this.showTesting.isChecked =
-          this.profilesController
-            .profileCurrent()
-            .preferences()
-            .showTestingLibraries
+        this.showTesting.isChecked = showTestingLibraries
       })
     }
   }
