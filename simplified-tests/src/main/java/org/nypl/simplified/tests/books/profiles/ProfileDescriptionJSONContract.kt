@@ -45,7 +45,9 @@ abstract class ProfileDescriptionJSONContract {
         displayName = "Kermit",
         preferences = ProfilePreferences(ProfileDateOfBirth(dateTime, true),
           showTestingLibraries = false,
-          readerPreferences = ReaderPreferences.builder().build()),
+          readerPreferences = ReaderPreferences.builder().build(),
+          mostRecentAccount = null
+        ),
         attributes = ProfileAttributes(
           sortedMapOf(
             Pair("a", "b"),
