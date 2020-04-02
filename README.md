@@ -250,7 +250,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
 |[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
 |[org.librarysimplified.migration.spi](simplified-migration-spi)|Data migration SPI|
-|[org.librarysimplified.mime](simplified-mime)|MIME type handling|
 |[org.librarysimplified.networkconnectivity](simplified-networkconnectivity)|Network connectivity|
 |[org.librarysimplified.networkconnectivity.api](simplified-networkconnectivity-api)|Network connectivity API|
 |[org.librarysimplified.notifications](simplified-notifications)|Notification service|
