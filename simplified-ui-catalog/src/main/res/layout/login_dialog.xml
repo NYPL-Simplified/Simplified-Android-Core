@@ -92,16 +92,31 @@
       app:layout_constraintStart_toStartOf="@id/loginTable"
       app:layout_constraintTop_toBottomOf="@id/loginProgressBar" />
 
-    <Button
-      android:id="@+id/loginButton"
-      android:layout_width="match_parent"
+    <LinearLayout
+      android:orientation="horizontal"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:layout_margin="16dp"
-      android:layout_marginBottom="16dp"
-      android:text="@string/loginLogin"
+      android:layout_marginTop="32dp"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/loginEULA" />
+      app:layout_constraintTop_toBottomOf="@id/loginEULA">
+
+      <Button
+        android:id="@+id/loginErrorDetailsButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:layout_weight="1"
+        android:text="@string/errorDetailsTitle"
+        android:visibility="gone" />
+
+      <Button
+        android:id="@+id/loginButton"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="@string/loginLogin" />
+    </LinearLayout>
 
     <View
       android:id="@+id/lockFormOverlay"
@@ -115,6 +130,7 @@
         android:id="@+id/loginProgressText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:ellipsize="end"
         android:gravity="center_horizontal"

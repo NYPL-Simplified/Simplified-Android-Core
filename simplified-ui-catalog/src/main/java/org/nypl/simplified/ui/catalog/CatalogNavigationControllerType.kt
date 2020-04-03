@@ -32,6 +32,14 @@ interface CatalogNavigationControllerType : NavigationControllerType {
   )
 
   /**
+   * Open a login dialog for the given parameters.
+   */
+
+  fun openLoginDialog(
+    parameters: CatalogFragmentLoginDialogParameters
+  )
+
+  /**
    * A catalog screen wants to open a feed.
    */
 

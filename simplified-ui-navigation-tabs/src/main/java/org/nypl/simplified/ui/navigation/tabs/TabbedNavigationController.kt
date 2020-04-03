@@ -24,6 +24,8 @@ import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsR
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
 import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
+import org.nypl.simplified.ui.catalog.CatalogFragmentLoginDialog
+import org.nypl.simplified.ui.catalog.CatalogFragmentLoginDialogParameters
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -213,6 +215,13 @@ class TabbedNavigationController private constructor(
   override fun <E : PresentableErrorType> openErrorPage(parameters: ErrorPageParameters<E>) {
     this.navigator.addFragment(
       fragment = ErrorPageFragment.create(parameters),
+      tab = this.navigator.currentTab()
+    )
+  }
+
+  override fun openLoginDialog(parameters: CatalogFragmentLoginDialogParameters) {
+    this.navigator.addFragment(
+      fragment = CatalogFragmentLoginDialog.create(parameters),
       tab = this.navigator.currentTab()
     )
   }

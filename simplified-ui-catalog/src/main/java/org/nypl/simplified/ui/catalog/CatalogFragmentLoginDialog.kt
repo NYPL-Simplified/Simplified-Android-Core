@@ -1,8 +1,6 @@
 package org.nypl.simplified.ui.catalog
 
-import android.content.DialogInterface
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +10,7 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
@@ -27,9 +25,14 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
+import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
@@ -42,7 +45,7 @@ import org.slf4j.LoggerFactory
  * receive a call when the dialog is closed.
  */
 
-class CatalogFragmentLoginDialog : DialogFragment() {
+class CatalogFragmentLoginDialog : Fragment() {
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentLoginDialog::class.java)
 
@@ -66,10 +69,13 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
   private lateinit var account: AccountType
   private lateinit var action: Button
+  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var dialogModel: CatalogLoginViewModel
   private lateinit var documents: DocumentStoreType
+  private lateinit var errorDetails: Button
   private lateinit var eula: CheckBox
   private lateinit var fieldListener: OnTextChangeListener
+  private lateinit var lockFormOverlay: View
   private lateinit var parameters: CatalogFragmentLoginDialogParameters
   private lateinit var password: EditText
   private lateinit var passwordLabel: TextView
@@ -80,7 +86,6 @@ class CatalogFragmentLoginDialog : DialogFragment() {
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var userName: EditText
   private lateinit var userNameLabel: TextView
-  private lateinit var lockFormOverlay: View
   private val parametersId = PARAMETERS_ID
   private var accountEventSubscription: Disposable? = null
 
@@ -94,6 +99,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
     this.uiThread = services.requireService(UIThreadServiceType::class.java)
     this.documents = services.requireService(DocumentStoreType::class.java)
     this.screenSize = services.requireService(ScreenSizeInformationType::class.java)
+    this.buildConfig = services.requireService(BuildConfigurationServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -104,6 +110,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
     val layout =
       inflater.inflate(R.layout.login_dialog, container, false)
 
+    this.errorDetails = layout.findViewById<Button>(R.id.loginErrorDetailsButton)
     this.action = layout.findViewById(R.id.loginButton)
     this.eula = layout.findViewById(R.id.loginEULA)
     this.password = layout.findViewById(R.id.loginPassword)
@@ -128,8 +135,6 @@ class CatalogFragmentLoginDialog : DialogFragment() {
     this.dialogModel = ViewModelProviders.of(this.requireActivity())
       .get(CatalogLoginViewModel::class.java)
 
-    this.resizeDialog()
-
     /*
      * Re-fetch the account. Note that it could (theoretically) have been deleted, so we fetch
      * and re-fetch every time and close the dialog if the account is no longer there.
@@ -139,7 +144,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
       this.account =
         this.profilesController.profileCurrent().account(this.parameters.accountId)
     } catch (e: AccountsDatabaseNonexistentException) {
-      this.dismiss()
+      this.findNavigationController().popBackStack()
       return
     }
 
@@ -148,7 +153,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
      */
 
     if (!this.account.requiresCredentials) {
-      this.dismiss()
+      this.findNavigationController().popBackStack()
       return
     }
 
@@ -179,39 +184,11 @@ class CatalogFragmentLoginDialog : DialogFragment() {
     this.reconfigureUI()
   }
 
-  /**
-   * Android will typically make custom dialogs into a less-than-useful size. To combat
-   * this, we resize the window containing the dialog to a proportion of the screen size.
-   */
-
-  private fun resizeDialog() {
-    val dialog = this.dialog
-    if (dialog != null) {
-      val window = dialog.window
-      if (window != null) {
-        if (this.screenSize.isPortrait) {
-          this.logger.debug(
-            "screen portrait ({}x{})",
-            this.screenSize.widthPixels,
-            this.screenSize.heightPixels
-          )
-          window.setLayout(
-            (this.screenSize.widthPixels * 0.8).toInt(),
-            (this.screenSize.heightPixels * 0.475).toInt())
-        } else {
-          this.logger.debug(
-            "screen landscape ({}x{})",
-            this.screenSize.widthPixels,
-            this.screenSize.heightPixels
-          )
-          window.setLayout(
-            (this.screenSize.widthPixels * 0.6).toInt(),
-            (this.screenSize.heightPixels * 0.8).toInt())
-        }
-        window.setGravity(Gravity.CENTER)
-      }
-    }
-  }
+  private fun findNavigationController() =
+    NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = CatalogNavigationControllerType::class.java
+    )
 
   private fun onAccountEvent(event: AccountEvent) {
     return when (event) {
@@ -318,6 +295,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
       AccountLoginState.AccountNotLoggedIn -> {
         this.unlockForm()
         this.action.isEnabled = this.determineLoginIsSatisfied()
+        this.errorDetails.visibility = View.GONE
         this.progress.visibility = View.INVISIBLE
         this.progressText.visibility = View.INVISIBLE
         this.action.setOnClickListener {
@@ -328,6 +306,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
       is AccountLoginState.AccountLoggingIn -> {
         this.lockForm()
+        this.errorDetails.visibility = View.GONE
         this.progress.visibility = View.VISIBLE
         this.progressText.text = state.status
         this.progressText.visibility = View.VISIBLE
@@ -335,20 +314,53 @@ class CatalogFragmentLoginDialog : DialogFragment() {
 
       is AccountLoginState.AccountLoginFailed -> {
         this.unlockForm()
+        this.errorDetails.visibility = View.VISIBLE
         this.action.isEnabled = this.determineLoginIsSatisfied()
         this.progress.visibility = View.INVISIBLE
         this.progressText.visibility = View.VISIBLE
+        this.progressText.text = state.taskResult.steps.last().resolution.message
         this.action.setOnClickListener {
           this.lockForm()
           this.tryLogin()
         }
+        this.errorDetails.setOnClickListener {
+          this.openErrorPage(state.taskResult.steps)
+        }
+      }
+
+      is AccountLoginState.AccountLogoutFailed -> {
+        this.lockForm()
+        this.errorDetails.visibility = View.VISIBLE
+        this.action.isEnabled = this.determineLoginIsSatisfied()
+        this.progress.visibility = View.INVISIBLE
+        this.progressText.visibility = View.VISIBLE
+        this.progressText.text = state.taskResult.steps.last().resolution.message
+        this.errorDetails.setOnClickListener {
+          this.openErrorPage(state.taskResult.steps)
+        }
       }
 
       is AccountLoginState.AccountLoggedIn,
-      is AccountLoginState.AccountLoggingOut,
-      is AccountLoginState.AccountLogoutFailed ->
-        this.dismiss()
+      is AccountLoginState.AccountLoggingOut -> {
+        this.findNavigationController().popBackStack()
+        Unit
+      }
     }
+  }
+
+  @UiThread
+  private fun <E : PresentableErrorType> openErrorPage(taskSteps: List<TaskStep<E>>) {
+    this.uiThread.checkIsUIThread()
+
+    val parameters =
+      ErrorPageParameters(
+        emailAddress = this.buildConfig.errorReportEmail,
+        body = "",
+        subject = "[simplye-error-report]",
+        attributes = sortedMapOf(),
+        taskSteps = taskSteps)
+
+    this.findNavigationController().openErrorPage(parameters)
   }
 
   private fun unlockForm() {
@@ -393,10 +405,7 @@ class CatalogFragmentLoginDialog : DialogFragment() {
     this.userName.removeTextChangedListener(this.fieldListener)
     this.password.removeTextChangedListener(this.fieldListener)
     this.accountEventSubscription?.dispose()
-  }
 
-  override fun onDismiss(dialog: DialogInterface) {
-    super.onDismiss(dialog)
     this.dialogModel.loginDialogCompleted.onNext(Unit)
   }
 }
