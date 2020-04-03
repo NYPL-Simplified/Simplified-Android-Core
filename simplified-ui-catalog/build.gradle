@@ -8,6 +8,7 @@ dependencies {
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-controller-api")
   implementation project(":simplified-books-registry-api")
+  implementation project(":simplified-buildconfig-api")
   implementation project(":simplified-documents")
   implementation project(":simplified-futures")
   implementation project(":simplified-profiles-controller-api")

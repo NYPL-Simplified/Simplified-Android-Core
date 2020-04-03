@@ -1,6 +1,5 @@
 package org.nypl.simplified.ui.catalog
 
-import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -8,6 +7,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.common.base.Preconditions
@@ -28,6 +28,7 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.futures.FluentFutureExtensions.map
+import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -45,7 +46,7 @@ import java.util.concurrent.atomic.AtomicReference
 class CatalogPagedViewHolder(
   private val buttonCreator: CatalogButtons,
   private val registrySubscriptions: CompositeDisposable,
-  private val context: Activity,
+  private val context: FragmentActivity,
   private val fragmentManager: FragmentManager,
   private val loginViewModel: CatalogLoginViewModel,
   private val navigation: () -> CatalogNavigationControllerType,
@@ -570,13 +571,19 @@ class CatalogPagedViewHolder(
       val dialogParameters =
         CatalogFragmentLoginDialogParameters(
           this.profilesController.profileAccountCurrent().id)
-      val dialog = CatalogFragmentLoginDialog.create(dialogParameters)
-      dialog.show(this.fragmentManager, "LOGIN")
+
+      this.findNavigationController().openLoginDialog(dialogParameters)
       this.runOnLoginDialogClosed.set(execute)
     } catch (e: Exception) {
       this.logger.error("could not open login dialog: ", e)
     }
   }
+
+  private fun findNavigationController() =
+    NavigationControllers.find(
+      activity = this.context,
+      interfaceType = CatalogNavigationControllerType::class.java
+    )
 
   /**
    * @return `true` if a login is required on the current account

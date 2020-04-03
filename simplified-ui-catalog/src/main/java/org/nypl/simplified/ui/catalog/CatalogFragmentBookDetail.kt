@@ -902,8 +902,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
   private fun openLoginDialogAndThen(execute: () -> Unit) {
     val dialogParameters = CatalogFragmentLoginDialogParameters(this.parameters.accountId)
-    val dialog = CatalogFragmentLoginDialog.create(dialogParameters)
-    dialog.show(this.requireFragmentManager(), "LOGIN")
+    this.findNavigationController().openLoginDialog(dialogParameters)
     this.runOnLoginDialogClosed.set(execute)
   }
 
