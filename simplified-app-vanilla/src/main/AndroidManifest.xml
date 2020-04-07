@@ -73,6 +73,12 @@
       android:exported="false"
       android:label="Simplified Vanilla" />
 
+    <activity
+        android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"
+        android:contentDescription="Simplified Vanilla"
+        android:exported="false"
+        android:label="Simplified Vanilla" />
+
   </application>
 
 </manifest>

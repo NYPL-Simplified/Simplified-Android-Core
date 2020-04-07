@@ -452,6 +452,20 @@ internal object MainServices {
     }
   }
 
+  private fun cardCreatorCredentials(
+    context: Context
+  ): AccountBundledCredentialsType {
+    return try {
+      this.createBundledCredentials(context.assets)
+    } catch (e: FileNotFoundException) {
+      this.logger.debug("could not initialize bundled credentials: ", e)
+      AccountBundledCredentialsEmpty.getInstance()
+    } catch (e: IOException) {
+      this.logger.debug("could not initialize bundled credentials: ", e)
+      throw IllegalStateException("could not initialize bundled credentials", e)
+    }
+  }
+
   @Throws(ProfileDatabaseException::class)
   private fun createProfileDatabase(
     context: Context,

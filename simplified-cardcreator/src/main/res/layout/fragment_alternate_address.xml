@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.HomeAddressFragment">
+    tools:context=".ui.AlternateAddressFragment">
 
     <LinearLayout
         android:id="@+id/header"
@@ -16,17 +16,18 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/header_error_tv"
+            android:id="@+id/header_tv"
             style="@style/WizardHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/home_address" />
+            tools:text="Alternate Address" />
 
         <TextView
             android:id="@+id/header_status_desc_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
+            android:textColor="@color/red"
             android:layout_marginTop="16sp"
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
@@ -160,11 +161,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/loading"
         android:layout_width="match_parent"
-        android:clickable="true"
         android:layout_height="match_parent"
         android:background="@color/trans_white"
-        android:visibility="gone"
-        tools:ignore="KeyboardInaccessibleWidget">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/loading_tv"

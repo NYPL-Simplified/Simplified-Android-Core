@@ -10,4 +10,5 @@ dependencies {
   implementation libraries.kotlinStdlib
   implementation libraries.nyplPDFAPI
   implementation libraries.nyplPDFViewer
+  implementation libraries.androidXActivity
 }

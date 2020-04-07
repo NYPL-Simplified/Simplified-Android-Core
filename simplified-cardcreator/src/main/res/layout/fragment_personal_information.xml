@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.HomeAddressFragment">
+    tools:context=".ui.PersonalInformationFragment">
 
     <LinearLayout
         android:id="@+id/header"
@@ -20,7 +20,7 @@
             style="@style/WizardHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/home_address" />
+            android:text="@string/personal_information" />
 
         <TextView
             android:id="@+id/header_status_desc_tv"
@@ -33,99 +33,80 @@
             android:fontFamily="sans-serif"
             android:gravity="center"
             android:textSize="16sp" />
-    </LinearLayout>
 
-    <ScrollView
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="16dp"
-        android:paddingTop="16dp"
-        android:paddingRight="16dp"
-        android:scrollbarStyle="outsideOverlay">
-
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:paddingLeft="16dp"
+            android:paddingTop="16dp"
+            android:paddingRight="16dp"
+            android:scrollbarStyle="outsideOverlay">
 
-            <TextView
-                android:id="@+id/tv_street_1"
-                style="@style/WizardFormLabel"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/street_1" />
-
-            <EditText
-                android:id="@+id/et_street_1"
-                style="@style/WizardFormEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/required" />
-
-            <TextView
-                android:id="@+id/tv_street_2"
-                style="@style/WizardFormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/street_2" />
-
-            <EditText
-                android:id="@+id/et_street_2"
-                style="@style/WizardFormEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/optional" />
-
-            <TextView
-                android:id="@+id/tv_city"
-                style="@style/WizardFormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/city" />
-
-            <EditText
-                android:id="@+id/et_city"
-                style="@style/WizardFormEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/required" />
+                android:orientation="vertical">
 
 
-            <TextView
-                android:id="@+id/tv_state"
-                style="@style/WizardFormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/state" />
+                <TextView
+                    style="@style/WizardFormLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/first_name" />
 
-            <Spinner
-                android:id="@+id/sp_state"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/required"
-                android:maxLength="2" />
+                <EditText
+                    android:id="@+id/first_name_et"
+                    style="@style/WizardFormEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/required"
+                    android:inputType="text" />
 
-            <TextView
-                android:id="@+id/tv_zip"
-                style="@style/WizardFormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/zip" />
+                <TextView
+                    style="@style/WizardFormLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/middle_name" />
 
-            <EditText
-                android:id="@+id/et_zip"
-                style="@style/WizardFormEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/required"
-                android:inputType="number"
-                android:maxLength="5" />
+                <EditText
+                    android:id="@+id/middle_name_et"
+                    style="@style/WizardFormEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/optional"
+                    android:inputType="text" />
 
-        </LinearLayout>
-    </ScrollView>
+                <TextView
+                    style="@style/WizardFormLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/last_name" />
+
+                <EditText
+                    android:id="@+id/last_name_et"
+                    style="@style/WizardFormEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/required"
+                    android:inputType="text" />
+
+                <TextView
+                    style="@style/WizardFormLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/email" />
+
+                <EditText
+                    android:id="@+id/email_et"
+                    style="@style/WizardFormEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/required"
+                    android:inputType="textEmailAddress" />
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/nav_buttons"
@@ -160,11 +141,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/loading"
         android:layout_width="match_parent"
-        android:clickable="true"
         android:layout_height="match_parent"
         android:background="@color/trans_white"
-        android:visibility="gone"
-        tools:ignore="KeyboardInaccessibleWidget">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/loading_tv"
