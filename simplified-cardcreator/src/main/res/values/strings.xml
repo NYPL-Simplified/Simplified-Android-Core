@@ -33,6 +33,7 @@
     <string name="create_card">Create Card</string>
     <string name="save_card">Save Card</string>
     <string name="confirmation">Confirmation</string>
+    <string name="card_saved">card saved</string>
 
     <!-- Account Information -->
     <string name="account_information">Account Information</string>

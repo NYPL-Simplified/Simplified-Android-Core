@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentConfirmationBinding
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -92,7 +94,7 @@ class ConfirmationFragment : Fragment() {
         var f: File
         try {
           if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-            val file = File(Environment.getExternalStorageDirectory(), "library_card")
+            val file = File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_PICTURES)
             if (!file.exists()) {
               file.mkdirs()
             }
@@ -100,13 +102,24 @@ class ConfirmationFragment : Fragment() {
             val outStream: FileOutputStream = FileOutputStream(f)
             bitmap.compress(Bitmap.CompressFormat.PNG, 10, outStream)
             outStream.close()
-            Toast.makeText(activity!!, "card saved", Toast.LENGTH_SHORT).show()
+            addCardToGallery(f)
+            Toast.makeText(activity!!, getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
           }
         } catch (e: Exception) {
           e.printStackTrace()
         }
       }
     }
+  }
+
+  /**
+   * Adds library card image to device photo gallery
+   */
+  private fun addCardToGallery(card: File) {
+    val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+    val contentUri: Uri = Uri.fromFile(card)
+    mediaScanIntent.data = contentUri
+    activity!!.sendBroadcast(mediaScanIntent)
   }
 
   /**
