@@ -102,7 +102,9 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
         binding.etStreet1.text.toString(),
         getStateAbbreviation(binding.spState.selectedItem.toString()),
         binding.etZip.text.toString()),
-        false))
+        false),
+        activity!!.intent.extras.getString("username"),
+        activity!!.intent.extras.getString("password"))
     }
 
     // Go to previous screen

@@ -13,13 +13,13 @@ import java.lang.Exception
 class PatronViewModel : ViewModel() {
 
   private val logger = LoggerFactory.getLogger(PatronViewModel::class.java)
-  private val cardCreatorService = CardCreatorService()
 
   val createPatronResponse = MutableLiveData<CreatePatronResponse>()
 
-  fun createPatron(patron: Patron) {
+  fun createPatron(patron: Patron, username: String, password: String) {
     viewModelScope.launch {
       try {
+        val cardCreatorService = CardCreatorService(username, password)
         val response = cardCreatorService.createPatron(patron)
         createPatronResponse.postValue(response)
       } catch (e: Exception) {

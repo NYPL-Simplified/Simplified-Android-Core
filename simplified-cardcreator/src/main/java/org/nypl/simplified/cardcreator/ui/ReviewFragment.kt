@@ -61,7 +61,9 @@ class ReviewFragment : Fragment() {
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       showLoading(true)
-      viewModel.createPatron(getPatron())
+      viewModel.createPatron(getPatron(),
+        activity!!.intent.extras.getString("username"),
+        activity!!.intent.extras.getString("password"))
     }
 
     // Go to previous screen

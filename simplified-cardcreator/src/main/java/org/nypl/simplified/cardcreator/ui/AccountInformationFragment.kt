@@ -78,7 +78,10 @@ class AccountInformationFragment : Fragment() {
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       showLoading(true)
-      viewModel.validateUsername(binding.usernameEt.text.toString())
+      viewModel.validateUsername(
+        binding.usernameEt.text.toString(),
+        activity!!.intent.extras.getString("username"),
+        activity!!.intent.extras.getString("password"))
     }
 
     // Go to previous screen

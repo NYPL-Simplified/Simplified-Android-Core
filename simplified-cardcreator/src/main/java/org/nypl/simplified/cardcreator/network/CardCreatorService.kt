@@ -11,7 +11,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface CardCreatorService {
+internal interface CardCreatorService {
 
   /**
    * Validates the patron's address. Only 'valid-address' and 'non-residential-address'
@@ -47,7 +47,7 @@ interface CardCreatorService {
   ): CreatePatronResponse
 
   companion object {
-    operator fun invoke(): CardCreatorService {
+    operator fun invoke(authUsername: String, authPassword: String): CardCreatorService {
       val logging = run {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.apply {
@@ -58,8 +58,9 @@ interface CardCreatorService {
       val auth = Interceptor {
         val request = it.request().newBuilder()
           .addHeader("Authorization",
-            Credentials.basic("username from cardcreator.conf",
-              "password from cardcreator.conf"))
+            Credentials.basic(
+              authUsername,
+              authPassword))
           .build()
         it.proceed(request)
       }

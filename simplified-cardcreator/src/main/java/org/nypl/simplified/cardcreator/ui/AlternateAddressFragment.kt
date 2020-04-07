@@ -112,11 +112,15 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       showLoading(true)
-      viewModel.validateAddress(Address(AddressDetails(binding.etCity.text.toString(),
-        binding.etStreet1.text.toString(),
-        getStateAbbreviation(binding.spState.selectedItem.toString()),
-        binding.etZip.text.toString()),
-        false))
+      viewModel.validateAddress(
+        Address(
+          AddressDetails(binding.etCity.text.toString(),
+          binding.etStreet1.text.toString(),
+          getStateAbbreviation(binding.spState.selectedItem.toString()),
+          binding.etZip.text.toString()),
+          false),
+        activity!!.intent.extras.getString("username"),
+        activity!!.intent.extras.getString("password"))
     }
 
     // Go to previous screen

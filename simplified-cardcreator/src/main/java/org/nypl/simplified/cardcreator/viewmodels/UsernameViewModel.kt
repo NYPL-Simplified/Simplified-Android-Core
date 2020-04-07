@@ -13,13 +13,13 @@ import java.lang.Exception
 class UsernameViewModel : ViewModel() {
 
   private val logger = LoggerFactory.getLogger(UsernameViewModel::class.java)
-  private val cardCreatorService = CardCreatorService()
 
   val validateUsernameResponse = MutableLiveData<ValidateUsernameResponse>()
 
-  fun validateUsername(username: String) {
+  fun validateUsername(username: String, authUsername: String, authPassword: String) {
     viewModelScope.launch {
       try {
+        val cardCreatorService = CardCreatorService(authUsername, authPassword)
         val response = cardCreatorService.validateUsername(Username(username))
         validateUsernameResponse.postValue(response)
       } catch (e: Exception) {

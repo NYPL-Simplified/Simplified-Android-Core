@@ -32,7 +32,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.cardcreator.CardCreatorActivity
+import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -90,6 +90,7 @@ class SettingsFragmentAccount : Fragment() {
   private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
   private val cardCreatorResultCode = 101
+  private var cardCreatorService: CardCreatorServiceType? = null
 
   companion object {
 
@@ -114,6 +115,8 @@ class SettingsFragmentAccount : Fragment() {
     this.parameters = this.arguments!![PARAMETERS_ID] as SettingsFragmentAccountParameters
 
     val services = Services.serviceDirectory()
+
+    cardCreatorService = services.optionalService(CardCreatorServiceType::class.java)
 
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
@@ -310,12 +313,23 @@ class SettingsFragmentAccount : Fragment() {
     this.authenticationCOPPAOver13.isEnabled = true
 
     /*
+     * Conditionally enable sign up button
+     */
+    if (this.account.provider.cardCreatorURI != null && cardCreatorService != null) {
+      this.signUpButton.isEnabled = true
+    }
+
+    /*
      * Launch Card Creator
      */
 
     this.signUpButton.setOnClickListener {
-      val intent = Intent(activity, CardCreatorActivity::class.java)
-      startActivityForResult(intent, cardCreatorResultCode)
+      val cardCreator = cardCreatorService
+      if (cardCreator == null) {
+        this.logger.error("Card creator not configured")
+      } else {
+        cardCreator.openCardCreatorActivity(activity, this.context, cardCreatorResultCode)
+      }
     }
 
     /*

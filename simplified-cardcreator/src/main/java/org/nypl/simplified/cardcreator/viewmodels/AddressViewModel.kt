@@ -13,13 +13,13 @@ import java.lang.Exception
 class AddressViewModel : ViewModel() {
 
   private val logger = LoggerFactory.getLogger(AddressViewModel::class.java)
-  private val cardCreatorService = CardCreatorService()
 
   val validateAddressResponse = MutableLiveData<ValidateAddressResponse>()
 
-  fun validateAddress(address: Address) {
+  fun validateAddress(address: Address, username: String, password: String) {
     viewModelScope.launch {
       try {
+        val cardCreatorService = CardCreatorService(username, password)
         val response = cardCreatorService.validateAddress(address)
         validateAddressResponse.postValue(response)
       } catch (e: Exception) {
