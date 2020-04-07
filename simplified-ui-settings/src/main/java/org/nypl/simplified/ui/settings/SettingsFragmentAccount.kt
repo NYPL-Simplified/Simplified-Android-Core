@@ -81,6 +81,7 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var login: ViewGroup
   private lateinit var loginButton: Button
   private lateinit var signUpButton: Button
+  private lateinit var signUpLabel: TextView
   private lateinit var loginButtonErrorDetails: Button
   private lateinit var loginProgress: ProgressBar
   private lateinit var loginProgressText: TextView
@@ -191,6 +192,8 @@ class SettingsFragmentAccount : Fragment() {
       layout.findViewById(R.id.settingsEULACheckbox)
     this.signUpButton =
       layout.findViewById(R.id.settingsCardCreatorSignUp)
+    this.signUpLabel =
+      layout.findViewById(R.id.settingsCardCreatorLabel)
 
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginButton.isEnabled = false
@@ -317,6 +320,7 @@ class SettingsFragmentAccount : Fragment() {
      */
     if (this.account.provider.cardCreatorURI != null && cardCreatorService != null) {
       this.signUpButton.isEnabled = true
+      this.signUpLabel.isEnabled = true
     }
 
     /*
@@ -328,7 +332,7 @@ class SettingsFragmentAccount : Fragment() {
       if (cardCreator == null) {
         this.logger.error("Card creator not configured")
       } else {
-        cardCreator.openCardCreatorActivity(activity, this.context, cardCreatorResultCode)
+        cardCreator.openCardCreatorActivity(this, activity, cardCreatorResultCode)
       }
     }
 
