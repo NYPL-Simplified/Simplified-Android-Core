@@ -18,6 +18,7 @@ import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAccountInformationBinding
 import org.nypl.simplified.cardcreator.utils.Cache
+import org.nypl.simplified.cardcreator.utils.hideKeyboard
 import org.nypl.simplified.cardcreator.viewmodels.UsernameViewModel
 import org.slf4j.LoggerFactory
 
@@ -92,6 +93,7 @@ class AccountInformationFragment : Fragment() {
         Cache(sharedPreferences).setAccountInformation(binding.usernameEt.text.toString(),
           binding.pinEt.text.toString())
         nextAction = AccountInformationFragmentDirections.actionNext()
+        hideKeyboard()
         navController.navigate(nextAction)
       } else {
         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()

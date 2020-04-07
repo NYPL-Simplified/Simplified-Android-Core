@@ -143,20 +143,23 @@ class ReviewFragment : Fragment() {
    */
   private fun setReviewData() {
     val homeAddress = cache.getHomeAddress()
-    binding.addressHomeTv.text = "${homeAddress.line_1}\n${homeAddress.city}, ${homeAddress.state} ${homeAddress.zip}"
+    binding.addressHomeTv1.text = homeAddress.line_1
+    binding.addressHomeTv2.text = "${homeAddress.city}, ${homeAddress.state} ${homeAddress.zip}"
     if (homeAddress.state != NY_STATE) {
       val workAddress = cache.getWorkAddress()
       if (workAddress.line_1 != EMPTY) {
         binding.workAddressData.visibility = View.VISIBLE
-        binding.workAddressTv.text = "${workAddress.line_1}\n${workAddress.city}, ${workAddress.state} ${workAddress.zip}"
+        binding.workAddressTv1.text = workAddress.line_1
+        binding.workAddressTv2.text = "${workAddress.city}, ${workAddress.state} ${workAddress.zip}"
       } else {
         val schoolAddress = cache.getSchoolAddress()
         binding.schoolAddressData.visibility = View.VISIBLE
-        binding.schoolAddressTv.text ="${schoolAddress.line_1}\n${schoolAddress.city}, ${schoolAddress.state} ${schoolAddress.zip}"
+        binding.schoolAddressTv1.text = schoolAddress.line_1
+        binding.schoolAddressTv1.text = "${schoolAddress.city}, ${schoolAddress.state} ${schoolAddress.zip}"
       }
     }
     val personalInformation = cache.getPersonalInformation()
-    binding.nameTv.text = "$personalInformation.firstName $personalInformation.lastName"
+    binding.nameTv.text = personalInformation.firstName + " " + personalInformation.lastName
     binding.emailTv.text = personalInformation.email
     val accountInformation = cache.getAccountInformation()
     binding.usernameTv.text = accountInformation.username

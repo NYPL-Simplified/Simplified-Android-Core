@@ -54,7 +54,13 @@
                     android:text="@string/home_address" />
 
                 <TextView
-                    android:id="@+id/address_home_tv"
+                    android:id="@+id/address_home_tv_1"
+                    style="@style/WizardFormTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/address_home_tv_2"
                     style="@style/WizardFormTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
@@ -74,7 +80,13 @@
                         android:text="@string/work_address" />
 
                     <TextView
-                        android:id="@+id/work_address_tv"
+                        android:id="@+id/work_address_tv_1"
+                        style="@style/WizardFormTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/work_address_tv_2"
                         style="@style/WizardFormTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
@@ -95,7 +107,13 @@
                         android:text="@string/school_address" />
 
                     <TextView
-                        android:id="@+id/school_address_tv"
+                        android:id="@+id/school_address_tv_1"
+                        style="@style/WizardFormTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/school_address_tv_2"
                         style="@style/WizardFormTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
