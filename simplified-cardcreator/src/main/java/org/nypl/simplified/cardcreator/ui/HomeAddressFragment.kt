@@ -22,6 +22,7 @@ import org.nypl.simplified.cardcreator.databinding.FragmentHomeAddressBinding
 import org.nypl.simplified.cardcreator.models.Address
 import org.nypl.simplified.cardcreator.models.AddressDetails
 import org.nypl.simplified.cardcreator.utils.Cache
+import org.nypl.simplified.cardcreator.utils.hideKeyboard
 import org.nypl.simplified.cardcreator.viewmodels.AddressViewModel
 import org.slf4j.LoggerFactory
 
@@ -131,11 +132,16 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
    * Show loading screen
    */
   private fun showLoading(show: Boolean) {
+    hideKeyboard()
     logger.debug("Toggling loading screen")
     if (show) {
       binding.loading.visibility = View.VISIBLE
+      binding.form.visibility = View.GONE
+      binding.navButtons.visibility = View.GONE
     } else {
       binding.loading.visibility = View.GONE
+      binding.form.visibility = View.VISIBLE
+      binding.navButtons.visibility = View.VISIBLE
     }
   }
 

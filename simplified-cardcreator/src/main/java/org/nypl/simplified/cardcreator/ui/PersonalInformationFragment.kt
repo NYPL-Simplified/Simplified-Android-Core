@@ -16,6 +16,7 @@ import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentPersonalInformationBinding
 import org.nypl.simplified.cardcreator.models.PersonalInformation
 import org.nypl.simplified.cardcreator.utils.Cache
+import org.nypl.simplified.cardcreator.utils.hideKeyboard
 import org.slf4j.LoggerFactory
 import java.util.regex.Pattern
 
@@ -83,6 +84,7 @@ class PersonalInformationFragment : Fragment() {
         binding.lastNameEt.text.toString(),
         binding.emailEt.text.toString()
       ))
+      hideKeyboard()
       navController.navigate(nextAction)
     }
 
@@ -102,17 +104,5 @@ class PersonalInformationFragment : Fragment() {
     val p = Pattern.compile(".+@.+\\.[a-z]+")
     val m = p.matcher(binding.emailEt.text)
     return m.matches()
-  }
-
-  /**
-   * Show loading screen
-   */
-  private fun showLoading(show: Boolean) {
-    logger.debug("Toggling loading screen")
-    if (show) {
-      binding.loading.visibility = View.VISIBLE
-    } else {
-      binding.loading.visibility = View.GONE
-    }
   }
 }

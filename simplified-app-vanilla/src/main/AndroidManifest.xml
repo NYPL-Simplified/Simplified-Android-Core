@@ -76,6 +76,7 @@
     <activity
         android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"
         android:contentDescription="Simplified Vanilla"
+        android:windowSoftInputMode="adjustResize"
         android:exported="false"
         android:label="Simplified Vanilla" />
 
