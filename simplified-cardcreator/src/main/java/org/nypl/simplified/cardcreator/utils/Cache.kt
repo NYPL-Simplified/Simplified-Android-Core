@@ -14,8 +14,6 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
 
   companion object {
 
-    private const val TAG = "CardCreatorCache"
-
     /**
      * The default shared preference name for our current app
      */

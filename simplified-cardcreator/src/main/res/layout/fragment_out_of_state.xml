@@ -31,26 +31,27 @@
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
             android:fontFamily="sans-serif"
-            android:text="@string/out_of_state_subheader"
             android:gravity="center"
+            android:text="@string/out_of_state_subheader"
             android:textSize="16sp" />
 
         <RadioGroup
             android:id="@+id/address_rg"
-            android:layout_marginStart="8dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp">
 
             <RadioButton
                 android:id="@+id/work_rb"
-                android:text="@string/work_in_ny"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="@string/work_in_ny" />
+
             <RadioButton
                 android:id="@+id/school_rb"
-                android:text="@string/school_in_ny"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="@string/school_in_ny" />
         </RadioGroup>
     </LinearLayout>
 
@@ -83,35 +84,5 @@
             android:textAllCaps="true" />
 
     </LinearLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/loading"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/trans_white"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/loading_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:fontFamily="sans-serif"
-            android:text="@string/checking_location"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@id/progress"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <ProgressBar
-            android:id="@+id/progress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

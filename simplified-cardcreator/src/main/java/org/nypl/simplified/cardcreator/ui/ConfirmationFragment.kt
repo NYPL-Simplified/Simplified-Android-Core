@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
+import java.util.Date
 
 class ConfirmationFragment : Fragment() {
 
@@ -37,7 +38,8 @@ class ConfirmationFragment : Fragment() {
   private var temporary: Boolean = true
   private lateinit var message: String
 
-  private val STORAGE_REQUEST_CODE = 203
+  private val storageRequestCode = 203
+  private val dateFormat = "dd-MM-yyyy"
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -61,12 +63,12 @@ class ConfirmationFragment : Fragment() {
       message = bundle.message
 
       binding.nameCard.text = bundle.name
-      binding.cardBarcode.text = "Card Number: ${bundle.barcode}"
-      binding.cardPin.text = "PIN: ${bundle.pin}"
+      binding.cardBarcode.text = getString(R.string.user_card_number, bundle.barcode)
+      binding.cardPin.text = getString(R.string.user_pin, bundle.pin)
       binding.headerStatusDescTv.text = bundle.message
 
-      val currentDate: String = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
-      binding.issued.text = "Issued: $currentDate"
+      val currentDate: String = SimpleDateFormat(dateFormat, Locale.getDefault()).format(Date())
+      binding.issued.text = getString(R.string.issued_date, currentDate)
     }
 
     // Go to next screen
@@ -85,30 +87,37 @@ class ConfirmationFragment : Fragment() {
         ActivityCompat.requestPermissions(
           activity!!,
           arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-          STORAGE_REQUEST_CODE
+          storageRequestCode
         )
       } else {
-        val card = binding.libraryCard
-        card.isDrawingCacheEnabled = true
-        val bitmap = card.drawingCache
-        var f: File
-        try {
-          if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-            val file = File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_PICTURES)
-            if (!file.exists()) {
-              file.mkdirs()
-            }
-            f = File(file.absolutePath + File.separator + "library-card" + ".png")
-            val outStream: FileOutputStream = FileOutputStream(f)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 10, outStream)
-            outStream.close()
-            addCardToGallery(f)
-            Toast.makeText(activity!!, getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
-          }
-        } catch (e: Exception) {
-          e.printStackTrace()
-        }
+        createDigitalCard()
       }
+    }
+  }
+
+  /**
+   * Create library card from ImageView
+   */
+  private fun createDigitalCard() {
+    val card = binding.libraryCard
+    card.isDrawingCacheEnabled = true
+    val bitmap = card.drawingCache
+    val f: File
+    try {
+      if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
+        val file = File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_PICTURES)
+        if (!file.exists()) {
+          file.mkdirs()
+        }
+        f = File(file.absolutePath + File.separator + "library-card" + ".png")
+        val outStream = FileOutputStream(f)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 10, outStream)
+        outStream.close()
+        addCardToGallery(f)
+        Toast.makeText(activity!!, getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
   }
 
@@ -136,29 +145,11 @@ class ConfirmationFragment : Fragment() {
     grantResults: IntArray
   ) {
     when (requestCode) {
-      STORAGE_REQUEST_CODE -> {
+      storageRequestCode -> {
         // If request is cancelled, the result arrays are empty.
         if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
           logger.debug("Storage permission granted")
-          val card = binding.libraryCard
-          card.isDrawingCacheEnabled = true
-          val bitmap = card.drawingCache
-          var f: File
-          try {
-            if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-              val file = File(Environment.getExternalStorageDirectory(), "library_card")
-              if (!file.exists()) {
-                file.mkdirs()
-              }
-              f = File(file.absolutePath + File.separator + "library-card" + ".png")
-              val outStream: FileOutputStream = FileOutputStream(f)
-              bitmap.compress(Bitmap.CompressFormat.PNG, 10, outStream)
-              outStream.close()
-              Toast.makeText(activity!!, "card saved", Toast.LENGTH_SHORT).show()
-            }
-          } catch (e: Exception) {
-            e.printStackTrace()
-          }
+          createDigitalCard()
         } else {
           logger.debug("Storage permission NOT granted")
         }

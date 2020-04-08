@@ -51,6 +51,7 @@
             android:layout_height="wrap_content">
 
             <ImageView
+                android:contentDescription="@string/nypl_logo"
                 android:layout_width="100dp"
                 android:src="@drawable/nypl_logo"
                 android:scaleType="fitCenter"

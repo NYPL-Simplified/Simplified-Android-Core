@@ -29,11 +29,14 @@
     <string name="work_in_ny">I work in New York</string>
     <string name="school_in_ny">I attend school in New York</string>
 
-    <!-- Confirm -->
+    <!-- Confirmation -->
     <string name="create_card">Create Card</string>
     <string name="save_card">Save Card</string>
     <string name="confirmation">Confirmation</string>
     <string name="card_saved">card saved</string>
+    <string name="user_card_number">Card Number: %1$s</string>
+    <string name="user_pin">PIN: %1$s</string>
+    <string name="issued_date">Issued: %1$s</string>
 
     <!-- Account Information -->
     <string name="account_information">Account Information</string>
@@ -133,5 +136,8 @@
     <string name="cancel">Cancel</string>
     <string name="settings">Settings</string>
     <string name="new_york_success">We have successfully determined that you are in New York!</string>
+
+    <!-- Accessibility -->
+    <string name="nypl_logo">NYPL Logo</string>
 
 </resources>

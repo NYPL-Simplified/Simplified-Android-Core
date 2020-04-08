@@ -34,9 +34,8 @@ class ReviewFragment : Fragment() {
 
   private lateinit var cache: Cache
 
-  private val NY_STATE = "NY"
-  private val EMPTY = ""
-  private val CARD_GRANTED = "card-granted"
+  private val nyState = "NY"
+  private val cardGranted = "card-granted"
 
   private val viewModel: PatronViewModel by viewModels()
 
@@ -74,7 +73,7 @@ class ReviewFragment : Fragment() {
     viewModel.createPatronResponse.observe(viewLifecycleOwner, Observer { response ->
       showLoading(false)
       Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-      if (response.type == CARD_GRANTED) {
+      if (response.type == cardGranted) {
         logger.debug("User navigated to the next screen")
         logger.debug("Card granted")
         nextAction = ReviewFragmentDirections.actionNext(
@@ -98,7 +97,7 @@ class ReviewFragment : Fragment() {
     val schoolAddress = cache.getSchoolAddress()
 
     when {
-      cache.getHomeAddress().state == NY_STATE -> {
+      cache.getHomeAddress().state == nyState -> {
         return Patron(
           homeAddress,
           personalInformation.email,
@@ -107,7 +106,7 @@ class ReviewFragment : Fragment() {
           accountInformation.username,
           workAddress)
       }
-      cache.getSchoolAddress().line_1 == EMPTY -> {
+      cache.getSchoolAddress().line_1.isEmpty() -> {
         return Patron(
           homeAddress,
           personalInformation.email,
@@ -147,9 +146,9 @@ class ReviewFragment : Fragment() {
     val homeAddress = cache.getHomeAddress()
     binding.addressHomeTv1.text = homeAddress.line_1
     binding.addressHomeTv2.text = "${homeAddress.city}, ${homeAddress.state} ${homeAddress.zip}"
-    if (homeAddress.state != NY_STATE) {
+    if (homeAddress.state != nyState) {
       val workAddress = cache.getWorkAddress()
-      if (workAddress.line_1 != EMPTY) {
+      if (workAddress.line_1.isNotEmpty()) {
         binding.workAddressData.visibility = View.VISIBLE
         binding.workAddressTv1.text = workAddress.line_1
         binding.workAddressTv2.text = "${workAddress.city}, ${workAddress.state} ${workAddress.zip}"

@@ -26,7 +26,7 @@ class ConfirmHomeAddressFragment : Fragment() {
 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
-  private val NY_STATE = "NY"
+  private val nyState = "NY"
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -51,7 +51,7 @@ class ConfirmHomeAddressFragment : Fragment() {
       ${address.state} ${address.zip}
     """.trimIndent()
 
-    nextAction = if (address.state == NY_STATE) {
+    nextAction = if (address.state == nyState) {
       ConfirmHomeAddressFragmentDirections.actionPersonalInformation()
     } else {
       ConfirmHomeAddressFragmentDirections.actionOutOfState()
@@ -66,18 +66,6 @@ class ConfirmHomeAddressFragment : Fragment() {
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
       activity!!.onBackPressed()
-    }
-  }
-
-  /**
-   * Show loading screen
-   */
-  private fun showLoading(show: Boolean) {
-    logger.debug("Toggling loading screen")
-    if (show) {
-      binding.loading.visibility = View.VISIBLE
-    } else {
-      binding.loading.visibility = View.GONE
     }
   }
 }

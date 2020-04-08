@@ -731,13 +731,19 @@ class SettingsFragmentAccount : Fragment() {
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     if (requestCode == cardCreatorResultCode) {
-      if (resultCode == Activity.RESULT_OK) {
-        if (data != null) {
-          val barcode = data.getStringExtra("barcode")
-          val pin = data.getStringExtra("pin")
-          this.authenticationBasicUser.setText(barcode, TextView.BufferType.EDITABLE)
-          this.authenticationBasicPass.setText(pin, TextView.BufferType.EDITABLE)
-          tryLogin()
+
+      when (resultCode) {
+        Activity.RESULT_OK -> {
+          if (data != null) {
+            val barcode = data.getStringExtra("barcode")
+            val pin = data.getStringExtra("pin")
+            this.authenticationBasicUser.setText(barcode, TextView.BufferType.EDITABLE)
+            this.authenticationBasicPass.setText(pin, TextView.BufferType.EDITABLE)
+            tryLogin()
+          }
+        }
+        Activity.RESULT_CANCELED -> {
+          logger.debug("User has exited the card creator")
         }
       }
     }

@@ -36,9 +36,9 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
   private lateinit var sharedPreferences: SharedPreferences
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
-  private val ADDRESS_CHARS_MIN = 5
-  private val VALID_ADDRESS = "valid-address"
-  private val ALTERNATE_ADDRESS = "alternate-addresses"
+  private val addressCharsMin = 5
+  private val validAddress = "valid-address"
+  private val alternateAddress = "alternate-addresses"
 
   private val viewModel: AddressViewModel by viewModels()
 
@@ -114,7 +114,7 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     viewModel.validateAddressResponse.observe(viewLifecycleOwner, Observer { response ->
       showLoading(false)
-      if (response.type == VALID_ADDRESS || response.type == ALTERNATE_ADDRESS) {
+      if (response.type == validAddress || response.type == alternateAddress) {
         logger.debug("Address is valid")
         Cache(sharedPreferences).setHomeAddress(AddressDetails(
           response.address.line_1,
@@ -159,9 +159,9 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
    */
   private fun validateForm() {
     binding.nextBtn.isEnabled = (binding.spState.selectedItem.toString() != getString(R.string.required)
-      && binding.etZip.text.length == ADDRESS_CHARS_MIN
-      && binding.etStreet1.text.length >= ADDRESS_CHARS_MIN
-      && binding.etCity.text.length >= ADDRESS_CHARS_MIN)
+      && binding.etZip.text.length == addressCharsMin
+      && binding.etStreet1.text.length >= addressCharsMin
+      && binding.etCity.text.length >= addressCharsMin)
   }
 
   override fun onNothingSelected(parent: AdapterView<*>?) {

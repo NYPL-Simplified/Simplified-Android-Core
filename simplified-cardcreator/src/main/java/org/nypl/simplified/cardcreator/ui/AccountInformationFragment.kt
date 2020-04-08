@@ -34,10 +34,10 @@ class AccountInformationFragment : Fragment() {
 
   private lateinit var sharedPreferences: SharedPreferences
 
-  private val MIN_PIN_CHARS = 4
-  private val USERNAME_MIN_CHARS = 5
-  private val USERNAME_MAX_CHARS = 25
-  private val USERNAME_AVAILABLE = "available-username"
+  private val minPinChars = 4
+  private val usernameMinChars = 5
+  private val usernameMaxChars = 25
+  private val usernameAvailable = "available-username"
 
   private val viewModel: UsernameViewModel by viewModels()
 
@@ -91,7 +91,7 @@ class AccountInformationFragment : Fragment() {
 
     viewModel.validateUsernameResponse.observe(viewLifecycleOwner, Observer { response ->
       showLoading(false)
-      if (response.type == USERNAME_AVAILABLE) {
+      if (response.type == usernameAvailable) {
         logger.debug("Username is valid")
         Cache(sharedPreferences).setAccountInformation(binding.usernameEt.text.toString(),
           binding.pinEt.text.toString())
@@ -106,8 +106,8 @@ class AccountInformationFragment : Fragment() {
 
   private fun validateForm() {
     binding.nextBtn.isEnabled = binding.pinEt.text.length ==
-      MIN_PIN_CHARS &&
-      binding.usernameEt.text.length in USERNAME_MIN_CHARS..USERNAME_MAX_CHARS
+      minPinChars &&
+      binding.usernameEt.text.length in usernameMinChars..usernameMaxChars
   }
 
   /**

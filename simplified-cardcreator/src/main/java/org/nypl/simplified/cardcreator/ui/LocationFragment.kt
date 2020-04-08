@@ -40,13 +40,13 @@ class LocationFragment : Fragment(), LocationListener {
   private lateinit var nextAction: NavDirections
   private var isNewYork = false
 
-  private val LOCATION_REQUEST_CODE = 102
+  private val locationRequestCode = 102
 
   // Minimum distance between location updates, in meters
-  private val MIN_DISTANCE_UPDATES: Float = 10f
+  private val minDistanceUpdates: Float = 10f
 
   // Minimum time interval between location updates, in milliseconds
-  private val MIN_TIME_UPDATES = 1000 * 60.toLong()
+  private val minTimeUpdates = 1000 * 60.toLong()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -111,7 +111,7 @@ class LocationFragment : Fragment(), LocationListener {
       ActivityCompat.requestPermissions(
         activity!!,
         arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-        LOCATION_REQUEST_CODE
+        locationRequestCode
       )
     } else {
       logger.debug("Location permission granted")
@@ -121,7 +121,7 @@ class LocationFragment : Fragment(), LocationListener {
         val isNetworkLocationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (isNetworkLocationEnabled) {
-          locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_UPDATES, MIN_DISTANCE_UPDATES, this)
+          locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTimeUpdates, minDistanceUpdates, this)
           location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
         }
 
@@ -142,16 +142,16 @@ class LocationFragment : Fragment(), LocationListener {
     showLoading(true)
     val locationManager = activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     binding.nextBtn.isEnabled = false
-    val MAX_RESULTS = 1
+    val maxResults = 1
     val location = getLocation()
     val geocoder = Geocoder(activity!!, Locale.getDefault())
 
     // Address found using the Geocoder.
-    var address: Address? = null
+    val address: Address?
 
     try {
       if (location != null) {
-        address = geocoder.getFromLocation(location.latitude, location.longitude, MAX_RESULTS)[0]
+        address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
         logger.debug( "Region is: ${address.adminArea} ${address.countryCode} ")
         binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
 
@@ -197,7 +197,7 @@ class LocationFragment : Fragment(), LocationListener {
     grantResults: IntArray
   ) {
     when (requestCode) {
-      LOCATION_REQUEST_CODE -> {
+      locationRequestCode -> {
         // If request is cancelled, the result arrays are empty.
         if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
           logger.debug("Location permission granted")
@@ -217,14 +217,14 @@ class LocationFragment : Fragment(), LocationListener {
       logger.debug("Checking to see if user is in New York")
       showLoading(true)
       binding.nextBtn.isEnabled = false
-      val MAX_RESULTS = 1
+      val maxResults = 1
       val geocoder = Geocoder(activity!!, Locale.getDefault())
 
       // Address found using the Geocoder.
-      var address: Address? = null
+      val address: Address?
 
       try {
-          address = geocoder.getFromLocation(location.latitude, location.longitude, MAX_RESULTS)[0]
+          address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
           logger.debug( "Region is: ${address.adminArea} ${address.countryCode} ")
           binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
 
@@ -255,16 +255,9 @@ class LocationFragment : Fragment(), LocationListener {
     locationManager.removeUpdates(this)
   }
 
-  override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-    TODO("Not yet implemented")
-  }
-
-  override fun onProviderEnabled(provider: String?) {
-    TODO("Not yet implemented")
-  }
-
-  override fun onProviderDisabled(provider: String?) {
-    TODO("Not yet implemented")
-  }
+  // These are not needed but were invited to the party by Google
+  override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { TODO("Not yet implemented") }
+  override fun onProviderEnabled(provider: String?) { TODO("Not yet implemented") }
+  override fun onProviderDisabled(provider: String?) { TODO("Not yet implemented") }
 
 }

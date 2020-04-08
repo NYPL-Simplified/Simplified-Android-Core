@@ -39,10 +39,10 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
 
-  private val ADDRESS_CHARS_MIN = 5
-  private val VALID_ADDRESS = "valid-address"
-  private val ALTERNATE_ADDRESS = "alternate-addresses"
-  private val NY_STATE = "NY"
+  private val addressCharsMin = 5
+  private val validAddress = "valid-address"
+  private val alternateAddress = "alternate-addresses"
+  private val nyState = "NY"
   private lateinit var addressType: AddressType
 
   private val viewModel: AddressViewModel by viewModels()
@@ -130,7 +130,7 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
 
     viewModel.validateAddressResponse.observe(viewLifecycleOwner, Observer { response ->
       showLoading(false)
-      if (response.type == VALID_ADDRESS || response.type == ALTERNATE_ADDRESS) {
+      if (response.type == validAddress || response.type == alternateAddress) {
         logger.debug("Address is valid")
 
         if (addressType == AddressType.WORK) {
@@ -149,7 +149,7 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
           )
         }
 
-        if (response.original_address.state != NY_STATE) {
+        if (response.original_address.state != nyState) {
           binding.headerStatusDescTv.text = response.message
         } else {
           nextAction = AlternateAddressFragmentDirections.actionNext(addressType)
@@ -190,14 +190,12 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
    */
   private fun validateForm() {
     binding.nextBtn.isEnabled = (binding.spState.selectedItem.toString() != getString(R.string.required)
-      && binding.etZip.text.length == ADDRESS_CHARS_MIN
-      && binding.etStreet1.text.length >= ADDRESS_CHARS_MIN
-      && binding.etCity.text.length >= ADDRESS_CHARS_MIN)
+      && binding.etZip.text.length == addressCharsMin
+      && binding.etStreet1.text.length >= addressCharsMin
+      && binding.etCity.text.length >= addressCharsMin)
   }
 
-  override fun onNothingSelected(parent: AdapterView<*>?) {
-    TODO("Not yet implemented")
-  }
+  override fun onNothingSelected(parent: AdapterView<*>?) { TODO("Not yet implemented") }
 
   override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     logger.debug(parent!!.getItemAtPosition(position).toString())

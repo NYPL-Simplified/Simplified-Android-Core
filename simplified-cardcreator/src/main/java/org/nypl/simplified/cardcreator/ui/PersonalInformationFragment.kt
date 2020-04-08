@@ -30,7 +30,7 @@ class PersonalInformationFragment : Fragment() {
   private lateinit var sharedPreferences: SharedPreferences
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
-  private val NAME_MIN_CHARS = 3
+  private val nameMinChars = 3
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -95,8 +95,8 @@ class PersonalInformationFragment : Fragment() {
   }
 
   private fun validateForm() {
-    binding.nextBtn.isEnabled = binding.firstNameEt.text.length > NAME_MIN_CHARS &&
-      binding.lastNameEt.text.length > NAME_MIN_CHARS &&
+    binding.nextBtn.isEnabled = binding.firstNameEt.text.length > nameMinChars &&
+      binding.lastNameEt.text.length > nameMinChars &&
       isValidEmailAddress()
   }
 
