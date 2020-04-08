@@ -1,7 +1,9 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
@@ -23,8 +25,7 @@ import java.util.concurrent.TimeUnit;
  * Default implementation of the {@link HTTPType} type.
  */
 
-public final class HTTP implements HTTPType
-{
+public final class HTTP implements HTTPType {
   private static final Logger LOG;
 
   static {
@@ -33,13 +34,11 @@ public final class HTTP implements HTTPType
 
   private final String user_agent;
 
-  private HTTP()
-  {
+  private HTTP() {
     this.user_agent = HTTP.userAgent();
   }
 
-  private static String userAgent()
-  {
+  private static String userAgent() {
     final Package p = HTTP.class.getPackage();
     if (p != null) {
       final String v = p.getImplementationVersion();
@@ -51,8 +50,7 @@ public final class HTTP implements HTTPType
   }
 
   private static void checkURI(
-    final URI uri)
-  {
+    final URI uri) {
     NullCheck.notNull(uri);
 
     final String scheme = uri.getScheme();
@@ -72,25 +70,24 @@ public final class HTTP implements HTTPType
    * @return A new HTTP interface
    */
 
-  public static HTTPType newHTTP()
-  {
+  public static HTTPType newHTTP() {
     return new HTTP();
   }
 
-  @Override public HTTPResultType<InputStream> get(
+  @Override
+  public HTTPResultType<InputStream> get(
     final OptionType<HTTPAuthType> auth_opt,
     final URI uri,
-    final long offset)
-  {
+    final long offset) {
     final OptionType<byte[]> data = Option.none();
     final OptionType<String> content_type = Option.none();
     return this.requestInternal("GET", auth_opt, uri, offset, data, content_type);
   }
 
-  @Override public HTTPResultType<InputStream> put(
-      final OptionType<HTTPAuthType> auth_opt,
-      final URI uri)
-  {
+  @Override
+  public HTTPResultType<InputStream> put(
+    final OptionType<HTTPAuthType> auth_opt,
+    final URI uri) {
     final OptionType<byte[]> data = Option.none();
     final OptionType<String> content_type = Option.none();
     return this.requestInternal("PUT", auth_opt, uri, 0, data, content_type);
@@ -105,31 +102,30 @@ public final class HTTP implements HTTPType
     return this.requestInternal("PUT", auth_opt, uri, 0, Option.some(data), Option.some(content_type));
   }
 
-  @Override public HTTPResultType<InputStream> post(
+  @Override
+  public HTTPResultType<InputStream> post(
     final OptionType<HTTPAuthType> auth_opt,
     final URI uri,
     final byte[] data,
-    final String content_type)
-  {
+    final String content_type) {
     return this.requestInternal("POST", auth_opt, uri, 0, Option.some(data), Option.some(content_type));
   }
 
-  @Override public HTTPResultType<InputStream> delete(
+  @Override
+  public HTTPResultType<InputStream> delete(
     final OptionType<HTTPAuthType> auth_opt,
     final URI uri,
-    final String content_type)
-  {
+    final String content_type) {
     return this.requestInternal("DELETE", auth_opt, uri, 0, Option.<byte[]>none(), Option.some(content_type));
   }
 
   private HTTPResultType<InputStream> requestInternal(
-      final String method,
-      final OptionType<HTTPAuthType> auth_opt,
-      final URI uri,
-      final long offset,
-      final OptionType<byte[]> data_opt,
-      final OptionType<String> content_type_opt)
-  {
+    final String method,
+    final OptionType<HTTPAuthType> auth_opt,
+    final URI uri,
+    final long offset,
+    final OptionType<byte[]> data_opt,
+    final OptionType<String> content_type_opt) {
     NullCheck.notNull(method);
     NullCheck.notNull(auth_opt);
     HTTP.checkURI(uri);
@@ -139,7 +135,7 @@ public final class HTTP implements HTTPType
 
       final URL url = NullCheck.notNull(uri.toURL());
       final HttpURLConnection conn =
-          NullCheck.notNull((HttpURLConnection) url.openConnection());
+        NullCheck.notNull((HttpURLConnection) url.openConnection());
 
       conn.setInstanceFollowRedirects(false);
       conn.setRequestMethod(method);
@@ -172,31 +168,31 @@ public final class HTTP implements HTTPType
 
       conn.connect();
 
-      final int code = conn.getResponseCode();
-      HTTP.LOG.trace(
-          "{} {} (auth {}) (result {})", method, uri, auth_opt, code);
+      int code = conn.getResponseCode();
+      HTTP.LOG.trace("{} {} (auth {}) (result {})", method, uri, auth_opt, code);
+
+      final StatusCodeOverride override = statusCodeOverrideFrom(conn);
+      code = override.statusCode(code);
 
       conn.getLastModified();
       if (code >= 400) {
-        final OptionType<HTTPProblemReport> report =
-            this.getReportFromError(conn);
         return new HTTPResultError<InputStream>(
-            code,
-            NullCheck.notNull(conn.getResponseMessage()),
-            (long) conn.getContentLength(),
-            NullCheck.notNull(conn.getHeaderFields()),
-            conn.getLastModified(),
-            this.getErrorStreamOrEmpty(conn),
-            report);
+          code,
+          NullCheck.notNull(conn.getResponseMessage()),
+          (long) conn.getContentLength(),
+          NullCheck.notNull(conn.getHeaderFields()),
+          conn.getLastModified(),
+          this.getErrorStreamOrEmpty(conn),
+          override.reportOpt);
       }
 
       return new HTTPResultOK<InputStream>(
-          NullCheck.notNull(conn.getResponseMessage()),
-          code,
-          conn.getInputStream(),
-          (long) conn.getContentLength(),
-          NullCheck.notNull(conn.getHeaderFields()),
-          conn.getLastModified());
+        NullCheck.notNull(conn.getResponseMessage()),
+        code,
+        conn.getInputStream(),
+        (long) conn.getContentLength(),
+        NullCheck.notNull(conn.getHeaderFields()),
+        conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final UnknownHostException e) {
@@ -208,17 +204,14 @@ public final class HTTP implements HTTPType
 
   private OptionType<HTTPProblemReport> getReportFromError(
     final HttpURLConnection conn)
-    throws IOException
-  {
+    throws IOException {
     final OptionType<HTTPProblemReport> report;
     if ("application/api-problem+json".equals(conn.getContentType())) {
       if (conn.getErrorStream() != null) {
         final HTTPProblemReport r =
           HTTPProblemReport.fromStream(conn.getErrorStream());
         report = Option.some(r);
-      }
-      else
-      {
+      } else {
         report = Option.none();
       }
 
@@ -228,10 +221,57 @@ public final class HTTP implements HTTPType
     return report;
   }
 
-  @Override public HTTPResultType<InputStream> head(
+  /*
+   * https://jira.nypl.org/browse/SIMPLY-2402: We want problem report documents to be
+   * able to override the status code returned in HTTP responses in order to allow for
+   * easier testing.
+   */
+
+  private StatusCodeOverride statusCodeOverrideFrom(
+    final HttpURLConnection conn)
+    throws IOException {
+    final OptionType<HTTPProblemReport> reportOpt = getReportFromError(conn);
+    if (reportOpt.isSome()) {
+      final HTTPProblemReport report = ((Some<HTTPProblemReport>) reportOpt).get();
+      final OptionType<Integer> problemCodeOpt = report.getProblemStatusCode();
+      if (problemCodeOpt.isSome()) {
+        return new StatusCodeOverride(reportOpt, problemCodeOpt);
+      }
+    }
+    return new StatusCodeOverride(Option.none(), Option.none());
+  }
+
+  private static final class StatusCodeOverride {
+    private final OptionType<HTTPProblemReport> reportOpt;
+    private final OptionType<Integer> codeOpt;
+
+    StatusCodeOverride(
+      OptionType<HTTPProblemReport> reportOpt,
+      OptionType<Integer> codeOpt) {
+      this.reportOpt = reportOpt;
+      this.codeOpt = codeOpt;
+    }
+
+    int statusCode(int existingCode) {
+      return this.codeOpt.accept(
+        new OptionVisitorType<Integer, Integer>() {
+          @Override
+          public Integer none(None<Integer> n) {
+            return existingCode;
+          }
+
+          @Override
+          public Integer some(Some<Integer> s) {
+            return s.get();
+          }
+        });
+    }
+  }
+
+  @Override
+  public HTTPResultType<InputStream> head(
     final OptionType<HTTPAuthType> auth_opt,
-    final URI uri)
-  {
+    final URI uri) {
     NullCheck.notNull(auth_opt);
     HTTP.checkURI(uri);
 
@@ -256,13 +296,13 @@ public final class HTTP implements HTTPType
 
       conn.connect();
 
-      final int code = conn.getResponseCode();
-      HTTP.LOG.trace(
-        "HEAD {} (auth {}) (result {})", uri, auth_opt, code);
+      int code = conn.getResponseCode();
+      HTTP.LOG.trace("HEAD {} (auth {}) (result {})", uri, auth_opt, code);
+
+      final StatusCodeOverride override = statusCodeOverrideFrom(conn);
+      code = override.statusCode(code);
 
       if (code >= 400) {
-        final OptionType<HTTPProblemReport> report =
-          this.getReportFromError(conn);
         return new HTTPResultError<InputStream>(
           code,
           NullCheck.notNull(conn.getResponseMessage()),
@@ -270,7 +310,7 @@ public final class HTTP implements HTTPType
           NullCheck.notNull(conn.getHeaderFields()),
           conn.getLastModified(),
           this.getErrorStreamOrEmpty(conn),
-          report);
+          override.reportOpt);
       }
 
       return new HTTPResultOK<InputStream>(
@@ -289,8 +329,7 @@ public final class HTTP implements HTTPType
     }
   }
 
-  private InputStream getErrorStreamOrEmpty(final HttpURLConnection conn)
-  {
+  private InputStream getErrorStreamOrEmpty(final HttpURLConnection conn) {
     final InputStream stream = conn.getErrorStream();
     if (stream != null) {
       return stream;
