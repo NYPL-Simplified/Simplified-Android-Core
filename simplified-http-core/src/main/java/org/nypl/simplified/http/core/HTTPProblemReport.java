@@ -3,6 +3,8 @@ package org.nypl.simplified.http.core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 
@@ -112,6 +114,23 @@ public final class HTTPProblemReport implements Serializable
       }
     }
     return ProblemType.Unknown;
+  }
+
+  /**
+   * @return The integer status code from the problem report, if present
+   */
+
+  public OptionType<Integer> getProblemStatusCode()
+  {
+    try {
+      if (this.raw.has("status")) {
+        final String typeValue = this.raw.get("status").asText().trim();
+        return Option.some(Integer.parseInt(typeValue));
+      }
+      return Option.none();
+    } catch (final NumberFormatException e) {
+      return Option.none();
+    }
   }
 
   /**
