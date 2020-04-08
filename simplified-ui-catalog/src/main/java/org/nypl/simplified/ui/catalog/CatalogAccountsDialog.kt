@@ -65,7 +65,6 @@ object CatalogAccountsDialog {
     return profilesController.profileCurrent()
       .accounts()
       .values
-      .filter { account -> !this.accountIsCurrent(profilesController, account) }
       .sortedBy { account -> account.provider.displayName }
   }
 

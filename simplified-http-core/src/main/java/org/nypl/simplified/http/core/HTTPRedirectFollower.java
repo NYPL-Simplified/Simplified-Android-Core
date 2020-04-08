@@ -130,6 +130,7 @@ public final class HTTPRedirectFollower
       this.logger, this.current_uri, e.getMessage(), e.getStatus(), e.getProblemReport());
 
     switch (code) {
+      case HttpURLConnection.HTTP_FORBIDDEN:
       case HttpURLConnection.HTTP_UNAUTHORIZED: {
         if (this.tried_auth.contains(this.current_uri)) {
           this.logger.error(
@@ -140,10 +141,6 @@ public final class HTTPRedirectFollower
         this.current_auth = this.target_auth;
         this.tried_auth.add(this.current_uri);
         return this.processURI();
-      }
-
-      case HttpURLConnection.HTTP_FORBIDDEN: {
-        return e;
       }
     }
 

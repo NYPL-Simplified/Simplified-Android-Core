@@ -4,6 +4,7 @@
     <domain includeSubdomains="false">qa.circulation.librarysimplified.org</domain>
     <domain includeSubdomains="true">patrons.librarysimplified.org</domain>
   </domain-config>
+  <base-config cleartextTrafficPermitted="true" />
   <debug-overrides>
     <trust-anchors>
       <certificates src="user"/>
