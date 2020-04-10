@@ -40,7 +40,7 @@ class MainApplication : MultiDexApplication() {
     super.onCreate()
 
     this.configureLogging()
-    this.configureStringMode()
+    this.configureStrictMode()
     this.logger.debug("starting app: pid {}", android.os.Process.myPid())
     this.bootFuture = this.boot.start(this)
     INSTANCE = this
@@ -81,7 +81,7 @@ class MainApplication : MultiDexApplication() {
    * application's main thread, where UI operations are received and animations take place.
    */
 
-  private fun configureStringMode() {
+  private fun configureStrictMode() {
     if (BuildConfig.DEBUG) {
       StrictMode.setThreadPolicy(ThreadPolicy.Builder()
         .detectDiskReads()
