@@ -1,5 +1,8 @@
 package org.nypl.simplified.main
 
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
+import android.os.StrictMode.VmPolicy
 import androidx.multidex.MultiDexApplication
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.rolling.RollingFileAppender
@@ -37,6 +40,7 @@ class MainApplication : MultiDexApplication() {
     super.onCreate()
 
     this.configureLogging()
+    this.configureStringMode()
     this.logger.debug("starting app: pid {}", android.os.Process.myPid())
     this.bootFuture = this.boot.start(this)
     INSTANCE = this
@@ -66,6 +70,30 @@ class MainApplication : MultiDexApplication() {
       this.logger.debug("logging is configured")
     } catch (e: Exception) {
       this.logger.error("could not configure logging: ", e)
+    }
+  }
+
+  /**
+   * StrictMode is a developer tool which detects things you might be doing by accident and
+   * brings them to your attention so you can fix them.
+   *
+   * StrictMode is most commonly used to catch accidental disk or network access on the
+   * application's main thread, where UI operations are received and animations take place.
+   */
+
+  private fun configureStringMode() {
+    if (BuildConfig.DEBUG) {
+      StrictMode.setThreadPolicy(ThreadPolicy.Builder()
+        .detectDiskReads()
+        .detectDiskWrites()
+        .detectNetwork()
+        .penaltyLog()
+        .build())
+      StrictMode.setVmPolicy(VmPolicy.Builder()
+        .detectLeakedSqlLiteObjects()
+        .detectLeakedClosableObjects()
+        .penaltyLog()
+        .build())
     }
   }
 
