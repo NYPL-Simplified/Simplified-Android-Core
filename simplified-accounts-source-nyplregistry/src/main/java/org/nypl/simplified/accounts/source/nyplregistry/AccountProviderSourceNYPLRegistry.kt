@@ -82,9 +82,6 @@ class AccountProviderSourceNYPLRegistry(
   private val writeLock = Any()
 
   @Volatile
-  private var firstCall = true
-
-  @Volatile
   private var stringResources: AccountProviderResolutionStringsType? = null
 
   private data class CacheFiles(
@@ -131,8 +128,6 @@ class AccountProviderSourceNYPLRegistry(
     } catch (e: Exception) {
       this.logger.error("failed to fetch providers: ", e)
       SourceResult.SourceFailed(diskResults, e)
-    } finally {
-      this.firstCall = false
     }
   }
 
