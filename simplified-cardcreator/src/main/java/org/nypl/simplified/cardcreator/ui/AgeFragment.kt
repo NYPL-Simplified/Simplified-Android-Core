@@ -41,7 +41,7 @@ class AgeFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
     binding.older13Rb.setOnCheckedChangeListener { _, _ ->
       validateForm()
@@ -68,8 +68,8 @@ class AgeFragment : Fragment() {
         navController.navigate(nextAction)
       } else {
         val data = Intent()
-        activity!!.setResult(Activity.RESULT_CANCELED, data)
-        activity!!.finish()
+        requireActivity().setResult(Activity.RESULT_CANCELED, data)
+        requireActivity().finish()
       }
     }
   }

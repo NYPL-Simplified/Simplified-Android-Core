@@ -35,7 +35,7 @@ class OutOfStateFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
     binding.workRb.setOnCheckedChangeListener { _, isChecked ->
       if (isChecked) {
@@ -59,7 +59,7 @@ class OutOfStateFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      activity!!.onBackPressed()
+      requireActivity().onBackPressed()
     }
   }
 }

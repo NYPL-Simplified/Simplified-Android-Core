@@ -8,13 +8,14 @@ import org.nypl.simplified.cardcreator.models.CreatePatronResponse
 import org.nypl.simplified.cardcreator.models.Patron
 import org.nypl.simplified.cardcreator.network.CardCreatorService
 import org.slf4j.LoggerFactory
-import java.lang.Exception
+import retrofit2.HttpException
 
 class PatronViewModel : ViewModel() {
 
   private val logger = LoggerFactory.getLogger(PatronViewModel::class.java)
 
   val createPatronResponse = MutableLiveData<CreatePatronResponse>()
+  val apiError = MutableLiveData<Int?>()
 
   fun createPatron(patron: Patron, username: String, password: String) {
     viewModelScope.launch {
@@ -23,8 +24,11 @@ class PatronViewModel : ViewModel() {
         val response = cardCreatorService.createPatron(patron)
         createPatronResponse.postValue(response)
       } catch (e: Exception) {
-        logger.debug("createPatron call failed!")
-        e.printStackTrace()
+        logger.error("createPatron call failed!", e)
+        when (e) {
+          is HttpException -> { apiError.postValue(e.code()) }
+          else -> { apiError.postValue(null) }
+        }
       }
     }
   }

@@ -54,7 +54,7 @@
     <string name="zip">Zip</string>
     <string-array name="states_array">
         <item>Required</item>
-        <item>Alabama (AL))</item>
+        <item>Alabama (AL)</item>
         <item>Alaska (AK))</item>
         <item>Arizona (AZ)</item>
         <item>Arkansas (AR)</item>
@@ -71,7 +71,7 @@
         <item>Iowa (IA)</item>
         <item>Kansas (KS)</item>
         <item>Kentucky (KY)</item>
-        <item>Louisiana	(LA)</item>
+        <item>Louisiana (LA)</item>
         <item>Maine	(ME)</item>
         <item>Maryland (MD)</item>
         <item>Massachusetts (MA)</item>
@@ -110,7 +110,7 @@
     <string name="confirm_home_address">Confirm Home Address</string>
     <string name="confirm_address">Confirm Address</string>
     <string name="your_address">Your Address:</string>
-    <string name="confirm_address_subheader">Tap confirm if this is your correct address or previous to change your entry</string>
+    <string name="confirm_address_subheader">Tap confirm if this looks correct or previous to edit.</string>
 
     <!-- Alternate Address -->
     <string name="work_address">Work Address</string>
@@ -136,8 +136,19 @@
     <string name="cancel">Cancel</string>
     <string name="settings">Settings</string>
     <string name="new_york_success">We have successfully determined that you are in New York!</string>
+    <string name="location_permission_prompt">SimplyE needs access to you location in order to create a library card.</string>
+    <string name="location_access_error">SimplyE cannot access your device\'s location, configure your location settings to continue.</string>
 
     <!-- Accessibility -->
     <string name="nypl_logo">NYPL Logo</string>
+
+    <!-- Errors -->
+    <string name="create_card_error">There was an error creating your card\n<b>Error code: %1$d</b></string>
+    <string name="validate_address_error">There was an error validating your address\n<b>Error code: %1$d</b></string>
+    <string name="validate_username_error">There was an error validating your username\n<b>Error code: %1$d</b></string>
+    <string name="create_card_general_error">There was an error creating your card.</string>
+    <string name="validate_address_general_error">There was an error validating your address.</string>
+    <string name="validate_username_general_error">There was an error validating your username.</string>
+    <string name="try_again">Try again</string>
 
 </resources>

@@ -11,10 +11,13 @@ import android.location.Geocoder
 import android.location.Address
 import android.location.Location
 import android.os.Bundle
+import android.os.Looper
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -60,7 +63,7 @@ class LocationFragment : Fragment(), LocationListener {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
     isInNewYorkState()
 
     binding.checkLocationBtn.setOnClickListener {
@@ -75,15 +78,49 @@ class LocationFragment : Fragment(), LocationListener {
         navController.navigate(nextAction)
       } else {
         val data = Intent()
-        activity!!.setResult(Activity.RESULT_CANCELED, data)
-        activity!!.finish()
+        requireActivity().setResult(Activity.RESULT_CANCELED, data)
+        requireActivity().finish()
       }
     }
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      activity!!.onBackPressed()
+      requireActivity().onBackPressed()
     }
+  }
+
+  /**
+   * Show settings prompt for location
+   */
+  private fun showLocationSettingsPrompt() {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(getString(R.string.location_access_error))
+      .setCancelable(false)
+      .setPositiveButton(getString(R.string.settings)) { _, _ ->
+        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+      }
+      .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+        dialog.cancel()
+      }
+    val alert = dialogBuilder.create()
+    alert.show()
+  }
+
+  /**
+   * User denied location prompt, show this to ask again
+   */
+  private fun showLocationPrompt() {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(getString(R.string.location_permission_prompt))
+      .setCancelable(false)
+      .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+        isInNewYorkState()
+      }
+      .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+        dialog.cancel()
+      }
+    val alert = dialogBuilder.create()
+    alert.show()
   }
 
   /**
@@ -104,12 +141,12 @@ class LocationFragment : Fragment(), LocationListener {
   private fun getLocation(): Location? {
     var location: Location? = null
     logger.debug("Checking for location permission")
-    if (ContextCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_COARSE_LOCATION)
+    if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
       != PackageManager.PERMISSION_GRANTED
     ) {
       logger.debug("Requesting location permission")
       ActivityCompat.requestPermissions(
-        activity!!,
+        requireActivity(),
         arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
         locationRequestCode
       )
@@ -117,17 +154,18 @@ class LocationFragment : Fragment(), LocationListener {
       logger.debug("Location permission granted")
       try {
         logger.debug("Getting current location")
-        val locationManager = activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val isNetworkLocationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (isNetworkLocationEnabled) {
-          locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTimeUpdates, minDistanceUpdates, this)
+          val looper = Looper.myLooper()
+          locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, looper)
           location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
         }
 
       } catch (e: Exception) {
-        logger.debug("Error getting current location")
-        e.printStackTrace()
+        logger.error("Error getting current location", e)
+        showLocationSettingsPrompt()
       }
     }
     return location
@@ -140,11 +178,11 @@ class LocationFragment : Fragment(), LocationListener {
   private fun isInNewYorkState(): Boolean {
     logger.debug("Checking to see if user is in New York")
     showLoading(true)
-    val locationManager = activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
     binding.nextBtn.isEnabled = false
     val maxResults = 1
     val location = getLocation()
-    val geocoder = Geocoder(activity!!, Locale.getDefault())
+    val geocoder = Geocoder(requireContext(), Locale.getDefault())
 
     // Address found using the Geocoder.
     val address: Address?
@@ -161,8 +199,8 @@ class LocationFragment : Fragment(), LocationListener {
         }
       }
     } catch (e: Exception) {
-      logger.debug("Error checking to see if user is in New York")
-      e.printStackTrace()
+      logger.error("Error checking to see if user is in New York", e)
+      showLocationSettingsPrompt()
     }
     showLoading(false)
     // Show error if user is not in New York
@@ -171,12 +209,12 @@ class LocationFragment : Fragment(), LocationListener {
       binding.nextBtn.isEnabled = true
       binding.nextBtn.text = getString(R.string.done)
       binding.headerStatusDescTv.text = getString(R.string.location_error)
-      binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(activity!!, R.color.red))
+      binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
     } else {
       binding.nextBtn.isEnabled = true
       binding.nextBtn.text = getString(R.string.next)
       binding.headerStatusDescTv.text = getString(R.string.new_york_success)
-      binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(activity!!, R.color.trans_black))
+      binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.trans_black))
     }
     logger.debug("Stopping location updates")
     locationManager.removeUpdates(this)
@@ -204,6 +242,7 @@ class LocationFragment : Fragment(), LocationListener {
 
         } else {
           logger.debug("Location permission NOT granted")
+          showLocationPrompt()
         }
         return
       }
@@ -212,13 +251,13 @@ class LocationFragment : Fragment(), LocationListener {
 
   override fun onLocationChanged(location: Location?) {
     logger.debug("Location has changed")
-    val locationManager = activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
     if (location != null) {
       logger.debug("Checking to see if user is in New York")
       showLoading(true)
       binding.nextBtn.isEnabled = false
       val maxResults = 1
-      val geocoder = Geocoder(activity!!, Locale.getDefault())
+      val geocoder = Geocoder(requireActivity(), Locale.getDefault())
 
       // Address found using the Geocoder.
       val address: Address?
@@ -233,8 +272,8 @@ class LocationFragment : Fragment(), LocationListener {
             isNewYork = true
           }
       } catch (e: Exception) {
-        logger.debug("Error checking to see if user is in New York")
-        e.printStackTrace()
+        logger.error("Error checking to see if user is in New York", e)
+        showLocationSettingsPrompt()
       }
       showLoading(false)
       // Show error if user is not in New York
@@ -243,12 +282,12 @@ class LocationFragment : Fragment(), LocationListener {
         binding.nextBtn.isEnabled = true
         binding.nextBtn.text = getString(R.string.done)
         binding.headerStatusDescTv.text = getString(R.string.location_error)
-        binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(activity!!, R.color.red))
+        binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
       } else {
         binding.nextBtn.isEnabled = true
         binding.nextBtn.text = getString(R.string.next)
         binding.headerStatusDescTv.text = getString(R.string.new_york_success)
-        binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(activity!!, R.color.trans_black))
+        binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.trans_black))
       }
     }
     logger.debug("Stopping location updates")
@@ -256,8 +295,8 @@ class LocationFragment : Fragment(), LocationListener {
   }
 
   // These are not needed but were invited to the party by Google
-  override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { TODO("Not yet implemented") }
-  override fun onProviderEnabled(provider: String?) { TODO("Not yet implemented") }
-  override fun onProviderDisabled(provider: String?) { TODO("Not yet implemented") }
+  override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { logger.debug("location status changed") }
+  override fun onProviderEnabled(provider: String?) { logger.debug("location provider enabled") }
+  override fun onProviderDisabled(provider: String?) { logger.debug("location provider disabled") }
 
 }

@@ -1,7 +1,5 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +19,6 @@ class ConfirmAlternateAddressFragment : Fragment() {
 
   private val logger = LoggerFactory.getLogger(ConfirmAlternateAddressFragment::class.java)
 
-  private lateinit var sharedPreferences: SharedPreferences
   private lateinit var address: AddressDetails
 
   private var _binding: FragmentConfirmAlternateAddressBinding? = null
@@ -42,18 +39,16 @@ class ConfirmAlternateAddressFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
-
-    sharedPreferences = activity!!.getSharedPreferences(Cache.DEFAULT_PREFERENCE_NAME, Context.MODE_PRIVATE)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
     arguments?.let {
       val addressType = ConfirmAlternateAddressFragmentArgs.fromBundle(it).addressType
 
       if (addressType == AddressType.SCHOOL) {
-        address = Cache(sharedPreferences).getSchoolAddress()
+        address = Cache(requireContext()).getSchoolAddress()
         binding.headerErrorTv.text = getString(R.string.confirm_school_address)
       } else {
-        address = Cache(sharedPreferences).getWorkAddress()
+        address = Cache(requireContext()).getWorkAddress()
       }
 
       binding.addressRb.text = """
@@ -73,7 +68,7 @@ class ConfirmAlternateAddressFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      activity!!.onBackPressed()
+      requireActivity().onBackPressed()
     }
   }
 }

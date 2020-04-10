@@ -14,10 +14,10 @@ dependencies {
   implementation libraries.androidXLegacySupport
   implementation libraries.slf4j
   implementation libraries.androidXActivity
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXConstraintLayout
+  implementation libraries.kotlinStdlib
 
-  implementation 'androidx.appcompat:appcompat:1.1.0'
-  implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.71"
   implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.71"
   implementation "androidx.navigation:navigation-fragment-ktx:2.3.0-alpha04"
   implementation "androidx.navigation:navigation-ui-ktx:2.3.0-alpha04"

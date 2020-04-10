@@ -1,7 +1,5 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -32,8 +31,6 @@ class AccountInformationFragment : Fragment() {
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
 
-  private lateinit var sharedPreferences: SharedPreferences
-
   private val minPinChars = 4
   private val usernameMinChars = 5
   private val usernameMaxChars = 25
@@ -53,9 +50,7 @@ class AccountInformationFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
-
-    sharedPreferences = activity!!.getSharedPreferences(Cache.DEFAULT_PREFERENCE_NAME, Context.MODE_PRIVATE)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
     binding.pinEt.addTextChangedListener(object : TextWatcher {
       override fun afterTextChanged(s: Editable?) {
@@ -77,31 +72,54 @@ class AccountInformationFragment : Fragment() {
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
-      showLoading(true)
-      viewModel.validateUsername(
-        binding.usernameEt.text.toString(),
-        activity!!.intent.extras.getString("username"),
-        activity!!.intent.extras.getString("password"))
+      hideKeyboard()
+      validateUsername()
     }
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      activity!!.onBackPressed()
+      requireActivity().onBackPressed()
     }
 
     viewModel.validateUsernameResponse.observe(viewLifecycleOwner, Observer { response ->
       showLoading(false)
       if (response.type == usernameAvailable) {
         logger.debug("Username is valid")
-        Cache(sharedPreferences).setAccountInformation(binding.usernameEt.text.toString(),
+        Cache(requireContext()).setAccountInformation(binding.usernameEt.text.toString(),
           binding.pinEt.text.toString())
         nextAction = AccountInformationFragmentDirections.actionNext()
-        hideKeyboard()
         navController.navigate(nextAction)
       } else {
         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
       }
     })
+
+    viewModel.apiError.observe(viewLifecycleOwner, Observer {
+      showLoading(false)
+      var error = getString(R.string.validate_username_general_error)
+      if (it != null) {
+        error = getString(R.string.validate_username_error, it)
+      }
+      val dialogBuilder = AlertDialog.Builder(requireContext())
+      dialogBuilder.setMessage(error)
+        .setCancelable(false)
+        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+          validateUsername()
+        }
+        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+          dialog.cancel()
+        }
+      val alert = dialogBuilder.create()
+      alert.show()
+    })
+  }
+
+  private fun validateUsername() {
+    showLoading(true)
+    viewModel.validateUsername(
+      binding.usernameEt.text.toString(),
+      requireActivity().intent.extras.getString("username"),
+      requireActivity().intent.extras.getString("password"))
   }
 
   private fun validateForm() {

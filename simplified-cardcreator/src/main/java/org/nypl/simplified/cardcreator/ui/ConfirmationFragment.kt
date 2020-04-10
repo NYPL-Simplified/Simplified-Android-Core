@@ -15,8 +15,12 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentConfirmationBinding
+import org.nypl.simplified.cardcreator.utils.Cache
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
@@ -80,12 +84,12 @@ class ConfirmationFragment : Fragment() {
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
 
-      if (ContextCompat.checkSelfPermission(activity!!, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+      if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
         != PackageManager.PERMISSION_GRANTED
       ) {
         logger.debug("Requesting storage permission")
         ActivityCompat.requestPermissions(
-          activity!!,
+          requireActivity(),
           arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
           storageRequestCode
         )
@@ -99,25 +103,28 @@ class ConfirmationFragment : Fragment() {
    * Create library card from ImageView
    */
   private fun createDigitalCard() {
-    val card = binding.libraryCard
-    card.isDrawingCacheEnabled = true
-    val bitmap = card.drawingCache
-    val f: File
-    try {
-      if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-        val file = File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_PICTURES)
-        if (!file.exists()) {
-          file.mkdirs()
+    GlobalScope.launch(Dispatchers.Main) {
+      val card = binding.libraryCard
+      card.isDrawingCacheEnabled = true
+      val bitmap = card.drawingCache
+      val f: File
+      try {
+        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
+          val file = File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_PICTURES)
+          if (!file.exists()) {
+            file.mkdirs()
+          }
+          f = File(file.absolutePath, "library-card.png")
+          val outStream = FileOutputStream(f)
+          bitmap.compress(Bitmap.CompressFormat.PNG, 10, outStream)
+          outStream.close()
+          addCardToGallery(f)
+
+          Toast.makeText(requireContext(), getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
         }
-        f = File(file.absolutePath + File.separator + "library-card" + ".png")
-        val outStream = FileOutputStream(f)
-        bitmap.compress(Bitmap.CompressFormat.PNG, 10, outStream)
-        outStream.close()
-        addCardToGallery(f)
-        Toast.makeText(activity!!, getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
+      } catch (e: Exception) {
+        logger.error("Error creating digital card", e)
       }
-    } catch (e: Exception) {
-      e.printStackTrace()
     }
   }
 
@@ -126,9 +133,9 @@ class ConfirmationFragment : Fragment() {
    */
   private fun addCardToGallery(card: File) {
     val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-    val contentUri: Uri = Uri.fromFile(card)
+    val contentUri = Uri.fromFile(card)
     mediaScanIntent.data = contentUri
-    activity!!.sendBroadcast(mediaScanIntent)
+    requireActivity().sendBroadcast(mediaScanIntent)
   }
 
   /**
@@ -162,14 +169,16 @@ class ConfirmationFragment : Fragment() {
    * Returns result to caller with card details
    */
   private fun returnResult() {
-    val data = Intent()
-    data.putExtra("type", type)
-    data.putExtra("username", username)
-    data.putExtra("barcode", barcode)
-    data.putExtra("pin", pin)
-    data.putExtra("temporary", temporary)
-    data.putExtra("message", message)
-    activity!!.setResult(Activity.RESULT_OK, data)
-    activity!!.finish()
+    val data = Intent().apply {
+      putExtra("type", type)
+      putExtra("username", username)
+      putExtra("barcode", barcode)
+      putExtra("pin", pin)
+      putExtra("temporary", temporary)
+      putExtra("message", message)
+    }
+    requireActivity().setResult(Activity.RESULT_OK, data)
+    Cache(requireContext()).clear()
+    requireActivity().finish()
   }
 }

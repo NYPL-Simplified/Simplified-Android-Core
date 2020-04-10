@@ -1,7 +1,5 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,8 +20,6 @@ class ConfirmHomeAddressFragment : Fragment() {
   private var _binding: FragmentConfirmHomeAddressBinding? = null
   private val binding get() = _binding!!
 
-  private lateinit var sharedPreferences: SharedPreferences
-
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
   private val nyState = "NY"
@@ -40,10 +36,9 @@ class ConfirmHomeAddressFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
-    sharedPreferences = activity!!.getSharedPreferences(Cache.DEFAULT_PREFERENCE_NAME, Context.MODE_PRIVATE)
-    val address = Cache(sharedPreferences).getHomeAddress()
+    val address = Cache(requireContext()).getHomeAddress()
 
     binding.addressRb.text = """
       ${address.line_1}
@@ -65,7 +60,7 @@ class ConfirmHomeAddressFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      activity!!.onBackPressed()
+      requireActivity().onBackPressed()
     }
   }
 }

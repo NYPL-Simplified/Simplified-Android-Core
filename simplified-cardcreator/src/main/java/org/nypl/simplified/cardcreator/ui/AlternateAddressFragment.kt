@@ -1,7 +1,5 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -30,8 +29,6 @@ import org.slf4j.LoggerFactory
 class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
   private val logger = LoggerFactory.getLogger(AlternateAddressFragment::class.java)
-
-  private lateinit var sharedPreferences: SharedPreferences
 
   private var _binding: FragmentAlternateAddressBinding? = null
   private val binding get() = _binding!!
@@ -59,9 +56,7 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
-
-    sharedPreferences = activity!!.getSharedPreferences(Cache.DEFAULT_PREFERENCE_NAME, Context.MODE_PRIVATE)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
     arguments?.let {
       addressType = AlternateAddressFragmentArgs.fromBundle(it).addressType
@@ -111,21 +106,12 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
-      showLoading(true)
-      viewModel.validateAddress(
-        Address(
-          AddressDetails(binding.etCity.text.toString(),
-          binding.etStreet1.text.toString(),
-          getStateAbbreviation(binding.spState.selectedItem.toString()),
-          binding.etZip.text.toString()),
-          false),
-        activity!!.intent.extras.getString("username"),
-        activity!!.intent.extras.getString("password"))
+      validateAddress()
     }
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      activity!!.onBackPressed()
+      requireActivity().onBackPressed()
     }
 
     viewModel.validateAddressResponse.observe(viewLifecycleOwner, Observer { response ->
@@ -134,14 +120,14 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
         logger.debug("Address is valid")
 
         if (addressType == AddressType.WORK) {
-          Cache(sharedPreferences).setWorkAddress(AddressDetails(
+          Cache(requireContext()).setWorkAddress(AddressDetails(
             response.address.line_1,
             response.address.city,
             response.address.state,
             response.address.zip)
           )
         } else {
-          Cache(sharedPreferences).setSchoolAddress(AddressDetails(
+          Cache(requireContext()).setSchoolAddress(AddressDetails(
             response.address.line_1,
             response.address.city,
             response.address.state,
@@ -159,6 +145,41 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
       }
     })
+
+    viewModel.apiError.observe(viewLifecycleOwner, Observer {
+      showLoading(false)
+      var error = getString(R.string.validate_address_general_error)
+      if (it != null) {
+        error = getString(R.string.validate_address_error, it)
+      }
+      val dialogBuilder = AlertDialog.Builder(requireContext())
+      dialogBuilder.setMessage(error)
+        .setCancelable(false)
+        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+          validateAddress()
+        }
+        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+          dialog.cancel()
+        }
+      val alert = dialogBuilder.create()
+      alert.show()
+    })
+  }
+
+  /**
+   * Validates entered address
+   */
+  private fun validateAddress() {
+    showLoading(true)
+    viewModel.validateAddress(
+      Address(
+        AddressDetails(binding.etCity.text.toString(),
+          binding.etStreet1.text.toString(),
+          getStateAbbreviation(binding.spState.selectedItem.toString()),
+          binding.etZip.text.toString()),
+        false),
+      requireActivity().intent.extras.getString("username"),
+      requireActivity().intent.extras.getString("password"))
   }
 
   /**
@@ -195,7 +216,9 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
       && binding.etCity.text.length >= addressCharsMin)
   }
 
-  override fun onNothingSelected(parent: AdapterView<*>?) { TODO("Not yet implemented") }
+  override fun onNothingSelected(parent: AdapterView<*>?) {
+    binding.nextBtn.isEnabled = false
+  }
 
   override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     logger.debug(parent!!.getItemAtPosition(position).toString())

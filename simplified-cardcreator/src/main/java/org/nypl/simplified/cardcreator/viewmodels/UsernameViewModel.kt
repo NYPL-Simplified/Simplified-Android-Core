@@ -8,13 +8,14 @@ import org.nypl.simplified.cardcreator.models.Username
 import org.nypl.simplified.cardcreator.models.ValidateUsernameResponse
 import org.nypl.simplified.cardcreator.network.CardCreatorService
 import org.slf4j.LoggerFactory
-import java.lang.Exception
+import retrofit2.HttpException
 
 class UsernameViewModel : ViewModel() {
 
   private val logger = LoggerFactory.getLogger(UsernameViewModel::class.java)
 
   val validateUsernameResponse = MutableLiveData<ValidateUsernameResponse>()
+  val apiError = MutableLiveData<Int?>()
 
   fun validateUsername(username: String, authUsername: String, authPassword: String) {
     viewModelScope.launch {
@@ -23,8 +24,11 @@ class UsernameViewModel : ViewModel() {
         val response = cardCreatorService.validateUsername(Username(username))
         validateUsernameResponse.postValue(response)
       } catch (e: Exception) {
-        logger.debug("validateUsername call failed!")
-        e.printStackTrace()
+        logger.error("validateUsername call failed!", e)
+        when (e) {
+          is HttpException -> { apiError.postValue(e.code()) }
+          else -> { apiError.postValue(null) }
+        }
       }
     }
   }

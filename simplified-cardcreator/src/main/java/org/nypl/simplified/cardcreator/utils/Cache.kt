@@ -1,5 +1,6 @@
 package org.nypl.simplified.cardcreator.utils
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import org.nypl.simplified.cardcreator.models.AccountInformation
@@ -11,13 +12,11 @@ import org.nypl.simplified.cardcreator.models.PersonalInformation
  * This class acts as private key value pair caching system
  */
 class Cache internal constructor(private val sharedPreferences: SharedPreferences) {
+  constructor(context: Context) : this(
+    context.getSharedPreferences("CARD_CREATOR", Context.MODE_PRIVATE)
+  )
 
   companion object {
-
-    /**
-     * The default shared preference name for our current app
-     */
-    const val DEFAULT_PREFERENCE_NAME = "CARD_CREATOR"
 
     /**
      * SharePreferences keys
@@ -62,10 +61,12 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
    * Saves current home address data
    */
   fun setHomeAddress(address: AddressDetails) {
-    sharedPreferences.edit { putString(KEY_HOME_ADDRESS_LINE_1, address.line_1) }
-    sharedPreferences.edit { putString(KEY_HOME_CITY, address.city) }
-    sharedPreferences.edit { putString(KEY_HOME_STATE, address.state) }
-    sharedPreferences.edit { putString(KEY_HOME_ZIP, address.zip) }
+    sharedPreferences.edit {
+      putString(KEY_HOME_ADDRESS_LINE_1, address.line_1)
+      putString(KEY_HOME_CITY, address.city)
+      putString(KEY_HOME_STATE, address.state)
+      putString(KEY_HOME_ZIP, address.zip)
+    }
   }
 
   /**
@@ -84,10 +85,12 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
    * Saves current alternate address data
    */
   fun setSchoolAddress(address: AddressDetails) {
-    sharedPreferences.edit { putString(KEY_SCHOOL_ADDRESS_LINE_1, address.line_1) }
-    sharedPreferences.edit { putString(KEY_SCHOOL_CITY, address.city) }
-    sharedPreferences.edit { putString(KEY_SCHOOL_STATE, address.state) }
-    sharedPreferences.edit { putString(KEY_SCHOOL_ZIP, address.zip) }
+    sharedPreferences.edit {
+      putString(KEY_SCHOOL_ADDRESS_LINE_1, address.line_1)
+      putString(KEY_SCHOOL_CITY, address.city)
+      putString(KEY_SCHOOL_STATE, address.state)
+      putString(KEY_SCHOOL_ZIP, address.zip)
+    }
   }
 
   /**
@@ -106,10 +109,12 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
    * Saves current alternate address data
    */
   fun setWorkAddress(address: AddressDetails) {
-    sharedPreferences.edit { putString(KEY_WORK_ADDRESS_LINE_1, address.line_1) }
-    sharedPreferences.edit { putString(KEY_WORK_CITY, address.city) }
-    sharedPreferences.edit { putString(KEY_WORK_STATE, address.state) }
-    sharedPreferences.edit { putString(KEY_WORK_ZIP, address.zip) }
+    sharedPreferences.edit {
+      putString(KEY_WORK_ADDRESS_LINE_1, address.line_1)
+      putString(KEY_WORK_CITY, address.city)
+      putString(KEY_WORK_STATE, address.state)
+      putString(KEY_WORK_ZIP, address.zip)
+    }
   }
 
   /**
@@ -128,10 +133,12 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
    * Gets cached personal information data
    */
   fun setPersonalInformation(personalInformation: PersonalInformation) {
-    sharedPreferences.edit { putString(KEY_FIRST_NAME, personalInformation.firstName) }
-    sharedPreferences.edit { putString(KEY_MIDDLE_NAME, personalInformation.middleName) }
-    sharedPreferences.edit { putString(KEY_LAST_NAME, personalInformation.lastName) }
-    sharedPreferences.edit { putString(KEY_EMAIL, personalInformation.email) }
+    sharedPreferences.edit {
+      putString(KEY_FIRST_NAME, personalInformation.firstName)
+      putString(KEY_MIDDLE_NAME, personalInformation.middleName)
+      putString(KEY_LAST_NAME, personalInformation.lastName)
+      putString(KEY_EMAIL, personalInformation.email)
+    }
   }
 
   /**
@@ -160,7 +167,9 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
    * Sets cached account information data
    */
   fun setAccountInformation(username: String, pin: String) {
-    sharedPreferences.edit { putString(KEY_USERNAME, username) }
-    sharedPreferences.edit { putString(KEY_PIN, pin) }
+    sharedPreferences.edit {
+      putString(KEY_USERNAME, username)
+      putString(KEY_PIN, pin)
+    }
   }
 }

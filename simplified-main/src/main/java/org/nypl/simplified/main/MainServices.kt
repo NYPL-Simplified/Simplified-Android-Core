@@ -460,10 +460,10 @@ internal object MainServices {
     return try {
       this.createBundledCredentials(context.assets)
     } catch (e: FileNotFoundException) {
-      this.logger.debug("could not initialize bundled credentials: ", e)
+      this.logger.warn("could not initialize bundled credentials: ", e)
       AccountBundledCredentialsEmpty.getInstance()
     } catch (e: IOException) {
-      this.logger.debug("could not initialize bundled credentials: ", e)
+      this.logger.warn("could not initialize bundled credentials: ", e)
       throw IllegalStateException("could not initialize bundled credentials", e)
     }
   }

@@ -4,12 +4,18 @@ import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.nypl.simplified.cardcreator.models.*
+import org.nypl.simplified.cardcreator.models.Address
+import org.nypl.simplified.cardcreator.models.ValidateAddressResponse
+import org.nypl.simplified.cardcreator.models.Username
+import org.nypl.simplified.cardcreator.models.ValidateUsernameResponse
+import org.nypl.simplified.cardcreator.models.Patron
+import org.nypl.simplified.cardcreator.models.CreatePatronResponse
 import org.nypl.simplified.cardcreator.utils.Constants
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
+import java.util.concurrent.TimeUnit
 
 internal interface CardCreatorService {
 
@@ -65,7 +71,10 @@ internal interface CardCreatorService {
         it.proceed(request)
       }
 
-      val client: OkHttpClient = OkHttpClient.Builder()
+      val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(logging)
         .addInterceptor(auth)
         .build()

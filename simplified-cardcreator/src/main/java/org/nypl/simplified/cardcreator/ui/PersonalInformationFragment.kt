@@ -1,7 +1,5 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -27,7 +25,6 @@ class PersonalInformationFragment : Fragment() {
   private var _binding: FragmentPersonalInformationBinding? = null
   private val binding get() = _binding!!
 
-  private lateinit var sharedPreferences: SharedPreferences
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
   private val nameMinChars = 3
@@ -44,9 +41,8 @@ class PersonalInformationFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
     nextAction = PersonalInformationFragmentDirections.actionNext()
-    sharedPreferences = activity!!.getSharedPreferences(Cache.DEFAULT_PREFERENCE_NAME, Context.MODE_PRIVATE)
 
     binding.firstNameEt.addTextChangedListener(object : TextWatcher {
       override fun afterTextChanged(s: Editable?) {
@@ -78,7 +74,7 @@ class PersonalInformationFragment : Fragment() {
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       logger.debug("User navigated to the next screen")
-      Cache(sharedPreferences).setPersonalInformation(PersonalInformation(
+      Cache(requireContext()).setPersonalInformation(PersonalInformation(
         binding.firstNameEt.text.toString(),
         binding.middleNameEt.text.toString(),
         binding.lastNameEt.text.toString(),
@@ -90,7 +86,7 @@ class PersonalInformationFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      activity!!.onBackPressed()
+      requireActivity().onBackPressed()
     }
   }
 

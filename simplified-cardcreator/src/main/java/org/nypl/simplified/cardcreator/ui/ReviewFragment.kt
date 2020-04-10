@@ -1,12 +1,11 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -23,8 +22,6 @@ import org.slf4j.LoggerFactory
 class ReviewFragment : Fragment() {
 
   private val logger = LoggerFactory.getLogger(ReviewFragment::class.java)
-
-  private lateinit var sharedPreferences: SharedPreferences
 
   private var _binding: FragmentReviewBinding? = null
   private val binding get() = _binding!!
@@ -51,23 +48,19 @@ class ReviewFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    sharedPreferences = activity!!.getSharedPreferences(Cache.DEFAULT_PREFERENCE_NAME, Context.MODE_PRIVATE)
-    cache = Cache(sharedPreferences)
-    navController = Navigation.findNavController(activity!!, R.id.card_creator_nav_host_fragment)
+    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
+    cache = Cache(requireContext())
 
     setReviewData()
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
-      showLoading(true)
-      viewModel.createPatron(getPatron(),
-        activity!!.intent.extras.getString("username"),
-        activity!!.intent.extras.getString("password"))
+      createPatron()
     }
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      activity!!.onBackPressed()
+      requireActivity().onBackPressed()
     }
 
     viewModel.createPatronResponse.observe(viewLifecycleOwner, Observer { response ->
@@ -87,6 +80,32 @@ class ReviewFragment : Fragment() {
         navController.navigate(nextAction)
       }
     })
+
+    viewModel.apiError.observe(viewLifecycleOwner, Observer {
+      showLoading(false)
+      var error = getString(R.string.create_card_general_error)
+      if (it != null) {
+        error = getString(R.string.create_card_error, it)
+      }
+      val dialogBuilder = AlertDialog.Builder(requireContext())
+      dialogBuilder.setMessage(error)
+        .setCancelable(false)
+        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+          createPatron()
+        }
+        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+          dialog.cancel()
+        }
+      val alert = dialogBuilder.create()
+      alert.show()
+    })
+  }
+
+  private fun createPatron() {
+    showLoading(true)
+    viewModel.createPatron(getPatron(),
+      requireActivity().intent.extras.getString("username"),
+      requireActivity().intent.extras.getString("password"))
   }
 
   private fun getPatron(): Patron {
