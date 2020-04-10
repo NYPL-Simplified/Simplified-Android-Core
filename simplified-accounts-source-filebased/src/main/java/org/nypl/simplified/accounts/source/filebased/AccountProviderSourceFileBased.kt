@@ -49,6 +49,10 @@ class AccountProviderSourceFileBased(
     }
   }
 
+  override fun clear(context: Context) {
+    cache = null
+  }
+
   private fun mapResult(cached: Map<URI, AccountProviderType>) =
     cached.mapValues { v -> v.value.toDescription() }
 }

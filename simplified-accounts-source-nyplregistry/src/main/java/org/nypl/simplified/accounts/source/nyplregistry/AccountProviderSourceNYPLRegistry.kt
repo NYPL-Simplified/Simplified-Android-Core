@@ -5,6 +5,9 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.Duration
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSerializersType
@@ -89,6 +92,9 @@ class AccountProviderSourceNYPLRegistry(
     val fileTemp: File
   )
 
+  /** The default time to retain the disk cache. */
+  private val defaultCacheDuration = Duration.standardHours(4)
+
   override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
     if (this.stringResources == null) {
       this.stringResources = AccountProviderSourceResolutionStrings(context.resources)
@@ -97,15 +103,21 @@ class AccountProviderSourceNYPLRegistry(
     val files = this.cacheFiles(context)
     val diskResults = this.fetchDiskResults(files)
 
-    /*
-     * If we've not called the server before, and the disk cache is not empty, then just
-     * return the disk cache. Otherwise, we need to call the server.
-     */
-
     return try {
-      if (this.firstCall) {
-        if (diskResults.isNotEmpty()) {
+      /*
+       * If we have a populated disk cache, and haven't exceeded the cache duration, then
+       * just return the disk cache.
+       */
+      if (diskResults.isNotEmpty()) {
+        val now = DateTime.now(DateTimeZone.UTC)
+        val lastModifiedTime = DateTime(files.file.lastModified(), DateTimeZone.UTC)
+        val age = Duration(lastModifiedTime, now)
+
+        if (age.isShorterThan(defaultCacheDuration)) {
+          logger.debug("disk cache is fresh; last-modified={}", lastModifiedTime)
           return SourceResult.SourceSucceeded(diskResults)
+        } else {
+          logger.debug("disk cache is expired; last-modified={}", lastModifiedTime)
         }
       }
 
@@ -121,6 +133,14 @@ class AccountProviderSourceNYPLRegistry(
       SourceResult.SourceFailed(diskResults, e)
     } finally {
       this.firstCall = false
+    }
+  }
+
+  override fun clear(context: Context) {
+    synchronized(this.writeLock) {
+      val files = this.cacheFiles(context)
+      FileUtilities.fileDelete(files.file)
+      FileUtilities.fileDelete(files.fileTemp)
     }
   }
 

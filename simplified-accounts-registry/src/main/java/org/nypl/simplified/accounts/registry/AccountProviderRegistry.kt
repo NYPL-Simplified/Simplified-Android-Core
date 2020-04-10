@@ -95,6 +95,12 @@ class AccountProviderRegistry private constructor(
     }
   }
 
+  override fun clear() {
+    for (source in this.sources) {
+      source.clear(this.context)
+    }
+  }
+
   override fun updateProvider(accountProvider: AccountProviderType): AccountProviderType {
     val id = accountProvider.id
     val existing = this.resolved[id]

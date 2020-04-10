@@ -48,4 +48,8 @@ interface AccountProviderSourceType {
    */
 
   fun load(context: Context, includeTestingLibraries: Boolean): SourceResult
+
+  /** Clear any cached providers. */
+
+  fun clear(context: Context)
 }

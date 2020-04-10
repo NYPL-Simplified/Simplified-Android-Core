@@ -3,7 +3,6 @@ package org.nypl.simplified.accounts.registry.api
 import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
-
 import java.net.URI
 import javax.annotation.concurrent.ThreadSafe
 
@@ -48,6 +47,12 @@ interface AccountProviderRegistryType {
    */
 
   fun refresh(includeTestingLibraries: Boolean)
+
+  /**
+   * Clear cached account providers from all sources.
+   */
+
+  fun clear()
 
   /**
    * Return an immutable read-only of the account provider descriptions.

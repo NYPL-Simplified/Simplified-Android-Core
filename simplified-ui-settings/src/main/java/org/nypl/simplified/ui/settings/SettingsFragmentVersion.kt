@@ -26,6 +26,7 @@ import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
+import org.nypl.simplified.profiles.api.ProfileUpdated.Succeeded
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
@@ -292,16 +293,23 @@ class SettingsFragmentVersion : Fragment() {
 
   private fun onProfileEvent(event: ProfileEvent) {
     if (event is ProfileUpdated) {
-      val showTestingLibraries = this.profilesController
-        .profileCurrent()
-        .preferences()
-        .showTestingLibraries
-      if (showTestingLibraries) {
-        this.accountRegistry.refresh(includeTestingLibraries = true)
-      }
       this.uiThread.runOnUIThread(Runnable {
-        this.showTesting.isChecked = showTestingLibraries
+        this.showTesting.isChecked = this.profilesController
+          .profileCurrent()
+          .preferences()
+          .showTestingLibraries
       })
+
+      if (event is Succeeded) {
+        val old = event.oldDescription.preferences
+        val new = event.newDescription.preferences
+        if (old.showTestingLibraries != new.showTestingLibraries) {
+          this.accountRegistry.clear()
+          this.accountRegistry.refresh(
+            includeTestingLibraries = new.showTestingLibraries
+          )
+        }
+      }
     }
   }
 
