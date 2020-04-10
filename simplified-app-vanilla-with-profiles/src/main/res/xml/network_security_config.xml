@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-  <domain-config cleartextTrafficPermitted="true">
-    <domain includeSubdomains="false">qa.circulation.librarysimplified.org</domain>
-  </domain-config>
+  <base-config cleartextTrafficPermitted="true" />
   <debug-overrides>
     <trust-anchors>
       <certificates src="user"/>
