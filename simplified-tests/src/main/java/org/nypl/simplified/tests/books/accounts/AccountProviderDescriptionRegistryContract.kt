@@ -531,6 +531,8 @@ abstract class AccountProviderDescriptionRegistryContract {
           Pair(descriptionOld1.metadata.id, descriptionOld1),
           Pair(descriptionOld2.metadata.id, descriptionOld2)))
     }
+
+    override fun clear(context: Context) {}
   }
 
   class OKSource : AccountProviderSourceType {
@@ -541,17 +543,23 @@ abstract class AccountProviderDescriptionRegistryContract {
           Pair(description1.metadata.id, description1),
           Pair(description2.metadata.id, description2)))
     }
+
+    override fun clear(context: Context) {}
   }
 
   class CrashingSource : AccountProviderSourceType {
     override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       throw Exception()
     }
+
+    override fun clear(context: Context) {}
   }
 
   class FailingSource : AccountProviderSourceType {
     override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       return SourceResult.SourceFailed(mapOf(), java.lang.Exception())
     }
+
+    override fun clear(context: Context) {}
   }
 }

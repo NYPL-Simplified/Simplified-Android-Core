@@ -28,6 +28,9 @@ class MockAccountProviderRegistry : AccountProviderRegistryType {
   override fun refresh(includeTestingLibraries: Boolean) {
   }
 
+  override fun clear() {
+  }
+
   override fun accountProviderDescriptions(): Map<URI, AccountProviderDescriptionType> {
     return IntRange(0, 30)
       .toList()

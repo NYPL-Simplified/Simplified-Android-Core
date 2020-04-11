@@ -2,6 +2,7 @@ package org.nypl.simplified.tests.books.accounts
 
 import android.content.Context
 import android.content.res.Resources
+import org.joda.time.DateTimeUtils
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -273,8 +274,7 @@ abstract class AccountProviderNYPLRegistryContract {
   }
 
   /**
-   * The providers are returned from the disk cache the first time the source is queried. The
-   * next attempt gets them from the server.
+   * The providers are queried from the server if the cache is expired.
    */
 
   @Test
@@ -321,12 +321,50 @@ abstract class AccountProviderNYPLRegistryContract {
         mapOf(),
         0L))
 
+    // Expire the cache
+    DateTimeUtils.setCurrentMillisOffset(1000 * 43200)
+
     run {
       val result = provider.load(this.context, true)
       this.logger.debug("status: {}", result)
       val success = result as SourceSucceeded
 
       Assert.assertEquals(182, success.results.size)
+    }
+
+    // Reset
+    DateTimeUtils.setCurrentMillisSystem()
+  }
+
+  /**
+   * Test that the disk cache can be cleared.
+   */
+
+  @Test
+  fun testClearDiskCacheOK() {
+    val cacheFile = File(this.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json")
+    cacheFile.outputStream().use { output ->
+      readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
+    }
+
+    val mockHTTP = MockingHTTP()
+
+    val provider =
+      AccountProviderSourceNYPLRegistry(
+        http = mockHTTP,
+        authDocumentParsers = AuthenticationDocumentParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(),
+        serializers = AccountProviderDescriptionCollectionSerializers())
+
+    run {
+      val result1 = provider.load(this.context, true)
+      this.logger.debug("status: {}", result1)
+      val success1 = result1 as SourceSucceeded
+      Assert.assertEquals(43, success1.results.size)
+
+      // Bust the cache
+      provider.clear(context)
+      Assert.assertFalse(cacheFile.exists())
     }
   }
 }
