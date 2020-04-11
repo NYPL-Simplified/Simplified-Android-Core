@@ -55,7 +55,7 @@
     <string-array name="states_array">
         <item>Required</item>
         <item>Alabama (AL)</item>
-        <item>Alaska (AK))</item>
+        <item>Alaska (AK)</item>
         <item>Arizona (AZ)</item>
         <item>Arkansas (AR)</item>
         <item>California (CA)</item>
@@ -65,14 +65,14 @@
         <item>Florida (FL)</item>
         <item>Georgia (GA)</item>
         <item>Hawaii (HI)</item>
-        <item>Idaho	(ID)</item>
-        <item>Illinois (IL))</item>
-        <item>Indiana (IN))</item>
+        <item>Idaho (ID)</item>
+        <item>Illinois (IL)</item>
+        <item>Indiana (IN)</item>
         <item>Iowa (IA)</item>
         <item>Kansas (KS)</item>
         <item>Kentucky (KY)</item>
         <item>Louisiana (LA)</item>
-        <item>Maine	(ME)</item>
+        <item>Maine (ME)</item>
         <item>Maryland (MD)</item>
         <item>Massachusetts (MA)</item>
         <item>Michigan (MI)</item>
@@ -95,14 +95,14 @@
         <item>Rhode Island (RI)</item>
         <item>South Carolina (SC)</item>
         <item>South Dakota (SD)</item>
-        <item>Tennessee	(TN)</item>
-        <item>Texas	(TX)</item>
+        <item>Tennessee (TN)</item>
+        <item>Texas (TX)</item>
         <item>Utah (UT)</item>
         <item>Vermont (VT)</item>
         <item>Virginia (VA)</item>
         <item>Washington (WA)</item>
-        <item>West Virginia	(WV)</item>
-        <item>Wisconsin	(WI)</item>
+        <item>West Virginia (WV)</item>
+        <item>Wisconsin (WI)</item>
         <item>Wyoming (WY)</item>
     </string-array>
 

@@ -6,4 +6,3 @@ package org.nypl.simplified.cardcreator.models
 enum class AddressType {
   HOME, WORK, SCHOOL
 }
-

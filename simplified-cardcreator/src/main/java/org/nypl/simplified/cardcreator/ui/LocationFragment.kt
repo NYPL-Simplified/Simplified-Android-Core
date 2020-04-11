@@ -162,7 +162,6 @@ class LocationFragment : Fragment(), LocationListener {
           locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, looper)
           location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
         }
-
       } catch (e: Exception) {
         logger.error("Error getting current location", e)
         showLocationSettingsPrompt()
@@ -190,7 +189,7 @@ class LocationFragment : Fragment(), LocationListener {
     try {
       if (location != null) {
         address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
-        logger.debug( "Region is: ${address.adminArea} ${address.countryCode} ")
+        logger.debug("Region is: ${address.adminArea} ${address.countryCode} ")
         binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
 
         if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
@@ -239,7 +238,6 @@ class LocationFragment : Fragment(), LocationListener {
         // If request is cancelled, the result arrays are empty.
         if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
           logger.debug("Location permission granted")
-
         } else {
           logger.debug("Location permission NOT granted")
           showLocationPrompt()
@@ -264,7 +262,7 @@ class LocationFragment : Fragment(), LocationListener {
 
       try {
           address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
-          logger.debug( "Region is: ${address.adminArea} ${address.countryCode} ")
+          logger.debug("Region is: ${address.adminArea} ${address.countryCode} ")
           binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
 
           if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
@@ -298,5 +296,4 @@ class LocationFragment : Fragment(), LocationListener {
   override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { logger.debug("location status changed") }
   override fun onProviderEnabled(provider: String?) { logger.debug("location provider enabled") }
   override fun onProviderDisabled(provider: String?) { logger.debug("location provider disabled") }
-
 }

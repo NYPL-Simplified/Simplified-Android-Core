@@ -33,5 +33,4 @@ class AddressViewModel : ViewModel() {
       }
     }
   }
-
 }

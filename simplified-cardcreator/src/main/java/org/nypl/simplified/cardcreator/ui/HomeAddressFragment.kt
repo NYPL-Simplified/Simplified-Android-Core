@@ -180,10 +180,11 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
    * Checks form to verify that that address entered is legit
    */
   private fun validateForm() {
-    binding.nextBtn.isEnabled = (binding.spState.selectedItem.toString() != getString(R.string.required)
-      && binding.etZip.text.length == addressCharsMin
-      && binding.etStreet1.text.length >= addressCharsMin
-      && binding.etCity.text.length >= addressCharsMin)
+    binding.nextBtn.isEnabled = (
+      binding.spState.selectedItem.toString() != getString(R.string.required) &&
+        binding.etZip.text.length == addressCharsMin &&
+        binding.etStreet1.text.length >= addressCharsMin &&
+        binding.etCity.text.length >= addressCharsMin)
   }
 
   override fun onNothingSelected(parent: AdapterView<*>?) {
