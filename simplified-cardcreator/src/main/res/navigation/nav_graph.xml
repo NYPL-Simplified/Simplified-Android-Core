@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/destination_age">
+
+    <fragment
+        android:id="@+id/destination_age"
+        android:name="org.nypl.simplified.cardcreator.ui.AgeFragment"
+        android:label="fragment_age"
+        tools:layout="@layout/fragment_age">
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_location"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_location"
+        android:name="org.nypl.simplified.cardcreator.ui.LocationFragment"
+        android:label="fragment_location"
+        tools:layout="@layout/fragment_location">
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_home_address"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_home_address"
+        android:name="org.nypl.simplified.cardcreator.ui.HomeAddressFragment"
+        android:label="fragment_home_address"
+        tools:layout="@layout/fragment_home_address">
+
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_confirm_address"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_confirm_address"
+        android:name="org.nypl.simplified.cardcreator.ui.ConfirmHomeAddressFragment"
+        android:label="fragment_confirm_address"
+        tools:layout="@layout/fragment_confirm_home_address">
+
+        <action
+            android:id="@+id/action_out_of_state"
+            app:destination="@id/destination_out_of_state"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+
+        <action
+            android:id="@+id/action_personal_information"
+            app:destination="@id/destination_personal_information"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_out_of_state"
+        android:name="org.nypl.simplified.cardcreator.ui.OutOfStateFragment"
+        android:label="fragment_out_of_state"
+        tools:layout="@layout/fragment_out_of_state">
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_alternate_address"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_alternate_address"
+        android:name="org.nypl.simplified.cardcreator.ui.AlternateAddressFragment"
+        android:label="fragment_alternate_address"
+        tools:layout="@layout/fragment_alternate_address">
+
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_confirm_alternate_address"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+        <argument
+            android:name="address_type"
+            app:argType="org.nypl.simplified.cardcreator.models.AddressType" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_confirm_alternate_address"
+        android:name="org.nypl.simplified.cardcreator.ui.ConfirmAlternateAddressFragment"
+        android:label="fragment_confirm_alternate_address"
+        tools:layout="@layout/fragment_confirm_home_address">
+
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_personal_information"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+        <argument
+            android:name="address_type"
+            app:argType="org.nypl.simplified.cardcreator.models.AddressType" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_personal_information"
+        android:name="org.nypl.simplified.cardcreator.ui.PersonalInformationFragment"
+        android:label="fragment_personal_information"
+        tools:layout="@layout/fragment_personal_information">
+
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_account_information"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_account_information"
+        android:name="org.nypl.simplified.cardcreator.ui.AccountInformationFragment"
+        android:label="fragment_account_information"
+        tools:layout="@layout/fragment_account_information">
+
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_review"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_review"
+        android:name="org.nypl.simplified.cardcreator.ui.ReviewFragment"
+        android:label="fragment_review"
+        tools:layout="@layout/fragment_review">
+
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_confirrmation"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_confirrmation"
+        android:name="org.nypl.simplified.cardcreator.ui.ConfirmationFragment"
+        android:label="fragment_confirmation"
+        tools:layout="@layout/fragment_confirmation">
+
+        <argument
+            android:name="username"
+            app:argType="string" />
+        <argument
+            android:name="barcode"
+            app:argType="string" />
+        <argument
+            android:name="pin"
+            app:argType="string" />
+        <argument
+            android:name="type"
+            app:argType="string" />
+        <argument
+            android:name="temporary"
+            app:argType="boolean" />
+        <argument
+            android:name="message"
+            app:argType="string" />
+        <argument
+            android:name="name"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

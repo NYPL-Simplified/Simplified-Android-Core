@@ -141,4 +141,7 @@ internal class MainServicesStrings(
 
   val initializingInstabug =
     this.resources.getString(R.string.bootingInstabug)
+
+  val bootingCardCreatorService =
+    this.resources.getString(R.string.bootingCardCreatorService)
 }

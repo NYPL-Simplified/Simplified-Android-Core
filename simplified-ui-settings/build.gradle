@@ -18,6 +18,7 @@ dependencies {
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-ui-toolbar")
+  implementation project(":simplified-cardcreator")
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

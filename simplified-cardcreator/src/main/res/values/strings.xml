@@ -1,47 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="next">Next</string>
-  <string name="prev">Previous</string>
-  <string name="finish">Register</string>
-  <string name="review">Review</string>
 
+    <!-- Navigation -->
+    <string name="next">Next</string>
+    <string name="previous">Prev</string>
+    <string name="done">Done</string>
+    <string name="confirm">Confirm</string>
+    <string name="sign_up">Sign Up for a Library Card</string>
 
-  <string name="label_street1">Street 1</string>
-  <string name="label_street2">Street 2</string>
-  <string name="label_city">City</string>
-  <string name="label_state">State</string>
-  <string name="label_zip">Zip</string>
+    <!-- Review -->
+    <string name="name">Name</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="pin">Pin</string>
+    <string name="review">Review</string>
+    <string name="valid_address_subheader">This valid address will result in a temporary </string>
+    <string name="creating_card">Creating card&#8230;</string>
 
+    <!-- Personal Information -->
+    <string name="personal_information">Personal Information</string>
+    <string name="first_name">FIRST NAME</string>
+    <string name="middle_name">MIDDLE NAME</string>
+    <string name="last_name">LAST NAME</string>
 
-  <string name="label_address_home">Home Address</string>
-  <string name="label_address_work">Work Address</string>
-  <string name="label_address_school">School Address</string>
-  <string name="label_firstname">First Name</string>
-  <string name="label_middletname">Middle</string>
-  <string name="label_lastname">Last Name</string>
-  <string name="label_email">Email</string>
-  <string name="label_name">Name</string>
-  <string name="label_username">Username</string>
-  <string name="label_pin">PIN</string>
-  <string name="label_barcode">Barcode</string>
+    <!-- Out-of-State -->
+    <string name="out_of_state_address">Out-of-State Address</string>
+    <string name="out_of_state_subheader">Since you do not live in New York, you must work or attend school in New York to qualify for a library card.</string>
+    <string name="work_in_ny">I work in New York</string>
+    <string name="school_in_ny">I attend school in New York</string>
 
-  <string name="submit_confirm_message">You will receive an email confirmation.</string>
-  <string name="submit_confirm_button">Register</string>
+    <!-- Confirmation -->
+    <string name="create_card">Create Card</string>
+    <string name="save_card">Save Card</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="card_saved">card saved</string>
+    <string name="user_card_number">Card Number: %1$s</string>
+    <string name="user_pin">PIN: %1$s</string>
+    <string name="issued_date">Issued: %1$s</string>
 
+    <!-- Account Information -->
+    <string name="account_information">Account Information</string>
+    <string name="username_desc">Usernames must be 5–25 letters or numbers only. PINs must be four digits.</string>
+    <string name="validating_username">Validating username&#8230;</string>
 
-  <string name="no_geocoder_available">No geocoder available</string>
+    <!-- Home Address -->
+    <string name="home_address">Home Address</string>
+    <string name="required">Required</string>
+    <string name="optional">Optional</string>
+    <string name="street_1">Street 1</string>
+    <string name="street_2">Street 2</string>
+    <string name="city">City</string>
+    <string name="state">State</string>
+    <string name="zip">Zip</string>
+    <string-array name="states_array">
+        <item>Required</item>
+        <item>Alabama (AL)</item>
+        <item>Alaska (AK)</item>
+        <item>Arizona (AZ)</item>
+        <item>Arkansas (AR)</item>
+        <item>California (CA)</item>
+        <item>Colorado (CO)</item>
+        <item>Connecticut (CT)</item>
+        <item>Delaware (DE)</item>
+        <item>Florida (FL)</item>
+        <item>Georgia (GA)</item>
+        <item>Hawaii (HI)</item>
+        <item>Idaho (ID)</item>
+        <item>Illinois (IL)</item>
+        <item>Indiana (IN)</item>
+        <item>Iowa (IA)</item>
+        <item>Kansas (KS)</item>
+        <item>Kentucky (KY)</item>
+        <item>Louisiana (LA)</item>
+        <item>Maine (ME)</item>
+        <item>Maryland (MD)</item>
+        <item>Massachusetts (MA)</item>
+        <item>Michigan (MI)</item>
+        <item>Minnesota (MN)</item>
+        <item>Mississippi (MS)</item>
+        <item>Missouri (MO)</item>
+        <item>Montana (MT)</item>
+        <item>Nebraska (NE)</item>
+        <item>Nevada (NV)</item>
+        <item>New Hampshire (NH)</item>
+        <item>New Jersey (NJ)</item>
+        <item>New Mexico (NM)</item>
+        <item>New York (NY)</item>
+        <item>North Carolina (NC)</item>
+        <item>North Dakota (ND)</item>
+        <item>Ohio (OH)</item>
+        <item>Oklahoma (OK)</item>
+        <item>Oregon (OR)</item>
+        <item>Pennsylvania (PA)</item>
+        <item>Rhode Island (RI)</item>
+        <item>South Carolina (SC)</item>
+        <item>South Dakota (SD)</item>
+        <item>Tennessee (TN)</item>
+        <item>Texas (TX)</item>
+        <item>Utah (UT)</item>
+        <item>Vermont (VT)</item>
+        <item>Virginia (VA)</item>
+        <item>Washington (WA)</item>
+        <item>West Virginia (WV)</item>
+        <item>Wisconsin (WI)</item>
+        <item>Wyoming (WY)</item>
+    </string-array>
 
-  <string name="fetch_address">Fetch address</string>
+    <!-- Confirm Home Address -->
+    <string name="confirm_home_address">Confirm Home Address</string>
+    <string name="confirm_address">Confirm Address</string>
+    <string name="your_address">Your Address:</string>
+    <string name="confirm_address_subheader">Tap confirm if this looks correct or previous to edit.</string>
 
-  <string name="address_found">Address found</string>
+    <!-- Alternate Address -->
+    <string name="work_address">Work Address</string>
+    <string name="school_address">School Address</string>
 
-  <string name="no_address_found">Sorry, no address found</string>
-  <string name="no_location_data_provided">No location data provided</string>
-  <string name="service_not_available">Sorry, the service is not available</string>
-  <string name="invalid_lat_long_used">Invalid latitude or longitude used</string>
+    <!-- Confirm Alternate Address -->
+    <string name="confirm_work_address">Confirm Work Address</string>
+    <string name="confirm_school_address">Confirm School Address</string>
 
-  <!-- EULA strings -->
-  <string name="eula_checkbox">I agree to the terms of the End User License Agreement.</string>
-  <string name="age_verification_challenge">To obtain a digital library card from the New York Public Library, you must live, work, or attend school in New York State. You must also be at least 13 years of age and be physically present in New York at the time of sign-up.  \n\nYou must be 13 years of age or older to sign up for a library card. How old are you?</string>
+    <!-- Age -->
+    <string name="age_description">To obtain a digital library card from the New York Public Library, you must live, work, or attend school in New York State. You must also be at least 13 years of age and be physically present in New York at the time of sign-up.  \n\nYou must be 13 years of age or older to sign up for a library card. How old are you?</string>
+    <string name="under_13">Under 13</string>
+    <string name="over_13">13 or Older</string>
+    <string name="eula_checkbox">I agree to the terms of the End User License Agreement.</string>
+    <string name="age_error">You are not old enough to sign up for a library card.</string>
+
+    <!-- Location -->
+    <string name="checking_location">Checking location&#8230;</string>
+    <string name="location_check">Location Check</string>
+    <string name="location">Location</string>
+    <string name="location_error">You must be in New York to sign up for a library card. Please try to sign up again when you are in another location.</string>
+    <string name="check_location_again">Check location again</string>
+    <string name="cancel">Cancel</string>
+    <string name="settings">Settings</string>
+    <string name="new_york_success">We have successfully determined that you are in New York!</string>
+    <string name="location_permission_prompt">SimplyE needs access to you location in order to create a library card.</string>
+    <string name="location_access_error">SimplyE cannot access your device\'s location, configure your location settings to continue.</string>
+
+    <!-- Accessibility -->
+    <string name="nypl_logo">NYPL Logo</string>
+
+    <!-- Errors -->
+    <string name="create_card_error">There was an error creating your card\n<b>Error code: %1$d</b></string>
+    <string name="validate_address_error">There was an error validating your address\n<b>Error code: %1$d</b></string>
+    <string name="validate_username_error">There was an error validating your username\n<b>Error code: %1$d</b></string>
+    <string name="create_card_general_error">There was an error creating your card.</string>
+    <string name="validate_address_general_error">There was an error validating your address.</string>
+    <string name="validate_username_general_error">There was an error validating your username.</string>
+    <string name="try_again">Try again</string>
 
 </resources>

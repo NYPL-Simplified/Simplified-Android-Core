@@ -1,6 +1,8 @@
 package org.nypl.simplified.ui.settings
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
@@ -30,6 +32,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
+import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -77,6 +80,8 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var imageLoader: ImageLoaderType
   private lateinit var login: ViewGroup
   private lateinit var loginButton: Button
+  private lateinit var signUpButton: Button
+  private lateinit var signUpLabel: TextView
   private lateinit var loginButtonErrorDetails: Button
   private lateinit var loginProgress: ProgressBar
   private lateinit var loginProgressText: TextView
@@ -85,6 +90,8 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var uiThread: UIThreadServiceType
   private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
+  private val cardCreatorResultCode = 101
+  private var cardCreatorService: CardCreatorServiceType? = null
 
   companion object {
 
@@ -109,6 +116,8 @@ class SettingsFragmentAccount : Fragment() {
     this.parameters = this.arguments!![PARAMETERS_ID] as SettingsFragmentAccountParameters
 
     val services = Services.serviceDirectory()
+
+    cardCreatorService = services.optionalService(CardCreatorServiceType::class.java)
 
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
@@ -181,6 +190,10 @@ class SettingsFragmentAccount : Fragment() {
       layout.findViewById(R.id.settingsLoginButtonErrorDetails)
     this.eulaCheckbox =
       layout.findViewById(R.id.settingsEULACheckbox)
+    this.signUpButton =
+      layout.findViewById(R.id.settingsCardCreatorSignUp)
+    this.signUpLabel =
+      layout.findViewById(R.id.settingsCardCreatorLabel)
 
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginButton.isEnabled = false
@@ -301,6 +314,27 @@ class SettingsFragmentAccount : Fragment() {
     this.authenticationCOPPAOver13.isChecked = this.isOver13()
     this.authenticationCOPPAOver13.setOnClickListener(onAgeCheckboxClicked())
     this.authenticationCOPPAOver13.isEnabled = true
+
+    /*
+     * Conditionally enable sign up button
+     */
+    if (this.account.provider.cardCreatorURI != null && cardCreatorService != null) {
+      this.signUpButton.isEnabled = true
+      this.signUpLabel.isEnabled = true
+    }
+
+    /*
+     * Launch Card Creator
+     */
+
+    this.signUpButton.setOnClickListener {
+      val cardCreator = cardCreatorService
+      if (cardCreator == null) {
+        this.logger.error("Card creator not configured")
+      } else {
+        cardCreator.openCardCreatorActivity(this, activity, cardCreatorResultCode)
+      }
+    }
 
     /*
      * Configure a checkbox listener that shows and hides the password field. Note that
@@ -691,5 +725,26 @@ class SettingsFragmentAccount : Fragment() {
       activity = this.requireActivity(),
       interfaceType = SettingsNavigationControllerType::class.java
     )
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (requestCode == cardCreatorResultCode) {
+
+      when (resultCode) {
+        Activity.RESULT_OK -> {
+          if (data != null) {
+            val barcode = data.getStringExtra("barcode")
+            val pin = data.getStringExtra("pin")
+            this.authenticationBasicUser.setText(barcode, TextView.BufferType.EDITABLE)
+            this.authenticationBasicPass.setText(pin, TextView.BufferType.EDITABLE)
+            tryLogin()
+          }
+        }
+        Activity.RESULT_CANCELED -> {
+          logger.debug("User has exited the card creator")
+        }
+      }
+    }
   }
 }

@@ -1,11 +1,29 @@
+android {
+  kotlinOptions {
+    jvmTarget = '1.8'
+    noStdlib = true
+  }
+  viewBinding {
+    enabled = true
+  }
+}
+
 dependencies {
-  implementation project(":simplified-http-core")
-  implementation project(":simplified-json-core")
   implementation project(":simplified-prefs")
 
   implementation libraries.androidXLegacySupport
-  implementation libraries.io7mJFunctional
-  implementation libraries.io7mJNull
-  implementation libraries.jacksonDatabind
   implementation libraries.slf4j
+  implementation libraries.androidXActivity
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXConstraintLayout
+  implementation libraries.kotlinStdlib
+
+  def nav_version = "2.3.0-alpha04"
+  implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.71"
+  implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+  implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+  implementation 'com.squareup.retrofit2:retrofit:2.7.2'
+  implementation "com.squareup.moshi:moshi:1.8.0"
+  implementation "com.squareup.retrofit2:converter-moshi:2.5.0"
+  implementation "com.squareup.okhttp3:logging-interceptor:4.4.0"
 }

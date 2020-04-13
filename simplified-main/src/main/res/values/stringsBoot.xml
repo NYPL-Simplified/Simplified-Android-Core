@@ -45,5 +45,6 @@
   <string name="bootingThemeService">Initializing theme service…</string>
   <string name="bootingUIBackgroundExecutor">Initializing UI background executor…</string>
   <string name="bootingUIThreadService">Initializing UI thread service…</string>
+  <string name="bootingCardCreatorService">Initializing Card Creator Service…</string>
   <string name="bootStarted">Starting application…</string>
 </resources>

@@ -59,6 +59,8 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
+import org.nypl.simplified.cardcreator.CardCreatorService
+import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.documents.store.DocumentStore
@@ -452,6 +454,20 @@ internal object MainServices {
     }
   }
 
+  private fun cardCreatorCredentials(
+    context: Context
+  ): AccountBundledCredentialsType {
+    return try {
+      this.createBundledCredentials(context.assets)
+    } catch (e: FileNotFoundException) {
+      this.logger.warn("could not initialize bundled credentials: ", e)
+      AccountBundledCredentialsEmpty.getInstance()
+    } catch (e: IOException) {
+      this.logger.warn("could not initialize bundled credentials: ", e)
+      throw IllegalStateException("could not initialize bundled credentials", e)
+    }
+  }
+
   @Throws(ProfileDatabaseException::class)
   private fun createProfileDatabase(
     context: Context,
@@ -597,6 +613,20 @@ internal object MainServices {
       bookRegistry = bookRegistry,
       notificationsWrapper = NotificationsWrapper(context),
       notificationResourcesType = MainNotificationResources(context))
+  }
+
+  private fun createCardCreatorService(context: Context): CardCreatorServiceType? {
+    return try {
+      context.assets.open("cardcreator.conf").use { stream ->
+        CardCreatorService.create(stream)
+      }
+    } catch (e: FileNotFoundException) {
+      this.logger.debug("card creator configuration not present: ", e)
+      null
+    } catch (e: IOException) {
+      this.logger.debug("could not initialize card creator: ", e)
+      throw IllegalStateException("could not initialize card creator", e)
+    }
   }
 
   private fun publishApplicationStartupEvent(
@@ -1088,6 +1118,11 @@ internal object MainServices {
         optionalFromServiceLoader(AudioBookFeedbooksServiceType::class.java)
       }
     )
+
+    addServiceOptionally(
+      message = strings.bootingCardCreatorService,
+      interfaceType = CardCreatorServiceType::class.java,
+      serviceConstructor = { createCardCreatorService(context) })
 
     this.showThreads()
 

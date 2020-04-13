@@ -58,6 +58,7 @@ dependencies {
   api project(":simplified-viewer-epub-readium1")
   api project(":simplified-viewer-pdf")
   api project(":simplified-viewer-spi")
+  api project(":simplified-cardcreator")
 
   api libraries.androidAsync
   api libraries.androidXAppCompat
