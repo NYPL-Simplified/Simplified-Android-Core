@@ -383,4 +383,13 @@ sealed class AnalyticsEvent {
 
     val bookTitle: String
   ) : AnalyticsEvent()
+
+  /**
+   * The user explicitly asked for any buffered analytics events to be sent
+   */
+
+  data class SyncRequested(
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
+    override val credentials: AccountAuthenticationCredentials?
+  ) : AnalyticsEvent()
 }
