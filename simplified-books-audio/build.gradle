@@ -1,0 +1,17 @@
+dependencies {
+  api project(":simplified-taskrecorder-api")
+
+  implementation project(":simplified-books-database-api")
+  implementation project(":simplified-services-api")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.nyplAudiobookAPI
+  implementation libraries.nyplAudiobookDownloads
+  implementation libraries.nyplAudiobookFeedbooks
+  implementation libraries.nyplAudiobookLicenseCheckAPI
+  implementation libraries.nyplAudiobookManifestFulfillAPI
+  implementation libraries.nyplAudiobookManifestFulfillBasic
+  implementation libraries.nyplAudiobookManifestFulfillOPA
+  implementation libraries.nyplAudiobookManifestParserAPI
+  implementation libraries.nyplAudiobookManifestWebPub
+}

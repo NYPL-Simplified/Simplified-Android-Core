@@ -41,12 +41,16 @@ class AudioBookViewer : ViewerProviderType {
     val formatAudio = format as BookFormat.BookFormatAudioBook
     val manifest = formatAudio.manifest!!
 
-    val params = AudioBookPlayerParameters(
-      manifest.manifestFile,
-      manifest.manifestURI,
-      book.id,
-      book.entry
-    )
+    val params =
+      AudioBookPlayerParameters(
+        userAgent = TODO(),
+        manifestContentType = format.contentType.fullType,
+        manifestFile = manifest.manifestFile,
+        manifestURI = manifest.manifestURI,
+        bookID = book.id,
+        opdsEntry = book.entry
+      )
+
     AudioBookPlayerActivity.startActivity(activity, params)
   }
 }

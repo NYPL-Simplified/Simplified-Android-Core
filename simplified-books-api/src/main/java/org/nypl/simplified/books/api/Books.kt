@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.api
 
+import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerPosition
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.accounts.api.AccountID
@@ -91,6 +92,12 @@ data class Book(
 sealed class BookFormat {
 
   /**
+   * @return The content type of the book format
+   */
+
+  abstract val contentType: MIMEType
+
+  /**
    * @return `true` iff the book data for the format is downloaded
    */
 
@@ -132,7 +139,9 @@ sealed class BookFormat {
      * The list of bookmarks.
      */
 
-    val bookmarks: List<Bookmark>
+    val bookmarks: List<Bookmark>,
+
+    override val contentType: MIMEType
   ) : BookFormat() {
 
     override val isDownloaded: Boolean
@@ -174,7 +183,9 @@ sealed class BookFormat {
      * The most recent playback position.
      */
 
-    val position: PlayerPosition?
+    val position: PlayerPosition?,
+
+    override val contentType: MIMEType
   ) : BookFormat() {
 
     /*
@@ -201,7 +212,9 @@ sealed class BookFormat {
      * The PDF file on disk, if one has been downloaded.
      */
 
-    val file: File?
+    val file: File?,
+
+    override val contentType: MIMEType
   ) : BookFormat() {
     override val isDownloaded: Boolean
       get() = this.file != null

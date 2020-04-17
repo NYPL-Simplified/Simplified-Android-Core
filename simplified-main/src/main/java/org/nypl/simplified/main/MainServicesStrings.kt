@@ -7,6 +7,12 @@ internal class MainServicesStrings(
   private val resources: Resources
 ) : BootStringResourcesType {
 
+  val bootingOverdriveSecretService: String =
+    this.resources.getString(R.string.bootingOverdriveSecretService)
+
+  val bootingFeedbooksSecretService: String =
+    this.resources.getString(R.string.bootingFeedbooksSecretService)
+
   val bootingProfileModificationFragmentService: String =
     this.resources.getString(R.string.bootingProfileModificationFragmentService)
 

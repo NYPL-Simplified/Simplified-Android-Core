@@ -28,6 +28,7 @@ import org.librarysimplified.audiobook.api.PlayerResult
 import org.librarysimplified.audiobook.api.PlayerSleepTimer
 import org.librarysimplified.audiobook.api.PlayerSleepTimerType
 import org.librarysimplified.audiobook.api.PlayerType
+import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.audiobook.api.extensions.PlayerExtensionType
 import org.librarysimplified.audiobook.downloads.DownloadProvider
 import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtension
@@ -42,10 +43,10 @@ import org.librarysimplified.audiobook.views.PlayerTOCFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
@@ -119,7 +120,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   private lateinit var screenSize: ScreenSizeInformationType
   private lateinit var sleepTimer: PlayerSleepTimerType
   private lateinit var uiThread: UIThreadServiceType
-  private var download: DownloadType? = null
   private var playerInitialized: Boolean = false
 
   @Volatile
@@ -132,7 +132,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     val i = this.intent!!
     val a = i.extras!!
 
-    this.parameters = a.getSerializable(org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity.Companion.PARAMETER_ID) as AudioBookPlayerParameters
+    this.parameters = a.getSerializable(PARAMETER_ID) as AudioBookPlayerParameters
 
     this.log.debug("manifest file: {}", this.parameters.manifestFile)
     this.log.debug("manifest uri:  {}", this.parameters.manifestURI)
@@ -253,12 +253,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.destroying = true
 
     /*
-     * Cancel the manifest download if one is still happening.
-     */
-
-    this.download?.cancel()
-
-    /*
      * Cancel downloads, shut down the player, and close the book.
      */
 
@@ -328,7 +322,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       PlayerAudioEngineRequest(
         manifest = manifest,
         filter = { true },
-        downloadProvider = DownloadProvider.create(this.downloadExecutor)
+        downloadProvider = DownloadProvider.create(this.downloadExecutor),
+        userAgent = PlayerUserAgent(this.parameters.userAgent)
       )
     )
 
@@ -416,7 +411,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     extensions: List<PlayerExtensionType>
   ) {
     val feedbooksConfigService =
-      services.optionalService(AudioBookFeedbooksServiceType::class.java)
+      services.optionalService(AudioBookFeedbooksSecretServiceType::class.java)
 
     if (feedbooksConfigService != null) {
       this.log.debug("feedbooks configuration service is available; configuring extension")

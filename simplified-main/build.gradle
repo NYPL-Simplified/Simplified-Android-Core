@@ -23,10 +23,12 @@ dependencies {
   api project(":simplified-accounts-source-spi")
   api project(":simplified-adobe-extensions")
   api project(":simplified-analytics-api")
+  api project(":simplified-books-audio")
   api project(":simplified-books-controller")
   api project(":simplified-books-controller-api")
   api project(":simplified-boot-api")
   api project(":simplified-buildconfig-api")
+  api project(":simplified-cardcreator")
   api project(":simplified-clock")
   api project(":simplified-documents")
   api project(":simplified-downloader-core")
@@ -58,7 +60,6 @@ dependencies {
   api project(":simplified-viewer-epub-readium1")
   api project(":simplified-viewer-pdf")
   api project(":simplified-viewer-spi")
-  api project(":simplified-cardcreator")
 
   api libraries.androidAsync
   api libraries.androidXAppCompat

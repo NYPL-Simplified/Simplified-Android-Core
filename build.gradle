@@ -63,7 +63,7 @@ ext {
     useNYPLNexusDepend = true
   }
 
-  nyplAudioBookAPIVersion = "4.0.0"
+  nyplAudioBookAPIVersion = "5.0.0-beta0004"
 }
 
 subprojects {
@@ -88,7 +88,7 @@ subprojects {
 
 ext.libraries = [
   androidAsync                     : "com.koushikdutta.async:androidasync:2.2.1",
-  androidXActivity                 : "androidx.activity:activity:1.0.0",
+  androidXActivity                 : "androidx.activity:activity:1.1.0",
   androidXAppCompat                : "androidx.appcompat:appcompat:1.0.2",
   androidXCardView                 : "androidx.cardview:cardview:1.0.0",
   androidXConstraintLayout         : "androidx.constraintlayout:constraintlayout:1.1.3",
@@ -143,6 +143,7 @@ ext.libraries = [
   nyplAudiobookLicenseCheckAPI     : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.license_check.api:${nyplAudioBookAPIVersion}",
   nyplAudiobookManifestFulfillAPI  : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.api:${nyplAudioBookAPIVersion}",
   nyplAudiobookManifestFulfillBasic: "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.basic:${nyplAudioBookAPIVersion}",
+  nyplAudiobookManifestFulfillOPA  : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.opa:${nyplAudioBookAPIVersion}",
   nyplAudiobookManifestParserAPI   : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.api:${nyplAudioBookAPIVersion}",
   nyplAudiobookManifestWebPub      : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.webpub:${nyplAudioBookAPIVersion}",
   nyplAudiobookOpenAccess          : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access:${nyplAudioBookAPIVersion}",
