@@ -271,7 +271,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.parser.api](simplified-parser-api)|Parser API|
 |[org.librarysimplified.patron](simplified-patron)|Patron user profile parser implementation|
 |[org.librarysimplified.patron.api](simplified-patron-api)|Patron user profile parser API|
-|[org.librarysimplified.prefs](simplified-prefs)|Legacy preferences handler|
 |[org.librarysimplified.presentableerror.api](simplified-presentableerror-api)|Presentable error API|
 |[org.librarysimplified.profiles](simplified-profiles)|Profile database implementation|
 |[org.librarysimplified.profiles.api](simplified-profiles-api)|Profile database API|
