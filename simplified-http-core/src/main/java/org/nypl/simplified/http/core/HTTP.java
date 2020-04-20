@@ -38,7 +38,7 @@ public final class HTTP implements HTTPType {
     this.user_agent = HTTP.userAgent();
   }
 
-  private static String userAgent() {
+  public static String userAgent() {
     final Package p = HTTP.class.getPackage();
     if (p != null) {
       final String v = p.getImplementationVersion();

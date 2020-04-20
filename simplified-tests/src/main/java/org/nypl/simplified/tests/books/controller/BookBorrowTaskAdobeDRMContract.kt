@@ -38,6 +38,7 @@ import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
@@ -107,6 +108,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   protected abstract val logger: Logger
 
+  private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var adeptConnector: AdobeAdeptConnectorType
   private lateinit var adeptExecutor: AdobeAdeptExecutorType
   private lateinit var bookEvents: MutableList<BookEvent>
@@ -173,12 +175,15 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.clock = { Instant.now() }
 
+    this.audioBookManifestStrategies =
+      Mockito.mock(AudioBookManifestStrategiesType::class.java)
     this.adeptConnector =
       Mockito.mock(AdobeAdeptConnectorType::class.java)
     this.adeptExecutor =
       Mockito.mock(AdobeAdeptExecutorType::class.java)
 
     this.services = MutableServiceDirectory()
+    this.services.putService(AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
   }
 
   @After

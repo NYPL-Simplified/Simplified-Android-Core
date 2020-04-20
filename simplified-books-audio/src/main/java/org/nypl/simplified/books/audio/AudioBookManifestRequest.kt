@@ -53,7 +53,7 @@ data class AudioBookManifestRequest(
    * A function that returns `true` if networking is currently available.
    */
 
-  val isNetworkAvailable: () -> Boolean,
+  val isNetworkAvailable: () -> Boolean = { true },
 
   /**
    * A function that will be evaluated if networking is not available. The function
@@ -61,7 +61,7 @@ data class AudioBookManifestRequest(
    * strategy must fail.
    */
 
-  val loadFallbackData: () -> ManifestFulfilled?,
+  val loadFallbackData: () -> ManifestFulfilled? = { null },
 
   /**
    * The set of license checks to perform. The default value searches for license checks
