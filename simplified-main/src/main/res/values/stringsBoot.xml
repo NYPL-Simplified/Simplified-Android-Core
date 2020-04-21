@@ -6,6 +6,7 @@
   <string name="bootingAdobeDRM">Starting Adobe DRM…</string>
   <string name="bootingAnalytics">Starting analytics…</string>
   <string name="bootingAudioBookExtensions">Starting Audio Book extensions…</string>
+  <string name="bootingAudioBookManifestStrategiesService">Initializing Audio Book manifest strategy service…</string>
   <string name="bootingAuthenticationDocumentParsers">Initializing authentication document parsers…</string>
   <string name="bootingBookController">Initializing book controller…</string>
   <string name="bootingBookRegistry">Starting book registry…</string>

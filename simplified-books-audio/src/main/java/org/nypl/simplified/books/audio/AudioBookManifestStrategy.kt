@@ -1,10 +1,13 @@
 package org.nypl.simplified.books.audio
 
+import com.io7m.jfunctional.Option
 import com.io7m.junreachable.UnimplementedCodeException
 import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerResult
 import org.librarysimplified.audiobook.license_check.api.LicenseCheckParameters
+import org.librarysimplified.audiobook.license_check.api.LicenseCheckResult
 import org.librarysimplified.audiobook.license_check.api.LicenseChecks
+import org.librarysimplified.audiobook.license_check.spi.SingleLicenseCheckResult
 import org.librarysimplified.audiobook.license_check.spi.SingleLicenseCheckStatus
 import org.librarysimplified.audiobook.manifest.api.PlayerManifest
 import org.librarysimplified.audiobook.manifest_fulfill.basic.ManifestFulfillmentBasicCredentials
@@ -18,9 +21,13 @@ import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
 import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfillmentErrorType
 import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfillmentEvent
 import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfillmentStrategyType
-import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsers
+import org.librarysimplified.audiobook.parser.api.ParseError
 import org.librarysimplified.audiobook.parser.api.ParseResult
+import org.librarysimplified.audiobook.parser.api.ParseWarning
 import org.nypl.simplified.books.book_database.api.BookFormats
+import org.nypl.simplified.http.core.HTTP
+import org.nypl.simplified.http.core.HTTPProblemReport
+import org.nypl.simplified.http.core.HTTPProblemReportLogging
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -33,7 +40,7 @@ import java.net.URI
  * The default audio book manifest strategy.
  */
 
-internal class AudioBookManifestStrategy(
+class AudioBookManifestStrategy(
   private val request: AudioBookManifestRequest
 ) : AudioBookManifestStrategyType {
 
@@ -60,20 +67,36 @@ internal class AudioBookManifestStrategy(
         }
 
       if (downloadResult is PlayerResult.Failure) {
-        throw UnimplementedCodeException()
+        taskRecorder.currentStepFailed(
+          message = downloadResult.failure.message,
+          errorValue = formatServerData(
+            message = downloadResult.failure.message,
+            serverData = downloadResult.failure.serverData
+          )
+        )
+        return taskRecorder.finishFailure()
       }
 
       taskRecorder.beginNewStep("Parsing manifest…")
       val (contentType, downloadBytes) = (downloadResult as PlayerResult.Success).result
       val parseResult = this.parseManifest(this.request.targetURI, downloadBytes)
       if (parseResult is ParseResult.Failure) {
-        throw UnimplementedCodeException()
+        taskRecorder.currentStepFailed(
+          formatParseErrorsAndWarnings(parseResult.warnings, parseResult.errors),
+          ""
+        )
+        return taskRecorder.finishFailure()
       }
 
       taskRecorder.beginNewStep("Checking license…")
       val (_, parsedManifest) = parseResult as ParseResult.Success
-      if (!this.checkManifest(parsedManifest)) {
-        throw UnimplementedCodeException()
+      val checkResult = this.checkManifest(parsedManifest)
+      if (!checkResult.checkSucceeded()) {
+        taskRecorder.currentStepFailed(
+          formatLicenseCheckStatuses(checkResult.checkStatuses),
+          ""
+        )
+        return taskRecorder.finishFailure()
       }
 
       return this.finish(
@@ -83,7 +106,82 @@ internal class AudioBookManifestStrategy(
         taskRecorder = taskRecorder
       )
     } catch (e: Exception) {
-      throw UnimplementedCodeException(e)
+      this.logger.error("error during fulfillment: ", e)
+      val message = e.message ?: e.javaClass.name
+      taskRecorder.currentStepFailedAppending(message, message, e)
+      return taskRecorder.finishFailure()
+    }
+  }
+
+  private fun formatLicenseCheckStatuses(statuses: List<SingleLicenseCheckResult>): String {
+    return buildString {
+      this.append("One or more license checks failed.")
+      this.append('\n')
+
+      for (status in statuses) {
+        this.append(status.shortName)
+        this.append(": ")
+        this.append(status.message)
+        this.append('\n')
+      }
+    }
+  }
+
+  private fun formatParseErrorsAndWarnings(
+    warnings: List<ParseWarning>,
+    errors: List<ParseError>
+  ): String {
+    return buildString {
+      this.append("Manifest parsing failed.")
+      this.append('\n')
+
+      for (warning in warnings) {
+        this.append("Warning: ")
+        this.append(warning.source)
+        this.append(": ")
+        this.append(warning.line)
+        this.append(':')
+        this.append(warning.column)
+        this.append(": ")
+        this.append(warning.message)
+        this.append('\n')
+      }
+
+      for (error in errors) {
+        this.append("Error: ")
+        this.append(error.source)
+        this.append(": ")
+        this.append(error.line)
+        this.append(':')
+        this.append(error.column)
+        this.append(": ")
+        this.append(error.message)
+        this.append('\n')
+      }
+    }
+  }
+
+  private fun formatServerData(
+    message: String,
+    serverData: ManifestFulfillmentErrorType.ServerData?
+  ): String {
+    return when (serverData) {
+      null ->
+        ""
+      else ->
+        if (serverData.receivedContentType == HTTP.HTTP_PROBLEM_REPORT_CONTENT_TYPE) {
+          val problemReport =
+            HTTPProblemReport.fromStream(serverData.receivedBody.inputStream())
+          HTTPProblemReportLogging.logError(
+            this.logger,
+            serverData.uri,
+            message,
+            serverData.code,
+            Option.some(problemReport)
+          )
+        } else {
+          String.format("%s: %s %s", serverData.uri, serverData.code)
+        }
     }
   }
 
@@ -226,7 +324,7 @@ internal class AudioBookManifestStrategy(
     data: ByteArray
   ): ParseResult<PlayerManifest> {
     this.logger.debug("parseManifest")
-    return ManifestParsers.parse(
+    return this.request.manifestParsers.parse(
       uri = source,
       streams = data,
       extensions = this.request.extensions
@@ -239,7 +337,7 @@ internal class AudioBookManifestStrategy(
 
   private fun checkManifest(
     manifest: PlayerManifest
-  ): Boolean {
+  ): LicenseCheckResult {
     this.logger.debug("checkManifest")
 
     val check =
@@ -257,8 +355,7 @@ internal class AudioBookManifestStrategy(
       }
 
     try {
-      val checkResult = check.execute()
-      return checkResult.checkSucceeded()
+      return check.execute()
     } finally {
       checkSubscription.unsubscribe()
     }

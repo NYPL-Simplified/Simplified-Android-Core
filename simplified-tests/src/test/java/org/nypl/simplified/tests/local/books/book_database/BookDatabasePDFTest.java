@@ -8,9 +8,9 @@ import org.nypl.simplified.tests.books.book_database.BookDatabasePDFContract;
 
 public final class BookDatabasePDFTest extends BookDatabasePDFContract {
 
-    @NotNull
-    @Override
-    protected Context context() {
-        return Mockito.mock(Context.class);
-    }
+  @NotNull
+  @Override
+  protected Context context() {
+    return Mockito.mock(Context.class);
+  }
 }

@@ -28,6 +28,13 @@ import java.util.concurrent.TimeUnit;
 public final class HTTP implements HTTPType {
   private static final Logger LOG;
 
+  /**
+   * The MIME type of HTTP problem reports.
+   */
+
+  public static final String HTTP_PROBLEM_REPORT_CONTENT_TYPE =
+    "application/api-problem+json";
+
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(HTTP.class));
   }
@@ -206,7 +213,7 @@ public final class HTTP implements HTTPType {
     final HttpURLConnection conn)
     throws IOException {
     final OptionType<HTTPProblemReport> report;
-    if ("application/api-problem+json".equals(conn.getContentType())) {
+    if (HTTP_PROBLEM_REPORT_CONTENT_TYPE.equals(conn.getContentType())) {
       if (conn.getErrorStream() != null) {
         final HTTPProblemReport r =
           HTTPProblemReport.fromStream(conn.getErrorStream());

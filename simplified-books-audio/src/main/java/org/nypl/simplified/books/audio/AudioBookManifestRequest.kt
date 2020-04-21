@@ -6,6 +6,8 @@ import org.librarysimplified.audiobook.license_check.spi.SingleLicenseCheckProvi
 import org.librarysimplified.audiobook.manifest_fulfill.api.ManifestFulfillmentStrategies
 import org.librarysimplified.audiobook.manifest_fulfill.api.ManifestFulfillmentStrategyRegistryType
 import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
+import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsers
+import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsersType
 import org.librarysimplified.audiobook.manifest_parser.extension_spi.ManifestParserExtensionType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import java.net.URI
@@ -87,5 +89,12 @@ data class AudioBookManifestRequest(
    */
 
   val strategyRegistry: ManifestFulfillmentStrategyRegistryType =
-    ManifestFulfillmentStrategies
+    ManifestFulfillmentStrategies,
+
+  /**
+   * The manifest parser API.
+   */
+
+  val manifestParsers: ManifestParsersType =
+    ManifestParsers
 )

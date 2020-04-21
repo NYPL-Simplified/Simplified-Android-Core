@@ -117,6 +117,8 @@ import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
+import org.nypl.simplified.books.audio.AudioBookManifests
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPMimeMap
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerAAsync
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerType
@@ -1124,6 +1126,11 @@ internal object MainServices {
       message = strings.bootingCardCreatorService,
       interfaceType = CardCreatorServiceType::class.java,
       serviceConstructor = { this.createCardCreatorService(context) })
+
+    addService(
+      message = strings.bootingAudioBookManifestStrategiesService,
+      interfaceType = AudioBookManifestStrategiesType::class.java,
+      serviceConstructor = { AudioBookManifests })
 
     addServiceOptionally(
       message = strings.bootingFeedbooksSecretService,
