@@ -27,7 +27,6 @@ class PersonalInformationFragment : Fragment() {
 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
-  private val nameMinChars = 3
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -91,8 +90,9 @@ class PersonalInformationFragment : Fragment() {
   }
 
   private fun validateForm() {
-    binding.nextBtn.isEnabled = binding.firstNameEt.text.length > nameMinChars &&
-      binding.lastNameEt.text.length > nameMinChars &&
+    binding.nextBtn.isEnabled =
+      binding.firstNameEt.text.trim().isNotEmpty() &&
+      binding.lastNameEt.text.trim().isNotEmpty() &&
       isValidEmailAddress()
   }
 
