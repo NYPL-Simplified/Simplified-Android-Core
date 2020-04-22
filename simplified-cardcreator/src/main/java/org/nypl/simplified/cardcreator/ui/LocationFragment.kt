@@ -18,7 +18,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -45,12 +44,6 @@ class LocationFragment : Fragment(), LocationListener {
 
   private val locationRequestCode = 102
 
-  // Minimum distance between location updates, in meters
-  private val minDistanceUpdates: Float = 10f
-
-  // Minimum time interval between location updates, in milliseconds
-  private val minTimeUpdates = 1000 * 60.toLong()
-
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -64,10 +57,10 @@ class LocationFragment : Fragment(), LocationListener {
     super.onViewCreated(view, savedInstanceState)
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
-    isInNewYorkState()
+    checkIfInNewYorkState()
 
     binding.checkLocationBtn.setOnClickListener {
-      isInNewYorkState()
+      checkIfInNewYorkState()
     }
 
     // Go to next screen
@@ -110,11 +103,12 @@ class LocationFragment : Fragment(), LocationListener {
    * User denied location prompt, show this to ask again
    */
   private fun showLocationPrompt() {
+    logger.debug("Showing location prompt...")
     val dialogBuilder = AlertDialog.Builder(requireContext())
     dialogBuilder.setMessage(getString(R.string.location_permission_prompt))
       .setCancelable(false)
       .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-        isInNewYorkState()
+        checkIfInNewYorkState()
       }
       .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
         dialog.cancel()
@@ -124,29 +118,16 @@ class LocationFragment : Fragment(), LocationListener {
   }
 
   /**
-   * Show loading screen
-   */
-  private fun showLoading(show: Boolean) {
-    logger.debug("Toggling loading screen")
-    if (show) {
-      binding.loading.visibility = View.VISIBLE
-    } else {
-      binding.loading.visibility = View.GONE
-    }
-  }
-
-  /**
    * Checks to see if the user has granted required location permissions
    */
   private fun getLocation(): Location? {
     var location: Location? = null
-    logger.debug("Checking for location permission")
+    logger.debug("Checking for location permission...")
     if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
       != PackageManager.PERMISSION_GRANTED
     ) {
-      logger.debug("Requesting location permission")
-      ActivityCompat.requestPermissions(
-        requireActivity(),
+      logger.debug("Requesting location permission...")
+      requestPermissions(
         arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
         locationRequestCode
       )
@@ -174,9 +155,8 @@ class LocationFragment : Fragment(), LocationListener {
    * Checks to see if a give location is in the state of New York
    */
   // TODO: This function is doing to much, break it up into smaller pieces
-  private fun isInNewYorkState(): Boolean {
+  private fun checkIfInNewYorkState() {
     logger.debug("Checking to see if user is in New York")
-    showLoading(true)
     val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
     binding.nextBtn.isEnabled = false
     val maxResults = 1
@@ -194,30 +174,19 @@ class LocationFragment : Fragment(), LocationListener {
 
         if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
           logger.debug("User is in New York")
-          isNewYork = true
+          enableNext(true)
+        } else {
+          enableNext(false)
         }
       }
     } catch (e: Exception) {
       logger.error("Error checking to see if user is in New York", e)
+      enableNext(false)
       showLocationSettingsPrompt()
     }
-    showLoading(false)
-    // Show error if user is not in New York
-    if (!isNewYork) {
-      logger.debug("User is NOT in New York")
-      binding.nextBtn.isEnabled = true
-      binding.nextBtn.text = getString(R.string.done)
-      binding.headerStatusDescTv.text = getString(R.string.location_error)
-      binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
-    } else {
-      binding.nextBtn.isEnabled = true
-      binding.nextBtn.text = getString(R.string.next)
-      binding.headerStatusDescTv.text = getString(R.string.new_york_success)
-      binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.trans_black))
-    }
+
     logger.debug("Stopping location updates")
     locationManager.removeUpdates(this)
-    return isNewYork
   }
 
   /**
@@ -238,6 +207,7 @@ class LocationFragment : Fragment(), LocationListener {
         // If request is cancelled, the result arrays are empty.
         if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
           logger.debug("Location permission granted")
+          checkIfInNewYorkState()
         } else {
           logger.debug("Location permission NOT granted")
           showLocationPrompt()
@@ -252,7 +222,6 @@ class LocationFragment : Fragment(), LocationListener {
     val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
     if (location != null) {
       logger.debug("Checking to see if user is in New York")
-      showLoading(true)
       binding.nextBtn.isEnabled = false
       val maxResults = 1
       val geocoder = Geocoder(requireActivity(), Locale.getDefault())
@@ -267,29 +236,34 @@ class LocationFragment : Fragment(), LocationListener {
 
           if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
             logger.debug("User is in New York")
-            isNewYork = true
+            enableNext(true)
           }
       } catch (e: Exception) {
         logger.error("Error checking to see if user is in New York", e)
+        enableNext(false)
         showLocationSettingsPrompt()
-      }
-      showLoading(false)
-      // Show error if user is not in New York
-      if (!isNewYork) {
-        logger.debug("User is NOT in New York")
-        binding.nextBtn.isEnabled = true
-        binding.nextBtn.text = getString(R.string.done)
-        binding.headerStatusDescTv.text = getString(R.string.location_error)
-        binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
-      } else {
-        binding.nextBtn.isEnabled = true
-        binding.nextBtn.text = getString(R.string.next)
-        binding.headerStatusDescTv.text = getString(R.string.new_york_success)
-        binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.trans_black))
       }
     }
     logger.debug("Stopping location updates")
     locationManager.removeUpdates(this)
+  }
+
+  /**
+   * Enables the next button and update header status
+   */
+  fun enableNext(enable: Boolean) {
+    isNewYork = enable
+    binding.nextBtn.isEnabled = enable
+    if (enable) {
+      binding.nextBtn.text = getString(R.string.next)
+      binding.headerStatusDescTv.text = getString(R.string.new_york_success)
+      binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.trans_black))
+    } else {
+      logger.debug("User is NOT in New York")
+      binding.nextBtn.text = getString(R.string.done)
+      binding.headerStatusDescTv.text = getString(R.string.location_error)
+      binding.headerStatusDescTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+    }
   }
 
   // These are not needed but were invited to the party by Google
