@@ -1,6 +1,9 @@
 package org.nypl.simplified.books.controller
 
 import io.reactivex.subjects.Subject
+import org.joda.time.LocalDateTime
+import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -14,10 +17,11 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.Callable
 
 class ProfileSelectionTask(
-  private val profiles: ProfilesDatabaseType,
+  private val analytics: AnalyticsType,
   private val bookRegistry: BookRegistryType,
   private val events: Subject<ProfileEvent>,
-  private val id: ProfileID
+  private val id: ProfileID,
+  private val profiles: ProfilesDatabaseType
 ) : Callable<Unit> {
 
   private val logger = LoggerFactory.getLogger(ProfileSelectionTask::class.java)
@@ -37,7 +41,22 @@ class ProfileSelectionTask(
     } finally {
       this.logger.debug("[{}]: profile selection completed", this.id.uuid)
       this.events.onNext(ProfileSelection.ProfileSelectionCompleted(this.id))
+      this.publishAnalyticsEvent()
     }
+  }
+
+  private fun publishAnalyticsEvent() {
+    val profile = this.profiles.currentProfileUnsafe()
+    this.analytics.publishEvent(
+      AnalyticsEvent.ProfileLoggedIn(
+        timestamp = LocalDateTime.now(),
+        credentials = profile.accountCurrent().loginState.credentials,
+        profileUUID = profile.id.uuid,
+        displayName = profile.displayName,
+        birthDate = profile.preferences().dateOfBirth?.show(),
+        attributes = profile.attributes().attributes
+      )
+    )
   }
 
   private fun loadData() {
