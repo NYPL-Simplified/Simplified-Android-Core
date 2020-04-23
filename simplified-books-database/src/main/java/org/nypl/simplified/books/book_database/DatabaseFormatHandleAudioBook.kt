@@ -1,11 +1,13 @@
 package org.nypl.simplified.books.book_database
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
 import org.librarysimplified.audiobook.api.PlayerAudioEngines
 import org.librarysimplified.audiobook.api.PlayerPosition
 import org.librarysimplified.audiobook.api.PlayerPositions
 import org.librarysimplified.audiobook.api.PlayerResult
+import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.audiobook.manifest.api.PlayerManifest
 import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsers
 import org.librarysimplified.audiobook.parser.api.ParseResult
@@ -49,7 +51,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
       loadInitial(
         fileManifest = this.fileManifest,
         fileManifestURI = this.fileManifestURI,
-        filePosition = this.filePosition
+        filePosition = this.filePosition,
+        contentType = this.parameters.contentType
       )
     }
 
@@ -108,7 +111,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
                 PlayerAudioEngineRequest(
                   manifest = manifestResult.result,
                   filter = { true },
-                  downloadProvider = NullDownloadProvider()
+                  downloadProvider = NullDownloadProvider(),
+                  userAgent = PlayerUserAgent("unused")
                 )
               )
 
@@ -198,11 +202,13 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
     private fun loadInitial(
       fileManifest: File,
       fileManifestURI: File,
-      filePosition: File
+      filePosition: File,
+      contentType: MIMEType
     ): BookFormat.BookFormatAudioBook {
       return BookFormat.BookFormatAudioBook(
         manifest = loadManifestIfNecessary(fileManifest, fileManifestURI),
-        position = loadPositionIfNecessary(filePosition)
+        position = loadPositionIfNecessary(filePosition),
+        contentType = contentType
       )
     }
 

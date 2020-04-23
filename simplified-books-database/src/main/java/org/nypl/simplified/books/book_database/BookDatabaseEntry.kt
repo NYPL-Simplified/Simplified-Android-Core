@@ -234,27 +234,28 @@ internal class BookDatabaseEntry internal constructor(
       existingFormats: MutableMap<Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle>,
       contentTypes: Set<MIMEType>
     ) {
-
-      val params =
-        DatabaseFormatHandleParameters(
-          context = context,
-          bookID = owner.book.id,
-          directory = ownerDirectory,
-          onUpdated = onUpdate,
-          entry = owner)
-
       for (contentType in contentTypes) {
         for (formatDefinition in constructors.keys) {
-          val formatConstructor = constructors[formatDefinition]!!
+          val constructor = constructors[formatDefinition]!!
           if (formatDefinition.supportedContentTypes().contains(contentType)) {
-            if (!existingFormats.containsKey(formatConstructor.classType)) {
+            if (!existingFormats.containsKey(constructor.classType)) {
               val bookID = owner.book.id
               logger.debug("[{}]: instantiating format {} for content type {}",
                 bookID.brief(),
-                formatConstructor.classType.simpleName,
+                constructor.classType.simpleName,
                 contentType)
-              existingFormats[formatConstructor.classType] =
-                formatConstructor.constructor.invoke(params)
+
+              val params =
+                DatabaseFormatHandleParameters(
+                  context = context,
+                  bookID = owner.book.id,
+                  directory = ownerDirectory,
+                  onUpdated = onUpdate,
+                  entry = owner,
+                  contentType = contentType
+                )
+
+              existingFormats[constructor.classType] = constructor.constructor.invoke(params)
               return
             }
           }

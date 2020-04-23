@@ -1,7 +1,8 @@
 package org.nypl.simplified.books.book_database
 
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.files.FileUtilities
 import java.io.File
@@ -18,16 +19,18 @@ internal class DatabaseFormatHandlePDF internal constructor(
   private val fileBook: File =
     File(this.parameters.directory, "pdf-book.pdf")
   private val fileLastRead: File =
-          File(this.parameters.directory, "pdf-meta_last_read.json")
+    File(this.parameters.directory, "pdf-meta_last_read.json")
   private val fileLastReadTmp: File =
-          File(this.parameters.directory, "pdf-meta_last_read.json.tmp")
+    File(this.parameters.directory, "pdf-meta_last_read.json.tmp")
 
   private val formatLock: Any = Any()
   private var formatRef: BookFormat.BookFormatPDF =
     synchronized(this.formatLock) {
       loadInitial(
-              fileBook = this.fileBook,
-              fileLastRead = this.fileLastRead)
+        fileBook = this.fileBook,
+        fileLastRead = this.fileLastRead,
+        contentType = this.parameters.contentType
+      )
     }
 
   override val format: BookFormat.BookFormatPDF
@@ -60,9 +63,10 @@ internal class DatabaseFormatHandlePDF internal constructor(
     val newFormat = synchronized(this.formatLock) {
       if (pageNumber != null) {
         FileUtilities.fileWriteUTF8Atomically(
-                this.fileLastRead,
-                this.fileLastReadTmp,
-                pageNumber.toString())
+          this.fileLastRead,
+          this.fileLastReadTmp,
+          pageNumber.toString()
+        )
       } else {
         FileUtilities.fileDelete(this.fileLastRead)
       }
@@ -79,11 +83,14 @@ internal class DatabaseFormatHandlePDF internal constructor(
     @Throws(IOException::class)
     private fun loadInitial(
       fileBook: File,
-      fileLastRead: File
+      fileLastRead: File,
+      contentType: MIMEType
     ): BookFormat.BookFormatPDF {
-            return BookFormat.BookFormatPDF(
-              file = if (fileBook.isFile) fileBook else null,
-              lastReadLocation = loadLastReadLocationIfPresent(fileLastRead))
+      return BookFormat.BookFormatPDF(
+        file = if (fileBook.isFile) fileBook else null,
+        lastReadLocation = loadLastReadLocationIfPresent(fileLastRead),
+        contentType = contentType
+      )
     }
 
     @Throws(IOException::class)

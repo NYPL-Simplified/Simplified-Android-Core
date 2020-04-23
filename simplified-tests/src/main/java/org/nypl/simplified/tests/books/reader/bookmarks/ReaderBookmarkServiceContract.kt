@@ -16,10 +16,14 @@ import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_database.api.BookDatabaseType
+import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPResultType
@@ -129,7 +133,7 @@ abstract class ReaderBookmarkServiceContract {
       EventLogging.create<AccountEvent>(this.logger, 1)
 
     val books =
-      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
+      Mockito.mock(BookDatabaseType::class.java)
 
     Mockito.`when`(books.books())
       .thenReturn(sortedSetOf())
@@ -272,12 +276,14 @@ abstract class ReaderBookmarkServiceContract {
       mutableListOf<Bookmark>()
 
     val format =
-      org.nypl.simplified.books.api.BookFormat.BookFormatEPUB(
+      BookFormat.BookFormatEPUB(
         adobeRightsFile = null,
         adobeRights = null,
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
@@ -293,13 +299,13 @@ abstract class ReaderBookmarkServiceContract {
       }
 
     val bookEntry =
-      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
+      Mockito.mock(BookDatabaseEntryType::class.java)
 
     Mockito.`when`(bookEntry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java))
       .thenReturn(formatHandle)
 
     val books =
-      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
+      Mockito.mock(BookDatabaseType::class.java)
 
     Mockito.`when`(books.books())
       .thenReturn(sortedSetOf())
@@ -467,12 +473,14 @@ abstract class ReaderBookmarkServiceContract {
         uri = null))
 
     val format =
-      org.nypl.simplified.books.api.BookFormat.BookFormatEPUB(
+      BookFormat.BookFormatEPUB(
         adobeRightsFile = null,
         adobeRights = null,
         file = null,
         lastReadLocation = null,
-        bookmarks = startingBookmarks)
+        bookmarks = startingBookmarks,
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
@@ -488,13 +496,13 @@ abstract class ReaderBookmarkServiceContract {
       }
 
     val bookEntry =
-      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseEntryType::class.java)
+      Mockito.mock(BookDatabaseEntryType::class.java)
 
     Mockito.`when`(bookEntry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java))
       .thenReturn(formatHandle)
 
     val books =
-      Mockito.mock(org.nypl.simplified.books.book_database.api.BookDatabaseType::class.java)
+      Mockito.mock(BookDatabaseType::class.java)
 
     Mockito.`when`(books.books())
       .thenReturn(sortedSetOf())

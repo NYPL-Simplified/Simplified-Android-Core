@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <resources>
-  <string name="bootingAudioBookExtensions">Starting Audio Book extensions…</string>
   <string name="bootFailedGeneric">We found a problem. Please check your connection or close and reopen the app to retry.</string>
   <string name="bootingAccountProviders">Initializing account providers…</string>
   <string name="bootingAdobeDRM">Starting Adobe DRM…</string>
   <string name="bootingAnalytics">Starting analytics…</string>
+  <string name="bootingAudioBookExtensions">Starting Audio Book extensions…</string>
+  <string name="bootingAudioBookManifestStrategiesService">Initializing Audio Book manifest strategy service…</string>
   <string name="bootingAuthenticationDocumentParsers">Initializing authentication document parsers…</string>
   <string name="bootingBookController">Initializing book controller…</string>
   <string name="bootingBookRegistry">Starting book registry…</string>
@@ -13,6 +14,7 @@
   <string name="bootingBuildConfigurationService">Initializing build configuration service…</string>
   <string name="bootingBundledContent">Initializing bundled content…</string>
   <string name="bootingBundledCredentials">Initializing bundled credentials…</string>
+  <string name="bootingCardCreatorService">Initializing Card Creator Service…</string>
   <string name="bootingCatalogConfigurationService">Initializing catalog configuration…</string>
   <string name="bootingClock">Initializing clock…</string>
   <string name="bootingCompleted">Startup completed!</string>
@@ -24,6 +26,7 @@
   <string name="bootingDocumentStore">Initializing document store…</string>
   <string name="bootingDownloadService">Starting download service…</string>
   <string name="bootingEPUBLoader">Starting EPUB loader…</string>
+  <string name="bootingFeedbooksSecretService">Initializing Feedbooks secret service…</string>
   <string name="bootingFeedLoader">Starting OPDS feed loader…</string>
   <string name="bootingFeedParser">Starting OPDS feed parser…</string>
   <string name="bootingHTTP">Starting HTTP client…</string>
@@ -33,6 +36,7 @@
   <string name="bootingLocalImageLoader">Starting local image loader…</string>
   <string name="bootingNetworkConnectivity">Initializing network connectivity monitor…</string>
   <string name="bootingNotificationsService">Initializing Notifications Service…</string>
+  <string name="bootingOverdriveSecretService">Initializing Overdrive secret service…</string>
   <string name="bootingPatronProfileParsers">Initializing patron profile parsers…</string>
   <string name="bootingProfileModificationFragmentService">Initializing profile modification fragment service…</string>
   <string name="bootingProfilesDatabase">Initializing profiles database…</string>
@@ -45,6 +49,5 @@
   <string name="bootingThemeService">Initializing theme service…</string>
   <string name="bootingUIBackgroundExecutor">Initializing UI background executor…</string>
   <string name="bootingUIThreadService">Initializing UI thread service…</string>
-  <string name="bootingCardCreatorService">Initializing Card Creator Service…</string>
   <string name="bootStarted">Starting application…</string>
 </resources>

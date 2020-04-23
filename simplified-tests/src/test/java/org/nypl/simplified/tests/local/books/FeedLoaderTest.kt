@@ -24,8 +24,8 @@ class FeedLoaderTest : FeedLoaderContract() {
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
     val parser =
       OPDSFeedParser.newParser(entryParser)
-    val transport = OPDSFeedTransportType<OptionType<HTTPAuthType>> {
-      context, uri, method -> uri.toURL().openStream()
+    val transport = OPDSFeedTransportType<OptionType<HTTPAuthType>> { context, uri, method ->
+      uri.toURL().openStream()
     }
 
     val searchParser = OPDSSearchParser.newParser()

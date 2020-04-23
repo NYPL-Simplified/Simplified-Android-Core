@@ -56,6 +56,13 @@ sealed class TaskResult<E : Serializable, A> {
   }
 
   /**
+   * @return The resolution of step `step`
+   */
+
+  fun resolutionOf(step: Int): TaskStepResolution<E> =
+    this.steps[step].resolution
+
+  /**
    * Functor map for task results.
    */
 

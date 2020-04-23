@@ -2,8 +2,10 @@ package org.nypl.simplified.books.book_database
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
+import one.irradia.mime.api.MIMEType
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
+import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkJSON
 import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkExplicit
@@ -47,17 +49,19 @@ internal class DatabaseFormatHandleEPUB internal constructor(
     File(this.parameters.directory, "epub-meta_bookmarks.json.tmp")
 
   private val formatLock: Any = Any()
-  private var formatRef: org.nypl.simplified.books.api.BookFormat.BookFormatEPUB =
+  private var formatRef: BookFormat.BookFormatEPUB =
     synchronized(this.formatLock) {
       loadInitial(
         fileAdobeRights = this.fileAdobeRights,
         fileAdobeMeta = this.fileAdobeMeta,
         fileBookmarks = this.fileBookmarks,
         fileBook = this.fileBook,
-        fileLastRead = this.fileLastRead)
+        fileLastRead = this.fileLastRead,
+        contentType = this.parameters.contentType
+      )
     }
 
-  override val format: org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
+  override val format: BookFormat.BookFormatEPUB
     get() = synchronized(this.formatLock) { this.formatRef }
 
   override val formatDefinition: BookFormats.BookFormatDefinition
@@ -174,14 +178,17 @@ internal class DatabaseFormatHandleEPUB internal constructor(
       fileAdobeMeta: File,
       fileBook: File,
       fileBookmarks: File,
-      fileLastRead: File
-    ): org.nypl.simplified.books.api.BookFormat.BookFormatEPUB {
-      return org.nypl.simplified.books.api.BookFormat.BookFormatEPUB(
+      fileLastRead: File,
+      contentType: MIMEType
+    ): BookFormat.BookFormatEPUB {
+      return BookFormat.BookFormatEPUB(
         adobeRightsFile = if (fileAdobeRights.isFile) fileAdobeRights else null,
         adobeRights = loadAdobeRightsInformationIfPresent(fileAdobeRights, fileAdobeMeta),
         bookmarks = loadBookmarksIfPresent(fileBookmarks),
         file = if (fileBook.isFile) fileBook else null,
-        lastReadLocation = loadLastReadLocationIfPresent(fileLastRead))
+        lastReadLocation = loadLastReadLocationIfPresent(fileLastRead),
+        contentType = contentType
+      )
     }
 
     @Throws(IOException::class)

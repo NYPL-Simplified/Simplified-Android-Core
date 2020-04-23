@@ -27,7 +27,9 @@ import org.librarysimplified.audiobook.api.PlayerPosition
 import org.librarysimplified.audiobook.api.PlayerResult
 import org.librarysimplified.audiobook.api.PlayerSleepTimer
 import org.librarysimplified.audiobook.api.PlayerSleepTimerType
+import org.librarysimplified.audiobook.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloadExpired
 import org.librarysimplified.audiobook.api.PlayerType
+import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.audiobook.api.extensions.PlayerExtensionType
 import org.librarysimplified.audiobook.downloads.DownloadProvider
 import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtension
@@ -42,15 +44,18 @@ import org.librarysimplified.audiobook.views.PlayerTOCFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.theme.ThemeServiceType
@@ -58,10 +63,12 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
+import java.io.IOException
 import java.util.ServiceLoader
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The main activity for playing audio books.
@@ -102,6 +109,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   private lateinit var book: PlayerAudioBookType
   private lateinit var bookAuthor: String
   private lateinit var books: BooksControllerType
+  private lateinit var bookSubscription: Subscription
   private lateinit var bookTitle: String
   private lateinit var covers: BookCoverProviderType
   private lateinit var downloadExecutor: ListeningExecutorService
@@ -118,9 +126,10 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   private lateinit var profiles: ProfilesControllerType
   private lateinit var screenSize: ScreenSizeInformationType
   private lateinit var sleepTimer: PlayerSleepTimerType
+  private lateinit var strategies: AudioBookManifestStrategiesType
   private lateinit var uiThread: UIThreadServiceType
-  private var download: DownloadType? = null
   private var playerInitialized: Boolean = false
+  private val reloadingManifest = AtomicBoolean(false)
 
   @Volatile
   private var destroying: Boolean = false
@@ -132,7 +141,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     val i = this.intent!!
     val a = i.extras!!
 
-    this.parameters = a.getSerializable(org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity.Companion.PARAMETER_ID) as AudioBookPlayerParameters
+    this.parameters = a.getSerializable(PARAMETER_ID) as AudioBookPlayerParameters
 
     this.log.debug("manifest file: {}", this.parameters.manifestFile)
     this.log.debug("manifest uri:  {}", this.parameters.manifestURI)
@@ -169,6 +178,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       services.requireService(BookCoverProviderType::class.java)
     this.networkConnectivity =
       services.requireService(NetworkConnectivityType::class.java)
+    this.strategies =
+      services.requireService(AudioBookManifestStrategiesType::class.java)
 
     /*
      * Open the database format handle.
@@ -246,17 +257,11 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
     /*
      * We set a flag to indicate that the activity is currently being destroyed because
-     * there may be scheduled tasks that try to execute afte the activity has stopped. This
+     * there may be scheduled tasks that try to execute after the activity has stopped. This
      * flag allows them to gracefully avoid running.
      */
 
     this.destroying = true
-
-    /*
-     * Cancel the manifest download if one is still happening.
-     */
-
-    this.download?.cancel()
 
     /*
      * Cancel downloads, shut down the player, and close the book.
@@ -272,6 +277,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
         this.log.error("error closing player: ", e)
       }
 
+      this.bookSubscription.unsubscribe()
       this.playerSubscription.unsubscribe()
 
       try {
@@ -328,7 +334,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       PlayerAudioEngineRequest(
         manifest = manifest,
         filter = { true },
-        downloadProvider = DownloadProvider.create(this.downloadExecutor)
+        downloadProvider = DownloadProvider.create(this.downloadExecutor),
+        userAgent = PlayerUserAgent(this.parameters.userAgent)
       )
     )
 
@@ -381,7 +388,13 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
     this.book = (bookResult as PlayerResult.Success).result
     this.player = this.book.createPlayer()
-    this.playerSubscription = this.player.events.subscribe { event -> this.onPlayerEvent(event) }
+
+    this.bookSubscription =
+      this.book.spineElementDownloadStatus.ofType(PlayerSpineElementDownloadExpired::class.java)
+        .subscribe(this::onDownloadExpired)
+    this.playerSubscription =
+      this.player.events.subscribe(this::onPlayerEvent)
+
     this.playerInitialized = true
 
     this.restoreSavedPlayerPosition()
@@ -401,6 +414,54 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     }
   }
 
+  private fun downloadAndSaveManifest(
+    credentials: AccountAuthenticationCredentials?
+  ): PlayerManifest {
+    this.log.debug("downloading and saving manifest")
+    val strategy =
+      this.parameters.toManifestStrategy(
+        strategies = this.strategies,
+        isNetworkAvailable = { this.networkConnectivity.isNetworkAvailable },
+        credentials = credentials
+      )
+    return when (val strategyResult = strategy.execute()) {
+      is TaskResult.Success -> {
+        AudioBookHelpers.saveManifest(
+          profiles = this.profiles,
+          bookId = this.parameters.bookID,
+          manifestURI = this.parameters.manifestURI,
+          manifest = strategyResult.result.fulfilled
+        )
+        strategyResult.result.manifest
+      }
+      is TaskResult.Failure ->
+        throw IOException(strategyResult.errors().get(0))
+    }
+  }
+
+  private fun onDownloadExpired(event: PlayerSpineElementDownloadExpired) {
+    this.log.debug("onDownloadExpired: ", event.exception)
+
+    if (this.reloadingManifest.compareAndSet(false, true)) {
+      this.log.debug("attempting to download fresh manifest due to expired links")
+      this.downloadExecutor.execute {
+        try {
+          this.book.replaceManifest(
+            this.downloadAndSaveManifest(
+              this.profiles.profileAccountForBook(this.parameters.bookID)
+                .loginState
+                .credentials
+            )
+          )
+        } catch (e: Exception) {
+          this.log.error("onDownloadExpired: failed to download/replace manifest: ", e)
+        } finally {
+          this.reloadingManifest.set(false)
+        }
+      }
+    }
+  }
+
   private fun loadAndConfigureExtensions(): List<PlayerExtensionType> {
     val extensions =
       ServiceLoader.load(PlayerExtensionType::class.java)
@@ -416,7 +477,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     extensions: List<PlayerExtensionType>
   ) {
     val feedbooksConfigService =
-      services.optionalService(AudioBookFeedbooksServiceType::class.java)
+      services.optionalService(AudioBookFeedbooksSecretServiceType::class.java)
 
     if (feedbooksConfigService != null) {
       this.log.debug("feedbooks configuration service is available; configuring extension")

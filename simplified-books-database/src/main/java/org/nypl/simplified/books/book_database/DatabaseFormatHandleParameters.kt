@@ -1,8 +1,10 @@
 package org.nypl.simplified.books.book_database
 
 import android.content.Context
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import java.io.File
 
 /**
@@ -41,5 +43,11 @@ internal data class DatabaseFormatHandleParameters(
    * The database entry that owns the format handle.
    */
 
-  val entry: org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+  val entry: BookDatabaseEntryType,
+
+  /**
+   * The MIME type of the format handle.
+   */
+
+  val contentType: MIMEType
 )

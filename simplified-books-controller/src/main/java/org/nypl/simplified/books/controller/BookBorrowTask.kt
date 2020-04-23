@@ -15,6 +15,7 @@ import org.joda.time.Duration
 import org.joda.time.LocalDateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
+import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptConnectorType
 import org.nypl.drm.core.AdobeAdeptExecutorType
@@ -29,6 +30,9 @@ import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillmentException
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.audio.AudioBookCredentials
+import org.nypl.simplified.books.audio.AudioBookManifestRequest
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
@@ -82,6 +86,7 @@ import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.FileUtilities
+import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.http.core.HTTPAuthOAuth
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPHasProblemReportType
@@ -138,6 +143,8 @@ class BookBorrowTask(
 
   private val adobeDRM =
     this.services.optionalService(AdobeAdeptExecutorType::class.java)
+  private val audioBookManifestStrategies =
+    this.services.requireService(AudioBookManifestStrategiesType::class.java)
   private val bookRegistry =
     this.services.requireService(BookRegistryType::class.java)
   private val borrowStrings =
@@ -201,7 +208,8 @@ class BookBorrowTask(
       cover = null,
       thumbnail = null,
       entry = this.entry,
-      formats = listOf())
+      formats = listOf()
+    )
 
   private fun debug(message: String, vararg arguments: Any?) =
     this.logger.debug("[{}] $message", this.bookId.brief(), *arguments)
@@ -215,10 +223,14 @@ class BookBorrowTask(
   @Throws(Exception::class)
   override fun call(): TaskResult<BookStatusDownloadErrorDetails, Unit> {
     return try {
-      this.debug("borrowing will time out after {} seconds",
-        this.borrowTimeoutDuration.standardSeconds)
-      this.debug("downloading will time out after {} seconds",
-        this.downloadTimeoutDuration.standardSeconds)
+      this.debug(
+        "borrowing will time out after {} seconds",
+        this.borrowTimeoutDuration.standardSeconds
+      )
+      this.debug(
+        "downloading will time out after {} seconds",
+        this.downloadTimeoutDuration.standardSeconds
+      )
 
       this.steps.beginNewStep(this.borrowStrings.borrowStarted)
 
@@ -282,7 +294,8 @@ class BookBorrowTask(
               type = type,
               attributes = this.currentAttributesWith(Pair("Acquisition type", type.toString()))
             ),
-            exception = exception)
+            exception = exception
+          )
           throw exception
         }
       }
@@ -292,7 +305,8 @@ class BookBorrowTask(
       this.steps.currentStepFailedAppending(
         this.borrowStrings.borrowBookUnexpectedException,
         UnexpectedException(e, this.currentAttributesWith()),
-        e)
+        e
+      )
 
       val result = this.steps.finishFailure<Unit>()
       val status =
@@ -343,10 +357,12 @@ class BookBorrowTask(
       this.databaseEntry = database.createOrUpdate(this.bookId, this.entry)
       this.databaseEntryInitialized = true
 
-      this.publishBookStatus(BookStatus.RequestingLoan(
-        id = this.bookId,
-        detailMessage = this.borrowStrings.borrowBookDatabaseCreateOrUpdate
-      ))
+      this.publishBookStatus(
+        BookStatus.RequestingLoan(
+          id = this.bookId,
+          detailMessage = this.borrowStrings.borrowBookDatabaseCreateOrUpdate
+        )
+      )
       this.steps.currentStepSucceeded(this.borrowStrings.borrowBookDatabaseUpdated)
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
@@ -382,10 +398,12 @@ class BookBorrowTask(
     val httpAuth = this.createHttpAuthIfRequired()
     this.debug("fetching item feed: {}", this.acquisition.uri)
 
-    this.publishBookStatus(BookStatus.RequestingLoan(
-      id = this.bookId,
-      detailMessage = this.borrowStrings.borrowBookGetFeedEntry
-    ))
+    this.publishBookStatus(
+      BookStatus.RequestingLoan(
+        id = this.bookId,
+        detailMessage = this.borrowStrings.borrowBookGetFeedEntry
+      )
+    )
 
     val feedResult =
       try {
@@ -411,7 +429,8 @@ class BookBorrowTask(
             exception = e,
             attributesInitial = this.currentAttributesWith()
           ),
-          exception = e)
+          exception = e
+        )
         throw e
       }
 
@@ -431,7 +450,8 @@ class BookBorrowTask(
                     exception = feedEntry.error,
                     attributes = this.currentAttributesWith()
                   ),
-                  exception = feedEntry.error)
+                  exception = feedEntry.error
+                )
                 throw BookBorrowExceptionBadBorrowFeed(feedEntry.error)
               }
               is FeedEntryOPDS -> feedEntry
@@ -453,7 +473,8 @@ class BookBorrowTask(
                     exception = feedEntry.error,
                     attributes = this.currentAttributesWith()
                   ),
-                  exception = feedEntry.error)
+                  exception = feedEntry.error
+                )
                 throw BookBorrowExceptionBadBorrowFeed(feedEntry.error)
               }
               is FeedEntryOPDS ->
@@ -475,7 +496,8 @@ class BookBorrowTask(
             exception = feedResult.exception,
             attributesInitial = this.currentAttributesWith(feedResult.attributes)
           ),
-          exception = feedResult.exception)
+          exception = feedResult.exception
+        )
         throw feedResult.exception
       }
 
@@ -491,7 +513,8 @@ class BookBorrowTask(
             exception = feedResult.exception,
             attributesInitial = this.currentAttributesWith(feedResult.attributes)
           ),
-          exception = feedResult.exception)
+          exception = feedResult.exception
+        )
         throw feedResult.exception
       }
     }
@@ -518,7 +541,8 @@ class BookBorrowTask(
           message = this.borrowStrings.borrowBookBadBorrowFeed,
           attributes = this.currentAttributesWith(attribute)
         ),
-        exception = exception)
+        exception = exception
+      )
       throw exception
     }
     return groups
@@ -545,7 +569,8 @@ class BookBorrowTask(
           message = this.borrowStrings.borrowBookBadBorrowFeed,
           attributes = this.currentAttributesWith(attribute)
         ),
-        exception = exception)
+        exception = exception
+      )
       throw exception
     }
     return entries
@@ -651,7 +676,8 @@ class BookBorrowTask(
         override fun onLoaned(a: OPDSAvailabilityLoaned): Boolean {
           this@BookBorrowTask.debug("book is loaned, fulfilling")
           this@BookBorrowTask.publishBookStatus(
-            BookStatus.RequestingDownload(this@BookBorrowTask.bookId))
+            BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
+          )
           return java.lang.Boolean.TRUE
         }
 
@@ -663,7 +689,8 @@ class BookBorrowTask(
         override fun onOpenAccess(a: OPDSAvailabilityOpenAccess): Boolean {
           this@BookBorrowTask.debug("book is open access, fulfilling")
           this@BookBorrowTask.publishBookStatus(
-            BookStatus.RequestingDownload(this@BookBorrowTask.bookId))
+            BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
+          )
           return java.lang.Boolean.TRUE
         }
 
@@ -685,7 +712,8 @@ class BookBorrowTask(
       this.steps.currentStepFailed(
         message = message,
         errorValue = WrongAvailability(message, this.currentAttributesWith()),
-        exception = exception)
+        exception = exception
+      )
       throw exception
     }
   }
@@ -723,7 +751,8 @@ class BookBorrowTask(
     this.steps.currentStepFailed(
       message = message,
       errorValue = UnusableAcquisitions(message, this.currentAttributesWith()),
-      exception = exception)
+      exception = exception
+    )
     throw exception
   }
 
@@ -825,32 +854,72 @@ class BookBorrowTask(
       problemReport: OptionType<HTTPProblemReport>,
       exception: OptionType<Throwable>
     ) {
-      this.downloadFuture.set(DownloadFailed(
-        uri = download.uri(),
-        status = status,
-        problemReport = problemReport,
-        exception = exception
-      ))
+      this.downloadFuture.set(
+        DownloadFailed(
+          uri = download.uri(),
+          status = status,
+          problemReport = problemReport,
+          exception = exception
+        )
+      )
     }
 
     override fun onDownloadCompleted(
       download: DownloadType,
       file: File
     ) {
-      this.downloadFuture.set(DownloadOK(
-        uri = download.uri(),
-        file = file
-      ))
+      this.downloadFuture.set(
+        DownloadOK(
+          uri = download.uri(),
+          file = file
+        )
+      )
     }
   }
+
+  private data class FileAndType(
+    val file: File,
+    val contentType: MIMEType
+  )
 
   private fun runAcquisitionFulfillDoDownload(
     acquisition: OPDSAcquisition,
     httpAuth: OptionType<HTTPAuthType>
   ) {
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillDownload)
-
     this.fulfillURI = acquisition.uri
+
+    val (file, contentType) =
+      if (this.acquisitionIsAudioBook(acquisition)) {
+        this.runAcquisitionFulfillDoDownloadAudioBook(acquisition)
+      } else {
+        this.runAcquisitionFulfillDoDownloadWithDownloader(acquisition, httpAuth)
+      }
+
+    this.debug("download completed for {}", file)
+    this.debug("content type is {}", contentType)
+
+    this.steps.currentStepSucceeded(
+      this.borrowStrings.borrowBookFulfillDownloaded(file, contentType))
+
+    return when (contentType) {
+      this.contentTypeACSM ->
+        this.runFulfillACSM(file)
+      this.contentTypeSimplifiedBearerToken ->
+        this.runFulfillSimplifiedBearerToken(acquisition, file)
+      else ->
+        this.saveFinalContent(
+          file = file,
+          expectedContentTypes = acquisition.availableFinalContentTypes(),
+          receivedContentType = contentType
+        )
+    }
+  }
+
+  private fun runAcquisitionFulfillDoDownloadWithDownloader(
+    acquisition: OPDSAcquisition,
+    httpAuth: OptionType<HTTPAuthType>
+  ): FileAndType {
 
     /*
      * Point the downloader at the acquisition link. The result will be an
@@ -869,7 +938,8 @@ class BookBorrowTask(
           detailMessage = this.borrowStrings.borrowBookFulfillDownload,
           runningTotal = runningTotal,
           expectedTotal = expectedTotal,
-          unconditional = unconditional)
+          unconditional = unconditional
+        )
       }
 
     val download =
@@ -884,7 +954,8 @@ class BookBorrowTask(
       this.steps.currentStepFailed(
         message = message,
         errorValue = TimedOut(message, this.currentAttributesWith()),
-        exception = ex)
+        exception = ex
+      )
       download.cancel()
       downloadFuture.cancel(true)
       throw IOException("Timed out", ex)
@@ -892,26 +963,73 @@ class BookBorrowTask(
       this.downloads.remove(this.bookId)
     }
 
-    val file = this.fileFromDownloadResult(result)
-    this.debug("download {} completed for {}", download, file)
-    val contentType = MIMEParser.parseRaisingException(download.contentType)
-    this.debug("content type is {}", contentType)
+    return FileAndType(
+      file = this.fileFromDownloadResult(result),
+      contentType = MIMEParser.parseRaisingException(download.contentType)
+    )
+  }
 
-    this.steps.currentStepSucceeded(
-      this.borrowStrings.borrowBookFulfillDownloaded(file, contentType))
+  private fun runAcquisitionFulfillDoDownloadAudioBook(
+    acquisition: OPDSAcquisition
+  ): FileAndType {
+    val targetContentType = acquisition.availableFinalContentTypes().first()
+    this.debug("making audio book request for type {}", targetContentType.fullType)
 
-    return when (contentType) {
-      this.contentTypeACSM ->
-        this.runFulfillACSM(file)
-      this.contentTypeSimplifiedBearerToken ->
-        this.runFulfillSimplifiedBearerToken(acquisition, file)
-      else ->
-        this.saveFinalContent(
-          file = file,
-          expectedContentTypes = acquisition.availableFinalContentTypes(),
-          receivedContentType = contentType)
+    val audioBookCredentials: AudioBookCredentials? =
+      this.account.loginState.credentials?.let { credentials ->
+        AudioBookCredentials.UsernamePassword(
+          userName = credentials.barcode().value(),
+          password = credentials.pin().value()
+        )
+      }
+
+    val strategy =
+      this.audioBookManifestStrategies.createStrategy(
+        AudioBookManifestRequest(
+          targetURI = acquisition.uri,
+          contentType = targetContentType,
+          userAgent = PlayerUserAgent(HTTP.userAgent()),
+          credentials = audioBookCredentials,
+          services = this.services
+        )
+      )
+
+    val subscription = strategy.events.subscribe { message ->
+      this.downloadDataReceived(
+        detailMessage = message,
+        runningTotal = 50L,
+        expectedTotal = 100L,
+        unconditional = false
+      )
+    }
+
+    return try {
+      when (val result = strategy.execute()) {
+        is TaskResult.Success -> {
+          val outputFile =
+            File.createTempFile("manifest", "data", this.cacheDirectory)
+          outputFile.writeBytes(result.result.fulfilled.data)
+          FileAndType(outputFile, result.result.fulfilled.contentType)
+        }
+        is TaskResult.Failure -> {
+          val message = result.errors().first()
+          val exception = IOException()
+          this.steps.currentStepFailed(
+            message = message,
+            errorValue = TimedOut(message, this.currentAttributesWith()),
+            exception = exception
+          )
+          throw exception
+        }
+      }
+    } finally {
+      subscription.unsubscribe()
     }
   }
+
+  private fun acquisitionIsAudioBook(acquisition: OPDSAcquisition) =
+    acquisition.availableFinalContentTypes().intersect(BookFormats.audioBookMimeTypes())
+      .isNotEmpty()
 
   private fun fileFromDownloadResult(result: DownloadResult): File {
     return when (result) {
@@ -934,7 +1052,8 @@ class BookBorrowTask(
             attributesInitial = this.currentAttributesWith(uriAttribute),
             message = message
           ),
-          exception = exception)
+          exception = exception
+        )
         throw exception
       }
 
@@ -943,7 +1062,10 @@ class BookBorrowTask(
         val message = this.borrowStrings.borrowBookFulfillCancelled
         this.steps.currentStepFailed(
           message = message,
-          errorValue = BookStatusDownloadErrorDetails.DownloadCancelled(message, this.currentAttributesWith()),
+          errorValue = BookStatusDownloadErrorDetails.DownloadCancelled(
+            message,
+            this.currentAttributesWith()
+          ),
           exception = exception
         )
         throw exception
@@ -964,15 +1086,16 @@ class BookBorrowTask(
     expectedContentTypes: Set<MIMEType>,
     receivedContentType: MIMEType
   ) {
-
     this.steps.beginNewStep(
-      this.borrowStrings.borrowBookSaving(receivedContentType, expectedContentTypes))
+      this.borrowStrings.borrowBookSaving(receivedContentType, expectedContentTypes)
+    )
 
     this.debug(
       "saving content {} (expected one of {}, received {})",
       file,
       expectedContentTypes,
-      receivedContentType)
+      receivedContentType
+    )
 
     this.debug("saving adobe rights {}", this.adobeLoan)
     this.debug("saving fulfill URI  {}", this.fulfillURI)
@@ -1009,7 +1132,8 @@ class BookBorrowTask(
       this.steps.currentStepFailed(
         message = message,
         errorValue = UnsupportedType(message, this.currentAttributesWith()),
-        exception = exception)
+        exception = exception
+      )
       throw exception
     }
   }
@@ -1027,16 +1151,21 @@ class BookBorrowTask(
 
     this.steps.beginNewStep(
       this.borrowStrings.borrowBookSavingCheckingContentType(
-        receivedContentType, expectedContentTypes))
+        receivedContentType, expectedContentTypes
+      )
+    )
 
     Preconditions.checkArgument(
       !expectedContentTypes.isEmpty(),
-      "At least one expected content type")
+      "At least one expected content type"
+    )
 
     if (receivedContentType == this.contentTypeOctetStream) {
-      this.debug("expected one of {} but received {} (acceptable)",
+      this.debug(
+        "expected one of {} but received {} (acceptable)",
         expectedContentTypes,
-        receivedContentType)
+        receivedContentType
+      )
 
       this.steps.currentStepSucceeded(this.borrowStrings.borrowBookSavingCheckingContentTypeOK)
       return expectedContentTypes.first()
@@ -1051,7 +1180,8 @@ class BookBorrowTask(
     this.debug(
       "expected {} but received {} (unacceptable)",
       expectedContentTypes,
-      receivedContentType)
+      receivedContentType
+    )
 
     val exception =
       BookUnexpectedTypeException(
@@ -1065,7 +1195,8 @@ class BookBorrowTask(
           .append('\n')
           .toString(),
         expected = expectedContentTypes,
-        received = receivedContentType)
+        received = receivedContentType
+      )
 
     val message = this.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable
     this.steps.currentStepFailed(
@@ -1074,7 +1205,8 @@ class BookBorrowTask(
         message = message,
         attributes = this.currentAttributesWith(Pair("Content Type", receivedContentType.fullType))
       ),
-      exception = exception)
+      exception = exception
+    )
 
     throw exception
   }
@@ -1102,7 +1234,8 @@ class BookBorrowTask(
       detailMessage = this.borrowStrings.borrowBookFulfillACSM,
       runningTotal = 0L,
       expectedTotal = 100L,
-      unconditional = true)
+      unconditional = true
+    )
 
     return if (this.adobeDRM != null) {
       this.debug("DRM support is available, using DRM connector")
@@ -1116,7 +1249,8 @@ class BookBorrowTask(
           message = this.borrowStrings.borrowBookFulfillDRMNotSupported,
           system = this.adobeACS
         ),
-        exception = ex)
+        exception = ex
+      )
       throw ex
     }
   }
@@ -1147,7 +1281,8 @@ class BookBorrowTask(
       this.saveFinalContent(
         file = fulfillment.file,
         expectedContentTypes = BookFormats.epubMimeTypes(),
-        receivedContentType = this.contentTypeEPUB)
+        receivedContentType = this.contentTypeEPUB
+      )
     } finally {
       try {
         FileUtilities.fileDelete(fulfillment.file)
@@ -1172,7 +1307,8 @@ class BookBorrowTask(
       detailMessage = this.borrowStrings.borrowBookFulfillACSMConnector,
       runningTotal = 0,
       expectedTotal = 100,
-      unconditional = true)
+      unconditional = true
+    )
 
     val outputFile =
       File.createTempFile("ADOBE-DRM", "data", this.cacheDirectory)
@@ -1188,11 +1324,13 @@ class BookBorrowTask(
             detailMessage = this.borrowStrings.borrowBookFulfillACSMConnector,
             runningTotal = progress.toLong(),
             expectedTotal = 100,
-            unconditional = false)
+            unconditional = false
+          )
         },
         outputFile,
         acsmBytes,
-        credentials.userID)
+        credentials.userID
+      )
 
     val fulfillment =
       try {
@@ -1204,7 +1342,8 @@ class BookBorrowTask(
         this.steps.currentStepFailed(
           message = message,
           errorValue = TimedOut(message, this.currentAttributesWith()),
-          exception = e)
+          exception = e
+        )
         this.downloads[this.bookId]?.cancel()
         throw IOException("Timed out", e)
       } catch (e: ExecutionException) {
@@ -1213,8 +1352,12 @@ class BookBorrowTask(
             val message = this.borrowStrings.borrowBookFulfillCancelled
             this.steps.currentStepFailed(
               message = message,
-              errorValue = BookStatusDownloadErrorDetails.DownloadCancelled(message, this.currentAttributesWith()),
-              exception = cause)
+              errorValue = BookStatusDownloadErrorDetails.DownloadCancelled(
+                message,
+                this.currentAttributesWith()
+              ),
+              exception = cause
+            )
             cause
           }
           is AdobeDRMFulfillmentException -> {
@@ -1227,14 +1370,16 @@ class BookBorrowTask(
                 errorCode = cause.errorCode,
                 message = message
               ),
-              exception = cause)
+              exception = cause
+            )
             cause
           }
           else -> {
             this.steps.currentStepFailed(
               message = this.borrowStrings.borrowBookFulfillACSMFailed,
               errorValue = UnexpectedException(cause, this.currentAttributesWith()),
-              exception = cause)
+              exception = cause
+            )
             cause
           }
         }
@@ -1242,7 +1387,8 @@ class BookBorrowTask(
         this.steps.currentStepFailed(
           message = this.borrowStrings.borrowBookFulfillACSMFailed,
           errorValue = UnexpectedException(e, this.currentAttributesWith()),
-          exception = e)
+          exception = e
+        )
         throw e
       }
 
@@ -1271,12 +1417,14 @@ class BookBorrowTask(
           system = this.adobeACS,
           message = message
         ),
-        exception = exception)
+        exception = exception
+      )
       throw exception
     }
 
     this.steps.currentStepSucceeded(
-      this.borrowStrings.borrowBookFulfillACSMGettingDeviceCredentialsOK)
+      this.borrowStrings.borrowBookFulfillACSMGettingDeviceCredentialsOK
+    )
     return credentials
   }
 
@@ -1297,7 +1445,8 @@ class BookBorrowTask(
           system = this.adobeACS,
           message = message
         ),
-        exception = e)
+        exception = e
+      )
       throw e
     }
   }
@@ -1344,12 +1493,14 @@ class BookBorrowTask(
           contentType = contentType,
           message = message
         ),
-        exception = exception)
+        exception = exception
+      )
       throw exception
     }
 
     this.steps.currentStepSucceeded(
-      this.borrowStrings.borrowBookFulfillACSMCheckContentTypeOK(contentType))
+      this.borrowStrings.borrowBookFulfillACSMCheckContentTypeOK(contentType)
+    )
   }
 
   /**
@@ -1362,14 +1513,15 @@ class BookBorrowTask(
     return try {
       AdobeAdeptFulfillmentToken.parseFromBytes(acsmBytes)
     } catch (e: Exception) {
-      val message = borrowStrings.borrowBookFulfillACSMParseFailed
-      steps.currentStepFailed(
+      val message = this.borrowStrings.borrowBookFulfillACSMParseFailed
+      this.steps.currentStepFailed(
         message = message,
         errorValue = DRMUnparseableACSM(
-          system = adobeACS,
+          system = this.adobeACS,
           message = message
         ),
-        exception = e)
+        exception = e
+      )
       throw e
     }
   }
@@ -1392,7 +1544,8 @@ class BookBorrowTask(
       detailMessage = this.borrowStrings.borrowBookFulfillBearerToken,
       runningTotal = 0L,
       expectedTotal = 100L,
-      unconditional = true)
+      unconditional = true
+    )
 
     val token = try {
       SimplifiedBearerTokenJSON.deserializeFromFile(ObjectMapper(), LocalDateTime.now(), file)
@@ -1402,7 +1555,8 @@ class BookBorrowTask(
       this.steps.currentStepFailed(
         message = message,
         errorValue = UnparseableBearerToken(message, this.currentAttributesWith()),
-        exception = ex)
+        exception = ex
+      )
       throw ex
     }
 
@@ -1413,7 +1567,8 @@ class BookBorrowTask(
         ACQUISITION_GENERIC,
         token.location,
         acquisition.type,
-        acquisition.indirectAcquisitions)
+        acquisition.indirectAcquisitions
+      )
 
     val auth = HTTPAuthOAuth.create(HTTPOAuthToken.create(token.accessToken))
     this.runAcquisitionFulfillDoDownload(nextAcquisition, Option.some(auth))
@@ -1456,10 +1611,12 @@ class BookBorrowTask(
     this.debug("acquisition is bundled")
     this.steps.beginNewStep(this.borrowStrings.borrowBookBundledCopy)
 
-    this.publishBookStatus(BookStatus.RequestingLoan(
-      id = this.bookId,
-      detailMessage = this.borrowStrings.borrowBookBundledCopy
-    ))
+    this.publishBookStatus(
+      BookStatus.RequestingLoan(
+        id = this.bookId,
+        detailMessage = this.borrowStrings.borrowBookBundledCopy
+      )
+    )
 
     this.fulfillURI = this.acquisition.uri
     val file = this.databaseEntry.temporaryFile()
@@ -1474,7 +1631,8 @@ class BookBorrowTask(
             detailMessage = this.borrowStrings.borrowBookBundledCopy,
             runningTotal = consumed,
             expectedTotal = size,
-            unconditional = true)
+            unconditional = true
+          )
 
           while (true) {
             val r = stream.read(buffer)
@@ -1488,7 +1646,8 @@ class BookBorrowTask(
               detailMessage = this.borrowStrings.borrowBookBundledCopy,
               runningTotal = consumed,
               expectedTotal = size,
-              unconditional = false)
+              unconditional = false
+            )
           }
           output.flush()
         }
@@ -1501,7 +1660,8 @@ class BookBorrowTask(
         this.saveFinalContent(
           file = file,
           expectedContentTypes = BookFormats.epubMimeTypes(),
-          receivedContentType = this.contentTypeOctetStream)
+          receivedContentType = this.contentTypeOctetStream
+        )
 
         this.publishBookStatus(BookStatus.fromBook(this.databaseEntry.book))
       }
@@ -1512,7 +1672,8 @@ class BookBorrowTask(
       this.steps.currentStepFailed(
         message = message,
         errorValue = BundledCopyFailed(message, this.currentAttributesWith()),
-        exception = e)
+        exception = e
+      )
       FileUtilities.fileDelete(file)
       throw e
     }
@@ -1522,10 +1683,12 @@ class BookBorrowTask(
     this.debug("acquisition is content")
     this.steps.beginNewStep(this.borrowStrings.borrowBookContentCopy)
 
-    this.publishBookStatus(BookStatus.RequestingLoan(
-      id = this.bookId,
-      detailMessage = this.borrowStrings.borrowBookContentCopy
-    ))
+    this.publishBookStatus(
+      BookStatus.RequestingLoan(
+        id = this.bookId,
+        detailMessage = this.borrowStrings.borrowBookContentCopy
+      )
+    )
 
     this.fulfillURI = this.acquisition.uri
     val file = this.databaseEntry.temporaryFile()
@@ -1546,7 +1709,8 @@ class BookBorrowTask(
             detailMessage = this.borrowStrings.borrowBookContentCopy,
             runningTotal = consumed,
             expectedTotal = size,
-            unconditional = true)
+            unconditional = true
+          )
 
           while (true) {
             val r = stream.read(buffer)
@@ -1560,7 +1724,8 @@ class BookBorrowTask(
               detailMessage = this.borrowStrings.borrowBookContentCopy,
               runningTotal = consumed,
               expectedTotal = size,
-              unconditional = false)
+              unconditional = false
+            )
           }
           output.flush()
         }
@@ -1573,7 +1738,8 @@ class BookBorrowTask(
         this.saveFinalContent(
           file = file,
           expectedContentTypes = BookFormats.epubMimeTypes(),
-          receivedContentType = this.contentTypeOctetStream)
+          receivedContentType = this.contentTypeOctetStream
+        )
 
         this.publishBookStatus(BookStatus.fromBook(this.databaseEntry.book))
       }
@@ -1584,7 +1750,8 @@ class BookBorrowTask(
       this.steps.currentStepFailed(
         message = message,
         errorValue = ContentCopyFailed(message, this.currentAttributesWith()),
-        exception = e)
+        exception = e
+      )
       FileUtilities.fileDelete(file)
       throw e
     }
@@ -1623,7 +1790,8 @@ class BookBorrowTask(
           id = this.bookId,
           detailMessage = detailMessage,
           currentTotalBytes = runningTotal,
-          expectedTotalBytes = expectedTotal)
+          expectedTotalBytes = expectedTotal
+        )
       this.bookRegistry.update(BookWithStatus(this.databaseEntry.book, status))
       this.downloadRunningTotal = runningTotal
       this.downloadTimeThen = timeNow

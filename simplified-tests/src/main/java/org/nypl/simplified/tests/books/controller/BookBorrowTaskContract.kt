@@ -20,13 +20,21 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.librarysimplified.audiobook.manifest.api.PlayerManifest
+import org.librarysimplified.audiobook.manifest.api.PlayerManifestMetadata
+import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
 import org.mockito.Mockito
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.audio.AudioBookManifestData
+import org.nypl.simplified.books.audio.AudioBookManifestRequest
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategyType
 import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
@@ -78,11 +86,14 @@ import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.nypl.simplified.tests.strings.MockBorrowStringResources
 import org.slf4j.Logger
+import rx.Observable
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileNotFoundException
@@ -112,6 +123,7 @@ abstract class BookBorrowTaskContract {
 
   protected abstract val logger: Logger
 
+  private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var booksDirectory: File
@@ -145,8 +157,11 @@ abstract class BookBorrowTaskContract {
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
-    this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.bundledContent =
+      BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.contentResolver = Mockito.mock(ContentResolver::class.java)
+    this.audioBookManifestStrategies =
+      Mockito.mock(AudioBookManifestStrategiesType::class.java)
 
     this.tempDirectory = TestDirectories.temporaryDirectory()
     this.cacheDirectory = File(this.tempDirectory, "cache")
@@ -157,11 +172,24 @@ abstract class BookBorrowTaskContract {
     Preconditions.checkState(this.cacheDirectory.isDirectory)
     Preconditions.checkState(this.booksDirectory.isDirectory)
 
-    this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
+    this.downloader =
+      DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
     this.clock = { Instant.now() }
 
     this.services = MutableServiceDirectory()
+    this.services.putService(
+      AudioBookManifestStrategiesType::class.java,
+      this.audioBookManifestStrategies
+    )
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
   }
 
   @After
@@ -231,21 +259,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -260,14 +292,6 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -281,7 +305,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -323,21 +347,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.pdf"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.pdf"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.pdf"),
-        Option.some(mimeOf("application/pdf")),
-        listOf())
+        Option.some(this.mimeOf("application/pdf")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -355,7 +383,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -363,18 +392,10 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/pdf")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/pdf")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -388,7 +409,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -403,11 +424,9 @@ abstract class BookBorrowTaskContract {
    * Borrowing an open access audio book directly, works.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
   fun testBorrowOpenAccessAudioBook() {
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -417,7 +436,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(account.loginState)
+      .thenReturn(AccountLoginState.AccountNotLoggedIn)
 
     this.http.addResponse(
       "http://www.example.com/0.json",
@@ -427,21 +449,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.json"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.json"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.json"),
-        Option.some(mimeOf("application/audiobook+json")),
-        listOf())
+        Option.some(this.mimeOf("application/audiobook+json")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -459,7 +485,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -467,18 +494,53 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/audiobook+json")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/audiobook+json")))
       .thenReturn(formatHandle)
 
+    val strategy =
+      Mockito.mock(AudioBookManifestStrategyType::class.java)
+
+    val manifestBytes =
+      "HELLO!".toByteArray()
+
+    val playerManifest =
+      PlayerManifest(
+        manifestBytes,
+        listOf(),
+        PlayerManifestMetadata("title", "id", null),
+        listOf(),
+        listOf()
+      )
+
+    Mockito.`when`(strategy.events)
+      .thenReturn(Observable.never())
+    Mockito.`when`(strategy.execute())
+      .thenReturn(
+        TaskResult.Success(
+          AudioBookManifestData(
+            playerManifest,
+            ManifestFulfilled(
+              this.mimeOf("application/audiobook+json"),
+              manifestBytes
+            )
+          ),
+          listOf(
+            TaskStep("Did something", TaskStepResolution.TaskStepSucceeded("OK")),
+            TaskStep("Did something", TaskStepResolution.TaskStepSucceeded("OK")),
+            TaskStep("Did something", TaskStepResolution.TaskStepSucceeded("OK"))
+          )
+        )
+      )
+
+    Mockito.`when`(
+      this.audioBookManifestStrategies.createStrategy(
+        anyOfType(
+          AudioBookManifestRequest::class.java
+        )
+      )
+    ).thenReturn(strategy)
+
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -492,7 +554,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -501,9 +563,18 @@ abstract class BookBorrowTaskContract {
 
     Mockito.verify(formatHandle, Mockito.times(1))
       .copyInManifestAndURI(
-        File(this.directoryDownloads, "0000000000000001.data").readBytes(),
-        URI.create("http://www.example.com/0.json"))
+        manifestBytes,
+        URI.create("http://www.example.com/0.json")
+      )
   }
+
+  private fun <T> anyOfType(type: Class<T>): T {
+    Mockito.any(type)
+    return uninitialized()
+  }
+
+  private fun <T> uninitialized(): T =
+    null as T
 
   /**
    * Borrowing bundled content works.
@@ -533,15 +604,17 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("simplified-bundled:0.epub"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -559,7 +632,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(bundledContent.resolve(URI.create("simplified-bundled:0.epub")))
       .thenReturn(this.resource("/org/nypl/simplified/tests/books/4096.bin"))
@@ -571,18 +645,12 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
     this.services.putService(BundledContentResolverType::class.java, bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -596,7 +664,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -633,15 +701,17 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("simplified-bundled:0.epub"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -658,14 +728,8 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
     this.services.putService(BundledContentResolverType::class.java, bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -679,7 +743,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -716,7 +780,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -726,21 +792,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -758,7 +828,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -766,18 +837,10 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -791,7 +854,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -830,21 +893,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_GENERIC,
         URI.create("http://example.com/fulfill/0"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -862,7 +929,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -870,18 +938,10 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -895,7 +955,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -934,7 +994,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val headers = HashMap<String, MutableList<String>>()
     headers["Content-Type"] = mutableListOf("application/epub+zip")
@@ -947,21 +1009,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -979,7 +1045,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -987,18 +1054,10 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1012,7 +1071,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -1047,21 +1106,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1076,14 +1139,6 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1097,7 +1152,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1130,30 +1185,40 @@ abstract class BookBorrowTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"))
+        feedURI = URI("http://www.example.com/0.feed")
+      )
 
     feed.entriesInOrder.add(
-      FeedEntry.FeedEntryCorrupt(BookID.create("a"), java.lang.IllegalStateException()))
+      FeedEntry.FeedEntryCorrupt(BookID.create("a"), java.lang.IllegalStateException())
+    )
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    )
       .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1168,14 +1233,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1189,7 +1247,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1227,7 +1285,8 @@ abstract class BookBorrowTaskContract {
         URI.create("http://www.example.com/0.feed"),
         "x",
         DateTime.now(),
-        "Title")
+        "Title"
+      )
 
     val feedEntryBuilder =
       OPDSAcquisitionFeedEntry
@@ -1235,7 +1294,8 @@ abstract class BookBorrowTaskContract {
           "x",
           "Title",
           DateTime.now(),
-          OPDSAvailabilityOpenAccess.get(Option.none()))
+          OPDSAvailabilityOpenAccess.get(Option.none())
+        )
 
     feedEntryBuilder.addGroup(URI.create("group"), "group")
 
@@ -1256,22 +1316,30 @@ abstract class BookBorrowTaskContract {
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    )
       .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1286,14 +1354,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1307,7 +1368,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1340,27 +1401,36 @@ abstract class BookBorrowTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"))
+        feedURI = URI("http://www.example.com/0.feed")
+      )
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    )
       .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1375,14 +1445,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1396,7 +1459,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1434,7 +1497,8 @@ abstract class BookBorrowTaskContract {
         URI.create("http://www.example.com/0.feed"),
         "x",
         DateTime.now(),
-        "Title")
+        "Title"
+      )
 
     val feedEntryBuilder =
       OPDSAcquisitionFeedEntry
@@ -1442,7 +1506,8 @@ abstract class BookBorrowTaskContract {
           "x",
           "Title",
           DateTime.now(),
-          OPDSAvailabilityOpenAccess.get(Option.none()))
+          OPDSAvailabilityOpenAccess.get(Option.none())
+        )
 
     feedEntryBuilder.addGroup(URI.create("group"), "group")
 
@@ -1463,22 +1528,30 @@ abstract class BookBorrowTaskContract {
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    )
       .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1493,14 +1566,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1514,7 +1580,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1542,22 +1608,30 @@ abstract class BookBorrowTaskContract {
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    )
       .thenThrow(NullPointerException("Not really!"))
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1572,14 +1646,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1593,7 +1660,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1626,21 +1693,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1655,14 +1726,6 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1676,7 +1739,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1709,7 +1772,8 @@ abstract class BookBorrowTaskContract {
         HashMap(),
         0L,
         ByteArrayInputStream(ByteArray(0)),
-        Option.none())
+        Option.none()
+      )
 
     /*
      * XXX: The current HTTP transport implementation will erroneously retry
@@ -1729,15 +1793,17 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1752,14 +1818,6 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1773,7 +1831,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1811,7 +1869,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -1821,21 +1881,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1854,14 +1918,6 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1875,7 +1931,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -1916,7 +1972,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val headers = HashMap<String, MutableList<String>>()
     headers["Content-Type"] = mutableListOf("application/nonsense")
@@ -1929,21 +1987,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1961,7 +2023,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -1969,18 +2032,10 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -1994,7 +2049,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -2031,7 +2086,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/feed-only-buy-acquisitions.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/feed-only-buy-acquisitions.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -2041,21 +2098,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -2070,14 +2131,6 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2091,7 +2144,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -2127,7 +2180,10 @@ abstract class BookBorrowTaskContract {
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val headers = HashMap<String, MutableList<String>>()
-    headers.put("Content-Type", mutableListOf("application/vnd.librarysimplified.bearer-token+json"))
+    headers.put(
+      "Content-Type",
+      mutableListOf("application/vnd.librarysimplified.bearer-token+json")
+    )
     this.http.addResponse(
       "http://www.example.com/0.epub",
       HTTPResultOK(
@@ -2136,7 +2192,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/bearer-token-0.json"),
         this.resourceSize("/org/nypl/simplified/tests/books/bearer-token-0.json"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/1.epub",
@@ -2146,21 +2204,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -2178,7 +2240,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -2186,18 +2249,11 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2211,7 +2267,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -2245,7 +2301,10 @@ abstract class BookBorrowTaskContract {
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
     val headers = HashMap<String, MutableList<String>>()
-    headers.put("Content-Type", mutableListOf("application/vnd.librarysimplified.bearer-token+json"))
+    headers.put(
+      "Content-Type",
+      mutableListOf("application/vnd.librarysimplified.bearer-token+json")
+    )
     this.http.addResponse(
       "http://www.example.com/0.epub",
       HTTPResultOK(
@@ -2254,7 +2313,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/bearer-token-bad.json"),
         this.resourceSize("/org/nypl/simplified/tests/books/bearer-token-bad.json"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/1.epub",
@@ -2264,21 +2325,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -2296,7 +2361,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -2304,18 +2370,11 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2329,7 +2388,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -2352,7 +2411,13 @@ abstract class BookBorrowTaskContract {
     val download =
       Mockito.mock(DownloadType::class.java)
 
-    Mockito.`when`(downloader.download(anyNonNull(), anyNonNull(), anyNonNull()))
+    Mockito.`when`(
+      this.downloader.download(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    )
       .then { invocation ->
         val listener = invocation.arguments[2] as DownloadListenerType
         listener.onDownloadStarted(download, 1000L)
@@ -2375,7 +2440,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -2385,21 +2452,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -2414,14 +2485,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
     this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2435,11 +2499,12 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
     Assert.assertEquals(
       CancellationException::class.java,
-      results.steps.last().resolution.exception!!.javaClass)
+      results.steps.last().resolution.exception!!.javaClass
+    )
 
     /*
      * Check that the download failed.
@@ -2469,7 +2534,13 @@ abstract class BookBorrowTaskContract {
     val report =
       HTTPProblemReport(reportNode)
 
-    Mockito.`when`(downloader.download(anyNonNull(), anyNonNull(), anyNonNull()))
+    Mockito.`when`(
+      this.downloader.download(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    )
       .then { invocation ->
         val listener = invocation.arguments[2] as DownloadListenerType
         listener.onDownloadStarted(download, 1000L)
@@ -2492,7 +2563,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -2502,21 +2575,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -2531,14 +2608,7 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
     this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2552,7 +2622,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     val errorData =
@@ -2587,15 +2657,17 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BUY,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -2610,14 +2682,6 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2631,7 +2695,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     val errorData =
@@ -2661,22 +2725,24 @@ abstract class BookBorrowTaskContract {
 
     Mockito.`when`(account.id).thenReturn(this.accountID)
 
-    Mockito.`when`(bookDatabase.createOrUpdate(anyNonNull(), anyNonNull()))
+    Mockito.`when`(bookDatabase.createOrUpdate(this.anyNonNull(), this.anyNonNull()))
       .thenThrow(BookDatabaseException("Ouch", listOf()))
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BUY,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -2691,14 +2757,6 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2712,7 +2770,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
     /*
@@ -2751,7 +2809,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/cover.jpg",
@@ -2761,21 +2821,25 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.setCoverOption(Option.some(URI.create("http://www.example.com/cover.jpg")))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -2794,7 +2858,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     val tempCoverFile =
       File.createTempFile("borrow-contract", "jpg")
@@ -2807,18 +2872,11 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempCoverFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2832,7 +2890,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
@@ -2875,7 +2933,9 @@ abstract class BookBorrowTaskContract {
         this.resource("/org/nypl/simplified/tests/books/empty.epub"),
         this.resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/cover.jpg",
@@ -2886,21 +2946,25 @@ abstract class BookBorrowTaskContract {
         mutableMapOf(),
         0L,
         ByteArrayInputStream(ByteArray(0)),
-        Option.none()))
+        Option.none()
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        Option.some(this.mimeOf("application/epub+zip")),
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.setCoverOption(Option.some(URI.create("http://www.example.com/cover.jpg")))
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -2919,7 +2983,8 @@ abstract class BookBorrowTaskContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     val tempCoverFile =
       File.createTempFile("borrow-contract", "jpg")
@@ -2932,18 +2997,11 @@ abstract class BookBorrowTaskContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.temporaryFile())
       .thenReturn(tempCoverFile)
-    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType(this.mimeOf("application/epub+zip")))
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
@@ -2957,7 +3015,7 @@ abstract class BookBorrowTaskContract {
         contentResolver = this.contentResolver
       )
 
-    val results = task.call(); TaskDumps.dump(logger, results)
+    val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Success
 
     /*
