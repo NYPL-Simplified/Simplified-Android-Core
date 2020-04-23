@@ -6,7 +6,7 @@
   <string name="settingsAboutSummary" />
   <string name="settingsAccountAdd">Add account…</string>
   <string name="settingsAccountCreationFailed">Account creation failed</string>
-  <string name="settingsAccountCreationFailedMessage">The account \'%1$s\' could not be created.</string>
+  <string name="settingsAccountCreationFailedMessage">The account could not be created.</string>
   <string name="settingsAccountCurrent">Current Account</string>
   <string name="settingsAccountDelete">@string/settingsDelete</string>
   <string name="settingsAccountDeleteConfirm">Are you sure you want to remove your \"%1$s\" account from this device?</string>

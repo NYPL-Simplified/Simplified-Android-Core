@@ -18,7 +18,7 @@
     android:label="Simplified Vanilla"
     android:largeHeap="true"
     android:theme="@style/VanillaTheme_NoActionBar_DeepPurple"
-    android:usesCleartextTraffic="true">
+    android:networkSecurityConfig="@xml/network_security_config">
 
     <!-- Main entry point for the application. -->
     <activity
@@ -71,6 +71,13 @@
       android:contentDescription="Simplified Vanilla"
       android:exported="false"
       android:label="Simplified Vanilla" />
+
+    <activity
+        android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"
+        android:contentDescription="Simplified Vanilla"
+        android:windowSoftInputMode="adjustResize"
+        android:exported="false"
+        android:label="Simplified Vanilla" />
 
   </application>
 

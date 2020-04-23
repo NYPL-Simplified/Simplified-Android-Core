@@ -1,8 +1,8 @@
 package org.nypl.simplified.accounts.api
 
+import one.irradia.mime.api.MIMEType
 import org.joda.time.DateTime
 import org.nypl.simplified.links.Link
-import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
 import java.net.URI
 

@@ -28,9 +28,9 @@ class MockAccount(override val id: AccountID) : AccountType {
       val authentication =
         AccountProviderAuthenticationDescription.Basic(
           barcodeFormat = null,
-          keyboard = null,
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
           passwordMaximumLength = 4,
-          passwordKeyboard = null,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
           description = "What?",
           labels = mapOf()
         )

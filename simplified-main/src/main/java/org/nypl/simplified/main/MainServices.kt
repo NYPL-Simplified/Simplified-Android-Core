@@ -15,6 +15,7 @@ import com.io7m.jfunctional.Some
 import com.squareup.picasso.Picasso
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
+import org.librarysimplified.instabug.spi.InstabugType
 import org.librarysimplified.services.api.ServiceDirectory
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
@@ -59,6 +60,8 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
+import org.nypl.simplified.cardcreator.CardCreatorService
+import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.documents.store.DocumentStore
@@ -113,6 +116,7 @@ import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.viewer.audiobook.AudioBookFeedbooksServiceType
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPMimeMap
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerAAsync
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerType
@@ -451,6 +455,20 @@ internal object MainServices {
     }
   }
 
+  private fun cardCreatorCredentials(
+    context: Context
+  ): AccountBundledCredentialsType {
+    return try {
+      this.createBundledCredentials(context.assets)
+    } catch (e: FileNotFoundException) {
+      this.logger.warn("could not initialize bundled credentials: ", e)
+      AccountBundledCredentialsEmpty.getInstance()
+    } catch (e: IOException) {
+      this.logger.warn("could not initialize bundled credentials: ", e)
+      throw IllegalStateException("could not initialize bundled credentials", e)
+    }
+  }
+
   @Throws(ProfileDatabaseException::class)
   private fun createProfileDatabase(
     context: Context,
@@ -596,6 +614,20 @@ internal object MainServices {
       bookRegistry = bookRegistry,
       notificationsWrapper = NotificationsWrapper(context),
       notificationResourcesType = MainNotificationResources(context))
+  }
+
+  private fun createCardCreatorService(context: Context): CardCreatorServiceType? {
+    return try {
+      context.assets.open("cardcreator.conf").use { stream ->
+        CardCreatorService.create(stream)
+      }
+    } catch (e: FileNotFoundException) {
+      this.logger.debug("card creator configuration not present: ", e)
+      null
+    } catch (e: IOException) {
+      this.logger.debug("could not initialize card creator: ", e)
+      throw IllegalStateException("could not initialize card creator", e)
+    }
   }
 
   private fun publishApplicationStartupEvent(
@@ -766,6 +798,11 @@ internal object MainServices {
       message = strings.bootingStrings("book revocation"),
       interfaceType = BookRevokeStringResourcesType::class.java,
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) })
+
+    addServiceOptionally(
+      message = strings.bootingInstabug,
+      interfaceType = InstabugType::class.java,
+      serviceConstructor = { MainInstabugService.create(MainApplication.application) })
 
     addService(
       message = strings.bootingCatalogConfiguration,
@@ -1079,6 +1116,19 @@ internal object MainServices {
         this.createNotificationsService(context, profileEvents, bookRegistry)
       }
     )
+
+    addServiceOptionally(
+      message = strings.bootingAudioBookExtensions,
+      interfaceType = AudioBookFeedbooksServiceType::class.java,
+      serviceConstructor = {
+        optionalFromServiceLoader(AudioBookFeedbooksServiceType::class.java)
+      }
+    )
+
+    addServiceOptionally(
+      message = strings.bootingCardCreatorService,
+      interfaceType = CardCreatorServiceType::class.java,
+      serviceConstructor = { createCardCreatorService(context) })
 
     this.showThreads()
 

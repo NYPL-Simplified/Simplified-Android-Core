@@ -26,6 +26,7 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -102,6 +103,8 @@ class Controller private constructor(
     this.services.requireService(AccountProviderRegistryType::class.java)
   private val adobeDrm =
     this.services.optionalService(AdobeAdeptExecutorType::class.java)
+  private val analytics =
+    this.services.requireService(AnalyticsType::class.java)
   private val authDocumentParsers =
     this.services.requireService(AuthenticationDocumentParsersType::class.java)
   private val bookRegistry =
@@ -237,10 +240,11 @@ class Controller private constructor(
     profileID: ProfileID
   ): FluentFuture<Unit> {
     return this.submitTask(ProfileSelectionTask(
-      profiles = this.profiles,
+      analytics = this.analytics,
       bookRegistry = this.bookRegistry,
       events = this.profileEvents,
-      id = profileID
+      id = profileID,
+      profiles = this.profiles
     ))
   }
 

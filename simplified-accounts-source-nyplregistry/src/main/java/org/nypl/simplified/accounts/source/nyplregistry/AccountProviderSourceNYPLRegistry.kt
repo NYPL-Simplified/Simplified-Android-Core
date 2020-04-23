@@ -1,14 +1,17 @@
 package org.nypl.simplified.accounts.source.nyplregistry
 
 import android.content.Context
-import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.Duration
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSerializersType
+import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
@@ -79,9 +82,6 @@ class AccountProviderSourceNYPLRegistry(
   private val writeLock = Any()
 
   @Volatile
-  private var firstCall = true
-
-  @Volatile
   private var stringResources: AccountProviderResolutionStringsType? = null
 
   private data class CacheFiles(
@@ -89,7 +89,10 @@ class AccountProviderSourceNYPLRegistry(
     val fileTemp: File
   )
 
-  override fun load(context: Context): SourceResult {
+  /** The default time to retain the disk cache. */
+  private val defaultCacheDuration = Duration.standardHours(4)
+
+  override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
     if (this.stringResources == null) {
       this.stringResources = AccountProviderSourceResolutionStrings(context.resources)
     }
@@ -97,20 +100,26 @@ class AccountProviderSourceNYPLRegistry(
     val files = this.cacheFiles(context)
     val diskResults = this.fetchDiskResults(files)
 
-    /*
-     * If we've not called the server before, and the disk cache is not empty, then just
-     * return the disk cache. Otherwise, we need to call the server.
-     */
-
     return try {
-      if (this.firstCall) {
-        if (diskResults.isNotEmpty()) {
+      /*
+       * If we have a populated disk cache, and haven't exceeded the cache duration, then
+       * just return the disk cache.
+       */
+      if (diskResults.isNotEmpty()) {
+        val now = DateTime.now(DateTimeZone.UTC)
+        val lastModifiedTime = DateTime(files.file.lastModified(), DateTimeZone.UTC)
+        val age = Duration(lastModifiedTime, now)
+
+        if (age.isShorterThan(defaultCacheDuration)) {
+          logger.debug("disk cache is fresh; last-modified={}", lastModifiedTime)
           return SourceResult.SourceSucceeded(diskResults)
+        } else {
+          logger.debug("disk cache is expired; last-modified={}", lastModifiedTime)
         }
       }
 
       val serverResults =
-        this.fetchServerResults()
+        this.fetchServerResults(includeTestingLibraries)
       val mergedResults =
         this.mergeResults(diskResults, serverResults)
 
@@ -119,8 +128,14 @@ class AccountProviderSourceNYPLRegistry(
     } catch (e: Exception) {
       this.logger.error("failed to fetch providers: ", e)
       SourceResult.SourceFailed(diskResults, e)
-    } finally {
-      this.firstCall = false
+    }
+  }
+
+  override fun clear(context: Context) {
+    synchronized(this.writeLock) {
+      val files = this.cacheFiles(context)
+      FileUtilities.fileDelete(files.file)
+      FileUtilities.fileDelete(files.fileTemp)
     }
   }
 
@@ -201,10 +216,8 @@ class AccountProviderSourceNYPLRegistry(
               result.result.providers.size,
               result.warnings.size)
 
-            val countProduction =
-              result.result.providers.count { p -> p.isProduction }
-            val countTesting =
-              result.result.providers.count { p -> !p.isProduction }
+            val countProduction = result.result.providers.count { it.isProduction }
+            val countTesting = result.result.providers.count { !it.isProduction }
 
             this.logger.debug("{} cached production providers", countProduction)
             this.logger.debug("{} cached testing providers", countTesting)
@@ -235,40 +248,40 @@ class AccountProviderSourceNYPLRegistry(
    * Fetch a set of provider descriptions from the server.
    */
 
-  private fun fetchServerResults(): Map<URI, AccountProviderDescriptionType> {
-    this.logger.debug("fetching production providers from ${this.uriProduction}")
-    val sourceProductionProviders =
-      this.fetchAndParse(this.uriProduction)
-        .providers
-        .map { p -> Pair(p.id, p) }
-        .toMap()
+  private fun fetchServerResults(
+    includeTestingLibraries: Boolean
+  ): Map<URI, AccountProviderDescriptionType> {
+    val results = mutableMapOf<URI, AccountProviderDescriptionMetadata>()
 
-    this.logger.debug("fetching QA providers from ${this.uriQA}")
-    val sourceQaProviders =
+    this.logger.debug("fetching providers from ${this.uriProduction}")
+    this.fetchAndParse(this.uriProduction)
+      .providers
+      .associateByTo(results, { it.id }, {
+        it.copy(isProduction = true)
+      })
+
+    /* Fetch testing libraries, if required. */
+
+    if (includeTestingLibraries) {
+      this.logger.debug("fetching QA providers from ${this.uriQA}")
       this.fetchAndParse(this.uriQA)
         .providers
-        .map { p -> Pair(p.id, p) }
-        .toMap()
-
-    this.logger.debug("categorizing ${sourceQaProviders.size} providers")
-    val results = mutableMapOf<URI, AccountProviderDescriptionType>()
-    for (id in sourceQaProviders.keys) {
-      val sourceMetadata =
-        sourceQaProviders[id]!!
-      val resultMetadata =
-        sourceMetadata.copy(isProduction = sourceProductionProviders.containsKey(id))
-
-      Preconditions.checkState(
-        !results.containsKey(id),
-        "ID $id must not already be present in the results")
-
-      results[id] = AccountProviderSourceStandardDescription(
-        stringResources = this.stringResources!!,
-        authDocumentParsers = this.authDocumentParsers,
-        http = this.http,
-        metadata = resultMetadata)
+        .filterNot { results.containsKey(it.id) }
+        .associateByTo(results, { it.id }, {
+          it.copy(isProduction = false)
+        })
     }
-    return results.toMap()
+
+    this.logger.debug("categorizing ${results.size} providers")
+    return results
+      .map {
+        AccountProviderSourceStandardDescription(
+          stringResources = this.stringResources!!,
+          authDocumentParsers = this.authDocumentParsers,
+          http = this.http,
+          metadata = it.value
+        )
+      }.associateBy { it.metadata.id }
   }
 
   private fun fetchAndParse(target: URI): AccountProviderDescriptionCollection {

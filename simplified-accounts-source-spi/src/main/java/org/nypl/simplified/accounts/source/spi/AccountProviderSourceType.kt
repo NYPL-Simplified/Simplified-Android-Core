@@ -42,7 +42,14 @@ interface AccountProviderSourceType {
 
   /**
    * Retrieve everything the source provides.
+   *
+   * @param includeTestingLibraries A hint for the provider indicating whether
+   * testing libraries should be loaded. May be ignored by some providers.
    */
 
-  fun load(context: Context): SourceResult
+  fun load(context: Context, includeTestingLibraries: Boolean): SourceResult
+
+  /** Clear any cached providers. */
+
+  fun clear(context: Context)
 }

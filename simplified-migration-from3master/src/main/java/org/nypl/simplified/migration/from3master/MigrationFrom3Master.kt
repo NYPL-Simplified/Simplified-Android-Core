@@ -413,7 +413,7 @@ class MigrationFrom3Master(
   ): CopiedBook {
     if (book.audioBookManifest != null) {
       handle.copyInManifestAndURI(
-        file = book.audioBookManifest.manifestFile,
+        data = book.audioBookManifest.manifestFile.readBytes(),
         manifestURI = book.audioBookManifest.manifestURI)
     }
     if (book.audioBookPosition != null) {

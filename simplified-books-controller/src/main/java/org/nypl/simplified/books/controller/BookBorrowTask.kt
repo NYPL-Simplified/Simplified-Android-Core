@@ -9,6 +9,8 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
+import one.irradia.mime.api.MIMEType
+import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.Duration
 import org.joda.time.LocalDateTime
 import org.joda.time.Period
@@ -152,13 +154,13 @@ class BookBorrowTask(
     this.services.requireService(HTTPType::class.java)
 
   private val contentTypeACSM =
-    "application/vnd.adobe.adept+xml"
+    MIMEParser.parseRaisingException("application/vnd.adobe.adept+xml")
   private val contentTypeSimplifiedBearerToken =
-    "application/vnd.librarysimplified.bearer-token+json"
+    MIMEParser.parseRaisingException("application/vnd.librarysimplified.bearer-token+json")
   private val contentTypeEPUB =
-    "application/epub+zip"
+    MIMEParser.parseRaisingException("application/epub+zip")
   private val contentTypeOctetStream =
-    "application/octet-stream"
+    MIMEParser.parseRaisingException("application/octet-stream")
 
   private val adobeACS =
     "Adobe ACS"
@@ -846,7 +848,6 @@ class BookBorrowTask(
     acquisition: OPDSAcquisition,
     httpAuth: OptionType<HTTPAuthType>
   ) {
-
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillDownload)
 
     this.fulfillURI = acquisition.uri
@@ -893,7 +894,7 @@ class BookBorrowTask(
 
     val file = this.fileFromDownloadResult(result)
     this.debug("download {} completed for {}", download, file)
-    val contentType = download.contentType
+    val contentType = MIMEParser.parseRaisingException(download.contentType)
     this.debug("content type is {}", contentType)
 
     this.steps.currentStepSucceeded(
@@ -960,8 +961,8 @@ class BookBorrowTask(
 
   private fun saveFinalContent(
     file: File,
-    expectedContentTypes: Set<String>,
-    receivedContentType: String
+    expectedContentTypes: Set<MIMEType>,
+    receivedContentType: MIMEType
   ) {
 
     this.steps.beginNewStep(
@@ -997,7 +998,7 @@ class BookBorrowTask(
           updateStatus()
         }
         is BookDatabaseEntryFormatHandleAudioBook -> {
-          formatHandle.copyInManifestAndURI(file, this.fulfillURI)
+          formatHandle.copyInManifestAndURI(file.readBytes(), this.fulfillURI)
           updateStatus()
         }
       }
@@ -1020,9 +1021,9 @@ class BookBorrowTask(
    */
 
   private fun checkExpectedContentType(
-    expectedContentTypes: Set<String>,
-    receivedContentType: String
-  ): String {
+    expectedContentTypes: Set<MIMEType>,
+    receivedContentType: MIMEType
+  ): MIMEType {
 
     this.steps.beginNewStep(
       this.borrowStrings.borrowBookSavingCheckingContentType(
@@ -1032,52 +1033,50 @@ class BookBorrowTask(
       !expectedContentTypes.isEmpty(),
       "At least one expected content type")
 
-    return when (receivedContentType) {
-      this.contentTypeOctetStream -> {
-        this.debug("expected one of {} but received {} (acceptable)",
-          expectedContentTypes,
-          receivedContentType)
+    if (receivedContentType == this.contentTypeOctetStream) {
+      this.debug("expected one of {} but received {} (acceptable)",
+        expectedContentTypes,
+        receivedContentType)
 
-        this.steps.currentStepSucceeded(this.borrowStrings.borrowBookSavingCheckingContentTypeOK)
-        expectedContentTypes.first()
-      }
+      this.steps.currentStepSucceeded(this.borrowStrings.borrowBookSavingCheckingContentTypeOK)
+      return expectedContentTypes.first()
+    }
 
-      else -> {
-        if (expectedContentTypes.contains(receivedContentType)) {
-          return receivedContentType
-        }
-
-        this.debug(
-          "expected {} but received {} (unacceptable)",
-          expectedContentTypes,
-          receivedContentType)
-
-        val exception =
-          BookUnexpectedTypeException(
-            message =
-            StringBuilder("Unexpected content type\n")
-              .append("  Expected: One of ")
-              .append(expectedContentTypes)
-              .append('\n')
-              .append("  Received: ")
-              .append(receivedContentType)
-              .append('\n')
-              .toString(),
-            expected = expectedContentTypes,
-            received = receivedContentType)
-
-        val message = this.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = UnsupportedType(
-            message = message,
-            attributes = this.currentAttributesWith(Pair("Content Type", receivedContentType))
-          ),
-          exception = exception)
-
-        throw exception
+    for (expectedContentType in expectedContentTypes) {
+      if (expectedContentType.fullType == receivedContentType.fullType) {
+        return receivedContentType
       }
     }
+
+    this.debug(
+      "expected {} but received {} (unacceptable)",
+      expectedContentTypes,
+      receivedContentType)
+
+    val exception =
+      BookUnexpectedTypeException(
+        message =
+        StringBuilder("Unexpected content type\n")
+          .append("  Expected: One of ")
+          .append(expectedContentTypes)
+          .append('\n')
+          .append("  Received: ")
+          .append(receivedContentType)
+          .append('\n')
+          .toString(),
+        expected = expectedContentTypes,
+        received = receivedContentType)
+
+    val message = this.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable
+    this.steps.currentStepFailed(
+      message = message,
+      errorValue = UnsupportedType(
+        message = message,
+        attributes = this.currentAttributesWith(Pair("Content Type", receivedContentType.fullType))
+      ),
+      exception = exception)
+
+    throw exception
   }
 
   /**
@@ -1322,7 +1321,7 @@ class BookBorrowTask(
       }
 
       override fun getContentType(): String {
-        return this@BookBorrowTask.contentTypeOctetStream
+        return this@BookBorrowTask.contentTypeOctetStream.fullType
       }
     }
   }
@@ -1334,8 +1333,8 @@ class BookBorrowTask(
   private fun runFulfillACSMWithConnectorCheckContentType(parsed: AdobeAdeptFulfillmentToken) {
     this.steps.beginNewStep(this.borrowStrings.borrowBookFulfillACSMCheckContentType)
 
-    val contentType = parsed.format
-    if (this.contentTypeEPUB != contentType) {
+    val contentType = MIMEParser.parseRaisingException(parsed.format)
+    if (this.contentTypeEPUB.fullType != contentType.fullType) {
       val exception = BookUnsupportedTypeException(contentType)
       val message = this.borrowStrings.borrowBookFulfillACSMUnsupportedContentType
       this.steps.currentStepFailed(

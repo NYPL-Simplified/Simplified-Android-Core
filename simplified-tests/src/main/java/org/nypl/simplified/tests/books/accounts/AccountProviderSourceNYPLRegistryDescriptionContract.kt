@@ -1,8 +1,11 @@
 package org.nypl.simplified.tests.books.accounts
 
 import com.io7m.jfunctional.Option
+import one.irradia.mime.api.MIMEType
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
+import org.joda.time.DateTimeZone
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -17,7 +20,6 @@ import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.links.Link
-import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParserType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
@@ -43,13 +45,23 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
   private val logger =
     LoggerFactory.getLogger(AccountProviderSourceNYPLRegistryDescriptionContract::class.java)
+  private val currentDateTimeZoneSystem = DateTimeZone.getDefault()
 
   @Before
   fun testSetup() {
+    DateTimeUtils.setCurrentMillisFixed(0L)
+    DateTimeZone.setDefault(DateTimeZone.UTC)
+
     this.stringResources = MockAccountProviderResolutionStrings()
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
     this.authDocumentParser = Mockito.mock(AuthenticationDocumentParserType::class.java)
     this.mockHTTP = MockingHTTP()
+  }
+
+  @After
+  fun tearDown() {
+    DateTimeUtils.setCurrentMillisSystem()
+    DateTimeZone.setDefault(currentDateTimeZoneSystem)
   }
 
   /**
@@ -234,8 +246,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
   @Test
   fun testAuthDocumentOK() {
-    DateTimeUtils.setCurrentMillisFixed(0L)
-
     val metadata =
       AccountProviderDescriptionMetadata(
         id = URI.create("urn:fake:0"),
@@ -355,9 +365,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Basic(
         "CODABAR",
-        "DEFAULT",
+        AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         20,
-        "DEFAULT",
+        AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         "Basic Auth",
         labels = mapOf(
           Pair("LOGIN", "LOGIN!"),
@@ -391,8 +401,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
   @Test
   fun testAuthDocumentOK_COPPA() {
-    DateTimeUtils.setCurrentMillisFixed(0L)
-
     val metadata =
       AccountProviderDescriptionMetadata(
         id = URI.create("urn:fake:0"),
@@ -538,8 +546,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
   @Test
   fun testAuthDocumentOK_NoAuth() {
-    DateTimeUtils.setCurrentMillisFixed(0L)
-
     val metadata =
       AccountProviderDescriptionMetadata(
         id = URI.create("urn:fake:0"),
@@ -668,8 +674,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
   @Test
   fun testAuthDocumentFails_COPPAMalformed() {
-    DateTimeUtils.setCurrentMillisFixed(0L)
-
     val metadata =
       AccountProviderDescriptionMetadata(
         id = URI.create("urn:fake:0"),
@@ -780,8 +784,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
   @Test
   fun testAuthDocumentFails_OnlyUnrecognizedAuth() {
-    DateTimeUtils.setCurrentMillisFixed(0L)
-
     val metadata =
       AccountProviderDescriptionMetadata(
         id = URI.create("urn:fake:0"),
@@ -891,8 +893,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
   @Test
   fun testAuthDocumentFails_NoCatalogURI() {
-    DateTimeUtils.setCurrentMillisFixed(0L)
-
     val metadata =
       AccountProviderDescriptionMetadata(
         id = URI.create("urn:fake:0"),

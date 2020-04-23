@@ -1130,4 +1130,40 @@ abstract class ProfilesDatabaseContract {
     Assert.assertEquals("Big Bird", p0.displayName)
     Assert.assertEquals("Grouch", p1.displayName)
   }
+
+  /**
+   * The most recently used account is stored as a preference.
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testSetCurrentAccountPreference() {
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
+
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.analytics,
+      this.accountEvents,
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
+      this.accountsDatabases(),
+      fileProfiles)
+
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val acc1 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
+
+    val p0 = db0.createProfile(acc0, "Kermit")
+    db0.setProfileCurrent(p0.id)
+    val ac0 = p0.accountsByProvider()[acc0.id]!!
+    val ac1 = p0.createAccount(acc1)
+
+    p0.selectAccount(acc0.id)
+    Assert.assertEquals(p0.preferences().mostRecentAccount, ac0.id)
+    p0.selectAccount(acc1.id)
+    Assert.assertEquals(p0.preferences().mostRecentAccount, ac1.id)
+  }
 }

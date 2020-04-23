@@ -1,0 +1,83 @@
+<feed xmlns:app="http://www.w3.org/2007/app" xmlns:bib="http://bib.schema.org/" xmlns:bibframe="http://bibframe.org/vocab/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:drm="http://librarysimplified.org/terms/drm" xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:opf="http://www.idpf.org/2007/opf" xmlns:schema="http://schema.org/" xmlns:simplified="http://librarysimplified.org/terms/" xmlns="http://www.w3.org/2005/Atom" simplified:entryPoint="http://bib.schema.org/Audiobook">
+  <id>http://qa.circulation.librarysimplified.org/DEX/groups/?entrypoint=Audio</id>
+  <title>DPLA Exchange Audiobook Test</title>
+  <updated>2020-03-12T17:32:32Z</updated>
+  <link href="http://qa.circulation.librarysimplified.org/DEX/groups/?entrypoint=Audio" rel="self"/>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <title>Pretend She's Here</title>
+    <author>
+      <name>Luanne Rice</name>
+      <link href="http://qa.circulation.librarysimplified.org/DEX/works/contributor/Luanne%20Rice/eng/Adult%2CAdults+Only%2CAll+Ages%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Luanne Rice"/>
+    </author>
+    <summary type="html">Mega-bestselling author Luanne Rice returns with a ripped-from-the-headlines story of a girl who is kidnapped by her friend's family.
+
+      Emily Lonergan's best friend died last year.
+
+      And Emily hasn't stopped grieving. Lizzie Porter was lively, loud,...</summary>
+    <simplified:pwid>6667de94-694c-98cd-ab3d-f308074c0603</simplified:pwid>
+    <link href="http://covers.feedbooks.net/item/3264294.jpg?size=large&amp;t=1579794502" type="image/png" rel="http://opds-spec.org/image"/>
+    <link href="http://covers.feedbooks.net/item/3264294.jpg?size=large&amp;t=1579794502" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Scholastic Inc. Audio</dcterms:publisher>
+    <dcterms:issued>2019-07-31</dcterms:issued>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/works/URI/http://www.feedbooks.com/item/3264294/report" rel="issues"/>
+    <id>http://www.feedbooks.com/item/3264294</id>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/works/URI/http://www.feedbooks.com/item/3264294" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="DPLA Exchange"/>
+    <published>2020-01-28T00:00:00Z</published>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/groups/640?entrypoint=Audio" rel="collection" title="Fiction"/>
+    <updated>2020-01-29T17:56:47Z</updated>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/works/URI/http://www.feedbooks.com/item/3264294/borrow" rel="http://opds-spec.org/acquisition/borrow" type="application/atom+xml;type=entry;profile=opds-catalog">
+      <opds:indirectAcquisition type="application/audiobook+json;profile=&quot;http://www.feedbooks.com/audiobooks/access-restriction&quot;"/>
+      <opds:availability status="available"/>
+      <opds:holds total="0"/>
+      <opds:copies available="5" total="5"/>
+    </link>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/works/URI/http://www.feedbooks.com/item/3264294/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/annotations/URI/http://www.feedbooks.com/item/3264294/" type="application/ld+json; profile=&quot;http://www.w3.org/ns/anno.jsonld&quot;" rel="http://www.w3.org/ns/oa#annotationService"/>
+  </entry>
+  <entry schema:additionalType="http://schema.org/EBook">
+    <title>Rise of the Dragons, Book 1</title>
+    <author>
+      <name>Angie Sage</name>
+      <link href="http://qa.circulation.librarysimplified.org/DEX/works/contributor/Angie%20Sage/eng/Adult%2CAdults+Only%2CAll+Ages%2CChildren%2CYoung+Adult" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="contributor" title="Angie Sage"/>
+    </author>
+    <summary type="html">Mega bestselling author Angie Sage takes flight with an epic adventure that imagines dragons in the modern world.
+
+      Once our world was full of dragons who lived in harmony with humans. Dragons counseled kings and queens. They fought in human battle...</summary>
+    <simplified:pwid>5322a86d-e465-3ea3-7ced-4f13d91b7aba</simplified:pwid>
+    <link href="http://covers.feedbooks.net/item/3264308.jpg?size=large&amp;t=1579794526" type="image/png" rel="http://opds-spec.org/image"/>
+    <link href="http://covers.feedbooks.net/item/3264308.jpg?size=large&amp;t=1579794526" type="image/png" rel="http://opds-spec.org/image/thumbnail"/>
+    <category term="Adult" scheme="http://schema.org/audience" label="Adult"/>
+    <category term="http://librarysimplified.org/terms/fiction/Fiction" scheme="http://librarysimplified.org/terms/fiction/" label="Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Literary%20Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Literary Fiction"/>
+    <category term="http://librarysimplified.org/terms/genres/Simplified/Fantasy" scheme="http://librarysimplified.org/terms/genres/Simplified/" label="Fantasy"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Scholastic Inc. Audio</dcterms:publisher>
+    <dcterms:issued>2019-07-31</dcterms:issued>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/works/URI/http://www.feedbooks.com/item/3264308/report" rel="issues"/>
+    <id>http://www.feedbooks.com/item/3264308</id>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/works/URI/http://www.feedbooks.com/item/3264308" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
+    <bibframe:distribution bibframe:ProviderName="DPLA Exchange"/>
+    <published>2020-01-28T00:00:00Z</published>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/groups/640?entrypoint=Audio" rel="collection" title="Fiction"/>
+    <updated>2020-02-26T17:47:49Z</updated>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/works/URI/http://www.feedbooks.com/item/3264308/borrow" rel="http://opds-spec.org/acquisition/borrow" type="application/atom+xml;type=entry;profile=opds-catalog">
+      <opds:indirectAcquisition type="application/audiobook+json;profile=&quot;http://www.feedbooks.com/audiobooks/access-restriction&quot;"/>
+      <opds:availability status="available"/>
+      <opds:holds total="0"/>
+      <opds:copies available="4" total="5"/>
+    </link>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/works/URI/http://www.feedbooks.com/item/3264308/related_books" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="related" title="Recommended Works"/>
+    <link href="http://qa.circulation.librarysimplified.org/DEX/annotations/URI/http://www.feedbooks.com/item/3264308/" type="application/ld+json; profile=&quot;http://www.w3.org/ns/anno.jsonld&quot;" rel="http://www.w3.org/ns/oa#annotationService"/>
+  </entry>
+  <link href="http://qa.circulation.librarysimplified.org/DEX/groups/" rel="start" title="All Books"/>
+  <link href="http://qa.circulation.librarysimplified.org/DEX/authentication_document" rel="http://opds-spec.org/auth/document"/>
+  <link href="http://qa.circulation.librarysimplified.org/DEX/search/?entrypoint=All" type="application/opensearchdescription+xml" rel="search"/>
+  <link href="http://qa.circulation.librarysimplified.org/DEX/loans/" type="application/atom+xml;profile=opds-catalog;kind=acquisition" rel="http://opds-spec.org/shelf"/>
+  <link href="http://qa.circulation.librarysimplified.org/DEX/annotations/" type="application/ld+json; profile=&quot;http://www.w3.org/ns/anno.jsonld&quot;" rel="http://www.w3.org/ns/oa#annotationService"/>
+  <link href="mailto:josephdalton@nypl.org" rel="help"/>
+</feed>

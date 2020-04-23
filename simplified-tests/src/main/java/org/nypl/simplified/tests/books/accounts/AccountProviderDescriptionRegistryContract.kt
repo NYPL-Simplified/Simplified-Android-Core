@@ -81,7 +81,7 @@ abstract class AccountProviderDescriptionRegistryContract {
         listOf(CrashingSource()))
 
     registry.events.subscribe { e -> this.events.add(e) }
-    registry.refresh()
+    registry.refresh(true)
 
     Assert.assertEquals(Idle, registry.status)
     Assert.assertEquals(3, this.events.size)
@@ -112,7 +112,7 @@ abstract class AccountProviderDescriptionRegistryContract {
         listOf(OKSource()))
 
     registry.events.subscribe { this.events.add(it) }
-    registry.refresh()
+    registry.refresh(true)
 
     val description0 =
       registry.findAccountProviderDescription(URI.create("urn:0"))
@@ -159,7 +159,7 @@ abstract class AccountProviderDescriptionRegistryContract {
         listOf(OKSource(), OKAncientSource()))
 
     registry.events.subscribe { this.events.add(it) }
-    registry.refresh()
+    registry.refresh(true)
 
     val description0 =
       registry.findAccountProviderDescription(URI.create("urn:0"))
@@ -212,7 +212,7 @@ abstract class AccountProviderDescriptionRegistryContract {
         listOf(OKSource(), CrashingSource()))
 
     registry.events.subscribe { this.events.add(it) }
-    registry.refresh()
+    registry.refresh(true)
 
     val description0 =
       registry.findAccountProviderDescription(URI.create("urn:0"))
@@ -260,7 +260,7 @@ abstract class AccountProviderDescriptionRegistryContract {
         listOf(OKSource(), FailingSource()))
 
     registry.events.subscribe { this.events.add(it) }
-    registry.refresh()
+    registry.refresh(true)
 
     val description0 =
       registry.findAccountProviderDescription(URI.create("urn:0"))
@@ -309,7 +309,7 @@ abstract class AccountProviderDescriptionRegistryContract {
         listOf(OKSource(), OKAncientSource()))
 
     registry.events.subscribe { this.events.add(it) }
-    registry.refresh()
+    registry.refresh(true)
 
     val existing0 =
       registry.findAccountProviderDescription(URI.create("urn:0"))!!
@@ -334,7 +334,7 @@ abstract class AccountProviderDescriptionRegistryContract {
         listOf())
 
     registry.events.subscribe { this.events.add(it) }
-    registry.refresh()
+    registry.refresh(true)
 
     val existing0 =
       MockAccountProviders.fakeProvider("urn:fake:0")
@@ -372,7 +372,7 @@ abstract class AccountProviderDescriptionRegistryContract {
       eventsWithRefreshing.add(registry.status)
     }
 
-    registry.refresh()
+    registry.refresh(true)
 
     Assert.assertEquals(5, eventsWithRefreshing.size)
     Assert.assertEquals(Refreshing::class.java, eventsWithRefreshing[0].javaClass)
@@ -524,34 +524,42 @@ abstract class AccountProviderDescriptionRegistryContract {
   }
 
   class OKAncientSource : AccountProviderSourceType {
-    override fun load(context: Context): SourceResult {
+    override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       return SourceResult.SourceSucceeded(
         mapOf(
           Pair(descriptionOld0.metadata.id, descriptionOld0),
           Pair(descriptionOld1.metadata.id, descriptionOld1),
           Pair(descriptionOld2.metadata.id, descriptionOld2)))
     }
+
+    override fun clear(context: Context) {}
   }
 
   class OKSource : AccountProviderSourceType {
-    override fun load(context: Context): SourceResult {
+    override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       return SourceResult.SourceSucceeded(
         mapOf(
           Pair(description0.metadata.id, description0),
           Pair(description1.metadata.id, description1),
           Pair(description2.metadata.id, description2)))
     }
+
+    override fun clear(context: Context) {}
   }
 
   class CrashingSource : AccountProviderSourceType {
-    override fun load(context: Context): SourceResult {
+    override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       throw Exception()
     }
+
+    override fun clear(context: Context) {}
   }
 
   class FailingSource : AccountProviderSourceType {
-    override fun load(context: Context): SourceResult {
+    override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       return SourceResult.SourceFailed(mapOf(), java.lang.Exception())
     }
+
+    override fun clear(context: Context) {}
   }
 }

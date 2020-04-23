@@ -2,6 +2,7 @@ package org.nypl.simplified.books.book_database
 
 import android.content.Context
 import com.google.common.base.Preconditions
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
@@ -231,7 +232,7 @@ internal class BookDatabaseEntry internal constructor(
       owner: BookDatabaseEntryType,
       onUpdate: (BookFormat) -> Unit,
       existingFormats: MutableMap<Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle>,
-      contentTypes: Set<String>
+      contentTypes: Set<MIMEType>
     ) {
 
       val params =

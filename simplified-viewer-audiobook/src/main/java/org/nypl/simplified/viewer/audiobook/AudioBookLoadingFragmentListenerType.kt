@@ -1,7 +1,7 @@
 package org.nypl.simplified.viewer.audiobook
 
-import org.librarysimplified.audiobook.api.PlayerManifest
-import org.nypl.simplified.downloader.core.DownloaderType
+import com.google.common.util.concurrent.ListeningExecutorService
+import org.librarysimplified.audiobook.manifest.api.PlayerManifest
 
 /**
  * The interface that must be implemented by activities hosting a {@link AudioBookLoadingFragment}.
@@ -10,10 +10,10 @@ import org.nypl.simplified.downloader.core.DownloaderType
 interface AudioBookLoadingFragmentListenerType {
 
   /**
-   * @return A downloader for the fragment
+   * @return A listening executor service for running background I/O operations
    */
 
-  fun onLoadingFragmentWantsDownloader(): DownloaderType
+  fun onLoadingFragmentWantsIOExecutor(): ListeningExecutorService
 
   /**
    * @return `true` if network connectivity is currently available

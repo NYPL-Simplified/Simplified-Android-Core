@@ -1,49 +1,102 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              style="@style/WizardPageContainer">
-
-  <TextView style="@style/WizardPageTitle"/>
-
-  <TextView style="@style/WizardPageDescription"/>
-
-
-  <ScrollView
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="16dp"
-    android:scrollbarStyle="outsideOverlay">
+    android:layout_height="match_parent"
+    tools:context=".ui.LocationFragment">
 
     <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="vertical">
-
-
-      <TextView
-        style="@style/WizardFormLabel"
-        android:text="location"/>
-
-      <EditText
-        android:id="@+id/region"
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:enabled="false"
-        android:saveEnabled="false"/>
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-      <Button
-        android:id="@+id/fetch_address_button"
+        <TextView
+            android:id="@+id/header_error_tv"
+            style="@style/WizardHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/location_check" />
+
+        <TextView
+            android:id="@+id/header_status_desc_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="16sp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif"
+            android:text="@string/validating_location"
+            android:gravity="center"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/form_label_tv"
+        style="@style/WizardFormLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="@string/location"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header" />
+
+    <EditText
+        android:id="@+id/region_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:enabled="false"
+        android:saveEnabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/form_label_tv" />
+
+    <Button
+        android:id="@+id/check_location_btn"
         style="?android:attr/buttonBarButtonStyle"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:onClick="checkLocation"
-        android:text="Check location again"/>
+        android:layout_height="wrap_content"
+        android:text="@string/check_location_again"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/region_et" />
 
+    <LinearLayout
+        android:id="@+id/nav_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/prev_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="@string/previous"
+            android:textAllCaps="true" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/next_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="@string/next"
+            android:textAllCaps="true" />
 
     </LinearLayout>
-  </ScrollView>
 
-  <TextView style="@style/WizardPageFooter"/>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -118,7 +118,7 @@ class ProfileAccountCreateTask(
           this.taskRecorder.currentStepFailed(
             message = message.toString(),
             errorValue = AccountProviderResolutionFailed(resolution.errors()))
-          throw AccountUnresolvableProviderException()
+          throw AccountUnresolvableProviderException(message.toString())
         }
       }
     } catch (e: Exception) {

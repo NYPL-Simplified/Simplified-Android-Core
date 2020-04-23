@@ -1,4 +1,4 @@
-package org.nypl.simplified.accounts.json
+package org.nypl.simplified.links.json
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode

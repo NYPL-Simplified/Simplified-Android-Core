@@ -25,7 +25,10 @@ class MockAccountProviderRegistry : AccountProviderRegistryType {
   override val status: AccountProviderRegistryStatus
     get() = AccountProviderRegistryStatus.Idle
 
-  override fun refresh() {
+  override fun refresh(includeTestingLibraries: Boolean) {
+  }
+
+  override fun clear() {
   }
 
   override fun accountProviderDescriptions(): Map<URI, AccountProviderDescriptionType> {

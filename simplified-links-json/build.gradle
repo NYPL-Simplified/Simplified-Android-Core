@@ -1,8 +1,9 @@
 dependencies {
   api project(":simplified-links")
-  api project(":simplified-mime")
   api project(":simplified-parser-api")
-  
+
+  api libraries.irradiaMimeAPI
+  api libraries.irradiaMimeVanilla
   api libraries.jacksonDatabind
 
   implementation project(":simplified-json-core")

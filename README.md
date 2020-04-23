@@ -32,6 +32,8 @@ repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
 The short version: Install an [Android SDK](#android-sdk) and run:
 
 ~~~
+$ echo "org.gradle.internal.publish.checksums.insecure=true" >> "$HOME/.gradle/gradle.properties"
+
 $ ./gradlew clean assembleDebug test
 ~~~
 
@@ -113,6 +115,16 @@ $ ./gradlew clean assembleRelease test
 $ ./gradlew clean assemble test
 ~~~
 
+#### Insecure checksums?
+
+Astute readers may have noticed the `org.gradle.internal.publish.checksums.insecure` property
+in the initial build instructions. This is necessary because Gradle 6 currently publishes
+checksums that [Maven Central doesn't like](https://github.com/gradle/gradle/issues/11308#issuecomment-554317655).
+Until Maven Central is updated to accept SHA256 and SHA512 checksums, this flag is necessary.
+As all artifacts published to Maven Central are PGP signed, this is not a serious issue; PGP
+signatures combine integrity checking and authentication, so checksum files are essentially
+redundant nowadays.
+
 ### Branching/Merging
 
 We use [git flow](https://nvie.com/posts/a-successful-git-branching-model/) as our
@@ -125,114 +137,8 @@ branches consistent.
 
 ### Releasing
 
-We currently push releases to [Maven Central](https://search.maven.org).
-
-As mentioned above, we use the `git flow` model for development and that
-includes making releases. The release process essentially involves
-creating a temporary release branch from `develop`, incrementing version
-numbers, merging that release branch into `master`, pushing binaries to
-Maven Central, and then setting the version number for the next development cycle.
-
-The instructions for producing a hypothetical version `99.0.0` release
-are as follows:
-
-#### Create A Release Branch
-
-```
-$ git flow release start 99.0.0
-```
-
-This creates a new `release/99.0.0` branch to which various commits
-may be made to increment version numbers, update change logs, run
-any last test builds, etc.
-
-#### Update Version Numbers
-
-The `gradle.properties` file for the project defines the version number
-for all modules. The version number used cannot match any version number
-used for any existing release on Maven Central. We attempt to follow
-[semantic versioning](https://www.semver.org) as much as we can.
-
-```
-$ grep VERSION_NAME gradle.properties
-VERSION_NAME=98.0.0
-
-$ $EDITOR gradle.properties
-<... edit VERSION_NAME ...>
-
-$ grep VERSION_NAME gradle.properties
-VERSION_NAME=99.0.0
-
-$ git add gradle.properties
-$ git commit -m 'Mark version 99.0.0'
-```
-
-Optionally, you can `git push` here to give continuous integration
-systems a chance to build the code and make sure everything is alright.
-
-#### Finish And Merge The Release Branch
-
-```
-$ git flow release finish
-```
-
-You will be prompted to add a commit message for the commit that
-merges all of the changes back to the `master` branch, and you will
-also be prompted to add a message to the new `v99.0.0` tag that `git flow`
-will create in the repository. We recommend adding changelog entries
-here.
-
-The `git flow` tool will also make sure to clean up any `release`
-branch that you may have pushed in the previous step.
-
-#### Push Branches And Tags
-
-```
-$ git push --tags
-$ git push --all
-```
-
-This updates the remote Git repository with the new branches.
-
-#### Push To Maven Central
-
-Assuming that you haven't already, place your Maven Central
-credentials in your `$HOME/.gradle/gradle.properties` file. Our projects
-use the properties `mavenCentralUsername` and `mavenCentralPassword`
-to refer to your username and password, respectively:
-
-```
-$ grep mavenCentral $HOME/.gradle/gradle.properties
-mavenCentralUsername=hypotheticaluser
-mavenCentralPassword=arathersecurepassword
-```
-
-With the credentials in place, the `publish`, `closeRepository`, and
-`releaseRepository` Gradle tasks can be used to publish artifacts to
-Central:
-
-```
-$ ./gradlew clean assemble
-$ ./gradlew publish
-$ ./gradlew closeRepository
-$ ./gradlew releaseRepository
-```
-
-#### Prepare For The Next Development Cycle
-
-Update the `gradle.properties` file to set a new `-SNAPSHOT` version
-for the next development cycle:
-
-```
-$ $EDITOR gradle.properties
-<... edit VERSION_NAME ...>
-
-$ grep VERSION_NAME gradle.properties
-VERSION_NAME=99.0.1-SNAPSHOT
-
-$ git add gradle.properties
-$ git commit -m 'Start new development cycle; mark version 99.0.1-SNAPSHOT'
-```
+See our [RELEASING.md](RELEASING.md) document for information on how
+to perform releases.
 
 ### Project Structure / Architecture
 
@@ -356,7 +262,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
 |[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
 |[org.librarysimplified.migration.spi](simplified-migration-spi)|Data migration SPI|
-|[org.librarysimplified.mime](simplified-mime)|MIME type handling|
 |[org.librarysimplified.networkconnectivity](simplified-networkconnectivity)|Network connectivity|
 |[org.librarysimplified.networkconnectivity.api](simplified-networkconnectivity-api)|Network connectivity API|
 |[org.librarysimplified.notifications](simplified-notifications)|Notification service|
@@ -366,7 +271,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.parser.api](simplified-parser-api)|Parser API|
 |[org.librarysimplified.patron](simplified-patron)|Patron user profile parser implementation|
 |[org.librarysimplified.patron.api](simplified-patron-api)|Patron user profile parser API|
-|[org.librarysimplified.prefs](simplified-prefs)|Legacy preferences handler|
 |[org.librarysimplified.presentableerror.api](simplified-presentableerror-api)|Presentable error API|
 |[org.librarysimplified.profiles](simplified-profiles)|Profile database implementation|
 |[org.librarysimplified.profiles.api](simplified-profiles-api)|Profile database API|

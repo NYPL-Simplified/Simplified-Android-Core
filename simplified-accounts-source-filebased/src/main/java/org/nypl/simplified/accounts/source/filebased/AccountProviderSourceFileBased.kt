@@ -28,7 +28,7 @@ class AccountProviderSourceFileBased(
   @Volatile
   private var cache: Map<URI, AccountProviderType>? = null
 
-  override fun load(context: Context): SourceResult {
+  override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
     val cached = this.cache
     if (cached != null) {
       this.logger.debug("returning cached providers")
@@ -47,6 +47,10 @@ class AccountProviderSourceFileBased(
       this.logger.error("failed to load providers from file: ", e)
       SourceResult.SourceFailed(mapOf(), e)
     }
+  }
+
+  override fun clear(context: Context) {
+    cache = null
   }
 
   private fun mapResult(cached: Map<URI, AccountProviderType>) =

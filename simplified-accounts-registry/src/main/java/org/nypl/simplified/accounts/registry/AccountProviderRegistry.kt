@@ -56,7 +56,7 @@ class AccountProviderRegistry private constructor(
 
   override fun accountProviderDescriptions(): Map<URI, AccountProviderDescriptionType> {
     if (!this.initialized) {
-      this.refresh()
+      this.refresh(false)
     }
     return this.descriptionsReadOnly
   }
@@ -64,7 +64,7 @@ class AccountProviderRegistry private constructor(
   override val resolvedProviders: Map<URI, AccountProviderType>
     get() = this.resolvedReadOnly
 
-  override fun refresh() {
+  override fun refresh(includeTestingLibraries: Boolean) {
     this.logger.debug("refreshing account provider descriptions")
 
     this.statusRef = Refreshing
@@ -73,7 +73,7 @@ class AccountProviderRegistry private constructor(
     try {
       for (source in this.sources) {
         try {
-          when (val result = source.load(this.context)) {
+          when (val result = source.load(this.context, includeTestingLibraries)) {
             is AccountProviderSourceType.SourceResult.SourceSucceeded -> {
               val newDescriptions = result.results
               for (key in newDescriptions.keys) {
@@ -92,6 +92,12 @@ class AccountProviderRegistry private constructor(
       this.initialized = true
       this.statusRef = Idle
       this.eventsActual.onNext(StatusChanged)
+    }
+  }
+
+  override fun clear() {
+    for (source in this.sources) {
+      source.clear(this.context)
     }
   }
 

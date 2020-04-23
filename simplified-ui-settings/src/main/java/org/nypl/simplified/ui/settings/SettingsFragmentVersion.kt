@@ -12,19 +12,25 @@ import android.widget.Switch
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
+import org.joda.time.LocalDateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
+import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
+import org.nypl.simplified.profiles.api.ProfileUpdated.Succeeded
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
@@ -43,7 +49,9 @@ class SettingsFragmentVersion : Fragment() {
   private val logger =
     LoggerFactory.getLogger(SettingsFragmentVersion::class.java)
 
+  private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var adobeDRMActivationTable: TableLayout
+  private lateinit var analytics: AnalyticsType
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var buildText: TextView
   private lateinit var buildTitle: TextView
@@ -54,6 +62,7 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var drmTable: TableLayout
   private lateinit var failNextBoot: Switch
   private lateinit var profilesController: ProfilesControllerType
+  private lateinit var sendAnalyticsButton: Button
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
   private lateinit var showTesting: Switch
@@ -72,6 +81,10 @@ class SettingsFragmentVersion : Fragment() {
 
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
+    this.accountRegistry =
+      services.requireService(AccountProviderRegistryType::class.java)
+    this.analytics =
+      services.requireService(AnalyticsType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
     this.buildConfig =
@@ -98,6 +111,8 @@ class SettingsFragmentVersion : Fragment() {
       this.developerOptions.findViewById(R.id.settingsVersionDevSendReports)
     this.showErrorButton =
       this.developerOptions.findViewById(R.id.settingsVersionDevShowError)
+    this.sendAnalyticsButton =
+      this.developerOptions.findViewById(R.id.settingsVersionDevSyncAnalytics)
 
     this.buildTitle =
       layout.findViewById(R.id.settingsVersionBuildTitle)
@@ -173,6 +188,26 @@ class SettingsFragmentVersion : Fragment() {
         address = this.buildConfig.errorReportEmail,
         subject = "[simplye-error-report] ${this.versionText.text}",
         body = "")
+    }
+
+    /*
+     * A button that publishes a "sync requested" event to the analytics system. Registered
+     * analytics implementations are expected to respond to this event and publish any buffered
+     * data that they may have to remote servers.
+     */
+
+    this.sendAnalyticsButton.setOnClickListener {
+      this.analytics.publishEvent(
+        AnalyticsEvent.SyncRequested(
+          timestamp = LocalDateTime.now(),
+          credentials = null
+        )
+      )
+      Toast.makeText(
+        this.requireContext(),
+        "Triggered analytics send",
+        Toast.LENGTH_SHORT
+      ).show()
     }
 
     this.showErrorButton.setOnClickListener {
@@ -289,12 +324,22 @@ class SettingsFragmentVersion : Fragment() {
   private fun onProfileEvent(event: ProfileEvent) {
     if (event is ProfileUpdated) {
       this.uiThread.runOnUIThread(Runnable {
-        this.showTesting.isChecked =
-          this.profilesController
-            .profileCurrent()
-            .preferences()
-            .showTestingLibraries
+        this.showTesting.isChecked = this.profilesController
+          .profileCurrent()
+          .preferences()
+          .showTestingLibraries
       })
+
+      if (event is Succeeded) {
+        val old = event.oldDescription.preferences
+        val new = event.newDescription.preferences
+        if (old.showTestingLibraries != new.showTestingLibraries) {
+          this.accountRegistry.clear()
+          this.accountRegistry.refresh(
+            includeTestingLibraries = new.showTestingLibraries
+          )
+        }
+      }
     }
   }
 

@@ -1,6 +1,9 @@
 package org.nypl.simplified.books.book_database.api
 
+import one.irradia.mime.api.MIMEType
+import one.irradia.mime.vanilla.MIMEParser
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import java.lang.IllegalStateException
 import java.util.Collections
 import java.util.HashSet
 
@@ -19,32 +22,40 @@ object BookFormats {
   private val SUPPORTED_BOOK_MIME_TYPES =
     makeSupportedBookMimeTypes(EPUB_MIME_TYPES, AUDIO_BOOK_MIME_TYPES, PDF_MIME_TYPES)
 
-  private fun makeEPUBMimeTypes(): Set<String> {
-    val types = HashSet<String>(1)
-    types.add("application/epub+zip")
+  private fun makeEPUBMimeTypes(): Set<MIMEType> {
+    val types = HashSet<MIMEType>(1)
+    types.add(MIMEParser.parseRaisingException("application/epub+zip"))
     return Collections.unmodifiableSet(types)
   }
 
-  private fun makeAudioBookMimeTypes(): Set<String> {
-    val types = HashSet<String>(2)
-    types.add("application/vnd.librarysimplified.findaway.license+json")
-    types.add("application/audiobook+json")
-    types.add("audio/mpeg")
-    return Collections.unmodifiableSet(types)
+  private fun makeAudioBookMimeTypes(): Set<MIMEType> {
+    try {
+      val types = HashSet<MIMEType>(2)
+      types.add(
+        MIMEParser.parseRaisingException(
+          "application/vnd.librarysimplified.findaway.license+json"))
+      types.add(
+        MIMEParser.parseRaisingException("application/audiobook+json"))
+      types.add(
+        MIMEParser.parseRaisingException("audio/mpeg"))
+      return Collections.unmodifiableSet(types)
+    } catch (e: Exception) {
+      throw IllegalStateException(e)
+    }
   }
 
-  private fun makePDFMimeTypes(): Set<String> {
-    val types = HashSet<String>(1)
-    types.add("application/pdf")
+  private fun makePDFMimeTypes(): Set<MIMEType> {
+    val types = HashSet<MIMEType>(1)
+    types.add(MIMEParser.parseRaisingException("application/pdf"))
     return Collections.unmodifiableSet(types)
   }
 
   private fun makeSupportedBookMimeTypes(
-    epub: Set<String>,
-    audioBook: Set<String>,
-    pdf: Set<String>
-  ): Set<String> {
-    val types = HashSet<String>(epub.size)
+    epub: Set<MIMEType>,
+    audioBook: Set<MIMEType>,
+    pdf: Set<MIMEType>
+  ): Set<MIMEType> {
+    val types = HashSet<MIMEType>(epub.size)
     types.addAll(epub)
     types.addAll(audioBook)
     types.addAll(pdf)
@@ -55,7 +66,7 @@ object BookFormats {
    * @return A set of the supported book format MIME types
    */
 
-  fun supportedBookMimeTypes(): Set<String> {
+  fun supportedBookMimeTypes(): Set<MIMEType> {
     return SUPPORTED_BOOK_MIME_TYPES
   }
 
@@ -63,7 +74,7 @@ object BookFormats {
    * @return The set of MIME types for EPUBs
    */
 
-  fun epubMimeTypes(): Set<String> {
+  fun epubMimeTypes(): Set<MIMEType> {
     return EPUB_MIME_TYPES
   }
 
@@ -71,7 +82,7 @@ object BookFormats {
    * @return The set of MIME types for EPUBs
    */
 
-  fun audioBookMimeTypes(): Set<String> {
+  fun audioBookMimeTypes(): Set<MIMEType> {
     return AUDIO_BOOK_MIME_TYPES
   }
 
@@ -79,7 +90,7 @@ object BookFormats {
    * @return The set of MIME types for PDFs
    */
 
-  fun pdfMimeTypes(): Set<String> {
+  fun pdfMimeTypes(): Set<MIMEType> {
     return PDF_MIME_TYPES
   }
 
@@ -113,7 +124,7 @@ object BookFormats {
      */
 
     BOOK_FORMAT_EPUB {
-      override fun supportedContentTypes(): Set<String> {
+      override fun supportedContentTypes(): Set<MIMEType> {
         return epubMimeTypes()
       }
     },
@@ -123,7 +134,7 @@ object BookFormats {
      */
 
     BOOK_FORMAT_AUDIO {
-      override fun supportedContentTypes(): Set<String> {
+      override fun supportedContentTypes(): Set<MIMEType> {
         return audioBookMimeTypes()
       }
     },
@@ -133,7 +144,7 @@ object BookFormats {
      */
 
     BOOK_FORMAT_PDF {
-      override fun supportedContentTypes(): Set<String> {
+      override fun supportedContentTypes(): Set<MIMEType> {
         return pdfMimeTypes()
       }
     };
@@ -142,6 +153,18 @@ object BookFormats {
      * The content types supported by this format.
      */
 
-    abstract fun supportedContentTypes(): Set<String>
+    abstract fun supportedContentTypes(): Set<MIMEType>
+
+    /**
+     * @return `true` if the format handle supports content of the given content type
+     */
+
+    fun supports(
+      contentType: MIMEType
+    ): Boolean {
+      return this.supportedContentTypes().any { supportedType ->
+        contentType.fullType == supportedType.fullType
+      }
+    }
   }
 }

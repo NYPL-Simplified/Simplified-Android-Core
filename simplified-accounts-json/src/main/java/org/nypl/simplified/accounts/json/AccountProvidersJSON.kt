@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Basic
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.COPPAAgeGate
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.json.core.JSONParseException
@@ -17,6 +20,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
+import java.util.Locale
 import java.util.TreeMap
 
 /**
@@ -63,22 +67,22 @@ object AccountProvidersJSON {
     this.putConditionally(node, "supportEmail", provider.supportEmail)
 
     when (val auth = provider.authentication) {
-      is AccountProviderAuthenticationDescription.COPPAAgeGate -> {
+      is COPPAAgeGate -> {
         val authObject = mapper.createObjectNode()
         authObject.put("type", AccountProviderAuthenticationDescription.COPPA_TYPE)
         authObject.put("greaterEqual13", auth.greaterEqual13.toString())
         authObject.put("under13", auth.under13.toString())
         node.set<ObjectNode>("authentication", authObject)
       }
-      is AccountProviderAuthenticationDescription.Basic -> {
+      is Basic -> {
         val authObject = mapper.createObjectNode()
         authObject.put("type", AccountProviderAuthenticationDescription.BASIC_TYPE)
         this.putConditionally(authObject, "barcodeFormat", auth.barcodeFormat?.toUpperCase())
         this.putConditionally(authObject, "description", auth.description)
-        this.putConditionally(authObject, "keyboard", auth.keyboard?.toUpperCase())
-        this.putConditionally(authObject, "passwordKeyboard", auth.passwordKeyboard?.toUpperCase())
+        this.putConditionally(authObject, "keyboard", auth.keyboard.name)
+        this.putConditionally(authObject, "passwordKeyboard", auth.passwordKeyboard.name)
         authObject.put("passwordMaximumLength", auth.passwordMaximumLength)
-        authObject.set<ObjectNode>("labels", mapToObject(mapper, auth.labels))
+        authObject.set<ObjectNode>("labels", this.mapToObject(mapper, auth.labels))
         node.set<ObjectNode>("authentication", authObject)
       }
       null -> {
@@ -185,7 +189,8 @@ object AccountProvidersJSON {
         supportEmail = supportEmail,
         supportsReservations = supportsReservations,
         supportsSimplyESynchronization = supportsSimplyESynchronization,
-        updated = updated)
+        updated = updated
+      )
     } catch (e: JSONParseException) {
       throw JSONParseException("Unable to parse provider $idUUID", e)
     }
@@ -200,26 +205,39 @@ object AccountProvidersJSON {
         AccountProviderAuthenticationDescription.BASIC_TYPE -> {
           val labels =
             this.toStringMap(JSONParserUtilities.getObject(container, "labels"))
+          val barcodeFormat =
+            JSONParserUtilities.getStringOrNull(container, "barcodeFormat")
+              ?.toUpperCase(Locale.ROOT)
+          val keyboard =
+            this.parseKeyboardType(JSONParserUtilities.getStringOrNull(container, "keyboard"))
+          val passwordMaximumLength =
+            JSONParserUtilities.getIntegerDefault(container, "passwordMaximumLength", 0)
+          val passwordKeyboard =
+            this.parseKeyboardType(
+              JSONParserUtilities.getStringOrNull(
+                container,
+                "passwordKeyboard"
+              )
+            )
+          val description =
+            JSONParserUtilities.getString(container, "description")
 
-          AccountProviderAuthenticationDescription.Basic(
-            barcodeFormat =
-            JSONParserUtilities.getStringOrNull(container, "barcodeFormat")?.toUpperCase(),
-            keyboard =
-            JSONParserUtilities.getStringOrNull(container, "keyboard")?.toUpperCase(),
-            passwordMaximumLength =
-            JSONParserUtilities.getIntegerDefault(container, "passwordMaximumLength", 0),
-            passwordKeyboard =
-            JSONParserUtilities.getStringOrNull(container, "passwordKeyboard")?.toUpperCase(),
-            description =
-            JSONParserUtilities.getString(container, "description"),
-            labels = labels)
+          Basic(
+            barcodeFormat = barcodeFormat,
+            keyboard = keyboard,
+            passwordMaximumLength = passwordMaximumLength,
+            passwordKeyboard = passwordKeyboard,
+            description = description,
+            labels = labels
+          )
         }
         AccountProviderAuthenticationDescription.COPPA_TYPE -> {
-          AccountProviderAuthenticationDescription.COPPAAgeGate(
+          COPPAAgeGate(
             greaterEqual13 =
             JSONParserUtilities.getURIOrNull(container, "greaterEqual13"),
             under13 =
-            JSONParserUtilities.getURIOrNull(container, "under13"))
+            JSONParserUtilities.getURIOrNull(container, "under13")
+          )
         }
         else -> {
           this.logger.warn("encountered unrecognized authentication type: {}", authType)
@@ -228,6 +246,37 @@ object AccountProvidersJSON {
       }
     } else {
       null
+    }
+  }
+
+  /**
+   * Parse the keyboard type from the given string. Note that the cases containing spaces
+   * here are for compatibility with old cached values that may be present on devices. Ideally
+   * the cases containing spaces will never be encountered in practice, but we can't be
+   * certain they won't.
+   */
+
+  private fun parseKeyboardType(
+    text: String?
+  ): KeyboardInput {
+    return when (val keyboardText = text?.toUpperCase(Locale.ROOT)) {
+      null ->
+        KeyboardInput.DEFAULT
+      "NO_INPUT",
+      "NO INPUT" ->
+        KeyboardInput.NO_INPUT
+      "DEFAULT" ->
+        KeyboardInput.DEFAULT
+      "NUMBER_PAD",
+      "NUMBER PAD" ->
+        KeyboardInput.NUMBER_PAD
+      "EMAIL_ADDRESS",
+      "EMAIL ADDRESS" ->
+        KeyboardInput.EMAIL_ADDRESS
+      else -> {
+        this.logger.warn("encountered unrecognized keyboard type: {}", keyboardText)
+        return KeyboardInput.DEFAULT
+      }
     }
   }
 

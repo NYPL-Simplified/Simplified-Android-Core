@@ -27,6 +27,7 @@ class CirculationAnalyticsSystem(
 
   private fun consumeEvent(event: AnalyticsEvent): Unit =
     when (event) {
+      is AnalyticsEvent.SyncRequested,
       is AnalyticsEvent.BookPageTurned,
       is AnalyticsEvent.BookClosed,
       is AnalyticsEvent.ApplicationOpened,

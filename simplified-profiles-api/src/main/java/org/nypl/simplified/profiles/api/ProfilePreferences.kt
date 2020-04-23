@@ -1,5 +1,6 @@
 package org.nypl.simplified.profiles.api
 
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.reader.api.ReaderPreferences
 
 /**
@@ -29,5 +30,11 @@ data class ProfilePreferences(
    * @return The reader-specific preferences
    */
 
-  val readerPreferences: ReaderPreferences
+  val readerPreferences: ReaderPreferences,
+
+  /**
+   * The most recently used account provider.
+   */
+
+  val mostRecentAccount: AccountID?
 )

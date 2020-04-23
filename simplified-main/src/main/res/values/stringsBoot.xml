@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <resources>
+  <string name="bootingAudioBookExtensions">Starting Audio Book extensions…</string>
   <string name="bootFailedGeneric">We found a problem. Please check your connection or close and reopen the app to retry.</string>
   <string name="bootingAccountProviders">Initializing account providers…</string>
   <string name="bootingAdobeDRM">Starting Adobe DRM…</string>
@@ -44,5 +45,6 @@
   <string name="bootingThemeService">Initializing theme service…</string>
   <string name="bootingUIBackgroundExecutor">Initializing UI background executor…</string>
   <string name="bootingUIThreadService">Initializing UI thread service…</string>
+  <string name="bootingCardCreatorService">Initializing Card Creator Service…</string>
   <string name="bootStarted">Starting application…</string>
 </resources>

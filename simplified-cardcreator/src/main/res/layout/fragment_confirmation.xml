@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.ConfirmationFragment">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/header_error_tv"
+            style="@style/WizardHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/confirmation" />
+
+        <TextView
+            android:id="@+id/header_status_desc_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="16sp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="20dp"
+        android:id="@+id/library_card"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:contentDescription="@string/nypl_logo"
+                android:layout_width="100dp"
+                android:src="@drawable/nypl_logo"
+                android:scaleType="fitCenter"
+                android:id="@+id/nypl_logo"
+                android:layout_margin="16dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_height="50dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/name_card"
+                android:layout_margin="16dp"
+                tools:text ="John Doe"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_below="@id/nypl_logo"
+                android:id="@+id/card_barcode"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_margin="16dp"
+                tools:text="Card Number: 3423 24242 24242 24242"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_margin="16dp"
+                android:layout_below="@id/card_barcode"
+                android:id="@+id/card_pin"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="PIN: 3423 "
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_margin="16dp"
+                android:layout_below="@id/card_barcode"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/issued"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="Issued: 12/12/2020"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/nav_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/prev_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="@string/save_card"
+            android:textAllCaps="true" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/next_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="@string/done"
+            android:textAllCaps="true" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

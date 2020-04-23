@@ -1,6 +1,7 @@
 package org.nypl.simplified.main
 
 import android.content.res.Resources
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAvailabilityType
@@ -73,20 +74,26 @@ class MainCatalogBookBorrowStrings(
       availability.javaClass.simpleName)
   }
 
-  override fun borrowBookFulfillDownloaded(file: File, contentType: String): String {
-    return this.resources.getString(R.string.borrowBookFulfillDownloaded, contentType)
+  override fun borrowBookFulfillDownloaded(file: File, contentType: MIMEType): String {
+    return this.resources.getString(R.string.borrowBookFulfillDownloaded, contentType.fullType)
   }
 
-  override fun borrowBookFulfillACSMCheckContentTypeOK(contentType: String): String {
-    return this.resources.getString(R.string.borrowBookFulfillACSMCheckContentTypeOK, contentType)
+  override fun borrowBookFulfillACSMCheckContentTypeOK(contentType: MIMEType): String {
+    return this.resources.getString(R.string.borrowBookFulfillACSMCheckContentTypeOK, contentType.fullType)
   }
 
-  override fun borrowBookSaving(receivedContentType: String, expectedContentTypes: Set<String>): String {
-    return this.resources.getString(R.string.borrowBookSaving, receivedContentType)
+  override fun borrowBookSaving(
+    receivedContentType: MIMEType,
+    expectedContentTypes: Set<MIMEType>
+  ): String {
+    return this.resources.getString(R.string.borrowBookSaving, receivedContentType.fullType)
   }
 
-  override fun borrowBookSavingCheckingContentType(receivedContentType: String, expectedContentTypes: Set<String>): String {
-    return this.resources.getString(R.string.borrowBookSavingCheckingContentType, receivedContentType)
+  override fun borrowBookSavingCheckingContentType(
+    receivedContentType: MIMEType,
+    expectedContentTypes: Set<MIMEType>
+  ): String {
+    return this.resources.getString(R.string.borrowBookSavingCheckingContentType, receivedContentType.fullType)
   }
 
   override val borrowBookSavingCheckingContentTypeUnacceptable: String

@@ -3,7 +3,6 @@ package org.nypl.simplified.accounts.registry.api
 import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
 import org.nypl.simplified.accounts.api.AccountProviderType
-
 import java.net.URI
 import javax.annotation.concurrent.ThreadSafe
 
@@ -42,9 +41,18 @@ interface AccountProviderRegistryType {
 
   /**
    * Refresh the available account providers from all sources.
+   *
+   * @param includeTestingLibraries A hint for providers indicating whether
+   * testing libraries should be loaded. May be ignored by some providers.
    */
 
-  fun refresh()
+  fun refresh(includeTestingLibraries: Boolean)
+
+  /**
+   * Clear cached account providers from all sources.
+   */
+
+  fun clear()
 
   /**
    * Return an immutable read-only of the account provider descriptions.

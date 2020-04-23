@@ -189,7 +189,12 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
     this.refresh.setOnClickListener {
       this.refresh.isEnabled = false
-      this.accountRegistry.refresh()
+      this.accountRegistry.refresh(
+        includeTestingLibraries = this.profilesController
+          .profileCurrent()
+          .preferences()
+          .showTestingLibraries
+      )
     }
 
     return layout
@@ -209,7 +214,12 @@ class SettingsFragmentAccountRegistry : Fragment() {
         .subscribe(this::onAccountEvent)
 
     this.reconfigureViewForRegistryStatus(this.accountRegistry.status)
-    this.accountRegistry.refresh()
+    this.accountRegistry.refresh(
+      includeTestingLibraries = this.profilesController
+        .profileCurrent()
+        .preferences()
+        .showTestingLibraries
+    )
   }
 
   private fun configureToolbar() {

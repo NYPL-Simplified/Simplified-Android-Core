@@ -90,6 +90,13 @@
         android:layout_marginBottom="16dp"
         android:text="Show Error Page" />
 
+      <Button
+        android:id="@+id/settingsVersionDevSyncAnalytics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Send Analytics" />
+
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.nypl.simplified.accounts.json.LinkParsing
+import org.nypl.simplified.links.json.LinkParsing
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.links.Link
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument

@@ -6,4 +6,4 @@ import java.lang.Exception
  * An unresolvable provider was specified when trying to create an account.
  */
 
-class AccountUnresolvableProviderException : Exception()
+class AccountUnresolvableProviderException(message: String?) : Exception(message)

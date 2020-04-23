@@ -7,6 +7,9 @@ internal class MainServicesStrings(
   private val resources: Resources
 ) : BootStringResourcesType {
 
+  val bootingInstabug: String =
+    this.resources.getString(R.string.bootingInstabug)
+
   val bootingProfileModificationFragmentService: String =
     this.resources.getString(R.string.bootingProfileModificationFragmentService)
 
@@ -136,6 +139,12 @@ internal class MainServicesStrings(
   val bootingNotificationsService =
     this.resources.getString(R.string.bootingNotificationsService)
 
+  val bootingAudioBookExtensions =
+    this.resources.getString(R.string.bootingAudioBookExtensions)
+
   val initializingInstabug =
     this.resources.getString(R.string.bootingInstabug)
+
+  val bootingCardCreatorService =
+    this.resources.getString(R.string.bootingCardCreatorService)
 }
