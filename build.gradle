@@ -120,7 +120,6 @@ ext.libraries = [
   googleGuava                      : "com.google.guava:guava:23.6.1-android",
   googleZXing                      : "com.google.zxing:core:3.2.1",
   iharderBase64                    : "net.iharder:base64:2.3.9",
-  instabug                         : "com.instabug.library:instabug:8.6.2",
   io7mJFunctional                  : "com.io7m.jfunctional:io7m-jfunctional-core:1.3.0",
   io7mJNull                        : "com.io7m.jnull:io7m-jnull-core:1.0.2",
   io7mJUnreachable                 : "com.io7m.junreachable:io7m-junreachable-core:1.0.2",
