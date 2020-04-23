@@ -32,6 +32,8 @@ repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
 The short version: Install an [Android SDK](#android-sdk) and run:
 
 ~~~
+$ echo "systemProp.org.gradle.internal.publish.checksums.insecure=true" >> "$HOME/.gradle/gradle.properties"
+
 $ ./gradlew clean assembleDebug test
 ~~~
 
@@ -112,6 +114,16 @@ $ ./gradlew clean assembleRelease test
 
 $ ./gradlew clean assemble test
 ~~~
+
+#### Insecure checksums?
+
+Astute readers may have noticed the `org.gradle.internal.publish.checksums.insecure` property
+in the initial build instructions. This is necessary because Gradle 6 currently publishes
+checksums that [Maven Central doesn't like](https://github.com/gradle/gradle/issues/11308#issuecomment-554317655).
+Until Maven Central is updated to accept SHA256 and SHA512 checksums, this flag is necessary.
+As all artifacts published to Maven Central are PGP signed, this is not a serious issue; PGP
+signatures combine integrity checking and authentication, so checksum files are essentially
+redundant nowadays.
 
 ### Branching/Merging
 
@@ -259,7 +271,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.parser.api](simplified-parser-api)|Parser API|
 |[org.librarysimplified.patron](simplified-patron)|Patron user profile parser implementation|
 |[org.librarysimplified.patron.api](simplified-patron-api)|Patron user profile parser API|
-|[org.librarysimplified.prefs](simplified-prefs)|Legacy preferences handler|
 |[org.librarysimplified.presentableerror.api](simplified-presentableerror-api)|Presentable error API|
 |[org.librarysimplified.profiles](simplified-profiles)|Profile database implementation|
 |[org.librarysimplified.profiles.api](simplified-profiles-api)|Profile database API|

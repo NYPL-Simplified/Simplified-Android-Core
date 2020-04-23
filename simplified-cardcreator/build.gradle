@@ -9,8 +9,6 @@ android {
 }
 
 dependencies {
-  implementation project(":simplified-prefs")
-
   implementation libraries.androidXLegacySupport
   implementation libraries.slf4j
   implementation libraries.androidXActivity
