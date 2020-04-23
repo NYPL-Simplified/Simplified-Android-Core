@@ -32,7 +32,7 @@ repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
 The short version: Install an [Android SDK](#android-sdk) and run:
 
 ~~~
-$ echo "org.gradle.internal.publish.checksums.insecure=true" >> "$HOME/.gradle/gradle.properties"
+$ echo "systemProp.org.gradle.internal.publish.checksums.insecure=true" >> "$HOME/.gradle/gradle.properties"
 
 $ ./gradlew clean assembleDebug test
 ~~~
