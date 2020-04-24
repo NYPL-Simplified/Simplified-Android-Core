@@ -48,8 +48,8 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepSucceeded
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -995,21 +995,35 @@ class CatalogFragmentBookDetail : Fragment() {
 
   private fun tryReserveAuthenticated(book: Book) {
     this.logger.debug("reserving: {}", book.id)
-    this.booksController.bookBorrowWithDefaultAcquisition(
-      this.parameters.accountId, book.id, book.entry
-    )
+    try {
+      this.booksController.bookBorrowWithDefaultAcquisition(
+        this.parameters.accountId, book.id, book.entry
+      )
+    } catch (e: Throwable) {
+      this.logger.error("failed to start borrow task: ", e)
+    }
   }
 
   private fun tryRevokeAuthenticated(book: Book) {
     this.logger.debug("revoking: {}", book.id)
-    this.booksController.bookRevoke(this.parameters.accountId, book.id)
+
+    try {
+      this.booksController.bookRevoke(this.parameters.accountId, book.id)
+    } catch (e: Throwable) {
+      this.logger.error("failed to start revocation task: ", e)
+    }
   }
 
   private fun tryBorrowAuthenticated(book: Book) {
     this.logger.debug("borrowing: {}", book.id)
-    this.booksController.bookBorrowWithDefaultAcquisition(
-      this.parameters.accountId, book.id, book.entry
-    )
+
+    try {
+      this.booksController.bookBorrowWithDefaultAcquisition(
+        this.parameters.accountId, book.id, book.entry
+      )
+    } catch (e: Throwable) {
+      this.logger.error("failed to start borrow task: ", e)
+    }
   }
 
   private fun <E : PresentableErrorType> tryShowError(
@@ -1040,9 +1054,9 @@ class CatalogFragmentBookDetail : Fragment() {
     val attributes = mutableMapOf<String, String>()
     for (step in result.steps) {
       when (val resolution = step.resolution) {
-        is TaskStepResolution.TaskStepSucceeded -> {
+        is TaskStepSucceeded -> {
         }
-        is TaskStepResolution.TaskStepFailed -> {
+        is TaskStepFailed -> {
           attributes.putAll(resolution.errorValue.attributes)
         }
       }
@@ -1052,21 +1066,41 @@ class CatalogFragmentBookDetail : Fragment() {
 
   private fun tryDismissBorrowError(id: BookID) {
     this.logger.debug("dismissing borrow error: {}", id)
-    this.booksController.bookBorrowFailedDismiss(this.parameters.accountId, id)
+
+    try {
+      this.booksController.bookBorrowFailedDismiss(this.parameters.accountId, id)
+    } catch (e: Throwable) {
+      this.logger.error("failed to dismiss task error: ", e)
+    }
   }
 
   private fun tryDismissRevokeError(id: BookID) {
     this.logger.debug("dismissing revoke error: {}", id)
-    this.booksController.bookRevokeFailedDismiss(this.parameters.accountId, id)
+
+    try {
+      this.booksController.bookRevokeFailedDismiss(this.parameters.accountId, id)
+    } catch (e: Throwable) {
+      this.logger.error("failed to dismiss revoke error: ", e)
+    }
   }
 
   private fun tryCancelDownload(id: BookID) {
     this.logger.debug("cancelling: {}", id)
-    this.booksController.bookDownloadCancel(this.parameters.accountId, id)
+
+    try {
+      this.booksController.bookDownloadCancel(this.parameters.accountId, id)
+    } catch (e: Throwable) {
+      this.logger.error("failed to cancel download: ", e)
+    }
   }
 
   private fun tryDelete(id: BookID) {
     this.logger.debug("deleting: {}", id)
-    this.booksController.bookDelete(this.parameters.accountId, id)
+
+    try {
+      this.booksController.bookDelete(this.parameters.accountId, id)
+    } catch (e: Throwable) {
+      this.logger.error("failed to start deletion: ", e)
+    }
   }
 }

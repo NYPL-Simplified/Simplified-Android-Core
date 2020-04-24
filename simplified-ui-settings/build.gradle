@@ -15,6 +15,7 @@ dependencies {
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-reports")
   implementation project(":simplified-services-api")
+  implementation project(":simplified-threads")
   implementation project(":simplified-ui-images")
   implementation project(":simplified-ui-navigation-api")
   implementation project(":simplified-ui-theme")

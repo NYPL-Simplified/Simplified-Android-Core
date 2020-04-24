@@ -52,6 +52,7 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.Un
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
+import org.nypl.simplified.books.controller.BookTaskRequiredServices
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookUnexpectedTypeException
@@ -85,6 +86,8 @@ import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
@@ -127,6 +130,7 @@ abstract class BookBorrowTaskContract {
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var booksDirectory: File
+  private lateinit var bookTaskRequiredServices: BookTaskRequiredServices
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
   private lateinit var clock: () -> Instant
@@ -140,6 +144,8 @@ abstract class BookBorrowTaskContract {
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var feedLoader: FeedLoaderType
   private lateinit var http: MockingHTTP
+  private lateinit var profile: ProfileType
+  private lateinit var profilesDatabase: ProfilesDatabaseType
   private lateinit var services: MutableServiceDirectory
   private lateinit var tempDirectory: File
 
@@ -162,6 +168,15 @@ abstract class BookBorrowTaskContract {
     this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.audioBookManifestStrategies =
       Mockito.mock(AudioBookManifestStrategiesType::class.java)
+    this.profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
+    this.profile =
+      Mockito.mock(ProfileType::class.java)
+    this.downloader =
+      Mockito.mock(DownloaderType::class.java)
+
+    Mockito.`when`(this.profilesDatabase.currentProfileUnsafe())
+      .thenReturn(this.profile)
 
     this.tempDirectory = TestDirectories.temporaryDirectory()
     this.cacheDirectory = File(this.tempDirectory, "cache")
@@ -190,6 +205,10 @@ abstract class BookBorrowTaskContract {
     this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, this.feedLoader)
     this.services.putService(HTTPType::class.java, this.http)
+    this.services.putService(ProfilesDatabaseType::class.java, this.profilesDatabase)
+
+    this.bookTaskRequiredServices =
+      BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
   }
 
   @After
@@ -242,14 +261,15 @@ abstract class BookBorrowTaskContract {
   @Test(timeout = 5_000L)
   fun testBorrowOpenAccessEPUB() {
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.epub",
@@ -295,14 +315,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -326,8 +345,6 @@ abstract class BookBorrowTaskContract {
   @Test(timeout = 5_000L)
   fun testBorrowOpenAccessPDF() {
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -337,7 +354,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandlePDF::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.pdf",
@@ -399,14 +419,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -438,6 +457,8 @@ abstract class BookBorrowTaskContract {
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountNotLoggedIn)
 
@@ -544,14 +565,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -598,7 +618,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val acquisition =
       OPDSAcquisition(
@@ -652,16 +675,18 @@ abstract class BookBorrowTaskContract {
     this.services.putService(BundledContentResolverType::class.java, bundledContent)
     this.services.putService(FeedLoaderType::class.java, feedLoader)
 
+    this.bookTaskRequiredServices =
+      BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
+
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -684,8 +709,6 @@ abstract class BookBorrowTaskContract {
   @Test(timeout = 5_000L)
   fun testBorrowBundledEPUBMissing() {
 
-    val tempFile =
-      File.createTempFile("nypl-test", "epub")
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
     val bundledContent =
@@ -695,7 +718,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val acquisition =
       OPDSAcquisition(
@@ -733,14 +759,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -770,7 +795,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -844,14 +872,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -883,7 +910,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://example.com/fulfill/0",
@@ -945,14 +975,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -984,7 +1013,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -1061,14 +1093,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1096,7 +1127,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -1142,14 +1176,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1175,7 +1208,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1237,14 +1273,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1270,7 +1305,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1358,14 +1396,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1391,7 +1428,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1449,14 +1489,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1482,7 +1521,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1570,14 +1612,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1603,7 +1644,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
@@ -1650,14 +1694,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1683,7 +1726,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -1729,14 +1775,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1762,7 +1807,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val error =
       HTTPResultError<InputStream>(
@@ -1821,14 +1869,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1859,7 +1906,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -1921,14 +1971,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -1962,7 +2011,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -2039,14 +2091,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2076,7 +2127,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -2134,14 +2188,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2177,7 +2230,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val headers = HashMap<String, MutableList<String>>()
     headers.put(
@@ -2257,14 +2313,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2298,7 +2353,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val headers = HashMap<String, MutableList<String>>()
     headers.put(
@@ -2378,14 +2436,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2405,11 +2462,14 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBCancelled() {
-
-    this.downloader =
-      Mockito.mock(DownloaderType::class.java)
     val download =
       Mockito.mock(DownloadType::class.java)
+    this.downloader =
+      Mockito.mock(DownloaderType::class.java)
+    this.services.putService(
+      DownloaderType::class.java, this.downloader)
+    this.bookTaskRequiredServices =
+      BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
 
     Mockito.`when`(
       this.downloader.download(
@@ -2417,20 +2477,22 @@ abstract class BookBorrowTaskContract {
         this.anyNonNull(),
         this.anyNonNull()
       )
-    )
-      .then { invocation ->
-        val listener = invocation.arguments[2] as DownloadListenerType
-        listener.onDownloadStarted(download, 1000L)
-        listener.onDownloadCancelled(download)
-        download
-      }
+    ).then { invocation ->
+      val listener = invocation.arguments[2] as DownloadListenerType
+      listener.onDownloadStarted(download, 1000L)
+      listener.onDownloadCancelled(download)
+      download
+    }
 
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -2485,18 +2547,16 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(DownloaderType::class.java, this.downloader)
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2520,11 +2580,14 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBDownloadFails() {
-
-    this.downloader =
-      Mockito.mock(DownloaderType::class.java)
     val download =
       Mockito.mock(DownloadType::class.java)
+    this.downloader =
+      Mockito.mock(DownloaderType::class.java)
+    this.services.putService(
+      DownloaderType::class.java, this.downloader)
+    this.bookTaskRequiredServices =
+      BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
 
     Mockito.`when`(download.uri())
       .thenReturn(URI.create("urn:somewhere"))
@@ -2553,7 +2616,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -2608,18 +2674,16 @@ abstract class BookBorrowTaskContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(DownloaderType::class.java, this.downloader)
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2651,7 +2715,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val acquisition =
       OPDSAcquisition(
@@ -2685,14 +2752,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2723,7 +2789,10 @@ abstract class BookBorrowTaskContract {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     Mockito.`when`(bookDatabase.createOrUpdate(this.anyNonNull(), this.anyNonNull()))
       .thenThrow(BookDatabaseException("Ouch", listOf()))
@@ -2760,14 +2829,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2799,7 +2867,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.epub",
@@ -2880,14 +2951,13 @@ abstract class BookBorrowTaskContract {
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
@@ -2911,9 +2981,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowCoverFailure() {
-
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -2923,7 +2990,10 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     this.http.addResponse(
       "http://www.example.com/0.epub",
@@ -3001,18 +3071,16 @@ abstract class BookBorrowTaskContract {
       .thenReturn(formatHandle)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(FeedLoaderType::class.java, feedLoader)
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(this.logger, results)

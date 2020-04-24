@@ -29,6 +29,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -104,6 +105,7 @@ abstract class BooksControllerContract {
 
   private lateinit var accountEvents: PublishSubject<AccountEvent>
   private lateinit var accountEventsReceived: MutableList<AccountEvent>
+  private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var bookRegistry: BookRegistryType
@@ -183,6 +185,8 @@ abstract class BooksControllerContract {
 
     val services = MutableServiceDirectory()
     services.putService(
+      AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
+    services.putService(
       AnalyticsType::class.java, this.analytics)
     services.putService(
       AccountLoginStringResourcesType::class.java, this.accountLoginStringResources)
@@ -236,6 +240,7 @@ abstract class BooksControllerContract {
   @Before
   @Throws(Exception::class)
   fun setUp() {
+    this.audioBookManifestStrategies = Mockito.mock(AudioBookManifestStrategiesType::class.java)
     this.credentialsStore = FakeAccountCredentialStorage()
     this.http = MockingHTTP()
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
