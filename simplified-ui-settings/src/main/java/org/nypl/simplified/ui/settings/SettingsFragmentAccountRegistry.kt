@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -27,6 +28,7 @@ import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -39,12 +41,15 @@ import org.slf4j.LoggerFactory
 
 class SettingsFragmentAccountRegistry : Fragment() {
 
+  private lateinit var backgroundExecutor: ListeningScheduledExecutorService
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: SettingsAccountProviderDescriptionAdapter
   private lateinit var accountListData: MutableList<AccountProviderDescriptionType>
   private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var imageLoader: ImageLoaderType
+
+  @Volatile
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var progress: ProgressBar
   private lateinit var progressText: TextView
@@ -76,7 +81,8 @@ class SettingsFragmentAccountRegistry : Fragment() {
       SettingsAccountProviderDescriptionAdapter(
         this.accountListData,
         this.imageLoader,
-        this::onAccountClicked)
+        this::onAccountClicked
+      )
   }
 
   /**
@@ -189,12 +195,19 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
     this.refresh.setOnClickListener {
       this.refresh.isEnabled = false
-      this.accountRegistry.refresh(
-        includeTestingLibraries = this.profilesController
-          .profileCurrent()
-          .preferences()
-          .showTestingLibraries
-      )
+
+      this.backgroundExecutor.execute {
+        try {
+          this.accountRegistry.refresh(
+            includeTestingLibraries = this.profilesController
+              .profileCurrent()
+              .preferences()
+              .showTestingLibraries
+          )
+        } catch (e: Exception) {
+          this.logger.error("failed to refresh registry: ", e)
+        }
+      }
     }
 
     return layout
@@ -205,6 +218,8 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
     this.configureToolbar()
 
+    this.backgroundExecutor =
+      NamedThreadPools.namedThreadPool(1, "simplified-registry-io", 19)
     this.accountRegistrySubscription =
       this.accountRegistry.events.subscribe(this::onAccountRegistryEvent)
 
@@ -214,12 +229,19 @@ class SettingsFragmentAccountRegistry : Fragment() {
         .subscribe(this::onAccountEvent)
 
     this.reconfigureViewForRegistryStatus(this.accountRegistry.status)
-    this.accountRegistry.refresh(
-      includeTestingLibraries = this.profilesController
-        .profileCurrent()
-        .preferences()
-        .showTestingLibraries
-    )
+
+    this.backgroundExecutor.execute {
+      try {
+        this.accountRegistry.refresh(
+          includeTestingLibraries = this.profilesController
+            .profileCurrent()
+            .preferences()
+            .showTestingLibraries
+        )
+      } catch (e: Exception) {
+        this.logger.error("failed to refresh registry: ", e)
+      }
+    }
   }
 
   private fun configureToolbar() {
@@ -297,6 +319,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
   override fun onStop() {
     super.onStop()
 
+    this.backgroundExecutor.shutdown()
     this.accountCreationSubscription?.dispose()
     this.accountRegistrySubscription?.dispose()
   }
@@ -332,7 +355,9 @@ class SettingsFragmentAccountRegistry : Fragment() {
     taskSteps.add(
       TaskStep(
         "Opening error page.",
-        TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")))
+        TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")
+      )
+    )
 
     val parameters =
       ErrorPageParameters(
@@ -340,7 +365,8 @@ class SettingsFragmentAccountRegistry : Fragment() {
         body = "",
         subject = "[simplye-error-report]",
         attributes = accountEvent.attributes.toSortedMap(),
-        taskSteps = taskSteps)
+        taskSteps = taskSteps
+      )
 
     this.findNavigationController().openErrorPage(parameters)
   }
