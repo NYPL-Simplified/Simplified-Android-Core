@@ -54,6 +54,7 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DR
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
+import org.nypl.simplified.books.controller.BookTaskRequiredServices
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
@@ -116,6 +117,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var booksDirectory: File
+  private lateinit var bookTaskRequiredServices: BookTaskRequiredServices
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
   private lateinit var clock: () -> Instant
@@ -194,8 +196,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(this.profile)
 
     this.services = MutableServiceDirectory()
-    this.services.putService(AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
     this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
+    this.services.putService(AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
     this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
     this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
     this.services.putService(BookRegistryType::class.java, this.bookRegistry)
@@ -204,6 +206,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
     this.services.putService(DownloaderType::class.java, this.downloader)
     this.services.putService(FeedLoaderType::class.java, this.feedLoader)
     this.services.putService(HTTPType::class.java, this.http)
+    this.services.putService(ProfilesDatabaseType::class.java, this.profilesDatabase)
+
+    this.bookTaskRequiredServices =
+      BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
   }
 
   @After
@@ -372,11 +378,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
-        contentResolver = this.contentResolver,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        profiles = this.profilesDatabase,
-        services = this.services
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -405,10 +409,21 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
+    val adobeCredentials =
+      this.adobeCredentialsValid
+
+    val credentials =
+      AccountAuthenticationCredentials
+        .builder(AccountPIN.create("abcd"), AccountBarcode.create("1234"))
+        .setAdobeCredentials(adobeCredentials)
+        .build()
+
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
     Mockito.`when`(this.profile.account(this.accountID))
       .thenReturn(account)
+    Mockito.`when`(account.loginState)
+      .thenReturn(AccountLoginState.AccountLoggedIn(credentials))
 
     val headers =
       mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
@@ -459,6 +474,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
 
+    this.bookTaskRequiredServices =
+      BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
+
     val task =
       BookBorrowTask(
         accountId = account.id,
@@ -467,9 +485,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        profiles = this.profilesDatabase,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -610,9 +626,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        profiles = this.profilesDatabase,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -722,9 +736,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        profiles = this.profilesDatabase,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -819,9 +831,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        profiles = this.profilesDatabase,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -936,9 +946,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        profiles = this.profilesDatabase,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -1048,9 +1056,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        profiles = this.profilesDatabase,
-        services = this.services,
-        contentResolver = this.contentResolver
+        services = this.bookTaskRequiredServices
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)

@@ -1016,6 +1016,21 @@ internal object MainServices {
       interfaceType = ProfileIdleTimerType::class.java,
       serviceConstructor = { this.createProfileIdleTimer(profileEvents) })
 
+    addService(
+      message = strings.bootingAudioBookManifestStrategiesService,
+      interfaceType = AudioBookManifestStrategiesType::class.java,
+      serviceConstructor = { return@addService AudioBookManifests })
+
+    addServiceOptionally(
+      message = strings.bootingFeedbooksSecretService,
+      interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
+      serviceConstructor = { MainFeedbooksSecretService.createConditionally(context) })
+
+    addServiceOptionally(
+      message = strings.bootingOverdriveSecretService,
+      interfaceType = AudioBookOverdriveSecretServiceType::class.java,
+      serviceConstructor = { MainOverdriveSecretService.createConditionally(context) })
+
     val bookController = this.run {
       publishEvent(strings.bootingBookController)
       val execBooks =
@@ -1132,21 +1147,6 @@ internal object MainServices {
       message = strings.bootingCardCreatorService,
       interfaceType = CardCreatorServiceType::class.java,
       serviceConstructor = { this.createCardCreatorService(context) })
-
-    addService(
-      message = strings.bootingAudioBookManifestStrategiesService,
-      interfaceType = AudioBookManifestStrategiesType::class.java,
-      serviceConstructor = { AudioBookManifests })
-
-    addServiceOptionally(
-      message = strings.bootingFeedbooksSecretService,
-      interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
-      serviceConstructor = { MainFeedbooksSecretService.createConditionally(context) })
-
-    addServiceOptionally(
-      message = strings.bootingOverdriveSecretService,
-      interfaceType = AudioBookOverdriveSecretServiceType::class.java,
-      serviceConstructor = { MainOverdriveSecretService.createConditionally(context) })
 
     this.showThreads()
 

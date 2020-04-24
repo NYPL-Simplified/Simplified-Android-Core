@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
+import com.google.common.util.concurrent.SettableFuture
 import com.io7m.jfunctional.Some
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -33,13 +34,9 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.books.bundled.api.BundledContentResolverType
-import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloadType
-import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -110,14 +107,6 @@ class Controller private constructor(
     this.services.requireService(AuthenticationDocumentParsersType::class.java)
   private val bookRegistry =
     this.services.requireService(BookRegistryType::class.java)
-  private val borrowStrings =
-    this.services.requireService(BookBorrowStringResourcesType::class.java)
-  private val bundledContent =
-    this.services.requireService(BundledContentResolverType::class.java)
-  private val clock =
-    this.services.requireService(ClockType::class.java)
-  private val downloader =
-    this.services.requireService(DownloaderType::class.java)
   private val feedLoader =
     this.services.requireService(FeedLoaderType::class.java)
   private val feedParser =
@@ -136,6 +125,9 @@ class Controller private constructor(
     this.services.requireService(BookRevokeStringResourcesType::class.java)
   private val profileIdleTimer =
     this.services.requireService(ProfileIdleTimerType::class.java)
+
+  private val bookTaskRequiredServices =
+    BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
 
   private val accountRegistrySubscription: Disposable
   private val downloads: ConcurrentHashMap<BookID, DownloadType> =
@@ -181,21 +173,43 @@ class Controller private constructor(
     val profileCurrentOpt = this.profiles.currentProfile()
     if (profileCurrentOpt is Some<ProfileType>) {
       val profileCurrent = profileCurrentOpt.get()
-      this.taskExecutor.submit(ProfileAccountProviderUpdatedTask(
-        profile = profileCurrent,
-        accountProviderID = event.id,
-        accountProviders = this.accountProviders))
-      Unit
+      this.submitTask {
+        ProfileAccountProviderUpdatedTask(
+          profile = profileCurrent,
+          accountProviderID = event.id,
+          accountProviders = this.accountProviders)
+      }
     } else {
+      this.logger.debug("no profile is current")
     }
   }
 
   private fun <A> submitTask(task: () -> A): FluentFuture<A> {
-    return FluentFuture.from(this.taskExecutor.submit(task))
+    val future = SettableFuture.create<A>()
+    this.taskExecutor.execute {
+      try {
+        future.set(task.invoke())
+      } catch (e: Throwable) {
+        this.logger.error("exception raised during task execution: ", e)
+        future.setException(e)
+        throw e
+      }
+    }
+    return FluentFuture.from(future)
   }
 
   private fun <A> submitTask(task: Callable<A>): FluentFuture<A> {
-    return FluentFuture.from(this.taskExecutor.submit(task))
+    val future = SettableFuture.create<A>()
+    this.taskExecutor.execute {
+      try {
+        future.set(task.call())
+      } catch (e: Throwable) {
+        this.logger.error("exception raised during task execution: ", e)
+        future.setException(e)
+        throw e
+      }
+    }
+    return FluentFuture.from(future)
   }
 
   override fun profiles(): SortedMap<ProfileID, ProfileReadableType> {
@@ -480,11 +494,9 @@ class Controller private constructor(
       accountId = accountID,
       bookId = bookID,
       cacheDirectory = this.cacheDirectory,
-      contentResolver = this.contentResolver,
       downloads = this.downloads,
       entry = entry,
-      profiles = this.profiles,
-      services = this.services
+      services = this.bookTaskRequiredServices
     ))
   }
 
@@ -500,11 +512,9 @@ class Controller private constructor(
       acquisition = acquisition,
       bookId = bookID,
       cacheDirectory = this.cacheDirectory,
-      contentResolver = this.contentResolver,
       downloads = this.downloads,
       entry = entry,
-      profiles = this.profiles,
-      services = this.services
+      services = this.bookTaskRequiredServices
     ))
   }
 

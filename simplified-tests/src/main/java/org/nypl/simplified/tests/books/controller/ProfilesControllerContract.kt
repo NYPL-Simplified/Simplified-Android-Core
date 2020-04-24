@@ -21,6 +21,7 @@ import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -93,6 +94,7 @@ abstract class ProfilesControllerContract {
 
   private lateinit var accountEvents: PublishSubject<AccountEvent>
   private lateinit var accountEventsReceived: MutableList<AccountEvent>
+  private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var cacheDirectory: File
@@ -159,7 +161,9 @@ abstract class ProfilesControllerContract {
 
     val services = MutableServiceDirectory()
     services.putService(
-      AnalyticsType::class.java, analyticsLogger)
+      AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
+    services.putService(
+      AnalyticsType::class.java, this.analyticsLogger)
     services.putService(
       AccountLoginStringResourcesType::class.java, this.accountLoginStringResources)
     services.putService(
@@ -177,23 +181,25 @@ abstract class ProfilesControllerContract {
     services.putService(
       BundledContentResolverType::class.java, bundledContent)
     services.putService(
-      DownloaderType::class.java, downloader)
+      DownloaderType::class.java, this.downloader)
     services.putService(
       FeedLoaderType::class.java, feedLoader)
     services.putService(
       OPDSFeedParserType::class.java, parser)
     services.putService(
-      HTTPType::class.java, http)
+      HTTPType::class.java, this.http)
     services.putService(
-      PatronUserProfileParsersType::class.java, patronUserProfileParsers)
+      PatronUserProfileParsersType::class.java, this.patronUserProfileParsers)
     services.putService(
-      ProfileAccountCreationStringResourcesType::class.java, profileAccountCreationStringResources)
+      ProfileAccountCreationStringResourcesType::class.java,
+      this.profileAccountCreationStringResources)
     services.putService(
-      ProfileAccountDeletionStringResourcesType::class.java, profileAccountDeletionStringResources)
+      ProfileAccountDeletionStringResourcesType::class.java,
+      this.profileAccountDeletionStringResources)
     services.putService(
       ProfilesDatabaseType::class.java, profiles)
     services.putService(
-      BookRevokeStringResourcesType::class.java, bookRevokeStringResources)
+      BookRevokeStringResourcesType::class.java, this.bookRevokeStringResources)
     services.putService(
       ProfileIdleTimerType::class.java, InoperableIdleTimer())
     services.putService(
@@ -203,8 +209,8 @@ abstract class ProfilesControllerContract {
       services = services,
       contentResolver = this.contentResolver,
       executorService = this.executorBooks,
-      accountEvents = accountEvents,
-      profileEvents = profileEvents,
+      accountEvents = this.accountEvents,
+      profileEvents = this.profileEvents,
       cacheDirectory = this.cacheDirectory
     )
   }
@@ -212,6 +218,7 @@ abstract class ProfilesControllerContract {
   @Before
   @Throws(Exception::class)
   fun setUp() {
+    this.audioBookManifestStrategies = Mockito.mock(AudioBookManifestStrategiesType::class.java)
     this.credentialsStore = FakeAccountCredentialStorage()
     this.http = MockingHTTP()
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
