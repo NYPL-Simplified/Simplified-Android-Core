@@ -74,6 +74,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.IOException
 import java.net.URI
 import java.util.SortedMap
 import java.util.concurrent.Callable
@@ -448,67 +449,61 @@ class Controller private constructor(
     return this.profileIdleTimer
   }
 
+  private fun accountForActual(
+    accountID: AccountID
+  ): AccountType {
+    this.logger.debug("account for: {}", accountID.uuid)
+    return try {
+      val profileCurrent = this.profileCurrent()
+      profileCurrent.account(accountID)
+    } catch (e: Throwable) {
+      this.logger.error("failed to fetch account: ", e)
+      throw IOException(e)
+    }
+  }
+
   private fun accountFor(
     accountID: AccountID
   ): FluentFuture<AccountType> {
-    return this.submitTask { this.profileCurrent().account(accountID) }
+    return this.submitTask {
+      return@submitTask this.accountForActual(accountID)
+    }
   }
 
   override fun bookBorrowWithDefaultAcquisition(
-    account: AccountType,
+    accountID: AccountID,
     bookID: BookID,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
     this.publishRequestingDownload(bookID)
     return this.submitTask(BookBorrowWithDefaultAcquisitionTask(
-      account = account,
+      accountId = accountID,
       bookId = bookID,
       cacheDirectory = this.cacheDirectory,
       contentResolver = this.contentResolver,
       downloads = this.downloads,
       entry = entry,
+      profiles = this.profiles,
       services = this.services
     ))
   }
 
-  override fun bookBorrowWithDefaultAcquisition(
-    accountID: AccountID,
-    bookID: BookID,
-    entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
-    this.publishRequestingDownload(bookID)
-    return this.accountFor(accountID).flatMap { account ->
-      this.bookBorrowWithDefaultAcquisition(account, bookID, entry)
-    }
-  }
-
   override fun bookBorrow(
     accountID: AccountID,
-    bookID: BookID,
-    acquisition: OPDSAcquisition,
-    entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
-    this.publishRequestingDownload(bookID)
-    return this.accountFor(accountID).flatMap { account ->
-      this.bookBorrow(account, bookID, acquisition, entry)
-    }
-  }
-
-  override fun bookBorrow(
-    account: AccountType,
     bookID: BookID,
     acquisition: OPDSAcquisition,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
     this.publishRequestingDownload(bookID)
     return this.submitTask(BookBorrowTask(
-      account = account,
+      accountId = accountID,
       acquisition = acquisition,
       bookId = bookID,
       cacheDirectory = this.cacheDirectory,
       contentResolver = this.contentResolver,
       downloads = this.downloads,
       entry = entry,
+      profiles = this.profiles,
       services = this.services
     ))
   }

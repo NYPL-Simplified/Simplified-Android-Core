@@ -74,6 +74,8 @@ import org.nypl.simplified.opds.core.OPDSIndirectAcquisition
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
@@ -108,9 +110,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   protected abstract val logger: Logger
 
-  private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var adeptConnector: AdobeAdeptConnectorType
   private lateinit var adeptExecutor: AdobeAdeptExecutorType
+  private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var booksDirectory: File
@@ -127,6 +129,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var feedLoader: FeedLoaderType
   private lateinit var http: MockingHTTP
+  private lateinit var profile: ProfileType
+  private lateinit var profilesDatabase: ProfilesDatabaseType
   private lateinit var services: MutableServiceDirectory
   private lateinit var tempDirectory: File
 
@@ -181,9 +185,25 @@ abstract class BookBorrowTaskAdobeDRMContract {
       Mockito.mock(AdobeAdeptConnectorType::class.java)
     this.adeptExecutor =
       Mockito.mock(AdobeAdeptExecutorType::class.java)
+    this.profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
+    this.profile =
+      Mockito.mock(ProfileType::class.java)
+
+    Mockito.`when`(this.profilesDatabase.currentProfileUnsafe())
+      .thenReturn(this.profile)
 
     this.services = MutableServiceDirectory()
     this.services.putService(AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
+    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
+    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
+    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
+    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
+    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
+    this.services.putService(ClockType::class.java, Clock)
+    this.services.putService(DownloaderType::class.java, this.downloader)
+    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
+    this.services.putService(HTTPType::class.java, this.http)
   }
 
   @After
@@ -241,7 +261,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val bookDatabase =
       this.createBookDatabase()
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val adobeCredentials =
       this.adobeCredentialsValid
@@ -343,26 +366,17 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
-    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
-
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
+        contentResolver = this.contentResolver,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
-        services = this.services,
-        contentResolver = this.contentResolver
+        profiles = this.profilesDatabase,
+        services = this.services
       )
 
     val results = task.call(); TaskDumps.dump(logger, results)
@@ -391,7 +405,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val headers =
       mapOf(Pair("Content-Type", listOf("application/vnd.adobe.adept+xml")))
@@ -441,23 +458,16 @@ abstract class BookBorrowTaskAdobeDRMContract {
       .thenReturn(bookDatabase)
 
     this.services.ensureServiceIsNotPresent(AdobeAdeptExecutorType::class.java)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
 
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
+        profiles = this.profilesDatabase,
         services = this.services,
         contentResolver = this.contentResolver
       )
@@ -490,7 +500,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val adobeCredentials =
       this.adobeCredentialsValid
@@ -589,24 +602,15 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
-    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
-
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
+        profiles = this.profilesDatabase,
         services = this.services,
         contentResolver = this.contentResolver
       )
@@ -640,7 +644,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
 
     val adobeCredentials =
       AccountAuthenticationAdobePreActivationCredentials(
@@ -707,24 +714,15 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
-    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
-
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
+        profiles = this.profilesDatabase,
         services = this.services,
         contentResolver = this.contentResolver
       )
@@ -757,8 +755,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
-
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(accountCredentialsValid))
 
@@ -811,24 +811,15 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
-    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
-
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
+        profiles = this.profilesDatabase,
         services = this.services,
         contentResolver = this.contentResolver
       )
@@ -861,8 +852,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
-
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(accountCredentialsValid))
 
@@ -935,24 +928,15 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
-    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
-
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
+        profiles = this.profilesDatabase,
         services = this.services,
         contentResolver = this.contentResolver
       )
@@ -980,8 +964,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.id).thenReturn(this.accountID)
-
+    Mockito.`when`(account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.profile.account(this.accountID))
+      .thenReturn(account)
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(accountCredentialsValid))
 
@@ -1054,24 +1040,15 @@ abstract class BookBorrowTaskAdobeDRMContract {
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
 
-    this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
-    this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
-    this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
-    this.services.putService(BookRegistryType::class.java, this.bookRegistry)
-    this.services.putService(BundledContentResolverType::class.java, this.bundledContent)
-    this.services.putService(ClockType::class.java, Clock)
-    this.services.putService(DownloaderType::class.java, this.downloader)
-    this.services.putService(FeedLoaderType::class.java, this.feedLoader)
-    this.services.putService(HTTPType::class.java, this.http)
-
     val task =
       BookBorrowTask(
-        account = account,
+        accountId = account.id,
         acquisition = acquisition,
         bookId = bookId,
         cacheDirectory = this.cacheDirectory,
         downloads = ConcurrentHashMap(),
         entry = opdsEntry,
+        profiles = this.profilesDatabase,
         services = this.services,
         contentResolver = this.contentResolver
       )

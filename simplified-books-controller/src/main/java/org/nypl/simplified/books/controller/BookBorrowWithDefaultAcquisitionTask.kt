@@ -3,7 +3,7 @@ package org.nypl.simplified.books.controller
 import android.content.ContentResolver
 import org.joda.time.Duration
 import org.librarysimplified.services.api.ServiceDirectoryType
-import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
@@ -14,6 +14,7 @@ import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -25,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 
 class BookBorrowWithDefaultAcquisitionTask(
-  private val account: AccountType,
+  private val accountId: AccountID,
   private val bookId: BookID,
   private val borrowTimeoutDuration: Duration = Duration.standardMinutes(1L),
   private val cacheDirectory: File,
@@ -33,6 +34,7 @@ class BookBorrowWithDefaultAcquisitionTask(
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
+  private val profiles: ProfilesDatabaseType,
   private val services: ServiceDirectoryType
 ) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
 
@@ -50,7 +52,7 @@ class BookBorrowWithDefaultAcquisitionTask(
   private val bookInitial =
     Book(
       id = this.bookId,
-      account = this.account.id,
+      account = this.accountId,
       cover = null,
       thumbnail = null,
       entry = this.entry,
@@ -81,7 +83,7 @@ class BookBorrowWithDefaultAcquisitionTask(
     }
 
     return BookBorrowTask(
-      account = this.account,
+      accountId = accountId,
       acquisition = acquisition,
       bookId = this.bookId,
       borrowTimeoutDuration = this.borrowTimeoutDuration,
@@ -90,6 +92,7 @@ class BookBorrowWithDefaultAcquisitionTask(
       downloads = this.downloads,
       downloadTimeoutDuration = this.downloadTimeoutDuration,
       entry = this.entry,
+      profiles = this.profiles,
       services = this.services
     ).call()
   }

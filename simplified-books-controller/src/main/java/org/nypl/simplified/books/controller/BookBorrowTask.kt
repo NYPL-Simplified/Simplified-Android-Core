@@ -25,6 +25,7 @@ import org.nypl.drm.core.DRMUnsupportedException
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillmentException
@@ -109,6 +110,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
@@ -129,7 +131,7 @@ import java.util.concurrent.TimeoutException
  */
 
 class BookBorrowTask(
-  private val account: AccountType,
+  private val accountId: AccountID,
   private val acquisition: OPDSAcquisition,
   private val bookId: BookID,
   private val borrowTimeoutDuration: Duration = Duration.standardMinutes(1L),
@@ -138,6 +140,7 @@ class BookBorrowTask(
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
+  private val profiles: ProfilesDatabaseType,
   private val services: ServiceDirectoryType
 ) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
 
@@ -179,6 +182,9 @@ class BookBorrowTask(
   private lateinit var databaseEntry: BookDatabaseEntryType
 
   @Volatile
+  private lateinit var account: AccountType
+
+  @Volatile
   private var databaseEntryInitialized = false
 
   @Volatile
@@ -204,7 +210,7 @@ class BookBorrowTask(
   private val bookInitial: Book =
     Book(
       id = this.bookId,
-      account = this.account.id,
+      account = this.accountId,
       cover = null,
       thumbnail = null,
       entry = this.entry,
@@ -233,6 +239,27 @@ class BookBorrowTask(
       )
 
       this.steps.beginNewStep(this.borrowStrings.borrowStarted)
+
+      val foundAccount = try {
+        val profile = this.profiles.currentProfileUnsafe()
+        profile.account(this.accountId)
+      } catch (e: Throwable) {
+        this.logger.error("[{}]: failed to find account!", this.bookId.brief())
+
+        val failure =
+          TaskResult.fail<BookStatusDownloadErrorDetails, Unit>(
+            description = this.borrowStrings.borrowStarted,
+            resolution = this.borrowStrings.borrowBookUnexpectedException,
+            errorValue = BookStatusDownloadErrorDetails.UnexpectedException(e)
+          ) as TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
+
+        this.bookRegistry.update(
+          BookWithStatus(this.bookInitial, BookStatus.FailedLoan(this.bookId, failure)))
+
+        return failure
+      }
+
+      this.account = foundAccount
 
       /*
        * Set up the book database.

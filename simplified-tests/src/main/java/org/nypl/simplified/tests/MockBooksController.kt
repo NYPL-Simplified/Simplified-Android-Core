@@ -32,14 +32,6 @@ class MockBooksController : BooksControllerType {
   }
 
   override fun bookBorrowWithDefaultAcquisition(
-    account: AccountType,
-    bookID: BookID,
-    entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
-    return FluentFuture.from(SettableFuture.create())
-  }
-
-  override fun bookBorrowWithDefaultAcquisition(
     accountID: AccountID,
     id: BookID,
     entry: OPDSAcquisitionFeedEntry
@@ -70,15 +62,6 @@ class MockBooksController : BooksControllerType {
     accountID: AccountID,
     bookID: BookID
   ): FluentFuture<Unit> {
-    return FluentFuture.from(SettableFuture.create())
-  }
-
-  override fun bookBorrow(
-    account: AccountType,
-    bookID: BookID,
-    acquisition: OPDSAcquisition,
-    entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
     return FluentFuture.from(SettableFuture.create())
   }
 

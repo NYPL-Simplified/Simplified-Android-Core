@@ -21,22 +21,6 @@ interface BooksControllerType {
   /**
    * Attempt to borrow the given book.
    *
-   * @param account The account that will receive the book
-   * @param id The ID of the book
-   * @param acquisition The acquisition entry for the book
-   * @param entry The OPDS feed entry for the book
-   */
-
-  fun bookBorrow(
-    account: AccountType,
-    bookID: BookID,
-    acquisition: OPDSAcquisition,
-    entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>>
-
-  /**
-   * Attempt to borrow the given book.
-   *
    * @param accountID The account that will receive the book
    * @param id The ID of the book
    * @param acquisition The acquisition entry for the book
@@ -47,21 +31,6 @@ interface BooksControllerType {
     accountID: AccountID,
     bookID: BookID,
     acquisition: OPDSAcquisition,
-    entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>>
-
-  /**
-   * Attempt to borrow the given book. The controller will pick the acquisition.
-   *
-   * @param account The account that will receive the book
-   * @param id The ID of the book
-   * @param entry The OPDS feed entry for the book
-   * @see org.nypl.simplified.books.book_database.api.BookAcquisitionSelection.preferredAcquisition
-   */
-
-  fun bookBorrowWithDefaultAcquisition(
-    account: AccountType,
-    bookID: BookID,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>>
 

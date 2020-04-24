@@ -1,7 +1,6 @@
 package org.nypl.simplified.viewer.audiobook
 
 import android.app.Activity
-import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.http.core.HTTP
