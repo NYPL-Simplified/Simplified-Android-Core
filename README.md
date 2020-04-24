@@ -32,7 +32,7 @@ repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
 The short version: Install an [Android SDK](#android-sdk) and run:
 
 ~~~
-$ echo "org.gradle.internal.publish.checksums.insecure=true" >> "$HOME/.gradle/gradle.properties"
+$ echo "systemProp.org.gradle.internal.publish.checksums.insecure=true" >> "$HOME/.gradle/gradle.properties"
 
 $ ./gradlew clean assembleDebug test
 ~~~
@@ -237,6 +237,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.app.vanilla.with_profiles](simplified-app-vanilla-with-profiles)|Vanilla application [with profiles enabled]|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
+|[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
 |[org.librarysimplified.books.bundled.api](simplified-books-bundled-api)|Bundled books API|
 |[org.librarysimplified.books.controller](simplified-books-controller)|Books/Profiles controller implementation|
 |[org.librarysimplified.books.controller.api](simplified-books-controller-api)|Books controller API|
@@ -254,6 +255,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.files](simplified-files)|File utilities|
 |[org.librarysimplified.futures](simplified-futures)|Guava Future extensions|
 |[org.librarysimplified.http.core](simplified-http-core)|HTTP API|
+|[org.librarysimplified.instabug.spi](simplified-instabug-spi)|Instabug SPI|
 |[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
 |[org.librarysimplified.links](simplified-links)|Link types|
 |[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|

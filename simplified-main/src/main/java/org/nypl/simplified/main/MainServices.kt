@@ -41,6 +41,7 @@ import org.nypl.simplified.analytics.api.Analytics
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.audio.AudioBookOverdriveSecretServiceType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -116,7 +117,9 @@ import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.viewer.audiobook.AudioBookFeedbooksServiceType
+import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
+import org.nypl.simplified.books.audio.AudioBookManifests
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPMimeMap
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerAAsync
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerType
@@ -269,7 +272,7 @@ internal object MainServices {
       if (this.brandingThemeOverride.isSome) {
         return (this.brandingThemeOverride as Some<ThemeValue>).get()
       }
-      return themeForProfile(this.profilesDatabase.currentProfile())
+      return org.nypl.simplified.main.MainServices.themeForProfile(this.profilesDatabase.currentProfile())
     }
   }
 
@@ -915,7 +918,7 @@ internal object MainServices {
       message = strings.bootingProfileModificationFragmentService,
       interfaceType = ProfileModificationFragmentServiceType::class.java,
       serviceConstructor = {
-        optionalFromServiceLoader(ProfileModificationFragmentServiceType::class.java)
+        this.optionalFromServiceLoader(ProfileModificationFragmentServiceType::class.java)
       }
     )
 
@@ -1012,6 +1015,21 @@ internal object MainServices {
       message = strings.bootingProfileTimer,
       interfaceType = ProfileIdleTimerType::class.java,
       serviceConstructor = { this.createProfileIdleTimer(profileEvents) })
+
+    addService(
+      message = strings.bootingAudioBookManifestStrategiesService,
+      interfaceType = AudioBookManifestStrategiesType::class.java,
+      serviceConstructor = { return@addService AudioBookManifests })
+
+    addServiceOptionally(
+      message = strings.bootingFeedbooksSecretService,
+      interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
+      serviceConstructor = { MainFeedbooksSecretService.createConditionally(context) })
+
+    addServiceOptionally(
+      message = strings.bootingOverdriveSecretService,
+      interfaceType = AudioBookOverdriveSecretServiceType::class.java,
+      serviceConstructor = { MainOverdriveSecretService.createConditionally(context) })
 
     val bookController = this.run {
       publishEvent(strings.bootingBookController)
@@ -1119,16 +1137,16 @@ internal object MainServices {
 
     addServiceOptionally(
       message = strings.bootingAudioBookExtensions,
-      interfaceType = AudioBookFeedbooksServiceType::class.java,
+      interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
       serviceConstructor = {
-        optionalFromServiceLoader(AudioBookFeedbooksServiceType::class.java)
+        this.optionalFromServiceLoader(AudioBookFeedbooksSecretServiceType::class.java)
       }
     )
 
     addServiceOptionally(
       message = strings.bootingCardCreatorService,
       interfaceType = CardCreatorServiceType::class.java,
-      serviceConstructor = { createCardCreatorService(context) })
+      serviceConstructor = { this.createCardCreatorService(context) })
 
     this.showThreads()
 

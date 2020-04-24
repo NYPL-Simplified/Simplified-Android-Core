@@ -27,6 +27,8 @@ class ReaderBookmarkServiceTest : ReaderBookmarkServiceContract() {
         threads = threads,
         events = events,
         httpCalls = httpCalls,
-        profilesController = profilesController))
+        profilesController = profilesController
+      )
+    )
   }
 }

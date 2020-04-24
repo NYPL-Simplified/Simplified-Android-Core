@@ -1,6 +1,15 @@
 package org.nypl.simplified.viewer.audiobook
 
+import one.irradia.mime.vanilla.MIMEParser
+import org.librarysimplified.audiobook.api.PlayerUserAgent
+import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
+import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.audio.AudioBookCredentials
+import org.nypl.simplified.books.audio.AudioBookManifestRequest
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategyType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
 import java.io.Serializable
@@ -11,6 +20,18 @@ import java.net.URI
  */
 
 data class AudioBookPlayerParameters(
+
+  /**
+   * The user agent string used to make manifest requests.
+   */
+
+  val userAgent: String,
+
+  /**
+   * The current manifest content type.
+   */
+
+  val manifestContentType: String,
 
   /**
    * The current manifest file.
@@ -35,4 +56,46 @@ data class AudioBookPlayerParameters(
    */
 
   val opdsEntry: OPDSAcquisitionFeedEntry
-) : Serializable
+) : Serializable {
+
+  /**
+   * Create a manifest strategy for the current parameters.
+   */
+
+  fun toManifestStrategy(
+    strategies: AudioBookManifestStrategiesType,
+    isNetworkAvailable: () -> Boolean,
+    credentials: AccountAuthenticationCredentials?
+  ): AudioBookManifestStrategyType {
+
+    val manifestContentType =
+      MIMEParser.parseRaisingException(this.manifestContentType)
+    val userAgent =
+      PlayerUserAgent(this.userAgent)
+
+    val audioBookCredentials =
+      if (credentials != null) {
+        AudioBookCredentials.UsernamePassword(
+          userName = credentials.barcode().value(),
+          password = credentials.pin().value()
+        )
+      } else {
+        null
+      }
+
+    val request =
+      AudioBookManifestRequest(
+        targetURI = this.manifestURI,
+        contentType = manifestContentType,
+        userAgent = userAgent,
+        credentials = audioBookCredentials,
+        services = Services.serviceDirectory(),
+        isNetworkAvailable = isNetworkAvailable,
+        loadFallbackData = {
+          ManifestFulfilled(manifestContentType, this.manifestFile.readBytes())
+        }
+      )
+
+    return strategies.createStrategy(request)
+  }
+}

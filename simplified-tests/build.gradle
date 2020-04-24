@@ -13,6 +13,7 @@ dependencies {
   api project(":simplified-analytics-api")
   api project(":simplified-analytics-circulation")
   api project(":simplified-books-api")
+  api project(":simplified-books-audio")
   api project(":simplified-books-bundled-api")
   api project(":simplified-books-controller")
   api project(":simplified-books-controller-api")
@@ -21,7 +22,6 @@ dependencies {
   api project(":simplified-books-database-api")
   api project(":simplified-books-registry-api")
   api project(":simplified-boot-api")
-
   api project(":simplified-clock")
   api project(":simplified-documents")
   api project(":simplified-downloader-core")

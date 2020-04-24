@@ -20,6 +20,8 @@
 ReaderClientCert.sig 
 instabug.conf
 *.jks
+cardcreator.conf
+overdrive.json
 
 # backup files
 *~

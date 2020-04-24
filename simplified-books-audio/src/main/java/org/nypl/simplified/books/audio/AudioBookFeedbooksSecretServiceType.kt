@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook
+package org.nypl.simplified.books.audio
 
 import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtensionConfiguration
 
@@ -6,7 +6,7 @@ import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtensionConfigu
  * A service for supplying Feedbooks configuration data.
  */
 
-interface AudioBookFeedbooksServiceType {
+interface AudioBookFeedbooksSecretServiceType : AudioBookSecretServiceType {
 
   /**
    * Configuration information for the Feedbooks extension.

@@ -7,17 +7,14 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.ListeningExecutorService
-import org.librarysimplified.audiobook.api.PlayerResult
-import org.librarysimplified.audiobook.license_check.spi.SingleLicenseCheckStatus
 import org.librarysimplified.audiobook.manifest.api.PlayerManifest
-import org.librarysimplified.audiobook.parser.api.ParseResult
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.downloader.core.DownloadType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
-import java.io.FileInputStream
 import java.io.IOException
 
 /**
@@ -50,9 +47,9 @@ class AudioBookLoadingFragment : Fragment() {
   private lateinit var playerParameters: AudioBookPlayerParameters
   private lateinit var profiles: ProfilesControllerType
   private lateinit var progress: ProgressBar
+  private lateinit var strategies: AudioBookManifestStrategiesType
   private lateinit var uiThread: UIThreadServiceType
   private val log = LoggerFactory.getLogger(AudioBookLoadingFragment::class.java)
-  private var download: DownloadType? = null
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -85,6 +82,8 @@ class AudioBookLoadingFragment : Fragment() {
       services.requireService(ProfilesControllerType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
+    this.strategies =
+      services.requireService(AudioBookManifestStrategiesType::class.java)
   }
 
   override fun onActivityCreated(state: Bundle?) {
@@ -109,11 +108,7 @@ class AudioBookLoadingFragment : Fragment() {
           this.progress.progress = 0
         }
 
-        val manifest =
-          this.downloadAndSaveManifest(
-            hasNetwork = this.listener.onLoadingFragmentIsNetworkConnectivityAvailable(),
-            credentials = credentials
-          )
+        val manifest = this.downloadAndSaveManifest(credentials)
 
         this.uiThread.runOnUIThread {
           this.progress.isIndeterminate = false
@@ -133,68 +128,26 @@ class AudioBookLoadingFragment : Fragment() {
   }
 
   private fun downloadAndSaveManifest(
-    hasNetwork: Boolean,
     credentials: AccountAuthenticationCredentials?
   ): PlayerManifest {
-
-    /*
-     * If network connectivity is available, download a new version of the manifest. If it isn't
-     * available, just use the existing one.
-     */
-
-    if (hasNetwork) {
-      this.log.debug("downloading fresh manifest")
-
-      val downloadResult =
-        AudioBookManifests.downloadManifest(
-          credentials = credentials,
-          manifestURI = this.playerParameters.manifestURI,
-          onManifestFulfillmentEvent = { event ->
-            this.log.debug("download: {}", event.message)
-          })
-
-      if (downloadResult is PlayerResult.Success) {
-        AudioBookManifests.saveManifest(
+    val strategy =
+      this.playerParameters.toManifestStrategy(
+        this.strategies,
+        this.listener::onLoadingFragmentIsNetworkConnectivityAvailable,
+        credentials
+      )
+    return when (val strategyResult = strategy.execute()) {
+      is TaskResult.Success -> {
+        AudioBookHelpers.saveManifest(
           profiles = this.profiles,
           bookId = this.playerParameters.bookID,
           manifestURI = this.playerParameters.manifestURI,
-          manifest = downloadResult.result
+          manifest = strategyResult.result.fulfilled
         )
+        strategyResult.result.manifest
       }
+      is TaskResult.Failure ->
+        throw IOException(strategyResult.errors().get(0))
     }
-
-    this.log.debug("loading manifest")
-    val manifestBytes =
-      this.playerParameters.manifestFile.inputStream()
-        .use(FileInputStream::readBytes)
-
-    this.log.debug("parsing manifest")
-    val parseResult =
-      AudioBookManifests.parseManifest(
-        source = this.playerParameters.manifestURI,
-        data = manifestBytes
-      )
-
-    if (parseResult is ParseResult.Failure) {
-      throw IOException("Manifest parsing failed")
-    }
-
-    this.log.debug("checking manifest license")
-    val manifest = (parseResult as ParseResult.Success).result
-    val allowed = AudioBookManifests.checkManifest(manifest, this::onLicenseCheckEvent)
-    if (!allowed) {
-      throw IOException("License checking failed.")
-    }
-    return manifest
-  }
-
-  private fun onLicenseCheckEvent(event: SingleLicenseCheckStatus) {
-    this.log.debug("[{}]: license check: {}", event.source, event.message)
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    this.log.debug("onDestroy")
-    this.download?.cancel()
   }
 }

@@ -191,7 +191,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           false),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val adobeExecutor =
       Mockito.mock(AdobeAdeptExecutorType::class.java)
@@ -285,7 +287,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           true),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val bookId =
       BookID.create("a")
@@ -377,7 +381,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           true),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val bookId =
       BookID.create("a")
@@ -504,7 +510,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           true),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val bookId =
       BookID.create("a")
@@ -627,7 +635,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           true),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val bookId =
       BookID.create("a")
@@ -749,7 +759,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           true),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val bookId =
       BookID.create("a")
@@ -877,7 +889,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           true),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val bookId =
       BookID.create("a")
@@ -983,7 +997,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           true),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val bookId =
       BookID.create("a")
@@ -1079,7 +1095,9 @@ abstract class BookRevokeTaskAdobeDRMContract {
           true),
         file = null,
         lastReadLocation = null,
-        bookmarks = listOf())
+        bookmarks = listOf(),
+        contentType = BookFormats.epubMimeTypes().first()
+      )
 
     val bookId =
       BookID.create("a")

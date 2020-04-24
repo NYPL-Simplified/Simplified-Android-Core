@@ -27,7 +27,7 @@ object HTTPProblemReportLogging {
     message: String,
     statusCode: Int,
     reportOption: OptionType<HTTPProblemReport>
-  ) {
+  ): String {
 
     val text =
       StringBuilder(128)
@@ -65,5 +65,7 @@ object HTTPProblemReportLogging {
           .append("\n")
           .toString())
     }
+
+    return text.toString()
   }
 }
