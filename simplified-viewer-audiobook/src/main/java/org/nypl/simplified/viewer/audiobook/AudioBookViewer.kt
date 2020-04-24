@@ -1,8 +1,10 @@
 package org.nypl.simplified.viewer.audiobook
 
 import android.app.Activity
+import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.viewer.spi.ViewerProviderType
 import org.slf4j.LoggerFactory
 
@@ -38,12 +40,14 @@ class AudioBookViewer : ViewerProviderType {
     book: Book,
     format: BookFormat
   ) {
-    val formatAudio = format as BookFormat.BookFormatAudioBook
-    val manifest = formatAudio.manifest!!
+    val formatAudio =
+      format as BookFormat.BookFormatAudioBook
+    val manifest =
+      formatAudio.manifest!!
 
     val params =
       AudioBookPlayerParameters(
-        userAgent = TODO(),
+        userAgent = HTTP.userAgent(),
         manifestContentType = format.contentType.fullType,
         manifestFile = manifest.manifestFile,
         manifestURI = manifest.manifestURI,
