@@ -340,6 +340,11 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
               name = "Malcolm Woods"
               url = "https://github.com/MalcolmMcFly"
             }
+            developer {
+              id = "twaddington"
+              name = "Tristan Waddington"
+              url = "https://github.com/twaddington"
+            }
           }
         }
       }
