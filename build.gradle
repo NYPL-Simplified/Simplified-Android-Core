@@ -174,12 +174,6 @@ allprojects {
   version = project.ext["VERSION_NAME"]
 }
 
-// Add ktlint tasks to all projects
-
-subprojects { project ->
-  apply from: file("$rootDir/ktlint.gradle")
-}
-
 // Configure all projects
 
 subprojects { project ->
@@ -313,4 +307,12 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
 configure(subprojects.findAll { !it.plugins.hasPlugin('com.android.application') }) { project ->
   println("Configuring publishing for ${project} (${POM_PACKAGING})")
   apply from: file("$rootDir/publishing.gradle")
+}
+
+// Add ktlint to all kotlin projects
+
+configure(subprojects.findAll {
+  it.plugins.hasPlugin('kotlin') || it.plugins.hasPlugin('kotlin-android')
+}) {
+  apply from: file("$rootDir/ktlint.gradle")
 }
