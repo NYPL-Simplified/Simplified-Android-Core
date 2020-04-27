@@ -1,0 +1,123 @@
+apply plugin: "digital.wup.android-maven-publish"
+apply plugin: "signing"
+
+publishing {
+    publications {
+        basicJar(MavenPublication) {
+            switch (POM_PACKAGING) {
+                case "jar":
+                    from components.java
+                    break
+
+                case "aar":
+                    from components.android
+                    break
+            }
+
+            artifact sourcesJar
+            artifact javadocsJar
+
+            pom {
+                artifactId = POM_ARTIFACT_ID
+                name = POM_NAME
+                packaging = POM_PACKAGING
+                description = POM_DESCRIPTION
+                url = POM_URL
+
+                scm {
+                    connection = POM_SCM_CONNECTION
+                    developerConnection = POM_SCM_DEV_CONNECTION
+                    url = POM_SCM_URL
+                }
+
+                licenses {
+                    license {
+                        name = POM_LICENCE_NAME
+                        url = POM_LICENCE_URL
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "io7m"
+                        name = "Mark Raynsford"
+                        email = "code@io7m.com"
+                        url = "https://www.io7m.com"
+                    }
+                    developer {
+                        id = "winniequinn"
+                        name = "Winnie Quinn"
+                        url = "https://www.winniequinn.com/"
+                    }
+                    developer {
+                        id = "gioneill"
+                        name = "Greg O'Neill"
+                        url = "https://github.com/gioneill"
+                    }
+                    developer {
+                        id = "mattniehoff"
+                        name = "Matt Niehoff"
+                        url = "https://github.com/mattniehoff"
+                    }
+                    developer {
+                        id = "MalcolmMcFly"
+                        name = "Malcolm Woods"
+                        url = "https://github.com/MalcolmMcFly"
+                    }
+                    developer {
+                        id = "twaddington"
+                        name = "Tristan Waddington"
+                        url = "https://github.com/twaddington"
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        if (useNYPLNexusPublish) {
+            logger.info("using NYPL Nexus repository for publication")
+
+            maven {
+                def releasesRepoUrl = "https://nexus.librarysimplified.org:8443/nexus/content/repositories/releases-no-drm/"
+                def snapshotsRepoUrl = "https://nexus.librarysimplified.org:8443/nexus/content/repositories/snapshots-no-drm/"
+                url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
+                credentials(PasswordCredentials) {
+                    username findProperty("org.librarysimplified.nexus.username")
+                    password findProperty("org.librarysimplified.nexus.password")
+                }
+            }
+        } else {
+            logger.info("using Maven Central repository for publication")
+
+            maven {
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
+                credentials(PasswordCredentials) {
+                    username mavenCentralUsername
+                    password mavenCentralPassword
+                }
+            }
+        }
+    }
+}
+
+signing {
+    useGpgCmd()
+    sign publishing.publications.basicJar
+}
+
+tasks.withType(Sign) { task ->
+    def isSnapshot = version.endsWith("SNAPSHOT")
+
+    // Sign release versions only; not snapshots
+    onlyIf {
+        if (isSnapshot) {
+            logger.warn("$POM_NAME: '$version' is a snapshot version; artifacts will not be signed")
+        } else {
+            logger.info("$POM_NAME: '$version' is a release version; artifacts will be signed")
+        }
+        return !isSnapshot
+    }
+}
