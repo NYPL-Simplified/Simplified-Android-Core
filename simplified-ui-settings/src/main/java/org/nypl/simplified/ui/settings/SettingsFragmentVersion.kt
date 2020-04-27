@@ -24,6 +24,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -52,6 +53,7 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var adobeDRMActivationTable: TableLayout
   private lateinit var analytics: AnalyticsType
+  private lateinit var booksController: BooksControllerType
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var buildText: TextView
   private lateinit var buildTitle: TextView
@@ -66,6 +68,7 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
   private lateinit var showTesting: Switch
+  private lateinit var syncAccountsButton: Button
   private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var versionText: TextView
@@ -79,6 +82,8 @@ class SettingsFragmentVersion : Fragment() {
 
     val services = Services.serviceDirectory()
 
+    this.booksController =
+      services.requireService(BooksControllerType::class.java)
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
     this.accountRegistry =
@@ -113,6 +118,8 @@ class SettingsFragmentVersion : Fragment() {
       this.developerOptions.findViewById(R.id.settingsVersionDevShowError)
     this.sendAnalyticsButton =
       this.developerOptions.findViewById(R.id.settingsVersionDevSyncAnalytics)
+    this.syncAccountsButton =
+      this.developerOptions.findViewById(R.id.settingsVersionDevSyncAccounts)
 
     this.buildTitle =
       layout.findViewById(R.id.settingsVersionBuildTitle)
@@ -212,6 +219,25 @@ class SettingsFragmentVersion : Fragment() {
 
     this.showErrorButton.setOnClickListener {
       this.showErrorPage()
+    }
+
+    this.syncAccountsButton.setOnClickListener {
+      Toast.makeText(
+        this.requireContext(),
+        "Triggered sync of all accounts",
+        Toast.LENGTH_SHORT
+      ).show()
+
+      try {
+        this.profilesController.profileCurrent()
+          .accounts()
+          .values
+          .forEach { account ->
+            this.booksController.booksSync(account)
+          }
+      } catch (e: Exception) {
+        this.logger.error("ouch: ", e)
+      }
     }
 
     this.developerOptions.visibility = View.GONE

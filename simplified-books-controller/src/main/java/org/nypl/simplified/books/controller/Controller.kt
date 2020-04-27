@@ -587,11 +587,12 @@ class Controller private constructor(
     account: AccountType
   ): FluentFuture<Unit> {
     return this.submitTask(BookSyncTask(
-      booksController = this,
       account = account,
+      accountRegistry = this.accountProviders,
       bookRegistry = this.bookRegistry,
-      http = this.http,
-      feedParser = this.feedParser
+      booksController = this,
+      feedParser = this.feedParser,
+      http = this.http
     ))
   }
 
