@@ -174,14 +174,15 @@ allprojects {
   version = project.ext["VERSION_NAME"]
 }
 
-// Add ktlint tasks to all subprojects
+// Add ktlint tasks to all projects
 
 subprojects { project ->
   apply from: file("$rootDir/ktlint.gradle")
 }
 
-subprojects { project ->
+// Configure all projects
 
+subprojects { project ->
   switch (POM_PACKAGING) {
     case "jar":
       logger.info("Configuring ${project} (${POM_PACKAGING}) as jar project")
@@ -270,7 +271,7 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
 
     default:
       throw new IllegalStateException(
-        "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
+              "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
   }
 
   task javadocsJar(type: Jar) {
@@ -282,6 +283,36 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     from "src/main/java", "src/main/resources"
   }
 
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    google()
+
+    // Sonatype snapshots
+    maven {
+      url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+
+    if (useNYPLNexusDepend) {
+      maven {
+        credentials {
+          username findProperty("org.librarysimplified.nexus.username")
+          password findProperty("org.librarysimplified.nexus.password")
+        }
+        url "https://nexus.librarysimplified.org:8443/nexus/content/groups/external/"
+      }
+    }
+
+    maven { url "https://jitpack.io" }
+    jcenter()
+  }
+}
+
+// Configure publishing for appropriate projects
+
+configure(subprojects.findAll { it.POM_PACKAGING != "apk" }) { project ->
+  logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
+
   apply plugin: "digital.wup.android-maven-publish"
   apply plugin: "signing"
 
@@ -292,9 +323,6 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
         switch (POM_PACKAGING) {
           case "jar":
             from components.java
-            break
-
-          case "apk":
             break
 
           case "aar":
@@ -408,29 +436,5 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
       }
       return !isSnapshot
     }
-  }
-
-  repositories {
-    mavenLocal()
-    mavenCentral()
-
-    // Sonatype snapshots
-    maven {
-      url "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-
-    if (useNYPLNexusDepend) {
-      maven {
-        credentials {
-          username findProperty("org.librarysimplified.nexus.username")
-          password findProperty("org.librarysimplified.nexus.password")
-        }
-        url "https://nexus.librarysimplified.org:8443/nexus/content/groups/external/"
-      }
-    }
-
-    maven { url "https://jitpack.io" }
-    jcenter()
-    google()
   }
 }
