@@ -67,8 +67,7 @@ class AgeFragment : Fragment() {
         nextAction = AgeFragmentDirections.actionNext()
         navController.navigate(nextAction)
       } else {
-        val data = Intent()
-        requireActivity().setResult(Activity.RESULT_CANCELED, data)
+        requireActivity().setResult(Activity.RESULT_CANCELED)
         requireActivity().finish()
       }
     }

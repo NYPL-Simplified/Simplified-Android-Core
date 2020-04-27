@@ -1,5 +1,6 @@
 package org.nypl.simplified.cardcreator.ui
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -93,8 +94,10 @@ class ReviewFragment : Fragment() {
         .setPositiveButton(getString(R.string.try_again)) { _, _ ->
           createPatron()
         }
-        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-          dialog.cancel()
+        .setNegativeButton(getString(R.string.quit)) { _, _ ->
+          Cache(requireContext()).clear()
+          requireActivity().setResult(Activity.RESULT_CANCELED)
+          requireActivity().finish()
         }
       val alert = dialogBuilder.create()
       alert.show()
@@ -120,7 +123,7 @@ class ReviewFragment : Fragment() {
         return Patron(
           homeAddress,
           personalInformation.email,
-          "$personalInformation.firstName $personalInformation.lastName",
+          "${personalInformation.firstName} ${personalInformation.lastName}",
           accountInformation.pin,
           accountInformation.username,
           workAddress)
@@ -129,7 +132,7 @@ class ReviewFragment : Fragment() {
         return Patron(
           homeAddress,
           personalInformation.email,
-          "$personalInformation.firstName $personalInformation.lastName",
+          "${personalInformation.firstName} ${personalInformation.lastName}",
           accountInformation.pin,
           accountInformation.username,
           workAddress)
@@ -138,7 +141,7 @@ class ReviewFragment : Fragment() {
         return Patron(
           homeAddress,
           personalInformation.email,
-          "$personalInformation.firstName $personalInformation.lastName",
+          "${personalInformation.firstName} ${personalInformation.lastName}",
           accountInformation.pin,
           accountInformation.username,
           schoolAddress)
@@ -179,7 +182,7 @@ class ReviewFragment : Fragment() {
       }
     }
     val personalInformation = cache.getPersonalInformation()
-    binding.nameTv.text = personalInformation.firstName + " " + personalInformation.lastName
+    binding.nameTv.text = "${personalInformation.firstName} ${personalInformation.lastName}"
     binding.emailTv.text = personalInformation.email
     val accountInformation = cache.getAccountInformation()
     binding.usernameTv.text = accountInformation.username
