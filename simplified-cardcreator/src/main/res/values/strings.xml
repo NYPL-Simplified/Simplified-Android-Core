@@ -9,6 +9,7 @@
     <string name="sign_up">Sign Up for a Library Card</string>
 
     <!-- Review -->
+    <string name="quit">Quit</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="email">Email</string>
