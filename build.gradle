@@ -105,7 +105,6 @@ ext.libraries = [
   androidXLegacyPreferenceV14      : "androidx.legacy:legacy-preference-v14:1.0.0",
   androidXLegacySupport            : "androidx.legacy:legacy-support-v4:1.0.0",
   androidXLifecycle                : "androidx.lifecycle:lifecycle-extensions:2.1.0",
-  androidXMultidex                 : "androidx.multidex:multidex:2.0.0",
   androidXPaging                   : "androidx.paging:paging-runtime-ktx:2.1.0",
   androidXPreference               : "androidx.preference:preference-ktx:1.1.0",
   androidXRecyclerView             : "androidx.recyclerview:recyclerview:1.1.0",
@@ -245,7 +244,6 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
         buildToolsVersion androidBuildToolsVersion
 
         defaultConfig {
-          multiDexEnabled true
           minSdkVersion androidMinimumSDKVersion
           targetSdkVersion androidTargetSDKVersion
           testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
