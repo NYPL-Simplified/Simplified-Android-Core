@@ -234,7 +234,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
-|[org.librarysimplified.app.vanilla.with_profiles](simplified-app-vanilla-with-profiles)|Vanilla application [with profiles enabled]|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
 |[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
 |[org.librarysimplified.books.bundled.api](simplified-books-bundled-api)|Bundled books API|

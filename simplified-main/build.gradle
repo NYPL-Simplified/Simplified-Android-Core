@@ -63,7 +63,6 @@ dependencies {
 
   api libraries.androidAsync
   api libraries.androidXAppCompat
-  api libraries.androidXMultidex
   api libraries.kotlinStdlib
   api libraries.slf4j
 
