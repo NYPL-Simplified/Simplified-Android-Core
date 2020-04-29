@@ -288,6 +288,9 @@ class CatalogFragmentLoginDialog : Fragment() {
             this.password.visibility = View.VISIBLE
           }
         }
+
+        this.userNameLabel.text = auth.labels["LOGIN"] ?: this.userNameLabel.text
+        this.passwordLabel.text = auth.labels["PASSWORD"] ?: this.passwordLabel.text
       }
     }
 
