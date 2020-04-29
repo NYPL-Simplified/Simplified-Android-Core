@@ -8,11 +8,9 @@ import java.net.URI
 
 /**
  * The metadata associated with the description of an account provider.
- *
- * @see AccountProviderDescriptionType
  */
 
-data class AccountProviderDescriptionMetadata(
+data class AccountProviderDescription(
 
   /**
    * The unique identifier for the account provider.
@@ -62,12 +60,12 @@ data class AccountProviderDescriptionMetadata(
 
   val isProduction: Boolean
 
-) : Comparable<AccountProviderDescriptionMetadata> {
+) : Comparable<AccountProviderDescription> {
 
   private val authenticationDocumentType =
     MIMEType("application", "vnd.opds.authentication.v1.0+json", mapOf())
 
-  override fun compareTo(other: AccountProviderDescriptionMetadata): Int =
+  override fun compareTo(other: AccountProviderDescription): Int =
     this.title.compareTo(other.title)
 
   /**

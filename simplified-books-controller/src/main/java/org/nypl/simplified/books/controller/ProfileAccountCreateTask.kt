@@ -46,7 +46,8 @@ class ProfileAccountCreateTask(
       this.taskRecorder.currentStepFailedAppending(
         this.strings.unexpectedException,
         AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
-        e)
+        e
+      )
 
       this.publishFailureEvent(this.taskRecorder.currentStep()!!)
       this.taskRecorder.finishFailure()
@@ -62,21 +63,30 @@ class ProfileAccountCreateTask(
       val profile = this.profiles.currentProfileUnsafe()
       profile.createAccount(accountProvider)
     } catch (e: Exception) {
-      this.publishFailureEvent(this.taskRecorder.currentStepFailedAppending(
-        this.strings.creatingAccountFailed,
-        AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
-        e))
+      this.publishFailureEvent(
+        this.taskRecorder.currentStepFailedAppending(
+          this.strings.creatingAccountFailed,
+          AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
+          e
+        )
+      )
       throw e
     }
   }
 
   private fun publishSuccessEvent(account: AccountType) =
-    this.accountEvents.onNext(AccountEventCreationSucceeded(
-      this.strings.creatingAccountSucceeded, account.id))
+    this.accountEvents.onNext(
+      AccountEventCreationSucceeded(
+        this.strings.creatingAccountSucceeded, account.id
+      )
+    )
 
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.onNext(AccountEventCreationFailed(
-      step.resolution.message, this.taskRecorder.finishFailure<AccountType>()))
+    this.accountEvents.onNext(
+      AccountEventCreationFailed(
+        step.resolution.message, this.taskRecorder.finishFailure<AccountType>()
+      )
+    )
 
   private fun publishProgressEvent(step: TaskStep<AccountCreateErrorDetails>) =
     this.accountEvents.onNext(AccountEventCreationInProgress(step.description))
@@ -90,9 +100,9 @@ class ProfileAccountCreateTask(
           ?: throw AccountUnknownProviderException()
 
       val resolution =
-        description.resolve { _, status ->
+        this.accountProviders.resolve({ _, status ->
           this.publishProgressEvent(this.taskRecorder.beginNewStep(status))
-        }
+        }, description)
 
       return when (resolution) {
         is TaskResult.Success -> resolution.result
@@ -117,15 +127,19 @@ class ProfileAccountCreateTask(
 
           this.taskRecorder.currentStepFailed(
             message = message.toString(),
-            errorValue = AccountProviderResolutionFailed(resolution.errors()))
+            errorValue = AccountProviderResolutionFailed(resolution.errors())
+          )
           throw AccountUnresolvableProviderException(message.toString())
         }
       }
     } catch (e: Exception) {
-      this.publishFailureEvent(this.taskRecorder.currentStepFailedAppending(
-        this.strings.resolvingAccountProviderFailed,
-        AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
-        e))
+      this.publishFailureEvent(
+        this.taskRecorder.currentStepFailedAppending(
+          this.strings.resolvingAccountProviderFailed,
+          AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
+          e
+        )
+      )
       throw e
     }
   }

@@ -1,4 +1,4 @@
-package org.nypl.simplified.accounts.source.resolution
+package org.nypl.simplified.accounts.source.spi
 
 import android.content.res.Resources
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType

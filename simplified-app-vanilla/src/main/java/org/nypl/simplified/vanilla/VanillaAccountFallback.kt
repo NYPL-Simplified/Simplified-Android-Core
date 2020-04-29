@@ -1,9 +1,9 @@
 package org.nypl.simplified.vanilla
 
 import org.joda.time.DateTime
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderFallbackType
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderType
 import java.net.URI
 
@@ -14,7 +14,7 @@ import java.net.URI
 class VanillaAccountFallback : AccountProviderFallbackType {
 
   override fun get(): AccountProviderType {
-    return AccountProviderImmutable(
+    return AccountProvider(
       addAutomatically = false,
       annotationsURI = null,
       authenticationDocumentURI = URI.create("https://circulation.librarysimplified.org/CLASSICS/authentication_document"),
@@ -26,6 +26,7 @@ class VanillaAccountFallback : AccountProviderFallbackType {
       displayName = "The SimplyE Collection",
       eula = null,
       id = URI.create("urn:uuid:56906f26-2c9a-4ae9-bd02-552557720b99"),
+      idNumeric = -1,
       isProduction = true,
       license = URI.create("http://www.librarysimplified.org/iclicenses.html"),
       loansURI = URI.create("https://circulation.librarysimplified.org/CLASSICS/loans/"),
@@ -37,6 +38,7 @@ class VanillaAccountFallback : AccountProviderFallbackType {
       supportEmail = "mailto:gethelp+simplye-collection@nypl.org",
       supportsReservations = false,
       supportsSimplyESynchronization = false,
-      updated = DateTime.parse("2019-07-08T16:32:52+00:00"))
+      updated = DateTime.parse("2019-07-08T16:32:52+00:00")
+    )
   }
 }

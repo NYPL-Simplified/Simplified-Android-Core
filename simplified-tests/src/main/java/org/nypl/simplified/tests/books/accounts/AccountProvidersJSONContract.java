@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.nypl.simplified.accounts.api.AccountProvider;
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription;
 import org.nypl.simplified.accounts.api.AccountProviderType;
 import org.nypl.simplified.accounts.json.AccountProvidersJSON;
@@ -66,7 +67,7 @@ public abstract class AccountProvidersJSONContract {
   @Test
   public final void testAll()
       throws Exception {
-    final Map<URI, AccountProviderType> c =
+    final Map<URI, AccountProvider> c =
         AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
             readAllFromResource("providers-all.json"));
 

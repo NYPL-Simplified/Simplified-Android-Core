@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import org.nypl.drm.core.AdobeVendorID
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParserType
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.links.Link
 import org.nypl.simplified.links.json.LinkParsing
@@ -179,7 +179,7 @@ class AccountProviderDescriptionCollectionParser internal constructor(
     }
   }
 
-  private fun parseCatalogs(root: ObjectNode): List<AccountProviderDescriptionMetadata> {
+  private fun parseCatalogs(root: ObjectNode): List<AccountProviderDescription> {
     val array = try {
       JSONParserUtilities.getArray(root, "catalogs")
     } catch (e: Exception) {
@@ -197,7 +197,7 @@ class AccountProviderDescriptionCollectionParser internal constructor(
     }
   }
 
-  private fun parseAccountProviderDescriptionMetadata(node: JsonNode): AccountProviderDescriptionMetadata? {
+  private fun parseAccountProviderDescriptionMetadata(node: JsonNode): AccountProviderDescription? {
     return this.metaParsers.createParserForObject(
       uri = this.uri,
       objectNode = JSONParserUtilities.checkObject(null, node),

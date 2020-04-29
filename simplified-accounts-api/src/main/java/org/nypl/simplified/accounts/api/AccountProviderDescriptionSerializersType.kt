@@ -8,11 +8,11 @@ import java.net.URI
  * A provider of account provider description serializers.
  */
 
-interface AccountProviderDescriptionSerializersType : SerializersType<AccountProviderDescriptionMetadata> {
+interface AccountProviderDescriptionSerializersType : SerializersType<AccountProviderDescription> {
 
   override fun createSerializer(
     uri: URI,
     stream: OutputStream,
-    document: AccountProviderDescriptionMetadata
+    document: AccountProviderDescription
   ): AccountProviderDescriptionSerializerType
 }

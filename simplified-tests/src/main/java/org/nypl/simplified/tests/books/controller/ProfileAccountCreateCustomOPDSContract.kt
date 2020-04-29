@@ -17,7 +17,7 @@ import org.junit.rules.ExpectedException
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseIOException
 import org.nypl.simplified.accounts.registry.AccountProviderRegistry
@@ -47,6 +47,7 @@ import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.tests.MockAccountProviderRegistry
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.nypl.simplified.tests.strings.MockAccountCreationStringResources
@@ -90,7 +91,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   private lateinit var clock: () -> Instant
   private lateinit var contentResolver: ContentResolver
   private lateinit var context: Context
-  private lateinit var defaultProvider: AccountProviderImmutable
+  private lateinit var defaultProvider: AccountProvider
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
   private lateinit var downloader: DownloaderType
@@ -279,10 +280,17 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     Mockito.`when`(account.id)
       .thenReturn(accountId)
 
+    val accountProvider =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+    val accountProviders =
+      MockAccountProviderRegistry.singleton(accountProvider)
+
+    accountProviders.returnForNextResolution(accountProvider)
+
     val task =
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
-        accountProviderRegistry = this.accountProviderRegistry,
+        accountProviderRegistry = accountProviders,
         authDocumentParsers = this.authDocumentParsers,
         http = this.http,
         opdsURI = opdsURI,
@@ -399,17 +407,25 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     Mockito.`when`(profile.createAccount(anyNonNull()))
       .thenThrow(AccountsDatabaseIOException("FAILED!", IOException()))
 
+    val accountProvider =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+    val accountProviders =
+      MockAccountProviderRegistry.singleton(accountProvider)
+
+    accountProviders.returnForNextResolution(accountProvider)
+
     val task =
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
-        accountProviderRegistry = this.accountProviderRegistry,
+        accountProviderRegistry = accountProviders,
         authDocumentParsers = this.authDocumentParsers,
         http = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
         resolutionStrings = this.accountProviderResolutionStrings,
-        strings = this.profileAccountCreationStrings)
+        strings = this.profileAccountCreationStrings
+      )
 
     val result = task.call()
     val failure = result as TaskResult.Failure

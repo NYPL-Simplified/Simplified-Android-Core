@@ -1,18 +1,17 @@
-package org.nypl.simplified.accounts.source.resolution
+package org.nypl.simplified.accounts.source.nyplregistry
 
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.ANONYMOUS_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.AuthDocumentParseFailed
 import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.AuthDocumentUnusable
@@ -42,21 +41,20 @@ import java.net.URI
 import java.util.Locale
 
 /**
- * An account provider description augmented with the logic needed to resolve the description
- * into a full provider using standard NYPL logic.
+ * The logic needed to resolve a description into a full provider using standard NYPL logic.
  */
 
-class AccountProviderSourceStandardDescription(
+class AccountProviderResolution(
   private val stringResources: AccountProviderResolutionStringsType,
   private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val http: HTTPType,
-  override val metadata: AccountProviderDescriptionMetadata
-) : AccountProviderDescriptionType {
+  private val description: AccountProviderDescription
+) {
 
   private val logger =
-    LoggerFactory.getLogger(AccountProviderSourceStandardDescription::class.java)
+    LoggerFactory.getLogger(AccountProviderResolution::class.java)
 
-  override fun resolve(onProgress: AccountProviderResolutionListenerType):
+  fun resolve(onProgress: AccountProviderResolutionListenerType):
     TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
     val taskRecorder =
       TaskRecorder.create<AccountProviderResolutionErrorDetails>()
@@ -64,7 +62,7 @@ class AccountProviderSourceStandardDescription(
     return try {
       this.logger.debug("starting resolution")
       taskRecorder.beginNewStep(this.stringResources.resolving)
-      onProgress.invoke(this.metadata.id, this.stringResources.resolving)
+      onProgress.invoke(this.description.id, this.stringResources.resolving)
 
       val authDocument =
         this.fetchAuthDocument(taskRecorder, onProgress)
@@ -92,21 +90,10 @@ class AccountProviderSourceStandardDescription(
        */
 
       val catalogURI =
-        authDocument?.startURI
-          ?: this.metadata.catalogURI
-            ?.hrefURI
-          ?: this.run {
-            val message = this.stringResources.resolvingAuthDocumentNoStartURI
-            taskRecorder.currentStepFailed(
-              message = message,
-              errorValue = AuthDocumentUnusable(
-                message = message,
-                accountProviderID = this.metadata.id.toASCIIString(),
-                accountProviderTitle = this.metadata.title
-              ))
-            onProgress.invoke(this.metadata.id, message)
-            throw IOException()
-          }
+        this.findCatalogURI(authDocument, taskRecorder, onProgress)
+
+      val title =
+        this.findTitle(authDocument)
 
       /*
        * The annotations URI can only be located by an authenticated user. We'll update
@@ -116,20 +103,21 @@ class AccountProviderSourceStandardDescription(
       val annotationsURI = null
 
       val accountProvider =
-        AccountProviderImmutable(
-          addAutomatically = this.metadata.isAutomatic,
+        AccountProvider(
+          addAutomatically = this.description.isAutomatic,
           annotationsURI = annotationsURI,
           authentication = authenticationDescription,
-          authenticationDocumentURI = this.metadata.authenticationDocumentURI?.hrefURI,
+          authenticationDocumentURI = this.description.authenticationDocumentURI?.hrefURI,
           cardCreatorURI = authDocument?.cardCreatorURI,
           catalogURI = catalogURI,
-          displayName = this.metadata.title,
+          displayName = title,
           eula = authDocument?.eulaURI,
-          id = this.metadata.id,
-          isProduction = this.metadata.isProduction,
+          id = this.description.id,
+          idNumeric = -1,
+          isProduction = this.description.isProduction,
           license = authDocument?.licenseURI,
           loansURI = authDocument?.loansURI,
-          logo = authDocument?.logoURI ?: this.metadata.logoURI?.hrefURI,
+          logo = authDocument?.logoURI ?: this.description.logoURI?.hrefURI,
           mainColor = authDocument?.mainColor ?: "red",
           patronSettingsURI = authDocument?.patronSettingsURI,
           privacyPolicy = authDocument?.privacyPolicyURI,
@@ -137,7 +125,8 @@ class AccountProviderSourceStandardDescription(
           supportEmail = authDocument?.supportURI?.toString(),
           supportsReservations = supportsReservations,
           supportsSimplyESynchronization = false,
-          updated = updated)
+          updated = updated
+        )
 
       taskRecorder.finishSuccess(accountProvider)
     } catch (e: Exception) {
@@ -147,12 +136,57 @@ class AccountProviderSourceStandardDescription(
         errorValue = UnexpectedException(
           message = this.stringResources.resolvingUnexpectedException,
           exception = e,
-          accountProviderID = this.metadata.id.toASCIIString(),
-          accountProviderTitle = this.metadata.title
+          accountProviderID = this.description.id.toASCIIString(),
+          accountProviderTitle = this.description.title
         ),
         exception = e)
       taskRecorder.finishFailure()
     }
+  }
+
+  private fun findTitle(
+    authDocument: AuthenticationDocument?
+  ): String {
+    val authTitle = authDocument?.title
+    if (authTitle != null) {
+      this.logger.debug("took title from authentication document")
+      return authTitle
+    }
+
+    this.logger.debug("took title from metadata")
+    return this.description.title
+  }
+
+  private fun findCatalogURI(
+    authDocument: AuthenticationDocument?,
+    taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>,
+    onProgress: AccountProviderResolutionListenerType
+  ): URI {
+    this.logger.debug("finding catalog URI")
+
+    val authDocumentStartURI = authDocument?.startURI
+    if (authDocumentStartURI != null) {
+      this.logger.debug("took catalog URI from authentication document")
+      return authDocumentStartURI
+    }
+
+    val metadataCatalogURI = this.description.catalogURI?.hrefURI
+    if (metadataCatalogURI != null) {
+      this.logger.debug("took catalog URI from metadata")
+      return metadataCatalogURI
+    }
+
+    val message = this.stringResources.resolvingAuthDocumentNoStartURI
+    taskRecorder.currentStepFailed(
+      message = message,
+      errorValue = AuthDocumentUnusable(
+        message = message,
+        accountProviderID = this.description.id.toASCIIString(),
+        accountProviderTitle = this.description.title
+      )
+    )
+    onProgress.invoke(this.description.id, message)
+    throw IOException()
   }
 
   private fun supportsReservations(authDocument: AuthenticationDocument): Boolean {
@@ -184,8 +218,8 @@ class AccountProviderSourceStandardDescription(
     val message = this.stringResources.resolvingAuthDocumentNoUsableAuthenticationTypes
     taskRecorder.currentStepFailed(message, AuthDocumentUnusable(
       message = message,
-      accountProviderTitle = this.metadata.title,
-      accountProviderID = this.metadata.id.toASCIIString()
+      accountProviderTitle = this.description.title,
+      accountProviderID = this.description.id.toASCIIString()
     ))
     throw IOException(message)
   }
@@ -246,8 +280,8 @@ class AccountProviderSourceStandardDescription(
       val message = this.stringResources.resolvingAuthDocumentCOPPAAgeGateMalformed
       taskRecorder.currentStepFailed(message, AuthDocumentUnusable(
         message = message,
-        accountProviderID = this.metadata.id.toASCIIString(),
-        accountProviderTitle = this.metadata.title
+        accountProviderID = this.description.id.toASCIIString(),
+        accountProviderTitle = this.description.title
       ))
       throw IOException(message)
     }
@@ -259,10 +293,13 @@ class AccountProviderSourceStandardDescription(
   ): AuthenticationDocument? {
     this.logger.debug("fetching authentication document")
     taskRecorder.beginNewStep(this.stringResources.resolvingAuthDocument)
-    onProgress.invoke(this.metadata.id, this.stringResources.resolvingAuthDocument)
+    onProgress.invoke(this.description.id, this.stringResources.resolvingAuthDocument)
 
-    val targetLink =
-      this.metadata.authenticationDocumentURI ?: return null
+    val targetLink = this.description.authenticationDocumentURI
+    if (targetLink == null) {
+      this.logger.debug("description did not contain an authentication document link")
+      return null
+    }
 
     return when (targetLink) {
       is Link.LinkBasic -> {
@@ -273,8 +310,8 @@ class AccountProviderSourceStandardDescription(
               errorValue = HTTPRequestFailed(
                 message = result.message,
                 errorCode = result.status,
-                accountProviderID = this.metadata.id.toASCIIString(),
-                accountProviderTitle = this.metadata.title,
+                accountProviderID = this.description.id.toASCIIString(),
+                accountProviderTitle = this.description.title,
                 problemReport = this.someOrNull(result.problemReport)))
             throw IOException(result.message)
           }
@@ -295,8 +332,8 @@ class AccountProviderSourceStandardDescription(
           message = message,
           errorValue = AccountProviderResolutionErrorDetails.AuthDocumentUnusableLink(
             message = message,
-            accountProviderID = this.metadata.id.toASCIIString(),
-            accountProviderTitle = this.metadata.title))
+            accountProviderID = this.description.id.toASCIIString(),
+            accountProviderTitle = this.description.title))
         throw IOException(message)
       }
     }
@@ -319,8 +356,8 @@ class AccountProviderSourceStandardDescription(
             message = this.stringResources.resolvingAuthDocumentParseFailed,
             errorValue = AuthDocumentParseFailed(
               message = this.stringResources.resolvingAuthDocumentParseFailed,
-              accountProviderTitle = this.metadata.title,
-              accountProviderID = this.metadata.id.toASCIIString(),
+              accountProviderTitle = this.description.title,
+              accountProviderID = this.description.id.toASCIIString(),
               warnings = parseResult.warnings,
               errors = parseResult.errors))
           throw IOException(this.stringResources.resolvingAuthDocumentParseFailed)

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 
@@ -15,9 +15,9 @@ import org.nypl.simplified.ui.images.ImageLoaderType
  */
 
 class SettingsAccountProviderDescriptionAdapter(
-  private val accounts: List<AccountProviderDescriptionType>,
+  private val accounts: List<AccountProviderDescription>,
   private val imageLoader: ImageLoaderType,
-  private val onItemClicked: (AccountProviderDescriptionType) -> Unit
+  private val onItemClicked: (AccountProviderDescription) -> Unit
 ) : RecyclerView.Adapter<SettingsAccountProviderDescriptionAdapter.AccountViewHolder>() {
 
   override fun onCreateViewHolder(
@@ -41,7 +41,7 @@ class SettingsAccountProviderDescriptionAdapter(
   ) {
     val account = this.accounts[position]
     holder.parent.setOnClickListener { this.onItemClicked.invoke(account) }
-    holder.accountTitleView.text = account.metadata.title
+    holder.accountTitleView.text = account.title
     holder.accountSubtitleView.text = ""
 
     ImageAccountIcons.loadAccountLogoIntoView(

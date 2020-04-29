@@ -1,6 +1,6 @@
 package org.nypl.simplified.accounts.json
 
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionSerializerType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionSerializersType
 import java.io.OutputStream
@@ -17,7 +17,7 @@ class AccountProviderDescriptionSerializers : AccountProviderDescriptionSerializ
   override fun createSerializer(
     uri: URI,
     stream: OutputStream,
-    document: AccountProviderDescriptionMetadata
+    document: AccountProviderDescription
   ): AccountProviderDescriptionSerializerType {
     return AccountProviderDescriptionSerializer(uri, stream, document)
   }

@@ -8,18 +8,19 @@ import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.Duration
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSerializersType
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
+import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerConnectionFailure
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerReturnedError
-import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceResolutionStrings
-import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceStandardDescription
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceResolutionStrings
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.files.FileUtilities
@@ -30,6 +31,7 @@ import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.parser.api.ParseResult
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -94,7 +96,10 @@ class AccountProviderSourceNYPLRegistry(
 
   override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
     if (this.stringResources == null) {
-      this.stringResources = AccountProviderSourceResolutionStrings(context.resources)
+      this.stringResources =
+        AccountProviderSourceResolutionStrings(
+          context.resources
+        )
     }
 
     val files = this.cacheFiles(context)
@@ -110,11 +115,11 @@ class AccountProviderSourceNYPLRegistry(
         val lastModifiedTime = DateTime(files.file.lastModified(), DateTimeZone.UTC)
         val age = Duration(lastModifiedTime, now)
 
-        if (age.isShorterThan(defaultCacheDuration)) {
-          logger.debug("disk cache is fresh; last-modified={}", lastModifiedTime)
+        if (age.isShorterThan(this.defaultCacheDuration)) {
+          this.logger.debug("disk cache is fresh; last-modified={}", lastModifiedTime)
           return SourceResult.SourceSucceeded(diskResults)
         } else {
-          logger.debug("disk cache is expired; last-modified={}", lastModifiedTime)
+          this.logger.debug("disk cache is expired; last-modified={}", lastModifiedTime)
         }
       }
 
@@ -139,10 +144,32 @@ class AccountProviderSourceNYPLRegistry(
     }
   }
 
+  override fun canResolve(description: AccountProviderDescription): Boolean {
+
+    /*
+     * We assume that the NYPL registry can always resolve any account description.
+     */
+
+    return true
+  }
+
+  override fun resolve(
+    onProgress: AccountProviderResolutionListenerType,
+    description: AccountProviderDescription
+  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+    return AccountProviderResolution(
+      stringResources = this.stringResources!!,
+      authDocumentParsers = this.authDocumentParsers,
+      http = this.http,
+      description = description
+    ).resolve(onProgress)
+  }
+
   private fun cacheFiles(context: Context): CacheFiles {
     return CacheFiles(
       file = File(context.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json"),
-      fileTemp = File(context.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json.tmp"))
+      fileTemp = File(context.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json.tmp")
+    )
   }
 
   /**
@@ -153,9 +180,8 @@ class AccountProviderSourceNYPLRegistry(
 
   private fun cacheServerResults(
     cacheFiles: CacheFiles,
-    mergedResults: Map<URI, AccountProviderDescriptionType>
+    mergedResults: Map<URI, AccountProviderDescription>
   ) {
-
     try {
       this.logger.debug("serializing cache: {}", cacheFiles.fileTemp)
 
@@ -165,9 +191,10 @@ class AccountProviderSourceNYPLRegistry(
             AccountProviderDescriptionCollection.Metadata(null, "")
           val collection =
             AccountProviderDescriptionCollection(
-              providers = mergedResults.values.map { p -> p.metadata },
+              providers = mergedResults.values.toList(),
               links = listOf(),
-              metadata = meta)
+              metadata = meta
+            )
           val serializer =
             this.serializers.createSerializer(cacheFiles.fileTemp.toURI(), stream, collection)
           serializer.serialize()
@@ -181,16 +208,16 @@ class AccountProviderSourceNYPLRegistry(
   }
 
   private fun mergeResults(
-    diskResults: Map<URI, AccountProviderDescriptionType>,
-    serverResults: Map<URI, AccountProviderDescriptionType>
-  ): Map<URI, AccountProviderDescriptionType> =
+    diskResults: Map<URI, AccountProviderDescription>,
+    serverResults: Map<URI, AccountProviderDescription>
+  ): Map<URI, AccountProviderDescription> =
     diskResults.plus(serverResults)
 
   /**
    * Fetch the set of serialized provider descriptions.
    */
 
-  private fun fetchDiskResults(cacheFiles: CacheFiles): Map<URI, AccountProviderDescriptionType> {
+  private fun fetchDiskResults(cacheFiles: CacheFiles): Map<URI, AccountProviderDescription> {
     this.logger.debug("fetching disk cache: {}", cacheFiles.file)
 
     return try {
@@ -214,27 +241,15 @@ class AccountProviderSourceNYPLRegistry(
             this.logger.debug(
               "loaded {} cached providers ({} warnings)",
               result.result.providers.size,
-              result.warnings.size)
+              result.warnings.size
+            )
 
             val countProduction = result.result.providers.count { it.isProduction }
             val countTesting = result.result.providers.count { !it.isProduction }
 
             this.logger.debug("{} cached production providers", countProduction)
             this.logger.debug("{} cached testing providers", countTesting)
-
-            result.result.providers
-              .map { provider ->
-                Pair(
-                  provider.id,
-                  AccountProviderSourceStandardDescription(
-                    stringResources = this.stringResources!!,
-                    authDocumentParsers = this.authDocumentParsers,
-                    http = this.http,
-                    metadata = provider
-                  )
-                )
-              }
-              .toMap()
+            result.result.providers.associateBy(AccountProviderDescription::id).toMap()
           }
         }
       }
@@ -250,8 +265,8 @@ class AccountProviderSourceNYPLRegistry(
 
   private fun fetchServerResults(
     includeTestingLibraries: Boolean
-  ): Map<URI, AccountProviderDescriptionType> {
-    val results = mutableMapOf<URI, AccountProviderDescriptionMetadata>()
+  ): Map<URI, AccountProviderDescription> {
+    val results = mutableMapOf<URI, AccountProviderDescription>()
 
     this.logger.debug("fetching providers from ${this.uriProduction}")
     this.fetchAndParse(this.uriProduction)
@@ -273,15 +288,7 @@ class AccountProviderSourceNYPLRegistry(
     }
 
     this.logger.debug("categorizing ${results.size} providers")
-    return results
-      .map {
-        AccountProviderSourceStandardDescription(
-          stringResources = this.stringResources!!,
-          authDocumentParsers = this.authDocumentParsers,
-          http = this.http,
-          metadata = it.value
-        )
-      }.associateBy { it.metadata.id }
+    return results.toMap()
   }
 
   private fun fetchAndParse(target: URI): AccountProviderDescriptionCollection {
@@ -290,7 +297,10 @@ class AccountProviderSourceNYPLRegistry(
     }
   }
 
-  private fun parseFromStream(target: URI, stream: InputStream): AccountProviderDescriptionCollection {
+  private fun parseFromStream(
+    target: URI,
+    stream: InputStream
+  ): AccountProviderDescriptionCollection {
     return this.parsers.createParser(target, stream, warningsAsErrors = false).use { parser ->
       when (val parseResult = parser.parse()) {
         is ParseResult.Success ->
@@ -301,7 +311,8 @@ class AccountProviderSourceNYPLRegistry(
           throw AccountProviderSourceNYPLRegistryException.ServerReturnedUnparseableData(
             uri = target,
             warnings = parseResult.warnings,
-            errors = parseResult.errors)
+            errors = parseResult.errors
+          )
         }
       }
     }
@@ -311,9 +322,11 @@ class AccountProviderSourceNYPLRegistry(
     source: String,
     parseResult: ParseResult.Failure<AccountProviderDescriptionCollection>
   ) {
-    this.logger.debug("failed to parse providers from $source ({} errors, {} warnings)",
+    this.logger.debug(
+      "failed to parse providers from $source ({} errors, {} warnings)",
       parseResult.errors.size,
-      parseResult.warnings.size)
+      parseResult.warnings.size
+    )
 
     parseResult.errors.forEach { this.logger.error("parse error: {}: ", it.message) }
     parseResult.warnings.forEach { this.logger.warn("parse warning: {}: ", it.message) }
@@ -328,11 +341,13 @@ class AccountProviderSourceNYPLRegistry(
           uri = target,
           errorCode = connectResult.status,
           message = connectResult.message,
-          problemReport = this.someOrNull(connectResult.problemReport))
+          problemReport = this.someOrNull(connectResult.problemReport)
+        )
       is HTTPResultException ->
         throw ServerConnectionFailure(
           uri = target,
-          cause = connectResult.error)
+          cause = connectResult.error
+        )
 
       // XXX: Somebody should seal the HTTPResultType class...
       else -> throw UnreachableCodeException()

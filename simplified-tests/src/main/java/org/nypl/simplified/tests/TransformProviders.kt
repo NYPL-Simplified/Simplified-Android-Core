@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.joda.time.DateTime
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.json.AccountProvidersJSON
 import java.io.File
 import java.io.FileOutputStream
@@ -24,7 +24,7 @@ class TransformProviders {
       val entries =
         mapper.readValue<Array<Entry>>(File(file), object : TypeReference<Array<Entry>>() {})
 
-      val providers = mutableListOf<AccountProviderImmutable>()
+      val providers = mutableListOf<AccountProvider>()
       for (entry in entries) {
         val authentication =
           if (entry.needsAuth) {
@@ -47,7 +47,7 @@ class TransformProviders {
           }
 
         val provider =
-          AccountProviderImmutable(
+          AccountProvider(
             addAutomatically = false,
             annotationsURI = null,
             authenticationDocumentURI = null,

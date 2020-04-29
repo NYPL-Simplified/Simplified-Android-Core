@@ -4,8 +4,8 @@ import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPreferences
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
@@ -35,7 +35,7 @@ class MockAccount(override val id: AccountID) : AccountType {
           labels = mapOf()
         )
 
-      AccountProviderImmutable(
+      AccountProvider(
         addAutomatically = false,
         annotationsURI = null,
         authentication = authentication,

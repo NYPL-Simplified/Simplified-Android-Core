@@ -96,24 +96,24 @@ class BookSyncTask(
     this.logger.debug("resolving the existing account provider")
 
     val oldProvider = this.account.provider
-    val oldDescription = oldProvider.toDescription()
+    var newDescription =
+      this.accountRegistry.findAccountProviderDescription(oldProvider.id)
+    if (newDescription == null) {
+      this.logger.debug("could not find account description for {} in registry", oldProvider.id)
+      newDescription = oldProvider.toDescription()
+    } else {
+      this.logger.debug("found account description for {} in registry", oldProvider.id)
+    }
+
     val newProviderResult =
-      oldDescription.resolve { accountProvider, message ->
+      this.accountRegistry.resolve({ accountProvider, message ->
         this.logger.debug("[{}]: {}", accountProvider, message)
-      }
+      }, newDescription)
 
     return when (newProviderResult) {
       is TaskResult.Success -> {
         this.logger.debug("successfully resolved the account provider")
-        try {
-          val newProvider = newProviderResult.result
-          this.accountRegistry.updateProvider(newProvider)
-          this.account.setAccountProvider(newProvider)
-          newProvider
-        } catch (e: Exception) {
-          this.logger.error("error saving account provider: ", e)
-          oldProvider
-        }
+        newProviderResult.result
       }
       is TaskResult.Failure -> {
         this.logger.error("failed to resolve account provider")
