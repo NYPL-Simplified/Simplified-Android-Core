@@ -8,10 +8,10 @@ import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.Duration
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSerializersType
-import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
@@ -168,7 +168,8 @@ class AccountProviderSourceNYPLRegistry(
   private fun cacheFiles(context: Context): CacheFiles {
     return CacheFiles(
       file = File(context.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json"),
-      fileTemp = File(context.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json.tmp"))
+      fileTemp = File(context.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json.tmp")
+    )
   }
 
   /**
@@ -192,7 +193,8 @@ class AccountProviderSourceNYPLRegistry(
             AccountProviderDescriptionCollection(
               providers = mergedResults.values.toList(),
               links = listOf(),
-              metadata = meta)
+              metadata = meta
+            )
           val serializer =
             this.serializers.createSerializer(cacheFiles.fileTemp.toURI(), stream, collection)
           serializer.serialize()
@@ -239,7 +241,8 @@ class AccountProviderSourceNYPLRegistry(
             this.logger.debug(
               "loaded {} cached providers ({} warnings)",
               result.result.providers.size,
-              result.warnings.size)
+              result.warnings.size
+            )
 
             val countProduction = result.result.providers.count { it.isProduction }
             val countTesting = result.result.providers.count { !it.isProduction }
@@ -308,7 +311,8 @@ class AccountProviderSourceNYPLRegistry(
           throw AccountProviderSourceNYPLRegistryException.ServerReturnedUnparseableData(
             uri = target,
             warnings = parseResult.warnings,
-            errors = parseResult.errors)
+            errors = parseResult.errors
+          )
         }
       }
     }
@@ -318,9 +322,11 @@ class AccountProviderSourceNYPLRegistry(
     source: String,
     parseResult: ParseResult.Failure<AccountProviderDescriptionCollection>
   ) {
-    this.logger.debug("failed to parse providers from $source ({} errors, {} warnings)",
+    this.logger.debug(
+      "failed to parse providers from $source ({} errors, {} warnings)",
       parseResult.errors.size,
-      parseResult.warnings.size)
+      parseResult.warnings.size
+    )
 
     parseResult.errors.forEach { this.logger.error("parse error: {}: ", it.message) }
     parseResult.warnings.forEach { this.logger.warn("parse warning: {}: ", it.message) }
@@ -335,11 +341,13 @@ class AccountProviderSourceNYPLRegistry(
           uri = target,
           errorCode = connectResult.status,
           message = connectResult.message,
-          problemReport = this.someOrNull(connectResult.problemReport))
+          problemReport = this.someOrNull(connectResult.problemReport)
+        )
       is HTTPResultException ->
         throw ServerConnectionFailure(
           uri = target,
-          cause = connectResult.error)
+          cause = connectResult.error
+        )
 
       // XXX: Somebody should seal the HTTPResultType class...
       else -> throw UnreachableCodeException()

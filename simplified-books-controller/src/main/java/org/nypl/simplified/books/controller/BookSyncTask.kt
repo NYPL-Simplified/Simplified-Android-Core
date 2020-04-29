@@ -113,15 +113,7 @@ class BookSyncTask(
     return when (newProviderResult) {
       is TaskResult.Success -> {
         this.logger.debug("successfully resolved the account provider")
-        try {
-          val newProvider = newProviderResult.result
-          this.accountRegistry.updateProvider(newProvider)
-          this.account.setAccountProvider(newProvider)
-          newProvider
-        } catch (e: Exception) {
-          this.logger.error("error saving account provider: ", e)
-          oldProvider
-        }
+        newProviderResult.result
       }
       is TaskResult.Failure -> {
         this.logger.error("failed to resolve account provider")

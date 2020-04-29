@@ -162,7 +162,11 @@ class AccountProviderRegistry private constructor(
           val result = source.resolve(onProgress, description)
           taskRecorder.addAll(result.steps)
           return when (result) {
-            is TaskResult.Success -> taskRecorder.finishSuccess(result.result)
+            is TaskResult.Success -> {
+              this.updateProvider(result.result)
+              this.updateDescription(result.result.toDescription())
+              taskRecorder.finishSuccess(result.result)
+            }
             is TaskResult.Failure -> taskRecorder.finishFailure()
           }
         }

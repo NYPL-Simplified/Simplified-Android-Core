@@ -295,8 +295,11 @@ class AccountProviderResolution(
     taskRecorder.beginNewStep(this.stringResources.resolvingAuthDocument)
     onProgress.invoke(this.description.id, this.stringResources.resolvingAuthDocument)
 
-    val targetLink =
-      this.description.authenticationDocumentURI ?: return null
+    val targetLink = this.description.authenticationDocumentURI
+    if (targetLink == null) {
+      this.logger.debug("description did not contain an authentication document link")
+      return null
+    }
 
     return when (targetLink) {
       is Link.LinkBasic -> {
