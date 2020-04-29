@@ -64,11 +64,11 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var authentication: ViewGroup
   private lateinit var authenticationBasic: ViewGroup
   private lateinit var authenticationBasicPass: EditText
-  private lateinit var authenticationBasicPassLabel: View
+  private lateinit var authenticationBasicPassLabel: TextView
   private lateinit var authenticationBasicPassListener: OnTextChangeListener
   private lateinit var authenticationBasicShowPass: CheckBox
   private lateinit var authenticationBasicUser: EditText
-  private lateinit var authenticationBasicUserLabel: View
+  private lateinit var authenticationBasicUserLabel: TextView
   private lateinit var authenticationBasicUserListener: OnTextChangeListener
   private lateinit var authenticationCOPPA: ViewGroup
   private lateinit var authenticationCOPPAOver13: Switch
@@ -104,7 +104,7 @@ class SettingsFragmentAccount : Fragment() {
 
     fun create(parameters: SettingsFragmentAccountParameters): SettingsFragmentAccount {
       val arguments = Bundle()
-      arguments.putSerializable(PARAMETERS_ID, parameters)
+      arguments.putSerializable(this.PARAMETERS_ID, parameters)
       val fragment = SettingsFragmentAccount()
       fragment.arguments = arguments
       return fragment
@@ -117,7 +117,7 @@ class SettingsFragmentAccount : Fragment() {
 
     val services = Services.serviceDirectory()
 
-    cardCreatorService = services.optionalService(CardCreatorServiceType::class.java)
+    this.cardCreatorService = services.optionalService(CardCreatorServiceType::class.java)
 
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
@@ -312,13 +312,13 @@ class SettingsFragmentAccount : Fragment() {
 
     this.authenticationCOPPAOver13.setOnClickListener {}
     this.authenticationCOPPAOver13.isChecked = this.isOver13()
-    this.authenticationCOPPAOver13.setOnClickListener(onAgeCheckboxClicked())
+    this.authenticationCOPPAOver13.setOnClickListener(this.onAgeCheckboxClicked())
     this.authenticationCOPPAOver13.isEnabled = true
 
     /*
      * Conditionally enable sign up button
      */
-    if (this.account.provider.cardCreatorURI != null && cardCreatorService != null) {
+    if (this.account.provider.cardCreatorURI != null && this.cardCreatorService != null) {
       this.signUpButton.isEnabled = true
       this.signUpLabel.isEnabled = true
     }
@@ -328,11 +328,11 @@ class SettingsFragmentAccount : Fragment() {
      */
 
     this.signUpButton.setOnClickListener {
-      val cardCreator = cardCreatorService
+      val cardCreator = this.cardCreatorService
       if (cardCreator == null) {
         this.logger.error("Card creator not configured")
       } else {
-        cardCreator.openCardCreatorActivity(this, activity, cardCreatorResultCode)
+        cardCreator.openCardCreatorActivity(this, this.activity, this.cardCreatorResultCode)
       }
     }
 
@@ -459,6 +459,11 @@ class SettingsFragmentAccount : Fragment() {
             this.authenticationBasicShowPass.visibility = View.VISIBLE
           }
         }
+
+        this.authenticationBasicUserLabel.text =
+          auth.labels["LOGIN"] ?: this.authenticationBasicUserLabel.text
+        this.authenticationBasicPassLabel.text =
+          auth.labels["PASSWORD"] ?: this.authenticationBasicPassLabel.text
       }
       null -> {
         this.authentication.visibility = View.GONE
@@ -729,7 +734,7 @@ class SettingsFragmentAccount : Fragment() {
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
-    if (requestCode == cardCreatorResultCode) {
+    if (requestCode == this.cardCreatorResultCode) {
 
       when (resultCode) {
         Activity.RESULT_OK -> {
@@ -738,11 +743,11 @@ class SettingsFragmentAccount : Fragment() {
             val pin = data.getStringExtra("pin")
             this.authenticationBasicUser.setText(barcode, TextView.BufferType.EDITABLE)
             this.authenticationBasicPass.setText(pin, TextView.BufferType.EDITABLE)
-            tryLogin()
+            this.tryLogin()
           }
         }
         Activity.RESULT_CANCELED -> {
-          logger.debug("User has exited the card creator")
+          this.logger.debug("User has exited the card creator")
         }
       }
     }
