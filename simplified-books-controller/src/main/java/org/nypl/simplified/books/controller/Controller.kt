@@ -58,6 +58,7 @@ import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
@@ -129,6 +130,7 @@ class Controller private constructor(
   private val bookTaskRequiredServices =
     BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
 
+  private val profileSelectionSubscription: Disposable
   private val accountRegistrySubscription: Disposable
   private val downloads: ConcurrentHashMap<BookID, DownloadType> =
     ConcurrentHashMap(32)
@@ -139,6 +141,9 @@ class Controller private constructor(
   init {
     this.accountRegistrySubscription =
       this.accountProviders.events.subscribe { event -> this.onAccountRegistryEvent(event) }
+    this.profileSelectionSubscription =
+      this.profileEvents.ofType(ProfileSelection.ProfileSelectionCompleted::class.java)
+        .subscribe { event -> this.onProfileSelectionCompleted(event) }
 
     /*
      * If the anonymous profile is enabled, then ensure that it is "selected" and will
@@ -148,6 +153,28 @@ class Controller private constructor(
     if (this.profiles.anonymousProfileEnabled() == ANONYMOUS_PROFILE_ENABLED) {
       this.logger.debug("initializing anonymous profile")
       this.profileSelect(this.profileCurrent().id)
+    }
+  }
+
+  private fun onProfileSelectionCompleted(
+    event: ProfileSelection.ProfileSelectionCompleted
+  ) {
+    if (!this.profileAnyIsCurrent()) {
+      return
+    }
+
+    /*
+     * Attempt to sync books if a profile is selected.
+     */
+
+    try {
+      this.logger.debug("triggering syncing of all accounts in profile")
+      this.profiles.currentProfileUnsafe()
+        .accounts()
+        .values
+        .forEach { this.booksSync(it) }
+    } catch (e: Exception) {
+      this.logger.error("failed to trigger book syncing: ", e)
     }
   }
 
