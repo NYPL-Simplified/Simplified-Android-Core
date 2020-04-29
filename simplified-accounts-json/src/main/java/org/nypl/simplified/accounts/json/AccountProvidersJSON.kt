@@ -196,31 +196,6 @@ object AccountProvidersJSON {
     }
   }
 
-  class AccountProviderParsedData(
-    val id: URI,
-    val idNumeric: Int,
-    val isProduction: Boolean,
-    val displayName: String,
-    val subtitle: String?,
-    val logo: URI?,
-    val authentication: AccountProviderAuthenticationDescription?,
-    val supportsSimplyESynchronization: Boolean,
-    val supportsReservations: Boolean,
-    val loansURI: URI?,
-    val cardCreatorURI: URI?,
-    val authenticationDocumentURI: URI?,
-    val catalogURI: URI,
-    val supportEmail: String?,
-    val eula: URI?,
-    val license: URI?,
-    val privacyPolicy: URI?,
-    val mainColor: String,
-    val addAutomatically: Boolean,
-    val patronSettingsURI: URI?,
-    val annotationsURI: URI?,
-    val updated: DateTime
-  )
-
   private fun parseAuthentication(
     obj: ObjectNode
   ): AccountProviderAuthenticationDescription? {
