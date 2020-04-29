@@ -206,8 +206,8 @@ interface AccountProviderType : Comparable<AccountProviderType> {
       )
     }
 
-    val links =
-      mutableListOf<Link>()
+    val links = mutableListOf<Link>()
+    addLink(links, this.catalogURI, "http://opds-spec.org/catalog")
 
     this.annotationsURI?.let { uri ->
       addLink(links, uri, "http://www.w3.org/ns/oa#annotationService")
