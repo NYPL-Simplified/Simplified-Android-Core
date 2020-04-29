@@ -1,9 +1,9 @@
 package org.nypl.simplified.main
 
+import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
-import androidx.multidex.MultiDexApplication
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.rolling.RollingFileAppender
 import com.google.common.util.concurrent.ListenableFuture
@@ -15,7 +15,7 @@ import org.nypl.simplified.boot.api.BootProcessType
 import org.slf4j.LoggerFactory
 import java.io.File
 
-class MainApplication : MultiDexApplication() {
+class MainApplication : Application() {
 
   companion object {
     private lateinit var INSTANCE: MainApplication

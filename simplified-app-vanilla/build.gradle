@@ -19,7 +19,6 @@ android {
   def version = versionValues()
 
   defaultConfig {
-    multiDexEnabled true
     versionName = version.get(0)
     versionCode = version.get(1)
     setProperty("archivesBaseName", "${versionName}-${versionCode}")
