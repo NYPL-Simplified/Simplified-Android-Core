@@ -1,7 +1,11 @@
 package org.nypl.simplified.accounts.source.spi
 
 import android.content.Context
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
+import org.nypl.simplified.accounts.api.AccountProviderDescription
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
+import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
+import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import java.lang.Exception
 import java.net.URI
 
@@ -26,7 +30,7 @@ interface AccountProviderSourceType {
      */
 
     data class SourceSucceeded(
-      val results: Map<URI, AccountProviderDescriptionType>
+      val results: Map<URI, AccountProviderDescription>
     ) : SourceResult()
 
     /**
@@ -35,7 +39,7 @@ interface AccountProviderSourceType {
      */
 
     data class SourceFailed(
-      val results: Map<URI, AccountProviderDescriptionType>,
+      val results: Map<URI, AccountProviderDescription>,
       val exception: Exception
     ) : SourceResult()
   }
@@ -49,7 +53,26 @@ interface AccountProviderSourceType {
 
   fun load(context: Context, includeTestingLibraries: Boolean): SourceResult
 
-  /** Clear any cached providers. */
+  /**
+   * Clear any cached providers.
+   */
 
   fun clear(context: Context)
+
+  /**
+   * @return `true` if this source can resolve the given description
+   */
+
+  fun canResolve(description: AccountProviderDescription): Boolean
+
+  /**
+   * Resolve the description into a full account provider. The given `onProgress` function
+   * will be called repeatedly during the resolution process to report on the status of the
+   * resolution.
+   */
+
+  fun resolve(
+    onProgress: AccountProviderResolutionListenerType,
+    description: AccountProviderDescription
+  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType>
 }

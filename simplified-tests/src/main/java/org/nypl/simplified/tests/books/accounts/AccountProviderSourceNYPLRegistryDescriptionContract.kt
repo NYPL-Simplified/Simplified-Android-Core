@@ -10,12 +10,12 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
-import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceStandardDescription
+import org.nypl.simplified.accounts.api.AccountProviderDescription
+import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderResolution
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
@@ -71,7 +71,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testMissingURI() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -80,12 +80,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     val result =
       description.resolve { _, message -> this.logger.debug("{}", message) }
@@ -105,7 +106,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentFetchFails() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -118,12 +119,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",
@@ -152,7 +154,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentFetchFailsException() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -165,12 +167,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",
@@ -194,7 +197,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentUnparseable() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -207,12 +210,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",
@@ -247,7 +251,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentOK() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -260,12 +264,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",
@@ -360,7 +365,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
     this.logger.debug("result: {}", result)
     result as TaskResult.Success
 
-    val provider = AccountProviderImmutable(
+    val provider = AccountProvider(
       addAutomatically = false,
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Basic(
@@ -375,7 +380,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),
-      displayName = "Title",
+      displayName = "Auth",
       eula = URI("http://www.example.com/eula.xml"),
       id = URI.create("urn:fake:0"),
       idNumeric = -1,
@@ -402,7 +407,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentOK_COPPA() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -415,12 +420,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",
@@ -510,7 +516,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
     this.logger.debug("result: {}", result)
     result as TaskResult.Success
 
-    val provider = AccountProviderImmutable(
+    val provider = AccountProvider(
       addAutomatically = false,
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
@@ -520,7 +526,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),
-      displayName = "Title",
+      displayName = "Auth",
       eula = URI("http://www.example.com/eula.xml"),
       id = URI.create("urn:fake:0"),
       idNumeric = -1,
@@ -547,7 +553,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentOK_NoAuth() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -560,12 +566,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",
@@ -641,14 +648,14 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
     this.logger.debug("result: {}", result)
     result as TaskResult.Success
 
-    val provider = AccountProviderImmutable(
+    val provider = AccountProvider(
       addAutomatically = false,
       annotationsURI = null,
       authentication = null,
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),
-      displayName = "Title",
+      displayName = "Auth",
       eula = URI("http://www.example.com/eula.xml"),
       id = URI.create("urn:fake:0"),
       idNumeric = -1,
@@ -675,7 +682,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentFails_COPPAMalformed() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -688,12 +695,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",
@@ -785,7 +793,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentFails_OnlyUnrecognizedAuth() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -798,12 +806,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",
@@ -894,7 +903,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
   @Test
   fun testAuthDocumentFails_NoCatalogURI() {
     val metadata =
-      AccountProviderDescriptionMetadata(
+      AccountProviderDescription(
         id = URI.create("urn:fake:0"),
         title = "Title",
         updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
@@ -907,12 +916,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         isProduction = true,
         isAutomatic = false)
 
-    val description = AccountProviderSourceStandardDescription(
-      stringResources = this.stringResources,
-      authDocumentParsers = this.authDocumentParsers,
-      http = this.mockHTTP,
-      metadata = metadata
-    )
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.mockHTTP,
+        description = metadata
+      )
 
     this.mockHTTP.addResponse(
       "http://www.example.com/auth",

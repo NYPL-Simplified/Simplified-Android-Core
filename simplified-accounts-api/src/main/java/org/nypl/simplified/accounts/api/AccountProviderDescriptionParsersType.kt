@@ -9,11 +9,11 @@ import java.net.URI
  * A provider of account provider description parsers.
  */
 
-interface AccountProviderDescriptionParsersType : ParserProviderType<AccountProviderDescriptionMetadata> {
+interface AccountProviderDescriptionParsersType : ParserProviderType<AccountProviderDescription> {
 
   fun createParserForObject(
     uri: URI,
     objectNode: ObjectNode,
     warningsAsErrors: Boolean = false
-  ): ParserType<AccountProviderDescriptionMetadata>
+  ): ParserType<AccountProviderDescription>
 }

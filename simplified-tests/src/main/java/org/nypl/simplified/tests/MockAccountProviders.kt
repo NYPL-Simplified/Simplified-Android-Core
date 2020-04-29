@@ -4,8 +4,8 @@ import android.content.Context
 import com.google.common.base.Preconditions
 import org.joda.time.DateTime
 import org.mockito.Mockito
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.AccountProviderRegistry
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -27,11 +27,14 @@ object MockAccountProviders {
 
     Preconditions.checkState(
       accountProviderDescription != null,
-      "Looking up provider $id must not fail")
+      "Looking up provider $id must not fail"
+    )
 
     val result =
-      accountProviderDescription!!
-        .resolve { providerId, status -> logger.debug("status: {}: {}", providerId, status) }
+      registry.resolve(
+        { providerId, status -> this.logger.debug("status: {}: {}", providerId, status) },
+        accountProviderDescription!!
+      )
 
     return (result as TaskResult.Success).result
   }
@@ -42,8 +45,8 @@ object MockAccountProviders {
   ): AccountProviderType =
     this.findAccountProviderDangerously(registry, URI.create(id))
 
-  fun fakeProvider(providerId: String): AccountProviderImmutable {
-    return AccountProviderImmutable(
+  fun fakeProvider(providerId: String): AccountProvider {
+    return AccountProvider(
       addAutomatically = false,
       annotationsURI = URI.create("http://example.com/accounts0/annotations"),
       authentication = null,
@@ -53,6 +56,7 @@ object MockAccountProviders {
       displayName = "Fake Library",
       eula = null,
       id = URI.create(providerId),
+      idNumeric = -1,
       isProduction = false,
       license = null,
       loansURI = URI.create("http://www.example.com/accounts0/loans.xml"),
@@ -77,10 +81,10 @@ object MockAccountProviders {
   }
 
   fun fakeAccountProviders(): AccountProviderRegistryType {
-    val fake0 = fakeProvider("urn:fake:0")
-    val fake1 = fakeProvider("urn:fake:1")
-    val fake2 = fakeProvider("urn:fake:2")
-    val fake3 = fakeAuthProvider("urn:fake-auth:0")
+    val fake0 = this.fakeProvider("urn:fake:0")
+    val fake1 = this.fakeProvider("urn:fake:1")
+    val fake2 = this.fakeProvider("urn:fake:2")
+    val fake3 = this.fakeAuthProvider("urn:fake-auth:0")
 
     val providers = TreeMap<URI, AccountProviderType>()
     providers[fake0.id] = fake0
@@ -98,12 +102,31 @@ object MockAccountProviders {
     return registry
   }
 
+  fun fakeAccountProviderList(): List<AccountProviderType> {
+    return listOf(
+      this.fakeProvider("urn:fake:0"),
+      this.fakeProvider("urn:fake:1"),
+      this.fakeProvider("urn:fake:2"),
+      this.fakeAuthProvider("urn:fake-auth:0")
+    )
+  }
+
+  fun fakeAccountProviderListWithAutomatic(): List<AccountProviderType> {
+    return listOf(
+      this.fakeProvider("urn:fake:0"),
+      this.fakeProvider("urn:fake:1"),
+      this.fakeProvider("urn:fake:2"),
+      this.fakeAuthProvider("urn:fake-auth:0"),
+      this.fakeProviderAuto("urn:fake:auto-4")
+    )
+  }
+
   fun fakeAccountProvidersWithAutomatic(): AccountProviderRegistryType {
-    val fake0 = fakeProvider("urn:fake:0")
-    val fake1 = fakeProvider("urn:fake:1")
-    val fake2 = fakeProvider("urn:fake:2")
-    val fake3 = fakeAuthProvider("urn:fake-auth:0")
-    val fake4 = fakeProviderAuto("urn:fake:auto-4")
+    val fake0 = this.fakeProvider("urn:fake:0")
+    val fake1 = this.fakeProvider("urn:fake:1")
+    val fake2 = this.fakeProvider("urn:fake:2")
+    val fake3 = this.fakeAuthProvider("urn:fake-auth:0")
+    val fake4 = this.fakeProviderAuto("urn:fake:auto-4")
 
     val providers = TreeMap<URI, AccountProviderType>()
     providers[fake0.id] = fake0
@@ -122,14 +145,14 @@ object MockAccountProviders {
     return registry
   }
 
-  fun fakeProviderAuto(id: String): AccountProviderImmutable {
-    return fakeProvider(id).copy(addAutomatically = true)
+  fun fakeProviderAuto(id: String): AccountProvider {
+    return this.fakeProvider(id).copy(addAutomatically = true)
   }
 
   fun fakeAccountProvidersMissing0(): AccountProviderRegistryType {
-    val fake1 = fakeProvider("urn:fake:1")
-    val fake2 = fakeProvider("urn:fake:2")
-    val fake3 = fakeAuthProvider("urn:fake-auth:0")
+    val fake1 = this.fakeProvider("urn:fake:1")
+    val fake2 = this.fakeProvider("urn:fake:2")
+    val fake3 = this.fakeAuthProvider("urn:fake-auth:0")
 
     val providers = TreeMap<URI, AccountProviderType>()
     providers[fake1.id] = fake1
@@ -147,9 +170,9 @@ object MockAccountProviders {
   }
 
   fun fakeAccountProvidersMissing1(): AccountProviderRegistryType {
-    val fake0 = fakeProvider("urn:fake:0")
-    val fake2 = fakeProvider("urn:fake:2")
-    val fake3 = fakeAuthProvider("urn:fake-auth:0")
+    val fake0 = this.fakeProvider("urn:fake:0")
+    val fake2 = this.fakeProvider("urn:fake:2")
+    val fake3 = this.fakeAuthProvider("urn:fake-auth:0")
 
     val providers = TreeMap<URI, AccountProviderType>()
     providers[fake0.id] = fake0
@@ -166,15 +189,17 @@ object MockAccountProviders {
     return registry
   }
 
-  fun fakeAuthProvider(uri: String): AccountProviderImmutable {
-    return fakeProvider(uri)
-      .copy(authentication = AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 4,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Stuff!",
-        labels = mapOf()
-      ))
+  fun fakeAuthProvider(uri: String): AccountProvider {
+    return this.fakeProvider(uri)
+      .copy(
+        authentication = AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = "CODABAR",
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = 4,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          description = "Stuff!",
+          labels = mapOf()
+        )
+      )
   }
 }

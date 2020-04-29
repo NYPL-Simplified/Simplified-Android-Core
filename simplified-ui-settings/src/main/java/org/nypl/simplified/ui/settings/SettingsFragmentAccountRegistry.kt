@@ -18,7 +18,7 @@ import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -44,7 +44,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
   private lateinit var backgroundExecutor: ListeningScheduledExecutorService
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: SettingsAccountProviderDescriptionAdapter
-  private lateinit var accountListData: MutableList<AccountProviderDescriptionType>
+  private lateinit var accountListData: MutableList<AccountProviderDescription>
   private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var imageLoader: ImageLoaderType
@@ -90,7 +90,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
    * if no account already exists for it in the current profile.
    */
 
-  private fun determineAvailableAccountProviderDescriptions(): List<AccountProviderDescriptionType> {
+  private fun determineAvailableAccountProviderDescriptions(): List<AccountProviderDescription> {
 
     val profileCurrent =
       this.profilesController.profileCurrent()
@@ -113,8 +113,8 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
     availableAccountProviders.removeAll(usedAccountProviders)
     availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
-      val name0 = provider0.metadata.title.removePrefix("The ")
-      val name1 = provider1.metadata.title.removePrefix("The ")
+      val name0 = provider0.title.removePrefix("The ")
+      val name1 = provider1.title.removePrefix("The ")
       name0.toUpperCase().compareTo(name1.toUpperCase())
     })
 
@@ -123,16 +123,16 @@ class SettingsFragmentAccountRegistry : Fragment() {
   }
 
   private fun shouldShowProvider(
-    provider: AccountProviderDescriptionType,
+    provider: AccountProviderDescription,
     preferences: ProfilePreferences
   ) =
-    provider.metadata.isProduction || preferences.showTestingLibraries
+    provider.isProduction || preferences.showTestingLibraries
 
   @UiThread
-  private fun onAccountClicked(account: AccountProviderDescriptionType) {
+  private fun onAccountClicked(account: AccountProviderDescription) {
     this.uiThread.checkIsUIThread()
 
-    this.logger.debug("selected account: {} ({})", account.metadata.id, account.metadata.title)
+    this.logger.debug("selected account: {} ({})", account.id, account.title)
 
     this.refresh.isEnabled = false
     this.accountList.visibility = View.INVISIBLE
@@ -140,7 +140,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
     this.progressText.text = ""
     this.progress.visibility = View.VISIBLE
 
-    this.profilesController.profileAccountCreate(account.metadata.id)
+    this.profilesController.profileAccountCreate(account.id)
   }
 
   private fun onAccountEvent(event: AccountEvent) {

@@ -13,7 +13,7 @@ data class AccountProviderDescriptionCollection(
    * The list of account providers.
    */
 
-  val providers: List<AccountProviderDescriptionMetadata>,
+  val providers: List<AccountProviderDescription>,
 
   /**
    * The list of links associated with the collection.

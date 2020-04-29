@@ -3,7 +3,7 @@ package org.nypl.simplified.accounts.json
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionSerializerType
 import org.nypl.simplified.links.json.LinkSerialization
 import java.io.OutputStream
@@ -12,7 +12,7 @@ import java.net.URI
 class AccountProviderDescriptionSerializer internal constructor(
   private val uri: URI,
   private val stream: OutputStream,
-  private val document: AccountProviderDescriptionMetadata
+  private val document: AccountProviderDescription
 ) : AccountProviderDescriptionSerializerType {
 
   private val mapper = ObjectMapper()

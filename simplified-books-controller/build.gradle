@@ -4,7 +4,6 @@ dependencies {
 
   implementation project(":simplified-accounts-api")
   implementation project(":simplified-accounts-database-api")
-  implementation project(":simplified-accounts-source-resolution")
   implementation project(":simplified-accounts-source-spi")
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-analytics-api")

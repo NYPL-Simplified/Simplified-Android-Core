@@ -7,8 +7,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionType
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
@@ -123,9 +122,9 @@ abstract class AccountProviderDescriptionRegistryContract {
 
     Assert.assertEquals(Idle, registry.status)
 
-    Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
-    Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
-    Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:0"), description0!!.id)
+    Assert.assertEquals(URI.create("urn:1"), description1!!.id)
+    Assert.assertEquals(URI.create("urn:2"), description2!!.id)
 
     Assert.assertEquals(5, this.events.size)
 
@@ -170,16 +169,16 @@ abstract class AccountProviderDescriptionRegistryContract {
 
     Assert.assertEquals(Idle, registry.status)
 
-    Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
-    Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
-    Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:0"), description0!!.id)
+    Assert.assertEquals(URI.create("urn:1"), description1!!.id)
+    Assert.assertEquals(URI.create("urn:2"), description2!!.id)
 
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"), description0.metadata.updated)
+      DateTime.parse("1900-01-01T00:00:00Z"), description0.updated)
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"), description1.metadata.updated)
+      DateTime.parse("1900-01-01T00:00:00Z"), description1.updated)
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"), description2.metadata.updated)
+      DateTime.parse("1900-01-01T00:00:00Z"), description2.updated)
 
     Assert.assertEquals(5, this.events.size)
 
@@ -223,9 +222,9 @@ abstract class AccountProviderDescriptionRegistryContract {
 
     Assert.assertEquals(Idle, registry.status)
 
-    Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
-    Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
-    Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:0"), description0!!.id)
+    Assert.assertEquals(URI.create("urn:1"), description1!!.id)
+    Assert.assertEquals(URI.create("urn:2"), description2!!.id)
 
     Assert.assertEquals(6, this.events.size)
     run {
@@ -271,9 +270,9 @@ abstract class AccountProviderDescriptionRegistryContract {
 
     Assert.assertEquals(Idle, registry.status)
 
-    Assert.assertEquals(URI.create("urn:0"), description0!!.metadata.id)
-    Assert.assertEquals(URI.create("urn:1"), description1!!.metadata.id)
-    Assert.assertEquals(URI.create("urn:2"), description2!!.metadata.id)
+    Assert.assertEquals(URI.create("urn:0"), description0!!.id)
+    Assert.assertEquals(URI.create("urn:1"), description1!!.id)
+    Assert.assertEquals(URI.create("urn:2"), description2!!.id)
 
     Assert.assertEquals(6, this.events.size)
 
@@ -319,7 +318,7 @@ abstract class AccountProviderDescriptionRegistryContract {
 
     Assert.assertEquals(Idle, registry.status)
     Assert.assertEquals(existing0, changed)
-    Assert.assertEquals(existing0, registry.accountProviderDescriptions()[existing0.metadata.id])
+    Assert.assertEquals(existing0, registry.accountProviderDescriptions()[existing0.id])
   }
 
   /**
@@ -386,8 +385,8 @@ abstract class AccountProviderDescriptionRegistryContract {
 
   companion object {
 
-    val descriptionMeta0 =
-      AccountProviderDescriptionMetadata(
+    val description0 =
+      AccountProviderDescription(
         id = URI.create("urn:0"),
         title = "Title 0",
         updated = DateTime.now(),
@@ -395,16 +394,6 @@ abstract class AccountProviderDescriptionRegistryContract {
         images = listOf(),
         isAutomatic = false,
         isProduction = true)
-
-    val description0 =
-      object : AccountProviderDescriptionType {
-        override val metadata: AccountProviderDescriptionMetadata = descriptionMeta0
-
-        override fun resolve(onProgress: AccountProviderResolutionListenerType):
-          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
-          return fail()
-        }
-      }
 
     private fun fail(): TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType> {
       val taskRecorder =
@@ -422,8 +411,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       return taskRecorder.finishFailure()
     }
 
-    val descriptionMeta1 =
-      AccountProviderDescriptionMetadata(
+    val description1 =
+      AccountProviderDescription(
         id = URI.create("urn:1"),
         title = "Title 1",
         updated = DateTime.now(),
@@ -432,18 +421,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         isAutomatic = false,
         isProduction = true)
 
-    val description1 =
-      object : AccountProviderDescriptionType {
-        override val metadata: AccountProviderDescriptionMetadata = descriptionMeta1
-
-        override fun resolve(onProgress: AccountProviderResolutionListenerType):
-          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
-          return fail()
-        }
-      }
-
-    val descriptionMeta2 =
-      AccountProviderDescriptionMetadata(
+    val description2 =
+      AccountProviderDescription(
         id = URI.create("urn:2"),
         title = "Title 2",
         updated = DateTime.now(),
@@ -452,18 +431,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         isAutomatic = false,
         isProduction = true)
 
-    val description2 =
-      object : AccountProviderDescriptionType {
-        override val metadata: AccountProviderDescriptionMetadata = descriptionMeta2
-
-        override fun resolve(onProgress: AccountProviderResolutionListenerType):
-          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
-          return fail()
-        }
-      }
-
-    val descriptionMetaOld0 =
-      AccountProviderDescriptionMetadata(
+    val descriptionOld0 =
+      AccountProviderDescription(
         id = URI.create("urn:0"),
         title = "Title 0",
         updated = DateTime.parse("1900-01-01T00:00:00Z"),
@@ -472,18 +441,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         isAutomatic = false,
         isProduction = true)
 
-    val descriptionOld0 =
-      object : AccountProviderDescriptionType {
-        override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld0
-
-        override fun resolve(onProgress: AccountProviderResolutionListenerType):
-          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
-          return fail()
-        }
-      }
-
-    val descriptionMetaOld1 =
-      AccountProviderDescriptionMetadata(
+    val descriptionOld1 =
+      AccountProviderDescription(
         id = URI.create("urn:1"),
         title = "Title 1",
         updated = DateTime.parse("1900-01-01T00:00:00Z"),
@@ -492,18 +451,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         isAutomatic = false,
         isProduction = true)
 
-    val descriptionOld1 =
-      object : AccountProviderDescriptionType {
-        override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld1
-
-        override fun resolve(onProgress: AccountProviderResolutionListenerType):
-          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
-          return fail()
-        }
-      }
-
-    val descriptionMetaOld2 =
-      AccountProviderDescriptionMetadata(
+    val descriptionOld2 =
+      AccountProviderDescription(
         id = URI.create("urn:2"),
         title = "Title 2",
         updated = DateTime.parse("1900-01-01T00:00:00Z"),
@@ -511,40 +460,52 @@ abstract class AccountProviderDescriptionRegistryContract {
         images = listOf(),
         isAutomatic = false,
         isProduction = true)
-
-    val descriptionOld2 =
-      object : AccountProviderDescriptionType {
-        override val metadata: AccountProviderDescriptionMetadata = descriptionMetaOld2
-
-        override fun resolve(onProgress: AccountProviderResolutionListenerType):
-          TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
-          return fail()
-        }
-      }
   }
 
   class OKAncientSource : AccountProviderSourceType {
     override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       return SourceResult.SourceSucceeded(
         mapOf(
-          Pair(descriptionOld0.metadata.id, descriptionOld0),
-          Pair(descriptionOld1.metadata.id, descriptionOld1),
-          Pair(descriptionOld2.metadata.id, descriptionOld2)))
+          Pair(descriptionOld0.id, descriptionOld0),
+          Pair(descriptionOld1.id, descriptionOld1),
+          Pair(descriptionOld2.id, descriptionOld2)))
     }
 
     override fun clear(context: Context) {}
+
+    override fun canResolve(description: AccountProviderDescription): Boolean {
+      return false
+    }
+
+    override fun resolve(
+      onProgress: AccountProviderResolutionListenerType,
+      description: AccountProviderDescription
+    ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+      throw IllegalStateException()
+    }
   }
 
   class OKSource : AccountProviderSourceType {
     override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       return SourceResult.SourceSucceeded(
         mapOf(
-          Pair(description0.metadata.id, description0),
-          Pair(description1.metadata.id, description1),
-          Pair(description2.metadata.id, description2)))
+          Pair(description0.id, description0),
+          Pair(description1.id, description1),
+          Pair(description2.id, description2)))
     }
 
     override fun clear(context: Context) {}
+
+    override fun canResolve(description: AccountProviderDescription): Boolean {
+      return false
+    }
+
+    override fun resolve(
+      onProgress: AccountProviderResolutionListenerType,
+      description: AccountProviderDescription
+    ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+      throw IllegalStateException()
+    }
   }
 
   class CrashingSource : AccountProviderSourceType {
@@ -553,6 +514,17 @@ abstract class AccountProviderDescriptionRegistryContract {
     }
 
     override fun clear(context: Context) {}
+
+    override fun canResolve(description: AccountProviderDescription): Boolean {
+      return false
+    }
+
+    override fun resolve(
+      onProgress: AccountProviderResolutionListenerType,
+      description: AccountProviderDescription
+    ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+      throw IllegalStateException()
+    }
   }
 
   class FailingSource : AccountProviderSourceType {
@@ -561,5 +533,16 @@ abstract class AccountProviderDescriptionRegistryContract {
     }
 
     override fun clear(context: Context) {}
+
+    override fun canResolve(description: AccountProviderDescription): Boolean {
+      return false
+    }
+
+    override fun resolve(
+      onProgress: AccountProviderResolutionListenerType,
+      description: AccountProviderDescription
+    ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+      throw IllegalStateException()
+    }
   }
 }

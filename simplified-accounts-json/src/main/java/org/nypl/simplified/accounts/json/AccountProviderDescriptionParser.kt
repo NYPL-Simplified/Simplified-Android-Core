@@ -3,7 +3,7 @@ package org.nypl.simplified.accounts.json
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import org.nypl.simplified.accounts.api.AccountProviderDescriptionMetadata
+import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionParserType
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.links.Link
@@ -76,7 +76,7 @@ class AccountProviderDescriptionParser internal constructor(
     val isProduction: Boolean
   )
 
-  override fun parse(): ParseResult<AccountProviderDescriptionMetadata> {
+  override fun parse(): ParseResult<AccountProviderDescription> {
     return try {
       val root = this.objectNode.invoke()
       val metadata = this.parseMetadata(root)
@@ -86,7 +86,7 @@ class AccountProviderDescriptionParser internal constructor(
       if (this.errors.isEmpty()) {
         return ParseResult.Success(
           warnings = this.warnings.toList(),
-          result = AccountProviderDescriptionMetadata(
+          result = AccountProviderDescription(
             id = metadata.id,
             title = metadata.title,
             updated = metadata.updated,

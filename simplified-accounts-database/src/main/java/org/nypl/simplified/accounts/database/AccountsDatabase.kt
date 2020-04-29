@@ -458,9 +458,9 @@ class AccountsDatabase private constructor(
         accountProviders.findAccountProviderDescription(URI(id)) ?: return null
 
       val result =
-        description.resolve { _, message ->
+        accountProviders.resolve({ _, message ->
           accountEvents.onNext(AccountEventCreation.AccountEventCreationInProgress(message))
-        }
+        }, description)
 
       return when (result) {
         is TaskResult.Success -> result.result

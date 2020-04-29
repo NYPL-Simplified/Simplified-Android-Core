@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
+import org.nypl.simplified.links.Link
 import java.net.URI
 import javax.annotation.concurrent.ThreadSafe
 
@@ -193,12 +194,61 @@ interface AccountProviderType : Comparable<AccountProviderType> {
       null -> false
     }
 
-  /**
-   * @return A description that, when resolved, produces this account provider
-   */
+  fun toDescription(): AccountProviderDescription {
+    val imageLinks = mutableListOf<Link>()
+    this.logo?.let { uri ->
+      imageLinks.add(
+        Link.LinkBasic(
+          href = uri,
+          type = null,
+          relation = "http://opds-spec.org/image/thumbnail"
+        )
+      )
+    }
 
-  fun toDescription(): AccountProviderDescriptionType
+    val links =
+      mutableListOf<Link>()
 
-  override fun compareTo(other: AccountProviderType): Int =
-    this.id.compareTo(other.id)
+    this.annotationsURI?.let { uri ->
+      addLink(links, uri, "http://www.w3.org/ns/oa#annotationService")
+    }
+    this.cardCreatorURI?.let { uri ->
+      addLink(links, uri, "register")
+    }
+    this.eula?.let { uri ->
+      addLink(links, uri, "terms-of-service")
+    }
+    this.license?.let { uri ->
+      addLink(links, uri, "license")
+    }
+    this.loansURI?.let { uri ->
+      addLink(links, uri, "http://opds-spec.org/shelf")
+    }
+    this.patronSettingsURI?.let { uri ->
+      addLink(links, uri, "http://librarysimplified.org/terms/rel/user-profile")
+    }
+    this.privacyPolicy?.let { uri ->
+      addLink(links, uri, "privacy-policy")
+    }
+
+    return AccountProviderDescription(
+      id = this.id,
+      title = this.displayName,
+      updated = this.updated,
+      links = links.toList(),
+      images = imageLinks.toList(),
+      isAutomatic = this.addAutomatically,
+      isProduction = this.isProduction
+    )
+  }
+
+  private fun addLink(links: MutableList<Link>, uri: URI, relation: String): Boolean {
+    return links.add(
+      Link.LinkBasic(
+        href = uri,
+        type = null,
+        relation = relation
+      )
+    )
+  }
 }

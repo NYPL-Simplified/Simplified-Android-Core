@@ -8,7 +8,6 @@ dependencies {
   api project(":simplified-accounts-registry-api")
   api project(":simplified-accounts-source-filebased")
   api project(":simplified-accounts-source-nyplregistry")
-  api project(":simplified-accounts-source-resolution")
   api project(":simplified-accounts-source-spi")
   api project(":simplified-analytics-api")
   api project(":simplified-analytics-circulation")

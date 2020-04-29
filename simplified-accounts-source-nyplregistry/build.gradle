@@ -7,7 +7,6 @@ dependencies {
   api libraries.nyplDRMCore
 
   implementation project(":simplified-accounts-json")
-  implementation project(":simplified-accounts-source-resolution")
   implementation project(":simplified-files")
   implementation project(":simplified-http-core")
   implementation project(":simplified-opds-auth-document-api")

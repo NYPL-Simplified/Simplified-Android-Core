@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.joda.time.DateTime
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Basic
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.COPPAAgeGate
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
-import org.nypl.simplified.accounts.api.AccountProviderImmutable
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
@@ -113,7 +113,7 @@ object AccountProvidersJSON {
    */
 
   @Throws(JSONParseException::class)
-  fun deserializeFromJSON(node: JsonNode): AccountProviderType {
+  fun deserializeFromJSON(node: JsonNode): AccountProvider {
 
     val obj =
       JSONParserUtilities.checkObject(null, node)
@@ -167,7 +167,7 @@ object AccountProvidersJSON {
           ?.let { text -> DateTime.parse(text) }
           ?: DateTime.now()
 
-      return AccountProviderImmutable(
+      return AccountProvider(
         addAutomatically = addAutomatically,
         annotationsURI = annotationsURI,
         authentication = authentication,
@@ -195,6 +195,31 @@ object AccountProvidersJSON {
       throw JSONParseException("Unable to parse provider $idUUID", e)
     }
   }
+
+  class AccountProviderParsedData(
+    val id: URI,
+    val idNumeric: Int,
+    val isProduction: Boolean,
+    val displayName: String,
+    val subtitle: String?,
+    val logo: URI?,
+    val authentication: AccountProviderAuthenticationDescription?,
+    val supportsSimplyESynchronization: Boolean,
+    val supportsReservations: Boolean,
+    val loansURI: URI?,
+    val cardCreatorURI: URI?,
+    val authenticationDocumentURI: URI?,
+    val catalogURI: URI,
+    val supportEmail: String?,
+    val eula: URI?,
+    val license: URI?,
+    val privacyPolicy: URI?,
+    val mainColor: String,
+    val addAutomatically: Boolean,
+    val patronSettingsURI: URI?,
+    val annotationsURI: URI?,
+    val updated: DateTime
+  )
 
   private fun parseAuthentication(
     obj: ObjectNode
@@ -298,10 +323,10 @@ object AccountProvidersJSON {
    */
 
   @Throws(JSONParseException::class)
-  fun deserializeCollectionFromJSONArray(node: ArrayNode): Map<URI, AccountProviderType> {
+  fun deserializeCollectionFromJSONArray(node: ArrayNode): Map<URI, AccountProvider> {
 
-    val providers = TreeMap<URI, AccountProviderType>()
-    var default_provider: AccountProviderType? = null
+    val providers = TreeMap<URI, AccountProvider>()
+    var default_provider: AccountProvider? = null
 
     var ex: JSONParseException? = null
     for (index in 0 until node.size()) {
@@ -343,7 +368,7 @@ object AccountProvidersJSON {
    */
 
   @Throws(IOException::class)
-  fun deserializeCollectionFromStream(stream: InputStream): Map<URI, AccountProviderType> {
+  fun deserializeCollectionFromStream(stream: InputStream): Map<URI, AccountProvider> {
     val jom = ObjectMapper()
     val node = this.mapNullToTextNode(jom.readTree(stream))
     return this.deserializeCollectionFromJSONArray(JSONParserUtilities.checkArray(null, node))
@@ -358,7 +383,7 @@ object AccountProvidersJSON {
    */
 
   @Throws(IOException::class)
-  fun deserializeOneFromStream(stream: InputStream): AccountProviderType {
+  fun deserializeOneFromStream(stream: InputStream): AccountProvider {
     val jom = ObjectMapper()
     val node = this.mapNullToTextNode(jom.readTree(stream))
     return this.deserializeFromJSON(JSONParserUtilities.checkObject(null, node))
@@ -373,6 +398,6 @@ object AccountProvidersJSON {
    */
 
   @Throws(IOException::class)
-  fun deserializeOneFromFile(file: File): AccountProviderType =
+  fun deserializeOneFromFile(file: File): AccountProvider =
     FileInputStream(file).use { stream -> this.deserializeOneFromStream(stream) }
 }

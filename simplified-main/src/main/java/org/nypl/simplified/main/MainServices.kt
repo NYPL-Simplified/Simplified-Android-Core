@@ -34,7 +34,7 @@ import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON
 import org.nypl.simplified.accounts.registry.AccountProviderRegistry
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.accounts.source.resolution.AccountProviderSourceResolutionStrings
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceResolutionStrings
 import org.nypl.simplified.adobe.extensions.AdobeConfigurationServiceType
 import org.nypl.simplified.adobe.extensions.AdobeDRMServices
 import org.nypl.simplified.analytics.api.Analytics
@@ -780,7 +780,9 @@ internal object MainServices {
     addService(
       message = strings.bootingStrings("resolution"),
       interfaceType = AccountProviderResolutionStringsType::class.java,
-      serviceConstructor = { AccountProviderSourceResolutionStrings(context.resources) })
+      serviceConstructor = {
+        AccountProviderSourceResolutionStrings(context.resources)
+      })
 
     addService(
       message = strings.bootingStrings("borrow"),
