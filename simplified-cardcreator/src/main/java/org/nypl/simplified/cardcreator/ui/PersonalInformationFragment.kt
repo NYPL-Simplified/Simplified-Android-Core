@@ -143,12 +143,12 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
     val year = c.get(Calendar.YEAR) - 13
     val month = c.get(Calendar.MONTH)
     val day = c.get(Calendar.DAY_OF_MONTH)
-    val datePickerDialog = DatePickerDialog(requireContext(), this,  year, month, day)
+    val datePickerDialog = DatePickerDialog(requireContext(), this, year, month, day)
     datePickerDialog.show()
   }
 
   override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-    birthDate = "${month}/${dayOfMonth}/${year}"
+    birthDate = "$month/$dayOfMonth/$year"
     binding.birthDateEt.setText(birthDate, TextView.BufferType.EDITABLE)
   }
 }
