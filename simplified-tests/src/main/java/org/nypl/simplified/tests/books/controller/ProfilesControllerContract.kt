@@ -64,6 +64,7 @@ import org.nypl.simplified.reader.api.ReaderFontSelection
 import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MockAccountProviderRegistry
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.MutableServiceDirectory
@@ -263,8 +264,6 @@ abstract class ProfilesControllerContract {
 
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val downloader =
-      DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     val controller =
       this.controller(
         profiles = profiles,
@@ -284,20 +283,17 @@ abstract class ProfilesControllerContract {
   @Throws(Exception::class)
   fun testProfilesCurrentSelectCurrent() {
 
+    val accountProvider =
+      MockAccountProviders.fakeProvider("urn:fake:0")
     val accountProviders =
-      MockAccountProviders.fakeAccountProviders()
+      MockAccountProviderRegistry.singleton(accountProvider)
 
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val downloader =
-      DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     val controller =
       this.controller(
         profiles = profiles,
         accountProviders = accountProviders)
-
-    val accountProvider =
-      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
 
     controller.profileCreate(accountProvider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
@@ -321,8 +317,11 @@ abstract class ProfilesControllerContract {
 
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
+
+    val accountProvider =
+      MockAccountProviders.fakeProvider("urn:fake:0")
     val accountProviders =
-      MockAccountProviders.fakeAccountProviders()
+      MockAccountProviderRegistry.singleton(accountProvider)
     val controller =
       this.controller(
         profiles = profiles,
@@ -332,9 +331,6 @@ abstract class ProfilesControllerContract {
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
 
     val date = DateTime.now()
-
-    val accountProvider =
-      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
 
     controller.profileCreate(accountProvider, "Kermit", "Female", date).get()
     controller.profileCreate(accountProvider, "Kermit", "Female", date).get()
@@ -358,18 +354,18 @@ abstract class ProfilesControllerContract {
 
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
+    val accountProvider =
+      MockAccountProviders.fakeProvider("urn:fake:0")
     val accountProviders =
-      MockAccountProviders.fakeAccountProviders()
+      MockAccountProviderRegistry.singleton(accountProvider)
     val controller =
       this.controller(
         profiles = profiles,
         accountProviders = accountProviders)
 
-    val provider =
-      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
-    controller.profileCreate(provider, "Kermit", "Female", DateTime.now()).get()
+    controller.profileCreate(accountProvider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id).get()
+    controller.profileAccountCreate(accountProvider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
     controller.profileUpdate { description -> description }.get()
 
@@ -408,20 +404,21 @@ abstract class ProfilesControllerContract {
   @Throws(Exception::class)
   fun testProfilesFeed() {
 
+    val accountProvider =
+      MockAccountProviders.fakeProvider("urn:fake:0")
+    val accountProviders =
+      MockAccountProviderRegistry.singleton(accountProvider)
+
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val accountProviders =
-      MockAccountProviders.fakeAccountProviders()
     val controller =
       this.controller(
         profiles = profiles,
         accountProviders = accountProviders)
 
-    val provider =
-      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0")
-    controller.profileCreate(provider, "Kermit", "Female", DateTime.now()).get()
+    controller.profileCreate(accountProvider, "Kermit", "Female", DateTime.now()).get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id).get()
+    controller.profileAccountCreate(accountProvider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
 
     val feed =

@@ -51,8 +51,7 @@ git rm -f build.properties
 cd "${WORKING_DIRECTORY}" ||
   fatal "could not restore working directory"
 
-cp -v ./simplified-app-vanilla/build/outputs/apk/debug/*.apk   "${BINARIES_DIRECTORY}"
-cp -v ./simplified-app-vanilla/build/outputs/apk/release/*.apk "${BINARIES_DIRECTORY}"
+find ./simplified-app-vanilla -name *.apk -exec cp -v {} "${BINARIES_DIRECTORY}" \;
 
 cp -v "${WORKING_DIRECTORY}/.travis/build.properties" "${BINARIES_DIRECTORY}"/build.properties ||
   fatal "could not copy build properties"

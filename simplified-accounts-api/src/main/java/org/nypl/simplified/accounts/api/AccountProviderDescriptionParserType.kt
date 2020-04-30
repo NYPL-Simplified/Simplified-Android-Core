@@ -6,4 +6,4 @@ import org.nypl.simplified.parser.api.ParserType
  * A parser of account provider descriptions.
  */
 
-interface AccountProviderDescriptionParserType : ParserType<AccountProviderDescriptionMetadata>
+interface AccountProviderDescriptionParserType : ParserType<AccountProviderDescription>

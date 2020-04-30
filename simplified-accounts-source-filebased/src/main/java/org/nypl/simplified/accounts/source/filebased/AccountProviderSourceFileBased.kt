@@ -1,10 +1,15 @@
 package org.nypl.simplified.accounts.source.filebased
 
 import android.content.Context
+import org.nypl.simplified.accounts.api.AccountProviderDescription
+import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
+import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.json.AccountProvidersJSON
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.net.URI
@@ -32,7 +37,7 @@ class AccountProviderSourceFileBased(
     val cached = this.cache
     if (cached != null) {
       this.logger.debug("returning cached providers")
-      return SourceResult.SourceSucceeded(mapResult(cached))
+      return SourceResult.SourceSucceeded(this.mapResult(cached))
     }
 
     return try {
@@ -41,7 +46,7 @@ class AccountProviderSourceFileBased(
         val newResult = AccountProvidersJSON.deserializeCollectionFromStream(stream)
         this.logger.debug("loaded {} providers from file", newResult.size)
         this.cache = newResult
-        SourceResult.SourceSucceeded(mapResult(newResult))
+        SourceResult.SourceSucceeded(this.mapResult(newResult))
       }
     } catch (e: Exception) {
       this.logger.error("failed to load providers from file: ", e)
@@ -50,7 +55,26 @@ class AccountProviderSourceFileBased(
   }
 
   override fun clear(context: Context) {
-    cache = null
+    this.cache = null
+  }
+
+  override fun canResolve(description: AccountProviderDescription): Boolean {
+    return this.cache?.containsKey(description.id) ?: false
+  }
+
+  override fun resolve(
+    onProgress: AccountProviderResolutionListenerType,
+    description: AccountProviderDescription
+  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+    val taskRecorder = TaskRecorder.create<AccountProviderResolutionErrorDetails>()
+    taskRecorder.beginNewStep("Resolving account provider from file cache")
+
+    val provider = this.cache?.get(description.id)
+    return if (provider != null) {
+      taskRecorder.finishSuccess(provider)
+    } else {
+      taskRecorder.finishFailure()
+    }
   }
 
   private fun mapResult(cached: Map<URI, AccountProviderType>) =

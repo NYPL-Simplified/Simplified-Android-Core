@@ -93,4 +93,14 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
     override val accountProviderID: String,
     override val accountProviderTitle: String
   ) : AccountProviderResolutionErrorDetails()
+
+  /**
+   * No account source claimed to be able to resolve the description.
+   */
+
+  data class NoApplicableSource(
+    override val message: String,
+    override val accountProviderID: String,
+    override val accountProviderTitle: String
+  ) : AccountProviderResolutionErrorDetails()
 }

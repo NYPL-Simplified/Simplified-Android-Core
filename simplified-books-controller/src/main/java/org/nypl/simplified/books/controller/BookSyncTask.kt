@@ -6,6 +6,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
@@ -21,6 +22,7 @@ import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 
 import java.io.IOException
@@ -32,6 +34,7 @@ import java.util.concurrent.Callable
 class BookSyncTask(
   private val booksController: BooksControllerType,
   private val account: AccountType,
+  private val accountRegistry: AccountProviderRegistryType,
   private val bookRegistry: BookRegistryType,
   private val http: HTTPType,
   private val feedParser: OPDSFeedParserType
@@ -51,9 +54,9 @@ class BookSyncTask(
 
   @Throws(Exception::class)
   private fun execute() {
-    val provider = this.account.provider
-    val providerAuth = provider.authentication
+    val provider = this.updateAccountProvider()
 
+    val providerAuth = provider.authentication
     if (providerAuth == null) {
       this.logger.debug("account does not support syncing")
       return
@@ -87,6 +90,40 @@ class BookSyncTask(
           return this@BookSyncTask.onHTTPOK(e, provider)
         }
       })
+  }
+
+  private fun updateAccountProvider(): AccountProviderType {
+    this.logger.debug("resolving the existing account provider")
+
+    val oldProvider = this.account.provider
+    var newDescription =
+      this.accountRegistry.findAccountProviderDescription(oldProvider.id)
+    if (newDescription == null) {
+      this.logger.debug("could not find account description for {} in registry", oldProvider.id)
+      newDescription = oldProvider.toDescription()
+    } else {
+      this.logger.debug("found account description for {} in registry", oldProvider.id)
+    }
+
+    val newProviderResult =
+      this.accountRegistry.resolve({ accountProvider, message ->
+        this.logger.debug("[{}]: {}", accountProvider, message)
+      }, newDescription)
+
+    return when (newProviderResult) {
+      is TaskResult.Success -> {
+        this.logger.debug("successfully resolved the account provider")
+        newProviderResult.result
+      }
+      is TaskResult.Failure -> {
+        this.logger.error("failed to resolve account provider")
+        newProviderResult.errors()
+          .forEach {
+            this.logger.error("account provider resolution: {}: ", it.message, it.exception)
+          }
+        oldProvider
+      }
+    }
   }
 
   @Throws(IOException::class)

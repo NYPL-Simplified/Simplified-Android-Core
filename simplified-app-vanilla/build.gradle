@@ -19,10 +19,9 @@ android {
   def version = versionValues()
 
   defaultConfig {
-    multiDexEnabled true
     versionName = version.get(0)
     versionCode = version.get(1)
-    setProperty("archivesBaseName", "vanilla-${versionName}-${versionCode}")
+    setProperty("archivesBaseName", "${versionName}-${versionCode}")
   }
 
   signingConfigs {
@@ -35,8 +34,23 @@ android {
   }
 
   buildTypes {
+    debug {
+      versionNameSuffix '-debug'
+    }
     release {
       signingConfig signingConfigs.release
+    }
+  }
+
+  flavorDimensions 'mode'
+
+  productFlavors {
+    vanilla {
+      dimension 'mode'
+    }
+    vanillaWithProfiles {
+      dimension 'mode'
+      applicationIdSuffix ".with_profiles"
     }
   }
 
@@ -44,7 +58,7 @@ android {
     exclude "META-INF/LICENSE"
 
     // The PDF library and Readium both provide this shared library. This will
-    // cause the build to fail because Gradle doesn"t know which one to pick.
+    // cause the build to fail because Gradle doesn't know which one to pick.
     pickFirst "lib/arm64-v8a/libc++_shared.so"
     pickFirst "lib/armeabi-v7a/libc++_shared.so"
     pickFirst "lib/x86/libc++_shared.so"
@@ -54,6 +68,7 @@ android {
 dependencies {
   implementation project(":simplified-main")
   implementation project(":simplified-accounts-source-nyplregistry")
-
   annotationProcessor libraries.autoValueProcessor
+
+  vanillaWithProfilesImplementation project(":simplified-accounts-source-filebased")
 }

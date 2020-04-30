@@ -19,7 +19,6 @@ dependencies {
   api project(":simplified-accounts-json")
   api project(":simplified-accounts-registry")
   api project(":simplified-accounts-registry-api")
-  api project(":simplified-accounts-source-resolution")
   api project(":simplified-accounts-source-spi")
   api project(":simplified-adobe-extensions")
   api project(":simplified-analytics-api")
@@ -64,7 +63,6 @@ dependencies {
 
   api libraries.androidAsync
   api libraries.androidXAppCompat
-  api libraries.androidXMultidex
   api libraries.kotlinStdlib
   api libraries.slf4j
 

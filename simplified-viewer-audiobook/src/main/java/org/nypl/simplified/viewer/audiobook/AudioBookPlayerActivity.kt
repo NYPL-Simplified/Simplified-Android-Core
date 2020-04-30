@@ -747,6 +747,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
         .setOnDismissListener {
           execute.invoke()
         }
+        .show()
     }
   }
 }

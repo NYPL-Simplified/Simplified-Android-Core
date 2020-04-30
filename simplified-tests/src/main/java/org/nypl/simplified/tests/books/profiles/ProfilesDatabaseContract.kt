@@ -32,6 +32,7 @@ import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNonexistentException
 import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.tests.MockAccountProviderRegistry
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.slf4j.LoggerFactory
@@ -272,10 +273,13 @@ abstract class ProfilesDatabaseContract {
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
 
+    val accountProviderList =
+      MockAccountProviders.fakeAccountProviderList()
     val accountProviders =
-      MockAccountProviders.fakeAccountProviders()
+      MockAccountProviderRegistry.withProviders(accountProviderList)
 
-    val db = ProfilesDatabases.openWithAnonymousProfileDisabled(
+    val db =
+      ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.analytics,
       this.accountEvents,
@@ -285,12 +289,10 @@ abstract class ProfilesDatabaseContract {
       this.accountsDatabases(),
       fileProfiles)
 
-    val acc =
-      MockAccountProviders.fakeProvider("urn:fake:0")
-
-    val p0 = db.createProfile(acc, "Kermit")
-    val p1 = db.createProfile(acc, "Gonzo")
-    val p2 = db.createProfile(acc, "Beaker")
+    val accountProvider = accountProviderList[0]
+    val p0 = db.createProfile(accountProvider, "Kermit")
+    val p1 = db.createProfile(accountProvider, "Gonzo")
+    val p2 = db.createProfile(accountProvider, "Beaker")
 
     Assert.assertFalse("Profile is not anonymous", p0.isAnonymous)
     Assert.assertFalse("Profile is not anonymous", p1.isAnonymous)
@@ -332,16 +334,9 @@ abstract class ProfilesDatabaseContract {
     Assert.assertFalse(p1.isCurrent)
     Assert.assertFalse(p2.isCurrent)
 
-    Assert.assertEquals(
-      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0"),
-      p0.accountCurrent().provider)
-    Assert.assertEquals(
-      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0"),
-      p1.accountCurrent().provider)
-    Assert.assertEquals(
-      MockAccountProviders.findAccountProviderDangerously(accountProviders, "urn:fake:0"),
-      p2.accountCurrent().provider)
-
+    Assert.assertEquals(accountProvider, p0.accountCurrent().provider)
+    Assert.assertEquals(accountProvider, p1.accountCurrent().provider)
+    Assert.assertEquals(accountProvider, p2.accountCurrent().provider)
     Assert.assertTrue(db.currentProfile().isNone)
   }
 
@@ -813,8 +808,10 @@ abstract class ProfilesDatabaseContract {
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
 
+    val accountProviderList =
+      MockAccountProviders.fakeAccountProviderList()
     val accountProviders =
-      MockAccountProviders.fakeAccountProviders()
+      MockAccountProviderRegistry.withProviders(accountProviderList)
 
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
@@ -827,19 +824,19 @@ abstract class ProfilesDatabaseContract {
         this.accountsDatabases(),
         fileProfiles)
 
-    val acc =
-      MockAccountProviders.fakeProvider("urn:fake:0")
-    val newProvider =
-      MockAccountProviders.findAccountProviderDangerously(accountProviders, URI.create("urn:fake:1"))
+    val accountProvider0 =
+      accountProviderList[0]
+    val accountProvider1 =
+      accountProviderList[1]
 
-    val p0 = db0.createProfile(acc, "Kermit")
-    p0.createAccount(newProvider)
+    val p0 = db0.createProfile(accountProvider0, "Kermit")
+    p0.createAccount(accountProvider1)
 
     ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.analytics,
       this.accountEvents,
-      MockAccountProviders.fakeAccountProvidersMissing1(),
+      MockAccountProviderRegistry.singleton(accountProvider0),
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
@@ -859,34 +856,40 @@ abstract class ProfilesDatabaseContract {
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
 
+    val accountProviderList =
+      MockAccountProviders.fakeAccountProviderList()
     val accountProviders =
-      MockAccountProviders.fakeAccountProviders()
+      MockAccountProviderRegistry.withProviders(accountProviderList)
+    val accountProvidersOnly1 =
+      MockAccountProviderRegistry.singleton(accountProviderList[1])
 
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
         this.context(),
         this.analytics,
         this.accountEvents,
-        MockAccountProviders.fakeAccountProvidersMissing0(),
+        accountProviders,
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
         fileProfiles)
 
     val p0 =
-      db0.createProfile(MockAccountProviders.findAccountProviderDangerously(
-        accountProviders, "urn:fake:0"),
-        "Kermit")
+      db0.createProfile(accountProviderList[0], "Kermit")
 
-    ProfilesDatabases.openWithAnonymousProfileDisabled(
+    val db1 =
+      ProfilesDatabases.openWithAnonymousProfileDisabled(
       this.context(),
       this.analytics,
       this.accountEvents,
-      MockAccountProviders.fakeAccountProvidersMissing0(),
+      accountProvidersOnly1,
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
       fileProfiles)
+
+    val p0After = db1.profiles()[db1.profiles().firstKey()]!!
+    Assert.assertEquals(1, p0After.accounts().size)
   }
 
   /**
@@ -950,7 +953,8 @@ abstract class ProfilesDatabaseContract {
     val fileProfiles = File(fileTemp, "profiles")
 
     val accountProviders =
-      MockAccountProviders.fakeAccountProvidersWithAutomatic()
+      MockAccountProviderRegistry.withProviders(
+        MockAccountProviders.fakeAccountProviderListWithAutomatic())
 
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(

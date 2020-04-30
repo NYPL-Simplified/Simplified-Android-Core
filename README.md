@@ -229,13 +229,11 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.accounts.registry.api](simplified-accounts-registry-api)|Account provider registry API|
 |[org.librarysimplified.accounts.source.filebased](simplified-accounts-source-filebased)|File/asset based registry source implementation|
 |[org.librarysimplified.accounts.source.nyplregistry](simplified-accounts-source-nyplregistry)|NYPL registry client implementation|
-|[org.librarysimplified.accounts.source.resolution](simplified-accounts-source-resolution)|Standard account provider resolution logic|
 |[org.librarysimplified.accounts.source.spi](simplified-accounts-source-spi)|Account provider source SPI|
 |[org.librarysimplified.adobe.extensions](simplified-adobe-extensions)|Adobe DRM convenience functions|
 |[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
-|[org.librarysimplified.app.vanilla.with_profiles](simplified-app-vanilla-with-profiles)|Vanilla application [with profiles enabled]|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
 |[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
 |[org.librarysimplified.books.bundled.api](simplified-books-bundled-api)|Bundled books API|

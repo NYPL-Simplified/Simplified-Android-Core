@@ -96,7 +96,8 @@ object ProfilesDatabases {
       directory = directory,
       profiles = profiles,
       jom = jom,
-      errors = errors)
+      errors = errors
+    )
     profiles.remove(this.ANONYMOUS_PROFILE_ID)
 
     if (errors.isNotEmpty()) {
@@ -106,7 +107,8 @@ object ProfilesDatabases {
 
       throw ProfileDatabaseOpenException(
         "One or more errors occurred whilst trying to open the profile database.",
-        errors)
+        errors
+      )
     }
 
     return ProfilesDatabase(
@@ -119,7 +121,8 @@ object ProfilesDatabases {
       anonymousProfileEnabled = ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED,
       context = context,
       directory = directory,
-      profiles = profiles)
+      profiles = profiles
+    )
   }
 
   private fun openAllProfiles(
@@ -160,7 +163,8 @@ object ProfilesDatabases {
             jom = jom,
             directory = directory,
             errors = errors,
-            profileIdName = profileIdName) ?: continue
+            profileIdName = profileIdName
+          ) ?: continue
 
         profiles[profile.id] = profile
       }
@@ -202,7 +206,8 @@ object ProfilesDatabases {
       directory = directory,
       profiles = profiles,
       jom = jom,
-      errors = errors)
+      errors = errors
+    )
 
     if (!profiles.containsKey(this.ANONYMOUS_PROFILE_ID)) {
       val anon =
@@ -217,13 +222,15 @@ object ProfilesDatabases {
           accountProvider = accountProviders.defaultProvider,
           directory = directory,
           displayName = "",
-          id = this.ANONYMOUS_PROFILE_ID)
+          id = this.ANONYMOUS_PROFILE_ID
+        )
       profiles[this.ANONYMOUS_PROFILE_ID] = anon
     }
 
     if (!errors.isEmpty()) {
       throw ProfileDatabaseOpenException(
-        "One or more errors occurred whilst trying to open the profile database.", errors)
+        "One or more errors occurred whilst trying to open the profile database.", errors
+      )
     }
 
     val database =
@@ -237,7 +244,8 @@ object ProfilesDatabases {
         anonymousProfileEnabled = ANONYMOUS_PROFILE_ENABLED,
         context = context,
         directory = directory,
-        profiles = profiles)
+        profiles = profiles
+      )
 
     database.setCurrentProfile(this.ANONYMOUS_PROFILE_ID)
     return database
@@ -318,7 +326,10 @@ object ProfilesDatabases {
       }
     }
 
-    this.logger.error("could not migrate directory {} after multiple attempts, aborting!", existingDirectory)
+    this.logger.error(
+      "could not migrate directory {} after multiple attempts, aborting!",
+      existingDirectory
+    )
     return null
   }
 
@@ -363,14 +374,16 @@ object ProfilesDatabases {
           accountEvents = accountEvents,
           accountProviders = accountProviders,
           context = context,
-          directory = profileAccountsDir)
+          directory = profileAccountsDir
+        )
 
       this.createAutomaticAccounts(
         accounts = accounts,
         accountEvents = accountEvents,
         accountBundledCredentials = accountBundledCredentials,
         accountProviders = accountProviders,
-        profile = profileId)
+        profile = profileId
+      )
 
       if (accounts.accounts().isEmpty()) {
         this.logger.debug("profile is empty, creating a default account")
@@ -379,7 +392,8 @@ object ProfilesDatabases {
 
       Preconditions.checkArgument(
         !accounts.accounts().isEmpty(),
-        "Accounts database must not be empty")
+        "Accounts database must not be empty"
+      )
 
       val account = accounts.accounts()[accounts.accounts().firstKey()]!!
       return Profile(
@@ -537,8 +551,11 @@ object ProfilesDatabases {
 
         if (credentialsOpt.isSome) {
           this.logger.debug("[{}]: credentials for automatic account {} were provided", pId, id)
-          autoAccount.setLoginState(AccountLoginState.AccountLoggedIn(
-            (credentialsOpt as Some<AccountAuthenticationCredentials>).get()))
+          autoAccount.setLoginState(
+            AccountLoginState.AccountLoggedIn(
+              (credentialsOpt as Some<AccountAuthenticationCredentials>).get()
+            )
+          )
         } else {
           this.logger.debug("[{}]: credentials for automatic account {} were not provided", pId, id)
         }
@@ -559,30 +576,38 @@ object ProfilesDatabases {
     val resolvedProviders = mutableListOf<AccountProviderType>()
     for (entry in accountProviders.accountProviderDescriptions()) {
       val description = entry.value
-      if (description.metadata.isAutomatic) {
-        this.logger.debug("[{}]: resolving automatic account provider {}",
-          profile.uuid, description.metadata.id)
+      if (description.isAutomatic) {
+        this.logger.debug(
+          "[{}]: resolving automatic account provider {}",
+          profile.uuid, description.id
+        )
 
         val resolutionResult =
-          description.resolve { _, message ->
+          accountProviders.resolve({ _, message ->
             accountEvents.onNext(AccountEventCreationInProgress(message))
-          }
+          }, description)
 
         when (resolutionResult) {
           is TaskResult.Success -> {
-            this.logger.debug("[{}]: resolved automatic account provider {}",
-              profile.uuid, description.metadata.id)
+            this.logger.debug(
+              "[{}]: resolved automatic account provider {}",
+              profile.uuid, description.id
+            )
             resolvedProviders.add(resolutionResult.result)
           }
           is TaskResult.Failure -> {
-            this.logger.error("[{}]: failed to resolve automatic account provider {}",
-              profile.uuid, description.metadata.id)
+            this.logger.error(
+              "[{}]: failed to resolve automatic account provider {}",
+              profile.uuid, description.id
+            )
             publishResolutionError(accountEvents, resolutionResult)
           }
         }
       } else {
-        this.logger.debug("[{}]: account provider {} is not automatic",
-          profile.uuid, description.metadata.id)
+        this.logger.debug(
+          "[{}]: account provider {} is not automatic",
+          profile.uuid, description.id
+        )
       }
     }
 
@@ -646,7 +671,8 @@ object ProfilesDatabases {
       FileUtilities.fileWriteUTF8Atomically(
         profileFile,
         profileFileTemp,
-        ProfileDescriptionJSON.serializeToString(ObjectMapper(), newDescription))
+        ProfileDescriptionJSON.serializeToString(ObjectMapper(), newDescription)
+      )
     }
   }
 }
