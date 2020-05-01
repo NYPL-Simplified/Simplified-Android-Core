@@ -136,18 +136,25 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
   }
 
   /**
-   * Shows date picker dialog
+   * Shows date picker spinner
    */
   private fun showDatePickerDialog() {
     val c = Calendar.getInstance()
     val year = c.get(Calendar.YEAR) - 13
     val month = c.get(Calendar.MONTH)
     val day = c.get(Calendar.DAY_OF_MONTH)
-    val datePickerDialog = DatePickerDialog(requireContext(), this, year, month, day)
-    datePickerDialog.show()
+    val datePickerSpinner = DatePickerDialog(
+      requireContext(),
+      R.style.DatePickerSpinnerDialog,
+      this,
+      year,
+      month,
+      day
+    )
+    datePickerSpinner.show()
   }
 
-  override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+  override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
     birthDate = "$month/$dayOfMonth/$year"
     binding.birthDateEt.setText(birthDate, TextView.BufferType.EDITABLE)
   }
