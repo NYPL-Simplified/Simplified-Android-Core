@@ -27,6 +27,12 @@ data class ProfilePreferences(
   val showTestingLibraries: Boolean,
 
   /**
+   * @return `true` if the user has seen the library selection screen
+   */
+
+  val hasSeenLibrarySelectionScreen: Boolean,
+
+  /**
    * @return The reader-specific preferences
    */
 

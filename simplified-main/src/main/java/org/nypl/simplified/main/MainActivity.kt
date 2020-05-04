@@ -159,8 +159,12 @@ class MainActivity :
         .requireService(ProfilesControllerType::class.java)
 
     return when (profilesController.profileAnonymousEnabled()) {
-      ANONYMOUS_PROFILE_ENABLED -> this.openCatalog()
-      ANONYMOUS_PROFILE_DISABLED -> this.openProfileScreen()
+      ANONYMOUS_PROFILE_ENABLED -> {
+        this.openCatalog()
+      }
+      ANONYMOUS_PROFILE_DISABLED -> {
+        this.openProfileScreen()
+      }
     }
   }
 

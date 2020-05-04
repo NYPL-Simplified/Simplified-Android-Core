@@ -63,6 +63,7 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var developerOptions: ViewGroup
   private lateinit var drmTable: TableLayout
   private lateinit var failNextBoot: Switch
+  private lateinit var hasSeenLibrarySelection: Switch
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendAnalyticsButton: Button
   private lateinit var sendReportButton: Button
@@ -137,6 +138,8 @@ class SettingsFragmentVersion : Fragment() {
       layout.findViewById(R.id.settingsVersionDevProductionLibrariesSwitch)
     this.failNextBoot =
       layout.findViewById(R.id.settingsVersionDevFailNextBootSwitch)
+    this.hasSeenLibrarySelection =
+      layout.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
     this.customOPDS =
       layout.findViewById(R.id.settingsVersionDevCustomOPDS)
 
@@ -265,6 +268,21 @@ class SettingsFragmentVersion : Fragment() {
     this.failNextBoot.isChecked = isBootFailureEnabled()
     this.failNextBoot.setOnCheckedChangeListener { _, checked ->
       enableBootFailures(checked)
+    }
+
+    /*
+     * Configure the "has seen library selection" switch
+     */
+
+    this.hasSeenLibrarySelection.isChecked =
+      this.profilesController
+        .profileCurrent()
+        .preferences()
+        .hasSeenLibrarySelectionScreen
+    this.hasSeenLibrarySelection.setOnCheckedChangeListener { _, isChecked ->
+      this.profilesController.profileUpdate { description ->
+        description.copy(preferences = description.preferences.copy(hasSeenLibrarySelectionScreen = isChecked))
+      }
     }
 
     /*

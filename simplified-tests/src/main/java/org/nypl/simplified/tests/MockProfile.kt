@@ -29,7 +29,13 @@ class MockProfile(
   override fun description(): ProfileDescription {
     return ProfileDescription(
       displayName = "Profile ${id.uuid}",
-      preferences = ProfilePreferences(null, false, ReaderPreferences.builder().build(), null),
+      preferences = ProfilePreferences(
+        dateOfBirth = null,
+        showTestingLibraries = false,
+        hasSeenLibrarySelectionScreen = false,
+        readerPreferences = ReaderPreferences.builder().build(),
+        mostRecentAccount = null
+      ),
       attributes = ProfileAttributes(sortedMapOf())
     )
   }
