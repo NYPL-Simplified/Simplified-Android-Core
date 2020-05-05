@@ -96,6 +96,25 @@
 
             <TextView
                 style="@style/WizardFormLabel"
+                android:id="@+id/birth_date_label"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/birth_date" />
+
+            <EditText
+                android:id="@+id/birth_date_et"
+                android:clickable="true"
+                android:focusable="false"
+                style="@style/WizardFormEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/required"
+                android:inputType="text" />
+
+            <TextView
+                style="@style/WizardFormLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/email" />

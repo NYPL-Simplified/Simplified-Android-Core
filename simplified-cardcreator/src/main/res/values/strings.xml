@@ -23,6 +23,9 @@
     <string name="first_name">FIRST NAME</string>
     <string name="middle_name">MIDDLE NAME</string>
     <string name="last_name">LAST NAME</string>
+    <string name="birth_date">BIRTH DATE</string>
+    <string name="under_13_warning">You must be 13 years of age or older to sign up for a library card.</string>
+    <string name="enter_birth_date_warning">Please enter a valid birthdate</string>
 
     <!-- Out-of-State -->
     <string name="out_of_state_address">Out-of-State Address</string>
