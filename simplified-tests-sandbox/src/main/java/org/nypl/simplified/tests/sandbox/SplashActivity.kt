@@ -42,6 +42,12 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
   override fun onSplashMigrationReport(report: MigrationReport) {
   }
 
+  override fun onSplashLibrarySelectionWanted() {
+  }
+
+  override fun onSplashLibrarySelectionNotWanted() {
+  }
+
   private val migrationExecutor =
     MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor())
 

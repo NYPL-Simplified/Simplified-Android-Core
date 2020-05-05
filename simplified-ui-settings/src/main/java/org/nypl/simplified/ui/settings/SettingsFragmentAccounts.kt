@@ -23,8 +23,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
@@ -212,21 +210,13 @@ class SettingsFragmentAccounts : Fragment() {
   private fun showErrorPage(accountEvent: AccountEventDeletionFailed) {
     this.uiThread.checkIsUIThread()
 
-    val taskSteps =
-      mutableListOf<TaskStep<SettingsFragmentVersion.ExampleError>>()
-
-    taskSteps.add(
-      TaskStep(
-        "Opening error page.",
-        TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")))
-
     val parameters =
       ErrorPageParameters(
         emailAddress = this.buildConfig.errorReportEmail,
         body = "",
         subject = "[simplye-error-report]",
         attributes = accountEvent.attributes.toSortedMap(),
-        taskSteps = taskSteps)
+        taskSteps = accountEvent.taskResult.steps)
 
     this.findNavigationController().openErrorPage(parameters)
   }

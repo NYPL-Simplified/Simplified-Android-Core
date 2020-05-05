@@ -26,8 +26,6 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
@@ -41,6 +39,7 @@ import org.slf4j.LoggerFactory
 
 class SettingsFragmentAccountRegistry : Fragment() {
 
+  private var errorDialog: AlertDialog? = null
   private lateinit var backgroundExecutor: ListeningScheduledExecutorService
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: SettingsAccountProviderDescriptionAdapter
@@ -108,7 +107,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
     val availableAccountProviders =
       this.accountRegistry.accountProviderDescriptions()
         .values
-        .filter { provider -> shouldShowProvider(provider, preferences) }
+        .filter { provider -> this.shouldShowProvider(provider, preferences) }
         .toMutableList()
 
     availableAccountProviders.removeAll(usedAccountProviders)
@@ -335,29 +334,26 @@ class SettingsFragmentAccountRegistry : Fragment() {
   private fun showAccountCreationFailedDialog(accountEvent: AccountEventCreation.AccountEventCreationFailed) {
     this.uiThread.checkIsUIThread()
 
-    AlertDialog.Builder(this.requireContext())
-      .setTitle(R.string.settingsAccountCreationFailed)
-      .setMessage(R.string.settingsAccountCreationFailedMessage)
-      .setPositiveButton(R.string.settingsDetails) { _, _ ->
-        showErrorPage(accountEvent)
-      }
-      .create()
-      .show()
+    this.logger.debug("showAccountCreationFailedDialog")
+
+    if (this.errorDialog == null) {
+      val newDialog =
+        AlertDialog.Builder(this.requireActivity())
+        .setTitle(R.string.settingsAccountCreationFailed)
+        .setMessage(R.string.settingsAccountCreationFailedMessage)
+        .setPositiveButton(R.string.settingsDetails) { dialog, _ ->
+          this.errorDialog = null
+          this.showErrorPage(accountEvent)
+          dialog.dismiss()
+        }.create()
+      this.errorDialog = newDialog
+      newDialog.show()
+    }
   }
 
   @UiThread
   private fun showErrorPage(accountEvent: AccountEventCreation.AccountEventCreationFailed) {
     this.uiThread.checkIsUIThread()
-
-    val taskSteps =
-      mutableListOf<TaskStep<SettingsFragmentVersion.ExampleError>>()
-
-    taskSteps.add(
-      TaskStep(
-        "Opening error page.",
-        TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")
-      )
-    )
 
     val parameters =
       ErrorPageParameters(
@@ -365,7 +361,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
         body = "",
         subject = "[simplye-error-report]",
         attributes = accountEvent.attributes.toSortedMap(),
-        taskSteps = taskSteps
+        taskSteps = accountEvent.taskResult.steps
       )
 
     this.findNavigationController().openErrorPage(parameters)
