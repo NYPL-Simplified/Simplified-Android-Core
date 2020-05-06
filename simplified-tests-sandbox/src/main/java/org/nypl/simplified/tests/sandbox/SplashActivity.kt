@@ -138,6 +138,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
         background = Color.WHITE,
         splashMigrationReportEmail = "co+org.librarysimplified.tests.sandbox@io7m.com",
         splashImageResource = R.drawable.sandbox,
+        splashImageTitleResource = R.drawable.sandbox,
         splashImageSeconds = 2L)
 
     this.splashMainFragment =

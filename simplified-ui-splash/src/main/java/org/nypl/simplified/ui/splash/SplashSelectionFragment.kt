@@ -56,7 +56,7 @@ class SplashSelectionFragment : Fragment() {
     super.onStart()
 
     this.listener = this.activity as SplashListenerType
-    this.selectionImageView.setImageResource(this.parameters.splashImageResource)
+    this.selectionImageView.setImageResource(this.parameters.splashImageTitleResource)
 
     this.selectionButton.setOnClickListener {
       this.listener.onSplashLibrarySelectionWanted()

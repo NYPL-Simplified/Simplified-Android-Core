@@ -148,6 +148,7 @@ class MainActivity :
         background = Color.WHITE,
         splashMigrationReportEmail = migrationReportingEmail,
         splashImageResource = splashService.splashImageResource(),
+        splashImageTitleResource = splashService.splashImageTitleResource(),
         splashImageSeconds = 2L
       )
 
