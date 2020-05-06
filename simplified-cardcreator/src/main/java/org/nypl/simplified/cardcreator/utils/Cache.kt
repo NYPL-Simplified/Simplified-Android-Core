@@ -42,6 +42,7 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
     private const val KEY_FIRST_NAME = "first_name"
     private const val KEY_MIDDLE_NAME = "middle_name"
     private const val KEY_LAST_NAME = "last_name"
+    private const val KEY_BIRTH_DATE = "birth_date"
     private const val KEY_EMAIL = "email"
 
     private const val KEY_USERNAME = "username"
@@ -137,6 +138,7 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
       putString(KEY_FIRST_NAME, personalInformation.firstName)
       putString(KEY_MIDDLE_NAME, personalInformation.middleName)
       putString(KEY_LAST_NAME, personalInformation.lastName)
+      putString(KEY_BIRTH_DATE, personalInformation.birthDate)
       putString(KEY_EMAIL, personalInformation.email)
     }
   }
@@ -149,6 +151,7 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
       sharedPreferences.getString(KEY_FIRST_NAME, EMPTY)!!,
       sharedPreferences.getString(KEY_MIDDLE_NAME, EMPTY)!!,
       sharedPreferences.getString(KEY_LAST_NAME, EMPTY)!!,
+      sharedPreferences.getString(KEY_BIRTH_DATE, EMPTY)!!,
       sharedPreferences.getString(KEY_EMAIL, EMPTY)!!
     )
   }

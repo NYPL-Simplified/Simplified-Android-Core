@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
+import org.nypl.simplified.cardcreator.CardCreatorDebugging
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentLocationBinding
 import org.slf4j.LoggerFactory
@@ -41,6 +42,7 @@ class LocationFragment : Fragment(), LocationListener {
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
   private var isNewYork = false
+  private var locationMock = false
 
   private val locationRequestCode = 102
 
@@ -56,6 +58,8 @@ class LocationFragment : Fragment(), LocationListener {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
+    locationMock = CardCreatorDebugging.fakeNewYorkLocation
+
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
     checkIfInNewYorkState()
 
@@ -65,7 +69,7 @@ class LocationFragment : Fragment(), LocationListener {
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
-      if (isNewYork) {
+      if (isNewYork || locationMock) {
         logger.debug("User navigated to the next screen")
         nextAction = LocationFragmentDirections.actionNext()
         navController.navigate(nextAction)
@@ -158,7 +162,7 @@ class LocationFragment : Fragment(), LocationListener {
   private fun checkIfInNewYorkState() {
     logger.debug("Checking to see if user is in New York")
     val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    binding.nextBtn.isEnabled = false
+    binding.nextBtn.isEnabled = false || locationMock
     val maxResults = 1
     val location = getLocation()
     val geocoder = Geocoder(requireContext(), Locale.getDefault())
@@ -222,7 +226,7 @@ class LocationFragment : Fragment(), LocationListener {
     val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
     if (location != null) {
       logger.debug("Checking to see if user is in New York")
-      binding.nextBtn.isEnabled = false
+      binding.nextBtn.isEnabled = false || locationMock
       val maxResults = 1
       val geocoder = Geocoder(requireActivity(), Locale.getDefault())
 
@@ -252,8 +256,8 @@ class LocationFragment : Fragment(), LocationListener {
    * Enables the next button and update header status
    */
   fun enableNext(enable: Boolean) {
-    isNewYork = enable
-    binding.nextBtn.isEnabled = enable
+    isNewYork = enable || locationMock
+    binding.nextBtn.isEnabled = enable || locationMock
     if (enable) {
       binding.nextBtn.text = getString(R.string.next)
       binding.headerStatusDescTv.text = getString(R.string.new_york_success)

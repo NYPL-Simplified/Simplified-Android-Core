@@ -34,6 +34,7 @@ class ReviewFragment : Fragment() {
 
   private val nyState = "NY"
   private val cardGranted = "card-granted"
+  private val policyTypeDefault = "web_applicant"
 
   private val viewModel: PatronViewModel by viewModels()
 
@@ -121,27 +122,33 @@ class ReviewFragment : Fragment() {
     when {
       cache.getHomeAddress().state == nyState -> {
         return Patron(
+          policyTypeDefault,
           homeAddress,
           personalInformation.email,
           "${personalInformation.firstName} ${personalInformation.lastName}",
+          personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
-          workAddress)
+          null)
       }
       cache.getSchoolAddress().line_1.isEmpty() -> {
         return Patron(
+          policyTypeDefault,
           homeAddress,
           personalInformation.email,
           "${personalInformation.firstName} ${personalInformation.lastName}",
+          personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
           workAddress)
       }
       else -> {
         return Patron(
+          policyTypeDefault,
           homeAddress,
           personalInformation.email,
           "${personalInformation.firstName} ${personalInformation.lastName}",
+          personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
           schoolAddress)
