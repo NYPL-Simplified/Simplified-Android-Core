@@ -11,32 +11,39 @@ import java.io.Serializable
 data class SplashParameters(
 
   /**
- * The text color for the splash screen.
- */
+   * The text color for the splash screen.
+   */
 
-@ColorInt val textColor: Int,
-
-  /**
- * The background color for the splash screen.
- */
-
-@ColorInt val background: Int,
+  @ColorInt val textColor: Int,
 
   /**
- * The image resource for the splash screen image.
- */
+   * The background color for the splash screen.
+   */
 
-@DrawableRes val splashImageResource: Int,
-
-  /**
- * The number of seconds to keep the splash screen image visible.
- */
-
-val splashImageSeconds: Long,
+  @ColorInt val background: Int,
 
   /**
- * The email address to which migration reports will be sent.
- */
+   * The image resource for the splash screen image.
+   */
 
-val splashMigrationReportEmail: String? = null
+  @DrawableRes val splashImageResource: Int,
+
+  /**
+   * The image resource for the splash screen title image.
+   */
+
+  @DrawableRes val splashImageTitleResource: Int,
+
+  /**
+   * The number of seconds to keep the splash screen image visible.
+   */
+
+  val splashImageSeconds: Long,
+
+  /**
+   * The email address to which migration reports will be sent.
+   */
+
+  val splashMigrationReportEmail: String? = null
+
 ) : Serializable

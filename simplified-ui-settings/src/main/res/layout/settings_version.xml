@@ -181,6 +181,15 @@
         android:text="Cause the next application startup to fail" />
 
       <Switch
+        android:id="@+id/settingsVersionDevSeenLibrarySelectionScreen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:checked="false"
+        android:enabled="true"
+        android:text="User has seen library selection screen?" />
+
+      <Switch
           android:id="@+id/settingsVersionDevCardCreatorLocationSwitch"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"

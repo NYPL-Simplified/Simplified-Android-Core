@@ -80,4 +80,16 @@ interface SplashListenerType {
    */
 
   fun onSplashMigrationReport(report: MigrationReport)
+
+  /**
+   * The library selection screen was opened, and the user chose to pick a library.
+   */
+
+  fun onSplashLibrarySelectionWanted()
+
+  /**
+   * The library selection screen was opened, and the user chose to use the default collection.
+   */
+
+  fun onSplashLibrarySelectionNotWanted()
 }

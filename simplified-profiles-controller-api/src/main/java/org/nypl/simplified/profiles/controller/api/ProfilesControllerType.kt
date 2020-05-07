@@ -97,6 +97,7 @@ interface ProfilesControllerType {
       ProfilePreferences(
         dateOfBirth = ProfileDateOfBirth(date, false),
         showTestingLibraries = false,
+        hasSeenLibrarySelectionScreen = false,
         readerPreferences = ReaderPreferences.builder().build(),
         mostRecentAccount = null
       )

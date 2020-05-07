@@ -99,8 +99,30 @@ object ProfileDescriptionJSON {
     return when (version) {
       null -> this.deserializeFromJSONUnversioned(objectMapper, obj)
       20191201 -> this.deserialize20191201(objectMapper, obj)
+      20200504 -> this.deserialize20200504(objectMapper, obj)
       else -> throw JSONParseException("Unsupported profile format version: $version")
     }
+  }
+
+  private fun deserialize20200504(
+    objectMapper: ObjectMapper,
+    objectNode: ObjectNode
+  ): ProfileDescription {
+    val displayName =
+      JSONParserUtilities.getString(objectNode, "displayName")
+    val preferences =
+      deserialize20200504Preferences(
+        objectMapper,
+        JSONParserUtilities.getObject(objectNode, "preferences")
+      )
+    val attributes =
+      deserialize20191201Attributes(JSONParserUtilities.getObject(objectNode, "attributes"))
+
+    return ProfileDescription(
+      displayName = displayName,
+      preferences = preferences,
+      attributes = attributes
+    )
   }
 
   private fun deserialize20191201(
@@ -134,6 +156,45 @@ object ProfileDescriptionJSON {
     return ProfileAttributes(attributes.toSortedMap())
   }
 
+  private fun deserialize20200504Preferences(
+    objectMapper: ObjectMapper,
+    objectNode: ObjectNode
+  ): ProfilePreferences {
+
+    val dateFormatter =
+      this.standardDateFormatter()
+
+    val dateOfBirth =
+      JSONParserUtilities.getObjectOrNull(objectNode, "dateOfBirth")
+        ?.let { node ->
+          ProfileDateOfBirth(
+            date = dateFormatter.parseDateTime(JSONParserUtilities.getString(node, "date")),
+            isSynthesized = JSONParserUtilities.getBoolean(node, "isSynthesized")
+          )
+        }
+
+    val showTestingLibraries =
+      JSONParserUtilities.getBoolean(objectNode, "showTestingLibraries")
+
+    val hasSeenLibrarySelectionScreen =
+      JSONParserUtilities.getBooleanDefault(objectNode, "hasSeenLibrarySelectionScreen", true)
+
+    val readerPreferences =
+      deserializeReaderPreferences(objectMapper, objectNode)
+
+    val mostRecentAccount =
+      JSONParserUtilities.getStringOrNull(objectNode, "mostRecentAccount")
+        ?.let { AccountID(UUID.fromString(it)) }
+
+    return ProfilePreferences(
+      dateOfBirth = dateOfBirth,
+      showTestingLibraries = showTestingLibraries,
+      readerPreferences = readerPreferences,
+      mostRecentAccount = mostRecentAccount,
+      hasSeenLibrarySelectionScreen = hasSeenLibrarySelectionScreen
+    )
+  }
+
   private fun deserialize20191201Preferences(
     objectMapper: ObjectMapper,
     objectNode: ObjectNode
@@ -165,7 +226,8 @@ object ProfileDescriptionJSON {
       dateOfBirth = dateOfBirth,
       showTestingLibraries = showTestingLibraries,
       readerPreferences = readerPreferences,
-      mostRecentAccount = mostRecentAccount
+      mostRecentAccount = mostRecentAccount,
+      hasSeenLibrarySelectionScreen = true
     )
   }
 
@@ -220,7 +282,8 @@ object ProfileDescriptionJSON {
         dateOfBirth = this.someOrNull(dateOfBirth),
         showTestingLibraries = showTestingLibraries,
         readerPreferences = readerPrefs,
-        mostRecentAccount = null
+        mostRecentAccount = null,
+        hasSeenLibrarySelectionScreen = true
       )
 
     val attributeMap = mutableMapOf<String, String>()
@@ -278,28 +341,28 @@ object ProfileDescriptionJSON {
     description: ProfileDescription
   ): ObjectNode {
     val output = objectMapper.createObjectNode()
-    serialize20191201(objectMapper, output, description)
+    serialize20200504(objectMapper, output, description)
     return output
   }
 
-  private fun serialize20191201(
+  private fun serialize20200504(
     objectMapper: ObjectMapper,
     output: ObjectNode,
     description: ProfileDescription
   ) {
-    output.put("@version", 20191201)
+    output.put("@version", 20200504)
     output.put("displayName", description.displayName)
     output.set<ObjectNode>(
       "preferences",
-      serialize20191201Preferences(objectMapper, description.preferences)
+      serialize20200504Preferences(objectMapper, description.preferences)
     )
     output.set<ObjectNode>(
       "attributes",
-      serialize20191201Attributes(objectMapper, description.attributes)
+      serialize20200504Attributes(objectMapper, description.attributes)
     )
   }
 
-  private fun serialize20191201Attributes(
+  private fun serialize20200504Attributes(
     objectMapper: ObjectMapper,
     attributes: ProfileAttributes
   ): ObjectNode {
@@ -311,12 +374,13 @@ object ProfileDescriptionJSON {
     return output
   }
 
-  private fun serialize20191201Preferences(
+  private fun serialize20200504Preferences(
     objectMapper: ObjectMapper,
     preferences: ProfilePreferences
   ): ObjectNode {
     val output = objectMapper.createObjectNode()
     output.put("showTestingLibraries", preferences.showTestingLibraries)
+    output.put("hasSeenLibrarySelectionScreen", preferences.hasSeenLibrarySelectionScreen)
 
     val mostRecentAccount = preferences.mostRecentAccount
     if (mostRecentAccount != null) {

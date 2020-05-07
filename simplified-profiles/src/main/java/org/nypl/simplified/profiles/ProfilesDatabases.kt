@@ -452,7 +452,8 @@ object ProfilesDatabases {
             dateOfBirth = null,
             showTestingLibraries = false,
             readerPreferences = ReaderPreferences.builder().build(),
-            mostRecentAccount = null
+            mostRecentAccount = null,
+            hasSeenLibrarySelectionScreen = false
           ),
           attributes = ProfileAttributes(sortedMapOf())
         )

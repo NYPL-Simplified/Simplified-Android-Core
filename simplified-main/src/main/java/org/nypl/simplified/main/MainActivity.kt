@@ -26,6 +26,7 @@ import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
@@ -36,6 +37,7 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
+import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileModificationDefaultFragment
@@ -43,9 +45,13 @@ import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
+import org.nypl.simplified.ui.settings.SettingsFragmentAccountRegistry
+import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
+import org.nypl.simplified.ui.settings.SettingsNavigationControllerUnreachable
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashParameters
+import org.nypl.simplified.ui.splash.SplashSelectionFragment
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
@@ -61,6 +67,7 @@ class MainActivity :
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
 
+  private lateinit var splashParameters: SplashParameters
   private lateinit var mainViewModel: MainFragmentViewModel
   private lateinit var migrationExecutor: ListeningScheduledExecutorService
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
@@ -125,7 +132,8 @@ class MainActivity :
         .toList()
         .firstOrNull()
         ?: throw IllegalStateException(
-          "Application is misconfigured: No available services of type ${BrandingSplashServiceType::class.java.canonicalName}")
+          "Application is misconfigured: No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
+        )
 
     this.logger.debug("using splash service: ${splashService.javaClass.canonicalName}")
 
@@ -134,16 +142,18 @@ class MainActivity :
         .trim()
         .let { text -> if (text.isEmpty()) null else text }
 
-    val parameters =
+    this.splashParameters =
       SplashParameters(
         textColor = this.resources.getColor(ThemeControl.themeFallback.color),
         background = Color.WHITE,
         splashMigrationReportEmail = migrationReportingEmail,
         splashImageResource = splashService.splashImageResource(),
-        splashImageSeconds = 2L)
+        splashImageTitleResource = splashService.splashImageTitleResource(),
+        splashImageSeconds = 2L
+      )
 
     this.splashMainFragment =
-      SplashFragment.newInstance(parameters)
+      SplashFragment.newInstance(this.splashParameters)
 
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
@@ -159,9 +169,39 @@ class MainActivity :
         .requireService(ProfilesControllerType::class.java)
 
     return when (profilesController.profileAnonymousEnabled()) {
-      ANONYMOUS_PROFILE_ENABLED -> this.openCatalog()
-      ANONYMOUS_PROFILE_DISABLED -> this.openProfileScreen()
+      ANONYMOUS_PROFILE_ENABLED -> {
+        val profile = profilesController.profileCurrent()
+        if (!profile.preferences().hasSeenLibrarySelectionScreen) {
+          this.openLibrarySelectionScreen()
+        } else {
+          this.openCatalog()
+        }
+      }
+      ANONYMOUS_PROFILE_DISABLED -> {
+        this.openProfileScreen()
+      }
     }
+  }
+
+  private fun openLibrarySelectionScreen() {
+    val profilesController =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+        .requireService(ProfilesControllerType::class.java)
+
+    /*
+     * Store the fact that we've seen the selection screen.
+     */
+
+    profilesController.profileUpdate { profileDescription ->
+      profileDescription.copy(
+        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true))
+    }
+
+    val fragment = SplashSelectionFragment.newInstance(this.splashParameters)
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.beginTransaction()
+      .replace(R.id.mainFragmentHolder, fragment, "SPLASH_MAIN")
+      .commit()
   }
 
   private class ProfilesNavigationController(
@@ -277,7 +317,8 @@ class MainActivity :
     this.profilesNavigationController =
       ProfilesNavigationController(this.supportFragmentManager, this.mainViewModel)
     this.navigationControllerDirectory.updateNavigationController(
-      ProfilesNavigationControllerType::class.java, this.profilesNavigationController)
+      ProfilesNavigationControllerType::class.java, this.profilesNavigationController
+    )
 
     if (savedInstanceState == null) {
       this.mainViewModel.clearHistory = true
@@ -288,7 +329,8 @@ class MainActivity :
   override fun onBackPressed() {
     val mainController =
       this.navigationControllerDirectory.navigationControllerIfAvailable(
-        CatalogNavigationControllerType::class.java)
+        CatalogNavigationControllerType::class.java
+      )
 
     if (mainController != null) {
       this.logger.debug("delivering back press to catalog navigation controller")
@@ -298,9 +340,23 @@ class MainActivity :
       return
     }
 
+    val settingsNavigationController =
+      this.navigationControllerDirectory.navigationControllerIfAvailable(
+        SettingsNavigationControllerType::class.java
+      )
+
+    if (settingsNavigationController != null) {
+      this.logger.debug("delivering back press to settings navigation controller")
+      if (!settingsNavigationController.popBackStack()) {
+        super.onBackPressed()
+      }
+      return
+    }
+
     val profilesNavigationController =
       this.navigationControllerDirectory.navigationControllerIfAvailable(
-        ProfilesNavigationControllerType::class.java)
+        ProfilesNavigationControllerType::class.java
+      )
 
     if (profilesNavigationController != null) {
       this.logger.debug("delivering back press to profiles navigation controller")
@@ -378,7 +434,8 @@ class MainActivity :
         applicationProfileIsAnonymous =
         profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_ENABLED,
         applicationVersion = this.applicationVersion(),
-        context = this)
+        context = this
+      )
 
     return Migrations.create(migrationServiceDependencies)
   }
@@ -388,6 +445,44 @@ class MainActivity :
   }
 
   override fun onSplashMigrationReport(report: MigrationReport) {
+    // No longer used
+  }
+
+  override fun onSplashLibrarySelectionWanted() {
+    val manager = this.supportFragmentManager
+
+    /*
+     * Set up a custom navigation controller used by the settings library registry screen. It's
+     * only capable of moving to the error page, or popping the back stack.
+     */
+
+    this.navigationControllerDirectory.updateNavigationController(
+      SettingsNavigationControllerType::class.java,
+      object : SettingsNavigationControllerUnreachable() {
+        override fun popBackStack(): Boolean {
+          this@MainActivity.openCatalog()
+          return true
+        }
+
+        override fun <E : PresentableErrorType> openErrorPage(
+          parameters: ErrorPageParameters<E>
+        ) {
+          val errorPage = ErrorPageFragment.create(parameters)
+          manager.beginTransaction()
+            .replace(R.id.mainFragmentHolder, errorPage, "MAIN")
+            .commit()
+        }
+      }
+    )
+
+    val fragment = SettingsFragmentAccountRegistry()
+    manager.beginTransaction()
+      .replace(R.id.mainFragmentHolder, fragment, "MAIN")
+      .commit()
+  }
+
+  override fun onSplashLibrarySelectionNotWanted() {
+    this.openCatalog()
   }
 
   override fun onErrorPageSendReport(parameters: ErrorPageParameters<*>) {
@@ -395,7 +490,8 @@ class MainActivity :
       context = this,
       address = parameters.emailAddress,
       subject = parameters.subject,
-      body = parameters.body)
+      body = parameters.body
+    )
   }
 
   override fun onUserInteraction() {

@@ -45,6 +45,7 @@ abstract class ProfileDescriptionJSONContract {
         displayName = "Kermit",
         preferences = ProfilePreferences(ProfileDateOfBirth(dateTime, true),
           showTestingLibraries = false,
+          hasSeenLibrarySelectionScreen = false,
           readerPreferences = ReaderPreferences.builder().build(),
           mostRecentAccount = null
         ),
