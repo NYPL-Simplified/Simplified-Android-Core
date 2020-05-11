@@ -302,15 +302,24 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
 
 // Configure publishing for appropriate projects
 
-configure(subprojects.findAll { !it.plugins.hasPlugin('com.android.application') }) { project ->
-  println("Configuring publishing for ${project} (${POM_PACKAGING})")
-  apply from: file("$rootDir/publishing.gradle")
+subprojects { project ->
+  pluginManager.withPlugin("java") {
+    println("Configuring publishing for ${project} (${POM_PACKAGING})")
+    apply from: file("$rootDir/publishing.gradle")
+  }
+  pluginManager.withPlugin("com.android.library") {
+    println("Configuring publishing for ${project} (${POM_PACKAGING})")
+    apply from: file("$rootDir/publishing.gradle")
+  }
 }
 
 // Add ktlint to all kotlin projects
 
-configure(subprojects.findAll {
-  it.plugins.hasPlugin('kotlin') || it.plugins.hasPlugin('kotlin-android')
-}) {
-  apply from: file("$rootDir/ktlint.gradle")
+subprojects { project ->
+  pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+    apply from: file("$rootDir/ktlint.gradle")
+  }
+  pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+    apply from: file("$rootDir/ktlint.gradle")
+  }
 }
