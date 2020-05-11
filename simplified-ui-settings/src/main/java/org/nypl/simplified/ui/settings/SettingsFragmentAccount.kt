@@ -17,6 +17,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
+import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
@@ -42,6 +43,7 @@ import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
@@ -57,6 +59,7 @@ class SettingsFragmentAccount : Fragment() {
 
   private val logger = LoggerFactory.getLogger(SettingsFragmentAccount::class.java)
 
+  private lateinit var backgroundExecutor: ListeningScheduledExecutorService
   private lateinit var account: AccountType
   private lateinit var accountIcon: ImageView
   private lateinit var accountSubtitle: TextView
@@ -74,24 +77,25 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var authenticationCOPPAOver13: Switch
   private lateinit var bookmarkSync: ViewGroup
   private lateinit var bookmarkSyncCheck: Switch
+  private lateinit var bookmarkSyncLabel: View
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var documents: DocumentStoreType
   private lateinit var eulaCheckbox: CheckBox
   private lateinit var imageLoader: ImageLoaderType
   private lateinit var login: ViewGroup
   private lateinit var loginButton: Button
-  private lateinit var signUpButton: Button
-  private lateinit var signUpLabel: TextView
   private lateinit var loginButtonErrorDetails: Button
   private lateinit var loginProgress: ProgressBar
   private lateinit var loginProgressText: TextView
   private lateinit var parameters: SettingsFragmentAccountParameters
   private lateinit var profilesController: ProfilesControllerType
+  private lateinit var signUpButton: Button
+  private lateinit var signUpLabel: TextView
   private lateinit var uiThread: UIThreadServiceType
-  private var accountSubscription: Disposable? = null
-  private var profileSubscription: Disposable? = null
   private val cardCreatorResultCode = 101
+  private var accountSubscription: Disposable? = null
   private var cardCreatorService: CardCreatorServiceType? = null
+  private var profileSubscription: Disposable? = null
 
   companion object {
 
@@ -117,8 +121,8 @@ class SettingsFragmentAccount : Fragment() {
 
     val services = Services.serviceDirectory()
 
-    this.cardCreatorService = services.optionalService(CardCreatorServiceType::class.java)
-
+    this.cardCreatorService =
+      services.optionalService(CardCreatorServiceType::class.java)
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
     this.documents =
@@ -177,6 +181,8 @@ class SettingsFragmentAccount : Fragment() {
       layout.findViewById(R.id.settingsSyncBookmarks)
     this.bookmarkSyncCheck =
       this.bookmarkSync.findViewById(R.id.settingsSyncBookmarksCheck)
+    this.bookmarkSyncLabel =
+      this.bookmarkSync.findViewById(R.id.settingsSyncBookmarksLabel)
 
     this.login =
       layout.findViewById(R.id.settingsLogin)
@@ -260,6 +266,9 @@ class SettingsFragmentAccount : Fragment() {
 
   override fun onStart() {
     super.onStart()
+
+    this.backgroundExecutor =
+      NamedThreadPools.namedThreadPool(1, "simplified-accounts-io", 19)
 
     try {
       this.account =
@@ -352,6 +361,18 @@ class SettingsFragmentAccount : Fragment() {
       }
     }
 
+    /*
+     * Configure the bookmark syncing switch to enable/disable syncing permissions.
+     */
+
+    this.bookmarkSyncCheck.setOnCheckedChangeListener { buttonView, isChecked ->
+      this.backgroundExecutor.execute {
+        this.account.setPreferences(
+          this.account.preferences.copy(bookmarkSyncingPermitted = isChecked)
+        )
+      }
+    }
+
     this.accountSubscription =
       this.profilesController.accountEvents()
         .subscribe(this::onAccountEvent)
@@ -386,6 +407,7 @@ class SettingsFragmentAccount : Fragment() {
   override fun onStop() {
     super.onStop()
 
+    this.backgroundExecutor.shutdown()
     this.accountIcon.setImageDrawable(null)
     this.eulaCheckbox.setOnCheckedChangeListener(null)
     this.authenticationCOPPAOver13.setOnClickListener {}
@@ -411,8 +433,11 @@ class SettingsFragmentAccount : Fragment() {
   private fun reconfigureAccountUI() {
     this.uiThread.checkIsUIThread()
 
-    this.bookmarkSyncCheck.isChecked = this.account.preferences.bookmarkSyncingPermitted
-    this.bookmarkSyncCheck.isEnabled = this.account.provider.supportsSimplyESynchronization
+    val isPermitted = this.account.preferences.bookmarkSyncingPermitted
+    val isSupported = this.account.provider.supportsSimplyESynchronization
+    this.bookmarkSyncCheck.isChecked = isPermitted
+    this.bookmarkSyncCheck.isEnabled = isSupported
+    this.bookmarkSyncLabel.isEnabled = isSupported
 
     when (val auth = this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate -> {

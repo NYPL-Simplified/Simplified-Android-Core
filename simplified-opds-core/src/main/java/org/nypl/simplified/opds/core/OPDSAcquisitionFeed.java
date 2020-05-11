@@ -3,7 +3,6 @@ package org.nypl.simplified.opds.core;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
-import com.io7m.jnull.Nullable;
 
 import org.joda.time.DateTime;
 import org.nypl.simplified.parser.api.ParseError;
@@ -43,6 +42,7 @@ public final class OPDSAcquisitionFeed implements Serializable {
   private final OptionType<URI> privacy_policy;
   private final List<ParseError> errors;
   private final OptionType<URI> auth_document;
+  private final OptionType<URI> annotations;
 
   private OPDSAcquisitionFeed(
     final URI in_uri,
@@ -62,7 +62,7 @@ public final class OPDSAcquisitionFeed implements Serializable {
     final OptionType<URI> in_licenses,
     final OptionType<DRMLicensor> in_licensor,
     final List<ParseError> in_errors,
-    final OptionType<URI> in_auth_document) {
+    final OptionType<URI> in_auth_document, OptionType<URI> in_annotations) {
     this.uri =
       Objects.requireNonNull(in_uri);
     this.entries =
@@ -98,6 +98,8 @@ public final class OPDSAcquisitionFeed implements Serializable {
       Objects.requireNonNull(in_errors, "in_errors");
     this.auth_document =
       Objects.requireNonNull(in_auth_document, "in_auth_document");
+    this.annotations =
+      Objects.requireNonNull(in_annotations, "in_annotations");
   }
 
   /**
@@ -118,33 +120,49 @@ public final class OPDSAcquisitionFeed implements Serializable {
     return new Builder(in_uri, in_title, in_id, in_updated);
   }
 
+  public OptionType<URI> getAnnotations() {
+    return annotations;
+  }
+
   @Override
-  public boolean equals(
-    final @Nullable Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final OPDSAcquisitionFeed other = (OPDSAcquisitionFeed) obj;
-    return this.uri.equals(other.uri)
-      && this.entries.equals(other.entries)
-      && this.facets_by_group.equals(other.facets_by_group)
-      && this.facets_order.equals(other.facets_order)
-      && this.groups.equals(other.groups)
-      && this.groups_order.equals(other.groups_order)
-      && this.id.equals(other.id)
-      && this.title.equals(other.title)
-      && this.updated.equals(other.updated)
-      && this.next.equals(other.next)
-      && this.search.equals(other.search)
-      && this.terms_of_service.equals(other.terms_of_service)
-      && this.about.equals(other.about)
-      && this.privacy_policy.equals(other.privacy_policy);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    OPDSAcquisitionFeed that = (OPDSAcquisitionFeed) o;
+    return id.equals(that.id)
+      && next.equals(that.next)
+      && search.equals(that.search)
+      && title.equals(that.title)
+      && updated.equals(that.updated)
+      && uri.equals(that.uri)
+      && terms_of_service.equals(that.terms_of_service)
+      && about.equals(that.about)
+      && licenses.equals(that.licenses)
+      && licensor.equals(that.licensor)
+      && privacy_policy.equals(that.privacy_policy)
+      && errors.equals(that.errors)
+      && auth_document.equals(that.auth_document)
+      && annotations.equals(that.annotations);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+      id,
+      next,
+      search,
+      title,
+      updated,
+      uri,
+      terms_of_service,
+      about,
+      licenses,
+      licensor,
+      privacy_policy,
+      errors,
+      auth_document,
+      annotations
+    );
   }
 
   /**
@@ -290,28 +308,6 @@ public final class OPDSAcquisitionFeed implements Serializable {
     return this.errors;
   }
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.uri.hashCode();
-    result = (prime * result) + this.entries.hashCode();
-    result = (prime * result) + this.groups.hashCode();
-    result = (prime * result) + this.groups_order.hashCode();
-    result = (prime * result) + this.facets_by_group.hashCode();
-    result = (prime * result) + this.facets_order.hashCode();
-    result = (prime * result) + this.id.hashCode();
-    result = (prime * result) + this.title.hashCode();
-    result = (prime * result) + this.updated.hashCode();
-    result = (prime * result) + this.next.hashCode();
-    result = (prime * result) + this.search.hashCode();
-    result = (prime * result) + this.terms_of_service.hashCode();
-    result = (prime * result) + this.about.hashCode();
-    result = (prime * result) + this.privacy_policy.hashCode();
-    result = (prime * result) + this.licenses.hashCode();
-    return result;
-  }
-
   private static final class Builder implements OPDSAcquisitionFeedBuilderType {
     private final List<OPDSAcquisitionFeedEntry> entries;
     private final Map<String, List<OPDSFacet>> facets_by_group;
@@ -332,6 +328,7 @@ public final class OPDSAcquisitionFeed implements Serializable {
     private OptionType<DRMLicensor> licensor;
     private final List<ParseError> errors;
     private OptionType<URI> auth_document;
+    private OptionType<URI> annotations;
 
     private Builder(
       final URI in_uri,
@@ -356,6 +353,7 @@ public final class OPDSAcquisitionFeed implements Serializable {
       this.auth_document = Option.none();
       this.licenses = Option.none();
       this.licensor = Option.none();
+      this.annotations = Option.none();
       this.errors = new ArrayList<>();
     }
 
@@ -440,6 +438,12 @@ public final class OPDSAcquisitionFeed implements Serializable {
     }
 
     @Override
+    public OPDSAcquisitionFeedBuilderType setAnnotationsOption(OptionType<URI> u) {
+      this.annotations = Objects.requireNonNull(u);
+      return this;
+    }
+
+    @Override
     public OPDSAcquisitionFeedBuilderType setPrivacyPolicyOption(final OptionType<URI> u) {
       this.privacy_policy = Objects.requireNonNull(u);
       return this;
@@ -476,7 +480,8 @@ public final class OPDSAcquisitionFeed implements Serializable {
         this.licenses,
         this.licensor,
         this.errors,
-        this.auth_document);
+        this.auth_document,
+        this.annotations);
     }
 
     @Override

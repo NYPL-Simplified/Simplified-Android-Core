@@ -124,7 +124,6 @@ class AccountProviderResolution(
           subtitle = authDocument?.description,
           supportEmail = authDocument?.supportURI?.toString(),
           supportsReservations = supportsReservations,
-          supportsSimplyESynchronization = false,
           updated = updated
         )
 

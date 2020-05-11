@@ -69,8 +69,10 @@ class AccountsDatabase private constructor(
     LoggerFactory.getLogger(AccountsDatabase::class.java)
 
   private val accountsLock: Any = Any()
+
   @GuardedBy("accountsLock")
   private val accountsReadOnly: SortedMap<AccountID, AccountType>
+
   @GuardedBy("accountsLock")
   private val accountsByProviderReadOnly: SortedMap<URI, AccountType>
 
@@ -110,7 +112,8 @@ class AccountsDatabase private constructor(
       this.logger.debug("creating account {} (provider {})", accountId, accountProvider.id)
       Preconditions.checkArgument(
         !this.accounts.containsKey(accountId),
-        "Account ID %s cannot have been used", accountId)
+        "Account ID %s cannot have been used", accountId
+      )
     }
 
     try {
@@ -141,7 +144,8 @@ class AccountsDatabase private constructor(
         accountLock = accountLock,
         accountFile = accountFile,
         accountFileTemp = accountFileTemp,
-        description = accountDescription)
+        description = accountDescription
+      )
 
       val account: Account
       synchronized(this.accountsLock) {
@@ -154,7 +158,8 @@ class AccountsDatabase private constructor(
             accountEvents = this.accountEvents,
             description = accountDescription,
             credentials = this.credentials,
-            accountLoginState = AccountLoginState.AccountNotLoggedIn)
+            accountLoginState = AccountLoginState.AccountNotLoggedIn
+          )
         this.accounts[accountId] = account
         this.accountsByProvider.put(accountProvider.id, account)
       }
@@ -177,7 +182,8 @@ class AccountsDatabase private constructor(
 
       if (this.accounts.size == 1) {
         throw AccountsDatabaseLastAccountException(
-          "At least one account must exist at any given time")
+          "At least one account must exist at any given time"
+        )
       }
 
       this.accounts.remove(account.id)
@@ -212,6 +218,7 @@ class AccountsDatabase private constructor(
 
     @GuardedBy("descriptionLock")
     private var loginStateActual: AccountLoginState = accountLoginState
+
     @GuardedBy("descriptionLock")
     private var providerActual: AccountProviderType = providerInitial
 
@@ -226,16 +233,26 @@ class AccountsDatabase private constructor(
         val existingProvider = existing.provider()
         if (existingProvider.id != accountProvider.id) {
           throw AccountsDatabaseWrongProviderException(
-            "Provider id ${accountProvider.id} does not match the existing id ${existingProvider.id}")
+            "Provider id ${accountProvider.id} does not match the existing id ${existingProvider.id}"
+          )
         }
         if (existingProvider.updated.isAfter(accountProvider.updated)) {
-          logger.warn("attempted to update provider {} with an older definition", existingProvider.id)
+          logger.warn(
+            "attempted to update provider {} with an older definition",
+            existingProvider.id
+          )
           return@FunctionType existing
         }
 
-        existing.toBuilder()
-          .setProvider(accountProvider)
-          .build()
+        val modifiedDescription =
+          existing.toBuilder()
+            .setProvider(accountProvider)
+            .build()
+
+        check(accountProvider == modifiedDescription.provider()) {
+          "Account providers must match"
+        }
+        modifiedDescription
       })
     }
 
@@ -267,10 +284,13 @@ class AccountsDatabase private constructor(
         this.loginStateActual = state
       }
 
-      this.accountEvents.onNext(AccountEventLoginStateChanged(
-        message = "",
-        accountID = this.id,
-        state = state))
+      this.accountEvents.onNext(
+        AccountEventLoginStateChanged(
+          message = "",
+          accountID = this.id,
+          state = state
+        )
+      )
 
       val credentials = state.credentials
       if (credentials != null) {
@@ -305,11 +325,15 @@ class AccountsDatabase private constructor(
             accountLock = accountLock,
             accountFile = accountFile,
             accountFileTemp = accountFileTemp,
-            description = newDescription)
+            description = newDescription
+          )
 
           this.description = newDescription
-        }
+          this.providerActual = newDescription.provider()
 
+          check(newDescription == this.description)
+          check(newDescription.provider() == this.provider)
+        }
         this.accountEvents.onNext(AccountEventUpdated("", this.id))
       } catch (e: IOException) {
         throw AccountsDatabaseIOException("Could not write account data", e)
@@ -435,7 +459,8 @@ class AccountsDatabase private constructor(
         }
 
         throw AccountsDatabaseOpenException(
-          "One or more errors occurred whilst trying to open the account database.", errors)
+          "One or more errors occurred whilst trying to open the account database.", errors
+        )
       }
 
       return AccountsDatabase(
@@ -590,12 +615,19 @@ class AccountsDatabase private constructor(
           this.logger.debug("migrated {} to {}", existingDirectory, accountDirNew)
           return AccountID(accountUuid)
         } catch (ex: IOException) {
-          this.logger.error("could not migrate directory {} -> {}", existingDirectory, accountDirNew)
+          this.logger.error(
+            "could not migrate directory {} -> {}",
+            existingDirectory,
+            accountDirNew
+          )
           return null
         }
       }
 
-      this.logger.error("could not migrate directory {} after multiple attempts, aborting!", existingDirectory)
+      this.logger.error(
+        "could not migrate directory {} after multiple attempts, aborting!",
+        existingDirectory
+      )
       return null
     }
 
@@ -628,16 +660,18 @@ class AccountsDatabase private constructor(
         val bookDatabase =
           bookDatabases.openDatabase(context, accountId, booksDir)
         val accountDescription =
-          AccountDescriptionJSON.deserializeFromFile(objectMapper, accountProviderResolver, accountFile)
+          AccountDescriptionJSON.deserializeFromFile(
+            objectMapper,
+            accountProviderResolver,
+            accountFile
+          )
         val accountProvider =
           accountDescription.provider()
-        val authentication =
-          accountProvider.authentication
         val credentials =
           credentialsStore.get(accountId)
 
         val loginState: AccountLoginState
-        if (authentication != null && credentials != null) {
+        if (credentials != null) {
           loginState = AccountLoginState.AccountLoggedIn(credentials)
         } else {
           loginState = AccountLoginState.AccountNotLoggedIn
@@ -690,11 +724,13 @@ class AccountsDatabase private constructor(
     ) {
 
       FileLocking.withFileThreadLocked<Unit, IOException>(
-        accountLock, 1000L) {
+        accountLock, 1000L
+      ) {
         FileUtilities.fileWriteUTF8Atomically(
           accountFile,
           accountFileTemp,
-          AccountDescriptionJSON.serializeToString(ObjectMapper(), description))
+          AccountDescriptionJSON.serializeToString(ObjectMapper(), description)
+        )
       }
     }
   }

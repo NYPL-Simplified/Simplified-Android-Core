@@ -2,6 +2,7 @@ package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
 import org.nypl.simplified.links.Link
+import org.nypl.simplified.opds.core.OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
 import java.net.URI
 import javax.annotation.concurrent.ThreadSafe
 
@@ -212,6 +213,9 @@ interface AccountProviderType : Comparable<AccountProviderType> {
     this.annotationsURI?.let { uri ->
       addLink(links, uri, "http://www.w3.org/ns/oa#annotationService")
     }
+    this.authenticationDocumentURI?.let { uri ->
+      addLink(links, uri, AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT)
+    }
     this.cardCreatorURI?.let { uri ->
       addLink(links, uri, "register")
     }
@@ -231,15 +235,19 @@ interface AccountProviderType : Comparable<AccountProviderType> {
       addLink(links, uri, "privacy-policy")
     }
 
-    return AccountProviderDescription(
-      id = this.id,
-      title = this.displayName,
-      updated = this.updated,
-      links = links.toList(),
-      images = imageLinks.toList(),
-      isAutomatic = this.addAutomatically,
-      isProduction = this.isProduction
-    )
+    val accountProviderDescription =
+      AccountProviderDescription(
+        id = id,
+        title = displayName,
+        updated = updated,
+        links = links.toList(),
+        images = imageLinks.toList(),
+        isAutomatic = addAutomatically,
+        isProduction = isProduction
+      )
+
+    check((this.authenticationDocumentURI != null) == (accountProviderDescription.authenticationDocumentURI != null))
+    return accountProviderDescription
   }
 
   private fun addLink(links: MutableList<Link>, uri: URI, relation: String): Boolean {

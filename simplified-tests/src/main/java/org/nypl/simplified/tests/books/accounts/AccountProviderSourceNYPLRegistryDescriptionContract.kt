@@ -394,7 +394,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      supportsSimplyESynchronization = false,
       updated = DateTime.parse("1970-01-01T00:00:00.000Z"))
 
     Assert.assertEquals(provider, result.result)
@@ -540,7 +539,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      supportsSimplyESynchronization = false,
       updated = DateTime.parse("1970-01-01T00:00:00.000Z"))
 
     Assert.assertEquals(provider, result.result)
@@ -669,7 +667,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      supportsSimplyESynchronization = false,
       updated = DateTime.parse("1970-01-01T00:00:00.000Z"))
 
     Assert.assertEquals(provider, result.result)
