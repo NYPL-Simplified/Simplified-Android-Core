@@ -697,7 +697,7 @@ class SettingsFragmentAccount : Fragment() {
    * Hides or show sign up options if is user in accessing the NYPL
    */
   private fun hideCardCreatorForNonNYPL() {
-    if(this.account.provider.cardCreatorURI != null) {
+    if (this.account.provider.cardCreatorURI != null) {
       settingsCardCreator.visibility = View.GONE
     }
   }
