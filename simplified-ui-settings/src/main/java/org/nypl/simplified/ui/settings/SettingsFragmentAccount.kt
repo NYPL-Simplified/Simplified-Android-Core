@@ -16,6 +16,7 @@ import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
@@ -85,6 +86,7 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var loginButtonErrorDetails: Button
   private lateinit var loginProgress: ProgressBar
   private lateinit var loginProgressText: TextView
+  private lateinit var settingsCardCreator: ConstraintLayout
   private lateinit var parameters: SettingsFragmentAccountParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
@@ -92,6 +94,7 @@ class SettingsFragmentAccount : Fragment() {
   private var profileSubscription: Disposable? = null
   private val cardCreatorResultCode = 101
   private var cardCreatorService: CardCreatorServiceType? = null
+  private var cardCreatorLibrary = "The New York Public Library"
 
   companion object {
 
@@ -113,7 +116,7 @@ class SettingsFragmentAccount : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    this.parameters = this.arguments!![PARAMETERS_ID] as SettingsFragmentAccountParameters
+    this.parameters = this.requireArguments()[PARAMETERS_ID] as SettingsFragmentAccountParameters
 
     val services = Services.serviceDirectory()
 
@@ -194,6 +197,8 @@ class SettingsFragmentAccount : Fragment() {
       layout.findViewById(R.id.settingsCardCreatorSignUp)
     this.signUpLabel =
       layout.findViewById(R.id.settingsCardCreatorLabel)
+    this.settingsCardCreator =
+      layout.findViewById(R.id.settingsCardCreator)
 
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginButton.isEnabled = false
@@ -272,6 +277,8 @@ class SettingsFragmentAccount : Fragment() {
     }
 
     this.configureToolbar()
+
+    this.hideCardCreatorForNonNYPL()
 
     this.accountTitle.text =
       this.account.provider.displayName
@@ -684,6 +691,15 @@ class SettingsFragmentAccount : Fragment() {
       age.yearsOld(DateTime.now()) >= 13
     } else {
       false
+    }
+  }
+
+  /**
+   * Hides or show sign up options if is user in accessing the NYPL
+   */
+  private fun hideCardCreatorForNonNYPL() {
+    if(this.account.provider.displayName != cardCreatorLibrary) {
+      settingsCardCreator.visibility = View.GONE
     }
   }
 
