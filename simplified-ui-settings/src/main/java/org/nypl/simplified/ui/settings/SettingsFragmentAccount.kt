@@ -94,7 +94,6 @@ class SettingsFragmentAccount : Fragment() {
   private var profileSubscription: Disposable? = null
   private val cardCreatorResultCode = 101
   private var cardCreatorService: CardCreatorServiceType? = null
-  private var cardCreatorLibrary = "The New York Public Library"
 
   companion object {
 
@@ -698,7 +697,7 @@ class SettingsFragmentAccount : Fragment() {
    * Hides or show sign up options if is user in accessing the NYPL
    */
   private fun hideCardCreatorForNonNYPL() {
-    if(this.account.provider.displayName != cardCreatorLibrary) {
+    if(this.account.provider.cardCreatorURI != null) {
       settingsCardCreator.visibility = View.GONE
     }
   }

@@ -44,6 +44,7 @@ class LocationFragment : Fragment(), LocationListener {
   private lateinit var nextAction: NavDirections
   private var isNewYork = false
   private var locationMock = false
+  private var initialLocationCheckCompleted = false
 
   private val locationRequestCode = 102
 
@@ -54,6 +55,13 @@ class LocationFragment : Fragment(), LocationListener {
   ): View? {
     _binding = FragmentLocationBinding.inflate(inflater, container, false)
     return binding.root
+  }
+
+  override fun onResume() {
+    super.onResume()
+    if (initialLocationCheckCompleted) {
+      checkIfInNewYorkState()
+    }
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -96,9 +104,11 @@ class LocationFragment : Fragment(), LocationListener {
     dialogBuilder.setMessage(getString(R.string.location_access_error))
       .setCancelable(false)
       .setPositiveButton(getString(R.string.settings)) { _, _ ->
+        initialLocationCheckCompleted = true
         startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
       }
       .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+        initialLocationCheckCompleted = true
         dialog.cancel()
       }
     val alert = dialogBuilder.create()
@@ -148,6 +158,8 @@ class LocationFragment : Fragment(), LocationListener {
           val looper = Looper.myLooper()
           locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, looper)
           location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        } else {
+          showLocationSettingsPrompt()
         }
       } catch (e: Exception) {
         logger.error("Error getting current location", e)
@@ -180,6 +192,8 @@ class LocationFragment : Fragment(), LocationListener {
 
         if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
           logger.debug("User is in New York")
+          logger.debug("Stopping location updates")
+          locationManager.removeUpdates(this)
           enableNext(true)
         } else {
           enableNext(false)
@@ -190,9 +204,6 @@ class LocationFragment : Fragment(), LocationListener {
       enableNext(false)
       showLocationSettingsPrompt()
     }
-
-    logger.debug("Stopping location updates")
-    locationManager.removeUpdates(this)
   }
 
   /**
@@ -242,7 +253,11 @@ class LocationFragment : Fragment(), LocationListener {
 
           if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
             logger.debug("User is in New York")
+            logger.debug("Stopping location updates")
+            locationManager.removeUpdates(this)
             enableNext(true)
+          } else {
+            enableNext(false)
           }
       } catch (e: Exception) {
         logger.error("Error checking to see if user is in New York", e)
@@ -250,8 +265,6 @@ class LocationFragment : Fragment(), LocationListener {
         showLocationSettingsPrompt()
       }
     }
-    logger.debug("Stopping location updates")
-    locationManager.removeUpdates(this)
   }
 
   /**
