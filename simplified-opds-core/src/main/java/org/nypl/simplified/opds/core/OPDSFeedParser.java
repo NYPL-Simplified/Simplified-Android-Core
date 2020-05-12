@@ -325,6 +325,37 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     return Option.none();
   }
 
+  private static OptionType<URI> parseAnnotationsLink(
+    final URI source,
+    final OPDSAcquisitionFeedBuilderType builder,
+    final Element e) {
+    Objects.requireNonNull(e);
+
+    final boolean has_name = OPDSXML.nodeHasName(
+      Objects.requireNonNull(e), ATOM_URI, "link");
+
+    Preconditions.checkArgument(has_name, "Node has name 'link'");
+
+    final boolean has_everything =
+      e.hasAttribute("rel") && e.hasAttribute("href");
+
+    if (has_everything) {
+      final String r = Objects.requireNonNull(e.getAttribute("rel"));
+      final String h = Objects.requireNonNull(e.getAttribute("href"));
+
+      if ("http://www.w3.org/ns/oa#annotationService".equals(r)) {
+        try {
+          return Option.some(scrubURI(source,h));
+        } catch (URISyntaxException ex) {
+          builder.addParseError(invalidURI(source, hrefAttributeOfLinkRel("http://www.w3.org/ns/oa#annotationService"), ex));
+          return Option.none();
+        }
+      }
+    }
+
+    return Option.none();
+  }
+
   private static String hrefAttributeOfLinkRel(String relValue) {
     return "'href' attribute of 'link' with 'rel' " + relValue;
   }
@@ -543,6 +574,19 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
               OPDSFeedParser.parseAuthenticationDocumentLink(uri, builder, e);
             if (pp_opt.isSome()) {
               builder.setAuthenticationDocumentLink(pp_opt);
+              continue;
+            }
+          }
+
+          /*
+           * Annotations links.
+           */
+
+          {
+            final OptionType<URI> annotOpt =
+              OPDSFeedParser.parseAnnotationsLink(uri, builder, e);
+            if (annotOpt.isSome()) {
+              builder.setAnnotationsOption(annotOpt);
               continue;
             }
           }
