@@ -130,7 +130,7 @@
     <string name="over_13">13 or Older</string>
     <string name="eula_checkbox">I agree to the terms of the End User License Agreement.</string>
     <string name="age_error">You are not old enough to sign up for a library card.</string>
-    <string name="validating_location">Validating your location&#8230;</string>
+    <string name="validating_location">Validating your location</string>
 
     <!-- Location -->
     <string name="checking_location">Checking location&#8230;</string>

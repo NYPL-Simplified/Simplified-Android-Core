@@ -26,6 +26,7 @@ import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentLocationBinding
+import org.nypl.simplified.cardcreator.utils.startEllipses
 import org.slf4j.LoggerFactory
 import java.util.Locale
 
@@ -58,6 +59,7 @@ class LocationFragment : Fragment(), LocationListener {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
+    binding.ellipsesTv.startEllipses()
     locationMock = CardCreatorDebugging.fakeNewYorkLocation
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
