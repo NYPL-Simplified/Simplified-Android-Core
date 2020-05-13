@@ -1,9 +1,13 @@
 package org.nypl.simplified.books.controller
 
+import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
+import com.io7m.jfunctional.Some
+import org.joda.time.DateTime
 
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -19,6 +23,7 @@ import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultMatcherType
 import org.nypl.simplified.http.core.HTTPResultOKType
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
@@ -28,6 +33,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
+import java.net.URI
 import java.util.HashSet
 import java.util.concurrent.Callable
 
@@ -113,6 +119,7 @@ class BookSyncTask(
     return when (newProviderResult) {
       is TaskResult.Success -> {
         this.logger.debug("successfully resolved the account provider")
+        this.account.setAccountProvider(newProviderResult.result)
         newProviderResult.result
       }
       is TaskResult.Failure -> {
@@ -144,6 +151,7 @@ class BookSyncTask(
   ) {
 
     val feed = this.feedParser.parse(provider.loansURI, result.value)
+    this.updateAnnotations(feed)
 
     /*
      * Obtain the set of books that are on disk already. If any
@@ -210,6 +218,44 @@ class BookSyncTask(
     for (revoke_id in revoking) {
       this.logger.debug("[{}] revoking", revoke_id.brief())
       this.booksController.bookRevoke(this.account, revoke_id)
+    }
+  }
+
+  /**
+   * Check to see if the feed contains an annotations link. If it does, update the account
+   * provider to indicate that the provider does support bookmark syncing.
+   */
+
+  private fun updateAnnotations(feed: OPDSAcquisitionFeed) {
+    this.logger.debug("checking feed for annotations link")
+
+    if (feed.annotations.isSome) {
+      this.logger.debug("feed contains annotations link: setting sync support to 'true'")
+
+      val newAccountProvider =
+        AccountProvider.copy(this.account.provider)
+        .copy(
+          annotationsURI = (feed.annotations as Some<URI>).get(),
+          updated = DateTime.now()
+        )
+      Preconditions.checkArgument(
+        newAccountProvider.supportsSimplyESynchronization,
+        "Support for syncing must now be enabled"
+      )
+
+      val newProvider = this.accountRegistry.updateProvider(newAccountProvider)
+      Preconditions.checkArgument(
+        newProvider.supportsSimplyESynchronization,
+        "Support for syncing must now be enabled"
+      )
+
+      this.account.setAccountProvider(newProvider)
+      Preconditions.checkArgument(
+        this.account.provider.supportsSimplyESynchronization,
+        "Support for syncing must now be enabled"
+      )
+    } else {
+      this.logger.debug("feed does not contain annotations link")
     }
   }
 

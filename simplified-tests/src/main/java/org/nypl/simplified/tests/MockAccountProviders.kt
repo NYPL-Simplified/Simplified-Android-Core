@@ -67,7 +67,6 @@ object MockAccountProviders {
       subtitle = "Imaginary books",
       supportEmail = "postmaster@example.com",
       supportsReservations = false,
-      supportsSimplyESynchronization = false,
       updated = DateTime.parse("2000-01-01T00:00:00Z")
     )
   }

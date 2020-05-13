@@ -65,7 +65,7 @@ class ProfileAccountCreateTask(
     } catch (e: Exception) {
       this.publishFailureEvent(
         this.taskRecorder.currentStepFailedAppending(
-          this.strings.creatingAccountFailed,
+          this.strings.creatingAccountFailed + "(" + e.javaClass.canonicalName + ")",
           AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
           e
         )

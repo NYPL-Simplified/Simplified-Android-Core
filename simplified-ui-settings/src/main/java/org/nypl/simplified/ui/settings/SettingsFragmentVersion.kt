@@ -27,6 +27,7 @@ import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
+import org.nypl.simplified.cardcreator.CardCreatorDebugging
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -58,11 +59,13 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var buildText: TextView
   private lateinit var buildTitle: TextView
   private lateinit var cacheButton: Button
+  private lateinit var cardCreatorFakeLocation: Switch
   private lateinit var crashButton: Button
   private lateinit var customOPDS: Button
   private lateinit var developerOptions: ViewGroup
   private lateinit var drmTable: TableLayout
   private lateinit var failNextBoot: Switch
+  private lateinit var hasSeenLibrarySelection: Switch
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendAnalyticsButton: Button
   private lateinit var sendReportButton: Button
@@ -137,6 +140,10 @@ class SettingsFragmentVersion : Fragment() {
       layout.findViewById(R.id.settingsVersionDevProductionLibrariesSwitch)
     this.failNextBoot =
       layout.findViewById(R.id.settingsVersionDevFailNextBootSwitch)
+    this.hasSeenLibrarySelection =
+      layout.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
+    this.cardCreatorFakeLocation =
+      layout.findViewById(R.id.settingsVersionDevCardCreatorLocationSwitch)
     this.customOPDS =
       layout.findViewById(R.id.settingsVersionDevCustomOPDS)
 
@@ -268,6 +275,21 @@ class SettingsFragmentVersion : Fragment() {
     }
 
     /*
+     * Configure the "has seen library selection" switch
+     */
+
+    this.hasSeenLibrarySelection.isChecked =
+      this.profilesController
+        .profileCurrent()
+        .preferences()
+        .hasSeenLibrarySelectionScreen
+    this.hasSeenLibrarySelection.setOnCheckedChangeListener { _, isChecked ->
+      this.profilesController.profileUpdate { description ->
+        description.copy(preferences = description.preferences.copy(hasSeenLibrarySelectionScreen = isChecked))
+      }
+    }
+
+    /*
      * Configure the custom OPDS button.
      */
 
@@ -284,6 +306,12 @@ class SettingsFragmentVersion : Fragment() {
       this.profilesController.profileUpdate { description ->
         description.copy(preferences = description.preferences.copy(showTestingLibraries = show))
       }
+    }
+
+    this.cardCreatorFakeLocation.isChecked = CardCreatorDebugging.fakeNewYorkLocation
+    this.cardCreatorFakeLocation.setOnCheckedChangeListener { button, checked ->
+      this.logger.debug("card creator fake location: {}", checked)
+      CardCreatorDebugging.fakeNewYorkLocation = checked
     }
   }
 

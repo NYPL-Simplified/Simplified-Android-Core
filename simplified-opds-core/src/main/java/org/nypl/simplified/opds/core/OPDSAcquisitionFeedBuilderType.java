@@ -104,4 +104,13 @@ public interface OPDSAcquisitionFeedBuilderType
 
   OPDSAcquisitionFeedBuilderType setAuthenticationDocumentLink(
     OptionType<URI> u);
+
+  /**
+   * Set the URI of the annotations service for the feed, if any
+   *
+   * @param u The annotations service URI, if any
+   */
+
+  OPDSAcquisitionFeedBuilderType setAnnotationsOption(
+    OptionType<URI> u);
 }

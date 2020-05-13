@@ -429,7 +429,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
     val result = task.call()
     val failure = result as TaskResult.Failure
-    Assert.assertEquals("creatingAccountFailed", failure.steps.last().resolution.message)
+    Assert.assertEquals("creatingAccountFailed(org.nypl.simplified.accounts.database.api.AccountsDatabaseIOException)", failure.steps.last().resolution.message)
   }
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {

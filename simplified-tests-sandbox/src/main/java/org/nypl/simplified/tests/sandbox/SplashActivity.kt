@@ -42,6 +42,12 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
   override fun onSplashMigrationReport(report: MigrationReport) {
   }
 
+  override fun onSplashLibrarySelectionWanted() {
+  }
+
+  override fun onSplashLibrarySelectionNotWanted() {
+  }
+
   private val migrationExecutor =
     MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor())
 
@@ -132,6 +138,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
         background = Color.WHITE,
         splashMigrationReportEmail = "co+org.librarysimplified.tests.sandbox@io7m.com",
         splashImageResource = R.drawable.sandbox,
+        splashImageTitleResource = R.drawable.sandbox,
         splashImageSeconds = 2L)
 
     this.splashMainFragment =

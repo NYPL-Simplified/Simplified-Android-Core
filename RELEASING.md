@@ -131,27 +131,94 @@ This updates the remote Git repository with the new branches.
 
 #### Push To Maven Central
 
-Assuming that you haven't already, place your Maven Central
-credentials in your `$HOME/.gradle/gradle.properties` file. Our projects
-use the properties `mavenCentralUsername` and `mavenCentralPassword`
-to refer to your username and password, respectively:
+We currently use the [brooklime](https://www.io7m.com/software/brooklime)
+tool to do reliable Maven Central deployments. This documentation
+makes references to a `brooklime.jar` file, and this should be understood
+to be an abbreviation for whichever is the current release of the `brooklime`
+command-line tool. At the time of writing, the exact jar file is
+[com.io7m.brooklime.cmdline-0.0.2-main.jar](https://repo1.maven.org/maven2/com/io7m/brooklime/com.io7m.brooklime.cmdline/0.0.2/com.io7m.brooklime.cmdline-0.0.2-main.jar).
+
+##### Building And Deploying
+
+First, build the code as normal using `./gradlew clean assemble`.
+
+Then, deploy the artifacts that will be uploaded to Maven Central into
+a directory using the `org.librarysimplified.directory.publish` Gradle
+property:
 
 ```
-$ grep mavenCentral $HOME/.gradle/gradle.properties
-mavenCentralUsername=hypotheticaluser
-mavenCentralPassword=arathersecurepassword
+$ ./gradlew -Porg.librarysimplified.directory.publish="$HOME/tmp/simplified" publishAllPublicationsToDirectoryRepository
 ```
 
-With the credentials in place, the `publish`, `closeRepository`, and
-`releaseRepository` Gradle tasks can be used to publish artifacts to
-Central:
+The above command uses a directory "$HOME/tmp/simplified" to contain
+the binaries that will be uploaded to Maven Central for the current
+release. You can use whatever directory you like, but you should use
+a fresh directory for each release to avoid re-uploading artifacts from
+older releases that may have been left hanging around.
+
+##### Creating A Staging Repository
+
+Then, using the `brooklime` tool, create a new staging repository:
 
 ```
-$ ./gradlew clean assemble
-$ ./gradlew publish
-$ ./gradlew closeRepository
-$ ./gradlew releaseRepository
+$ java -jar brooklime.jar \
+  create \
+  --description 'Simplified X.Y.Z' \
+  --stagingProfileId af061f5afba777 \
+  --user MyMavenCentralUser \
+  --password MyMavenCentralPassword
+
+orglibrarysimplified-1087
 ```
+
+The above command creates a new staging repository in the project's
+staging profile (`af061f5afba777`). The `X.Y.Z` string should be
+replaced with the version number of the release you are deploying,
+and the `MyMavenCentralUser` and `MyMavenCentralPassword` strings
+should be your Maven Central username and password, respectively. The
+command will print the name of the new staging repository when
+execution completes. In this case, it printed `orglibrarysimplified-1087`,
+but the exact value will differ each time a new repository is created.
+
+##### Uploading Content To The Staging Repository
+
+```
+$ java -jar brooklime.jar \
+  upload \
+  --stagingProfileId af061f5afba777 \
+  --repository orglibrarysimplified-1087 \
+  --user MyMavenCentralUser \
+  --password MyMavenCentralPassword \
+  --directory "$HOME/tmp/simplified"
+```
+
+The above command uploads the contents of the directory that we
+populated during the build, to the staging repository `orglibrarysimplified-1087`
+that we created in the previous step. The uploading step will typically
+upload around two thousand files, and will generally take around ten
+minutes to complete.
+
+##### Closing And Releasing The Staging Repository
+
+```
+$ java -jar brooklime.jar \
+  close \
+  --stagingProfileId af061f5afba777 \
+  --repository orglibrarysimplified-1087 \
+  --user MyMavenCentralUser \
+  --password MyMavenCentralPassword
+  
+$ java -jar brooklime.jar \
+  release \
+  --stagingProfileId af061f5afba777 \
+  --repository orglibrarysimplified-1087 \
+  --user MyMavenCentralUser \
+  --password MyMavenCentralPassword
+```
+
+The two commands above will _close_ and then _release_ the staging
+repository `orglibrarysimplified-1087`. This completes the deployment
+process.
 
 As closing and releasing a repository can take some time to complete,
 it's sometimes reassuring to be able to observe the state of the staging

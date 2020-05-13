@@ -74,4 +74,16 @@
         <item name="android:textAppearance">?android:textAppearanceMedium</item>
     </style>
 
+    <style name="DatePickerSpinnerDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:dialogTheme">@style/DatePickerSpinnerDialogTheme</item>
+        <item name="android:datePickerStyle">@style/DatePickerSpinner</item>
+    </style>
+
+    <style name="DatePickerSpinnerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:datePickerStyle">@style/DatePickerSpinner</item>
+    </style>
+
+    <style name="DatePickerSpinner" parent="@android:style/Widget.Material.DatePicker">
+        <item name="android:datePickerMode">spinner</item>
+    </style>
 </resources>

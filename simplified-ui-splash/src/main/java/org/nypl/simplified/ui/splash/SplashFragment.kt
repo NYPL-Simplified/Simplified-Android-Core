@@ -104,7 +104,7 @@ class SplashFragment : Fragment() {
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
     this.retainInstance = true
-    this.parameters = this.arguments!!.getSerializable(org.nypl.simplified.ui.splash.SplashFragment.Companion.parametersKey) as SplashParameters
+    this.parameters = this.arguments!!.getSerializable(parametersKey) as SplashParameters
   }
 
   override fun onAttach(context: Context) {

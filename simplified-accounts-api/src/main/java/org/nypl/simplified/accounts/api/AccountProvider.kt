@@ -11,7 +11,6 @@ data class AccountProvider(
   override val subtitle: String?,
   override val logo: URI?,
   override val authentication: AccountProviderAuthenticationDescription?,
-  override val supportsSimplyESynchronization: Boolean,
   override val supportsReservations: Boolean,
   override val loansURI: URI?,
   override val cardCreatorURI: URI?,
@@ -30,6 +29,9 @@ data class AccountProvider(
   override fun compareTo(other: AccountProviderType): Int {
     return this.id.compareTo(other.id)
   }
+
+  override val supportsSimplyESynchronization: Boolean =
+    this.annotationsURI != null
 
   companion object {
 
@@ -64,7 +66,6 @@ data class AccountProvider(
         subtitle = other.subtitle,
         supportEmail = other.supportEmail,
         supportsReservations = other.supportsReservations,
-        supportsSimplyESynchronization = other.supportsSimplyESynchronization,
         updated = other.updated
       )
     }

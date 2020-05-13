@@ -155,8 +155,6 @@ object AccountProvidersJSON {
         JSONParserUtilities.getStringOrNull(obj, "supportEmail")
       val supportsReservations =
         JSONParserUtilities.getBooleanDefault(obj, "supportsReservations", false)
-      val supportsSimplyESynchronization =
-        JSONParserUtilities.getBooleanDefault(obj, "supportsSimplyESynchronization", false)
       val isProduction =
         JSONParserUtilities.getBooleanDefault(obj, "isProduction", false)
       val idNumeric =
@@ -188,7 +186,6 @@ object AccountProvidersJSON {
         subtitle = subtitle,
         supportEmail = supportEmail,
         supportsReservations = supportsReservations,
-        supportsSimplyESynchronization = supportsSimplyESynchronization,
         updated = updated
       )
     } catch (e: JSONParseException) {
