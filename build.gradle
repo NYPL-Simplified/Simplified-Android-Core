@@ -63,6 +63,16 @@ ext {
     useNYPLNexusPublish = true
   }
 
+  if (project.hasProperty("org.librarysimplified.directory.publish")) {
+    useDirectoryPublishPath = project.property("org.librarysimplified.directory.publish")
+    useDirectoryPublish = true
+    logger.warn("org.librarysimplified.directory.publish is set: We will publish artifacts to ${useDirectoryPublishPath}")
+  } else {
+    logger.warn("org.librarysimplified.directory.publish is not set: We will not publish artifacts to a custom directory")
+    useDirectoryPublish = false
+    useDirectoryPublishPath = null
+  }
+
   if (!project.hasProperty("org.librarysimplified.nexus.depend")) {
     logger.warn("org.librarysimplified.nexus.depend is not set: We will not depend on artifacts on the NYPL Nexus")
     useNYPLNexusDepend = false

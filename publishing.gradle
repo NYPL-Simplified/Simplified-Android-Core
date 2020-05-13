@@ -75,6 +75,15 @@ publishing {
     }
 
     repositories {
+        if (useDirectoryPublish) {
+            logger.info("using ${useDirectoryPublishPath} for publication")
+
+            maven {
+                name = "Directory"
+                url = "file://${useDirectoryPublishPath}"
+            }
+        }
+
         if (useNYPLNexusPublish) {
             logger.info("using NYPL Nexus repository for publication")
 
