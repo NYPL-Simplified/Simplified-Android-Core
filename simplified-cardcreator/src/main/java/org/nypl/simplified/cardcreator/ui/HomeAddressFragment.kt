@@ -98,7 +98,7 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      requireActivity().onBackPressed()
+      navController.popBackStack()
     }
 
     viewModel.validateAddressResponse.observe(viewLifecycleOwner, Observer { response ->

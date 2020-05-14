@@ -62,7 +62,7 @@ class ReviewFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      requireActivity().onBackPressed()
+      navController.popBackStack()
     }
 
     viewModel.createPatronResponse.observe(viewLifecycleOwner, Observer { response ->

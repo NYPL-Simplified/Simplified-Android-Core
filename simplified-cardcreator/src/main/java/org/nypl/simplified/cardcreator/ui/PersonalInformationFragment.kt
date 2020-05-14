@@ -95,7 +95,7 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      requireActivity().onBackPressed()
+      navController.popBackStack()
     }
 
     // Either label or EditText can launch birthday picker

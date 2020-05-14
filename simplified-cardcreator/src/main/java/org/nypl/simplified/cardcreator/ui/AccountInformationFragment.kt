@@ -78,7 +78,7 @@ class AccountInformationFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      requireActivity().onBackPressed()
+      navController.popBackStack()
     }
 
     viewModel.validateUsernameResponse.observe(viewLifecycleOwner, Observer { response ->

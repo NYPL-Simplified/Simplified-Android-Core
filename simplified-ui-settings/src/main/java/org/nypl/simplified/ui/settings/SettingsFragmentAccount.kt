@@ -723,7 +723,7 @@ class SettingsFragmentAccount : Fragment() {
    */
   private fun hideCardCreatorForNonNYPL() {
     if (this.account.provider.cardCreatorURI != null) {
-      settingsCardCreator.visibility = View.GONE
+      settingsCardCreator.visibility = View.VISIBLE
     }
   }
 
