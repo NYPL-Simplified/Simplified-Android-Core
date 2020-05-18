@@ -5,9 +5,7 @@ import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.Color
-import android.os.Environment
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
@@ -41,6 +39,9 @@ import org.nypl.simplified.analytics.api.Analytics
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
+import org.nypl.simplified.books.audio.AudioBookManifests
 import org.nypl.simplified.books.audio.AudioBookOverdriveSecretServiceType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
@@ -117,9 +118,6 @@ import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
-import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
-import org.nypl.simplified.books.audio.AudioBookManifests
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPMimeMap
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerAAsync
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerType
