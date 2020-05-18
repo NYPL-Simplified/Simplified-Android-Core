@@ -210,33 +210,6 @@ internal object MainServices {
       directoryStorageProfiles = directoryStorageProfiles)
   }
 
-  private fun determineDiskDataDirectory(context: Context): File {
-
-    /*
-     * If external storage is mounted and is on a device that doesn't allow
-     * the storage to be removed, use the external storage for data.
-     */
-
-    if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
-      this.logger.debug("trying external storage")
-      if (!Environment.isExternalStorageRemovable()) {
-        val result = context.getExternalFilesDir(null)
-        this.logger.debug("external storage is not removable, using it ({})", result)
-        Preconditions.checkArgument(result!!.isDirectory, "Data directory {} is a directory", result)
-        return result
-      }
-    }
-
-    /*
-     * Otherwise, use internal storage.
-     */
-
-    val result = context.filesDir
-    this.logger.debug("no non-removable external storage, using internal storage ({})", result)
-    Preconditions.checkArgument(result.isDirectory, "Data directory {} is a directory", result)
-    return result
-  }
-
   private fun themeForProfile(profile: OptionType<ProfileType>): ThemeValue {
     if (profile.isSome) {
       val currentProfile = (profile as Some<ProfileType>).get()
