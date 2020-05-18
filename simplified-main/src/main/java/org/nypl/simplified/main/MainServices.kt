@@ -149,10 +149,8 @@ internal object MainServices {
    */
 
   const val CURRENT_DATA_VERSION = "v4.0"
-  const val SIMPLYE = "org.nypl.simplified.simplye"
 
   private data class Directories(
-    val directoryPrivateBaseVersioned: File,
     val directoryStorageBaseVersioned: File,
     val directoryStorageDownloads: File,
     val directoryStorageDocuments: File,
@@ -162,14 +160,8 @@ internal object MainServices {
   private fun initializeDirectories(context: Context): Directories {
     this.logger.debug("initializing directories")
 
-    val directoryPrivateBase =
-      context.filesDir
-    val directoryPrivateBaseVersioned =
-      File(directoryPrivateBase, this.CURRENT_DATA_VERSION)
-    val directoryStorageBase =
-      this.determineDiskDataDirectory(context)
     val directoryStorageBaseVersioned =
-      File(directoryStorageBase, this.CURRENT_DATA_VERSION)
+      File(context.filesDir, this.CURRENT_DATA_VERSION)
     val directoryStorageDownloads =
       File(directoryStorageBaseVersioned, "downloads")
     val directoryStorageDocuments =
@@ -177,9 +169,6 @@ internal object MainServices {
     val directoryStorageProfiles =
       File(directoryStorageBaseVersioned, "profiles")
 
-    this.logger.debug("directoryPrivateBase:          {}", directoryPrivateBase)
-    this.logger.debug("directoryPrivateBaseVersioned: {}", directoryPrivateBaseVersioned)
-    this.logger.debug("directoryStorageBase:          {}", directoryStorageBase)
     this.logger.debug("directoryStorageBaseVersioned: {}", directoryStorageBaseVersioned)
     this.logger.debug("directoryStorageDownloads:     {}", directoryStorageDownloads)
     this.logger.debug("directoryStorageDocuments:     {}", directoryStorageDocuments)
@@ -192,9 +181,6 @@ internal object MainServices {
 
     val directories =
       listOf<File>(
-        directoryPrivateBase,
-        directoryPrivateBaseVersioned,
-        directoryStorageBase,
         directoryStorageBaseVersioned,
         directoryStorageDownloads,
         directoryStorageDocuments,
@@ -218,7 +204,6 @@ internal object MainServices {
     }
 
     return Directories(
-      directoryPrivateBaseVersioned = directoryPrivateBaseVersioned,
       directoryStorageBaseVersioned = directoryStorageBaseVersioned,
       directoryStorageDownloads = directoryStorageDownloads,
       directoryStorageDocuments = directoryStorageDocuments,
@@ -423,9 +408,9 @@ internal object MainServices {
   ): AccountAuthenticationCredentialsStoreType {
     val accountCredentialsStore = try {
       val credentials =
-        File(directories.directoryPrivateBaseVersioned, "credentials.json")
+        File(directories.directoryStorageBaseVersioned, "credentials.json")
       val credentialsTemp =
-        File(directories.directoryPrivateBaseVersioned, "credentials.json.tmp")
+        File(directories.directoryStorageBaseVersioned, "credentials.json.tmp")
 
       this.logger.debug("credentials store path: {}", credentials)
       AccountAuthenticationCredentialsStore.open(credentials, credentialsTemp)
