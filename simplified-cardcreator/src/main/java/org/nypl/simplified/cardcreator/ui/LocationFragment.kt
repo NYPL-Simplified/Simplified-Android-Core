@@ -92,7 +92,7 @@ class LocationFragment : Fragment(), LocationListener {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      requireActivity().onBackPressed()
+      navController.popBackStack()
     }
   }
 

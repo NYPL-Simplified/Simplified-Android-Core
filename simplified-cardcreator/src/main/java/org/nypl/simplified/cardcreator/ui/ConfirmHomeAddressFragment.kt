@@ -60,7 +60,7 @@ class ConfirmHomeAddressFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      requireActivity().onBackPressed()
+      navController.popBackStack()
     }
   }
 }

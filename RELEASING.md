@@ -150,7 +150,7 @@ property:
 $ ./gradlew -Porg.librarysimplified.directory.publish="$HOME/tmp/simplified" publishAllPublicationsToDirectoryRepository
 ```
 
-The above command uses a directory "$HOME/tmp/simplified" to contain
+The above command uses a directory `$HOME/tmp/simplified` to contain
 the binaries that will be uploaded to Maven Central for the current
 release. You can use whatever directory you like, but you should use
 a fresh directory for each release to avoid re-uploading artifacts from

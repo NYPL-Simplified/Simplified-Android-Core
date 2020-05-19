@@ -1,9 +1,9 @@
 Library Simplified
 ===
 
-[![Build Status](https://img.shields.io/travis/com/NYPL-Simplified/android?style=flat-square)](https://www.travis-ci.com/NYPL-Simplified/android)
-[![Maven Central](https://img.shields.io/maven-central/v/org.librarysimplified/org.librarysimplified.app.vanilla?style=flat-square)](https://repo2.maven.org/maven2/org/librarysimplified/)
-[![Maven Central (snapshot)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.librarysimplified/org.librarysimplified.app.vanilla.svg?style=flat-square)](https://oss.sonatype.org/content/repositories/snapshots/org.librarysimplified/)
+[![Build Status](https://img.shields.io/travis/com/NYPL-Simplified/Simplified-Android-Core?style=flat-square)](https://www.travis-ci.com/NYPL-Simplified/Simplified-Android-Core)
+[![Maven Central](https://img.shields.io/maven-central/v/org.librarysimplified/org.librarysimplified.main?style=flat-square)](https://repo1.maven.org/maven2/org/librarysimplified/)
+[![Maven Central (snapshot)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.librarysimplified/org.librarysimplified.main.svg?style=flat-square)](https://oss.sonatype.org/content/repositories/snapshots/org.librarysimplified/)
 
 The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android client.
 
