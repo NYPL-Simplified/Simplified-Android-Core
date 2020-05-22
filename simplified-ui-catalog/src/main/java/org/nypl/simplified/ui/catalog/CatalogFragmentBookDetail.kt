@@ -282,7 +282,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private fun synthesizeBookWithStatus(): BookWithStatus {
     val book = Book(
       id = this.parameters.bookID,
-      account = this.parameters.accountId,
+      account = this.parameters.feedEntry.accountID,
       cover = null,
       thumbnail = null,
       entry = this.parameters.feedEntry.feedEntry,
@@ -310,7 +310,7 @@ class CatalogFragmentBookDetail : Fragment() {
     try {
       val accountProvider =
         this.profilesController.profileCurrent()
-          .account(this.parameters.accountId)
+          .account(this.parameters.feedEntry.accountID)
           .provider
 
       toolbar.subtitle = accountProvider.displayName
@@ -333,7 +333,10 @@ class CatalogFragmentBookDetail : Fragment() {
         ?: synthesizeBookWithStatus()
 
     this.uiThread.runOnUIThread { this.onBookStatusUI(bookWithStatus) }
-    this.onOPDSFeedEntry(FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry))
+    this.onOPDSFeedEntry(FeedEntry.FeedEntryOPDS(
+      bookWithStatus.book.account,
+      bookWithStatus.book.entry
+    ))
   }
 
   private fun onOPDSFeedEntry(entry: FeedEntry.FeedEntryOPDS) {
@@ -727,7 +730,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private fun shouldShowDeleteButton(book: Book): Boolean {
     return try {
       val profile = this.profilesController.profileCurrent()
-      val account = profile.account(this.parameters.accountId)
+      val account = profile.account(this.parameters.feedEntry.accountID)
       return if (account.bookDatabase.books().contains(book.id)) {
         book.entry.availability.matchAvailability(
           object : OPDSAvailabilityMatcherType<Boolean, Exception> {
@@ -901,7 +904,7 @@ class CatalogFragmentBookDetail : Fragment() {
    */
 
   private fun openLoginDialogAndThen(execute: () -> Unit) {
-    val dialogParameters = CatalogFragmentLoginDialogParameters(this.parameters.accountId)
+    val dialogParameters = CatalogFragmentLoginDialogParameters(this.parameters.feedEntry.accountID)
     this.findNavigationController().openLoginDialog(dialogParameters)
     this.runOnLoginDialogClosed.set(execute)
   }
@@ -914,7 +917,7 @@ class CatalogFragmentBookDetail : Fragment() {
     return try {
       val account =
         this.profilesController.profileCurrent()
-          .account(this.parameters.accountId)
+          .account(this.parameters.feedEntry.accountID)
       val requiresLogin = account.requiresCredentials
       val isNotLoggedIn = account.loginState !is AccountLoginState.AccountLoggedIn
       requiresLogin && isNotLoggedIn
@@ -997,7 +1000,9 @@ class CatalogFragmentBookDetail : Fragment() {
     this.logger.debug("reserving: {}", book.id)
     try {
       this.booksController.bookBorrowWithDefaultAcquisition(
-        this.parameters.accountId, book.id, book.entry
+        accountID = this.parameters.feedEntry.accountID,
+        bookID = book.id,
+        entry = book.entry
       )
     } catch (e: Throwable) {
       this.logger.error("failed to start borrow task: ", e)
@@ -1008,7 +1013,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.logger.debug("revoking: {}", book.id)
 
     try {
-      this.booksController.bookRevoke(this.parameters.accountId, book.id)
+      this.booksController.bookRevoke(this.parameters.feedEntry.accountID, book.id)
     } catch (e: Throwable) {
       this.logger.error("failed to start revocation task: ", e)
     }
@@ -1019,7 +1024,9 @@ class CatalogFragmentBookDetail : Fragment() {
 
     try {
       this.booksController.bookBorrowWithDefaultAcquisition(
-        this.parameters.accountId, book.id, book.entry
+        accountID = this.parameters.feedEntry.accountID,
+        bookID = book.id,
+        entry = book.entry
       )
     } catch (e: Throwable) {
       this.logger.error("failed to start borrow task: ", e)
@@ -1068,7 +1075,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.logger.debug("dismissing borrow error: {}", id)
 
     try {
-      this.booksController.bookBorrowFailedDismiss(this.parameters.accountId, id)
+      this.booksController.bookBorrowFailedDismiss(this.parameters.feedEntry.accountID, id)
     } catch (e: Throwable) {
       this.logger.error("failed to dismiss task error: ", e)
     }
@@ -1078,7 +1085,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.logger.debug("dismissing revoke error: {}", id)
 
     try {
-      this.booksController.bookRevokeFailedDismiss(this.parameters.accountId, id)
+      this.booksController.bookRevokeFailedDismiss(this.parameters.feedEntry.accountID, id)
     } catch (e: Throwable) {
       this.logger.error("failed to dismiss revoke error: ", e)
     }
@@ -1088,7 +1095,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.logger.debug("cancelling: {}", id)
 
     try {
-      this.booksController.bookDownloadCancel(this.parameters.accountId, id)
+      this.booksController.bookDownloadCancel(this.parameters.feedEntry.accountID, id)
     } catch (e: Throwable) {
       this.logger.error("failed to cancel download: ", e)
     }
@@ -1098,7 +1105,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.logger.debug("deleting: {}", id)
 
     try {
-      this.booksController.bookDelete(this.parameters.accountId, id)
+      this.booksController.bookDelete(this.parameters.feedEntry.accountID, id)
     } catch (e: Throwable) {
       this.logger.error("failed to start deletion: ", e)
     }

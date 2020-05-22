@@ -3,12 +3,15 @@ package org.nypl.simplified.ui.catalog
 import androidx.paging.PageKeyedDataSource
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
+import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.futures.FluentFutureExtensions.map
+import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -22,19 +25,12 @@ import java.net.URI
 class CatalogPagedDataSource(
   private val feedLoader: FeedLoaderType,
   private val initialFeed: Feed.FeedWithoutGroups,
+  private val ownership: CatalogFeedOwnership,
   private val profilesController: ProfilesControllerType
 ) : PageKeyedDataSource<URI, FeedEntry>() {
 
   private val logger =
     LoggerFactory.getLogger(CatalogPagedDataSource::class.java)
-
-  private val authenticationCredentials =
-    Option.of(this.profilesController.profileAccountCurrent()
-      .loginState
-      .credentials)
-      .map { credentials ->
-        AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials!!)
-      }
 
   override fun loadInitial(
     params: LoadInitialParams<URI>,
@@ -42,7 +38,8 @@ class CatalogPagedDataSource(
   ) {
     Preconditions.checkArgument(
       this.initialFeed.entriesInOrder.isNotEmpty(),
-      "Do not pass an empty initial feed to the paged data source!")
+      "Do not pass an empty initial feed to the paged data source!"
+    )
 
     callback.onResult(
       this.initialFeed.entriesInOrder,
@@ -53,13 +50,46 @@ class CatalogPagedDataSource(
     )
   }
 
+  private fun findAuthenticatedHTTP(): OptionType<HTTPAuthType> {
+    return when (val ownership = this.ownership) {
+      is CatalogFeedOwnership.OwnedByAccount ->
+        Option.of(
+          this.profilesController.profileCurrent()
+            .account(ownership.accountId)
+            .loginState
+            .credentials
+        ).map { credentials ->
+          AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials!!)
+        }
+
+      is CatalogFeedOwnership.CollectedFromAccounts ->
+        Option.none()
+    }
+  }
+
+  private fun findAccountID(): AccountID? {
+    return when (val ownership = this.ownership) {
+      is CatalogFeedOwnership.OwnedByAccount ->
+        ownership.accountId
+      is CatalogFeedOwnership.CollectedFromAccounts ->
+        null
+    }
+  }
+
   override fun loadAfter(
     params: LoadParams<URI>,
     callback: LoadCallback<URI, FeedEntry>
   ) {
     this.logger.debug("loadAfter: {}", params.key)
 
-    this.feedLoader.fetchURI(params.key, this.authenticationCredentials)
+    val accountId = this.findAccountID()
+    if (accountId == null) {
+      this.logger.error("loadAfter: can't support paged feeds without feed ownership")
+      callback.onResult(mutableListOf(), null)
+      return
+    }
+
+    this.feedLoader.fetchURI(accountId, params.key, this.findAuthenticatedHTTP())
       .map { result ->
         return@map when (result) {
           is FeedLoaderResult.FeedLoaderSuccess -> {
@@ -97,7 +127,14 @@ class CatalogPagedDataSource(
   ) {
     this.logger.debug("loadBefore: {}", params.key)
 
-    this.feedLoader.fetchURI(params.key, this.authenticationCredentials)
+    val accountId = this.findAccountID()
+    if (accountId == null) {
+      this.logger.error("loadBefore: can't support paged feeds without feed ownership")
+      callback.onResult(mutableListOf(), null)
+      return
+    }
+
+    this.feedLoader.fetchURI(accountId, params.key, this.findAuthenticatedHTTP())
       .map { result ->
         return@map when (result) {
           is FeedLoaderResult.FeedLoaderSuccess -> {

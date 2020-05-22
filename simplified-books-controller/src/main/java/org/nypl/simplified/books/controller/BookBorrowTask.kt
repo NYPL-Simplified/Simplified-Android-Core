@@ -408,8 +408,12 @@ class BookBorrowTask(
 
     val feedResult =
       try {
-        this.services.feedLoader.fetchURIRefreshing(this.acquisition.uri, httpAuth, "PUT")
-          .get(this.borrowTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
+        this.services.feedLoader.fetchURIRefreshing(
+          this.accountId,
+          this.acquisition.uri,
+          httpAuth,
+          "PUT"
+        ).get(this.borrowTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
       } catch (e: Exception) {
         this.error("feed loader raised exception: ", e)
 

@@ -95,7 +95,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       from: Activity,
       parameters: AudioBookPlayerParameters
     ) {
-
       val b = Bundle()
       b.putSerializable(this.PARAMETER_ID, parameters)
       val i = Intent(from, AudioBookPlayerActivity::class.java)
@@ -596,8 +595,10 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      */
 
     try {
-      val accountCurrent = this.profiles.profileAccountCurrent()
-      this.books.bookRevoke(accountCurrent, this.parameters.bookID)
+      val account =
+        this.profiles.profileCurrent()
+          .account(this.parameters.accountID)
+      this.books.bookRevoke(account, this.parameters.bookID)
     } catch (e: Exception) {
       this.log.error("could not execute revocation: ", e)
     }
@@ -706,7 +707,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      */
 
     this.covers.loadCoverInto(
-      FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
+      FeedEntry.FeedEntryOPDS(this.parameters.accountID, this.parameters.opdsEntry),
       view,
       this.screenSize.dpToPixels(300).toInt(),
       this.screenSize.dpToPixels(400).toInt()

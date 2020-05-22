@@ -66,10 +66,6 @@ class MockProfile(
     TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun selectAccount(accountProvider: URI): AccountType {
-    TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-  }
-
   override val isAnonymous: Boolean
     get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
@@ -81,10 +77,6 @@ class MockProfile(
 
   override val displayName: String
     get() = "Profile ${id.uuid}"
-
-  override fun accountCurrent(): AccountType {
-    return this.accountList[0]
-  }
 
   override fun accounts(): SortedMap<AccountID, AccountType> {
     return this.accounts as SortedMap<AccountID, AccountType>

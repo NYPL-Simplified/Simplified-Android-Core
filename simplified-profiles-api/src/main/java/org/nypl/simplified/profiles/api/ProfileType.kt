@@ -4,9 +4,7 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
-import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
-
 import java.io.IOException
 import java.net.URI
 
@@ -61,15 +59,6 @@ interface ProfileType : ProfileReadableType {
 
   @Throws(AccountsDatabaseException::class)
   fun deleteAccountByProvider(accountProvider: URI): AccountID
-
-  /**
-   * Set the account created by the given provider to be the current account in the profile.
-   *
-   * @param accountProvider The account provider
-   */
-
-  @Throws(AccountsDatabaseNonexistentException::class)
-  fun selectAccount(accountProvider: URI): AccountType
 
   /**
    * Delete the profile.

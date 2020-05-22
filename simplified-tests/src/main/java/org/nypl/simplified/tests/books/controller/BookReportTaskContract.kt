@@ -39,6 +39,7 @@ abstract class BookReportTaskContract {
 
     val feedEntry =
       FeedEntry.FeedEntryOPDS(
+        accountID = account.id,
         feedEntry = OPDSAcquisitionFeedEntry.newBuilder(
           "x",
           "Title",
@@ -83,7 +84,10 @@ abstract class BookReportTaskContract {
       OPDSAvailabilityOpenAccess.get(Option.none()))
     entryBuilder.setIssuesOption(Option.some(issuesURI))
 
-    val feedEntry = FeedEntry.FeedEntryOPDS(feedEntry = entryBuilder.build())
+    val feedEntry = FeedEntry.FeedEntryOPDS(
+      feedEntry = entryBuilder.build(),
+      accountID = account.id
+    )
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 
@@ -129,7 +133,10 @@ abstract class BookReportTaskContract {
         OPDSAvailabilityOpenAccess.get(Option.none()))
     entryBuilder.setIssuesOption(Option.some(issuesURI))
 
-    val feedEntry = FeedEntry.FeedEntryOPDS(feedEntry = entryBuilder.build())
+    val feedEntry = FeedEntry.FeedEntryOPDS(
+      feedEntry = entryBuilder.build(),
+      accountID = account.id
+    )
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 
@@ -177,7 +184,10 @@ abstract class BookReportTaskContract {
         OPDSAvailabilityOpenAccess.get(Option.none()))
     entryBuilder.setIssuesOption(Option.some(issuesURI))
 
-    val feedEntry = FeedEntry.FeedEntryOPDS(feedEntry = entryBuilder.build())
+    val feedEntry = FeedEntry.FeedEntryOPDS(
+      feedEntry = entryBuilder.build(),
+      accountID = account.id
+    )
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 

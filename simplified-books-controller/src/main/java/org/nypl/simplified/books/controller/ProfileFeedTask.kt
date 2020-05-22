@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.controller
 
-import com.io7m.jnull.NullCheck
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
@@ -8,60 +7,117 @@ import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
-import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FilteringForAccount
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy
 import org.nypl.simplified.feeds.api.FeedSearch
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
 import java.util.Collections
-import java.util.HashMap
+import java.util.Locale
 import java.util.concurrent.Callable
 
 internal class ProfileFeedTask(
   val bookRegistry: BookRegistryReadableType,
+  val profiles: ProfilesControllerType,
   val request: ProfileFeedRequest
 ) : Callable<Feed.FeedWithoutGroups> {
 
+  private val logger =
+    LoggerFactory.getLogger(ProfileFeedTask::class.java)
+
   override fun call(): Feed.FeedWithoutGroups {
-    LOG.debug("generating local feed")
+    this.logger.debug("generating local feed")
 
     /*
      * Generate facets.
      */
 
-    val facetGroups = HashMap<String, List<FeedFacet>>(32)
-    val facets = ArrayList<FeedFacet>(32)
-
-    facets(this.request, facetGroups, facets)
+    val facetGroups = this.makeFacets()
+    val facets = facetGroups.values.flatten()
 
     val feed =
       Feed.empty(
         feedURI = this.request.uri,
         feedID = this.request.id,
         feedSearch = FeedSearch.FeedSearchLocal,
-        feedTitle = this.request.title)
+        feedTitle = this.request.title,
+        feedFacets = facets,
+        feedFacetGroups = facetGroups
+      )
 
     try {
-      LOG.debug("book registry contains {} books", this.bookRegistry.books().size)
-      val books = collectAllBooks(this.bookRegistry)
-      LOG.debug("collected {} candidate books", books.size)
+      this.logger.debug("book registry contains {} books", this.bookRegistry.books().size)
+      val books = this.collectAllBooks(this.bookRegistry)
+      this.logger.debug("collected {} candidate books", books.size)
 
-      val filter = selectFeedFilter(this.request)
-      filterBooks(filter, books)
-      LOG.debug("after filtering, {} candidate books remain", books.size)
-      searchBooks(this.request.search, books)
-      LOG.debug("after searching, {} candidate books remain", books.size)
-      sortBooks(this.request.facetActive, books)
-      LOG.debug("after sorting, {} candidate books remain", books.size)
+      val filter = this.selectFeedFilter(this.request)
+      this.filterBooks(filter, books)
+      this.logger.debug("after filtering, {} candidate books remain", books.size)
+      this.searchBooks(this.request.search, books)
+      this.logger.debug("after searching, {} candidate books remain", books.size)
+      this.sortBooks(this.request.sortBy, books)
+      this.logger.debug("after sorting, {} candidate books remain", books.size)
 
       for (book in books) {
-        feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(book.book.entry))
+        feed.entriesInOrder.add(
+          FeedEntry.FeedEntryOPDS(
+            accountID = book.book.account,
+            feedEntry = book.book.entry
+          )
+        )
       }
 
       return feed
     } finally {
-      LOG.debug("generated a local feed with {} entries", feed.size)
+      this.logger.debug("generated a local feed with {} entries", feed.size)
     }
+  }
+
+  private fun makeFacets(): Map<String, List<FeedFacet>> {
+    val sorting = this.makeSortingFacets()
+    val filtering = this.makeFilteringFacets()
+    val results = mutableMapOf<String, List<FeedFacet>>()
+    results[sorting.first] = sorting.second
+    results[filtering.first] = filtering.second
+    check(results.size == 2)
+    return results.toMap()
+  }
+
+  private fun makeFilteringFacets(): Pair<String, List<FeedFacet>> {
+    val facets = mutableListOf<FeedFacet>()
+    val accounts = this.profiles.profileCurrent().accounts().values
+    for (account in accounts) {
+      val active = account.id == this.request.filterByAccountID
+      val title = account.provider.displayName
+      facets.add(FilteringForAccount(title, active, account.id))
+    }
+
+    facets.add(
+      FilteringForAccount(
+        title = this.request.facetTitleProvider.collectionAll,
+        isActive = this.request.filterByAccountID == null,
+        account = null
+      )
+    )
+    return Pair(this.request.facetTitleProvider.collection, facets)
+  }
+
+  private fun makeSortingFacets(): Pair<String, List<FeedFacet>> {
+    val facets = mutableListOf<FeedFacet>()
+    val values = SortBy.values()
+    for (sortingFacet in values) {
+      val active = sortingFacet == this.request.sortBy
+      val title =
+        when (sortingFacet) {
+          SortBy.SORT_BY_AUTHOR -> this.request.facetTitleProvider.sortByAuthor
+          SortBy.SORT_BY_TITLE -> this.request.facetTitleProvider.sortByTitle
+        }
+      facets.add(Sorting(title, active, sortingFacet))
+    }
+    return Pair(this.request.facetTitleProvider.sortBy, facets)
   }
 
   /**
@@ -72,16 +128,15 @@ internal class ProfileFeedTask(
     search: String?,
     books: ArrayList<BookWithStatus>
   ) {
-
     if (search == null) {
       return
     }
 
-    val termsUpper = searchTermsSplitUpper(search)
+    val termsUpper = this.searchTermsSplitUpper(search)
     val iterator = books.iterator()
     while (iterator.hasNext()) {
       val book = iterator.next()
-      if (!searchMatches(termsUpper, book)) {
+      if (!this.searchMatches(termsUpper, book)) {
         iterator.remove()
       }
     }
@@ -95,7 +150,7 @@ internal class ProfileFeedTask(
     val terms = search.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
     val termsUpper = ArrayList<String>(8)
     for (term in terms) {
-      termsUpper.add(term.toUpperCase())
+      termsUpper.add(term.toUpperCase(Locale.ROOT))
     }
     return termsUpper
   }
@@ -105,13 +160,12 @@ internal class ProfileFeedTask(
    */
 
   private fun sortBooks(
-    facet: FacetType,
+    sortBy: SortBy,
     books: ArrayList<BookWithStatus>
   ) {
-
-    when (facet) {
-      FacetType.SORT_BY_AUTHOR -> sortBooksByAuthor(books)
-      FacetType.SORT_BY_TITLE -> sortBooksByTitle(books)
+    when (sortBy) {
+      SortBy.SORT_BY_AUTHOR -> this.sortBooksByAuthor(books)
+      SortBy.SORT_BY_TITLE -> this.sortBooksByTitle(books)
     }
   }
 
@@ -138,8 +192,8 @@ internal class ProfileFeedTask(
       } else if (e1) {
         -1
       } else {
-        val author1 = NullCheck.notNull(authors1[0])
-        val author2 = NullCheck.notNull(authors2[0])
+        val author1 = authors1[0]!!
+        val author2 = authors2[0]!!
         author1.compareTo(author2)
       }
     }
@@ -153,7 +207,6 @@ internal class ProfileFeedTask(
     filter: (BookStatus) -> Boolean,
     books: ArrayList<BookWithStatus>
   ) {
-
     val iter = books.iterator()
     while (iter.hasNext()) {
       val book = iter.next()
@@ -163,9 +216,9 @@ internal class ProfileFeedTask(
     }
   }
 
-  private fun collectAllBooks(book_registry: BookRegistryReadableType): ArrayList<BookWithStatus> {
+  private fun collectAllBooks(bookRegistry: BookRegistryReadableType): ArrayList<BookWithStatus> {
     val accountID = this.request.filterByAccountID
-    val values = book_registry.books().values
+    val values = bookRegistry.books().values
     return ArrayList(if (accountID != null) {
       values.filter { book -> book.book.account == accountID }
     } else {
@@ -173,104 +226,85 @@ internal class ProfileFeedTask(
     })
   }
 
-  companion object {
+  private fun usableForBooksFeed(status: BookStatus): Boolean {
+    return when (status) {
+      is BookStatus.Held,
+      is BookStatus.Holdable,
+      is BookStatus.Loanable,
+      is BookStatus.Revoked ->
+        false
 
-    private val LOG = LoggerFactory.getLogger(ProfileFeedTask::class.java)
+      is BookStatus.Downloading,
+      is BookStatus.FailedDownload,
+      is BookStatus.FailedLoan,
+      is BookStatus.FailedRevoke,
+      is BookStatus.Loaned,
+      is BookStatus.RequestingDownload,
+      is BookStatus.RequestingLoan,
+      is BookStatus.RequestingRevoke ->
+        true
+    }
+  }
 
-    private fun usableForBooksFeed(status: BookStatus): Boolean {
-      return when (status) {
-        is BookStatus.Held,
-        is BookStatus.Holdable,
-        is BookStatus.Loanable,
-        is BookStatus.Revoked ->
-          false
+  private fun usableForHoldsFeed(status: BookStatus): Boolean {
+    return when (status) {
+      is BookStatus.Held,
+      is BookStatus.Holdable ->
+        true
 
-        is BookStatus.Downloading,
-        is BookStatus.FailedDownload,
-        is BookStatus.FailedLoan,
-        is BookStatus.FailedRevoke,
-        is BookStatus.Loaned,
-        is BookStatus.RequestingDownload,
-        is BookStatus.RequestingLoan,
-        is BookStatus.RequestingRevoke ->
-          true
-      }
+      is BookStatus.Downloading,
+      is BookStatus.FailedDownload,
+      is BookStatus.FailedLoan,
+      is BookStatus.FailedRevoke,
+      is BookStatus.Loanable,
+      is BookStatus.Loaned,
+      is BookStatus.RequestingDownload,
+      is BookStatus.RequestingLoan,
+      is BookStatus.RequestingRevoke,
+      is BookStatus.Revoked ->
+        false
+    }
+  }
+
+  /**
+   * @return `true` if any of the given search terms match the given book, or the list of
+   * search terms is empty
+   */
+
+  private fun searchMatches(
+    termsUpper: List<String>,
+    book: BookWithStatus
+  ): Boolean {
+
+    if (termsUpper.isEmpty()) {
+      return true
     }
 
-    private fun usableForHoldsFeed(status: BookStatus): Boolean {
-      return when (status) {
-        is BookStatus.Held,
-        is BookStatus.Holdable ->
-          true
-
-        is BookStatus.Downloading,
-        is BookStatus.FailedDownload,
-        is BookStatus.FailedLoan,
-        is BookStatus.FailedRevoke,
-        is BookStatus.Loanable,
-        is BookStatus.Loaned,
-        is BookStatus.RequestingDownload,
-        is BookStatus.RequestingLoan,
-        is BookStatus.RequestingRevoke,
-        is BookStatus.Revoked ->
-          false
-      }
-    }
-
-    private fun facets(
-      request: ProfileFeedRequest,
-      facet_groups: HashMap<String, List<FeedFacet>>,
-      facets: ArrayList<FeedFacet>
-    ) {
-      val values = FacetType.values()
-      for (v in values) {
-        val active = v == request.facetActive
-        val f = FeedFacet.FeedFacetPseudo(request.facetTitleProvider.getTitle(v), active, v)
-        facets.add(f)
-      }
-      facet_groups[request.facetGroup] = facets
-    }
-
-    /**
-     * @return `true` if any of the given search terms match the given book, or the list of
-     * search terms is empty
-     */
-
-    private fun searchMatches(
-      terms_upper: List<String>,
-      book: BookWithStatus
-    ): Boolean {
-
-      if (terms_upper.isEmpty()) {
+    for (index in termsUpper.indices) {
+      val termUpper = termsUpper[index]
+      val ee = book.book.entry
+      val eTitle = ee.title.toUpperCase(Locale.ROOT)
+      if (eTitle.contains(termUpper)) {
         return true
       }
 
-      for (index in terms_upper.indices) {
-        val term_upper = terms_upper[index]
-        val ee = book.book.entry
-        val e_title = ee.title.toUpperCase()
-        if (e_title.contains(term_upper)) {
+      val authors = ee.authors
+      for (a in authors) {
+        if (a.toUpperCase(Locale.ROOT).contains(termUpper)) {
           return true
         }
-
-        val authors = ee.authors
-        for (a in authors) {
-          if (a.toUpperCase().contains(term_upper)) {
-            return true
-          }
-        }
       }
-
-      return false
     }
 
-    private fun selectFeedFilter(
-      request: ProfileFeedRequest
-    ): (BookStatus) -> Boolean {
-      return when (request.feedSelection) {
-        FeedBooksSelection.BOOKS_FEED_LOANED -> ::usableForBooksFeed
-        FeedBooksSelection.BOOKS_FEED_HOLDS -> ::usableForHoldsFeed
-      }
+    return false
+  }
+
+  private fun selectFeedFilter(
+    request: ProfileFeedRequest
+  ): (BookStatus) -> Boolean {
+    return when (request.feedSelection) {
+      FeedBooksSelection.BOOKS_FEED_LOANED -> ::usableForBooksFeed
+      FeedBooksSelection.BOOKS_FEED_HOLDS -> ::usableForHoldsFeed
     }
   }
 }

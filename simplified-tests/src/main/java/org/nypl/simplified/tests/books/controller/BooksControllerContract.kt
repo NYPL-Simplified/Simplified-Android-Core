@@ -300,7 +300,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -346,7 +346,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -391,7 +391,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeProvider("urn:fake:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     Assert.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState)
@@ -426,7 +426,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
 
     Assert.assertEquals(AccountNotLoggedIn, account.loginState)
     controller.booksSync(account).get()
@@ -460,7 +460,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -505,7 +505,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -575,7 +575,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     /*
@@ -679,7 +679,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -761,7 +761,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(

@@ -3,7 +3,6 @@ package org.nypl.simplified.profiles.controller.api
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.Observable
-import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
@@ -16,22 +15,17 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.Feed
-import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
-import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
-import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
 import org.nypl.simplified.profiles.api.ProfileNonexistentAccountProviderException
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
-import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import java.net.URI
 import java.util.SortedMap
@@ -80,49 +74,6 @@ interface ProfilesControllerType {
    * Create a profile, asynchronously, and return a profile event.
    *
    * @param accountProvider The account provider used to create the default account
-   * @param displayName The profile display name
-   * @param gender The gender for the profile
-   * @param date The date of birth for the profile
-   * @return A future that returns a status value
-   */
-
-  @Deprecated("Use the profileCreate method that takes a ProfileDescription")
-  fun profileCreate(
-    accountProvider: AccountProviderType,
-    displayName: String,
-    gender: String,
-    date: DateTime
-  ): FluentFuture<ProfileCreationEvent> {
-    val preferences =
-      ProfilePreferences(
-        dateOfBirth = ProfileDateOfBirth(date, false),
-        showTestingLibraries = false,
-        hasSeenLibrarySelectionScreen = false,
-        readerPreferences = ReaderPreferences.builder().build(),
-        mostRecentAccount = null
-      )
-
-    val attributes =
-      ProfileAttributes(
-        sortedMapOf(
-          Pair(ProfileAttributes.GENDER_ATTRIBUTE_KEY, gender)
-        )
-      )
-
-    return this.profileCreate(
-      accountProvider = accountProvider,
-      description = ProfileDescription(
-        displayName = displayName,
-        preferences = preferences,
-        attributes = attributes
-      )
-    )
-  }
-
-  /**
-   * Create a profile, asynchronously, and return a profile event.
-   *
-   * @param accountProvider The account provider used to create the default account
    * @return A future that returns a status value
    */
 
@@ -154,16 +105,6 @@ interface ProfilesControllerType {
   fun profileSelect(
     profileID: ProfileID
   ): FluentFuture<Unit>
-
-  /**
-   * @return The current account in most recently selected profile, or the anonymous profile if it is enabled
-   * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
-   * @see .profileSelect
-   * @see .profileAnonymousEnabled
-   */
-
-  @Throws(ProfileNoneCurrentException::class)
-  fun profileAccountCurrent(): AccountType
 
   /**
    * Attempt to login using the given account of the current profile. The login is attempted
@@ -227,16 +168,6 @@ interface ProfilesControllerType {
   fun profileAccountDeleteByProvider(
     provider: URI
   ): FluentFuture<TaskResult<AccountDeleteErrorDetails, Unit>>
-
-  /**
-   * Switch the current account of the current profile to the one created by the given provider.
-   *
-   * @param provider The account provider ID
-   */
-
-  fun profileAccountSelectByProvider(
-    provider: URI
-  ): FluentFuture<ProfileAccountSelectEvent>
 
   /**
    * Find an account int the current profile using the given provider.

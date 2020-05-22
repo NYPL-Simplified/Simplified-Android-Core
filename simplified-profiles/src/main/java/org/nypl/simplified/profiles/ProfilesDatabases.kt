@@ -402,8 +402,7 @@ object ProfilesDatabases {
         directory = profileDir,
         analytics = analytics,
         accounts = accounts,
-        initialDescription = desc,
-        initialAccountCurrent = account
+        initialDescription = desc
       )
     } catch (e: AccountsDatabaseException) {
       this.logger.error("[{}]: error opening accounts: ", profileId.uuid, e)
@@ -491,8 +490,7 @@ object ProfilesDatabases {
             directory = profileDir,
             analytics = analytics,
             accounts = accounts,
-            initialDescription = description,
-            initialAccountCurrent = account
+            initialDescription = description
           )
 
         this.writeDescription(profileDir, description)

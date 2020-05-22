@@ -201,7 +201,8 @@ class SettingsFragmentVersion : Fragment() {
         context = this.requireContext(),
         address = this.buildConfig.errorReportEmail,
         subject = "[simplye-error-report] ${this.versionText.text}",
-        body = "")
+        body = ""
+      )
     }
 
     /*
@@ -351,7 +352,9 @@ class SettingsFragmentVersion : Fragment() {
     taskSteps.add(
       TaskStep(
         "Opening error page.",
-        TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")))
+        TaskStepResolution.TaskStepSucceeded("Error page successfully opened.")
+      )
+    )
 
     val parameters =
       ErrorPageParameters(
@@ -359,7 +362,8 @@ class SettingsFragmentVersion : Fragment() {
         body = "",
         subject = "[simplye-error-report] ${this.versionText.text}",
         attributes = attributes,
-        taskSteps = taskSteps)
+        taskSteps = taskSteps
+      )
 
     this.findNavigationController().openErrorPage(parameters)
   }
@@ -400,7 +404,8 @@ class SettingsFragmentVersion : Fragment() {
   private fun drmACSSupportRow(): TableRow {
     val row =
       this.layoutInflater.inflate(
-        R.layout.settings_version_table_item, this.drmTable, false) as TableRow
+        R.layout.settings_version_table_item, this.drmTable, false
+      ) as TableRow
     val key =
       row.findViewById<TextView>(R.id.key)
     val value =
@@ -435,7 +440,8 @@ class SettingsFragmentVersion : Fragment() {
           }
         })
       },
-      MoreExecutors.directExecutor())
+      MoreExecutors.directExecutor()
+    )
 
     value.setTextColor(Color.GREEN)
     value.text = "Supported"

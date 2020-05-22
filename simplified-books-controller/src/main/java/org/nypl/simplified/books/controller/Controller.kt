@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
 import com.io7m.jfunctional.Some
+import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.Subject
@@ -49,7 +50,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
-import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileDescription
@@ -290,12 +290,6 @@ class Controller private constructor(
     ))
   }
 
-  @Throws(ProfileNoneCurrentException::class)
-  override fun profileAccountCurrent(): AccountType {
-    val profile = this.profileCurrent()
-    return profile.accountCurrent()
-  }
-
   override fun profileAccountLogin(
     accountID: AccountID,
     credentials: AccountAuthenticationCredentials
@@ -391,16 +385,6 @@ class Controller private constructor(
     ))
   }
 
-  override fun profileAccountSelectByProvider(
-    provider: URI
-  ): FluentFuture<ProfileAccountSelectEvent> {
-    return this.submitTask(ProfileAccountSelectionTask(
-      profiles = this.profiles,
-      profileEvents = this.profileEvents,
-      accountProvider = provider
-    ))
-  }
-
   @Throws(ProfileNoneCurrentException::class, AccountsDatabaseNonexistentException::class)
   override fun profileAccountFindByProvider(provider: URI): AccountType {
     val profile = this.profileCurrent()
@@ -471,6 +455,7 @@ class Controller private constructor(
   ): FluentFuture<Feed.FeedWithoutGroups> {
     return this.submitTask(ProfileFeedTask(
       bookRegistry = this.bookRegistry,
+      profiles = this,
       request = request
     ))
   }
@@ -483,7 +468,7 @@ class Controller private constructor(
     if (bookWithStatus != null) {
       return this.profileCurrent().account(bookWithStatus.book.account)
     }
-    return this.profileAccountCurrent()
+    throw UnreachableCodeException()
   }
 
   override fun profileIdleTimer(): ProfileIdleTimerType {

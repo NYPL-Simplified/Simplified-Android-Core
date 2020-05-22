@@ -39,12 +39,14 @@ abstract class BookReportTaskAdobeDRMContract {
 
     val feedEntry =
       FeedEntry.FeedEntryOPDS(
+        accountID = account.id,
         feedEntry = OPDSAcquisitionFeedEntry.newBuilder(
           "x",
           "Title",
           DateTime.now(),
           OPDSAvailabilityOpenAccess.get(Option.none())
-        ).build())
+        ).build()
+      )
 
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
@@ -66,7 +68,9 @@ abstract class BookReportTaskAdobeDRMContract {
         ByteArrayInputStream(ByteArray(0)),
         0L,
         mutableMapOf(),
-        0L) as HTTPResultType<InputStream>)
+        0L
+      ) as HTTPResultType<InputStream>
+    )
 
     val account =
       Mockito.mock(AccountType::class.java)
@@ -77,19 +81,24 @@ abstract class BookReportTaskAdobeDRMContract {
 
     val entryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
-      "x",
-      "Title",
-      DateTime.now(),
-      OPDSAvailabilityOpenAccess.get(Option.none()))
+        "x",
+        "Title",
+        DateTime.now(),
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     entryBuilder.setIssuesOption(Option.some(issuesURI))
 
-    val feedEntry = FeedEntry.FeedEntryOPDS(feedEntry = entryBuilder.build())
+    val feedEntry = FeedEntry.FeedEntryOPDS(
+      feedEntry = entryBuilder.build(),
+      accountID = account.id
+    )
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 
     Assert.assertTrue(
       "Responses have been consumed",
-      http.responsesNow()[issuesURI]!!.isEmpty())
+      http.responsesNow()[issuesURI]!!.isEmpty()
+    )
   }
 
   /**
@@ -108,34 +117,46 @@ abstract class BookReportTaskAdobeDRMContract {
         ByteArrayInputStream(ByteArray(0)),
         0L,
         mutableMapOf(),
-        0L) as HTTPResultType<InputStream>)
+        0L
+      ) as HTTPResultType<InputStream>
+    )
 
     val account =
       Mockito.mock(AccountType::class.java)
     Mockito.`when`(account.id)
       .thenReturn(AccountID.generate())
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("abcd"),
-          AccountBarcode.create("1234"))
-          .build()))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.builder(
+            AccountPIN.create("abcd"),
+            AccountBarcode.create("1234")
+          )
+            .build()
+        )
+      )
 
     val entryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "x",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     entryBuilder.setIssuesOption(Option.some(issuesURI))
 
-    val feedEntry = FeedEntry.FeedEntryOPDS(feedEntry = entryBuilder.build())
+    val feedEntry =
+      FeedEntry.FeedEntryOPDS(
+        feedEntry = entryBuilder.build(),
+        accountID = account.id
+      )
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 
     Assert.assertTrue(
       "Responses have been consumed",
-      http.responsesNow()[issuesURI]!!.isEmpty())
+      http.responsesNow()[issuesURI]!!.isEmpty()
+    )
   }
 
   /**
@@ -156,33 +177,43 @@ abstract class BookReportTaskAdobeDRMContract {
         0L,
         ByteArrayInputStream(ByteArray(0)),
         Option.none()
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     val account =
       Mockito.mock(AccountType::class.java)
     Mockito.`when`(account.id)
       .thenReturn(AccountID.generate())
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("abcd"),
-          AccountBarcode.create("1234"))
-          .build()))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.builder(
+            AccountPIN.create("abcd"),
+            AccountBarcode.create("1234")
+          )
+            .build()
+        )
+      )
 
     val entryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "x",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     entryBuilder.setIssuesOption(Option.some(issuesURI))
 
-    val feedEntry = FeedEntry.FeedEntryOPDS(feedEntry = entryBuilder.build())
+    val feedEntry = FeedEntry.FeedEntryOPDS(
+      feedEntry = entryBuilder.build(),
+      accountID = account.id
+    )
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 
     Assert.assertTrue(
       "Responses have been consumed",
-      http.responsesNow()[issuesURI]!!.isEmpty())
+      http.responsesNow()[issuesURI]!!.isEmpty()
+    )
   }
 }

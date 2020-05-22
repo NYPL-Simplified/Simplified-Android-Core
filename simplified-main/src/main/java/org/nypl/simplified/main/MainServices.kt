@@ -91,7 +91,6 @@ import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabases
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerConfigurationServiceType
@@ -208,27 +207,14 @@ internal object MainServices {
       directoryStorageProfiles = directoryStorageProfiles)
   }
 
-  private fun themeForProfile(profile: OptionType<ProfileType>): ThemeValue {
-    if (profile.isSome) {
-      val currentProfile = (profile as Some<ProfileType>).get()
-      val accountCurrent = currentProfile.accountCurrent()
-      val theme = ThemeControl.themesByName[accountCurrent.provider.mainColor]
-      if (theme != null) {
-        return theme
-      }
-    }
-    return ThemeControl.themeFallback
-  }
-
   private class ThemeService(
-    private val profilesDatabase: ProfilesDatabaseType,
     private val brandingThemeOverride: OptionType<ThemeValue>
   ) : ThemeServiceType {
     override fun findCurrentTheme(): ThemeValue {
       if (this.brandingThemeOverride.isSome) {
         return (this.brandingThemeOverride as Some<ThemeValue>).get()
       }
-      return org.nypl.simplified.main.MainServices.themeForProfile(this.profilesDatabase.currentProfile())
+      return ThemeControl.themeFallback
     }
   }
 
@@ -1069,7 +1055,6 @@ internal object MainServices {
       interfaceType = ThemeServiceType::class.java,
       serviceConstructor = {
         ThemeService(
-          profilesDatabase = profilesDatabase,
           brandingThemeOverride = brandingThemeOverride
         )
       }

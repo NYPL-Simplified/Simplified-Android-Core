@@ -339,13 +339,13 @@ class SettingsFragmentAccountRegistry : Fragment() {
     if (this.errorDialog == null) {
       val newDialog =
         AlertDialog.Builder(this.requireActivity())
-        .setTitle(R.string.settingsAccountCreationFailed)
-        .setMessage(R.string.settingsAccountCreationFailedMessage)
-        .setPositiveButton(R.string.settingsDetails) { dialog, _ ->
-          this.errorDialog = null
-          this.showErrorPage(accountEvent)
-          dialog.dismiss()
-        }.create()
+          .setTitle(R.string.settingsAccountCreationFailed)
+          .setMessage(R.string.settingsAccountCreationFailedMessage)
+          .setPositiveButton(R.string.settingsDetails) { dialog, _ ->
+            this.errorDialog = null
+            this.showErrorPage(accountEvent)
+            dialog.dismiss()
+          }.create()
       this.errorDialog = newDialog
       newDialog.show()
     }
