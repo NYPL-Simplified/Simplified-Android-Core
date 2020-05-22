@@ -626,8 +626,6 @@ internal object MainServices {
         get() = true
       override val showHoldsTab: Boolean
         get() = true
-      override val showAllCollectionsInLocalFeeds: Boolean
-        get() = true
       override val supportErrorReportEmailAddress: String
         get() = ""
       override val supportErrorReportSubject: String

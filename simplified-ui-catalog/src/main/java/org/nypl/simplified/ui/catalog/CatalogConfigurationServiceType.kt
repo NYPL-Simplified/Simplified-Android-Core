@@ -16,19 +16,6 @@ interface CatalogConfigurationServiceType {
   val showSettingsTab: Boolean
 
   /**
-   * Should all collections be shown in the local "My Books" and "Holds" feeds?
-   *
-   * If set to `true`, books from all collections will be shown in local feeds.
-   * If set to `false`, only books from the currently selected account wil be shown.
-   *
-   * NYPL SimplyE builds have historically set this to `false`.
-   * LFA builds have historically set this to `true`.
-   * DRM-free builds have historically set this to `true`.
-   */
-
-  val showAllCollectionsInLocalFeeds: Boolean
-
-  /**
    * Should the "holds" tab be shown?
    *
    * If set to `true`, the holds tab will be visible.
