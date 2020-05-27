@@ -3,7 +3,6 @@ package org.nypl.simplified.ui.catalog
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.disposables.CompositeDisposable
@@ -19,10 +18,10 @@ import org.slf4j.LoggerFactory
 class CatalogPagedAdapter(
   private val buttonCreator: CatalogButtons,
   private val context: FragmentActivity,
-  private val fragmentManager: FragmentManager,
   private val loginViewModel: CatalogLoginViewModel,
   private val navigation: () -> CatalogNavigationControllerType,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
+  private val ownership: CatalogFeedOwnership,
   private val services: ServiceDirectoryType
 ) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
 
@@ -43,13 +42,13 @@ class CatalogPagedAdapter(
 
     return CatalogPagedViewHolder(
       buttonCreator = this.buttonCreator,
-      registrySubscriptions = this.registrySubscriptions,
       context = this.context,
-      fragmentManager = this.fragmentManager,
       loginViewModel = this.loginViewModel,
       navigation = this.navigation,
       onBookSelected = this.onBookSelected,
+      ownership = this.ownership,
       parent = LayoutInflater.from(parent.context).inflate(R.layout.book_cell, parent, false),
+      registrySubscriptions = this.registrySubscriptions,
       services = this.services
     )
   }

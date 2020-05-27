@@ -544,9 +544,11 @@ class SettingsFragmentAccount : Fragment() {
 
       is AccountLoginState.AccountLoggedIn -> {
         this.authenticationBasicUser.setText(
-          loginState.credentials.barcode().value())
+          loginState.credentials.barcode().value()
+        )
         this.authenticationBasicPass.setText(
-          loginState.credentials.pin().value())
+          loginState.credentials.pin().value()
+        )
 
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = ""
@@ -563,9 +565,11 @@ class SettingsFragmentAccount : Fragment() {
 
       is AccountLoginState.AccountLoggingOut -> {
         this.authenticationBasicUser.setText(
-          loginState.credentials.barcode().value())
+          loginState.credentials.barcode().value()
+        )
         this.authenticationBasicPass.setText(
-          loginState.credentials.pin().value())
+          loginState.credentials.pin().value()
+        )
 
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginProgress.visibility = View.VISIBLE
@@ -576,9 +580,11 @@ class SettingsFragmentAccount : Fragment() {
 
       is AccountLoginState.AccountLogoutFailed -> {
         this.authenticationBasicUser.setText(
-          loginState.credentials.barcode().value())
+          loginState.credentials.barcode().value()
+        )
         this.authenticationBasicPass.setText(
-          loginState.credentials.pin().value())
+          loginState.credentials.pin().value()
+        )
 
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
@@ -608,7 +614,8 @@ class SettingsFragmentAccount : Fragment() {
         body = "",
         subject = "[simplye-error-report]",
         attributes = sortedMapOf(),
-        taskSteps = taskSteps)
+        taskSteps = taskSteps
+      )
 
     this.findNavigationController().openErrorPage(parameters)
   }
@@ -696,7 +703,9 @@ class SettingsFragmentAccount : Fragment() {
     this.profilesController.profileUpdate { description ->
       description.copy(
         preferences = description.preferences.copy(
-          dateOfBirth = this.synthesizeDateOfBirth(0)))
+          dateOfBirth = this.synthesizeDateOfBirth(0)
+        )
+      )
     }
   }
 
@@ -704,7 +713,9 @@ class SettingsFragmentAccount : Fragment() {
     this.profilesController.profileUpdate { description ->
       description.copy(
         preferences = description.preferences.copy(
-          dateOfBirth = this.synthesizeDateOfBirth(14)))
+          dateOfBirth = this.synthesizeDateOfBirth(14)
+        )
+      )
     }
   }
 
@@ -763,7 +774,8 @@ class SettingsFragmentAccount : Fragment() {
   private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth =
     ProfileDateOfBirth(
       date = DateTime.now().minusYears(years),
-      isSynthesized = true)
+      isSynthesized = true
+    )
 
   private fun findNavigationController(): SettingsNavigationControllerType {
     return NavigationControllers.find(

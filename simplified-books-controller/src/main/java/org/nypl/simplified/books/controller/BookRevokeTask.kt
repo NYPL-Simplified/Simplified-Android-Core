@@ -297,8 +297,12 @@ class BookRevokeTask(
      */
 
     val feedResult = try {
-      this.feedLoader.fetchURIRefreshing(targetURI, httpAuth, "PUT")
-        .get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
+      this.feedLoader.fetchURIRefreshing(
+        this.account.id,
+        targetURI,
+        httpAuth,
+        "PUT"
+      ).get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
       val message = this.revokeStrings.revokeServerNotifyFeedTimedOut
       this.steps.currentStepFailed(

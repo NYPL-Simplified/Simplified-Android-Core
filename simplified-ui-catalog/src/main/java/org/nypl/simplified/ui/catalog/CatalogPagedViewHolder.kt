@@ -8,13 +8,13 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.ServiceDirectoryType
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
@@ -45,13 +45,13 @@ import java.util.concurrent.atomic.AtomicReference
 
 class CatalogPagedViewHolder(
   private val buttonCreator: CatalogButtons,
-  private val registrySubscriptions: CompositeDisposable,
   private val context: FragmentActivity,
-  private val fragmentManager: FragmentManager,
   private val loginViewModel: CatalogLoginViewModel,
   private val navigation: () -> CatalogNavigationControllerType,
   private val onBookSelected: (FeedEntryOPDS) -> Unit,
+  private val ownership: CatalogFeedOwnership,
   private val parent: View,
+  private val registrySubscriptions: CompositeDisposable,
   private val services: ServiceDirectoryType
 ) : RecyclerView.ViewHolder(parent) {
 
@@ -150,17 +150,7 @@ class CatalogPagedViewHolder(
 
         val status =
           this.bookRegistry.bookOrNull(item.bookID)
-            ?: run {
-              val book = Book(
-                id = item.bookID,
-                account = this.profilesController.profileAccountCurrent().id,
-                cover = null,
-                thumbnail = null,
-                entry = item.feedEntry,
-                formats = listOf()
-              )
-              BookWithStatus(book, BookStatus.fromBook(book))
-            }
+            ?: this.synthesizeFakeBookStatus(item)
 
         this.onBookWithStatus(status)
         this.checkSomethingIsVisible()
@@ -173,6 +163,20 @@ class CatalogPagedViewHolder(
         this.checkSomethingIsVisible()
       }
     }
+  }
+
+  private fun synthesizeFakeBookStatus(
+    item: FeedEntryOPDS
+  ): BookWithStatus {
+    val book = Book(
+      id = item.bookID,
+      account = item.accountID,
+      cover = null,
+      thumbnail = null,
+      entry = item.feedEntry,
+      formats = listOf()
+    )
+    return BookWithStatus(book, BookStatus.fromBook(book))
   }
 
   private fun setVisibilityIfNecessary(
@@ -204,7 +208,7 @@ class CatalogPagedViewHolder(
     this.errorTitle.text = item.feedEntry.title
 
     val targetHeight =
-      parent.resources.getDimensionPixelSize(R.dimen.cover_thumbnail_height)
+      this.parent.resources.getDimensionPixelSize(R.dimen.cover_thumbnail_height)
     val targetWidth = 0
     this.thumbnailLoading =
       this.bookCovers.loadThumbnailInto(
@@ -254,7 +258,7 @@ class CatalogPagedViewHolder(
       return
     }
 
-    this.onFeedEntryOPDSUI(FeedEntryOPDS(book.book.entry))
+    this.onFeedEntryOPDSUI(FeedEntryOPDS(book.book.account, book.book.entry))
     return this.onBookWithStatus(book)
   }
 
@@ -566,12 +570,12 @@ class CatalogPagedViewHolder(
    * @see [runOnLoginDialogClosed]
    */
 
-  private fun openLoginDialogAndThen(execute: () -> Unit) {
+  private fun openLoginDialogAndThen(
+    accountId: AccountID,
+    execute: () -> Unit
+  ) {
     try {
-      val dialogParameters =
-        CatalogFragmentLoginDialogParameters(
-          this.profilesController.profileAccountCurrent().id)
-
+      val dialogParameters = CatalogFragmentLoginDialogParameters(accountId)
       this.findNavigationController().openLoginDialog(dialogParameters)
       this.runOnLoginDialogClosed.set(execute)
     } catch (e: Exception) {
@@ -585,19 +589,34 @@ class CatalogPagedViewHolder(
       interfaceType = CatalogNavigationControllerType::class.java
     )
 
+  private fun findAccountIdForFeed(): AccountID? {
+    return when (val ownership = this.ownership) {
+      is CatalogFeedOwnership.OwnedByAccount -> ownership.accountId
+      is CatalogFeedOwnership.CollectedFromAccounts -> null
+    }
+  }
+
   /**
    * @return `true` if a login is required on the current account
    */
 
-  private fun isLoginRequired(): Boolean {
+  private fun isLoginRequired(): AccountID? {
     return try {
-      val account = this.profilesController.profileAccountCurrent()
+      val accountId =
+        this.findAccountIdForFeed() ?: return null
+      val account =
+        this.profilesController.profileCurrent()
+          .account(accountId)
       val requiresLogin = account.requiresCredentials
       val isNotLoggedIn = !(account.loginState is AccountLoginState.AccountLoggedIn)
-      requiresLogin && isNotLoggedIn
+      if (requiresLogin && isNotLoggedIn) {
+        accountId
+      } else {
+        null
+      }
     } catch (e: Exception) {
       this.logger.error("could not retrieve account: ", e)
-      false
+      null
     }
   }
 
@@ -611,13 +630,14 @@ class CatalogPagedViewHolder(
   ) {
     button.isEnabled = false
 
-    if (!this.isLoginRequired()) {
+    val account = this.isLoginRequired()
+    if (account == null) {
       this.tryBorrowAuthenticated(book)
       return
     }
 
-    this.openLoginDialogAndThen {
-      if (!this.isLoginRequired()) {
+    this.openLoginDialogAndThen(account) {
+      if (this.isLoginRequired() != null) {
         this.tryBorrowAuthenticated(book)
       } else {
         this.logger.debug("authentication did not complete")
@@ -636,13 +656,14 @@ class CatalogPagedViewHolder(
   ) {
     button.isEnabled = false
 
-    if (!this.isLoginRequired()) {
+    val account = this.isLoginRequired()
+    if (account == null) {
       this.tryRevokeAuthenticated(book)
       return
     }
 
-    this.openLoginDialogAndThen {
-      if (!this.isLoginRequired()) {
+    this.openLoginDialogAndThen(account) {
+      if (this.isLoginRequired() != null) {
         this.tryRevokeAuthenticated(book)
       } else {
         this.logger.debug("authentication did not complete")
@@ -661,13 +682,14 @@ class CatalogPagedViewHolder(
   ) {
     button.isEnabled = false
 
-    if (!this.isLoginRequired()) {
+    val account = this.isLoginRequired()
+    if (account == null) {
       this.tryReserveAuthenticated(book)
       return
     }
 
-    this.openLoginDialogAndThen {
-      if (!this.isLoginRequired()) {
+    this.openLoginDialogAndThen(account) {
+      if (this.isLoginRequired() != null) {
         this.tryReserveAuthenticated(book)
       } else {
         this.logger.debug("authentication did not complete")
@@ -701,7 +723,7 @@ class CatalogPagedViewHolder(
       emailAddress = this.configurationService.supportErrorReportEmailAddress,
       body = "",
       subject = this.configurationService.supportErrorReportSubject,
-      attributes = collectAttributes(result),
+      attributes = this.collectAttributes(result),
       taskSteps = result.steps
     )
     this.navigation().openErrorPage(errorPageParameters)

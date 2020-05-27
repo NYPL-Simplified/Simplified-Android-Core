@@ -1,7 +1,8 @@
 package org.nypl.simplified.ui.catalog
 
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.FeedBooksSelection
-import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy
 import java.io.Serializable
 import java.net.URI
 
@@ -30,6 +31,12 @@ sealed class CatalogFeedArguments : Serializable {
   abstract val isLocallyGenerated: Boolean
 
   /**
+   * The ownership of this feed.
+   */
+
+  abstract val ownership: CatalogFeedOwnership
+
+  /**
    * Arguments that specify a remote feed. Note that feeds consisting of books bundled into the
    * application are still considered to be "remote" because they consist of data that is effectively
    * external to the application.
@@ -37,21 +44,10 @@ sealed class CatalogFeedArguments : Serializable {
 
   data class CatalogFeedArgumentsRemote(
     override val title: String,
+    override val ownership: CatalogFeedOwnership.OwnedByAccount,
     val feedURI: URI,
     override val isSearchResults: Boolean
   ) : CatalogFeedArguments() {
-    override val isLocallyGenerated: Boolean = false
-  }
-
-  /**
-   * Arguments that specify whatever is the default remote feed for the account that is current
-   * at the time the loading is invoked.
-   */
-
-  data class CatalogFeedArgumentsRemoteAccountDefault(
-    override val title: String
-  ) : CatalogFeedArguments() {
-    override val isSearchResults: Boolean = false
     override val isLocallyGenerated: Boolean = false
   }
 
@@ -61,9 +57,11 @@ sealed class CatalogFeedArguments : Serializable {
 
   data class CatalogFeedArgumentsLocalBooks(
     override val title: String,
-    val facetType: FacetType,
+    override val ownership: CatalogFeedOwnership.CollectedFromAccounts,
+    val sortBy: SortBy,
     val searchTerms: String?,
-    val selection: FeedBooksSelection
+    val selection: FeedBooksSelection,
+    val filterAccount: AccountID?
   ) : CatalogFeedArguments() {
     override val isSearchResults: Boolean = false
     override val isLocallyGenerated: Boolean = true

@@ -4,8 +4,7 @@ import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedBooksSelection.BOOKS_FEED_LOANED
-import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType
-import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import java.net.URI
 
@@ -40,16 +39,10 @@ data class ProfileFeedRequest(
   val title: String,
 
   /**
-   * The active facet.
+   * The active sorting facet.
    */
 
-  val facetActive: FacetType = SORT_BY_TITLE,
-
-  /**
-   * The facet group.
-   */
-
-  val facetGroup: String,
+  val sortBy: SortBy = SortBy.SORT_BY_TITLE,
 
   /**
    * The title provider for facets.

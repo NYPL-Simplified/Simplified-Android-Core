@@ -1,5 +1,6 @@
 package org.nypl.simplified.feeds.api
 
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs.newFromText
 import org.nypl.simplified.books.book_database.api.BookFormats
@@ -12,6 +13,16 @@ import java.io.Serializable
 
 sealed class FeedEntry : Serializable {
 
+  /**
+   * The account that owns the feed entry
+   */
+
+  abstract val accountID: AccountID
+
+  /**
+   * The id of the book within the feed entry
+   */
+
   abstract val bookID: BookID
 
   /**
@@ -22,6 +33,7 @@ sealed class FeedEntry : Serializable {
    */
 
   data class FeedEntryCorrupt(
+    override val accountID: AccountID,
     override val bookID: BookID,
     val error: Throwable
   ) : FeedEntry()
@@ -31,6 +43,7 @@ sealed class FeedEntry : Serializable {
    */
 
   data class FeedEntryOPDS(
+    override val accountID: AccountID,
     val feedEntry: OPDSAcquisitionFeedEntry
   ) : FeedEntry() {
 

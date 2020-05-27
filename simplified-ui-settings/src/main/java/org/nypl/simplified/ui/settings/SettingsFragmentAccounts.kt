@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -24,7 +22,6 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
@@ -35,10 +32,6 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 class SettingsFragmentAccounts : Fragment() {
 
-  private lateinit var accountCurrentIcon: ImageView
-  private lateinit var accountCurrentSubtitle: TextView
-  private lateinit var accountCurrentTitle: TextView
-  private lateinit var accountCurrentView: ViewGroup
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: SettingsAccountsAdapter
   private lateinit var accountListData: MutableList<AccountType>
@@ -72,7 +65,12 @@ class SettingsFragmentAccounts : Fragment() {
     val context = this.requireContext()
     AlertDialog.Builder(context)
       .setTitle(R.string.settingsAccountDeleteConfirmTitle)
-      .setMessage(context.getString(R.string.settingsAccountDeleteConfirm, account.provider.displayName))
+      .setMessage(
+        context.getString(
+          R.string.settingsAccountDeleteConfirm,
+          account.provider.displayName
+        )
+      )
       .setPositiveButton(R.string.settingsAccountDelete) { dialog, _ ->
         this.profilesController.profileAccountDeleteByProvider(account.provider.id)
         dialog.dismiss()
@@ -94,18 +92,6 @@ class SettingsFragmentAccounts : Fragment() {
   ): View? {
     val layout =
       inflater.inflate(R.layout.settings_accounts, container, false)
-
-    this.accountCurrentView =
-      layout.findViewById(R.id.accountCurrent)
-    this.accountCurrentTitle =
-      this.accountCurrentView.findViewById(R.id.accountCellTitle)
-    this.accountCurrentSubtitle =
-      this.accountCurrentView.findViewById(R.id.accountCellSubtitle)
-    this.accountCurrentIcon =
-      this.accountCurrentView.findViewById(R.id.accountCellIcon)
-
-    this.accountCurrentTitle.text = ""
-    this.accountCurrentSubtitle.text = ""
 
     this.accountList =
       layout.findViewById(R.id.accountList)
@@ -216,7 +202,8 @@ class SettingsFragmentAccounts : Fragment() {
         body = "",
         subject = "[simplye-error-report]",
         attributes = accountEvent.attributes.toSortedMap(),
-        taskSteps = accountEvent.taskResult.steps)
+        taskSteps = accountEvent.taskResult.steps
+      )
 
     this.findNavigationController().openErrorPage(parameters)
   }
@@ -228,27 +215,11 @@ class SettingsFragmentAccounts : Fragment() {
     val profile =
       this.profilesController.profileCurrent()
 
-    val accountNow =
-      profile.accountCurrent()
-
     val accountList =
       profile
         .accounts()
         .values
-        .filter { account -> account.id != accountNow.id }
         .sortedBy { account -> account.provider.displayName }
-
-    this.accountCurrentSubtitle.text = accountNow.provider.subtitle
-    this.accountCurrentTitle.setOnClickListener { this.onAccountClicked(profile.accountCurrent()) }
-    this.accountCurrentTitle.text = accountNow.provider.displayName
-    this.accountCurrentView.setOnClickListener { this.onAccountClicked(profile.accountCurrent()) }
-
-    ImageAccountIcons.loadAccountLogoIntoView(
-      loader = imageLoader.loader,
-      account = accountNow.provider.toDescription(),
-      defaultIcon = R.drawable.account_default,
-      iconView = this.accountCurrentIcon
-    )
 
     this.accountListData.clear()
     this.accountListData.addAll(accountList)
@@ -257,10 +228,6 @@ class SettingsFragmentAccounts : Fragment() {
 
   override fun onStop() {
     super.onStop()
-
-    this.accountCurrentView.setOnClickListener(null)
-    this.accountCurrentTitle.setOnClickListener(null)
-    this.accountCurrentIcon.setImageDrawable(null)
     this.accountSubscription?.dispose()
   }
 

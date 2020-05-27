@@ -14,9 +14,6 @@ class VanillaCatalogConfigurationService : CatalogConfigurationServiceType {
   override val showHoldsTab: Boolean
     get() = false
 
-  override val showAllCollectionsInLocalFeeds: Boolean
-    get() = true
-
   override val supportErrorReportEmailAddress: String
     get() = "simplyemigrationreports@nypl.org"
 

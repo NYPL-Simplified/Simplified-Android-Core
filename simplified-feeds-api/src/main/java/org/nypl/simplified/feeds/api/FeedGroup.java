@@ -1,6 +1,8 @@
 package org.nypl.simplified.feeds.api;
 
 import com.io7m.jnull.NullCheck;
+
+import org.nypl.simplified.accounts.api.AccountID;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSGroup;
 
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A feed group.
@@ -45,8 +48,10 @@ public final class FeedGroup
    */
 
   public static FeedGroup fromOPDSGroup(
+    final AccountID accountID,
     final OPDSGroup b)
   {
+    Objects.requireNonNull(accountID, "accountID");
     NullCheck.notNull(b);
 
     final List<FeedEntry> es = new ArrayList<FeedEntry>(32);
@@ -54,7 +59,7 @@ public final class FeedGroup
     final int max = be_list.size();
     for (int index = 0; index < max; ++index) {
       final OPDSAcquisitionFeedEntry be = NullCheck.notNull(be_list.get(index));
-      es.add(new FeedEntry.FeedEntryOPDS(be));
+      es.add(new FeedEntry.FeedEntryOPDS(accountID, be));
     }
 
     return new FeedGroup(b.getGroupTitle(), b.getGroupURI(), es);
@@ -67,14 +72,16 @@ public final class FeedGroup
    */
 
   public static Map<String, FeedGroup> fromOPDSGroups(
+    final AccountID accountID,
     final Map<String, OPDSGroup> bs)
   {
+    Objects.requireNonNull(accountID, "accountID");
     NullCheck.notNull(bs);
 
     final Map<String, FeedGroup> rm = new HashMap<String, FeedGroup>(32);
     for (final String name : bs.keySet()) {
       final OPDSGroup block = NullCheck.notNull(bs.get(name));
-      rm.put(name, FeedGroup.fromOPDSGroup(block));
+      rm.put(name, FeedGroup.fromOPDSGroup(accountID, block));
     }
 
     return rm;

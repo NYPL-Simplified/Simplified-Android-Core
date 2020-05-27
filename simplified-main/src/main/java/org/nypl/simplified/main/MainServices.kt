@@ -5,9 +5,7 @@ import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.Color
-import android.os.Environment
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
@@ -41,6 +39,9 @@ import org.nypl.simplified.analytics.api.Analytics
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
+import org.nypl.simplified.books.audio.AudioBookManifests
 import org.nypl.simplified.books.audio.AudioBookOverdriveSecretServiceType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
@@ -90,7 +91,6 @@ import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabases
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerConfigurationServiceType
@@ -117,9 +117,6 @@ import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
-import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
-import org.nypl.simplified.books.audio.AudioBookManifests
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPMimeMap
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerAAsync
 import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerType
@@ -149,10 +146,8 @@ internal object MainServices {
    */
 
   const val CURRENT_DATA_VERSION = "v4.0"
-  const val SIMPLYE = "org.nypl.simplified.simplye"
 
   private data class Directories(
-    val directoryPrivateBaseVersioned: File,
     val directoryStorageBaseVersioned: File,
     val directoryStorageDownloads: File,
     val directoryStorageDocuments: File,
@@ -162,14 +157,8 @@ internal object MainServices {
   private fun initializeDirectories(context: Context): Directories {
     this.logger.debug("initializing directories")
 
-    val directoryPrivateBase =
-      context.filesDir
-    val directoryPrivateBaseVersioned =
-      File(directoryPrivateBase, this.CURRENT_DATA_VERSION)
-    val directoryStorageBase =
-      this.determineDiskDataDirectory(context)
     val directoryStorageBaseVersioned =
-      File(directoryStorageBase, this.CURRENT_DATA_VERSION)
+      File(context.filesDir, this.CURRENT_DATA_VERSION)
     val directoryStorageDownloads =
       File(directoryStorageBaseVersioned, "downloads")
     val directoryStorageDocuments =
@@ -177,9 +166,6 @@ internal object MainServices {
     val directoryStorageProfiles =
       File(directoryStorageBaseVersioned, "profiles")
 
-    this.logger.debug("directoryPrivateBase:          {}", directoryPrivateBase)
-    this.logger.debug("directoryPrivateBaseVersioned: {}", directoryPrivateBaseVersioned)
-    this.logger.debug("directoryStorageBase:          {}", directoryStorageBase)
     this.logger.debug("directoryStorageBaseVersioned: {}", directoryStorageBaseVersioned)
     this.logger.debug("directoryStorageDownloads:     {}", directoryStorageDownloads)
     this.logger.debug("directoryStorageDocuments:     {}", directoryStorageDocuments)
@@ -192,9 +178,6 @@ internal object MainServices {
 
     val directories =
       listOf<File>(
-        directoryPrivateBase,
-        directoryPrivateBaseVersioned,
-        directoryStorageBase,
         directoryStorageBaseVersioned,
         directoryStorageDownloads,
         directoryStorageDocuments,
@@ -218,61 +201,20 @@ internal object MainServices {
     }
 
     return Directories(
-      directoryPrivateBaseVersioned = directoryPrivateBaseVersioned,
       directoryStorageBaseVersioned = directoryStorageBaseVersioned,
       directoryStorageDownloads = directoryStorageDownloads,
       directoryStorageDocuments = directoryStorageDocuments,
       directoryStorageProfiles = directoryStorageProfiles)
   }
 
-  private fun determineDiskDataDirectory(context: Context): File {
-
-    /*
-     * If external storage is mounted and is on a device that doesn't allow
-     * the storage to be removed, use the external storage for data.
-     */
-
-    if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
-      this.logger.debug("trying external storage")
-      if (!Environment.isExternalStorageRemovable()) {
-        val result = context.getExternalFilesDir(null)
-        this.logger.debug("external storage is not removable, using it ({})", result)
-        Preconditions.checkArgument(result!!.isDirectory, "Data directory {} is a directory", result)
-        return result
-      }
-    }
-
-    /*
-     * Otherwise, use internal storage.
-     */
-
-    val result = context.filesDir
-    this.logger.debug("no non-removable external storage, using internal storage ({})", result)
-    Preconditions.checkArgument(result.isDirectory, "Data directory {} is a directory", result)
-    return result
-  }
-
-  private fun themeForProfile(profile: OptionType<ProfileType>): ThemeValue {
-    if (profile.isSome) {
-      val currentProfile = (profile as Some<ProfileType>).get()
-      val accountCurrent = currentProfile.accountCurrent()
-      val theme = ThemeControl.themesByName[accountCurrent.provider.mainColor]
-      if (theme != null) {
-        return theme
-      }
-    }
-    return ThemeControl.themeFallback
-  }
-
   private class ThemeService(
-    private val profilesDatabase: ProfilesDatabaseType,
     private val brandingThemeOverride: OptionType<ThemeValue>
   ) : ThemeServiceType {
     override fun findCurrentTheme(): ThemeValue {
       if (this.brandingThemeOverride.isSome) {
         return (this.brandingThemeOverride as Some<ThemeValue>).get()
       }
-      return org.nypl.simplified.main.MainServices.themeForProfile(this.profilesDatabase.currentProfile())
+      return ThemeControl.themeFallback
     }
   }
 
@@ -423,9 +365,9 @@ internal object MainServices {
   ): AccountAuthenticationCredentialsStoreType {
     val accountCredentialsStore = try {
       val credentials =
-        File(directories.directoryPrivateBaseVersioned, "credentials.json")
+        File(directories.directoryStorageBaseVersioned, "credentials.json")
       val credentialsTemp =
-        File(directories.directoryPrivateBaseVersioned, "credentials.json.tmp")
+        File(directories.directoryStorageBaseVersioned, "credentials.json.tmp")
 
       this.logger.debug("credentials store path: {}", credentials)
       AccountAuthenticationCredentialsStore.open(credentials, credentialsTemp)
@@ -683,8 +625,6 @@ internal object MainServices {
       override val showSettingsTab: Boolean
         get() = true
       override val showHoldsTab: Boolean
-        get() = true
-      override val showAllCollectionsInLocalFeeds: Boolean
         get() = true
       override val supportErrorReportEmailAddress: String
         get() = ""
@@ -1113,7 +1053,6 @@ internal object MainServices {
       interfaceType = ThemeServiceType::class.java,
       serviceConstructor = {
         ThemeService(
-          profilesDatabase = profilesDatabase,
           brandingThemeOverride = brandingThemeOverride
         )
       }
