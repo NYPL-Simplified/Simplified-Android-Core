@@ -53,10 +53,16 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val logo: URI?
 
   /**
-   * @return An authentication description if authentication is required, or nothing if it isn't
+   * @return An authentication description
    */
 
-  val authentication: AccountProviderAuthenticationDescription?
+  val authentication: AccountProviderAuthenticationDescription
+
+  /**
+   * @return A list of alternative authentication descriptions
+   */
+
+  val authenticationAlternatives: List<AccountProviderAuthenticationDescription>
 
   /**
    * @return `true` iff the SimplyE synchronization is supported
@@ -159,8 +165,6 @@ interface AccountProviderType : Comparable<AccountProviderType> {
 
   fun catalogURIForAge(age: Int): URI {
     return when (val auth = this.authentication) {
-      null -> this.catalogURI
-
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
         if (age >= 13) {
           auth.greaterEqual13
@@ -168,7 +172,9 @@ interface AccountProviderType : Comparable<AccountProviderType> {
           auth.under13
         }
 
-      is AccountProviderAuthenticationDescription.Basic ->
+      AccountProviderAuthenticationDescription.Anonymous,
+      is AccountProviderAuthenticationDescription.Basic,
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
         this.catalogURI
     }
   }
@@ -185,14 +191,16 @@ interface AccountProviderType : Comparable<AccountProviderType> {
 
   val supportsBarcodeDisplay: Boolean
     get() = when (val auth = this.authentication) {
-      is AccountProviderAuthenticationDescription.COPPAAgeGate -> false
+      AccountProviderAuthenticationDescription.Anonymous,
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
+      is AccountProviderAuthenticationDescription.COPPAAgeGate ->
+        false
       is AccountProviderAuthenticationDescription.Basic -> {
         when (auth.barcodeFormat) {
           "Codabar" -> true
           else -> false
         }
       }
-      null -> false
     }
 
   fun toDescription(): AccountProviderDescription {

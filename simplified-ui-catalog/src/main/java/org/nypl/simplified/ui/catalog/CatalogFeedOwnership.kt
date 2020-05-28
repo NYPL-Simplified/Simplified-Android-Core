@@ -1,12 +1,13 @@
 package org.nypl.simplified.ui.catalog
 
 import org.nypl.simplified.accounts.api.AccountID
+import java.io.Serializable
 
 /**
  * The ownership of a given feed.
  */
 
-sealed class CatalogFeedOwnership {
+sealed class CatalogFeedOwnership : Serializable {
 
   /**
    * The feed is owned by the given account.

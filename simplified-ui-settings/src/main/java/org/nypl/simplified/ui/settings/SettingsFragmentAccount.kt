@@ -227,6 +227,8 @@ class SettingsFragmentAccount : Fragment() {
   @UiThread
   private fun determineLoginIsSatisfied(): Boolean {
     return when (val auth = this.account.provider.authentication) {
+      is AccountProviderAuthenticationDescription.Anonymous,
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
         false
 
@@ -250,9 +252,6 @@ class SettingsFragmentAccount : Fragment() {
         this.logger.debug("login: eula ok: {}, user ok: {}, pass ok: {}", eulaOk, userOk, passOk)
         userOk && passOk && eulaOk
       }
-
-      null ->
-        return false
     }
   }
 
@@ -662,10 +661,11 @@ class SettingsFragmentAccount : Fragment() {
 
   private fun tryLogin() {
     return when (this.account.provider.authentication) {
+      is AccountProviderAuthenticationDescription.Anonymous,
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
         Unit
-      null ->
-        Unit
+
       is AccountProviderAuthenticationDescription.Basic -> {
         val accountPin =
           AccountPIN.create(this.authenticationBasicPass.text.toString())
@@ -683,7 +683,7 @@ class SettingsFragmentAccount : Fragment() {
 
   private fun tryLogout() {
     return when (this.account.provider.authentication) {
-      null ->
+      is AccountProviderAuthenticationDescription.Anonymous ->
         Unit
 
       /*
@@ -691,6 +691,7 @@ class SettingsFragmentAccount : Fragment() {
        * we *do* want local books to be deleted as part of a logout attempt.
        */
 
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
       is AccountProviderAuthenticationDescription.COPPAAgeGate,
       is AccountProviderAuthenticationDescription.Basic -> {
         this.profilesController.profileAccountLogout(this.account.id)

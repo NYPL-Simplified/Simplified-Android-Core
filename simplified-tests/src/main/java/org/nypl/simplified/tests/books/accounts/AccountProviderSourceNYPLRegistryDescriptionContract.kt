@@ -377,6 +377,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         labels = mapOf(
           Pair("LOGIN", "LOGIN!"),
           Pair("PASSWORD", "PASSWORD!"))),
+      authenticationAlternatives = listOf(),
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),
@@ -522,6 +523,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         greaterEqual13 = URI("http://www.example.com/feed-13.xml"),
         under13 = URI("http://www.example.com/feed-under-13.xml")
       ),
+      authenticationAlternatives = listOf(),
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),
@@ -649,7 +651,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
     val provider = AccountProvider(
       addAutomatically = false,
       annotationsURI = null,
-      authentication = null,
+      authentication = AccountProviderAuthenticationDescription.Anonymous,
+      authenticationAlternatives = listOf(),
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),

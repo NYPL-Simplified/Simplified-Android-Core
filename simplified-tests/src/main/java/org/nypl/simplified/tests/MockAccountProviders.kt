@@ -49,7 +49,8 @@ object MockAccountProviders {
     return AccountProvider(
       addAutomatically = false,
       annotationsURI = URI.create("http://example.com/accounts0/annotations"),
-      authentication = null,
+      authentication = AccountProviderAuthenticationDescription.Anonymous,
+      authenticationAlternatives = listOf(),
       authenticationDocumentURI = null,
       cardCreatorURI = null,
       catalogURI = URI.create("http://www.example.com/accounts0/feed.xml"),

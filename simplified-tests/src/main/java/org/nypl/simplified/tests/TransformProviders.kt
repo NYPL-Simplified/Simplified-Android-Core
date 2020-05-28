@@ -42,7 +42,7 @@ class TransformProviders {
                 under13 = URI.create(entry.catalogUrlUnder13)
               )
             } else {
-              null
+              AccountProviderAuthenticationDescription.Anonymous
             }
           }
 
@@ -52,6 +52,7 @@ class TransformProviders {
             annotationsURI = null,
             authenticationDocumentURI = null,
             authentication = authentication,
+            authenticationAlternatives = listOf(),
             catalogURI = URI.create(entry.catalogUrl),
             cardCreatorURI = null,
             displayName = entry.name!!,

@@ -1,0 +1,33 @@
+[
+  {
+    "@version" : "20200527",
+    "addAutomatically" : false,
+    "displayName" : "Open eBooks",
+    "idNumeric" : -1,
+    "idUUID" : "urn:uuid:c379b3b9-18e2-476f-95d1-7ba10f151d00",
+    "isProduction" : false,
+    "mainColor" : "blue",
+    "supportsReservations" : false,
+    "updated" : "2020-05-27T18:43:22.662+01:00",
+    "authenticationDocumentURI" : "https://circulation.openebooks.us/USOEI/authentication_document",
+    "catalogURI" : "https://circulation.openebooks.us/USOEI/",
+    "eula" : "https://openebooks.net/app_user_agreement.html",
+    "loansURI" : "https://circulation.openebooks.us/USOEI/loans/",
+    "patronSettingsURI" : "https://circulation.openebooks.us/USOEI/patrons/me/",
+    "privacyPolicy" : "https://openebooks.net/app_privacy.html",
+    "authentication" : {
+      "type" : "http://opds-spec.org/auth/basic",
+      "description" : "First Book - JWT",
+      "keyboard" : "DEFAULT",
+      "passwordKeyboard" : "DEFAULT",
+      "passwordMaximumLength" : 0,
+      "labels" : {
+        "LOGIN" : "Access Code",
+        "PASSWORD" : "PIN"
+      }
+    },
+    "authenticationAlternatives": [
+
+    ]
+  }
+]

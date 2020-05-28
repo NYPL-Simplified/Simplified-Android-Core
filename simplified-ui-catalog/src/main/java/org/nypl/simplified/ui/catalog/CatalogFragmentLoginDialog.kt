@@ -240,8 +240,11 @@ class CatalogFragmentLoginDialog : Fragment() {
         userOk && passOk && eulaOk
       }
 
-      null ->
-        return false
+      AccountProviderAuthenticationDescription.Anonymous ->
+        false
+
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
+        false
     }
   }
 
@@ -250,7 +253,7 @@ class CatalogFragmentLoginDialog : Fragment() {
     this.uiThread.checkIsUIThread()
 
     when (val auth = this.account.provider.authentication) {
-      null,
+      AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.COPPAAgeGate -> {
         // Technically unreachable code...
       }
@@ -382,10 +385,11 @@ class CatalogFragmentLoginDialog : Fragment() {
 
   private fun tryLogin() {
     return when (this.account.provider.authentication) {
-      is AccountProviderAuthenticationDescription.COPPAAgeGate ->
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
+      is AccountProviderAuthenticationDescription.COPPAAgeGate,
+      AccountProviderAuthenticationDescription.Anonymous ->
         Unit
-      null ->
-        Unit
+
       is AccountProviderAuthenticationDescription.Basic -> {
         val accountPin =
           AccountPIN.create(this.password.text.toString())

@@ -15,19 +15,30 @@ sealed class AccountProviderAuthenticationDescription {
      * The type used to identify basic authentication.
      */
 
-    const val BASIC_TYPE = "http://opds-spec.org/auth/basic"
+    const val BASIC_TYPE =
+      "http://opds-spec.org/auth/basic"
 
     /**
      * The type used to identify COPPA age gate authentication.
      */
 
-    const val COPPA_TYPE = "http://librarysimplified.org/terms/authentication/gate/coppa"
+    const val COPPA_TYPE =
+      "http://librarysimplified.org/terms/authentication/gate/coppa"
 
     /**
      * The type used to identify anonymous access (no authentication).
      */
 
-    const val ANONYMOUS_TYPE = "http://librarysimplified.org/rel/auth/anonymous"
+    const val ANONYMOUS_TYPE =
+      "http://librarysimplified.org/rel/auth/anonymous"
+
+    /**
+     * The type used to identify OAuth with an intermediary. This is the authentication used
+     * by projects such as Open eBooks.
+     */
+
+    const val OAUTH_INTERMEDIARY_TYPE =
+      "http://librarysimplified.org/authtype/OAuth-with-intermediary"
   }
 
   /**
@@ -149,4 +160,29 @@ sealed class AccountProviderAuthenticationDescription {
         "Barcode format ${this.barcodeFormat} must be uppercase")
     }
   }
+
+  /**
+   * OAuth with an intermediary.
+   */
+
+  data class OAuthWithIntermediary(
+
+    /**
+     * The URI used to perform authentication.
+     */
+
+    val authenticate: URI,
+
+    /**
+     * The URI of the authentication logo.
+     */
+
+    val logoURI: URI?
+  ) : AccountProviderAuthenticationDescription()
+
+  /**
+   * Anonymous authentication (equivalent to no authentication)
+   */
+
+  object Anonymous : AccountProviderAuthenticationDescription()
 }
