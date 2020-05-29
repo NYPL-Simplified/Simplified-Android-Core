@@ -6,6 +6,6 @@
   android:layout_height="wrap_content">
 
   <include layout="@layout/auth_basic" />
-
   <include layout="@layout/auth_coppa" />
+
 </FrameLayout>

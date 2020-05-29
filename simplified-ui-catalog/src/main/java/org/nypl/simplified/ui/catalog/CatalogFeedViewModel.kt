@@ -150,9 +150,6 @@ class CatalogFeedViewModel(
           return newState
         }
       }
-      is AccountProviderAuthenticationDescription.Basic,
-      null -> {
-      }
     }
 
     val loginState = account.loginState

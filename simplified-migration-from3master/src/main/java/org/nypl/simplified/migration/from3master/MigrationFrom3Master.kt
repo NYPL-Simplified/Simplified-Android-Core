@@ -275,7 +275,7 @@ class MigrationFrom3Master(
     return try {
       when (createdAccount.account.provider.authentication) {
         is AccountProviderAuthenticationDescription.COPPAAgeGate,
-        null -> {
+        is AccountProviderAuthenticationDescription.Anonymous -> {
           this.publishStepSucceeded(
             ACCOUNT, this.strings.successAuthenticatedAccountNotRequired(accountTitle))
           return

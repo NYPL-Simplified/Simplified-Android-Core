@@ -23,7 +23,10 @@
       android:id="@+id/settingsEULACheckbox"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_margin="16dp"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="16dp"
+      android:layout_marginEnd="16dp"
+      android:gravity="center"
       android:text="@string/settingsEULAStatement"
       android:textSize="12sp" />
 
@@ -57,7 +60,8 @@
         android:maxLines="2"
         android:text="@string/settingsPlaceholder"
         android:textAlignment="center"
-        android:textSize="12sp"
+        android:textSize="14sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settingsLoginProgress" />
@@ -71,24 +75,113 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settingsLoginProgressText">
 
+        <Space
+          android:id="@+id/settingsLoginButtonSpaceStart"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="0.5" />
+
         <Button
           android:id="@+id/settingsLoginButtonErrorDetails"
           android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:layout_marginRight="16dp"
-          android:text="@string/errorDetailsTitle"
+          android:layout_height="48dp"
+          android:layout_marginEnd="16dp"
           android:layout_weight="1"
-          android:enabled="true" />
+          android:enabled="true"
+          android:lines="1"
+          android:text="@string/errorDetailsTitle"
+          android:visibility="visible" />
 
-        <Button
+        <androidx.constraintlayout.widget.ConstraintLayout
           android:id="@+id/settingsLoginButton"
           android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:text="@string/settingsLogin"
+          android:layout_height="48dp"
           android:layout_weight="1"
-          android:enabled="false" />
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent">
+
+          <!--
+            Contrary to appearance, this image view does serve a purpose: We
+            will likely want to use button images coming from a server for
+            certain accounts (Open eBooks!), and it requires intrusive code
+            changes to move from an image/text view pair to a simple button.
+            Therefore, even though this image view is kept hidden right now,
+            it will likely be used in the future in much the same way as OAuth
+            layout image views are used now.
+          -->
+
+          <ImageView
+            android:id="@+id/settingsLoginButtonImage"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/error_small"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+          <TextView
+            android:id="@+id/settingsLoginButtonText"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/simplified_button"
+            android:gravity="center"
+            android:lines="2"
+            android:text="@string/settingsLogin"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <Space
+          android:id="@+id/settingsLoginButtonSpaceEnd"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="0.5" />
+
       </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+      android:id="@+id/settingsAuthAlternatives"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:visibility="visible">
+
+      <TextView
+        android:id="@+id/settingsAuthAlternativesTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/settingsLoginAlternatives"
+        android:textStyle="bold" />
+
+      <LinearLayout
+        android:id="@+id/settingsAuthAlternativesButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/settingsPlaceholder" />
+      </LinearLayout>
+    </LinearLayout>
+
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="16dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:id="@+id/settingsCardCreator"
@@ -112,8 +205,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/settingsCardCreatorLabel"
         android:enabled="false"
+        android:text="@string/settingsCardCreatorLabel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/settingsCardCreatorSignUp"
         app:layout_constraintStart_toStartOf="parent"
@@ -126,8 +219,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/settingsCardCreatorSignUp"
         android:enabled="false"
+        android:text="@string/settingsCardCreatorSignUp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -155,9 +248,9 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:enabled="false"
         android:labelFor="@id/settingsSyncBookmarksCheck"
         android:text="@string/settingsSyncBookmarks"
-        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/settingsSyncBookmarksCheck"
         app:layout_constraintStart_toStartOf="parent"
@@ -170,8 +263,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:label="@id/settingsSyncBookmarksLabel"
         android:enabled="false"
+        android:label="@id/settingsSyncBookmarksLabel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -179,9 +272,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:id="@+id/settingsReportIssue"
-      android:background="?attr/selectableItemBackground"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="wrap_content"
+      android:background="?attr/selectableItemBackground">
 
       <View
         android:layout_width="0dp"
@@ -199,8 +292,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/settingsReportIssue"
         android:enabled="false"
+        android:text="@string/settingsReportIssue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

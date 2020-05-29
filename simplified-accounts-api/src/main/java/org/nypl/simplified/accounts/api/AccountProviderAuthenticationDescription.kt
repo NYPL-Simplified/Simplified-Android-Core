@@ -151,7 +151,13 @@ sealed class AccountProviderAuthenticationDescription {
      * ```
      */
 
-    val labels: Map<String, String>
+    val labels: Map<String, String>,
+
+    /**
+     * The URI of the authentication logo.
+     */
+
+    val logoURI: URI?
   ) : AccountProviderAuthenticationDescription() {
 
     init {
@@ -166,6 +172,12 @@ sealed class AccountProviderAuthenticationDescription {
    */
 
   data class OAuthWithIntermediary(
+
+    /**
+     * The authentication description.
+     */
+
+    val description: String,
 
     /**
      * The URI used to perform authentication.

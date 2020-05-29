@@ -111,6 +111,7 @@ object AccountProvidersJSON {
       }
       is OAuthWithIntermediary -> {
         val authObject = mapper.createObjectNode()
+        authObject.put("description", authentication.description)
         authObject.put("type", OAUTH_INTERMEDIARY_TYPE)
         authObject.put("authenticate", authentication.authenticate.toString())
         val logo = authentication.logoURI
@@ -128,6 +129,10 @@ object AccountProvidersJSON {
         this.putConditionally(authObject, "passwordKeyboard", authentication.passwordKeyboard.name)
         authObject.put("passwordMaximumLength", authentication.passwordMaximumLength)
         authObject.set<ObjectNode>("labels", this.mapToObject(mapper, authentication.labels))
+        val logo = authentication.logoURI
+        if (logo != null) {
+          authObject.put("logo", logo.toString())
+        }
         authObject
       }
       is Anonymous -> {
@@ -278,9 +283,12 @@ object AccountProvidersJSON {
           JSONParserUtilities.getURI(container, "authenticate")
         val logoURI =
           JSONParserUtilities.getURIOrNull(container, "logo")
+        val description =
+          JSONParserUtilities.getStringOrNull(container, "description") ?: ""
 
         OAuthWithIntermediary(
           authenticate = authURI,
+          description = description,
           logoURI = logoURI
         )
       }
@@ -304,14 +312,17 @@ object AccountProvidersJSON {
           )
         val description =
           JSONParserUtilities.getString(container, "description")
+        val logoURI =
+          JSONParserUtilities.getURIOrNull(container, "logo")
 
         Basic(
           barcodeFormat = barcodeFormat,
-          keyboard = keyboard,
-          passwordMaximumLength = passwordMaximumLength,
-          passwordKeyboard = passwordKeyboard,
           description = description,
-          labels = labels
+          keyboard = keyboard,
+          labels = labels,
+          logoURI = logoURI,
+          passwordKeyboard = passwordKeyboard,
+          passwordMaximumLength = passwordMaximumLength
         )
       }
       COPPA_TYPE -> {

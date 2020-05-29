@@ -1,4 +1,4 @@
-package org.nypl.simplified.tests
+package org.nypl.simplified.tests.sandbox
 
 import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountID
@@ -23,24 +23,37 @@ class MockAccount(override val id: AccountID) : AccountType {
   override fun setPreferences(preferences: AccountPreferences) {
   }
 
+  private fun basic(): AccountProviderAuthenticationDescription {
+    return AccountProviderAuthenticationDescription.Basic(
+      barcodeFormat = null,
+      keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+      passwordMaximumLength = 4,
+      passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+      description = "What?",
+      labels = mapOf(),
+      logoURI = null
+    )
+  }
+
+  private fun oauth(): AccountProviderAuthenticationDescription {
+    return AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+      authenticate = URI.create("urn:create"),
+      description = "What?",
+      logoURI = URI.create("https://circulation.openebooks.us/images/CleverLoginButton280.png")
+    )
+  }
+
   private var accountProviderCurrent: AccountProviderType =
     run {
-      val authentication =
-        AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = null,
-          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          passwordMaximumLength = 4,
-          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          description = "What?",
-          labels = mapOf(),
-          logoURI = null
-        )
+      val authentication = basic()
 
       AccountProvider(
         addAutomatically = false,
         annotationsURI = null,
         authentication = authentication,
-        authenticationAlternatives = listOf(),
+        authenticationAlternatives = listOf(
+          this.oauth()
+        ),
         authenticationDocumentURI = null,
         cardCreatorURI = null,
         catalogURI = URI.create("catalog"),
@@ -58,7 +71,8 @@ class MockAccount(override val id: AccountID) : AccountType {
         subtitle = "Library ${this.id.uuid} Subtitle!",
         supportEmail = null,
         supportsReservations = false,
-        updated = DateTime())
+        updated = DateTime()
+      )
     }
 
   override fun setAccountProvider(accountProvider: AccountProviderType) {
@@ -69,13 +83,15 @@ class MockAccount(override val id: AccountID) : AccountType {
     get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
   override val provider: AccountProviderType
-    get() = accountProviderCurrent
+    get() {
+      return this.accountProviderCurrent
+    }
 
   override fun setLoginState(state: AccountLoginState) {
     this.loginStateMutable = state
   }
 
-  private var loginStateMutable: AccountLoginState =
+  var loginStateMutable: AccountLoginState =
     AccountLoginState.AccountNotLoggedIn
 
   override val loginState: AccountLoginState

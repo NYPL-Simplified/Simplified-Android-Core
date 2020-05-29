@@ -369,7 +369,8 @@ abstract class MigrationFrom3MasterContract {
           20,
           AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
           "Basic",
-          mapOf()
+          mapOf(),
+          logoURI = null
         )
       )
     Mockito.`when`(accountProvider.displayName)
@@ -455,7 +456,8 @@ abstract class MigrationFrom3MasterContract {
           20,
           AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
           "Basic",
-          mapOf()
+          mapOf(),
+          logoURI = null
         )
       )
     Mockito.`when`(accountProvider.displayName)
@@ -603,7 +605,8 @@ abstract class MigrationFrom3MasterContract {
           20,
           AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
           "Basic",
-          mapOf()
+          mapOf(),
+          logoURI = null
         )
       )
     Mockito.`when`(accountProvider.displayName)
@@ -725,7 +728,8 @@ abstract class MigrationFrom3MasterContract {
           20,
           AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
           "Basic",
-          mapOf()
+          mapOf(),
+          logoURI = null
         )
       )
     Mockito.`when`(accountProvider.displayName)

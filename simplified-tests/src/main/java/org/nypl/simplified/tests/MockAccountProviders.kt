@@ -198,7 +198,8 @@ object MockAccountProviders {
           passwordMaximumLength = 4,
           passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
           description = "Stuff!",
-          labels = mapOf()
+          labels = mapOf(),
+          logoURI = null
         )
       )
   }

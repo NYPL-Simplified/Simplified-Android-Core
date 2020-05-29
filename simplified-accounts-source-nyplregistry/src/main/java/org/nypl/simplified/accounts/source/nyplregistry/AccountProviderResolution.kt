@@ -268,6 +268,7 @@ class AccountProviderResolution(
 
     return AccountProviderAuthenticationDescription.OAuthWithIntermediary(
       authenticate = authenticateURI,
+      description = authObject.description,
       logoURI = logo?.hrefURI
     )
   }
@@ -280,14 +281,18 @@ class AccountProviderResolution(
       authObject.inputs[LABEL_LOGIN]
     val passwordRestrictions =
       authObject.inputs[LABEL_PASSWORD]
+    val logo =
+      authObject.links.find { link -> link.relation == "logo" }
+        ?.hrefURI
 
     return AccountProviderAuthenticationDescription.Basic(
       barcodeFormat = loginRestrictions?.barcodeFormat,
-      keyboard = parseKeyboardType(loginRestrictions?.keyboardType),
-      passwordMaximumLength = passwordRestrictions?.maximumLength ?: 0,
-      passwordKeyboard = parseKeyboardType(passwordRestrictions?.keyboardType),
       description = authObject.description,
-      labels = authObject.labels
+      keyboard = parseKeyboardType(loginRestrictions?.keyboardType),
+      labels = authObject.labels,
+      logoURI = logo,
+      passwordKeyboard = parseKeyboardType(passwordRestrictions?.keyboardType),
+      passwordMaximumLength = passwordRestrictions?.maximumLength ?: 0
     )
   }
 

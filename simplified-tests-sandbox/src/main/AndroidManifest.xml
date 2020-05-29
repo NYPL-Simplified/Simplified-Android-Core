@@ -28,6 +28,11 @@
       android:theme="@style/SimplifiedTheme_ActionBar_Blue" />
 
     <activity
+      android:name="org.nypl.simplified.tests.sandbox.SettingsAccountActivity"
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_NoActionBar_Blue" />
+
+    <activity
       android:name="org.nypl.simplified.tests.sandbox.BookDetailActivity"
       android:exported="true"
       android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />

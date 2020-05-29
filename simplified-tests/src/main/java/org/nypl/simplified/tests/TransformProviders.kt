@@ -34,7 +34,9 @@ class TransformProviders {
               passwordMaximumLength = entry.authPasscodeLength,
               passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.valueOf(entry.pinKeyboard ?: "DEFAULT"),
               description = "",
-              labels = mapOf())
+              labels = mapOf(),
+              logoURI = null
+            )
           } else {
             if (entry.catalogUrl13 != null) {
               AccountProviderAuthenticationDescription.COPPAAgeGate(

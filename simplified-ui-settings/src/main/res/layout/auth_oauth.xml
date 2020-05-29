@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/authOAuthIntermediary"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:layout_margin="16dp">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/authOAuthIntermediaryLogo"
+    android:layout_width="256dp"
+    android:layout_height="48dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <ImageView
+      android:id="@+id/authOAuthIntermediaryLogoImage"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:src="@drawable/error_small"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+      android:id="@+id/authOAuthIntermediaryLogoText"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:background="@drawable/simplified_button"
+      android:gravity="center"
+      android:lines="2"
+      android:text="@string/settingsPlaceholder"
+      android:textColor="?attr/colorPrimary"
+      android:textSize="14sp"
+      android:textStyle="bold"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

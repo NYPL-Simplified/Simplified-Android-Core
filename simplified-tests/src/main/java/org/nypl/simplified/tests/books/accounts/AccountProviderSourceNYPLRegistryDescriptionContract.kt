@@ -376,7 +376,9 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         "Basic Auth",
         labels = mapOf(
           Pair("LOGIN", "LOGIN!"),
-          Pair("PASSWORD", "PASSWORD!"))),
+          Pair("PASSWORD", "PASSWORD!")),
+        logoURI = null
+      ),
       authenticationAlternatives = listOf(),
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),

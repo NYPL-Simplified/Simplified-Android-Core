@@ -180,7 +180,9 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null
+      ))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -256,7 +258,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -338,7 +341,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+          logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -409,7 +413,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -478,7 +483,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -571,7 +577,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -664,7 +671,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -812,7 +820,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -919,7 +928,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -1036,7 +1046,8 @@ abstract class ProfileAccountLoginTaskContract {
         passwordMaximumLength = 10,
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         description = "Library Login",
-        labels = mapOf()))
+        labels = mapOf(),
+        logoURI = null))
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)

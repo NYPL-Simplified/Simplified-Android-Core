@@ -45,6 +45,8 @@
   <string name="settingsLicense">License</string>
   <string name="settingsLicenseSummary">Software license information</string>
   <string name="settingsLogin">Log in</string>
+  <string name="settingsLoginWith">Log in with %1$s</string>
+  <string name="settingsLoginAlternatives">Alternative Login Methods</string>
   <string name="settingsLogout">Log out</string>
   <string name="settingsPassword">Password</string>
   <string name="settingsPasswordHide">Hide password</string>
