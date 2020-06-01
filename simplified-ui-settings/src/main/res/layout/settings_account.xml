@@ -92,52 +92,16 @@
           android:text="@string/errorDetailsTitle"
           android:visibility="visible" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <Button
           android:id="@+id/settingsLoginButton"
           android:layout_width="0dp"
           android:layout_height="48dp"
+          android:layout_marginEnd="16dp"
           android:layout_weight="1"
-          app:layout_constraintBottom_toBottomOf="parent"
-          app:layout_constraintEnd_toEndOf="parent"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toTopOf="parent">
-
-          <!--
-            Contrary to appearance, this image view does serve a purpose: We
-            will likely want to use button images coming from a server for
-            certain accounts (Open eBooks!), and it requires intrusive code
-            changes to move from an image/text view pair to a simple button.
-            Therefore, even though this image view is kept hidden right now,
-            it will likely be used in the future in much the same way as OAuth
-            layout image views are used now.
-          -->
-
-          <ImageView
-            android:id="@+id/settingsLoginButtonImage"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:src="@drawable/error_small"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-          <TextView
-            android:id="@+id/settingsLoginButtonText"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@drawable/simplified_button"
-            android:gravity="center"
-            android:lines="2"
-            android:text="@string/settingsLogin"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+          android:enabled="true"
+          android:lines="1"
+          android:text="@string/settingsLogin"
+          android:visibility="visible" />
 
         <Space
           android:id="@+id/settingsLoginButtonSpaceEnd"

@@ -19,7 +19,13 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
-import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
@@ -298,7 +304,7 @@ class CatalogFragmentLoginDialog : Fragment() {
     }
 
     return when (val state = this.account.loginState) {
-      AccountLoginState.AccountNotLoggedIn -> {
+      AccountNotLoggedIn -> {
         this.unlockForm()
         this.action.isEnabled = this.determineLoginIsSatisfied()
         this.errorDetails.visibility = View.GONE
@@ -310,7 +316,7 @@ class CatalogFragmentLoginDialog : Fragment() {
         }
       }
 
-      is AccountLoginState.AccountLoggingIn -> {
+      is AccountLoggingInWaitingForExternalAuthentication -> {
         this.lockForm()
         this.errorDetails.visibility = View.GONE
         this.progress.visibility = View.VISIBLE
@@ -318,7 +324,15 @@ class CatalogFragmentLoginDialog : Fragment() {
         this.progressText.visibility = View.VISIBLE
       }
 
-      is AccountLoginState.AccountLoginFailed -> {
+      is AccountLoggingIn -> {
+        this.lockForm()
+        this.errorDetails.visibility = View.GONE
+        this.progress.visibility = View.VISIBLE
+        this.progressText.text = state.status
+        this.progressText.visibility = View.VISIBLE
+      }
+
+      is AccountLoginFailed -> {
         this.unlockForm()
         this.errorDetails.visibility = View.VISIBLE
         this.action.isEnabled = this.determineLoginIsSatisfied()
@@ -334,7 +348,7 @@ class CatalogFragmentLoginDialog : Fragment() {
         }
       }
 
-      is AccountLoginState.AccountLogoutFailed -> {
+      is AccountLogoutFailed -> {
         this.lockForm()
         this.errorDetails.visibility = View.VISIBLE
         this.action.isEnabled = this.determineLoginIsSatisfied()
@@ -346,8 +360,8 @@ class CatalogFragmentLoginDialog : Fragment() {
         }
       }
 
-      is AccountLoginState.AccountLoggedIn,
-      is AccountLoginState.AccountLoggingOut -> {
+      is AccountLoggedIn,
+      is AccountLoggingOut -> {
         this.findNavigationController().popBackStack()
         Unit
       }

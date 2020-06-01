@@ -42,9 +42,32 @@ sealed class AccountLoginState {
      * @see AccountLoginStringResourcesType
      */
 
+    val status: String,
+
+    /**
+     * `true` if the login operation can be cancelled.
+     */
+
+    val cancellable: Boolean
+  ) : AccountLoginState() {
+    override val credentials: AccountAuthenticationCredentials?
+      get() = null
+  }
+
+  /**
+   * The account is currently waiting for an external authentication mechanism to complete.
+   */
+
+  data class AccountLoggingInWaitingForExternalAuthentication(
+
+    /**
+     * A humanly-readable status message.
+     *
+     * @see AccountLoginStringResourcesType
+     */
+
     val status: String
   ) : AccountLoginState() {
-
     override val credentials: AccountAuthenticationCredentials?
       get() = null
   }

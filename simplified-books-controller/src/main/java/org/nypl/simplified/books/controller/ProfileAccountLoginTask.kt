@@ -453,8 +453,13 @@ class ProfileAccountLoginTask(
     }
   }
 
-  private fun updateLoggingInState(step: TaskStep<AccountLoginErrorData>) {
-    this.account.setLoginState(AccountLoggingIn(step.description))
+  private fun updateLoggingInState(
+    step: TaskStep<AccountLoginErrorData>
+  ) {
+    this.account.setLoginState(AccountLoggingIn(
+      status = step.description,
+      cancellable = false
+    ))
   }
 
   private fun logParseWarning(warning: ParseWarning) {
