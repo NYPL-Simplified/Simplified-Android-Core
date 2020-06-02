@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
+import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeVendorID
@@ -38,6 +39,7 @@ import org.nypl.simplified.patron.api.PatronDRM
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -62,7 +64,7 @@ class ProfileAccountLoginTask(
   private val loginStrings: AccountLoginStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType,
-  initialCredentials: AccountAuthenticationCredentials
+  private val request: ProfileAccountLoginRequest
 ) : Callable<TaskResult<AccountLoginErrorData, Unit>> {
 
   init {
@@ -73,8 +75,7 @@ class ProfileAccountLoginTask(
   }
 
   @Volatile
-  private var credentials: AccountAuthenticationCredentials =
-    initialCredentials
+  private lateinit var credentials: AccountAuthenticationCredentials
 
   private var adobeDRM: PatronDRMAdobe? =
     null
@@ -101,9 +102,8 @@ class ProfileAccountLoginTask(
     return try {
       this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired))
 
-      val authentication = this.account.provider.authentication
-      if (authentication == null) {
-        this.debug("account does not require authentication")
+      if (!this.validateRequest()) {
+        this.debug("account does not support the given authentication")
         val details = AccountLoginNotRequired(this.loginStrings.loginAuthNotRequired)
         this.steps.currentStepFailed(details.message, details)
         this.account.setLoginState(AccountLoginFailed(this.steps.finishFailure<Unit>()))
@@ -111,10 +111,13 @@ class ProfileAccountLoginTask(
       }
 
       this.steps.currentStepSucceeded(this.loginStrings.loginAuthRequired)
-      this.runPatronProfileRequest()
-      this.runDeviceActivation()
-      this.account.setLoginState(AccountLoggedIn(this.credentials))
-      this.steps.finishSuccess(Unit)
+
+      when (this.request) {
+        is ProfileAccountLoginRequest.Basic ->
+          this.runBasicLogin(this.request)
+        is ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate ->
+          this.runOAuthWithIntermediary(this.request)
+      }
     } catch (e: Throwable) {
       this.steps.currentStepFailedAppending(
         message = this.loginStrings.loginUnexpectedException,
@@ -126,6 +129,31 @@ class ProfileAccountLoginTask(
       this.account.setLoginState(AccountLoginFailed(failure))
       failure
     }
+  }
+
+  private fun runOAuthWithIntermediary(
+    request: ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
+  ): TaskResult.Success<AccountLoginErrorData, Unit> {
+    throw UnimplementedCodeException()
+  }
+
+  private fun runBasicLogin(
+    request: ProfileAccountLoginRequest.Basic
+  ): TaskResult.Success<AccountLoginErrorData, Unit> {
+    this.credentials =
+      AccountAuthenticationCredentials.builder(request.username, request.password)
+        .build()
+
+    this.runPatronProfileRequest()
+    this.runDeviceActivation()
+    this.account.setLoginState(AccountLoggedIn(this.credentials))
+    return this.steps.finishSuccess(Unit)
+  }
+
+  private fun validateRequest(): Boolean {
+    this.debug("validating login request")
+    return (this.account.provider.authentication == this.request.description) ||
+      (this.account.provider.authenticationAlternatives.any { it == this.request.description })
   }
 
   private fun runDeviceActivation() {
@@ -456,10 +484,12 @@ class ProfileAccountLoginTask(
   private fun updateLoggingInState(
     step: TaskStep<AccountLoginErrorData>
   ) {
-    this.account.setLoginState(AccountLoggingIn(
-      status = step.description,
-      cancellable = false
-    ))
+    this.account.setLoginState(
+      AccountLoggingIn(
+        status = step.description,
+        cancellable = false
+      )
+    )
   }
 
   private fun logParseWarning(warning: ParseWarning) {

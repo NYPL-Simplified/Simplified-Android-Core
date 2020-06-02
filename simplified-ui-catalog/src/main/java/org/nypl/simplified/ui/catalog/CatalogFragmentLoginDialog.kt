@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProviders
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
@@ -36,6 +35,7 @@ import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -398,7 +398,7 @@ class CatalogFragmentLoginDialog : Fragment() {
   }
 
   private fun tryLogin() {
-    return when (this.account.provider.authentication) {
+    return when (val description = this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
       is AccountProviderAuthenticationDescription.COPPAAgeGate,
       AccountProviderAuthenticationDescription.Anonymous ->
@@ -409,11 +409,15 @@ class CatalogFragmentLoginDialog : Fragment() {
           AccountPIN.create(this.password.text.toString())
         val accountBarcode =
           AccountBarcode.create(this.userName.text.toString())
-        val credentials =
-          AccountAuthenticationCredentials.builder(accountPin, accountBarcode)
-            .build()
+        val request =
+          ProfileAccountLoginRequest.Basic(
+            accountId = this.account.id,
+            description = description,
+            username = accountPin,
+            password = accountBarcode
+          )
 
-        this.profilesController.profileAccountLogin(this.account.id, credentials)
+        this.profilesController.profileAccountLogin(request)
         Unit
       }
     }

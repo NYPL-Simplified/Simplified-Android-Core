@@ -3,7 +3,6 @@ package org.nypl.simplified.profiles.controller.api
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.Observable
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -110,14 +109,12 @@ interface ProfilesControllerType {
    * Attempt to login using the given account of the current profile. The login is attempted
    * using the given credentials.
    *
-   * @param accountID The account ID
-   * @param credentials The credentials
+   * @param request The login request
    * @return A future that returns the result of logging in
    */
 
   fun profileAccountLogin(
-    accountID: AccountID,
-    credentials: AccountAuthenticationCredentials
+    request: ProfileAccountLoginRequest
   ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>>
 
   /**

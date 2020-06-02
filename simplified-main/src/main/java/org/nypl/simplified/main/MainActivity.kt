@@ -15,7 +15,9 @@ import io.reactivex.Observable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
-import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginMissingInformation
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.documents.eula.EULAType
@@ -31,8 +33,10 @@ import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
@@ -92,10 +96,39 @@ class MainActivity :
     profilesController: ProfilesControllerType,
     account: AccountType,
     credentials: AccountAuthenticationCredentials
-  ): TaskResult<AccountLoginState.AccountLoginErrorData, Unit> {
+  ): TaskResult<AccountLoginErrorData, Unit> {
     this.logger.debug("doLoginAccount")
-    return profilesController.profileAccountLogin(account.id, credentials)
-      .get(3L, TimeUnit.MINUTES)
+
+    val taskRecorder = TaskRecorder.create<AccountLoginErrorData>()
+    taskRecorder.beginNewStep("Logging in...")
+
+    if (account.provider.authenticationAlternatives.isEmpty()) {
+      when (val description = account.provider.authentication) {
+        is AccountProviderAuthenticationDescription.COPPAAgeGate,
+        AccountProviderAuthenticationDescription.Anonymous -> {
+          return taskRecorder.finishSuccess(Unit)
+        }
+        is AccountProviderAuthenticationDescription.Basic -> {
+          return profilesController.profileAccountLogin(
+            ProfileAccountLoginRequest.Basic(
+              account.id,
+              description,
+              credentials.pin(),
+              credentials.barcode()
+            )
+          ).get(3L, TimeUnit.MINUTES)
+        }
+        is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
+          val message = "Can't use OAuth authentication during migrations."
+          taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+          return taskRecorder.finishFailure()
+        }
+      }
+    } else {
+      val message = "Can't determine which authentication method is required."
+      taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+      return taskRecorder.finishFailure()
+    }
   }
 
   private fun doCreateAccount(
@@ -194,7 +227,8 @@ class MainActivity :
 
     profilesController.profileUpdate { profileDescription ->
       profileDescription.copy(
-        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true))
+        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
+      )
     }
 
     val fragment = SplashSelectionFragment.newInstance(this.splashParameters)

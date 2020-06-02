@@ -24,6 +24,7 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -98,13 +99,12 @@ class MockProfilesController(
   )
 
   var profileAccountLogins =
-    mutableListOf<ProfileAccountLogin>()
+    mutableListOf<ProfileAccountLoginRequest>()
 
   override fun profileAccountLogin(
-    account: AccountID,
-    credentials: AccountAuthenticationCredentials
+    request: ProfileAccountLoginRequest
   ): FluentFuture<TaskResult<AccountLoginState.AccountLoginErrorData, Unit>> {
-    this.profileAccountLogins.add(ProfileAccountLogin(account, credentials))
+    this.profileAccountLogins.add(request)
     return FluentFuture.from(SettableFuture.create())
   }
 

@@ -25,7 +25,6 @@ import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
@@ -50,6 +49,7 @@ import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.threads.NamedThreadPools
@@ -874,7 +874,7 @@ class SettingsFragmentAccount : Fragment() {
   }
 
   private fun tryLogin() {
-    return when (this.account.provider.authentication) {
+    return when (val description = this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
         this.onTryOAuthLogin()
       }
@@ -888,11 +888,15 @@ class SettingsFragmentAccount : Fragment() {
           AccountPIN.create(this.authenticationBasicPass.text.toString())
         val accountBarcode =
           AccountBarcode.create(this.authenticationBasicUser.text.toString())
-        val credentials =
-          AccountAuthenticationCredentials.builder(accountPin, accountBarcode)
-            .build()
+        val request =
+          ProfileAccountLoginRequest.Basic(
+            accountId = this.account.id,
+            description = description,
+            username = accountPin,
+            password = accountBarcode
+          )
 
-        this.profilesController.profileAccountLogin(this.account.id, credentials)
+        this.profilesController.profileAccountLogin(request)
         Unit
       }
     }
