@@ -641,13 +641,7 @@ internal object MainServices {
       return existing
     }
 
-    this.logger.debug("returning fallback build configuration service")
-    return object : BuildConfigurationServiceType {
-      override val vcsCommit: String
-        get() = BuildConfig.GIT_COMMIT
-      override val errorReportEmail: String
-        get() = ""
-    }
+    throw IllegalStateException("Missing build configuration service")
   }
 
   private fun findIdleTimerConfiguration(): ProfileIdleTimerConfigurationServiceType {

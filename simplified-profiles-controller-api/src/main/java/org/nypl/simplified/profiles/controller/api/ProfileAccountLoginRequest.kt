@@ -18,18 +18,12 @@ sealed class ProfileAccountLoginRequest {
   abstract val accountId: AccountID
 
   /**
-   * The authentication description that will be used to log in.
-   */
-
-  abstract val description: AccountProviderAuthenticationDescription
-
-  /**
    * A request to log in using basic authentication.
    */
 
   data class Basic(
     override val accountId: AccountID,
-    override val description: AccountProviderAuthenticationDescription.Basic,
+    val description: AccountProviderAuthenticationDescription.Basic,
     val username: AccountPIN,
     val password: AccountBarcode
   ) : ProfileAccountLoginRequest()
@@ -40,6 +34,16 @@ sealed class ProfileAccountLoginRequest {
 
   data class OAuthWithIntermediaryInitiate(
     override val accountId: AccountID,
-    override val description: AccountProviderAuthenticationDescription.OAuthWithIntermediary
+    val description: AccountProviderAuthenticationDescription.OAuthWithIntermediary
+  ) : ProfileAccountLoginRequest()
+
+  /**
+   * A request to complete a login using OAuth (with an intermediary) authentication. In other
+   * words, an OAuth token has been passed to the application.
+   */
+
+  data class OAuthWithIntermediaryComplete(
+    override val accountId: AccountID,
+    val token: String
   ) : ProfileAccountLoginRequest()
 }

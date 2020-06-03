@@ -26,6 +26,7 @@ import org.nypl.simplified.accounts.api.AccountPIN
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.buildconfig.api.BuildConfigOAuthScheme
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
@@ -83,8 +84,12 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
 
     this.services = MutableServiceDirectory()
     val buildConfiguration = object : BuildConfigurationServiceType {
-      override val vcsCommit: String = "abcd"
-      override val errorReportEmail: String = "errors@example.com"
+      override val vcsCommit: String =
+        "abcd"
+      override val errorReportEmail: String =
+        "errors@example.com"
+      override val oauthCallbackScheme: BuildConfigOAuthScheme =
+        BuildConfigOAuthScheme("simplified-sandbox-oauth")
     }
     val books = MockBooksController()
     val documents = MockDocumentStore()
@@ -148,7 +153,7 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
   private fun loggingOut(): AccountLoginState {
     return AccountLoggingOut(
       status = "Logging out",
-      credentials = credentials
+      credentials = this.credentials
     )
   }
 
@@ -178,7 +183,7 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
       AccountLogoutErrorData.AccountLogoutUnexpectedException(IOException()),
       IOException()
     )
-    return AccountLogoutFailed(recorder.finishFailure<String>(), credentials)
+    return AccountLogoutFailed(recorder.finishFailure<String>(), this.credentials)
   }
 
   override fun onStart() {
@@ -189,19 +194,23 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
 
     this.executor.scheduleAtFixedRate(
       {
-        uiThread.runOnUIThread {
-          val state = this.states[this.stateIndex]
-          this.account.loginStateMutable = state
-          this.accountEvents.onNext(
-            AccountEventLoginStateChanged(state.toString(), this.account.id, state)
-          )
-          this.stateIndex = (this.stateIndex + 1) % this.states.size
-        }
+        // this.cycleStates(uiThread)
       },
       1L,
       1L,
       SECONDS
     )
+  }
+
+  private fun cycleStates(uiThread: UIThreadServiceType) {
+    uiThread.runOnUIThread {
+      val state = this.states[this.stateIndex]
+      this.account.loginStateMutable = state
+      this.accountEvents.onNext(
+        AccountEventLoginStateChanged(state.toString(), this.account.id, state)
+      )
+      this.stateIndex = (this.stateIndex + 1) % this.states.size
+    }
   }
 
   override fun onStop() {

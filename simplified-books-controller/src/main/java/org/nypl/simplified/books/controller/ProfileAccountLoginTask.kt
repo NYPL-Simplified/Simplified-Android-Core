@@ -12,6 +12,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthentic
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
@@ -26,6 +27,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.http.core.HTTPResultError
@@ -40,6 +42,8 @@ import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -115,10 +119,14 @@ class ProfileAccountLoginTask(
       when (this.request) {
         is ProfileAccountLoginRequest.Basic ->
           this.runBasicLogin(this.request)
-        is ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate ->
-          this.runOAuthWithIntermediary(this.request)
+        is OAuthWithIntermediaryInitiate ->
+          this.runOAuthWithIntermediaryInitiate(this.request)
+        is OAuthWithIntermediaryComplete ->
+          this.runOAuthWithIntermediaryComplete(this.request)
       }
     } catch (e: Throwable) {
+      this.logger.error("error during login process: ", e)
+
       this.steps.currentStepFailedAppending(
         message = this.loginStrings.loginUnexpectedException,
         errorValue = AccountLoginUnexpectedException(this.loginStrings.loginUnexpectedException, e),
@@ -131,10 +139,19 @@ class ProfileAccountLoginTask(
     }
   }
 
-  private fun runOAuthWithIntermediary(
-    request: ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
-  ): TaskResult.Success<AccountLoginErrorData, Unit> {
+  private fun runOAuthWithIntermediaryComplete(
+    request: OAuthWithIntermediaryComplete
+  ): TaskResult<AccountLoginErrorData, Unit> {
     throw UnimplementedCodeException()
+  }
+
+  private fun runOAuthWithIntermediaryInitiate(
+    request: OAuthWithIntermediaryInitiate
+  ): TaskResult.Success<AccountLoginErrorData, Unit> {
+    this.account.setLoginState(AccountLoginState.AccountLoggingInWaitingForExternalAuthentication(
+      "Waiting for authentication..."
+    ))
+    return this.steps.finishSuccess(Unit)
   }
 
   private fun runBasicLogin(
@@ -152,8 +169,21 @@ class ProfileAccountLoginTask(
 
   private fun validateRequest(): Boolean {
     this.debug("validating login request")
-    return (this.account.provider.authentication == this.request.description) ||
-      (this.account.provider.authenticationAlternatives.any { it == this.request.description })
+
+    return when (this.request) {
+      is ProfileAccountLoginRequest.Basic -> {
+        (this.account.provider.authentication == this.request.description) ||
+          (this.account.provider.authenticationAlternatives.any { it == this.request.description })
+      }
+      is OAuthWithIntermediaryInitiate -> {
+        (this.account.provider.authentication == this.request.description) ||
+          (this.account.provider.authenticationAlternatives.any { it == this.request.description })
+      }
+      is OAuthWithIntermediaryComplete -> {
+        return this.account.provider.authentication is OAuthWithIntermediary ||
+          (this.account.provider.authenticationAlternatives.any { it is OAuthWithIntermediary })
+      }
+    }
   }
 
   private fun runDeviceActivation() {

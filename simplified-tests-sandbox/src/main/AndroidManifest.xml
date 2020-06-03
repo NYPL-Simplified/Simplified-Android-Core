@@ -30,7 +30,9 @@
     <activity
       android:name="org.nypl.simplified.tests.sandbox.SettingsAccountActivity"
       android:exported="true"
-      android:theme="@style/SimplifiedTheme_NoActionBar_Blue" />
+      android:launchMode="singleInstance"
+      android:theme="@style/SimplifiedTheme_NoActionBar_Blue">
+    </activity>
 
     <activity
       android:name="org.nypl.simplified.tests.sandbox.BookDetailActivity"
@@ -41,6 +43,19 @@
       android:name="org.nypl.simplified.tests.sandbox.ProfileActivity"
       android:exported="true"
       android:theme="@style/SimplifiedTheme_NoActionBar_Indigo" />
+
+    <activity
+      android:name="org.nypl.simplified.tests.sandbox.OAuthActivity"
+      android:exported="true"
+      android:launchMode="singleInstance"
+      android:theme="@style/SimplifiedTheme_NoActionBar_Indigo">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="simplified-sandbox-oauth" />
+      </intent-filter>
+    </activity>
 
     <activity
       android:name="org.nypl.simplified.tests.sandbox.ErrorPageActivity"
