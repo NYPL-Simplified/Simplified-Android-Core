@@ -158,8 +158,12 @@ class ProfileAccountLoginTask(
     request: ProfileAccountLoginRequest.Basic
   ): TaskResult.Success<AccountLoginErrorData, Unit> {
     this.credentials =
-      AccountAuthenticationCredentials.builder(request.username, request.password)
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = request.username,
+        password = request.password,
+        authenticationDescription = request.description.description,
+        adobeCredentials = null
+      )
 
     this.runPatronProfileRequest()
     this.runDeviceActivation()
@@ -203,18 +207,14 @@ class ProfileAccountLoginTask(
     val deviceManagerURI = adobeDRM.deviceManagerURI
     val adobePreCredentials =
       AccountAuthenticationAdobePreActivationCredentials(
-        AdobeVendorID(adobeDRM.vendor),
-        AccountAuthenticationAdobeClientToken.create(adobeDRM.clientToken),
-        deviceManagerURI,
-        null
+        clientToken = AccountAuthenticationAdobeClientToken.parse(adobeDRM.clientToken),
+        deviceManagerURI = deviceManagerURI,
+        postActivationCredentials = null,
+        vendorID = AdobeVendorID(adobeDRM.vendor)
       )
 
-    val newCredentials =
-      this.credentials.toBuilder()
-        .setAdobeCredentials(adobePreCredentials)
-        .build()
-
-    this.credentials = newCredentials
+    this.credentials =
+      this.credentials.withAdobePreActivationCredentials(adobePreCredentials)
 
     /*
      * We can only activate a device if there's a support Adept executor available.
@@ -245,12 +245,9 @@ class ProfileAccountLoginTask(
         "Must have returned at least one activation"
       )
 
-      val newPostCredentials =
-        this.credentials.toBuilder()
-          .setAdobeCredentials(adobePreCredentials.copy(postActivationCredentials = postCredentials.first()))
-          .build()
-
-      this.credentials = newPostCredentials
+      this.credentials = this.credentials.withAdobePreActivationCredentials(
+        adobePreCredentials.copy(postActivationCredentials = postCredentials.first())
+      )
       this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivated)
     } catch (e: ExecutionException) {
       val ex = e.cause!!
@@ -300,17 +297,18 @@ class ProfileAccountLoginTask(
 
     this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginDeviceActivationPostDeviceManager))
 
+    val adobePreCredentials =
+      this.credentials.adobeCredentials
+
     Preconditions.checkState(
-      this.credentials.adobeCredentials().isSome,
+      adobePreCredentials != null,
       "Adobe credentials must be present"
     )
     Preconditions.checkState(
-      this.credentials.adobePostActivationCredentials().isSome,
+      adobePreCredentials!!.postActivationCredentials != null,
       "Adobe post-activation credentials must be present"
     )
 
-    val adobePreCredentials =
-      (this.credentials.adobeCredentials() as Some<AccountAuthenticationAdobePreActivationCredentials>).get()
     val adobePostActivationCredentials =
       adobePreCredentials.postActivationCredentials!!
 

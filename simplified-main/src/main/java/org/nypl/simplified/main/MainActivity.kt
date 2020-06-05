@@ -116,14 +116,23 @@ class MainActivity :
           return taskRecorder.finishSuccess(Unit)
         }
         is AccountProviderAuthenticationDescription.Basic -> {
-          return profilesController.profileAccountLogin(
-            ProfileAccountLoginRequest.Basic(
-              account.id,
-              description,
-              credentials.pin(),
-              credentials.barcode()
-            )
-          ).get(3L, TimeUnit.MINUTES)
+          when (credentials) {
+            is AccountAuthenticationCredentials.Basic -> {
+              return profilesController.profileAccountLogin(
+                ProfileAccountLoginRequest.Basic(
+                  account.id,
+                  description,
+                  credentials.userName,
+                  credentials.password
+                )
+              ).get(3L, TimeUnit.MINUTES)
+            }
+            is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
+              val message = "Can't use OAuth authentication during migrations."
+              taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+              return taskRecorder.finishFailure()
+            }
+          }
         }
         is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
           val message = "Can't use OAuth authentication during migrations."

@@ -545,7 +545,7 @@ class BookRevokeTask(
     this.publishRequestingRevokeStatus()
 
     val credentials =
-      this.someOrNull(this.getRequiredAccountCredentials().adobePostActivationCredentials())
+      this.getRequiredAccountCredentials().adobeCredentials?.postActivationCredentials
 
     if (credentials == null) {
       val exception = BookRevokeExceptionDeviceNotActivated()

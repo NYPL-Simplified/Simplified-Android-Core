@@ -26,7 +26,7 @@ import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accounts.api.AccountBarcode
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
@@ -36,9 +36,10 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
@@ -713,8 +714,15 @@ class SettingsFragmentAccount : Fragment() {
       }
 
       is AccountLoggedIn -> {
-        this.authenticationBasicUser.setText(loginState.credentials.barcode().value())
-        this.authenticationBasicPass.setText(loginState.credentials.pin().value())
+        when (val creds = loginState.credentials) {
+          is AccountAuthenticationCredentials.Basic -> {
+            this.authenticationBasicUser.setText(creds.userName.value)
+            this.authenticationBasicPass.setText(creds.password.value)
+          }
+          is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
+            // No UI
+          }
+        }
 
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = ""
@@ -729,8 +737,15 @@ class SettingsFragmentAccount : Fragment() {
       }
 
       is AccountLoggingOut -> {
-        this.authenticationBasicUser.setText(loginState.credentials.barcode().value())
-        this.authenticationBasicPass.setText(loginState.credentials.pin().value())
+        when (val creds = loginState.credentials) {
+          is AccountAuthenticationCredentials.Basic -> {
+            this.authenticationBasicUser.setText(creds.userName.value)
+            this.authenticationBasicPass.setText(creds.password.value)
+          }
+          is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
+            // No UI
+          }
+        }
 
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginProgress.visibility = View.VISIBLE
@@ -740,8 +755,15 @@ class SettingsFragmentAccount : Fragment() {
       }
 
       is AccountLogoutFailed -> {
-        this.authenticationBasicUser.setText(loginState.credentials.barcode().value())
-        this.authenticationBasicPass.setText(loginState.credentials.pin().value())
+        when (val creds = loginState.credentials) {
+          is AccountAuthenticationCredentials.Basic -> {
+            this.authenticationBasicUser.setText(creds.userName.value)
+            this.authenticationBasicPass.setText(creds.password.value)
+          }
+          is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
+            // No UI
+          }
+        }
 
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
@@ -937,16 +959,16 @@ class SettingsFragmentAccount : Fragment() {
         throw UnreachableCodeException()
 
       is AccountProviderAuthenticationDescription.Basic -> {
-        val accountPin =
-          AccountPIN.create(this.authenticationBasicPass.text.toString())
-        val accountBarcode =
-          AccountBarcode.create(this.authenticationBasicUser.text.toString())
+        val accountPassword =
+          AccountPassword(this.authenticationBasicPass.text.toString())
+        val accountUsername =
+          AccountUsername(this.authenticationBasicUser.text.toString())
         val request =
           ProfileAccountLoginRequest.Basic(
             accountId = this.account.id,
             description = description,
-            username = accountPin,
-            password = accountBarcode
+            password = accountPassword,
+            username = accountUsername
           )
 
         this.profilesController.profileAccountLogin(request)

@@ -1,7 +1,7 @@
 {
   "credentialsByProvider": {
-    "urn:0": { "userName": "abcd", "passWord": "1234" },
-    "urn:1": { "userName": "efgh", "passWord": "5678" },
-    "urn:2": { "userName": "ijkl", "passWord": "9090" }
+    "urn:0": { "username": "abcd", "password": "1234" },
+    "urn:1": { "username": "efgh", "password": "5678" },
+    "urn:2": { "username": "ijkl", "password": "9090" }
   }
 }

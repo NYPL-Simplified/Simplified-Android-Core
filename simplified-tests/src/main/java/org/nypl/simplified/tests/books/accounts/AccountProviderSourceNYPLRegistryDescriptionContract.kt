@@ -369,11 +369,11 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       addAutomatically = false,
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Basic(
-        "CODABAR",
-        AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        20,
-        AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        "Basic Auth",
+        description = "Basic Auth",
+        barcodeFormat = "CODABAR",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+        passwordMaximumLength = 20,
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         labels = mapOf(
           Pair("LOGIN", "LOGIN!"),
           Pair("PASSWORD", "PASSWORD!")),

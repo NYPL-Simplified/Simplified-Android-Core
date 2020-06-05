@@ -72,16 +72,13 @@ object AccountProvidersJSON {
     this.putConditionally(node, "subtitle", provider.subtitle)
     this.putConditionally(node, "supportEmail", provider.supportEmail)
 
-    val authObjectOpt =
+    node.set<ObjectNode>("authentication",
       this.serializeAuthentication(mapper, provider.authentication)
-
-    if (authObjectOpt != null) {
-      node.set<ObjectNode>("authentication", authObjectOpt)
-    }
+    )
 
     node.set<ArrayNode>(
       "authenticationAlternatives",
-      serializeAuthenticationAlternatives(mapper, provider.authenticationAlternatives)
+      this.serializeAuthenticationAlternatives(mapper, provider.authenticationAlternatives)
     )
     return node
   }
@@ -92,7 +89,7 @@ object AccountProvidersJSON {
   ): ArrayNode {
     val array = mapper.createArrayNode()
     for (authentication in authenticationAlternatives) {
-      array.add(serializeAuthentication(mapper, authentication))
+      array.add(this.serializeAuthentication(mapper, authentication))
     }
     return array
   }
@@ -255,7 +252,7 @@ object AccountProvidersJSON {
       val items = mutableListOf<AccountProviderAuthenticationDescription>()
       for (authObj in objAlt) {
         if (authObj is ObjectNode) {
-          items.add(parseAuthenticationFromObject(authObj))
+          items.add(this.parseAuthenticationFromObject(authObj))
         }
       }
       items.toList()

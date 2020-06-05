@@ -8,7 +8,6 @@ import io.reactivex.subjects.PublishSubject
 import org.librarysimplified.services.api.ServiceDirectoryProviderType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState
@@ -22,7 +21,8 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.controller.api.BooksControllerType
@@ -59,10 +59,12 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
     this.services
 
   private val credentials =
-    AccountAuthenticationCredentials.builder(
-      AccountPIN.create("LOGGING OUT!"),
-      AccountBarcode.create("abcd")
-    ).build()
+    AccountAuthenticationCredentials.Basic(
+      userName = AccountUsername("Leaving!"),
+      password = AccountPassword("a very strong password"),
+      adobeCredentials = null,
+      authenticationDescription = null
+    )
 
   private var stateIndex = 0
   private val states =
@@ -159,10 +161,12 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
 
   private fun loggedIn(): AccountLoginState {
     return AccountLoggedIn(
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("abcd"),
-        AccountBarcode.create("abcd")
-      ).build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("user"),
+        password = AccountPassword("pass"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
     )
   }
 

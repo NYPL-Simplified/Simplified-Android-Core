@@ -31,10 +31,10 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookEvent
@@ -64,8 +64,8 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.strings.MockRevokeStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
+import org.nypl.simplified.tests.strings.MockRevokeStringResources
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -127,12 +127,14 @@ abstract class BookRevokeTaskAdobeDRMContract {
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
-    this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.bundledContent =
+      BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
-    this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
+    this.downloader =
+      DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
     this.clock = { Instant.now() }
   }
@@ -188,7 +190,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          false),
+          false
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -206,14 +209,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -228,7 +233,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
@@ -250,7 +256,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -284,7 +291,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          true),
+          true
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -299,14 +307,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -321,7 +331,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
@@ -343,7 +354,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -378,7 +390,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          true),
+          true
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -393,14 +406,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -415,24 +430,30 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("pin"),
-          AccountBarcode.create("barcode"))
-          .setAdobeCredentials(AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("NYPL"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = null,
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
-              AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8"))
-          )).build()
-      ))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("user"),
+            password = AccountPassword("password"),
+            adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+              vendorID = AdobeVendorID("NYPL"),
+              clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+              deviceManagerURI = null,
+              postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+                AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
+                AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
+              )
+            ),
+            authenticationDescription = null
+          )
+        )
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -450,11 +471,13 @@ abstract class BookRevokeTaskAdobeDRMContract {
      * success.
      */
 
-    Mockito.`when`(this.adobeConnector.loanReturn(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adobeConnector.loanReturn(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptLoanReturnListenerType
       receiver.onLoanReturnSuccess()
       Unit
@@ -473,7 +496,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -507,7 +531,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          true),
+          true
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -522,14 +547,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -544,24 +571,30 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("pin"),
-          AccountBarcode.create("barcode"))
-          .setAdobeCredentials(AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("NYPL"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = null,
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
-              AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8"))
-          )).build()
-      ))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("user"),
+            password = AccountPassword("password"),
+            adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+              vendorID = AdobeVendorID("NYPL"),
+              clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+              deviceManagerURI = null,
+              postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+                AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
+                AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
+              )
+            ),
+            authenticationDescription = null
+          )
+        )
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -578,11 +611,13 @@ abstract class BookRevokeTaskAdobeDRMContract {
      * When the code tells the connector to return the loan, it fails if the connector does nothing.
      */
 
-    Mockito.`when`(this.adobeConnector.loanReturn(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adobeConnector.loanReturn(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptLoanReturnListenerType
       Unit
     }
@@ -600,7 +635,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -632,7 +668,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          true),
+          true
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -647,14 +684,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -669,24 +708,30 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("pin"),
-          AccountBarcode.create("barcode"))
-          .setAdobeCredentials(AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("NYPL"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = null,
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
-              AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8"))
-          )).build()
-      ))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("user"),
+            password = AccountPassword("password"),
+            adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+              vendorID = AdobeVendorID("NYPL"),
+              clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+              deviceManagerURI = null,
+              postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+                AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
+                AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
+              )
+            ),
+            authenticationDescription = null
+          )
+        )
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -703,11 +748,13 @@ abstract class BookRevokeTaskAdobeDRMContract {
      * When the code tells the connector to return the loan, it fails if the connector crashes.
      */
 
-    Mockito.`when`(this.adobeConnector.loanReturn(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adobeConnector.loanReturn(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       throw IOException("I/O error")
     }
 
@@ -724,7 +771,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -756,7 +804,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          true),
+          true
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -771,14 +820,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -793,24 +844,30 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("pin"),
-          AccountBarcode.create("barcode"))
-          .setAdobeCredentials(AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("NYPL"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = null,
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
-              AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8"))
-          )).build()
-      ))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("user"),
+            password = AccountPassword("password"),
+            adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+              vendorID = AdobeVendorID("NYPL"),
+              clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+              deviceManagerURI = null,
+              postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+                AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
+                AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
+              )
+            ),
+            authenticationDescription = null
+          )
+        )
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -827,11 +884,13 @@ abstract class BookRevokeTaskAdobeDRMContract {
      * When the code tells the connector to return the loan, it fails if the connector fails.
      */
 
-    Mockito.`when`(this.adobeConnector.loanReturn(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adobeConnector.loanReturn(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptLoanReturnListenerType
       receiver.onLoanReturnFailure("E_DEFECTIVE")
       Unit
@@ -850,15 +909,21 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
     Assert.assertEquals(
-      DRMFailure(system = "Adobe ACS", errorCode = "E_DEFECTIVE", message = "revokeBookACSConnectorFailed"),
-      result.errors().last())
+      DRMFailure(
+        system = "Adobe ACS",
+        errorCode = "E_DEFECTIVE",
+        message = "revokeBookACSConnectorFailed"
+      ),
+      result.errors().last()
+    )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(0))
@@ -886,7 +951,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          true),
+          true
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -901,14 +967,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -923,22 +991,27 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("pin"),
-          AccountBarcode.create("barcode"))
-          .setAdobeCredentials(AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("NYPL"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = null,
-            postActivationCredentials = null))
-          .build()
-          ))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("user"),
+            password = AccountPassword("password"),
+            adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+              vendorID = AdobeVendorID("NYPL"),
+              clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+              deviceManagerURI = null,
+              postActivationCredentials = null
+            ),
+            authenticationDescription = null
+          )
+        )
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -958,7 +1031,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -966,7 +1040,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     Assert.assertEquals(
       DRMDeviceNotActive("Adobe ACS", "revokeACSGettingDeviceCredentialsNotActivated"),
-      result.errors().last())
+      result.errors().last()
+    )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(0))
@@ -994,7 +1069,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          true),
+          true
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -1009,14 +1085,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1031,7 +1109,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
@@ -1056,7 +1135,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -1064,7 +1144,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     Assert.assertEquals(
       NoCredentialsAvailable("revokeCredentialsRequired"),
-      result.errors().last())
+      result.errors().last()
+    )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(0))
@@ -1092,7 +1173,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
           ByteBuffer.allocate(32),
-          true),
+          true
+        ),
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -1107,14 +1189,16 @@ abstract class BookRevokeTaskAdobeDRMContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/epub+zip")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none()))
+        OPDSAvailabilityOpenAccess.get(Option.none())
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -1129,24 +1213,30 @@ abstract class BookRevokeTaskAdobeDRMContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("pin"),
-          AccountBarcode.create("barcode"))
-          .setAdobeCredentials(AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("NYPL"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = null,
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
-              AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8"))
-          )).build()
-      ))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("user"),
+            password = AccountPassword("password"),
+            adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+              vendorID = AdobeVendorID("NYPL"),
+              clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+              deviceManagerURI = null,
+              postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+                AdobeDeviceID("4361a1f6-aea8-4681-ad8b-df7e6923049f"),
+                AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
+              )
+            ),
+            authenticationDescription = null
+          )
+        )
+      )
 
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
@@ -1168,11 +1258,13 @@ abstract class BookRevokeTaskAdobeDRMContract {
      * success.
      */
 
-    Mockito.`when`(this.adobeConnector.loanReturn(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adobeConnector.loanReturn(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptLoanReturnListenerType
       receiver.onLoanReturnSuccess()
       Unit
@@ -1191,7 +1283,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.bookRevokeStrings)
+        revokeStrings = this.bookRevokeStrings
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -1199,7 +1292,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     Assert.assertEquals(
       IOException::class.java,
-      result.steps.last().resolution.exception!!::class.java)
+      result.steps.last().resolution.exception!!::class.java
+    )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
     Mockito.verify(bookDatabaseFormatHandle, Times(1))

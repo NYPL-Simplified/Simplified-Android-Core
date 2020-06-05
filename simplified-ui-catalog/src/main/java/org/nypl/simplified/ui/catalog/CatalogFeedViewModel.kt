@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.google.common.util.concurrent.FluentFuture
-import com.io7m.jfunctional.Option
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.DateTime
@@ -152,13 +151,10 @@ class CatalogFeedViewModel(
       }
     }
 
-    val loginState = account.loginState
+    val loginState =
+      account.loginState
     val authentication =
-      if (loginState.credentials != null) {
-        Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(loginState.credentials))
-      } else {
-        Option.none()
-      }
+      AccountAuthenticatedHTTP.createAuthenticatedHTTPOptional(loginState.credentials)
 
     val future =
       this.feedLoader.fetchURIWithBookRegistryEntries(

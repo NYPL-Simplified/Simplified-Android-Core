@@ -3,9 +3,7 @@ package org.nypl.simplified.profiles
 import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Some
 import io.reactivex.subjects.Subject
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
@@ -545,16 +543,12 @@ object ProfilesDatabases {
             accounts.createAccount(autoProvider)
           }
 
-        val credentialsOpt =
+        val credentials =
           accountBundledCredentials.bundledCredentialsFor(id)
 
-        if (credentialsOpt.isSome) {
+        if (credentials != null) {
           this.logger.debug("[{}]: credentials for automatic account {} were provided", pId, id)
-          autoAccount.setLoginState(
-            AccountLoginState.AccountLoggedIn(
-              (credentialsOpt as Some<AccountAuthenticationCredentials>).get()
-            )
-          )
+          autoAccount.setLoginState(AccountLoginState.AccountLoggedIn(credentials))
         } else {
           this.logger.debug("[{}]: credentials for automatic account {} were not provided", pId, id)
         }

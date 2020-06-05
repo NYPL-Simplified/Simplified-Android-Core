@@ -6,10 +6,10 @@ import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.controller.BookReportTask
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -120,10 +120,12 @@ abstract class BookReportTaskContract {
       .thenReturn(AccountID.generate())
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("abcd"),
-          AccountBarcode.create("1234"))
-          .build()))
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername("abcd"),
+          password = AccountPassword("1234"),
+          adobeCredentials = null,
+          authenticationDescription = null
+        )))
 
     val entryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -171,10 +173,12 @@ abstract class BookReportTaskContract {
       .thenReturn(AccountID.generate())
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("abcd"),
-          AccountBarcode.create("1234"))
-          .build()))
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername("abcd"),
+          password = AccountPassword("1234"),
+          adobeCredentials = null,
+          authenticationDescription = null
+        )))
 
     val entryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(

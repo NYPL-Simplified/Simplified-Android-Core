@@ -8,9 +8,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.AccountAuthenticationCredentialsStore
 import org.nypl.simplified.accounts.json.AccountAuthenticationCredentialsJSON
 import org.nypl.simplified.json.core.JSONParseException
@@ -56,10 +56,12 @@ abstract class AccountAuthenticationCredentialsStoreContract {
 
     val accountID = AccountID.generate()
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("abcd"),
-        AccountBarcode.create("1234"))
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("abcd"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     store0.put(accountID, credentials)
     Assert.assertEquals(credentials, store0.get(accountID))
@@ -125,10 +127,13 @@ abstract class AccountAuthenticationCredentialsStoreContract {
 
     val cred1 =
       AccountAuthenticationCredentialsJSON.serializeToJSON(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("abcd"),
-          AccountBarcode.create("1234"))
-          .build())
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername("abcd"),
+          password = AccountPassword("1234"),
+          adobeCredentials = null,
+          authenticationDescription = null
+        )
+      )
     cred1.remove("username")
     creds.set<ObjectNode>("8e058c17-6c59-490c-92c5-d950463c8632", cred1)
 
@@ -138,10 +143,13 @@ abstract class AccountAuthenticationCredentialsStoreContract {
 
     val cred2 =
       AccountAuthenticationCredentialsJSON.serializeToJSON(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("abcd"),
-          AccountBarcode.create("1234"))
-          .build())
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername("abcd"),
+          password = AccountPassword("1234"),
+          adobeCredentials = null,
+          authenticationDescription = null
+        )
+      )
     creds.set<ObjectNode>("not a uuid", cred2)
 
     /*
@@ -150,10 +158,13 @@ abstract class AccountAuthenticationCredentialsStoreContract {
 
     val cred3 =
       AccountAuthenticationCredentialsJSON.serializeToJSON(
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create("abcd"),
-          AccountBarcode.create("1234"))
-          .build())
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername("abcd"),
+          password = AccountPassword("1234"),
+          adobeCredentials = null,
+          authenticationDescription = null
+        )
+      )
     creds.set<ObjectNode>("37452e48-2235-4098-ad67-e72bce45ccb6", cred3)
 
     FileOutputStream(this.file)
@@ -176,10 +187,12 @@ abstract class AccountAuthenticationCredentialsStoreContract {
 
     val accountID = AccountID.generate()
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("abcd"),
-        AccountBarcode.create("1234"))
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("abcd"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     store.put(accountID, credentials)
     Assert.assertEquals(credentials, store.get(accountID))

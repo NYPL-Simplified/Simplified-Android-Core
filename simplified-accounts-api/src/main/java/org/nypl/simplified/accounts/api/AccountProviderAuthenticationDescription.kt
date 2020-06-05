@@ -42,6 +42,12 @@ sealed class AccountProviderAuthenticationDescription {
   }
 
   /**
+   * The authentication description.
+   */
+
+  abstract val description: String
+
+  /**
    * A COPPA age gate that redirects users that are thirteen or older to one URI, and under 13s
    * to a different URI.
    */
@@ -66,6 +72,9 @@ sealed class AccountProviderAuthenticationDescription {
         "URIs ${this.greaterEqual13} and ${this.under13} must differ"
       )
     }
+
+    override val description: String =
+      COPPA_TYPE
   }
 
   /**
@@ -106,6 +115,7 @@ sealed class AccountProviderAuthenticationDescription {
    */
 
   data class Basic(
+    override val description: String,
 
     /**
      * The barcode format, if specified, such as "CODABAR". If this is unspecified, then
@@ -137,12 +147,6 @@ sealed class AccountProviderAuthenticationDescription {
     val passwordKeyboard: KeyboardInput,
 
     /**
-     * The description of the login dialog.
-     */
-
-    val description: String,
-
-    /**
      * The labels that should be used for login forms. This is typically a map such as:
      *
      * ```
@@ -172,12 +176,7 @@ sealed class AccountProviderAuthenticationDescription {
    */
 
   data class OAuthWithIntermediary(
-
-    /**
-     * The authentication description.
-     */
-
-    val description: String,
+    override val description: String,
 
     /**
      * The URI used to perform authentication.
@@ -196,5 +195,8 @@ sealed class AccountProviderAuthenticationDescription {
    * Anonymous authentication (equivalent to no authentication)
    */
 
-  object Anonymous : AccountProviderAuthenticationDescription()
+  object Anonymous : AccountProviderAuthenticationDescription() {
+    override val description: String =
+      ANONYMOUS_TYPE
+  }
 }

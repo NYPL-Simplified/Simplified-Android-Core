@@ -364,12 +364,12 @@ abstract class MigrationFrom3MasterContract {
     Mockito.`when`(accountProvider.authentication)
       .thenReturn(
         AccountProviderAuthenticationDescription.Basic(
-          null,
-          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          20,
-          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          "Basic",
-          mapOf(),
+          description = "Basic",
+          barcodeFormat = null,
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = 20,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          labels = mapOf(),
           logoURI = null
         )
       )
@@ -451,12 +451,12 @@ abstract class MigrationFrom3MasterContract {
     Mockito.`when`(accountProvider.authentication)
       .thenReturn(
         AccountProviderAuthenticationDescription.Basic(
-          null,
-          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          20,
-          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          "Basic",
-          mapOf(),
+          description = "Basic",
+          barcodeFormat = null,
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = 20,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          labels = mapOf(),
           logoURI = null
         )
       )
@@ -600,12 +600,12 @@ abstract class MigrationFrom3MasterContract {
     Mockito.`when`(accountProvider.authentication)
       .thenReturn(
         AccountProviderAuthenticationDescription.Basic(
-          null,
-          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          20,
-          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          "Basic",
-          mapOf(),
+          description = "Basic",
+          barcodeFormat = null,
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = 20,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          labels = mapOf(),
           logoURI = null
         )
       )
@@ -723,12 +723,12 @@ abstract class MigrationFrom3MasterContract {
     Mockito.`when`(accountProvider.authentication)
       .thenReturn(
         AccountProviderAuthenticationDescription.Basic(
-          null,
-          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          20,
-          AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          "Basic",
-          mapOf(),
+          description = "Basic",
+          barcodeFormat = null,
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = 20,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          labels = mapOf(),
           logoURI = null
         )
       )

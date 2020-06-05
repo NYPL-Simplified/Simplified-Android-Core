@@ -1,9 +1,9 @@
 package org.nypl.simplified.profiles.controller.api
 
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountUsername
 
 /**
  * A request to log in to an account.
@@ -24,8 +24,8 @@ sealed class ProfileAccountLoginRequest {
   data class Basic(
     override val accountId: AccountID,
     val description: AccountProviderAuthenticationDescription.Basic,
-    val username: AccountPIN,
-    val password: AccountBarcode
+    val username: AccountUsername,
+    val password: AccountPassword
   ) : ProfileAccountLoginRequest()
 
   /**

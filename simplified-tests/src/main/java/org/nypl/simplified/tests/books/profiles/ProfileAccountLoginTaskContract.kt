@@ -17,7 +17,6 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
@@ -29,10 +28,11 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.controller.ProfileAccountLoginTask
 import org.nypl.simplified.http.core.HTTPResultError
@@ -120,8 +120,8 @@ abstract class ProfileAccountLoginTaskContract {
           labels = mapOf(),
           logoURI = null
         ),
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -188,8 +188,8 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = authDescription,
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -271,8 +271,8 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = authDescription,
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -362,8 +362,8 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = authDescription,
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -438,8 +438,8 @@ abstract class ProfileAccountLoginTaskContract {
           labels = mapOf(),
           logoURI = null
         ),
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -525,8 +525,8 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = authDescription,
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -629,8 +629,8 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = authDescription,
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -707,7 +707,12 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoggedIn
 
     Assert.assertEquals(
-      AccountAuthenticationCredentials.builder(request.username, request.password).build(),
+      AccountAuthenticationCredentials.Basic(
+        userName = request.username,
+        password = request.password,
+        adobeCredentials = null,
+        authenticationDescription = "Description"
+      ),
       state.credentials
     )
   }
@@ -734,8 +739,8 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = authDescription,
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -863,21 +868,25 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoggedIn
 
     val originalCredentials =
-      AccountAuthenticationCredentials.builder(request.username, request.password).build()
+      AccountAuthenticationCredentials.Basic(
+        userName = request.username,
+        password = request.password,
+        adobeCredentials = null,
+        authenticationDescription = "Library Login"
+      )
 
     val newCredentials =
-      originalCredentials.toBuilder()
-        .setAdobeCredentials(
-          AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("OmniConsumerProducts"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = URI("https://example.com/devices"),
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
-              userID = AdobeUserID("someone")
-            )
+      originalCredentials.withAdobePreActivationCredentials(
+        AccountAuthenticationAdobePreActivationCredentials(
+          vendorID = AdobeVendorID("OmniConsumerProducts"),
+          clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+          deviceManagerURI = URI("https://example.com/devices"),
+          postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+            deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
+            userID = AdobeUserID("someone")
           )
-        ).build()
+        )
+      )
 
     Assert.assertEquals(newCredentials, state.credentials)
   }
@@ -903,8 +912,8 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = authDescription,
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -988,19 +997,22 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoggedIn
 
     val originalCredentials =
-      AccountAuthenticationCredentials.builder(request.username, request.password).build()
+      AccountAuthenticationCredentials.Basic(
+        userName = request.username,
+        password = request.password,
+        adobeCredentials = null,
+        authenticationDescription = "Description"
+      )
 
     val newCredentials =
-      originalCredentials.toBuilder()
-        .setAdobeCredentials(
-          AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("OmniConsumerProducts"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = URI("https://example.com/devices"),
-            postActivationCredentials = null
-          )
+      originalCredentials.withAdobePreActivationCredentials(
+        AccountAuthenticationAdobePreActivationCredentials(
+          vendorID = AdobeVendorID("OmniConsumerProducts"),
+          clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+          deviceManagerURI = URI("https://example.com/devices"),
+          postActivationCredentials = null
         )
-        .build()
+      )
 
     Assert.assertEquals(newCredentials, state.credentials)
   }
@@ -1023,8 +1035,8 @@ abstract class ProfileAccountLoginTaskContract {
           labels = mapOf(),
           logoURI = null
         ),
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =
@@ -1163,8 +1175,8 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = authDescription,
-        username = AccountPIN.create("pin"),
-        password = AccountBarcode.create("barcode")
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
       )
 
     val provider =

@@ -2,7 +2,6 @@ package org.nypl.simplified.books.controller
 
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.Some
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
@@ -106,9 +105,9 @@ class ProfileAccountLogoutTask(
     this.steps.beginNewStep(this.logoutStrings.logoutDeactivatingDeviceAdobe)
     this.updateLoggingOutState()
 
-    val adobeCredentialsOpt = this.credentials.adobeCredentials()
-    if (adobeCredentialsOpt is Some<AccountAuthenticationAdobePreActivationCredentials>) {
-      this.runDeviceDeactivationAdobe(adobeCredentialsOpt.get())
+    val adobeCredentialsMaybe = this.credentials.adobeCredentials
+    if (adobeCredentialsMaybe != null) {
+      this.runDeviceDeactivationAdobe(adobeCredentialsMaybe)
       return
     }
   }
@@ -162,11 +161,7 @@ class ProfileAccountLogoutTask(
       throw e
     }
 
-    this.credentials =
-      this.credentials.toBuilder()
-        .setAdobeCredentials(adobeCredentials.copy(postActivationCredentials = null))
-        .build()
-
+    this.credentials = this.credentials.withoutAdobePostActivationCredentials()
     this.steps.currentStepSucceeded(this.logoutStrings.logoutDeactivatingDeviceAdobeDeactivated)
 
     adobeCredentials.deviceManagerURI?.let { uri ->

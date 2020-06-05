@@ -81,13 +81,16 @@ data class AudioBookPlayerParameters(
       PlayerUserAgent(this.userAgent)
 
     val audioBookCredentials =
-      if (credentials != null) {
-        AudioBookCredentials.UsernamePassword(
-          userName = credentials.barcode().value(),
-          password = credentials.pin().value()
-        )
-      } else {
-        null
+      when (credentials) {
+        is AccountAuthenticationCredentials.Basic ->
+          AudioBookCredentials.UsernamePassword(
+            userName = credentials.userName.value,
+            password = credentials.password.value
+          )
+        is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+          AudioBookCredentials.BearerToken(credentials.accessToken)
+        null ->
+          null
       }
 
     val request =

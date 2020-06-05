@@ -11,11 +11,8 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountAuthenticationProvider
-import org.nypl.simplified.accounts.api.AccountBarcode
-import org.nypl.simplified.accounts.api.AccountPIN
-import org.nypl.simplified.accounts.api.AccountPatron
-import org.nypl.simplified.http.core.HTTPOAuthToken
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 
@@ -35,7 +32,7 @@ object AccountAuthenticationCredentialsJSON {
    * The current supported version.
    */
 
-  private const val currentSupportedVersion = 20190424
+  private const val currentSupportedVersion = 20200604
 
   /**
    * Serialize the given credentials to a JSON object.
@@ -44,42 +41,60 @@ object AccountAuthenticationCredentialsJSON {
    * @return A JSON object
    */
 
-  @JvmStatic
   fun serializeToJSON(
     credentials: AccountAuthenticationCredentials
   ): ObjectNode {
 
-    val jom = ObjectMapper()
-    val jo = jom.createObjectNode()
+    val objectMapper = ObjectMapper()
+    val authObject = objectMapper.createObjectNode()
+    authObject.put("@version", this.currentSupportedVersion)
+    authObject.put("authenticationDescription", credentials.authenticationDescription)
 
-    jo.put("@version", this.currentSupportedVersion)
-    jo.put("username", credentials.barcode().value())
-    jo.put("password", credentials.pin().value())
-    credentials.oAuthToken().map_ { x: HTTPOAuthToken ->
-      jo.put("oauth_token", x.value())
-    }
-    credentials.adobeCredentials().map_ { (vendorID, clientToken, deviceURI, post) ->
-      val adobePreObj = jom.createObjectNode()
-      adobePreObj.put("client_token", clientToken.tokenRaw())
-      adobePreObj.put("vendor_id", vendorID.value)
-      if (deviceURI != null) {
-        adobePreObj.put("device_manager_uri", deviceURI.toString())
+    when (credentials) {
+      is AccountAuthenticationCredentials.Basic -> {
+        authObject.put("@type", "basic")
+        authObject.put("username", credentials.userName.value)
+        authObject.put("password", credentials.password.value)
       }
+      is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
+        authObject.put("@type", "oauthWithIntermediary")
+        authObject.put("accessToken", credentials.accessToken)
+      }
+    }
+
+    val adobeObj =
+      this.serializeAdobeCredentials(
+        objectMapper = objectMapper,
+        adobe = credentials.adobeCredentials
+      )
+    if (adobeObj != null) {
+      authObject.set<ObjectNode>("adobe_credentials", adobeObj)
+    }
+    return authObject
+  }
+
+  private fun serializeAdobeCredentials(
+    objectMapper: ObjectMapper,
+    adobe: AccountAuthenticationAdobePreActivationCredentials?
+  ): ObjectNode? {
+    return if (adobe != null) {
+      val adobePreObj = objectMapper.createObjectNode()
+      adobePreObj.put("client_token", adobe.clientToken.rawToken)
+      adobePreObj.put("vendor_id", adobe.vendorID.value)
+      if (adobe.deviceManagerURI != null) {
+        adobePreObj.put("device_manager_uri", adobe.deviceManagerURI.toString())
+      }
+      val post = adobe.postActivationCredentials
       if (post != null) {
-        val adobePostObj = jom.createObjectNode()
+        val adobePostObj = objectMapper.createObjectNode()
         adobePostObj.put("device_id", post.deviceID.value)
         adobePostObj.put("user_id", post.userID.value)
         adobePreObj.set<JsonNode>("activation", adobePostObj)
       }
-      jo.set<JsonNode>("adobe_credentials", adobePreObj)
+      adobePreObj
+    } else {
+      null
     }
-    credentials.authenticationProvider()
-      .map_ { x: AccountAuthenticationProvider ->
-        jo.put("auth_provider", x.value())
-      }
-    credentials.patron()
-      .map_ { x: AccountPatron -> jo.put("patron", x.value()) }
-    return jo
   }
 
   /**
@@ -91,7 +106,6 @@ object AccountAuthenticationCredentialsJSON {
    * @throws JSONParseException On parse errors
    */
 
-  @JvmStatic
   @Throws(JSONParseException::class)
   fun deserializeFromJSON(
     node: JsonNode
@@ -99,9 +113,56 @@ object AccountAuthenticationCredentialsJSON {
     val obj = JSONParserUtilities.checkObject(null, node)
     return when (val version =
       JSONParserUtilities.getIntegerDefault(obj, "@version", this.inferredVersion)) {
-      this.inferredVersion -> this.deserialize20190424(obj)
-      else -> throw JSONParseException("Unsupported version $version")
+      this.inferredVersion ->
+        this.deserialize20190424(obj)
+      20200604 ->
+        this.deserialize20200604(obj)
+      else ->
+        throw JSONParseException("Unsupported version $version")
     }
+  }
+
+  @Throws(JSONParseException::class)
+  private fun deserialize20200604(
+    obj: ObjectNode
+  ): AccountAuthenticationCredentials {
+    return when (val type = JSONParserUtilities.getString(obj, "@type")) {
+      "basic" ->
+        this.deserialize20200604Basic(obj)
+      "oauthWithIntermediary" ->
+        this.deserialize20200604OAuthWithIntermediary(obj)
+      else ->
+        throw JSONParseException("Unrecognized type: $type")
+    }
+  }
+
+  private fun deserialize20200604OAuthWithIntermediary(
+    obj: ObjectNode
+  ): AccountAuthenticationCredentials.OAuthWithIntermediary {
+    val adobeCredentials =
+      JSONParserUtilities.getObjectOrNull(obj, "adobe_credentials")
+        ?.let(this::deserializeAdobeCredentials)
+
+    return AccountAuthenticationCredentials.OAuthWithIntermediary(
+      accessToken = JSONParserUtilities.getString(obj, "accessToken"),
+      adobeCredentials = adobeCredentials,
+      authenticationDescription = JSONParserUtilities.getStringOrNull(obj, "authenticationDescription")
+    )
+  }
+
+  private fun deserialize20200604Basic(
+    obj: ObjectNode
+  ): AccountAuthenticationCredentials.Basic {
+    val adobeCredentials =
+      JSONParserUtilities.getObjectOrNull(obj, "adobe_credentials")
+        ?.let(this::deserializeAdobeCredentials)
+
+    return AccountAuthenticationCredentials.Basic(
+      userName = AccountUsername(JSONParserUtilities.getString(obj, "username")),
+      password = AccountPassword(JSONParserUtilities.getString(obj, "password")),
+      adobeCredentials = adobeCredentials,
+      authenticationDescription = JSONParserUtilities.getStringOrNull(obj, "authenticationDescription")
+    )
   }
 
   @Throws(JSONParseException::class)
@@ -109,51 +170,48 @@ object AccountAuthenticationCredentialsJSON {
     obj: ObjectNode
   ): AccountAuthenticationCredentials {
     val user =
-      AccountBarcode.create(JSONParserUtilities.getString(obj, "username"))
+      AccountUsername(JSONParserUtilities.getString(obj, "username"))
     val pass =
-      AccountPIN.create(JSONParserUtilities.getString(obj, "password"))
-    val builder =
-      AccountAuthenticationCredentials.builder(pass, user)
-    builder.setPatron(
-      JSONParserUtilities.getStringOptional(obj, "patron")
-        .map { x: String? -> AccountPatron.create(x) }
-    )
-    builder.setAuthenticationProvider(
-      JSONParserUtilities.getStringOptional(obj, "auth_provider")
-        .map { x: String? -> AccountAuthenticationProvider.create(x) }
-    )
-    builder.setOAuthToken(
-      JSONParserUtilities.getStringOptional(obj, "oauth_token")
-        .map { x: String? -> HTTPOAuthToken.create(x) }
-    )
-    builder.setAdobeCredentials(
-      JSONParserUtilities.getObjectOptional(obj, "adobe_credentials")
-        .mapPartial<AccountAuthenticationAdobePreActivationCredentials, JSONParseException> { credsObj: ObjectNode? ->
-          val activationOpt =
-            JSONParserUtilities.getObjectOptional(credsObj, "activation")
+      AccountPassword(JSONParserUtilities.getString(obj, "password"))
+    val adobeCredentials =
+      JSONParserUtilities.getObjectOrNull(obj, "adobe_credentials")
+        ?.let(this::deserializeAdobeCredentials)
 
-          val credsPost: AccountAuthenticationAdobePostActivationCredentials? =
-            if (activationOpt.isSome) {
-              val activation =
-                (activationOpt as Some<ObjectNode>).get()
-              AccountAuthenticationAdobePostActivationCredentials(
-                AdobeDeviceID(JSONParserUtilities.getString(activation, "device_id")),
-                AdobeUserID(JSONParserUtilities.getString(activation, "user_id"))
-              )
-            } else {
-              null
-            }
-
-          AccountAuthenticationAdobePreActivationCredentials(
-            AdobeVendorID(JSONParserUtilities.getString(credsObj, "vendor_id")),
-            AccountAuthenticationAdobeClientToken.create(
-              JSONParserUtilities.getString(credsObj, "client_token")
-            ),
-            JSONParserUtilities.getURIOrNull(credsObj, "device_manager_uri"),
-            credsPost
-          )
-        }
+    return AccountAuthenticationCredentials.Basic(
+      userName = user,
+      password = pass,
+      adobeCredentials = adobeCredentials,
+      authenticationDescription = null
     )
-    return builder.build()
+  }
+
+  private fun deserializeAdobeCredentials(
+    credsObj: ObjectNode
+  ): AccountAuthenticationAdobePreActivationCredentials {
+    val activationOpt =
+      JSONParserUtilities.getObjectOptional(credsObj, "activation")
+
+    val credsPost: AccountAuthenticationAdobePostActivationCredentials? =
+      if (activationOpt.isSome) {
+        val activation =
+          (activationOpt as Some<ObjectNode>).get()
+        AccountAuthenticationAdobePostActivationCredentials(
+          AdobeDeviceID(JSONParserUtilities.getString(activation, "device_id")),
+          AdobeUserID(JSONParserUtilities.getString(activation, "user_id"))
+        )
+      } else {
+        null
+      }
+
+    return AccountAuthenticationAdobePreActivationCredentials(
+      AdobeVendorID(
+        JSONParserUtilities.getString(credsObj, "vendor_id")
+      ),
+      AccountAuthenticationAdobeClientToken.parse(
+        JSONParserUtilities.getString(credsObj, "client_token")
+      ),
+      JSONParserUtilities.getURIOrNull(credsObj, "device_manager_uri"),
+      credsPost
+    )
   }
 }

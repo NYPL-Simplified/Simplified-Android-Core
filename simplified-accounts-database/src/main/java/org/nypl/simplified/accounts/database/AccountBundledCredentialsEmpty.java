@@ -1,8 +1,5 @@
 package org.nypl.simplified.accounts.database;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType;
 
@@ -15,6 +12,7 @@ import java.util.Map;
  */
 
 public final class AccountBundledCredentialsEmpty implements AccountBundledCredentialsType {
+
   private static final AccountBundledCredentialsEmpty INSTANCE =
     new AccountBundledCredentialsEmpty();
 
@@ -38,7 +36,7 @@ public final class AccountBundledCredentialsEmpty implements AccountBundledCrede
   }
 
   @Override
-  public OptionType<AccountAuthenticationCredentials> bundledCredentialsFor(URI accountProvider) {
-    return Option.none();
+  public AccountAuthenticationCredentials bundledCredentialsFor(URI accountProvider) {
+    return null;
   }
 }
