@@ -19,8 +19,3 @@ task ktlintFormat(type: JavaExec, group: "quality") {
     main = "com.pinterest.ktlint.Main"
     args "-F", "**/*.kt"
 }
-afterEvaluate {
-    tasks.withType(Test) {
-        dependsOn 'ktlint'
-    }
-}

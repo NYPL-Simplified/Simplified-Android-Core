@@ -323,13 +323,7 @@ subprojects { project ->
   }
 }
 
-// Add ktlint to all kotlin projects
+// Add ktlint tasks to root project. This executes faster than configuring
+// the tasks for each subproject individually.
 
-subprojects { project ->
-  pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-    apply from: file("$rootDir/ktlint.gradle")
-  }
-  pluginManager.withPlugin("org.jetbrains.kotlin.android") {
-    apply from: file("$rootDir/ktlint.gradle")
-  }
-}
+apply from: file("$rootDir/ktlint.gradle")
