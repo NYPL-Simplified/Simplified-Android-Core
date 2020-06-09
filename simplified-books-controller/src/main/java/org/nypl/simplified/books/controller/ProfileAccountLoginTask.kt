@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeVendorID
@@ -27,6 +26,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
@@ -42,6 +42,7 @@ import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -117,7 +118,7 @@ class ProfileAccountLoginTask(
       this.steps.currentStepSucceeded(this.loginStrings.loginAuthRequired)
 
       when (this.request) {
-        is ProfileAccountLoginRequest.Basic ->
+        is Basic ->
           this.runBasicLogin(this.request)
         is OAuthWithIntermediaryInitiate ->
           this.runOAuthWithIntermediaryInitiate(this.request)
@@ -142,20 +143,32 @@ class ProfileAccountLoginTask(
   private fun runOAuthWithIntermediaryComplete(
     request: OAuthWithIntermediaryComplete
   ): TaskResult<AccountLoginErrorData, Unit> {
-    throw UnimplementedCodeException()
+
+    this.credentials =
+      AccountAuthenticationCredentials.OAuthWithIntermediary(
+        accessToken = request.token,
+        adobeCredentials = null,
+        authenticationDescription = this.findCurrentDescription().description
+      )
+
+    this.runPatronProfileRequest()
+    this.runDeviceActivation()
+    this.account.setLoginState(AccountLoggedIn(this.credentials))
+    return this.steps.finishSuccess(Unit)
   }
 
   private fun runOAuthWithIntermediaryInitiate(
     request: OAuthWithIntermediaryInitiate
   ): TaskResult.Success<AccountLoginErrorData, Unit> {
     this.account.setLoginState(AccountLoginState.AccountLoggingInWaitingForExternalAuthentication(
-      "Waiting for authentication..."
+      description = request.description,
+      status = "Waiting for authentication..."
     ))
     return this.steps.finishSuccess(Unit)
   }
 
   private fun runBasicLogin(
-    request: ProfileAccountLoginRequest.Basic
+    request: Basic
   ): TaskResult.Success<AccountLoginErrorData, Unit> {
     this.credentials =
       AccountAuthenticationCredentials.Basic(
@@ -175,7 +188,7 @@ class ProfileAccountLoginTask(
     this.debug("validating login request")
 
     return when (this.request) {
-      is ProfileAccountLoginRequest.Basic -> {
+      is Basic -> {
         (this.account.provider.authentication == this.request.description) ||
           (this.account.provider.authenticationAlternatives.any { it == this.request.description })
       }
@@ -515,9 +528,30 @@ class ProfileAccountLoginTask(
     this.account.setLoginState(
       AccountLoggingIn(
         status = step.description,
+        description = this.findCurrentDescription(),
         cancellable = false
       )
     )
+  }
+
+  private fun findCurrentDescription(): AccountProviderAuthenticationDescription {
+    return when (this.request) {
+      is Basic -> this.request.description
+      is OAuthWithIntermediaryInitiate -> this.request.description
+      is OAuthWithIntermediaryComplete ->
+        when (val loginState = this.account.loginState) {
+          is AccountLoggingIn ->
+            loginState.description
+          is AccountLoginState.AccountLoggingInWaitingForExternalAuthentication ->
+            loginState.description
+          AccountLoginState.AccountNotLoggedIn,
+          is AccountLoginFailed,
+          is AccountLoggedIn,
+          is AccountLoginState.AccountLoggingOut,
+          is AccountLoginState.AccountLogoutFailed ->
+            throw UnreachableCodeException()
+        }
+    }
   }
 
   private fun logParseWarning(warning: ParseWarning) {

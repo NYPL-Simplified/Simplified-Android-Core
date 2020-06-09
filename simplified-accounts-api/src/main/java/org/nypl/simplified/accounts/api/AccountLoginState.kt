@@ -45,6 +45,12 @@ sealed class AccountLoginState {
     val status: String,
 
     /**
+     * The description being used to log in.
+     */
+
+    val description: AccountProviderAuthenticationDescription,
+
+    /**
      * `true` if the login operation can be cancelled.
      */
 
@@ -59,6 +65,12 @@ sealed class AccountLoginState {
    */
 
   data class AccountLoggingInWaitingForExternalAuthentication(
+
+    /**
+     * The description being used to log in.
+     */
+
+    val description: AccountProviderAuthenticationDescription,
 
     /**
      * A humanly-readable status message.

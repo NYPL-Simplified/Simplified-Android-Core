@@ -22,6 +22,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -43,6 +44,7 @@ import org.nypl.simplified.ui.settings.SettingsFragmentAccountParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import java.io.IOException
+import java.net.URI
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit.SECONDS
 
@@ -135,12 +137,22 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
   private fun loggingInCancellable(): AccountLoginState {
     return AccountLoggingIn(
       status = "Logging in (Cancellable)",
+      description = AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Login",
+        authenticate = URI.create("urn:unused"),
+        logoURI = null
+      ),
       cancellable = true
     )
   }
 
   private fun loggingInWaitingForExternal(): AccountLoginState {
     return AccountLoggingInWaitingForExternalAuthentication(
+      description = AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Login",
+        authenticate = URI.create("urn:unused"),
+        logoURI = null
+      ),
       status = "Logging in (Waiting for external)"
     )
   }
@@ -148,6 +160,11 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
   private fun loggingInNotCancellable(): AccountLoginState {
     return AccountLoggingIn(
       status = "Logging in (Not cancellable)",
+      description = AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Login",
+        authenticate = URI.create("urn:unused"),
+        logoURI = null
+      ),
       cancellable = false
     )
   }
