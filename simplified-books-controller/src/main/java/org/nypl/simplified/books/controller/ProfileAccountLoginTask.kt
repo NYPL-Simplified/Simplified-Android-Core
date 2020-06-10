@@ -536,8 +536,10 @@ class ProfileAccountLoginTask(
 
   private fun findCurrentDescription(): AccountProviderAuthenticationDescription {
     return when (this.request) {
-      is Basic -> this.request.description
-      is OAuthWithIntermediaryInitiate -> this.request.description
+      is Basic ->
+        this.request.description
+      is OAuthWithIntermediaryInitiate ->
+        this.request.description
       is OAuthWithIntermediaryComplete ->
         when (val loginState = this.account.loginState) {
           is AccountLoggingIn ->

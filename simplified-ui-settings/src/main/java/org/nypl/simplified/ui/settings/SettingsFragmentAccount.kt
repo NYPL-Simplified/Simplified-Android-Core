@@ -716,11 +716,17 @@ class SettingsFragmentAccount : Fragment() {
       is AccountLoggedIn -> {
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
+            this.authentication.visibility = View.VISIBLE
+            this.authenticationCOPPA.visibility = View.INVISIBLE
+            this.authenticationBasic.visibility = View.VISIBLE
+
             this.authenticationBasicUser.setText(creds.userName.value)
             this.authenticationBasicPass.setText(creds.password.value)
           }
           is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
-            // No UI
+            this.authentication.visibility = View.GONE
+            this.authenticationCOPPA.visibility = View.INVISIBLE
+            this.authenticationBasic.visibility = View.INVISIBLE
           }
         }
 

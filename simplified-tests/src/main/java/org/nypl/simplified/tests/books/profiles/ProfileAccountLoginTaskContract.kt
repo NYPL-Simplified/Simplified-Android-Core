@@ -20,13 +20,16 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
@@ -1285,6 +1288,335 @@ abstract class ProfileAccountLoginTaskContract {
     Assert.assertEquals(
       AccountLoginDRMFailure("loginDeviceActivationFailed", "E_FAIL_OFTEN_AND_LOUDLY"),
       state.taskResult.errors().last()
+    )
+  }
+
+  /**
+   * Trying to log in to an account using an unsupported mechanism, fails.
+   */
+
+  @Test
+  fun testLoginWrongType0() {
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Description",
+          labels = mapOf(),
+          logoURI = null
+        ),
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      ))
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request
+      )
+
+    val result = task.call()
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
+
+    val state =
+      this.account.loginState as AccountLoginFailed
+
+    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginNotRequired)
+  }
+
+  /**
+   * Trying to log in to an account using an unsupported mechanism, fails.
+   */
+
+  @Test
+  fun testLoginWrongType1() {
+    val request =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate(
+        accountId = this.accountID,
+        description = AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+          description = "Description",
+          logoURI = null,
+          authenticate = URI.create("urn:example")
+        )
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      ))
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request
+      )
+
+    val result = task.call()
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
+
+    val state =
+      this.account.loginState as AccountLoginFailed
+
+    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginNotRequired)
+  }
+
+  /**
+   * Trying to log in to an account using an unsupported mechanism, fails.
+   */
+
+  @Test
+  fun testLoginWrongType2() {
+    val request =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryComplete(
+        accountId = this.accountID,
+        token = "A TOKEN!"
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      ))
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.loginState = AccountNotLoggedIn
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request
+      )
+
+    val result = task.call()
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
+
+    val state =
+      this.account.loginState as AccountLoginFailed
+
+    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginUnexpectedException)
+  }
+
+  /**
+   * Logging in with OAuth succeeds.
+   */
+
+  @Test
+  fun testLoginOAuthCompleteNoDRM() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate(
+        accountId = this.accountID,
+        description = authDescription
+      )
+    val request1 =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryComplete(
+        accountId = this.accountID,
+        token = "A TOKEN!"
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("urn:patron"))
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val parser =
+      Mockito.mock(PatronUserProfileParserType::class.java)
+
+    val patronStream =
+      Mockito.mock(InputStream::class.java)
+
+    val profile =
+      PatronUserProfile(
+        settings = PatronSettings(false),
+        drm = listOf(),
+        authorization = null
+      )
+
+    Mockito.`when`(parser.parse())
+      .thenReturn(ParseResult.Success(listOf(), profile))
+    Mockito.`when`(this.patronParsers.createParser(URI.create("urn:patron"), patronStream, false))
+      .thenReturn(parser)
+
+    this.http.addResponse(
+      URI.create("urn:patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request0
+      )
+
+    val result0 = task0.call()
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountLoggingInWaitingForExternalAuthentication
+
+    val task1 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request1
+      )
+
+    val result1 = task1.call()
+    TaskDumps.dump(logger, result1)
+
+    val state =
+      this.account.loginState as AccountLoggedIn
+
+    Assert.assertEquals(
+      AccountAuthenticationCredentials.OAuthWithIntermediary(
+        adobeCredentials = null,
+        authenticationDescription = "Description",
+        accessToken = "A TOKEN!"
+      ),
+      state.credentials
     )
   }
 
