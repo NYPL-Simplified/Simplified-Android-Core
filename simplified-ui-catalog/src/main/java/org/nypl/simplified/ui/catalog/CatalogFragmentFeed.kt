@@ -99,6 +99,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var analytics: AnalyticsType
   private lateinit var bookCovers: BookCoverProviderType
   private lateinit var bookRegistry: BookRegistryReadableType
+  private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var feedCOPPAGate: ViewGroup
@@ -129,7 +130,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var feedWithoutGroupsScrollListener: RecyclerView.OnScrollListener
   private lateinit var feedWithoutGroupsTabs: RadioGroup
   private lateinit var imageLoader: ImageLoaderType
-  private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
@@ -144,7 +144,7 @@ class CatalogFragmentFeed : Fragment() {
 
     FluentFutureExtensions.fluentFutureOfValue(23)
 
-    this.parameters = this.arguments!![this.parametersId] as CatalogFeedArguments
+    this.parameters = this.requireArguments()[this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
 
     val services = Services.serviceDirectory()
@@ -252,11 +252,10 @@ class CatalogFragmentFeed : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.feedModel = this.createOrGetFeedModel()
-
-    this.loginDialogModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(CatalogLoginViewModel::class.java)
+    this.feedModel =
+      this.createOrGetFeedModel()
+    this.borrowViewModel =
+      CatalogBorrowViewModelFactory.get(this)
 
     /*
      * Configure the lanes based on the viewmodel.
@@ -331,8 +330,7 @@ class CatalogFragmentFeed : Fragment() {
         services = Services.serviceDirectory(),
         feedArguments = this.parameters
       )
-    )
-      .get(CatalogFeedViewModel::class.java)
+    ).get(CatalogFeedViewModel::class.java)
   }
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
@@ -559,12 +557,11 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedWithoutGroupsAdapter =
       CatalogPagedAdapter(
+        borrowViewModel = this.borrowViewModel,
         buttonCreator = this.buttonCreator,
         context = activity,
-        loginViewModel = this.loginDialogModel,
         navigation = this::findNavigationController,
         onBookSelected = this::onBookSelected,
-        ownership = this.parameters.ownership,
         services = Services.serviceDirectory()
       )
 

@@ -54,7 +54,7 @@
     android:fontFamily="monospace"
     android:gravity="start|top"
     android:scrollbarAlwaysDrawVerticalTrack="true"
-    android:text="@string/settingsPlaceholder"
+    android:text="@string/accountPlaceholder"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"

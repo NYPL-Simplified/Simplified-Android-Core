@@ -5,7 +5,7 @@
 
   <Preference
     android:key="settingsAccounts"
-    android:title="@string/settingsAccounts"
+    android:title="@string/accounts"
     android:summary="@string/settingsAccountsSummary" />
 
   <PreferenceCategory android:title="@string/settingsDocumentation">
@@ -40,7 +40,7 @@
       android:key="settingsVersion"
       android:title="@string/settingsVersion"
       android:summary="@string/settingsVersionSummary"
-      tools:summary="4.3.1 (5001)" />
+      tools:summary="" />
   </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

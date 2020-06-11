@@ -11,9 +11,10 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthentic
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
@@ -25,6 +26,8 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
@@ -43,6 +46,7 @@ import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -105,7 +109,12 @@ class ProfileAccountLoginTask(
 
   private fun run(): TaskResult<AccountLoginErrorData, Unit> {
     return try {
-      this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired))
+      if (!this.updateLoggingInState(
+          this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
+        )
+      ) {
+        return this.steps.finishSuccess(Unit)
+      }
 
       if (!this.validateRequest()) {
         this.debug("account does not support the given authentication")
@@ -124,6 +133,8 @@ class ProfileAccountLoginTask(
           this.runOAuthWithIntermediaryInitiate(this.request)
         is OAuthWithIntermediaryComplete ->
           this.runOAuthWithIntermediaryComplete(this.request)
+        is OAuthWithIntermediaryCancel ->
+          this.runOAuthWithIntermediaryCancel(this.request)
       }
     } catch (e: Throwable) {
       this.logger.error("error during login process: ", e)
@@ -140,30 +151,73 @@ class ProfileAccountLoginTask(
     }
   }
 
+  private fun runOAuthWithIntermediaryCancel(
+    request: OAuthWithIntermediaryCancel
+  ): TaskResult<AccountLoginErrorData, Unit> {
+    this.steps.beginNewStep("Cancelling login...")
+    return when (this.account.loginState) {
+      is AccountLoggingIn,
+      is AccountLoggingInWaitingForExternalAuthentication -> {
+        this.account.setLoginState(AccountNotLoggedIn)
+        this.steps.finishSuccess(Unit)
+      }
+
+      AccountNotLoggedIn,
+      is AccountLoggingIn,
+      is AccountLoginFailed,
+      is AccountLoggedIn,
+      is AccountLoggingOut,
+      is AccountLogoutFailed -> {
+        this.steps.currentStepSucceeded(
+          "Ignored the cancellation attempt because the account wasn't waiting for authentication."
+        )
+        this.steps.finishSuccess(Unit)
+      }
+    }
+  }
+
   private fun runOAuthWithIntermediaryComplete(
     request: OAuthWithIntermediaryComplete
   ): TaskResult<AccountLoginErrorData, Unit> {
+    this.steps.beginNewStep("Accepting login token...")
+    return when (this.account.loginState) {
+      is AccountLoggingIn,
+      is AccountLoggingInWaitingForExternalAuthentication -> {
+        this.credentials =
+          AccountAuthenticationCredentials.OAuthWithIntermediary(
+            accessToken = request.token,
+            adobeCredentials = null,
+            authenticationDescription = this.findCurrentDescription().description
+          )
 
-    this.credentials =
-      AccountAuthenticationCredentials.OAuthWithIntermediary(
-        accessToken = request.token,
-        adobeCredentials = null,
-        authenticationDescription = this.findCurrentDescription().description
-      )
+        this.runPatronProfileRequest()
+        this.runDeviceActivation()
+        this.account.setLoginState(AccountLoggedIn(this.credentials))
+        this.steps.finishSuccess(Unit)
+      }
 
-    this.runPatronProfileRequest()
-    this.runDeviceActivation()
-    this.account.setLoginState(AccountLoggedIn(this.credentials))
-    return this.steps.finishSuccess(Unit)
+      AccountNotLoggedIn,
+      is AccountLoginFailed,
+      is AccountLoggedIn,
+      is AccountLoggingOut,
+      is AccountLogoutFailed -> {
+        this.steps.currentStepSucceeded(
+          "Ignored the authentication token because the account wasn't waiting for one."
+        )
+        this.steps.finishSuccess(Unit)
+      }
+    }
   }
 
   private fun runOAuthWithIntermediaryInitiate(
     request: OAuthWithIntermediaryInitiate
   ): TaskResult.Success<AccountLoginErrorData, Unit> {
-    this.account.setLoginState(AccountLoginState.AccountLoggingInWaitingForExternalAuthentication(
-      description = request.description,
-      status = "Waiting for authentication..."
-    ))
+    this.account.setLoginState(
+      AccountLoggingInWaitingForExternalAuthentication(
+        description = request.description,
+        status = "Waiting for authentication..."
+      )
+    )
     return this.steps.finishSuccess(Unit)
   }
 
@@ -197,6 +251,10 @@ class ProfileAccountLoginTask(
           (this.account.provider.authenticationAlternatives.any { it == this.request.description })
       }
       is OAuthWithIntermediaryComplete -> {
+        return this.account.provider.authentication is OAuthWithIntermediary ||
+          (this.account.provider.authenticationAlternatives.any { it is OAuthWithIntermediary })
+      }
+      is OAuthWithIntermediaryCancel -> {
         return this.account.provider.authentication is OAuthWithIntermediary ||
           (this.account.provider.authenticationAlternatives.any { it is OAuthWithIntermediary })
       }
@@ -522,17 +580,48 @@ class ProfileAccountLoginTask(
     }
   }
 
-  private fun updateLoggingInState(
-    step: TaskStep<AccountLoginErrorData>
-  ) {
-    this.account.setLoginState(
-      AccountLoggingIn(
-        status = step.description,
-        description = this.findCurrentDescription(),
-        cancellable = false
-      )
-    )
+  private fun updateLoggingInState(step: TaskStep<AccountLoginErrorData>): Boolean {
+    return when (this.request) {
+      is Basic,
+      is OAuthWithIntermediaryInitiate -> {
+        this.account.setLoginState(
+          AccountLoggingIn(
+            status = step.description,
+            description = this.findCurrentDescription(),
+            cancellable = false
+          )
+        )
+        true
+      }
+      is OAuthWithIntermediaryComplete,
+      is OAuthWithIntermediaryCancel -> {
+        when (this.account.loginState) {
+          is AccountLoggingInWaitingForExternalAuthentication -> {
+            this.account.setLoginState(
+              AccountLoggingIn(
+                status = step.description,
+                description = this.findCurrentDescription(),
+                cancellable = false
+              )
+            )
+            true
+          }
+
+          AccountNotLoggedIn,
+          is AccountLoggingIn,
+          is AccountLoginFailed,
+          is AccountLoggedIn,
+          is AccountLoggingOut,
+          is AccountLogoutFailed -> {
+            this.steps.currentStepSucceeded("Ignored an unexpected completion/cancellation attempt.")
+            false
+          }
+        }
+      }
+    }
   }
+
+  private class NoCurrentDescription : Exception()
 
   private fun findCurrentDescription(): AccountProviderAuthenticationDescription {
     return when (this.request) {
@@ -540,18 +629,20 @@ class ProfileAccountLoginTask(
         this.request.description
       is OAuthWithIntermediaryInitiate ->
         this.request.description
+      is OAuthWithIntermediaryCancel ->
+        this.request.description
       is OAuthWithIntermediaryComplete ->
         when (val loginState = this.account.loginState) {
           is AccountLoggingIn ->
             loginState.description
-          is AccountLoginState.AccountLoggingInWaitingForExternalAuthentication ->
+          is AccountLoggingInWaitingForExternalAuthentication ->
             loginState.description
-          AccountLoginState.AccountNotLoggedIn,
+          AccountNotLoggedIn,
           is AccountLoginFailed,
           is AccountLoggedIn,
-          is AccountLoginState.AccountLoggingOut,
-          is AccountLoginState.AccountLogoutFailed ->
-            throw UnreachableCodeException()
+          is AccountLoggingOut,
+          is AccountLogoutFailed ->
+            throw NoCurrentDescription()
         }
     }
   }

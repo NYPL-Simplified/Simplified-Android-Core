@@ -46,4 +46,13 @@ sealed class ProfileAccountLoginRequest {
     override val accountId: AccountID,
     val token: String
   ) : ProfileAccountLoginRequest()
+
+  /**
+   * A request to cancel waiting for a login using OAuth (with an intermediary) authentication.
+   */
+
+  data class OAuthWithIntermediaryCancel(
+    override val accountId: AccountID,
+    val description: AccountProviderAuthenticationDescription.OAuthWithIntermediary
+  ) : ProfileAccountLoginRequest()
 }

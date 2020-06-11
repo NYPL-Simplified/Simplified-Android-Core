@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.settings
+package org.nypl.simplified.ui.accounts
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -37,12 +37,12 @@ import org.slf4j.LoggerFactory
  * A fragment that shows the account registry and allows for account creation.
  */
 
-class SettingsFragmentAccountRegistry : Fragment() {
+class AccountRegistryFragment : Fragment() {
 
   private var errorDialog: AlertDialog? = null
   private lateinit var backgroundExecutor: ListeningScheduledExecutorService
   private lateinit var accountList: RecyclerView
-  private lateinit var accountListAdapter: SettingsAccountProviderDescriptionAdapter
+  private lateinit var accountListAdapter: AccountProviderDescriptionAdapter
   private lateinit var accountListData: MutableList<AccountProviderDescription>
   private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var buildConfig: BuildConfigurationServiceType
@@ -55,7 +55,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
   private lateinit var refresh: Button
   private lateinit var title: TextView
   private lateinit var uiThread: UIThreadServiceType
-  private val logger = LoggerFactory.getLogger(SettingsFragmentAccountRegistry::class.java)
+  private val logger = LoggerFactory.getLogger(AccountRegistryFragment::class.java)
   private var accountCreationSubscription: Disposable? = null
   private var accountRegistrySubscription: Disposable? = null
 
@@ -77,7 +77,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
     this.accountListData = mutableListOf()
     this.accountListAdapter =
-      SettingsAccountProviderDescriptionAdapter(
+      AccountProviderDescriptionAdapter(
         this.accountListData,
         this.imageLoader,
         this::onAccountClicked
@@ -135,7 +135,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
     this.refresh.isEnabled = false
     this.accountList.visibility = View.INVISIBLE
-    this.title.setText(R.string.settingsAccountRegistryCreating)
+    this.title.setText(R.string.accountRegistryCreating)
     this.progressText.text = ""
     this.progress.visibility = View.VISIBLE
 
@@ -174,7 +174,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
   ): View? {
 
     val layout =
-      inflater.inflate(R.layout.settings_account_registry, container, false)
+      inflater.inflate(R.layout.account_registry, container, false)
 
     this.refresh =
       layout.findViewById(R.id.accountRegistryRefreshButton)
@@ -248,7 +248,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
     if (host is ToolbarHostType) {
       host.toolbarClearMenu()
       host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.settingsAccounts),
+        title = this.requireContext().getString(R.string.accounts),
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
@@ -284,7 +284,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
     return when (status) {
       AccountProviderRegistryStatus.Idle -> {
-        this.title.setText(R.string.settingsAccountRegistrySelect)
+        this.title.setText(R.string.accountRegistrySelect)
         this.accountList.visibility = View.VISIBLE
         this.progress.visibility = View.INVISIBLE
         this.refresh.isEnabled = true
@@ -294,7 +294,7 @@ class SettingsFragmentAccountRegistry : Fragment() {
 
         if (availableDescriptions.isEmpty()) {
           this.progressText.visibility = View.VISIBLE
-          this.progressText.setText(R.string.settingsAccountRegistryEmpty)
+          this.progressText.setText(R.string.accountRegistryEmpty)
         } else {
           this.progressText.visibility = View.INVISIBLE
         }
@@ -305,11 +305,11 @@ class SettingsFragmentAccountRegistry : Fragment() {
       }
 
       AccountProviderRegistryStatus.Refreshing -> {
-        this.title.setText(R.string.settingsAccountRegistrySelect)
+        this.title.setText(R.string.accountRegistrySelect)
         this.accountList.visibility = View.INVISIBLE
         this.progress.visibility = View.VISIBLE
         this.progressText.visibility = View.VISIBLE
-        this.progressText.setText(R.string.settingsAccountRegistryRetrieving)
+        this.progressText.setText(R.string.accountRegistryRetrieving)
         this.refresh.isEnabled = false
       }
     }
@@ -323,10 +323,10 @@ class SettingsFragmentAccountRegistry : Fragment() {
     this.accountRegistrySubscription?.dispose()
   }
 
-  private fun findNavigationController(): SettingsNavigationControllerType {
+  private fun findNavigationController(): AccountNavigationControllerType {
     return NavigationControllers.find(
       activity = this.requireActivity(),
-      interfaceType = SettingsNavigationControllerType::class.java
+      interfaceType = AccountNavigationControllerType::class.java
     )
   }
 
@@ -339,9 +339,9 @@ class SettingsFragmentAccountRegistry : Fragment() {
     if (this.errorDialog == null) {
       val newDialog =
         AlertDialog.Builder(this.requireActivity())
-          .setTitle(R.string.settingsAccountCreationFailed)
-          .setMessage(R.string.settingsAccountCreationFailedMessage)
-          .setPositiveButton(R.string.settingsDetails) { dialog, _ ->
+          .setTitle(R.string.accountCreationFailed)
+          .setMessage(R.string.accountCreationFailedMessage)
+          .setPositiveButton(R.string.accountsDetails) { dialog, _ ->
             this.errorDialog = null
             this.showErrorPage(accountEvent)
             dialog.dismiss()

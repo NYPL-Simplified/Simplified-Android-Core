@@ -34,7 +34,7 @@
       android:background="@drawable/simplified_button"
       android:gravity="center"
       android:lines="2"
-      android:text="@string/settingsPlaceholder"
+      android:text="@string/accountPlaceholder"
       android:textColor="?attr/colorPrimary"
       android:textSize="14sp"
       android:textStyle="bold"

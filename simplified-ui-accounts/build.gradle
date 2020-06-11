@@ -1,31 +1,22 @@
 dependencies {
-  api project(":simplified-books-api")
-  api project(":simplified-books-covers")
-  api project(":simplified-feeds-api")
-  api project(":simplified-ui-accounts")
-  api project(":simplified-ui-errorpage")
-
-  implementation project(":simplified-adobe-extensions")
-  implementation project(":simplified-analytics-api")
-  implementation project(":simplified-books-controller-api")
-  implementation project(":simplified-books-registry-api")
+  implementation project(":simplified-accounts-api")
   implementation project(":simplified-buildconfig-api")
+  implementation project(":simplified-cardcreator")
   implementation project(":simplified-documents")
-  implementation project(":simplified-futures")
+  implementation project(":simplified-oauth")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
+  implementation project(":simplified-threads")
+  implementation project(":simplified-ui-errorpage")
   implementation project(":simplified-ui-images")
   implementation project(":simplified-ui-navigation-api")
-  implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-ui-toolbar")
 
   implementation libraries.androidXAppCompat
-  implementation libraries.androidXCardView
   implementation libraries.androidXConstraintLayout
   implementation libraries.androidXLifecycle
-  implementation libraries.androidXPaging
   implementation libraries.androidXRecyclerView
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

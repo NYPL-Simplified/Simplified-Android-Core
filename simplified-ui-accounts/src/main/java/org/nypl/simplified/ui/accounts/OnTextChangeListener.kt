@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.settings
+package org.nypl.simplified.ui.accounts
 
 import android.text.Editable
 import android.text.TextWatcher

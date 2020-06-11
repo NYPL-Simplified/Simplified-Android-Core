@@ -16,12 +16,11 @@ import org.slf4j.LoggerFactory
  */
 
 class CatalogPagedAdapter(
+  private val borrowViewModel: CatalogBorrowViewModel,
   private val buttonCreator: CatalogButtons,
   private val context: FragmentActivity,
-  private val loginViewModel: CatalogLoginViewModel,
   private val navigation: () -> CatalogNavigationControllerType,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
-  private val ownership: CatalogFeedOwnership,
   private val services: ServiceDirectoryType
 ) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
 
@@ -41,12 +40,11 @@ class CatalogPagedAdapter(
     this.logger.trace("creating view holder ($viewHolders)")
 
     return CatalogPagedViewHolder(
+      borrowViewModel = this.borrowViewModel,
       buttonCreator = this.buttonCreator,
       context = this.context,
-      loginViewModel = this.loginViewModel,
       navigation = this.navigation,
       onBookSelected = this.onBookSelected,
-      ownership = this.ownership,
       parent = LayoutInflater.from(parent.context).inflate(R.layout.book_cell, parent, false),
       registrySubscriptions = this.registrySubscriptions,
       services = this.services

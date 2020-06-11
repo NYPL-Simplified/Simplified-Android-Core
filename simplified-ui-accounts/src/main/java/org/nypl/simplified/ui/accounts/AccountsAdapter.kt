@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.settings
+package org.nypl.simplified.ui.accounts
 
 import android.view.LayoutInflater
 import android.view.View
@@ -14,12 +14,12 @@ import org.nypl.simplified.ui.images.ImageLoaderType
  * An adapter for a list of accounts.
  */
 
-class SettingsAccountsAdapter(
+class AccountsAdapter(
   private val imageLoader: ImageLoaderType,
   private val accounts: List<AccountType>,
   private val onItemClicked: (AccountType) -> Unit,
   private val onItemLongClicked: (AccountType) -> Unit
-) : RecyclerView.Adapter<SettingsAccountsAdapter.AccountViewHolder>() {
+) : RecyclerView.Adapter<AccountsAdapter.AccountViewHolder>() {
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
@@ -28,7 +28,7 @@ class SettingsAccountsAdapter(
     val inflater =
       LayoutInflater.from(parent.context)
     val item =
-      inflater.inflate(R.layout.settings_account_cell, parent, false)
+      inflater.inflate(R.layout.account_cell, parent, false)
     return this.AccountViewHolder(item)
   }
 

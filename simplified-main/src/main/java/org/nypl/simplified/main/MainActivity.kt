@@ -56,7 +56,7 @@ import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsFragmentAccountRegistry
+import org.nypl.simplified.ui.accounts.AccountRegistryFragment
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerUnreachable
 import org.nypl.simplified.ui.splash.SplashFragment
@@ -525,7 +525,8 @@ class MainActivity :
       }
     )
 
-    val fragment = SettingsFragmentAccountRegistry()
+    val fragment =
+      AccountRegistryFragment()
     manager.beginTransaction()
       .replace(R.id.mainFragmentHolder, fragment, "MAIN")
       .commit()

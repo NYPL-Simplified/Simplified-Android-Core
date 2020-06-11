@@ -11,7 +11,7 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
-    android:text="@string/settingsAccounts"
+    android:text="@string/accounts"
     android:textStyle="bold"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"

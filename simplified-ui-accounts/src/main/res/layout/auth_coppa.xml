@@ -16,7 +16,7 @@
     android:layout_marginBottom="16dp"
     android:ellipsize="end"
     android:maxLines="1"
-    android:text="@string/settingsCOPPAOver13"
+    android:text="@string/accountCOPPAOver13"
     android:textSize="14sp"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/authCOPPASwitch"

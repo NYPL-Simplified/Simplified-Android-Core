@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.settings
+package org.nypl.simplified.ui.accounts
 
 import android.view.LayoutInflater
 import android.view.View
@@ -14,11 +14,11 @@ import org.nypl.simplified.ui.images.ImageLoaderType
  * An adapter for a list of account descriptions.
  */
 
-class SettingsAccountProviderDescriptionAdapter(
+class AccountProviderDescriptionAdapter(
   private val accounts: List<AccountProviderDescription>,
   private val imageLoader: ImageLoaderType,
   private val onItemClicked: (AccountProviderDescription) -> Unit
-) : RecyclerView.Adapter<SettingsAccountProviderDescriptionAdapter.AccountViewHolder>() {
+) : RecyclerView.Adapter<AccountProviderDescriptionAdapter.AccountViewHolder>() {
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
@@ -27,7 +27,7 @@ class SettingsAccountProviderDescriptionAdapter(
     val inflater =
       LayoutInflater.from(parent.context)
     val item =
-      inflater.inflate(R.layout.settings_account_cell, parent, false)
+      inflater.inflate(R.layout.account_cell, parent, false)
     return this.AccountViewHolder(item)
   }
 

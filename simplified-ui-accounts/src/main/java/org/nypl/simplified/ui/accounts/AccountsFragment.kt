@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.settings
+package org.nypl.simplified.ui.accounts
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -30,10 +30,10 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
  * A fragment that shows the set of accounts in the current profile.
  */
 
-class SettingsFragmentAccounts : Fragment() {
+class AccountsFragment : Fragment() {
 
   private lateinit var accountList: RecyclerView
-  private lateinit var accountListAdapter: SettingsAccountsAdapter
+  private lateinit var accountListAdapter: AccountsAdapter
   private lateinit var accountListData: MutableList<AccountType>
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var imageLoader: ImageLoaderType
@@ -64,14 +64,14 @@ class SettingsFragmentAccounts : Fragment() {
 
     val context = this.requireContext()
     AlertDialog.Builder(context)
-      .setTitle(R.string.settingsAccountDeleteConfirmTitle)
+      .setTitle(R.string.accountsDeleteConfirmTitle)
       .setMessage(
         context.getString(
-          R.string.settingsAccountDeleteConfirm,
+          R.string.accountsDeleteConfirm,
           account.provider.displayName
         )
       )
-      .setPositiveButton(R.string.settingsAccountDelete) { dialog, _ ->
+      .setPositiveButton(R.string.accountsDelete) { dialog, _ ->
         this.profilesController.profileAccountDeleteByProvider(account.provider.id)
         dialog.dismiss()
       }
@@ -82,7 +82,13 @@ class SettingsFragmentAccounts : Fragment() {
   @UiThread
   private fun onAccountClicked(account: AccountType) {
     this.uiThread.checkIsUIThread()
-    this.findNavigationController().openSettingsAccount(account.id)
+    this.findNavigationController().openSettingsAccount(
+      AccountFragmentParameters(
+        accountId = account.id,
+        closeOnLoginSuccess = false,
+        showPleaseLogInTitle = false
+      )
+    )
   }
 
   override fun onCreateView(
@@ -91,7 +97,7 @@ class SettingsFragmentAccounts : Fragment() {
     savedInstanceState: Bundle?
   ): View? {
     val layout =
-      inflater.inflate(R.layout.settings_accounts, container, false)
+      inflater.inflate(R.layout.accounts, container, false)
 
     this.accountList =
       layout.findViewById(R.id.accountList)
@@ -112,11 +118,12 @@ class SettingsFragmentAccounts : Fragment() {
         .subscribe(this::onAccountEvent)
 
     this.accountListAdapter =
-      SettingsAccountsAdapter(
+      AccountsAdapter(
         accounts = this.accountListData,
         imageLoader = this.imageLoader,
-        onItemClicked = { account -> this.onAccountClicked(account) },
-        onItemLongClicked = { account -> this.onAccountLongClicked(account) })
+        onItemClicked = this::onAccountClicked,
+        onItemLongClicked = this::onAccountLongClicked
+      )
 
     this.accountList.adapter = this.accountListAdapter
 
@@ -133,14 +140,14 @@ class SettingsFragmentAccounts : Fragment() {
       host.toolbarClearMenu()
       toolbar.inflateMenu(R.menu.accounts)
 
-      val accountAdd = toolbar.menu.findItem(R.id.settingsMenuActionAccountAdd)
+      val accountAdd = toolbar.menu.findItem(R.id.accountsMenuActionAccountAdd)
       accountAdd.setOnMenuItemClickListener {
         this.findNavigationController().openSettingsAccountRegistry()
         true
       }
 
       host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.settingsAccounts),
+        title = this.requireContext().getString(R.string.accounts),
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
@@ -183,9 +190,9 @@ class SettingsFragmentAccounts : Fragment() {
     this.uiThread.checkIsUIThread()
 
     AlertDialog.Builder(this.requireContext())
-      .setTitle(R.string.settingsAccountDeletionFailed)
-      .setMessage(R.string.settingsAccountDeletionFailedMessage)
-      .setPositiveButton(R.string.settingsDetails) { _, _ ->
+      .setTitle(R.string.accountsDeletionFailed)
+      .setMessage(R.string.accountsDeletionFailedMessage)
+      .setPositiveButton(R.string.accountsDetails) { _, _ ->
         showErrorPage(accountEvent)
       }
       .create()
@@ -231,10 +238,10 @@ class SettingsFragmentAccounts : Fragment() {
     this.accountSubscription?.dispose()
   }
 
-  private fun findNavigationController(): SettingsNavigationControllerType {
+  private fun findNavigationController(): AccountNavigationControllerType {
     return NavigationControllers.find(
       activity = this.requireActivity(),
-      interfaceType = SettingsNavigationControllerType::class.java
+      interfaceType = AccountNavigationControllerType::class.java
     )
   }
 }

@@ -10,7 +10,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
-    android:text="@string/settingsAccountRegistrySelect"
+    android:text="@string/accountRegistrySelect"
     android:textStyle="bold"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
@@ -31,7 +31,7 @@
     android:id="@+id/accountRegistryProgressText"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="@string/settingsAccountRegistryRetrieving"
+    android:text="@string/accountRegistryRetrieving"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintBottom_toTopOf="@id/accountRegistryProgress" />
@@ -68,7 +68,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
-    android:text="@string/settingsAccountRegistryRefresh"
+    android:text="@string/accountRegistryRefresh"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent" />

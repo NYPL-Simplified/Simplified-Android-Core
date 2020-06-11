@@ -40,6 +40,11 @@
       android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
 
     <activity
+      android:name="org.nypl.simplified.tests.sandbox.LifeActivity"
+      android:exported="true"
+      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
+
+    <activity
       android:name="org.nypl.simplified.tests.sandbox.ProfileActivity"
       android:exported="true"
       android:theme="@style/SimplifiedTheme_NoActionBar_Indigo" />

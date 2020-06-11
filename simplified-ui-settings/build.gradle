@@ -1,4 +1,5 @@
 dependencies {
+  api project(":simplified-ui-accounts")
   api project(":simplified-ui-errorpage")
 
   api libraries.androidXAppCompat
@@ -18,6 +19,7 @@ dependencies {
   implementation project(":simplified-reports")
   implementation project(":simplified-services-api")
   implementation project(":simplified-threads")
+  implementation project(":simplified-ui-accounts")
   implementation project(":simplified-ui-images")
   implementation project(":simplified-ui-navigation-api")
   implementation project(":simplified-ui-theme")

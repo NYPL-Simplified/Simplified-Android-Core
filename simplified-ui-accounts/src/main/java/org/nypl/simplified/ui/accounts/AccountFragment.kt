@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.settings
+package org.nypl.simplified.ui.accounts
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -52,31 +52,34 @@ import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
-import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.threads.NamedThreadPools
+import org.nypl.simplified.ui.accounts.AccountFragment.LoginButtonStatus.AsCancelButtonDisabled
+import org.nypl.simplified.ui.accounts.AccountFragment.LoginButtonStatus.AsCancelButtonEnabled
+import org.nypl.simplified.ui.accounts.AccountFragment.LoginButtonStatus.AsLoginButtonDisabled
+import org.nypl.simplified.ui.accounts.AccountFragment.LoginButtonStatus.AsLoginButtonEnabled
+import org.nypl.simplified.ui.accounts.AccountFragment.LoginButtonStatus.AsLogoutButtonDisabled
+import org.nypl.simplified.ui.accounts.AccountFragment.LoginButtonStatus.AsLogoutButtonEnabled
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
-import org.nypl.simplified.ui.settings.SettingsFragmentAccount.LoginButtonStatus.AsCancelButtonDisabled
-import org.nypl.simplified.ui.settings.SettingsFragmentAccount.LoginButtonStatus.AsCancelButtonEnabled
-import org.nypl.simplified.ui.settings.SettingsFragmentAccount.LoginButtonStatus.AsLoginButtonDisabled
-import org.nypl.simplified.ui.settings.SettingsFragmentAccount.LoginButtonStatus.AsLoginButtonEnabled
-import org.nypl.simplified.ui.settings.SettingsFragmentAccount.LoginButtonStatus.AsLogoutButtonDisabled
-import org.nypl.simplified.ui.settings.SettingsFragmentAccount.LoginButtonStatus.AsLogoutButtonEnabled
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A fragment that shows settings for a single account.
  */
 
-class SettingsFragmentAccount : Fragment() {
+class AccountFragment : Fragment() {
 
-  private val logger = LoggerFactory.getLogger(SettingsFragmentAccount::class.java)
+  private val logger = LoggerFactory.getLogger(AccountFragment::class.java)
 
   private lateinit var account: AccountType
   private lateinit var accountIcon: ImageView
@@ -109,31 +112,34 @@ class SettingsFragmentAccount : Fragment() {
   private lateinit var loginButtonErrorDetails: Button
   private lateinit var loginProgress: ProgressBar
   private lateinit var loginProgressText: TextView
-  private lateinit var parameters: SettingsFragmentAccountParameters
+  private lateinit var loginTitle: ViewGroup
+  private lateinit var parameters: AccountFragmentParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var settingsCardCreator: ConstraintLayout
   private lateinit var signUpButton: Button
   private lateinit var signUpLabel: TextView
   private lateinit var uiThread: UIThreadServiceType
   private val cardCreatorResultCode = 101
+  private val closing = AtomicBoolean(false)
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
   private var accountSubscription: Disposable? = null
   private var cardCreatorService: CardCreatorServiceType? = null
+  private var loginRequested: Boolean = false
   private var profileSubscription: Disposable? = null
 
   companion object {
 
     private const val PARAMETERS_ID =
-      "org.nypl.simplified.ui.settings.SettingsFragmentAccount.parameters"
+      "org.nypl.simplified.ui.accounts.SettingsFragmentAccount.parameters"
 
     /**
-     * Create a new settings fragment for the given account parameters.
+     * Create a new account fragment for the given parameters.
      */
 
-    fun create(parameters: SettingsFragmentAccountParameters): SettingsFragmentAccount {
+    fun create(parameters: AccountFragmentParameters): AccountFragment {
       val arguments = Bundle()
-      arguments.putSerializable(this.PARAMETERS_ID, parameters)
-      val fragment = SettingsFragmentAccount()
+      arguments.putSerializable(PARAMETERS_ID, parameters)
+      val fragment = AccountFragment()
       fragment.arguments = arguments
       return fragment
     }
@@ -141,7 +147,7 @@ class SettingsFragmentAccount : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    this.parameters = this.requireArguments()[PARAMETERS_ID] as SettingsFragmentAccountParameters
+    this.parameters = this.requireArguments()[PARAMETERS_ID] as AccountFragmentParameters
 
     val services = Services.serviceDirectory()
 
@@ -165,7 +171,7 @@ class SettingsFragmentAccount : Fragment() {
     savedInstanceState: Bundle?
   ): View? {
     val layout =
-      inflater.inflate(R.layout.settings_account, container, false)
+      inflater.inflate(R.layout.account, container, false)
 
     this.accountTitle =
       layout.findViewById(R.id.accountCellTitle)
@@ -177,9 +183,9 @@ class SettingsFragmentAccount : Fragment() {
     this.authentication =
       layout.findViewById(R.id.auth)
     this.authenticationAlternatives =
-      layout.findViewById(R.id.settingsAuthAlternatives)
+      layout.findViewById(R.id.accountAuthAlternatives)
     this.authenticationAlternativesButtons =
-      layout.findViewById(R.id.settingsAuthAlternativesButtons)
+      layout.findViewById(R.id.accountAuthAlternativesButtons)
 
     this.authenticationCOPPA =
       this.authentication.findViewById(R.id.authCOPPA)
@@ -208,35 +214,43 @@ class SettingsFragmentAccount : Fragment() {
     this.authenticationCOPPA.visibility = View.INVISIBLE
 
     this.bookmarkSync =
-      layout.findViewById(R.id.settingsSyncBookmarks)
+      layout.findViewById(R.id.accountSyncBookmarks)
     this.bookmarkSyncCheck =
-      this.bookmarkSync.findViewById(R.id.settingsSyncBookmarksCheck)
+      this.bookmarkSync.findViewById(R.id.accountSyncBookmarksCheck)
     this.bookmarkSyncLabel =
-      this.bookmarkSync.findViewById(R.id.settingsSyncBookmarksLabel)
+      this.bookmarkSync.findViewById(R.id.accountSyncBookmarksLabel)
 
+    this.loginTitle =
+      layout.findViewById(R.id.accountTitleAnnounce)
     this.login =
-      layout.findViewById(R.id.settingsLogin)
+      layout.findViewById(R.id.accountLogin)
     this.loginProgress =
-      layout.findViewById(R.id.settingsLoginProgress)
+      layout.findViewById(R.id.accountLoginProgress)
     this.loginProgressText =
-      layout.findViewById(R.id.settingsLoginProgressText)
+      layout.findViewById(R.id.accountLoginProgressText)
     this.loginButton =
-      layout.findViewById(R.id.settingsLoginButton)
+      layout.findViewById(R.id.accountLoginButton)
     this.loginButtonErrorDetails =
-      layout.findViewById(R.id.settingsLoginButtonErrorDetails)
+      layout.findViewById(R.id.accountLoginButtonErrorDetails)
     this.eulaCheckbox =
-      layout.findViewById(R.id.settingsEULACheckbox)
+      layout.findViewById(R.id.accountEULACheckbox)
     this.signUpButton =
-      layout.findViewById(R.id.settingsCardCreatorSignUp)
+      layout.findViewById(R.id.accountCardCreatorSignUp)
     this.signUpLabel =
-      layout.findViewById(R.id.settingsCardCreatorLabel)
+      layout.findViewById(R.id.accountCardCreatorLabel)
     this.settingsCardCreator =
-      layout.findViewById(R.id.settingsCardCreator)
+      layout.findViewById(R.id.accountCardCreator)
 
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginProgress.visibility = View.INVISIBLE
     this.loginProgressText.text = ""
     this.setLoginButtonStatus(AsLoginButtonDisabled)
+
+    if (this.parameters.showPleaseLogInTitle) {
+      this.loginTitle.visibility = View.VISIBLE
+    } else {
+      this.loginTitle.visibility = View.GONE
+    }
     return layout
   }
 
@@ -328,12 +342,11 @@ class SettingsFragmentAccount : Fragment() {
           .account(this.parameters.accountId)
     } catch (e: AccountsDatabaseNonexistentException) {
       this.logger.error("account no longer exists: ", e)
-      this.findNavigationController().popBackStack()
+      this.explicitlyClose()
       return
     }
 
     this.configureToolbar()
-
     this.hideCardCreatorForNonNYPL()
 
     this.accountTitle.text =
@@ -420,7 +433,7 @@ class SettingsFragmentAccount : Fragment() {
      * Configure the bookmark syncing switch to enable/disable syncing permissions.
      */
 
-    this.bookmarkSyncCheck.setOnCheckedChangeListener { buttonView, isChecked ->
+    this.bookmarkSyncCheck.setOnCheckedChangeListener { _, isChecked ->
       this.backgroundExecutor.execute {
         this.account.setPreferences(
           this.account.preferences.copy(bookmarkSyncingPermitted = isChecked)
@@ -466,7 +479,7 @@ class SettingsFragmentAccount : Fragment() {
             container = layout.findViewById(R.id.authOAuthIntermediaryLogo),
             buttonText = layout.findViewById(R.id.authOAuthIntermediaryLogoText),
             buttonImage = layout.findViewById(R.id.authOAuthIntermediaryLogoImage),
-            text = this.getString(R.string.settingsLoginWith, alternative.description),
+            text = this.getString(R.string.accountLoginWith, alternative.description),
             logoURI = alternative.logoURI,
             onClick = {
               this.onTryOAuthLogin(alternative)
@@ -504,7 +517,7 @@ class SettingsFragmentAccount : Fragment() {
     authenticationDescription: AccountProviderAuthenticationDescription.OAuthWithIntermediary
   ) {
     this.profilesController.profileAccountLogin(
-      ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate(
+      OAuthWithIntermediaryInitiate(
         accountId = this.account.id,
         description = authenticationDescription
       )
@@ -542,7 +555,7 @@ class SettingsFragmentAccount : Fragment() {
     if (host is ToolbarHostType) {
       host.toolbarClearMenu()
       host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.settingsAccounts),
+        title = this.requireContext().getString(R.string.accounts),
         subtitle = this.account.provider.displayName
       )
       host.toolbarSetBackArrowConditionally(
@@ -550,16 +563,32 @@ class SettingsFragmentAccount : Fragment() {
         shouldArrowBePresent = {
           this.findNavigationController().backStackSize() > 1
         },
-        onArrowClicked = {
-          this.findNavigationController().popBackStack()
-        })
+        onArrowClicked = this@AccountFragment::explicitlyClose
+      )
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
     }
   }
 
+  private fun explicitlyClose() {
+    if (this.closing.compareAndSet(false, true)) {
+      this.findNavigationController().popBackStack()
+    }
+  }
+
   override fun onStop() {
     super.onStop()
+
+    /*
+     * Broadcast the login state. The reason for doing this is that consumers might be subscribed
+     * to the account so that they can perform actions when the user has either attempted to log
+     * in, or has cancelled without attempting it. The consumers have no way to detect the fact
+     * that the user didn't even try to log in unless we tell the account to broadcast its current
+     * state.
+     */
+
+    this.logger.debug("broadcasting login state")
+    this.account.setLoginState(this.account.loginState)
 
     this.backgroundExecutor.shutdown()
     this.accountIcon.setImageDrawable(null)
@@ -693,11 +722,17 @@ class SettingsFragmentAccount : Fragment() {
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginFormLock()
         this.setLoginButtonStatus(AsCancelButtonEnabled {
-          throw UnimplementedCodeException()
+          this.profilesController.profileAccountLogin(
+            OAuthWithIntermediaryCancel(
+              accountId = this.account.id,
+              description = loginState.description as AccountProviderAuthenticationDescription.OAuthWithIntermediary
+            )
+          )
         })
       }
 
       is AccountLoginFailed -> {
+        this.loginRequested = false
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginFormUnlock()
@@ -740,9 +775,17 @@ class SettingsFragmentAccount : Fragment() {
           this.tryLogout()
         })
         this.authenticationAlternativesHide()
+
+        if (this.loginRequested && this.parameters.closeOnLoginSuccess) {
+          this.explicitlyClose()
+          return
+        } else {
+
+        }
       }
 
       is AccountLoggingOut -> {
+        this.loginRequested = false
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
             this.authenticationBasicUser.setText(creds.userName.value)
@@ -761,6 +804,7 @@ class SettingsFragmentAccount : Fragment() {
       }
 
       is AccountLogoutFailed -> {
+        this.loginRequested = false
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
             this.authenticationBasicUser.setText(creds.userName.value)
@@ -817,30 +861,30 @@ class SettingsFragmentAccount : Fragment() {
   ) {
     return when (status) {
       is AsLoginButtonEnabled -> {
-        this.loginButton.setText(R.string.settingsLogin)
+        this.loginButton.setText(R.string.accountLogin)
         this.loginButton.isEnabled = true
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       AsLoginButtonDisabled -> {
-        this.loginButton.setText(R.string.settingsLogin)
+        this.loginButton.setText(R.string.accountLogin)
         this.loginButton.isEnabled = false
       }
       is AsCancelButtonEnabled -> {
-        this.loginButton.setText(R.string.settingsCancel)
+        this.loginButton.setText(R.string.accountCancel)
         this.loginButton.isEnabled = true
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       is AsLogoutButtonEnabled -> {
-        this.loginButton.setText(R.string.settingsLogout)
+        this.loginButton.setText(R.string.accountLogout)
         this.loginButton.isEnabled = true
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       AsLogoutButtonDisabled -> {
-        this.loginButton.setText(R.string.settingsLogout)
+        this.loginButton.setText(R.string.accountLogout)
         this.loginButton.isEnabled = false
       }
       AsCancelButtonDisabled -> {
-        this.loginButton.setText(R.string.settingsCancel)
+        this.loginButton.setText(R.string.accountCancel)
         this.loginButton.isEnabled = false
       }
     }
@@ -859,14 +903,14 @@ class SettingsFragmentAccount : Fragment() {
         .tag(this.imageButtonLoadingTag)
         .into(view, object : com.squareup.picasso.Callback {
           override fun onSuccess() {
-            this@SettingsFragmentAccount.uiThread.runOnUIThread {
+            this@AccountFragment.uiThread.runOnUIThread {
               onSuccess.invoke()
             }
           }
 
           override fun onError(e: Exception) {
-            this@SettingsFragmentAccount.logger.error("failed to load authentication logo: ", e)
-            this@SettingsFragmentAccount.uiThread.runOnUIThread {
+            this@AccountFragment.logger.error("failed to load authentication logo: ", e)
+            this@AccountFragment.uiThread.runOnUIThread {
               view.visibility = View.GONE
             }
           }
@@ -956,6 +1000,8 @@ class SettingsFragmentAccount : Fragment() {
   }
 
   private fun tryLogin() {
+    this.loginRequested = true
+
     return when (val description = this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
         this.onTryOAuthLogin(description)
@@ -970,7 +1016,7 @@ class SettingsFragmentAccount : Fragment() {
         val accountUsername =
           AccountUsername(this.authenticationBasicUser.text.toString())
         val request =
-          ProfileAccountLoginRequest.Basic(
+          Basic(
             accountId = this.account.id,
             description = description,
             password = accountPassword,
@@ -1052,12 +1098,12 @@ class SettingsFragmentAccount : Fragment() {
 
   private fun onAgeCheckboxClicked(): (View) -> Unit = {
     AlertDialog.Builder(this.requireContext())
-      .setTitle(R.string.settingsCOPPADeleteBooks)
-      .setMessage(R.string.settingsCOPPADeleteBooksConfirm)
-      .setNegativeButton(R.string.settingsCancel) { _, _ ->
+      .setTitle(R.string.accountCOPPADeleteBooks)
+      .setMessage(R.string.accountCOPPADeleteBooksConfirm)
+      .setNegativeButton(R.string.accountCancel) { _, _ ->
         this.authenticationCOPPAOver13.isChecked = !this.authenticationCOPPAOver13.isChecked
       }
-      .setPositiveButton(R.string.settingsDelete) { _, _ ->
+      .setPositiveButton(R.string.accountDelete) { _, _ ->
         this.loginFormLock()
         if (this.authenticationCOPPAOver13.isChecked) {
           this.setOver13()
@@ -1080,10 +1126,10 @@ class SettingsFragmentAccount : Fragment() {
       isSynthesized = true
     )
 
-  private fun findNavigationController(): SettingsNavigationControllerType {
+  private fun findNavigationController(): AccountNavigationControllerType {
     return NavigationControllers.find(
       activity = this.requireActivity(),
-      interfaceType = SettingsNavigationControllerType::class.java
+      interfaceType = AccountNavigationControllerType::class.java
     )
   }
 

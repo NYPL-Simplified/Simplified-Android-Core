@@ -11,7 +11,30 @@
     android:layout_marginTop="16dp"
     android:orientation="vertical">
 
-    <include layout="@layout/settings_account_cell" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/accountTitleAnnounce"
+      android:layout_width="match_parent"
+      android:layout_height="48dp">
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="@string/accountLoginRequired"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include layout="@layout/account_cell" />
 
     <Space
       android:layout_width="match_parent"
@@ -20,23 +43,23 @@
     <include layout="@layout/auth" />
 
     <CheckBox
-      android:id="@+id/settingsEULACheckbox"
+      android:id="@+id/accountEULACheckbox"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
       android:layout_marginTop="16dp"
       android:layout_marginEnd="16dp"
       android:gravity="center"
-      android:text="@string/settingsEULAStatement"
+      android:text="@string/accountEULAStatement"
       android:textSize="12sp" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/settingsLogin"
+      android:id="@+id/accountLogin"
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
 
       <ProgressBar
-        android:id="@+id/settingsLoginProgress"
+        android:id="@+id/accountLoginProgress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -49,7 +72,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
       <TextView
-        android:id="@+id/settingsLoginProgressText"
+        android:id="@+id/accountLoginProgressText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -58,13 +81,13 @@
         android:ellipsize="end"
         android:gravity="center|center_horizontal"
         android:maxLines="2"
-        android:text="@string/settingsPlaceholder"
+        android:text="@string/accountPlaceholder"
         android:textAlignment="center"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settingsLoginProgress" />
+        app:layout_constraintTop_toBottomOf="@id/accountLoginProgress" />
 
       <LinearLayout
         android:layout_width="0dp"
@@ -73,16 +96,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settingsLoginProgressText">
+        app:layout_constraintTop_toBottomOf="@id/accountLoginProgressText">
 
         <Space
-          android:id="@+id/settingsLoginButtonSpaceStart"
+          android:id="@+id/accountLoginButtonSpaceStart"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_weight="0.5" />
 
         <Button
-          android:id="@+id/settingsLoginButtonErrorDetails"
+          android:id="@+id/accountLoginButtonErrorDetails"
           android:layout_width="0dp"
           android:layout_height="48dp"
           android:layout_marginEnd="16dp"
@@ -93,18 +116,18 @@
           android:visibility="visible" />
 
         <Button
-          android:id="@+id/settingsLoginButton"
+          android:id="@+id/accountLoginButton"
           android:layout_width="0dp"
           android:layout_height="48dp"
           android:layout_marginEnd="16dp"
           android:layout_weight="1"
           android:enabled="true"
           android:lines="1"
-          android:text="@string/settingsLogin"
+          android:text="@string/accountLogin"
           android:visibility="visible" />
 
         <Space
-          android:id="@+id/settingsLoginButtonSpaceEnd"
+          android:id="@+id/accountLoginButtonSpaceEnd"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_weight="0.5" />
@@ -113,22 +136,22 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
-      android:id="@+id/settingsAuthAlternatives"
+      android:id="@+id/accountAuthAlternatives"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical"
       android:visibility="visible">
 
       <TextView
-        android:id="@+id/settingsAuthAlternativesTitle"
+        android:id="@+id/accountAuthAlternativesTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/settingsLoginAlternatives"
+        android:text="@string/accountLoginAlternatives"
         android:textStyle="bold" />
 
       <LinearLayout
-        android:id="@+id/settingsAuthAlternativesButtons"
+        android:id="@+id/accountAuthAlternativesButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -136,7 +159,7 @@
         <Button
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:text="@string/settingsPlaceholder" />
+          android:text="@string/accountPlaceholder" />
       </LinearLayout>
     </LinearLayout>
 
@@ -148,7 +171,7 @@
       app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/settingsCardCreator"
+      android:id="@+id/accountCardCreator"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:visibility="gone">
@@ -162,7 +185,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
       <TextView
-        android:id="@+id/settingsCardCreatorLabel"
+        android:id="@+id/accountCardCreatorLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -170,21 +193,21 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:enabled="false"
-        android:text="@string/settingsCardCreatorLabel"
+        android:text="@string/accountCardCreatorLabel"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/settingsCardCreatorSignUp"
+        app:layout_constraintEnd_toStartOf="@+id/accountCardCreatorSignUp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
       <Button
-        android:id="@+id/settingsCardCreatorSignUp"
+        android:id="@+id/accountCardCreatorSignUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:enabled="false"
-        android:text="@string/settingsCardCreatorSignUp"
+        android:text="@string/accountCardCreatorSignUp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -192,7 +215,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/settingsSyncBookmarks"
+      android:id="@+id/accountSyncBookmarks"
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
 
@@ -205,7 +228,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
       <TextView
-        android:id="@+id/settingsSyncBookmarksLabel"
+        android:id="@+id/accountSyncBookmarksLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -213,29 +236,29 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:enabled="false"
-        android:labelFor="@id/settingsSyncBookmarksCheck"
-        android:text="@string/settingsSyncBookmarks"
+        android:labelFor="@id/accountSyncBookmarksCheck"
+        android:text="@string/accountSyncBookmarks"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/settingsSyncBookmarksCheck"
+        app:layout_constraintEnd_toStartOf="@+id/accountSyncBookmarksCheck"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
       <Switch
-        android:id="@+id/settingsSyncBookmarksCheck"
+        android:id="@+id/accountSyncBookmarksCheck"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:enabled="false"
-        android:label="@id/settingsSyncBookmarksLabel"
+        android:label="@id/accountSyncBookmarksLabel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/settingsReportIssue"
+      android:id="@+id/accountReportIssue"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="?attr/selectableItemBackground">
@@ -249,7 +272,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
       <TextView
-        android:id="@+id/settingsReportIssueText"
+        android:id="@+id/accountReportIssueText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -257,7 +280,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:enabled="false"
-        android:text="@string/settingsReportIssue"
+        android:text="@string/accountReportIssue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -1,4 +1,5 @@
 dependencies {
+  api project(":simplified-ui-accounts")
   api project(":simplified-ui-catalog")
   api project(":simplified-ui-navigation-api")
   api project(":simplified-ui-profiles")

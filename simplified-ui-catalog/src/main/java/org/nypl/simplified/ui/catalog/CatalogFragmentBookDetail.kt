@@ -6,7 +6,6 @@ import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -23,10 +22,8 @@ import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -50,6 +47,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepSucceeded
+import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -57,7 +55,6 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.SortedMap
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * A book detail page.
@@ -88,6 +85,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var authors: TextView
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var booksController: BooksControllerType
+  private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var buttons: LinearLayout
   private lateinit var configurationService: CatalogConfigurationServiceType
@@ -95,7 +93,6 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
   private lateinit var format: TextView
-  private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var metadata: TableLayout
   private lateinit var parameters: CatalogFragmentBookDetailParameters
   private lateinit var profilesController: ProfilesControllerType
@@ -114,10 +111,8 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var title: TextView
   private lateinit var uiThread: UIThreadServiceType
   private val parametersId = PARAMETERS_ID
-  private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
   private var bookRegistrySubscription: Disposable? = null
   private var debugService: CatalogDebuggingServiceType? = null
-  private var loginDialogModelSubscription: Disposable? = null
 
   private val dateFormatter =
     DateTimeFormatterBuilder()
@@ -145,7 +140,8 @@ class CatalogFragmentBookDetail : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    this.parameters = this.arguments!![this.parametersId] as CatalogFragmentBookDetailParameters
+    this.parameters =
+      this.requireArguments()[this.parametersId] as CatalogFragmentBookDetailParameters
 
     val services = Services.serviceDirectory()
 
@@ -172,15 +168,6 @@ class CatalogFragmentBookDetail : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-    this.loginDialogModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(CatalogLoginViewModel::class.java)
-
-    this.loginDialogModelSubscription =
-      this.loginDialogModel.loginDialogCompleted.subscribe {
-        this.onDialogClosed()
-      }
-
     this.buttonCreator =
       CatalogButtons(this.requireContext(), this.screenSize)
 
@@ -247,8 +234,11 @@ class CatalogFragmentBookDetail : Fragment() {
   override fun onStart() {
     super.onStart()
 
+    this.borrowViewModel =
+      CatalogBorrowViewModelFactory.get(this)
+
     val targetHeight =
-      resources.getDimensionPixelSize(R.dimen.cover_detail_height)
+      this.resources.getDimensionPixelSize(R.dimen.cover_detail_height)
     this.covers.loadCoverInto(
       this.parameters.feedEntry, this.cover, 0, targetHeight
     )
@@ -330,13 +320,15 @@ class CatalogFragmentBookDetail : Fragment() {
 
     val bookWithStatus =
       this.bookRegistry.bookOrNull(this.parameters.bookID)
-        ?: synthesizeBookWithStatus()
+        ?: this.synthesizeBookWithStatus()
 
     this.uiThread.runOnUIThread { this.onBookStatusUI(bookWithStatus) }
-    this.onOPDSFeedEntry(FeedEntry.FeedEntryOPDS(
-      bookWithStatus.book.account,
-      bookWithStatus.book.entry
-    ))
+    this.onOPDSFeedEntry(
+      FeedEntry.FeedEntryOPDS(
+        bookWithStatus.book.account,
+        bookWithStatus.book.entry
+      )
+    )
   }
 
   private fun onOPDSFeedEntry(entry: FeedEntry.FeedEntryOPDS) {
@@ -519,15 +511,16 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createDismissButton {
-      this.tryDismissBorrowError(book.id)
+      this.borrowViewModel.tryDismissBorrowError(this.parameters.feedEntry.accountID, book.id)
     })
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(this.buttonCreator.createDetailsButton {
       this.tryShowError(book, bookStatus.result)
     })
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createRetryButton { button ->
-      this.tryBorrowMaybeAuthenticated(button, book)
+    this.buttons.addView(this.buttonCreator.createRetryButton {
+      this.openLoginDialogIfNecessary()
+      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
     })
     this.checkButtonViewCount()
 
@@ -537,7 +530,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
     // Get the problem report message, if any.
     this.statusFailedText.text =
-      bookStatus.problemReport?.problemDetail ?: getString(R.string.catalogOperationFailed)
+      bookStatus.problemReport?.problemDetail ?: this.getString(R.string.catalogOperationFailed)
   }
 
   @UiThread
@@ -583,8 +576,9 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.buttons.addView(this.buttonCreator.createGetButton { button ->
-      this.tryBorrowMaybeAuthenticated(button, book)
+    this.buttons.addView(this.buttonCreator.createGetButton {
+      this.openLoginDialogIfNecessary()
+      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
     })
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
@@ -606,8 +600,9 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.buttons.addView(this.buttonCreator.createReserveButton { button ->
-      this.tryReserveMaybeAuthenticated(button, book)
+    this.buttons.addView(this.buttonCreator.createReserveButton {
+      this.openLoginDialogIfNecessary()
+      this.borrowViewModel.tryReserveMaybeAuthenticated(book)
     })
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
@@ -633,8 +628,9 @@ class CatalogFragmentBookDetail : Fragment() {
         if (bookStatus.isRevocable) {
           this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
           this.buttons.addView(
-            this.buttonCreator.createRevokeHoldButton { button ->
-              this.tryRevokeMaybeAuthenticated(button, book)
+            this.buttonCreator.createRevokeHoldButton {
+              this.openLoginDialogIfNecessary()
+              this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
             })
           this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
         } else {
@@ -646,12 +642,14 @@ class CatalogFragmentBookDetail : Fragment() {
       is BookStatus.Held.HeldReady -> {
         if (bookStatus.isRevocable) {
           this.buttons.addView(
-            this.buttonCreator.createRevokeHoldButton { button ->
-              this.tryRevokeMaybeAuthenticated(button, book)
+            this.buttonCreator.createRevokeHoldButton {
+              this.openLoginDialogIfNecessary()
+              this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
             })
         }
-        this.buttons.addView(this.buttonCreator.createGetButton { button ->
-          this.tryBorrowMaybeAuthenticated(button, book)
+        this.buttons.addView(this.buttonCreator.createGetButton {
+          this.openLoginDialogIfNecessary()
+          this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
         })
       }
     }
@@ -674,8 +672,9 @@ class CatalogFragmentBookDetail : Fragment() {
     this.buttons.removeAllViews()
     when (bookStatus) {
       is BookStatus.Loaned.LoanedNotDownloaded ->
-        this.buttons.addView(this.buttonCreator.createDownloadButton { button ->
-          this.tryBorrowMaybeAuthenticated(button, book)
+        this.buttons.addView(this.buttonCreator.createDownloadButton {
+          this.openLoginDialogIfNecessary()
+          this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
         })
 
       is BookStatus.Loaned.LoanedDownloaded ->
@@ -696,15 +695,16 @@ class CatalogFragmentBookDetail : Fragment() {
 
     if (bookStatus.returnable) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
-      this.buttons.addView(this.buttonCreator.createRevokeLoanButton { button ->
-        this.tryRevokeMaybeAuthenticated(button, book)
+      this.buttons.addView(this.buttonCreator.createRevokeLoanButton {
+        this.openLoginDialogIfNecessary()
+        this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
       })
     }
 
     if (this.shouldShowDeleteButton(book)) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
       this.buttons.addView(this.buttonCreator.createDeleteButton {
-        this.tryDelete(book.id)
+        this.borrowViewModel.tryDelete(book.account, book.id)
       })
     }
 
@@ -774,7 +774,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.buttons.addView(this.buttonCreator.createCancelDownloadButton {
-      this.tryCancelDownload(book.id)
+      this.borrowViewModel.tryCancelDownload(book.account, book.id)
     })
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
@@ -827,22 +827,23 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createDismissButton {
-      this.tryDismissBorrowError(book.id)
+      this.borrowViewModel.tryDismissBorrowError(book.account, book.id)
     })
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(this.buttonCreator.createDetailsButton {
       this.tryShowError(book, bookStatus.result)
     })
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createRetryButton { button ->
-      this.tryBorrowMaybeAuthenticated(button, book)
+    this.buttons.addView(this.buttonCreator.createRetryButton {
+      this.openLoginDialogIfNecessary()
+      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
     })
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
-    this.statusFailedText.text = getString(R.string.catalogOperationFailed)
+    this.statusFailedText.text = this.getString(R.string.catalogOperationFailed)
   }
 
   @UiThread
@@ -854,15 +855,16 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createDismissButton {
-      this.tryDismissRevokeError(book.id)
+      this.borrowViewModel.tryDismissRevokeError(book.account, book.id)
     })
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(this.buttonCreator.createDetailsButton {
       this.tryShowError(book, bookStatus.result)
     })
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createRetryButton { button ->
-      this.tryRevokeMaybeAuthenticated(button, book)
+    this.buttons.addView(this.buttonCreator.createRetryButton {
+      this.openLoginDialogIfNecessary()
+      this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
     })
     this.checkButtonViewCount()
 
@@ -872,7 +874,21 @@ class CatalogFragmentBookDetail : Fragment() {
 
     // Get the problem report message, if any.
     this.statusFailedText.text =
-      bookStatus.problemReport?.problemDetail ?: getString(R.string.catalogOperationFailed)
+      bookStatus.problemReport?.problemDetail ?: this.getString(R.string.catalogOperationFailed)
+  }
+
+  @UiThread
+  private fun openLoginDialogIfNecessary() {
+    this.uiThread.checkIsUIThread()
+
+    if (this.borrowViewModel.isLoginRequired(this.parameters.feedEntry.accountID)) {
+      this.findNavigationController()
+        .openSettingsAccount(AccountFragmentParameters(
+          accountId = this.parameters.feedEntry.accountID,
+          closeOnLoginSuccess = true,
+          showPleaseLogInTitle = true
+        ))
+    }
   }
 
   @UiThread
@@ -886,151 +902,6 @@ class CatalogFragmentBookDetail : Fragment() {
   override fun onStop() {
     super.onStop()
     this.bookRegistrySubscription?.dispose()
-    this.loginDialogModelSubscription?.dispose()
-  }
-
-  @UiThread
-  fun onDialogClosed() {
-    this.uiThread.checkIsUIThread()
-    this.logger.debug("login dialog was closed")
-    this.runOnLoginDialogClosed.getAndSet(null)?.invoke()
-  }
-
-  /**
-   * Open a login dialog. The given `execute` callback will be executed when the dialog is
-   * closed.
-   *
-   * @see [onDialogClosed]
-   */
-
-  private fun openLoginDialogAndThen(execute: () -> Unit) {
-    val dialogParameters = CatalogFragmentLoginDialogParameters(this.parameters.feedEntry.accountID)
-    this.findNavigationController().openLoginDialog(dialogParameters)
-    this.runOnLoginDialogClosed.set(execute)
-  }
-
-  /**
-   * @return `true` if a login is required on the current account
-   */
-
-  private fun isLoginRequired(): Boolean {
-    return try {
-      val account =
-        this.profilesController.profileCurrent()
-          .account(this.parameters.feedEntry.accountID)
-      val requiresLogin = account.requiresCredentials
-      val isNotLoggedIn = account.loginState !is AccountLoginState.AccountLoggedIn
-      requiresLogin && isNotLoggedIn
-    } catch (e: Exception) {
-      this.logger.error("could not retrieve account: ", e)
-      false
-    }
-  }
-
-  /*
-   * Try borrowing, performing the authentication dialog step if necessary.
-   */
-
-  private fun tryBorrowMaybeAuthenticated(
-    button: Button,
-    book: Book
-  ) {
-    if (!this.isLoginRequired()) {
-      this.tryBorrowAuthenticated(book)
-      return
-    }
-
-    this.openLoginDialogAndThen {
-      if (!this.isLoginRequired()) {
-        this.tryBorrowAuthenticated(book)
-      } else {
-        this.logger.debug("authentication did not complete")
-        button.isEnabled = true
-      }
-    }
-  }
-
-  /*
-   * Try revoking, performing the authentication dialog step if necessary.
-   */
-
-  private fun tryRevokeMaybeAuthenticated(
-    button: Button,
-    book: Book
-  ) {
-    if (!this.isLoginRequired()) {
-      this.tryRevokeAuthenticated(book)
-      return
-    }
-
-    this.openLoginDialogAndThen {
-      if (!this.isLoginRequired()) {
-        this.tryRevokeAuthenticated(book)
-      } else {
-        this.logger.debug("authentication did not complete")
-        button.isEnabled = true
-      }
-    }
-  }
-
-  /*
-   * Try reserving, performing the authentication dialog step if necessary.
-   */
-
-  private fun tryReserveMaybeAuthenticated(
-    button: Button,
-    book: Book
-  ) {
-    if (!this.isLoginRequired()) {
-      this.tryReserveAuthenticated(book)
-      return
-    }
-
-    this.openLoginDialogAndThen {
-      if (!this.isLoginRequired()) {
-        this.tryReserveAuthenticated(book)
-      } else {
-        this.logger.debug("authentication did not complete")
-        button.isEnabled = true
-      }
-    }
-  }
-
-  private fun tryReserveAuthenticated(book: Book) {
-    this.logger.debug("reserving: {}", book.id)
-    try {
-      this.booksController.bookBorrowWithDefaultAcquisition(
-        accountID = this.parameters.feedEntry.accountID,
-        bookID = book.id,
-        entry = book.entry
-      )
-    } catch (e: Throwable) {
-      this.logger.error("failed to start borrow task: ", e)
-    }
-  }
-
-  private fun tryRevokeAuthenticated(book: Book) {
-    this.logger.debug("revoking: {}", book.id)
-
-    try {
-      this.booksController.bookRevoke(this.parameters.feedEntry.accountID, book.id)
-    } catch (e: Throwable) {
-      this.logger.error("failed to start revocation task: ", e)
-    }
-  }
-
-  private fun tryBorrowAuthenticated(book: Book) {
-    this.logger.debug("borrowing: {}", book.id)
-
-    try {
-      this.booksController.bookBorrowWithDefaultAcquisition(
-        accountID = this.parameters.feedEntry.accountID,
-        bookID = book.id,
-        entry = book.entry
-      )
-    } catch (e: Throwable) {
-      this.logger.error("failed to start borrow task: ", e)
-    }
   }
 
   private fun <E : PresentableErrorType> tryShowError(
@@ -1069,45 +940,5 @@ class CatalogFragmentBookDetail : Fragment() {
       }
     }
     return attributes.toSortedMap()
-  }
-
-  private fun tryDismissBorrowError(id: BookID) {
-    this.logger.debug("dismissing borrow error: {}", id)
-
-    try {
-      this.booksController.bookBorrowFailedDismiss(this.parameters.feedEntry.accountID, id)
-    } catch (e: Throwable) {
-      this.logger.error("failed to dismiss task error: ", e)
-    }
-  }
-
-  private fun tryDismissRevokeError(id: BookID) {
-    this.logger.debug("dismissing revoke error: {}", id)
-
-    try {
-      this.booksController.bookRevokeFailedDismiss(this.parameters.feedEntry.accountID, id)
-    } catch (e: Throwable) {
-      this.logger.error("failed to dismiss revoke error: ", e)
-    }
-  }
-
-  private fun tryCancelDownload(id: BookID) {
-    this.logger.debug("cancelling: {}", id)
-
-    try {
-      this.booksController.bookDownloadCancel(this.parameters.feedEntry.accountID, id)
-    } catch (e: Throwable) {
-      this.logger.error("failed to cancel download: ", e)
-    }
-  }
-
-  private fun tryDelete(id: BookID) {
-    this.logger.debug("deleting: {}", id)
-
-    try {
-      this.booksController.bookDelete(this.parameters.feedEntry.accountID, id)
-    } catch (e: Throwable) {
-      this.logger.error("failed to start deletion: ", e)
-    }
   }
 }

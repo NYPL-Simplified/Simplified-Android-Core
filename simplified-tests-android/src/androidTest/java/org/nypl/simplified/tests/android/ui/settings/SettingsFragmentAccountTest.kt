@@ -89,7 +89,7 @@ class SettingsFragmentAccountTest :
         Assert.assertEquals("", view.text.toString())
         Assert.assertTrue(ViewMatchers.isDisplayed().matches(view))
       }
-    Espresso.onView(ViewMatchers.withId(R.id.settingsEULACheckbox))
+    Espresso.onView(ViewMatchers.withId(R.id.accountEULACheckbox))
       .check { view, _ ->
         view as CheckBox
         Assert.assertEquals(false, view.isChecked)
@@ -205,7 +205,7 @@ class SettingsFragmentAccountTest :
         Assert.assertEquals("", view.text.toString())
         Assert.assertTrue(ViewMatchers.isDisplayed().matches(view))
       }
-    Espresso.onView(ViewMatchers.withId(R.id.settingsEULACheckbox))
+    Espresso.onView(ViewMatchers.withId(R.id.accountEULACheckbox))
       .check { view, _ ->
         view as CheckBox
         Assert.assertEquals(false, view.isChecked)
@@ -253,7 +253,7 @@ class SettingsFragmentAccountTest :
      * Agreeing to the EULA unlocks the login button.
      */
 
-    Espresso.onView(ViewMatchers.withId(R.id.settingsEULACheckbox))
+    Espresso.onView(ViewMatchers.withId(R.id.accountEULACheckbox))
       .perform(ViewActions.click())
     Espresso.onView(ViewMatchers.withId(R.id.settingsLoginButton))
       .check { view, _ ->
@@ -345,7 +345,7 @@ class SettingsFragmentAccountTest :
         Assert.assertTrue(ViewMatchers.isDisplayed().matches(view))
         Assert.assertEquals(false, view.isEnabled)
       }
-    Espresso.onView(ViewMatchers.withId(R.id.settingsEULACheckbox))
+    Espresso.onView(ViewMatchers.withId(R.id.accountEULACheckbox))
       .check { view, _ ->
         view as CheckBox
         Assert.assertEquals(true, view.isChecked)

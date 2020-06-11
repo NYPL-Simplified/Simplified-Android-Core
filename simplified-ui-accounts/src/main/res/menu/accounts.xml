@@ -4,9 +4,9 @@
   xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <item
-    android:id="@+id/settingsMenuActionAccountAdd"
+    android:id="@+id/accountsMenuActionAccountAdd"
     android:icon="@drawable/account_add"
-    android:title="@string/settingsAccountAdd"
+    android:title="@string/accountAdd"
     app:showAsAction="ifRoom" />
 
 </menu>
