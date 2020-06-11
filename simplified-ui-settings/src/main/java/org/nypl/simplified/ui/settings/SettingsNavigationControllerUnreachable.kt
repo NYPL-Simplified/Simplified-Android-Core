@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.settings
 
 import com.io7m.junreachable.UnreachableCodeException
-import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters

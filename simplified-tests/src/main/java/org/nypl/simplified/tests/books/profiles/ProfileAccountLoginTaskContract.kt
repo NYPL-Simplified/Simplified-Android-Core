@@ -27,7 +27,6 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
@@ -1317,11 +1316,13 @@ abstract class ProfileAccountLoginTaskContract {
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.OAuthWithIntermediary(
-        description = "Description",
-        logoURI = null,
-        authenticate = URI.create("urn:example")
-      ))
+      .thenReturn(
+        AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+          description = "Description",
+          logoURI = null,
+          authenticate = URI.create("urn:example")
+        )
+      )
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -1382,15 +1383,17 @@ abstract class ProfileAccountLoginTaskContract {
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = null,
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 8,
-        passwordKeyboard = KeyboardInput.DEFAULT,
-        description = "Description",
-        labels = mapOf(),
-        logoURI = null
-      ))
+      .thenReturn(
+        AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Description",
+          labels = mapOf(),
+          logoURI = null
+        )
+      )
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -1851,7 +1854,6 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountNotLoggedIn
   }
-
 
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }

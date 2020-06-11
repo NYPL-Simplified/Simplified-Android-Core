@@ -780,7 +780,7 @@ class AccountFragment : Fragment() {
           this.explicitlyClose()
           return
         } else {
-
+          // Doing nothing.
         }
       }
 

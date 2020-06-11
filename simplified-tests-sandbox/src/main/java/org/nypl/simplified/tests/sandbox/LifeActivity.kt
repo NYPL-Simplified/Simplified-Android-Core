@@ -1,15 +1,7 @@
 package org.nypl.simplified.tests.sandbox
 
 import android.os.Bundle
-import android.view.ActionMode
 import androidx.appcompat.app.AppCompatActivity
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
-import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepSucceeded
-import org.nypl.simplified.ui.errorpage.ErrorPageFragment
-import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.LoggerFactory
 
 class LifeActivity : AppCompatActivity() {
