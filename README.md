@@ -265,6 +265,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.networkconnectivity](simplified-networkconnectivity)|Network connectivity|
 |[org.librarysimplified.networkconnectivity.api](simplified-networkconnectivity-api)|Network connectivity API|
 |[org.librarysimplified.notifications](simplified-notifications)|Notification service|
+|[org.librarysimplified.oauth](simplified-oauth)|OAuth|
 |[org.librarysimplified.opds.auth_document](simplified-opds-auth-document)|OPDS authentication document parser implementation|
 |[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
 |[org.librarysimplified.opds.core](simplified-opds-core)|OPDS feed parser|
@@ -287,6 +288,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.tests.sandbox](simplified-tests-sandbox)|Sandbox for informal testing|
 |[org.librarysimplified.tests.strings](simplified-tests-strings)|Mock strings for test suites|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
+|[org.librarysimplified.ui.accounts](simplified-ui-accounts)|Accounts UI components|
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
 |[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
 |[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
