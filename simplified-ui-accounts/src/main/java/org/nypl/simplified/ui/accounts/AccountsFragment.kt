@@ -37,13 +37,33 @@ class AccountsFragment : Fragment() {
   private lateinit var accountListData: MutableList<AccountType>
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var imageLoader: ImageLoaderType
+  private lateinit var parameters: AccountsFragmentParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
   private var accountSubscription: Disposable? = null
 
+  companion object {
+
+    private const val PARAMETERS_ID =
+      "org.nypl.simplified.ui.accounts.AccountsFragment.parameters"
+
+    /**
+     * Create a new accounts fragment for the given parameters.
+     */
+
+    fun create(parameters: AccountsFragmentParameters): AccountsFragment {
+      val arguments = Bundle()
+      arguments.putSerializable(PARAMETERS_ID, parameters)
+      val fragment = AccountsFragment()
+      fragment.arguments = arguments
+      return fragment
+    }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    this.parameters = this.requireArguments()[PARAMETERS_ID] as AccountsFragmentParameters
     this.accountListData = mutableListOf()
 
     val services = Services.serviceDirectory()
@@ -141,9 +161,14 @@ class AccountsFragment : Fragment() {
       toolbar.inflateMenu(R.menu.accounts)
 
       val accountAdd = toolbar.menu.findItem(R.id.accountsMenuActionAccountAdd)
-      accountAdd.setOnMenuItemClickListener {
-        this.findNavigationController().openSettingsAccountRegistry()
-        true
+      if (this.parameters.shouldShowLibraryRegistryMenu) {
+        accountAdd.setOnMenuItemClickListener {
+          this.findNavigationController().openSettingsAccountRegistry()
+          true
+        }
+        accountAdd.isVisible = true
+      } else {
+        accountAdd.isVisible = false
       }
 
       host.toolbarSetTitleSubtitle(

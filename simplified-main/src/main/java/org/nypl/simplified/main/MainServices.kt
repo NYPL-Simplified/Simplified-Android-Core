@@ -607,8 +607,8 @@ internal object MainServices {
 
     this.logger.debug("returning fallback settings configuration service")
     return object : SettingsConfigurationServiceType {
-      override val allowAccountsAccess: Boolean
-        get() = true
+      override val allowAccountsAccess: Boolean = true
+      override val allowAccountsRegistryAccess: Boolean = true
     }
   }
 

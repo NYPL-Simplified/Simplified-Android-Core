@@ -28,6 +28,7 @@ import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
+import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
@@ -47,6 +48,7 @@ class MainFragment : Fragment() {
   private lateinit var catalogConfig: CatalogConfigurationServiceType
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesController: ProfilesControllerType
+  private lateinit var settingsConfiguration: SettingsConfigurationServiceType
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var viewModel: MainFragmentViewModel
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
@@ -64,6 +66,8 @@ class MainFragment : Fragment() {
 
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
+    this.settingsConfiguration =
+      services.requireService(SettingsConfigurationServiceType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
     this.catalogConfig =
@@ -113,6 +117,7 @@ class MainFragment : Fragment() {
         TabbedNavigationController.create(
           activity = this.requireActivity(),
           profilesController = this.profilesController,
+          settingsConfiguration = this.settingsConfiguration,
           fragmentContainerId = R.id.tabbedFragmentHolder,
           navigationView = this.bottomView
         )

@@ -130,7 +130,7 @@ class AccountFragment : Fragment() {
   companion object {
 
     private const val PARAMETERS_ID =
-      "org.nypl.simplified.ui.accounts.SettingsFragmentAccount.parameters"
+      "org.nypl.simplified.ui.accounts.AccountFragment.parameters"
 
     /**
      * Create a new account fragment for the given parameters.
