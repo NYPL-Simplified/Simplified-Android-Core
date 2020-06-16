@@ -10,6 +10,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.ANONYMOUS_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_INTERMEDIARY_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
@@ -74,11 +75,11 @@ class AccountProviderResolution(
           false
         }
 
-      val authenticationDescription =
+      val authentications =
         if (authDocument != null) {
           this.extractAuthenticationDescription(taskRecorder, authDocument)
         } else {
-          null
+          Pair(AccountProviderAuthenticationDescription.Anonymous, listOf())
         }
 
       val updated =
@@ -106,7 +107,8 @@ class AccountProviderResolution(
         AccountProvider(
           addAutomatically = this.description.isAutomatic,
           annotationsURI = annotationsURI,
-          authentication = authenticationDescription,
+          authentication = authentications.first,
+          authenticationAlternatives = authentications.second,
           authenticationDocumentURI = this.description.authenticationDocumentURI?.hrefURI,
           cardCreatorURI = authDocument?.cardCreatorURI,
           catalogURI = catalogURI,
@@ -195,23 +197,43 @@ class AccountProviderResolution(
   private fun extractAuthenticationDescription(
     taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>,
     authDocument: AuthenticationDocument
-  ): AccountProviderAuthenticationDescription? {
+  ): Pair<AccountProviderAuthenticationDescription, List<AccountProviderAuthenticationDescription>> {
 
     if (authDocument.authentication.isEmpty()) {
-      return null
+      return Pair(AccountProviderAuthenticationDescription.Anonymous, listOf())
     }
 
-    for (authObject in authDocument.authentication) {
+    val authObjects =
+      mutableListOf<AccountProviderAuthenticationDescription>()
+
+    accumulateAuthentications@ for (authObject in authDocument.authentication) {
       when (val authType = authObject.type.toASCIIString()) {
-        BASIC_TYPE ->
-          return this.extractAuthenticationDescriptionBasic(authObject)
-        COPPA_TYPE ->
-          return this.extractAuthenticationDescriptionCOPPA(taskRecorder, authObject)
-        ANONYMOUS_TYPE ->
-          return null
-        else ->
+        OAUTH_INTERMEDIARY_TYPE -> {
+          authObjects.add(
+            this.extractAuthenticationDescriptionOAuthIntermediary(taskRecorder, authObject))
+        }
+        BASIC_TYPE -> {
+          authObjects.add(
+            this.extractAuthenticationDescriptionBasic(authObject))
+        }
+        COPPA_TYPE -> {
+          authObjects.add(
+            this.extractAuthenticationDescriptionCOPPA(taskRecorder, authObject))
+        }
+        ANONYMOUS_TYPE -> {
+          authObjects.clear()
+          authObjects.add(AccountProviderAuthenticationDescription.Anonymous)
+          break@accumulateAuthentications
+        }
+        else -> {
           this.logger.warn("encountered unrecognized authentication type: {}", authType)
+        }
       }
+    }
+
+    if (authObjects.size >= 1) {
+      val mainObject = authObjects.removeAt(0)
+      return Pair(mainObject, authObjects.toList())
     }
 
     val message = this.stringResources.resolvingAuthDocumentNoUsableAuthenticationTypes
@@ -223,6 +245,34 @@ class AccountProviderResolution(
     throw IOException(message)
   }
 
+  private fun extractAuthenticationDescriptionOAuthIntermediary(
+    taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>,
+    authObject: AuthenticationObject
+  ): AccountProviderAuthenticationDescription {
+
+    val authenticate =
+      authObject.links.find { link -> link.relation == "authenticate" }
+    val logo =
+      authObject.links.find { link -> link.relation == "logo" }
+
+    val authenticateURI = authenticate?.hrefURI
+    if (authenticateURI == null) {
+      val message = this.stringResources.resolvingAuthDocumentOAuthMalformed
+      taskRecorder.currentStepFailed(message, AuthDocumentUnusable(
+        message = message,
+        accountProviderID = this.description.id.toASCIIString(),
+        accountProviderTitle = this.description.title
+      ))
+      throw IOException(message)
+    }
+
+    return AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+      authenticate = authenticateURI,
+      description = authObject.description,
+      logoURI = logo?.hrefURI
+    )
+  }
+
   private fun extractAuthenticationDescriptionBasic(
     authObject: AuthenticationObject
   ): AccountProviderAuthenticationDescription.Basic {
@@ -231,14 +281,18 @@ class AccountProviderResolution(
       authObject.inputs[LABEL_LOGIN]
     val passwordRestrictions =
       authObject.inputs[LABEL_PASSWORD]
+    val logo =
+      authObject.links.find { link -> link.relation == "logo" }
+        ?.hrefURI
 
     return AccountProviderAuthenticationDescription.Basic(
       barcodeFormat = loginRestrictions?.barcodeFormat,
-      keyboard = parseKeyboardType(loginRestrictions?.keyboardType),
-      passwordMaximumLength = passwordRestrictions?.maximumLength ?: 0,
-      passwordKeyboard = parseKeyboardType(passwordRestrictions?.keyboardType),
       description = authObject.description,
-      labels = authObject.labels
+      keyboard = parseKeyboardType(loginRestrictions?.keyboardType),
+      labels = authObject.labels,
+      logoURI = logo,
+      passwordKeyboard = parseKeyboardType(passwordRestrictions?.keyboardType),
+      passwordMaximumLength = passwordRestrictions?.maximumLength ?: 0
     )
   }
 

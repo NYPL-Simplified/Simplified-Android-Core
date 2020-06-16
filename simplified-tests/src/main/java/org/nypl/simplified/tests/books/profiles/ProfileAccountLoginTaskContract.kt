@@ -17,10 +17,10 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
@@ -28,10 +28,13 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.controller.ProfileAccountLoginTask
 import org.nypl.simplified.http.core.HTTPResultError
@@ -48,6 +51,7 @@ import org.nypl.simplified.patron.api.PatronUserProfileParserType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.books.controller.TaskDumps
 import org.nypl.simplified.tests.http.MockingHTTP
@@ -106,11 +110,21 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginNotRequired() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Description",
+          labels = mapOf(),
+          logoURI = null
+        ),
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
@@ -143,7 +157,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -161,26 +176,31 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginServer401() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      )
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.patronSettingsURI)
       .thenReturn(URI.create("urn:patron"))
-
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(authDescription)
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -210,7 +230,8 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         ByteArrayInputStream(ByteArray(0)),
         Option.none()
-      ))
+      )
+    )
 
     val task =
       ProfileAccountLoginTask(
@@ -220,7 +241,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -237,26 +259,31 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginServerNon401() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      )
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.patronSettingsURI)
       .thenReturn(URI.create("urn:patron"))
-
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(authDescription)
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -286,7 +313,8 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         ByteArrayInputStream(ByteArray(0)),
         Option.none()
-      ))
+      )
+    )
 
     val task =
       ProfileAccountLoginTask(
@@ -296,7 +324,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -304,13 +333,15 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoginFailed
 
-    Assert.assertEquals(AccountLoginServerError(
-      "loginServerError 404 NOT FOUND",
-      URI.create("urn:patron"),
-      404,
-      "NOT FOUND",
-      null
-    ), state.taskResult.errors().last())
+    Assert.assertEquals(
+      AccountLoginServerError(
+        "loginServerError 404 NOT FOUND",
+        URI.create("urn:patron"),
+        404,
+        "NOT FOUND",
+        null
+      ), state.taskResult.errors().last()
+    )
   }
 
   /**
@@ -319,26 +350,31 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginServerException() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      )
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.patronSettingsURI)
       .thenReturn(URI.create("urn:patron"))
-
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(authDescription)
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -363,7 +399,8 @@ abstract class ProfileAccountLoginTaskContract {
       HTTPResultException(
         URI("urn:patron"),
         Exception()
-      ))
+      )
+    )
 
     val task =
       ProfileAccountLoginTask(
@@ -373,7 +410,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -390,11 +428,21 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginNoPatronURI() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Description",
+          labels = mapOf(),
+          logoURI = null
+        ),
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
@@ -403,13 +451,17 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(null)
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(
+        AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = "CODABAR",
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 10,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Library Login",
+          labels = mapOf(),
+          logoURI = null
+        )
+      )
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -434,7 +486,8 @@ abstract class ProfileAccountLoginTaskContract {
       HTTPResultException(
         URI("urn:patron"),
         Exception()
-      ))
+      )
+    )
 
     val task =
       ProfileAccountLoginTask(
@@ -444,7 +497,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -459,26 +513,31 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginPatronProfileUnparseable() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      )
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.patronSettingsURI)
       .thenReturn(URI.create("urn:patron"))
-
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(authDescription)
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -523,7 +582,8 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         mutableMapOf(),
         0L
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     val task =
       ProfileAccountLoginTask(
@@ -533,7 +593,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -541,7 +602,11 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoginFailed
 
-    val expected = AccountLoginServerParseError("loginPatronSettingsRequestParseFailed", parseWarnings, parseErrors)
+    val expected = AccountLoginServerParseError(
+      "loginPatronSettingsRequestParseFailed",
+      parseWarnings,
+      parseErrors
+    )
     val received = state.taskResult.errors().last()
     Assert.assertEquals(expected, received)
   }
@@ -552,26 +617,31 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginNoDRM() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      )
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.patronSettingsURI)
       .thenReturn(URI.create("urn:patron"))
-
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(authDescription)
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -601,7 +671,8 @@ abstract class ProfileAccountLoginTaskContract {
       PatronUserProfile(
         settings = PatronSettings(false),
         drm = listOf(),
-        authorization = null)
+        authorization = null
+      )
 
     Mockito.`when`(parser.parse())
       .thenReturn(ParseResult.Success(listOf(), profile))
@@ -617,7 +688,8 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         mutableMapOf(),
         0L
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     val task =
       ProfileAccountLoginTask(
@@ -627,7 +699,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -635,7 +708,15 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoggedIn
 
-    Assert.assertEquals(credentials, state.credentials)
+    Assert.assertEquals(
+      AccountAuthenticationCredentials.Basic(
+        userName = request.username,
+        password = request.password,
+        adobeCredentials = null,
+        authenticationDescription = "Description"
+      ),
+      state.credentials
+    )
   }
 
   /**
@@ -645,11 +726,24 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginAdobeDRM() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 10,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Library Login",
+        labels = mapOf(),
+        logoURI = null
+      )
+
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
@@ -658,13 +752,7 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(authDescription)
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -693,13 +781,16 @@ abstract class ProfileAccountLoginTaskContract {
     val profile =
       PatronUserProfile(
         settings = PatronSettings(false),
-        drm = listOf(PatronDRMAdobe(
-          vendor = "OmniConsumerProducts",
-          scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
-          clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
-          deviceManagerURI = URI("https://example.com/devices")
-        )),
-        authorization = null)
+        drm = listOf(
+          PatronDRMAdobe(
+            vendor = "OmniConsumerProducts",
+            scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
+            clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
+            deviceManagerURI = URI("https://example.com/devices")
+          )
+        ),
+        authorization = null
+      )
 
     Mockito.`when`(parser.parse())
       .thenReturn(ParseResult.Success(listOf(), profile))
@@ -715,7 +806,8 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         mutableMapOf(),
         0L
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     this.http.addResponse(
       URI.create("https://example.com/devices"),
@@ -726,19 +818,22 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         mutableMapOf(),
         0L
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     /*
      * When the code calls activateDevice(), it succeeds if the connector returns a single
      * activation.
      */
 
-    Mockito.`when`(this.adeptConnector.activateDevice(
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.activateDevice(
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptActivationReceiverType
       receiver.onActivationsCount(1)
       receiver.onActivation(
@@ -747,7 +842,8 @@ abstract class ProfileAccountLoginTaskContract {
         AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
         "user",
         AdobeUserID("someone"),
-        null)
+        null
+      )
     }
 
     Mockito.`when`(this.adeptExecutor.execute(anyNonNull()))
@@ -764,7 +860,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -772,17 +869,26 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoggedIn
 
+    val originalCredentials =
+      AccountAuthenticationCredentials.Basic(
+        userName = request.username,
+        password = request.password,
+        adobeCredentials = null,
+        authenticationDescription = "Library Login"
+      )
+
     val newCredentials =
-      credentials.toBuilder()
-        .setAdobeCredentials(
-          AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("OmniConsumerProducts"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = URI("https://example.com/devices"),
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
-              userID = AdobeUserID("someone"))
-          )).build()
+      originalCredentials.withAdobePreActivationCredentials(
+        AccountAuthenticationAdobePreActivationCredentials(
+          vendorID = AdobeVendorID("OmniConsumerProducts"),
+          clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+          deviceManagerURI = URI("https://example.com/devices"),
+          postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+            deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
+            userID = AdobeUserID("someone")
+          )
+        )
+      )
 
     Assert.assertEquals(newCredentials, state.credentials)
   }
@@ -793,26 +899,32 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginAdobeDRMNotSupported() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      )
+
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.patronSettingsURI)
       .thenReturn(URI.create("urn:patron"))
-
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(authDescription)
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -841,13 +953,16 @@ abstract class ProfileAccountLoginTaskContract {
     val profile =
       PatronUserProfile(
         settings = PatronSettings(false),
-        drm = listOf(PatronDRMAdobe(
-          vendor = "OmniConsumerProducts",
-          scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
-          clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
-          deviceManagerURI = URI("https://example.com/devices")
-        )),
-        authorization = null)
+        drm = listOf(
+          PatronDRMAdobe(
+            vendor = "OmniConsumerProducts",
+            scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
+            clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
+            deviceManagerURI = URI("https://example.com/devices")
+          )
+        ),
+        authorization = null
+      )
 
     Mockito.`when`(parser.parse())
       .thenReturn(ParseResult.Success(listOf(), profile))
@@ -863,7 +978,8 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         mutableMapOf(),
         0L
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     val task =
       ProfileAccountLoginTask(
@@ -873,7 +989,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -881,15 +998,23 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoggedIn
 
+    val originalCredentials =
+      AccountAuthenticationCredentials.Basic(
+        userName = request.username,
+        password = request.password,
+        adobeCredentials = null,
+        authenticationDescription = "Description"
+      )
+
     val newCredentials =
-      credentials.toBuilder()
-        .setAdobeCredentials(
-          AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("OmniConsumerProducts"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = URI("https://example.com/devices"),
-            postActivationCredentials = null))
-        .build()
+      originalCredentials.withAdobePreActivationCredentials(
+        AccountAuthenticationAdobePreActivationCredentials(
+          vendorID = AdobeVendorID("OmniConsumerProducts"),
+          clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+          deviceManagerURI = URI("https://example.com/devices"),
+          postActivationCredentials = null
+        )
+      )
 
     Assert.assertEquals(newCredentials, state.credentials)
   }
@@ -900,11 +1025,21 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginAdobeDRMNoActivations() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Description",
+          labels = mapOf(),
+          logoURI = null
+        ),
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
@@ -913,13 +1048,17 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(
+        AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = "CODABAR",
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 10,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Library Login",
+          labels = mapOf(),
+          logoURI = null
+        )
+      )
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -948,13 +1087,16 @@ abstract class ProfileAccountLoginTaskContract {
     val profile =
       PatronUserProfile(
         settings = PatronSettings(false),
-        drm = listOf(PatronDRMAdobe(
-          vendor = "OmniConsumerProducts",
-          scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
-          clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
-          deviceManagerURI = URI("https://example.com/devices")
-        )),
-        authorization = null)
+        drm = listOf(
+          PatronDRMAdobe(
+            vendor = "OmniConsumerProducts",
+            scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
+            clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
+            deviceManagerURI = URI("https://example.com/devices")
+          )
+        ),
+        authorization = null
+      )
 
     Mockito.`when`(parser.parse())
       .thenReturn(ParseResult.Success(listOf(), profile))
@@ -970,19 +1112,22 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         mutableMapOf(),
         0L
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     /*
      * When the code calls activateDevice(), it succeeds if the connector returns a single
      * activation.
      */
 
-    Mockito.`when`(this.adeptConnector.activateDevice(
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.activateDevice(
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull()
+      )
+    ).then { invocation ->
       val receiver =
         invocation.arguments[0] as AdobeAdeptActivationReceiverType
       Unit
@@ -1002,7 +1147,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -1017,11 +1163,23 @@ abstract class ProfileAccountLoginTaskContract {
 
   @Test
   fun testLoginAdobeDRMActivationError() {
-    val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = null,
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 8,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Description",
+        labels = mapOf(),
+        logoURI = null
+      )
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
 
     val provider =
       Mockito.mock(AccountProviderType::class.java)
@@ -1030,13 +1188,7 @@ abstract class ProfileAccountLoginTaskContract {
       .thenReturn(URI.create("urn:patron"))
 
     Mockito.`when`(provider.authentication)
-      .thenReturn(AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        description = "Library Login",
-        labels = mapOf()))
+      .thenReturn(authDescription)
 
     Mockito.`when`(this.profile.id)
       .thenReturn(this.profileID)
@@ -1065,13 +1217,16 @@ abstract class ProfileAccountLoginTaskContract {
     val profile =
       PatronUserProfile(
         settings = PatronSettings(false),
-        drm = listOf(PatronDRMAdobe(
-          vendor = "OmniConsumerProducts",
-          scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
-          clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
-          deviceManagerURI = URI("https://example.com/devices")
-        )),
-        authorization = null)
+        drm = listOf(
+          PatronDRMAdobe(
+            vendor = "OmniConsumerProducts",
+            scheme = URI("http://librarysimplified.org/terms/drm/scheme/ACS"),
+            clientToken = "NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K",
+            deviceManagerURI = URI("https://example.com/devices")
+          )
+        ),
+        authorization = null
+      )
 
     Mockito.`when`(parser.parse())
       .thenReturn(ParseResult.Success(listOf(), profile))
@@ -1087,18 +1242,21 @@ abstract class ProfileAccountLoginTaskContract {
         0L,
         mutableMapOf(),
         0L
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     /*
      * When the code calls activateDevice(), it fails if the connector returns an error.
      */
 
-    Mockito.`when`(this.adeptConnector.activateDevice(
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.activateDevice(
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptActivationReceiverType
       receiver.onActivationError("E_FAIL_OFTEN_AND_LOUDLY")
     }
@@ -1117,7 +1275,8 @@ abstract class ProfileAccountLoginTaskContract {
         account = this.account,
         loginStrings = this.loginStrings,
         patronParsers = this.patronParsers,
-        initialCredentials = credentials)
+        request = request
+      )
 
     val result = task.call()
     TaskDumps.dump(logger, result)
@@ -1127,7 +1286,573 @@ abstract class ProfileAccountLoginTaskContract {
 
     Assert.assertEquals(
       AccountLoginDRMFailure("loginDeviceActivationFailed", "E_FAIL_OFTEN_AND_LOUDLY"),
-      state.taskResult.errors().last())
+      state.taskResult.errors().last()
+    )
+  }
+
+  /**
+   * Trying to log in to an account using an unsupported mechanism, fails.
+   */
+
+  @Test
+  fun testLoginWrongType0() {
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Description",
+          labels = mapOf(),
+          logoURI = null
+        ),
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(
+        AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+          description = "Description",
+          logoURI = null,
+          authenticate = URI.create("urn:example")
+        )
+      )
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request
+      )
+
+    val result = task.call()
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
+
+    val state =
+      this.account.loginState as AccountLoginFailed
+
+    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginNotRequired)
+  }
+
+  /**
+   * Trying to log in to an account using an unsupported mechanism, fails.
+   */
+
+  @Test
+  fun testLoginWrongType1() {
+    val request =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate(
+        accountId = this.accountID,
+        description = AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+          description = "Description",
+          logoURI = null,
+          authenticate = URI.create("urn:example")
+        )
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(
+        AccountProviderAuthenticationDescription.Basic(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          description = "Description",
+          labels = mapOf(),
+          logoURI = null
+        )
+      )
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request
+      )
+
+    val result = task.call()
+    TaskDumps.dump(logger, result)
+    result as TaskResult.Failure
+
+    val state =
+      this.account.loginState as AccountLoginFailed
+
+    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginNotRequired)
+  }
+
+  /**
+   * Logging in with OAuth succeeds.
+   */
+
+  @Test
+  fun testLoginOAuthCompleteNoDRM() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate(
+        accountId = this.accountID,
+        description = authDescription
+      )
+    val request1 =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryComplete(
+        accountId = this.accountID,
+        token = "A TOKEN!"
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("urn:patron"))
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val parser =
+      Mockito.mock(PatronUserProfileParserType::class.java)
+
+    val patronStream =
+      Mockito.mock(InputStream::class.java)
+
+    val profile =
+      PatronUserProfile(
+        settings = PatronSettings(false),
+        drm = listOf(),
+        authorization = null
+      )
+
+    Mockito.`when`(parser.parse())
+      .thenReturn(ParseResult.Success(listOf(), profile))
+    Mockito.`when`(this.patronParsers.createParser(URI.create("urn:patron"), patronStream, false))
+      .thenReturn(parser)
+
+    this.http.addResponse(
+      URI.create("urn:patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request0
+      )
+
+    val result0 = task0.call()
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountLoggingInWaitingForExternalAuthentication
+
+    val task1 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request1
+      )
+
+    val result1 = task1.call()
+    TaskDumps.dump(logger, result1)
+
+    val state =
+      this.account.loginState as AccountLoggedIn
+
+    Assert.assertEquals(
+      AccountAuthenticationCredentials.OAuthWithIntermediary(
+        adobeCredentials = null,
+        authenticationDescription = "Description",
+        accessToken = "A TOKEN!"
+      ),
+      state.credentials
+    )
+  }
+
+  /**
+   * Receiving an OAuth token in an account that wasn't waiting for one ignores the request.
+   */
+
+  @Test
+  fun testLoginOAuthNotWaiting() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryComplete(
+        accountId = this.accountID,
+        token = "A TOKEN!"
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("urn:patron"))
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val parser =
+      Mockito.mock(PatronUserProfileParserType::class.java)
+
+    val patronStream =
+      Mockito.mock(InputStream::class.java)
+
+    val profile =
+      PatronUserProfile(
+        settings = PatronSettings(false),
+        drm = listOf(),
+        authorization = null
+      )
+
+    Mockito.`when`(parser.parse())
+      .thenReturn(ParseResult.Success(listOf(), profile))
+    Mockito.`when`(this.patronParsers.createParser(URI.create("urn:patron"), patronStream, false))
+      .thenReturn(parser)
+
+    this.http.addResponse(
+      URI.create("urn:patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request0
+      )
+
+    this.loginState = AccountNotLoggedIn
+
+    val result0 = task0.call() as TaskResult.Success
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountNotLoggedIn
+  }
+
+  /**
+   * Cancelling an OAuth request in an account that wasn't waiting for one ignores the request.
+   */
+
+  @Test
+  fun testLoginOAuthNotWaitingCancel() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryCancel(
+        accountId = this.accountID,
+        description = authDescription
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("urn:patron"))
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val parser =
+      Mockito.mock(PatronUserProfileParserType::class.java)
+
+    val patronStream =
+      Mockito.mock(InputStream::class.java)
+
+    val profile =
+      PatronUserProfile(
+        settings = PatronSettings(false),
+        drm = listOf(),
+        authorization = null
+      )
+
+    Mockito.`when`(parser.parse())
+      .thenReturn(ParseResult.Success(listOf(), profile))
+    Mockito.`when`(this.patronParsers.createParser(URI.create("urn:patron"), patronStream, false))
+      .thenReturn(parser)
+
+    this.http.addResponse(
+      URI.create("urn:patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request0
+      )
+
+    this.loginState = AccountNotLoggedIn
+
+    val result0 = task0.call() as TaskResult.Success
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountNotLoggedIn
+  }
+
+  /**
+   * Cancelling OAuth works.
+   */
+
+  @Test
+  fun testLoginOAuthCancel() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.OAuthWithIntermediary(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate(
+        accountId = this.accountID,
+        description = authDescription
+      )
+    val request1 =
+      ProfileAccountLoginRequest.OAuthWithIntermediaryCancel(
+        accountId = this.accountID,
+        description = authDescription
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("urn:patron"))
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    val parser =
+      Mockito.mock(PatronUserProfileParserType::class.java)
+
+    val patronStream =
+      Mockito.mock(InputStream::class.java)
+
+    val profile =
+      PatronUserProfile(
+        settings = PatronSettings(false),
+        drm = listOf(),
+        authorization = null
+      )
+
+    Mockito.`when`(parser.parse())
+      .thenReturn(ParseResult.Success(listOf(), profile))
+    Mockito.`when`(this.patronParsers.createParser(URI.create("urn:patron"), patronStream, false))
+      .thenReturn(parser)
+
+    this.http.addResponse(
+      URI.create("urn:patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        patronStream,
+        0L,
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request0
+      )
+
+    val result0 = task0.call()
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountLoggingInWaitingForExternalAuthentication
+
+    val task1 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParsers,
+        request = request1
+      )
+
+    val result1 = task1.call()
+    TaskDumps.dump(logger, result1)
+
+    val state =
+      this.account.loginState as AccountNotLoggedIn
   }
 
   private fun <T> anyNonNull(): T =

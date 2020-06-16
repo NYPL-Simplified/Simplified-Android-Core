@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/authBasic"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content">
+
+  <Button
+    android:id="@+id/authBasicLogo"
+    android:layout_width="0dp"
+    android:layout_height="48dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:visibility="gone"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/account_default" />
+
+  <TextView
+    android:id="@+id/authBasicUserNameLabel"
+    android:layout_width="96dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:ellipsize="end"
+    android:labelFor="@id/authBasicUserNameField"
+    android:maxLines="1"
+    android:text="@string/accountUserName"
+    android:textSize="14sp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/authBasicLogo" />
+
+  <TextView
+    android:id="@+id/authBasicPasswordLabel"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="24dp"
+    android:layout_marginBottom="16dp"
+    android:ellipsize="end"
+    android:labelFor="@id/authBasicPasswordField"
+    android:maxLines="1"
+    android:text="@string/accountPassword"
+    android:textSize="14sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="@+id/authBasicUserNameLabel"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/authBasicUserNameLabel" />
+
+  <androidx.appcompat.widget.AppCompatEditText
+    android:id="@+id/authBasicUserNameField"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:importantForAutofill="no"
+    android:inputType="textPersonName"
+    android:label="@id/authBasicUserNameLabel"
+    android:textSize="14sp"
+    android:theme="@style/SimplifiedEditText"
+    app:layout_constraintBaseline_toBaselineOf="@id/authBasicUserNameLabel"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/authBasicUserNameLabel" />
+
+  <androidx.appcompat.widget.AppCompatEditText
+    android:id="@+id/authBasicPasswordField"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:importantForAutofill="no"
+    android:inputType="textPassword"
+    android:label="@id/authBasicPasswordLabel"
+    android:textSize="14sp"
+    android:theme="@style/SimplifiedEditText"
+    app:layout_constraintBaseline_toBaselineOf="@id/authBasicPasswordLabel"
+    app:layout_constraintEnd_toStartOf="@id/authBasicPasswordShow"
+    app:layout_constraintStart_toEndOf="@id/authBasicPasswordLabel" />
+
+  <CheckBox
+    android:id="@+id/authBasicPasswordShow"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:text="@string/accountPasswordShow"
+    app:layout_constraintBaseline_toBaselineOf="@id/authBasicPasswordLabel"
+    app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

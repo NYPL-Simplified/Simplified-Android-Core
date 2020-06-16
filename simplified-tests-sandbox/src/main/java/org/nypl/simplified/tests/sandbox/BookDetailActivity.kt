@@ -31,6 +31,7 @@ import org.nypl.simplified.tests.MockDocumentStore
 import org.nypl.simplified.tests.MockProfilesController
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
+import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
@@ -144,32 +145,36 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
     statusValues.add(
       BookStatus.FailedRevoke(
         id = feedEntry.bookID,
-        result = TaskResult.Failure(listOf(
-          TaskStep(
-            "Did something",
-            TaskStepResolution.TaskStepFailed<BookStatusRevokeErrorDetails>(
-              message = "Failed at it",
-              errorValue = BookStatusRevokeErrorDetails.NotRevocable("Not revocable"),
-              exception = null
+        result = TaskResult.Failure(
+          listOf(
+            TaskStep(
+              "Did something",
+              TaskStepResolution.TaskStepFailed<BookStatusRevokeErrorDetails>(
+                message = "Failed at it",
+                errorValue = BookStatusRevokeErrorDetails.NotRevocable("Not revocable"),
+                exception = null
+              )
             )
           )
-        ))
+        )
       )
     )
 
     statusValues.add(
       BookStatus.FailedLoan(
         id = feedEntry.bookID,
-        result = TaskResult.Failure(listOf(
-          TaskStep(
-            "Did something",
-            TaskStepResolution.TaskStepFailed<BookStatusDownloadErrorDetails>(
-              message = "Failed at it",
-              errorValue = BookStatusDownloadErrorDetails.TimedOut("Timed out", mapOf()),
-              exception = null
+        result = TaskResult.Failure(
+          listOf(
+            TaskStep(
+              "Did something",
+              TaskStepResolution.TaskStepFailed<BookStatusDownloadErrorDetails>(
+                message = "Failed at it",
+                errorValue = BookStatusDownloadErrorDetails.TimedOut("Timed out", mapOf()),
+                exception = null
+              )
             )
           )
-        ))
+        )
       )
     )
 
@@ -195,16 +200,18 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
     statusValues.add(
       BookStatus.FailedDownload(
         id = feedEntry.bookID,
-        result = TaskResult.Failure(listOf(
-          TaskStep(
-            "Did something",
-            TaskStepResolution.TaskStepFailed<BookStatusDownloadErrorDetails>(
-              message = "Failed at it",
-              errorValue = BookStatusDownloadErrorDetails.TimedOut("Timed out", mapOf()),
-              exception = null
+        result = TaskResult.Failure(
+          listOf(
+            TaskStep(
+              "Did something",
+              TaskStepResolution.TaskStepFailed<BookStatusDownloadErrorDetails>(
+                message = "Failed at it",
+                errorValue = BookStatusDownloadErrorDetails.TimedOut("Timed out", mapOf()),
+                exception = null
+              )
             )
           )
-        ))
+        )
       )
     )
 
@@ -225,26 +232,34 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
       .setPublishedOption(Option.some(DateTime.now()))
       .setPublisherOption(Option.some("Book LLC"))
       .setDistribution("Word Cannon Co.")
-      .addCategory(OPDSCategory(
-        "Action",
-        "http://librarysimplified.org/terms/genres/Simplified/",
-        Option.none()
-      ))
-      .addCategory(OPDSCategory(
-        "Adventure",
-        "http://librarysimplified.org/terms/genres/Simplified/",
-        Option.none()
-      ))
-      .addCategory(OPDSCategory(
-        "After Dinner",
-        "urn:ignored",
-        Option.none()
-      ))
-      .addCategory(OPDSCategory(
-        "Doorstop",
-        "http://librarysimplified.org/terms/genres/Simplified/",
-        Option.none()
-      ))
+      .addCategory(
+        OPDSCategory(
+          "Action",
+          "http://librarysimplified.org/terms/genres/Simplified/",
+          Option.none()
+        )
+      )
+      .addCategory(
+        OPDSCategory(
+          "Adventure",
+          "http://librarysimplified.org/terms/genres/Simplified/",
+          Option.none()
+        )
+      )
+      .addCategory(
+        OPDSCategory(
+          "After Dinner",
+          "urn:ignored",
+          Option.none()
+        )
+      )
+      .addCategory(
+        OPDSCategory(
+          "Doorstop",
+          "http://librarysimplified.org/terms/genres/Simplified/",
+          Option.none()
+        )
+      )
       .build()
   }
 
@@ -262,25 +277,34 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
     this.services.putService(BookRegistryType::class.java, this.registry)
     this.services.putService(BookRegistryReadableType::class.java, this.registry)
     this.services.putService(UIThreadServiceType::class.java, object : UIThreadServiceType {})
-    this.services.putService(ScreenSizeInformationType::class.java, ScreenSizeInformation(this.resources))
+    this.services.putService(
+      ScreenSizeInformationType::class.java,
+      ScreenSizeInformation(this.resources)
+    )
     this.services.putService(DocumentStoreType::class.java, documents)
     this.services.putService(ProfilesControllerType::class.java, profiles)
     this.services.putService(BooksControllerType::class.java, books)
 
+    val profile =
+      profiles.profileCurrent()
+    val accountId =
+      profile.accounts().firstKey()
+
     val feedEntry =
-      FeedEntry.FeedEntryOPDS(this.makeEntry(this.resources))
+      FeedEntry.FeedEntryOPDS(accountId, this.makeEntry(this.resources))
 
     this.fragment =
       CatalogFragmentBookDetail.create(
         CatalogFragmentBookDetailParameters(
-          accountId = profiles.profileAccountCurrent().id,
           feedEntry = feedEntry,
           feedArguments = CatalogFeedArguments.CatalogFeedArgumentsRemote(
             title = "Some books",
             feedURI = URI.create("urn:fake"),
-            isSearchResults = false
+            isSearchResults = false,
+            ownership = CatalogFeedOwnership.OwnedByAccount(accountId)
           )
-        ))
+        )
+      )
 
     this.registry.update(
       BookWithStatus(
@@ -307,29 +331,40 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
     super.onStart()
 
     this.executor = Executors.newScheduledThreadPool(1)
-    this.executor.scheduleAtFixedRate({
-      if (this.randomStates) {
-        val feedEntry =
-          FeedEntry.FeedEntryOPDS(this.makeEntry(this.resources))
-        val statusValues =
-          this.bookStatusValues(feedEntry)
+    this.executor.scheduleAtFixedRate(
+      {
+        if (this.randomStates) {
+          val profiles =
+            this.services.requireService(ProfilesControllerType::class.java)
+          val profile =
+            profiles.profileCurrent()
+          val accountId =
+            profile.accounts().firstKey()
 
-        this.registry.update(BookWithStatus(
-          book = Book(
-            id = feedEntry.bookID,
-            account = AccountID.generate(),
-            cover = null,
-            thumbnail = null,
-            entry = feedEntry.feedEntry,
-            formats = listOf()
-          ),
-          status = statusValues.random()
-        ))
-      }
-    },
+          val feedEntry =
+            FeedEntry.FeedEntryOPDS(accountId, this.makeEntry(this.resources))
+          val statusValues =
+            this.bookStatusValues(feedEntry)
+
+          this.registry.update(
+            BookWithStatus(
+              book = Book(
+                id = feedEntry.bookID,
+                account = AccountID.generate(),
+                cover = null,
+                thumbnail = null,
+                entry = feedEntry.feedEntry,
+                formats = listOf()
+              ),
+              status = statusValues.random()
+            )
+          )
+        }
+      },
       2_000L,
       2_000L,
-      TimeUnit.MILLISECONDS)
+      TimeUnit.MILLISECONDS
+    )
   }
 
   override fun onStop() {

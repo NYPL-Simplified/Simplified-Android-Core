@@ -21,8 +21,8 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -107,7 +107,8 @@ class SettingsFragmentCustomOPDS : Fragment() {
       this.future = nextFuture
       nextFuture.addListener(
         Runnable { this.onCreationFinished() },
-        MoreExecutors.directExecutor())
+        MoreExecutors.directExecutor()
+      )
     }
 
     this.feedURL.addTextChangedListener(this.uriTextWatcher)

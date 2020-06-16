@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
-import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
@@ -16,7 +15,6 @@ import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.Feed
-import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileDescription
@@ -26,6 +24,7 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -41,15 +40,6 @@ class MockProfilesController(
   override fun profileCreate(
     accountProvider: AccountProviderType,
     description: ProfileDescription
-  ): FluentFuture<ProfileCreationEvent> {
-    return FluentFuture.from(SettableFuture.create())
-  }
-
-  override fun profileCreate(
-    accountProvider: AccountProviderType,
-    displayName: String,
-    gender: String,
-    date: DateTime
   ): FluentFuture<ProfileCreationEvent> {
     return FluentFuture.from(SettableFuture.create())
   }
@@ -103,23 +93,18 @@ class MockProfilesController(
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profileAccountCurrent(): AccountType {
-    return this.profileList[0].accountCurrent()
-  }
-
   data class ProfileAccountLogin(
     val account: AccountID,
     val credentials: AccountAuthenticationCredentials
   )
 
   var profileAccountLogins =
-    mutableListOf<ProfileAccountLogin>()
+    mutableListOf<ProfileAccountLoginRequest>()
 
   override fun profileAccountLogin(
-    account: AccountID,
-    credentials: AccountAuthenticationCredentials
+    request: ProfileAccountLoginRequest
   ): FluentFuture<TaskResult<AccountLoginState.AccountLoginErrorData, Unit>> {
-    this.profileAccountLogins.add(ProfileAccountLogin(account, credentials))
+    this.profileAccountLogins.add(request)
     return FluentFuture.from(SettableFuture.create())
   }
 
@@ -136,10 +121,6 @@ class MockProfilesController(
   }
 
   override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<TaskResult<AccountDeleteErrorDetails, Unit>> {
-    return FluentFuture.from(SettableFuture.create())
-  }
-
-  override fun profileAccountSelectByProvider(provider: URI): FluentFuture<ProfileAccountSelectEvent> {
     return FluentFuture.from(SettableFuture.create())
   }
 

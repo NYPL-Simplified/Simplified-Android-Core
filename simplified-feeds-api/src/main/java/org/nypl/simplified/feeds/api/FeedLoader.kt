@@ -9,6 +9,7 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import net.jodah.expiringmap.ExpiringMap
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
@@ -55,6 +56,7 @@ class FeedLoader private constructor(
   private val log = LoggerFactory.getLogger(FeedLoader::class.java)
 
   private fun fetchURICore(
+    accountId: AccountID,
     uri: URI,
     auth: OptionType<HTTPAuthType>,
     updateFromRegistry: Boolean
@@ -66,31 +68,55 @@ class FeedLoader private constructor(
     }
 
     return FluentFuture.from(this.exec.submit(Callable {
-      this.fetchSynchronously(uri, auth, "GET", updateFromRegistry = updateFromRegistry)
+      this.fetchSynchronously(
+        accountId = accountId,
+        uri = uri,
+        auth = auth,
+        method = "GET",
+        updateFromRegistry = updateFromRegistry
+      )
     }))
   }
 
   override fun fetchURI(
+    accountId: AccountID,
     uri: URI,
     auth: OptionType<HTTPAuthType>
   ): FluentFuture<FeedLoaderResult> {
-    return this.fetchURICore(uri, auth, updateFromRegistry = false)
+    return this.fetchURICore(
+      accountId = accountId,
+      uri = uri,
+      auth = auth,
+      updateFromRegistry = false
+    )
   }
 
   override fun fetchURIRefreshing(
+    accountId: AccountID,
     uri: URI,
     auth: OptionType<HTTPAuthType>,
     method: String
   ): FluentFuture<FeedLoaderResult> {
     this.invalidate(uri)
-    return this.fetchURICore(uri, auth, updateFromRegistry = false)
+    return this.fetchURICore(
+      accountId = accountId,
+      uri = uri,
+      auth = auth,
+      updateFromRegistry = false
+    )
   }
 
   override fun fetchURIWithBookRegistryEntries(
+    accountId: AccountID,
     uri: URI,
     auth: OptionType<HTTPAuthType>
   ): FluentFuture<FeedLoaderResult> {
-    return this.fetchURICore(uri, auth, updateFromRegistry = true)
+    return this.fetchURICore(
+      accountId = accountId,
+      uri = uri,
+      auth = auth,
+      updateFromRegistry = true
+    )
   }
 
   override fun invalidate(uri: URI) {
@@ -102,6 +128,7 @@ class FeedLoader private constructor(
   }
 
   private fun fetchSynchronously(
+    accountId: AccountID,
     uri: URI,
     auth: OptionType<HTTPAuthType>,
     method: String,
@@ -116,7 +143,7 @@ class FeedLoader private constructor(
        */
 
       if (BundledURIs.isBundledURI(uri)) {
-        return this.parseFromBundledContent(uri)
+        return this.parseFromBundledContent(accountId, uri)
       }
 
       /*
@@ -125,7 +152,7 @@ class FeedLoader private constructor(
        */
 
       if (uri.scheme == "content") {
-        return this.parseFromContentResolver(uri)
+        return this.parseFromContentResolver(accountId, uri)
       }
 
       /*
@@ -136,8 +163,8 @@ class FeedLoader private constructor(
         this.transport.getStream(auth, uri, method).use { stream -> this.parser.parse(uri, stream) }
       val search =
         this.fetchSearchLink(opdsFeed, auth, method)
-
-      val feed = Feed.fromAcquisitionFeed(opdsFeed, search)
+      val feed =
+        Feed.fromAcquisitionFeed(accountId, opdsFeed, search)
 
       /*
        * Replace entries in the feed with those from the book registry, if requested.
@@ -178,12 +205,17 @@ class FeedLoader private constructor(
   }
 
   private fun parseFromContentResolver(
+    accountId: AccountID,
     uri: URI
   ): FeedLoaderResult {
     val streamMaybe = this.contentResolver.openInputStream(Uri.parse(uri.toString()))
     return if (streamMaybe != null) {
       streamMaybe.use { stream ->
-        FeedLoaderSuccess(Feed.fromAcquisitionFeed(this.parser.parse(uri, stream), null))
+        FeedLoaderSuccess(Feed.fromAcquisitionFeed(
+          accountId = accountId,
+          feed = this.parser.parse(uri, stream),
+          search = null
+        ))
       }
     } else {
       FeedLoaderFailure.FeedLoaderFailedGeneral(
@@ -215,9 +247,12 @@ class FeedLoader private constructor(
     }
   }
 
-  private fun parseFromBundledContent(uri: URI): FeedLoaderSuccess {
+  private fun parseFromBundledContent(
+    accountId: AccountID,
+    uri: URI
+  ): FeedLoaderSuccess {
     return this.bundledContent.resolve(uri).use { stream ->
-      FeedLoaderSuccess(Feed.fromAcquisitionFeed(this.parser.parse(uri, stream), null))
+      FeedLoaderSuccess(Feed.fromAcquisitionFeed(accountId, this.parser.parse(uri, stream), null))
     }
   }
 
@@ -247,7 +282,10 @@ class FeedLoader private constructor(
           val bookWithStatus = this.bookRegistry.books().get(id)
           if (bookWithStatus != null) {
             this.log.debug("updating entry {} from book registry", id)
-            val en = FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry)
+            val en = FeedEntry.FeedEntryOPDS(
+              accountID = bookWithStatus.book.account,
+              feedEntry = bookWithStatus.book.entry
+            )
             feed.entriesInOrder.set(index, en)
           }
         }
@@ -263,7 +301,10 @@ class FeedLoader private constructor(
             val bookWithStatus = this.bookRegistry.books().get(id)
             if (bookWithStatus != null) {
               this.log.debug("updating entry {} from book registry", id)
-              entries.set(gi, FeedEntry.FeedEntryOPDS(bookWithStatus.book.entry))
+              entries.set(gi, FeedEntry.FeedEntryOPDS(
+                accountID = bookWithStatus.book.account,
+                feedEntry = bookWithStatus.book.entry
+              ))
             }
           }
         }

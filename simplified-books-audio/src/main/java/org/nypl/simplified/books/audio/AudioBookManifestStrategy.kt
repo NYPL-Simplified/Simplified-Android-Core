@@ -282,9 +282,10 @@ class AudioBookManifestStrategy(
               targetURI = OPAManifestURI.Indirect(this.request.targetURI),
               userAgent = this.request.userAgent
             )
-          null -> {
+          is AudioBookCredentials.BearerToken ->
+            throw UnsupportedOperationException("Can't use bearer tokens for Overdrive fulfillment")
+          null ->
             throw UnimplementedCodeException()
-          }
         }
 
       strategies.create(parameters)
@@ -306,6 +307,9 @@ class AudioBookManifestStrategy(
                   userName = credentials.userName,
                   password = credentials.password
                 )
+              is AudioBookCredentials.BearerToken ->
+                throw UnsupportedOperationException(
+                  "Can't use bearer tokens for audio book fulfillment")
             }
           },
           userAgent = this.request.userAgent

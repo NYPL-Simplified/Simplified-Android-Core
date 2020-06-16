@@ -8,9 +8,15 @@ import com.fasterxml.jackson.databind.node.TextNode
 import org.joda.time.DateTime
 import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Anonymous
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Basic
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.COPPAAgeGate
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.ANONYMOUS_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_INTERMEDIARY_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
@@ -43,7 +49,7 @@ object AccountProvidersJSON {
     val mapper = ObjectMapper()
     val node = mapper.createObjectNode()
 
-    node.put("@version", "20190708")
+    node.put("@version", "20200527")
     node.put("addAutomatically", provider.addAutomatically)
     node.put("displayName", provider.displayName)
     node.put("idNumeric", provider.idNumeric)
@@ -66,30 +72,72 @@ object AccountProvidersJSON {
     this.putConditionally(node, "subtitle", provider.subtitle)
     this.putConditionally(node, "supportEmail", provider.supportEmail)
 
-    when (val auth = provider.authentication) {
+    node.set<ObjectNode>("authentication",
+      this.serializeAuthentication(mapper, provider.authentication)
+    )
+
+    node.set<ArrayNode>(
+      "authenticationAlternatives",
+      this.serializeAuthenticationAlternatives(mapper, provider.authenticationAlternatives)
+    )
+    return node
+  }
+
+  private fun serializeAuthenticationAlternatives(
+    mapper: ObjectMapper,
+    authenticationAlternatives: List<AccountProviderAuthenticationDescription>
+  ): ArrayNode {
+    val array = mapper.createArrayNode()
+    for (authentication in authenticationAlternatives) {
+      array.add(this.serializeAuthentication(mapper, authentication))
+    }
+    return array
+  }
+
+  private fun serializeAuthentication(
+    mapper: ObjectMapper,
+    authentication: AccountProviderAuthenticationDescription
+  ): ObjectNode {
+    return when (authentication) {
       is COPPAAgeGate -> {
         val authObject = mapper.createObjectNode()
-        authObject.put("type", AccountProviderAuthenticationDescription.COPPA_TYPE)
-        authObject.put("greaterEqual13", auth.greaterEqual13.toString())
-        authObject.put("under13", auth.under13.toString())
-        node.set<ObjectNode>("authentication", authObject)
+        authObject.put("type", COPPA_TYPE)
+        authObject.put("greaterEqual13", authentication.greaterEqual13.toString())
+        authObject.put("under13", authentication.under13.toString())
+        authObject
+      }
+      is OAuthWithIntermediary -> {
+        val authObject = mapper.createObjectNode()
+        authObject.put("description", authentication.description)
+        authObject.put("type", OAUTH_INTERMEDIARY_TYPE)
+        authObject.put("authenticate", authentication.authenticate.toString())
+        val logo = authentication.logoURI
+        if (logo != null) {
+          authObject.put("logo", logo.toString())
+        }
+        authObject
       }
       is Basic -> {
         val authObject = mapper.createObjectNode()
-        authObject.put("type", AccountProviderAuthenticationDescription.BASIC_TYPE)
-        this.putConditionally(authObject, "barcodeFormat", auth.barcodeFormat?.toUpperCase())
-        this.putConditionally(authObject, "description", auth.description)
-        this.putConditionally(authObject, "keyboard", auth.keyboard.name)
-        this.putConditionally(authObject, "passwordKeyboard", auth.passwordKeyboard.name)
-        authObject.put("passwordMaximumLength", auth.passwordMaximumLength)
-        authObject.set<ObjectNode>("labels", this.mapToObject(mapper, auth.labels))
-        node.set<ObjectNode>("authentication", authObject)
+        authObject.put("type", BASIC_TYPE)
+        this.putConditionally(authObject, "barcodeFormat", authentication.barcodeFormat?.toUpperCase())
+        this.putConditionally(authObject, "description", authentication.description)
+        this.putConditionally(authObject, "keyboard", authentication.keyboard.name)
+        this.putConditionally(authObject, "passwordKeyboard", authentication.passwordKeyboard.name)
+        authObject.put("passwordMaximumLength", authentication.passwordMaximumLength)
+        authObject.set<ObjectNode>("labels", this.mapToObject(mapper, authentication.labels))
+        val logo = authentication.logoURI
+        if (logo != null) {
+          authObject.put("logo", logo.toString())
+        }
+        authObject
       }
-      null -> {
+      is Anonymous -> {
+        val authObject = mapper.createObjectNode()
+        authObject.put("type", ANONYMOUS_TYPE)
+        authObject
       }
     }
-
-    return node
   }
 
   private fun mapToObject(
@@ -133,6 +181,8 @@ object AccountProvidersJSON {
         JSONParserUtilities.getURIOrNull(obj, "catalogURI")!!
       val authentication =
         this.parseAuthentication(obj)
+      val authenticationAlternatives =
+        this.parseAuthenticationAlternatives(obj)
       val displayName =
         JSONParserUtilities.getString(obj, "displayName")
       val mainColor =
@@ -169,6 +219,7 @@ object AccountProvidersJSON {
         addAutomatically = addAutomatically,
         annotationsURI = annotationsURI,
         authentication = authentication,
+        authenticationAlternatives = authenticationAlternatives,
         authenticationDocumentURI = authenticationDocumentURI,
         cardCreatorURI = cardCreatorURI,
         catalogURI = catalogURI,
@@ -193,56 +244,96 @@ object AccountProvidersJSON {
     }
   }
 
-  private fun parseAuthentication(
+  private fun parseAuthenticationAlternatives(
     obj: ObjectNode
-  ): AccountProviderAuthenticationDescription? {
-    return if (obj.has("authentication")) {
-      val container = JSONParserUtilities.getObject(obj, "authentication")
-      when (val authType = JSONParserUtilities.getString(container, "type")) {
-        AccountProviderAuthenticationDescription.BASIC_TYPE -> {
-          val labels =
-            this.toStringMap(JSONParserUtilities.getObject(container, "labels"))
-          val barcodeFormat =
-            JSONParserUtilities.getStringOrNull(container, "barcodeFormat")
-              ?.toUpperCase(Locale.ROOT)
-          val keyboard =
-            this.parseKeyboardType(JSONParserUtilities.getStringOrNull(container, "keyboard"))
-          val passwordMaximumLength =
-            JSONParserUtilities.getIntegerDefault(container, "passwordMaximumLength", 0)
-          val passwordKeyboard =
-            this.parseKeyboardType(
-              JSONParserUtilities.getStringOrNull(
-                container,
-                "passwordKeyboard"
-              )
-            )
-          val description =
-            JSONParserUtilities.getString(container, "description")
-
-          Basic(
-            barcodeFormat = barcodeFormat,
-            keyboard = keyboard,
-            passwordMaximumLength = passwordMaximumLength,
-            passwordKeyboard = passwordKeyboard,
-            description = description,
-            labels = labels
-          )
-        }
-        AccountProviderAuthenticationDescription.COPPA_TYPE -> {
-          COPPAAgeGate(
-            greaterEqual13 =
-            JSONParserUtilities.getURIOrNull(container, "greaterEqual13"),
-            under13 =
-            JSONParserUtilities.getURIOrNull(container, "under13")
-          )
-        }
-        else -> {
-          this.logger.warn("encountered unrecognized authentication type: {}", authType)
-          return null
+  ): List<AccountProviderAuthenticationDescription> {
+    return if (obj.has("authenticationAlternatives")) {
+      val objAlt = JSONParserUtilities.getArray(obj, "authenticationAlternatives")
+      val items = mutableListOf<AccountProviderAuthenticationDescription>()
+      for (authObj in objAlt) {
+        if (authObj is ObjectNode) {
+          items.add(this.parseAuthenticationFromObject(authObj))
         }
       }
+      items.toList()
     } else {
-      null
+      listOf()
+    }
+  }
+
+  private fun parseAuthentication(
+    obj: ObjectNode
+  ): AccountProviderAuthenticationDescription {
+    return if (obj.has("authentication")) {
+      this.parseAuthenticationFromObject(JSONParserUtilities.getObject(obj, "authentication"))
+    } else {
+      Anonymous
+    }
+  }
+
+  private fun parseAuthenticationFromObject(
+    container: ObjectNode
+  ): AccountProviderAuthenticationDescription {
+    return when (val authType = JSONParserUtilities.getString(container, "type")) {
+      OAUTH_INTERMEDIARY_TYPE -> {
+        val authURI =
+          JSONParserUtilities.getURI(container, "authenticate")
+        val logoURI =
+          JSONParserUtilities.getURIOrNull(container, "logo")
+        val description =
+          JSONParserUtilities.getStringOrNull(container, "description") ?: ""
+
+        OAuthWithIntermediary(
+          authenticate = authURI,
+          description = description,
+          logoURI = logoURI
+        )
+      }
+
+      BASIC_TYPE -> {
+        val labels =
+          this.toStringMap(JSONParserUtilities.getObject(container, "labels"))
+        val barcodeFormat =
+          JSONParserUtilities.getStringOrNull(container, "barcodeFormat")
+            ?.toUpperCase(Locale.ROOT)
+        val keyboard =
+          this.parseKeyboardType(JSONParserUtilities.getStringOrNull(container, "keyboard"))
+        val passwordMaximumLength =
+          JSONParserUtilities.getIntegerDefault(container, "passwordMaximumLength", 0)
+        val passwordKeyboard =
+          this.parseKeyboardType(
+            JSONParserUtilities.getStringOrNull(
+              container,
+              "passwordKeyboard"
+            )
+          )
+        val description =
+          JSONParserUtilities.getString(container, "description")
+        val logoURI =
+          JSONParserUtilities.getURIOrNull(container, "logo")
+
+        Basic(
+          barcodeFormat = barcodeFormat,
+          description = description,
+          keyboard = keyboard,
+          labels = labels,
+          logoURI = logoURI,
+          passwordKeyboard = passwordKeyboard,
+          passwordMaximumLength = passwordMaximumLength
+        )
+      }
+      COPPA_TYPE -> {
+        COPPAAgeGate(
+          greaterEqual13 =
+          JSONParserUtilities.getURIOrNull(container, "greaterEqual13"),
+          under13 =
+          JSONParserUtilities.getURIOrNull(container, "under13")
+        )
+      }
+      else -> {
+        this.logger.warn("encountered unrecognized authentication type: {}", authType)
+        Anonymous
+      }
     }
   }
 

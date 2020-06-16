@@ -65,6 +65,50 @@ public abstract class AccountProvidersJSONContract {
   }
 
   @Test
+  public final void testMultipleAuthenticationTypes0()
+    throws Exception {
+    Map<URI, AccountProvider> providers =
+      AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
+      readAllFromResource("providers-multi-auth-0.json"));
+
+    Assert.assertEquals(1, providers.size());
+
+    final AccountProvider provider =
+      providers.get(URI.create("urn:uuid:c379b3b9-18e2-476f-95d1-7ba10f151d00"));
+
+    Assert.assertEquals(AccountProviderAuthenticationDescription.Basic.class, provider.getAuthentication().getClass());
+    Assert.assertEquals(0, provider.getAuthenticationAlternatives().size());
+
+    final AccountProvider providerAfter =
+      AccountProvidersJSON.INSTANCE.deserializeFromJSON(
+        AccountProvidersJSON.INSTANCE.serializeToJSON(provider));
+
+    Assert.assertEquals(providerAfter, provider);
+  }
+
+  @Test
+  public final void testMultipleAuthenticationTypes1()
+    throws Exception {
+    Map<URI, AccountProvider> providers =
+      AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
+        readAllFromResource("providers-multi-auth-1.json"));
+
+    Assert.assertEquals(1, providers.size());
+
+    final AccountProvider provider =
+      providers.get(URI.create("urn:uuid:c379b3b9-18e2-476f-95d1-7ba10f151d00"));
+
+    Assert.assertEquals(AccountProviderAuthenticationDescription.Basic.class, provider.getAuthentication().getClass());
+    Assert.assertEquals(2, provider.getAuthenticationAlternatives().size());
+
+    final AccountProvider providerAfter =
+      AccountProvidersJSON.INSTANCE.deserializeFromJSON(
+        AccountProvidersJSON.INSTANCE.serializeToJSON(provider));
+
+    Assert.assertEquals(providerAfter, provider);
+  }
+
+  @Test
   public final void testAll()
       throws Exception {
     final Map<URI, AccountProvider> c =

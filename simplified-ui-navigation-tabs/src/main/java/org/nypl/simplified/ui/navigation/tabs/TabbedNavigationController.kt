@@ -9,31 +9,30 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomnavigation.LabelVisibilityMode
+import com.io7m.junreachable.UnreachableCodeException
 import com.pandora.bottomnavigator.BottomNavigator
-import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.feeds.api.FeedFacet
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy.SORT_BY_TITLE
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.accounts.AccountFragment
+import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.accounts.AccountRegistryFragment
+import org.nypl.simplified.ui.accounts.AccountsFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
-import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault
+import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
 import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
-import org.nypl.simplified.ui.catalog.CatalogFragmentLoginDialog
-import org.nypl.simplified.ui.catalog.CatalogFragmentLoginDialogParameters
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
-import org.nypl.simplified.ui.settings.SettingsFragmentAccount
-import org.nypl.simplified.ui.settings.SettingsFragmentAccountParameters
-import org.nypl.simplified.ui.settings.SettingsFragmentAccountRegistry
-import org.nypl.simplified.ui.settings.SettingsFragmentAccounts
 import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
 import org.nypl.simplified.ui.settings.SettingsFragmentMain
 import org.nypl.simplified.ui.settings.SettingsFragmentVersion
@@ -80,7 +79,11 @@ class TabbedNavigationController private constructor(
           bottomNavigationView = navigationView,
           rootFragmentsFactory = mapOf(
             R.id.tabCatalog to {
-              this.createCatalogFragment(activity, R.id.tabCatalog)
+              this.createCatalogFragment(
+                context = activity,
+                id = R.id.tabCatalog,
+                feedArguments = catalogFeedArguments(profilesController)
+              )
             },
             R.id.tabBooks to {
               this.createBooksFragment(activity, R.id.tabBooks)
@@ -109,16 +112,44 @@ class TabbedNavigationController private constructor(
       )
     }
 
+    private fun pickDefaultAccount(
+      profilesController: ProfilesControllerType
+    ): AccountType {
+      val profile = profilesController.profileCurrent()
+      val mostRecentId = profile.preferences().mostRecentAccount
+      if (mostRecentId != null) {
+        return profile.account(mostRecentId)
+      }
+      for (account in profile.accounts().values) {
+        return account
+      }
+      throw UnreachableCodeException()
+    }
+
+    private fun catalogFeedArguments(
+      profilesController: ProfilesControllerType
+    ): CatalogFeedArguments.CatalogFeedArgumentsRemote {
+      val account = this.pickDefaultAccount(profilesController)
+      return CatalogFeedArguments.CatalogFeedArgumentsRemote(
+        title = account.provider.displayName,
+        ownership = CatalogFeedOwnership.OwnedByAccount(account.id),
+        feedURI = account.provider.catalogURI,
+        isSearchResults = false
+      )
+    }
+
     private fun colorStateListForTabs(context: FragmentActivity): ColorStateList {
       val states =
         arrayOf(
           intArrayOf(android.R.attr.state_checked),
-          intArrayOf(-android.R.attr.state_checked))
+          intArrayOf(-android.R.attr.state_checked)
+        )
 
       val colors =
         intArrayOf(
           ThemeControl.resolveColorAttribute(context.theme, R.attr.colorPrimary),
-          Color.DKGRAY)
+          Color.DKGRAY
+        )
 
       return ColorStateList(states, colors)
     }
@@ -133,12 +164,16 @@ class TabbedNavigationController private constructor(
       id: Int
     ): Fragment {
       this.logger.debug("[{}]: creating holds fragment", id)
-      return CatalogFragmentFeed.create(CatalogFeedArgumentsLocalBooks(
-        title = context.getString(R.string.tabHolds),
-        facetType = FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE,
-        searchTerms = null,
-        selection = FeedBooksSelection.BOOKS_FEED_HOLDS
-      ))
+      return CatalogFragmentFeed.create(
+        CatalogFeedArgumentsLocalBooks(
+          filterAccount = null,
+          ownership = CatalogFeedOwnership.CollectedFromAccounts,
+          searchTerms = null,
+          selection = FeedBooksSelection.BOOKS_FEED_HOLDS,
+          sortBy = SORT_BY_TITLE,
+          title = context.getString(R.string.tabHolds)
+        )
+      )
     }
 
     private fun createBooksFragment(
@@ -146,38 +181,34 @@ class TabbedNavigationController private constructor(
       id: Int
     ): Fragment {
       this.logger.debug("[{}]: creating books fragment", id)
-      return CatalogFragmentFeed.create(CatalogFeedArgumentsLocalBooks(
-        title = context.getString(R.string.tabBooks),
-        facetType = FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE,
-        searchTerms = null,
-        selection = FeedBooksSelection.BOOKS_FEED_LOANED
-      ))
+      return CatalogFragmentFeed.create(
+        CatalogFeedArgumentsLocalBooks(
+          filterAccount = null,
+          ownership = CatalogFeedOwnership.CollectedFromAccounts,
+          searchTerms = null,
+          selection = FeedBooksSelection.BOOKS_FEED_LOANED,
+          sortBy = SORT_BY_TITLE,
+          title = context.getString(R.string.tabBooks)
+        )
+      )
     }
 
     private fun createCatalogFragment(
       context: Context,
-      id: Int
+      id: Int,
+      feedArguments: CatalogFeedArguments.CatalogFeedArgumentsRemote
     ): Fragment {
       this.logger.debug("[{}]: creating catalog fragment", id)
-      return CatalogFragmentFeed.create(CatalogFeedArgumentsRemoteAccountDefault(
-        context.getString(R.string.tabBooks)
-      ))
+      return CatalogFragmentFeed.create(feedArguments)
     }
   }
 
   override fun openSettingsAbout() {
   }
 
-  override fun openSettingsAccount(id: AccountID) {
-    this.navigator.addFragment(
-      fragment = SettingsFragmentAccount.create(SettingsFragmentAccountParameters(id)),
-      tab = this.navigator.currentTab()
-    )
-  }
-
   override fun openSettingsAccounts() {
     this.navigator.addFragment(
-      fragment = SettingsFragmentAccounts(),
+      fragment = AccountsFragment(),
       tab = this.navigator.currentTab()
     )
   }
@@ -219,15 +250,15 @@ class TabbedNavigationController private constructor(
     )
   }
 
-  override fun openLoginDialog(parameters: CatalogFragmentLoginDialogParameters) {
-    this.navigator.addFragment(
-      fragment = CatalogFragmentLoginDialog.create(parameters),
-      tab = this.navigator.currentTab()
-    )
-  }
-
   override fun backStackSize(): Int {
     return this.navigator.stackSize(this.navigator.currentTab())
+  }
+
+  override fun openSettingsAccount(parameters: AccountFragmentParameters) {
+    this.navigator.addFragment(
+      fragment = AccountFragment.create(parameters),
+      tab = this.navigator.currentTab()
+    )
   }
 
   override fun openBookDetail(
@@ -236,7 +267,6 @@ class TabbedNavigationController private constructor(
   ) {
     val parameters =
       CatalogFragmentBookDetailParameters(
-        accountId = this.profilesController.profileAccountCurrent().id,
         feedEntry = entry,
         feedArguments = feedArguments
       )
@@ -256,7 +286,7 @@ class TabbedNavigationController private constructor(
 
   override fun openSettingsAccountRegistry() {
     this.navigator.addFragment(
-      fragment = SettingsFragmentAccountRegistry(),
+      fragment = AccountRegistryFragment(),
       tab = this.navigator.currentTab()
     )
   }

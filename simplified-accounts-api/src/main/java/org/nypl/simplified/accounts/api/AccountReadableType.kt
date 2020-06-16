@@ -52,6 +52,7 @@ interface AccountReadableType {
     get() = when (this.provider.authentication) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate -> false
       is AccountProviderAuthenticationDescription.Basic -> true
-      null -> false
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> true
+      AccountProviderAuthenticationDescription.Anonymous -> false
     }
 }

@@ -68,7 +68,7 @@ object AccountAuthenticationCredentialsStoreJSON {
 
     val credsObject = jom.createObjectNode()
     for (key in credentials.keys) {
-      val item = credentials[key]
+      val item = credentials[key]!!
       val credsObj = AccountAuthenticationCredentialsJSON.serializeToJSON(item)
       credsObject.set<ObjectNode>(key.uuid.toString(), credsObj)
     }
@@ -109,7 +109,7 @@ object AccountAuthenticationCredentialsStoreJSON {
       20190424 ->
         deserializeFromJSONV20190424(obj)
       else ->
-        throw JSONParseException("Unsupported credentials version: " + version)
+        throw JSONParseException("Unsupported credentials version: $version")
     }
   }
 
@@ -129,7 +129,7 @@ object AccountAuthenticationCredentialsStoreJSON {
         result[accountID] =
           AccountAuthenticationCredentialsJSON.deserializeFromJSON(credentials.get(key))
       } catch (e: Exception) {
-        logger.error("error deserializing credential: ", e)
+        this.logger.error("error deserializing credential: ", e)
       }
     }
 

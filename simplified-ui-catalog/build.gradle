@@ -2,6 +2,7 @@ dependencies {
   api project(":simplified-books-api")
   api project(":simplified-books-covers")
   api project(":simplified-feeds-api")
+  api project(":simplified-ui-accounts")
   api project(":simplified-ui-errorpage")
 
   implementation project(":simplified-adobe-extensions")

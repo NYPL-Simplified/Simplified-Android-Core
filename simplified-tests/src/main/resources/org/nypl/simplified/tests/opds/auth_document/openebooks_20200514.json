@@ -1,0 +1,102 @@
+{
+  "public_key": {
+    "type": "RSA",
+    "value": "-----BEGIN PUBLIC KEY-----\n\n-----END PUBLIC KEY-----"
+  },
+  "web_color_scheme": {
+    "foreground": "#ffffff",
+    "background": "#000000"
+  },
+  "focus_area": {
+    "CA": [],
+    "US": []
+  },
+  "links": [
+    {
+      "href": "https://openebooks.net/app_user_agreement.html",
+      "type": "text/html",
+      "rel": "terms-of-service"
+    },
+    {
+      "href": "https://openebooks.net/app_privacy.html",
+      "type": "text/html",
+      "rel": "privacy-policy"
+    },
+    {
+      "href": "https://openebooks.net/app_acknowledgments.html",
+      "type": "text/html",
+      "rel": "copyright"
+    },
+    {
+      "href": "https://circulation.openebooks.us/USOEI/",
+      "type": "application/atom+xml;profile=opds-catalog;kind=acquisition",
+      "rel": "start"
+    },
+    {
+      "href": "https://circulation.openebooks.us/USOEI/loans/",
+      "type": "application/atom+xml;profile=opds-catalog;kind=acquisition",
+      "rel": "http://opds-spec.org/shelf"
+    },
+    {
+      "href": "https://circulation.openebooks.us/USOEI/patrons/me/",
+      "type": "vnd.librarysimplified/user-profile+json",
+      "rel": "http://librarysimplified.org/terms/rel/user-profile"
+    },
+    {
+      "href": "https://openebooks.net/",
+      "type": "text/html",
+      "rel": "alternate"
+    }
+  ],
+  "title": "Open eBooks",
+  "service_area": {
+    "CA": [],
+    "US": []
+  },
+  "authentication": [
+    {
+      "inputs": {
+        "login": {
+          "keyboard": "Default"
+        },
+        "password": {
+          "keyboard": "Default"
+        }
+      },
+      "labels": {
+        "login": "Access Code",
+        "password": "PIN"
+      },
+      "type": "http://opds-spec.org/auth/basic",
+      "description": "First Book - JWT",
+      "links": [
+        {
+          "href": "https://circulation.openebooks.us/images/FirstBookLoginButton280.png",
+          "rel": "logo"
+        }
+      ]
+    },
+    {
+      "type": "http://librarysimplified.org/authtype/OAuth-with-intermediary",
+      "description": "Clever",
+      "links": [
+        {
+          "href": "https://circulation.openebooks.us/USOEI/oauth_authenticate?provider=Clever",
+          "rel": "authenticate"
+        },
+        {
+          "href": "https://circulation.openebooks.us/images/CleverLoginButton280.png",
+          "rel": "logo"
+        }
+      ]
+    }
+  ],
+  "color_scheme": "blue",
+  "id": "https://circulation.openebooks.us/USOEI/authentication_document",
+  "features": {
+    "disabled": [
+      "https://librarysimplified.org/rel/policy/reservations"
+    ],
+    "enabled": []
+  }
+}

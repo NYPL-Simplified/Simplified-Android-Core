@@ -228,7 +228,8 @@ class BookBorrowTask(
           ) as TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
 
         this.services.bookRegistry.update(
-          BookWithStatus(this.bookInitial, BookStatus.FailedLoan(this.bookId, failure)))
+          BookWithStatus(this.bookInitial, BookStatus.FailedLoan(this.bookId, failure))
+        )
 
         return failure
       }
@@ -408,8 +409,12 @@ class BookBorrowTask(
 
     val feedResult =
       try {
-        this.services.feedLoader.fetchURIRefreshing(this.acquisition.uri, httpAuth, "PUT")
-          .get(this.borrowTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
+        this.services.feedLoader.fetchURIRefreshing(
+          this.accountId,
+          this.acquisition.uri,
+          httpAuth,
+          "PUT"
+        ).get(this.borrowTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
       } catch (e: Exception) {
         this.error("feed loader raised exception: ", e)
 
@@ -709,7 +714,8 @@ class BookBorrowTask(
       this.runAcquisitionFulfill(feedEntry.feedEntry)
     } else {
       val exception = IllegalStateException()
-      val message = this.services.borrowStrings.borrowBookBorrowAvailabilityInappropriate(availability)
+      val message =
+        this.services.borrowStrings.borrowBookBorrowAvailabilityInappropriate(availability)
       this.steps.currentStepFailed(
         message = message,
         errorValue = WrongAvailability(message, this.currentAttributesWith()),
@@ -897,7 +903,8 @@ class BookBorrowTask(
     this.debug("content type is {}", contentType)
 
     this.steps.currentStepSucceeded(
-      this.services.borrowStrings.borrowBookFulfillDownloaded(file, contentType))
+      this.services.borrowStrings.borrowBookFulfillDownloaded(file, contentType)
+    )
 
     return when (contentType) {
       this.contentTypeACSM ->
@@ -974,10 +981,15 @@ class BookBorrowTask(
 
     val audioBookCredentials: AudioBookCredentials? =
       this.account.loginState.credentials?.let { credentials ->
-        AudioBookCredentials.UsernamePassword(
-          userName = credentials.barcode().value(),
-          password = credentials.pin().value()
-        )
+        when (credentials) {
+          is AccountAuthenticationCredentials.Basic ->
+            AudioBookCredentials.UsernamePassword(
+              userName = credentials.userName.value,
+              password = credentials.password.value
+            )
+          is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+            AudioBookCredentials.BearerToken(accessToken = credentials.accessToken)
+        }
       }
 
     val strategy =
@@ -1403,7 +1415,7 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.services.borrowStrings.borrowBookFulfillACSMGettingDeviceCredentials)
 
     val credentials =
-      this.someOrNull(this.getRequiredAccountCredentials().adobePostActivationCredentials())
+      this.getRequiredAccountCredentials().adobeCredentials?.postActivationCredentials
 
     if (credentials == null) {
       val exception = BookBorrowExceptionDeviceNotActivated()

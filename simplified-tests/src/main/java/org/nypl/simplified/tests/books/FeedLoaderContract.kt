@@ -7,7 +7,9 @@ import org.junit.Assert
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.nypl.simplified.accounts.api.AccountID
 import java.net.URI
+import java.util.UUID
 import java.util.concurrent.Executors
 
 abstract class FeedLoaderContract {
@@ -37,7 +39,11 @@ abstract class FeedLoaderContract {
     val loader =
       this.createFeedLoader(this.exec)
     val future =
-      loader.fetchURI(resource("feed-no-usable-acquisitions.xml"), Option.none())
+      loader.fetchURI(
+        AccountID(UUID.randomUUID()),
+        resource("feed-no-usable-acquisitions.xml"),
+        Option.none()
+      )
     val result =
       future.get()
 

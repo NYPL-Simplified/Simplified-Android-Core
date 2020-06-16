@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.librarysimplified.services.api.Services;
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials;
+import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
 import org.nypl.simplified.accounts.api.AccountLoginState;
 import org.nypl.simplified.accounts.database.api.AccountType;
@@ -723,19 +724,20 @@ public final class ReaderActivity extends AppCompatActivity implements
     final AccountAuthenticationCredentials credentials = state.getCredentials();
 
     if (credentials != null) {
-      final OptionType<AccountAuthenticationAdobePostActivationCredentials> postActivation =
-        credentials.adobePostActivationCredentials();
-      if (postActivation.isSome()) {
-        return ((Some<AccountAuthenticationAdobePostActivationCredentials>) postActivation)
-          .get()
-          .getDeviceID()
-          .getValue();
-      } else {
-        return "null";
+      final AccountAuthenticationAdobePreActivationCredentials preActivation =
+        credentials.getAdobeCredentials();
+
+      if (preActivation != null) {
+        final AccountAuthenticationAdobePostActivationCredentials postActivation =
+          preActivation.getPostActivationCredentials();
+
+        if (postActivation != null) {
+          return postActivation.getDeviceID().getValue();
+        }
       }
-    } else {
-      return "null";
     }
+
+    return "null";
   }
 
   @Override

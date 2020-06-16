@@ -41,7 +41,7 @@ class ReaderViewerR1 : ViewerProviderType {
       activity,
       book.id,
       formatEPUB.file,
-      FeedEntry.FeedEntryOPDS(book.entry)
+      FeedEntry.FeedEntryOPDS(book.account, book.entry)
     )
   }
 }

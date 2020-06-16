@@ -7,12 +7,12 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
 import com.io7m.jfunctional.Some
+import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.Subject
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -49,7 +49,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
-import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileDescription
@@ -67,6 +66,7 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -290,26 +290,18 @@ class Controller private constructor(
     ))
   }
 
-  @Throws(ProfileNoneCurrentException::class)
-  override fun profileAccountCurrent(): AccountType {
-    val profile = this.profileCurrent()
-    return profile.accountCurrent()
-  }
-
   override fun profileAccountLogin(
-    accountID: AccountID,
-    credentials: AccountAuthenticationCredentials
+    request: ProfileAccountLoginRequest
   ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>> {
-    return this.submitTask { this.runProfileAccountLogin(accountID, credentials) }
-      .flatMap { result -> this.runSyncIfLoginSucceeded(result, accountID) }
+    return this.submitTask { this.runProfileAccountLogin(request) }
+      .flatMap { result -> this.runSyncIfLoginSucceeded(result, request.accountId) }
   }
 
   private fun runProfileAccountLogin(
-    accountID: AccountID,
-    credentials: AccountAuthenticationCredentials
+    request: ProfileAccountLoginRequest
   ): TaskResult<AccountLoginErrorData, Unit> {
     val profile = this.profileCurrent()
-    val account = profile.account(accountID)
+    val account = profile.account(request.accountId)
     return ProfileAccountLoginTask(
       adeptExecutor = this.adobeDrm,
       http = this.http,
@@ -317,7 +309,7 @@ class Controller private constructor(
       account = account,
       loginStrings = this.accountLoginStringResources,
       patronParsers = this.patronUserProfileParsers,
-      initialCredentials = credentials
+      request = request
     ).call()
   }
 
@@ -391,16 +383,6 @@ class Controller private constructor(
     ))
   }
 
-  override fun profileAccountSelectByProvider(
-    provider: URI
-  ): FluentFuture<ProfileAccountSelectEvent> {
-    return this.submitTask(ProfileAccountSelectionTask(
-      profiles = this.profiles,
-      profileEvents = this.profileEvents,
-      accountProvider = provider
-    ))
-  }
-
   @Throws(ProfileNoneCurrentException::class, AccountsDatabaseNonexistentException::class)
   override fun profileAccountFindByProvider(provider: URI): AccountType {
     val profile = this.profileCurrent()
@@ -471,6 +453,7 @@ class Controller private constructor(
   ): FluentFuture<Feed.FeedWithoutGroups> {
     return this.submitTask(ProfileFeedTask(
       bookRegistry = this.bookRegistry,
+      profiles = this,
       request = request
     ))
   }
@@ -483,7 +466,7 @@ class Controller private constructor(
     if (bookWithStatus != null) {
       return this.profileCurrent().account(bookWithStatus.book.account)
     }
-    return this.profileAccountCurrent()
+    throw UnreachableCodeException()
   }
 
   override fun profileIdleTimer(): ProfileIdleTimerType {

@@ -36,6 +36,7 @@ dependencies {
   api project(":simplified-networkconnectivity")
   api project(":simplified-networkconnectivity-api")
   api project(":simplified-notifications")
+  api project(":simplified-oauth")
   api project(":simplified-opds-auth-document")
   api project(":simplified-opds-auth-document-api")
   api project(":simplified-patron")

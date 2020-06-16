@@ -9,8 +9,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPResultError
@@ -38,9 +38,12 @@ abstract class ReaderBookmarkHTTPCallsContract {
     val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("1234"), AccountBarcode.create("io7mtest"))
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("abcd"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     val targetURI =
       URI.create("https://example.com/me/")
@@ -59,9 +62,12 @@ abstract class ReaderBookmarkHTTPCallsContract {
     val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("1234"), AccountBarcode.create("io7mtest"))
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("abcd"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     val targetURI =
       URI.create("https://example.com/annotations/")
@@ -315,9 +321,12 @@ abstract class ReaderBookmarkHTTPCallsContract {
     val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("1234"), AccountBarcode.create("io7mtest"))
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("abcd"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     val targetURI =
       URI.create("https://example.com/me/")
@@ -343,9 +352,12 @@ abstract class ReaderBookmarkHTTPCallsContract {
     val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("1234"), AccountBarcode.create("io7mtest"))
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("io7mtest"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     val targetURI =
       URI.create("https://example.com/annotations/")
@@ -371,9 +383,12 @@ abstract class ReaderBookmarkHTTPCallsContract {
     val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("1234"), AccountBarcode.create("io7mtest"))
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("io7mtest"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     val targetURI =
       URI.create("https://example.com/annotations/")

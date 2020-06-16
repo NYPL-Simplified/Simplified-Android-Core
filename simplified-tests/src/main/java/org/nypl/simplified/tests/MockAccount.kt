@@ -32,13 +32,15 @@ class MockAccount(override val id: AccountID) : AccountType {
           passwordMaximumLength = 4,
           passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
           description = "What?",
-          labels = mapOf()
+          labels = mapOf(),
+          logoURI = null
         )
 
       AccountProvider(
         addAutomatically = false,
         annotationsURI = null,
         authentication = authentication,
+        authenticationAlternatives = listOf(),
         authenticationDocumentURI = null,
         cardCreatorURI = null,
         catalogURI = URI.create("catalog"),

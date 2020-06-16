@@ -16,12 +16,12 @@ import org.librarysimplified.audiobook.api.PlayerResult
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -275,7 +275,7 @@ class MigrationFrom3Master(
     return try {
       when (createdAccount.account.provider.authentication) {
         is AccountProviderAuthenticationDescription.COPPAAgeGate,
-        null -> {
+        is AccountProviderAuthenticationDescription.Anonymous -> {
           this.publishStepSucceeded(
             ACCOUNT, this.strings.successAuthenticatedAccountNotRequired(accountTitle))
           return
@@ -297,10 +297,12 @@ class MigrationFrom3Master(
       }
 
       val credentials =
-        AccountAuthenticationCredentials.builder(
-          AccountPIN.create(accountData.password),
-          AccountBarcode.create(accountData.username))
-          .build()
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername(accountData.username),
+          password = AccountPassword(accountData.password),
+          adobeCredentials = null,
+          authenticationDescription = null
+        )
 
       when (val taskResult = this.services.loginAccount(createdAccount.account, credentials)) {
         is TaskResult.Success -> {

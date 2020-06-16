@@ -6,9 +6,9 @@ import com.io7m.jfunctional.Some;
 import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
-import org.nypl.simplified.accounts.api.AccountBarcode;
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType;
-import org.nypl.simplified.accounts.api.AccountPIN;
+import org.nypl.simplified.accounts.api.AccountPassword;
+import org.nypl.simplified.accounts.api.AccountUsername;
 import org.nypl.simplified.accounts.json.AccountBundledCredentialsJSON;
 
 import java.io.ByteArrayInputStream;
@@ -49,20 +49,20 @@ public abstract class AccountBundledCredentialsJSONContract {
         AccountBundledCredentialsJSON.deserializeFromStream(mapper, stream);
       Assert.assertEquals(3L, credentials.bundledCredentials().size());
 
-      final AccountAuthenticationCredentials p0 =
-        ((Some<AccountAuthenticationCredentials>) credentials.bundledCredentialsFor(URI.create("urn:0"))).get();
-      final AccountAuthenticationCredentials p1 =
-        ((Some<AccountAuthenticationCredentials>) credentials.bundledCredentialsFor(URI.create("urn:1"))).get();
-      final AccountAuthenticationCredentials p2 =
-        ((Some<AccountAuthenticationCredentials>) credentials.bundledCredentialsFor(URI.create("urn:2"))).get();
+      final AccountAuthenticationCredentials.Basic p0 =
+        (AccountAuthenticationCredentials.Basic) credentials.bundledCredentialsFor(URI.create("urn:0"));
+      final AccountAuthenticationCredentials.Basic p1 =
+        (AccountAuthenticationCredentials.Basic) credentials.bundledCredentialsFor(URI.create("urn:1"));
+      final AccountAuthenticationCredentials.Basic p2 =
+        (AccountAuthenticationCredentials.Basic) credentials.bundledCredentialsFor(URI.create("urn:2"));
 
-      Assert.assertEquals(AccountBarcode.create("abcd"), p0.barcode());
-      Assert.assertEquals(AccountBarcode.create("efgh"), p1.barcode());
-      Assert.assertEquals(AccountBarcode.create("ijkl"), p2.barcode());
+      Assert.assertEquals(new AccountUsername("abcd"), p0.getUserName());
+      Assert.assertEquals(new AccountUsername("efgh"), p1.getUserName());
+      Assert.assertEquals(new AccountUsername("ijkl"), p2.getUserName());
 
-      Assert.assertEquals(AccountPIN.create("1234"), p0.pin());
-      Assert.assertEquals(AccountPIN.create("5678"), p1.pin());
-      Assert.assertEquals(AccountPIN.create("9090"), p2.pin());
+      Assert.assertEquals(new AccountPassword("1234"), p0.getPassword());
+      Assert.assertEquals(new AccountPassword("5678"), p1.getPassword());
+      Assert.assertEquals(new AccountPassword("9090"), p2.getPassword());
     }
   }
 

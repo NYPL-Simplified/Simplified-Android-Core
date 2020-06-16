@@ -5,14 +5,14 @@ import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.navigation.api.NavigationControllerType
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 
 /**
  * Navigation functions for the catalog screens.
  */
 
-interface CatalogNavigationControllerType : NavigationControllerType {
+interface CatalogNavigationControllerType : NavigationControllerType,
+  AccountNavigationControllerType {
 
   /**
    * The catalog wants to open a book detail page.
@@ -21,22 +21,6 @@ interface CatalogNavigationControllerType : NavigationControllerType {
   fun openBookDetail(
     feedArguments: CatalogFeedArguments,
     entry: FeedEntryOPDS
-  )
-
-  /**
-   * A catalog screen wants to open the error page.
-   */
-
-  fun <E : PresentableErrorType> openErrorPage(
-    parameters: ErrorPageParameters<E>
-  )
-
-  /**
-   * Open a login dialog for the given parameters.
-   */
-
-  fun openLoginDialog(
-    parameters: CatalogFragmentLoginDialogParameters
   )
 
   /**

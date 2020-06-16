@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
 import org.joda.time.DateTime
-
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -29,7 +29,6 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
-
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -63,7 +62,7 @@ class BookSyncTask(
     val provider = this.updateAccountProvider()
 
     val providerAuth = provider.authentication
-    if (providerAuth == null) {
+    if (providerAuth == AccountProviderAuthenticationDescription.Anonymous) {
       this.logger.debug("account does not support syncing")
       return
     }

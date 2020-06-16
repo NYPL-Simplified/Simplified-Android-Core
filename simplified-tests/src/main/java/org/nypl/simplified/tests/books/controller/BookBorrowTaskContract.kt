@@ -1221,11 +1221,17 @@ abstract class BookBorrowTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
     feed.entriesInOrder.add(
-      FeedEntry.FeedEntryCorrupt(BookID.create("a"), java.lang.IllegalStateException())
+      FeedEntry.FeedEntryCorrupt(
+        accountID = account.id,
+        bookID = BookID.create("a"),
+        error = java.lang.IllegalStateException()
+      )
     )
 
     val feedResult =
@@ -1233,6 +1239,7 @@ abstract class BookBorrowTaskContract {
 
     Mockito.`when`(
       feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
         this.anyNonNull(),
         this.anyNonNull(),
         this.anyNonNull()
@@ -1346,16 +1353,21 @@ abstract class BookBorrowTaskContract {
     val rawFeed =
       feedBuilder.build()
     val feed =
-      Feed.fromAcquisitionFeed(rawFeed, null) as Feed.FeedWithGroups
+      Feed.fromAcquisitionFeed(account.id, rawFeed, null) as Feed.FeedWithGroups
 
     feed.feedGroupsInOrder[0].groupEntries[0] =
-      FeedEntry.FeedEntryCorrupt(BookID.create("x"), java.lang.IllegalStateException())
+      FeedEntry.FeedEntryCorrupt(
+        account.id,
+        BookID.create("x"),
+        java.lang.IllegalStateException()
+      )
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
     Mockito.`when`(
       feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
         this.anyNonNull(),
         this.anyNonNull(),
         this.anyNonNull()
@@ -1441,7 +1453,9 @@ abstract class BookBorrowTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
     val feedResult =
@@ -1449,6 +1463,7 @@ abstract class BookBorrowTaskContract {
 
     Mockito.`when`(
       feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
         this.anyNonNull(),
         this.anyNonNull(),
         this.anyNonNull()
@@ -1562,10 +1577,14 @@ abstract class BookBorrowTaskContract {
     val rawFeed =
       feedBuilder.build()
     val feed =
-      Feed.fromAcquisitionFeed(rawFeed, null) as Feed.FeedWithGroups
+      Feed.fromAcquisitionFeed(account.id, rawFeed, null) as Feed.FeedWithGroups
 
     feed.feedGroupsInOrder[0].groupEntries[0] =
-      FeedEntry.FeedEntryCorrupt(BookID.create("x"), java.lang.IllegalStateException())
+      FeedEntry.FeedEntryCorrupt(
+        accountID = account.id,
+        bookID = BookID.create("x"),
+        error = java.lang.IllegalStateException()
+      )
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
@@ -1574,10 +1593,10 @@ abstract class BookBorrowTaskContract {
       feedLoader.fetchURIRefreshing(
         this.anyNonNull(),
         this.anyNonNull(),
+        this.anyNonNull(),
         this.anyNonNull()
       )
-    )
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val acquisition =
       OPDSAcquisition(
@@ -1654,6 +1673,7 @@ abstract class BookBorrowTaskContract {
 
     Mockito.`when`(
       feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
         this.anyNonNull(),
         this.anyNonNull(),
         this.anyNonNull()

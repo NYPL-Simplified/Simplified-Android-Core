@@ -3,6 +3,7 @@ package org.nypl.simplified.feeds.api;
 import com.google.common.util.concurrent.FluentFuture;
 import com.io7m.jfunctional.OptionType;
 
+import org.nypl.simplified.accounts.api.AccountID;
 import org.nypl.simplified.http.core.HTTPAuthType;
 
 import java.net.URI;
@@ -24,8 +25,10 @@ public interface FeedLoaderType
    */
 
   FluentFuture<FeedLoaderResult> fetchURI(
+    AccountID account,
     URI uri,
-    OptionType<HTTPAuthType> auth);
+    OptionType<HTTPAuthType> auth
+  );
 
   /**
    * Load a feed from the given URI, bypassing any cache, and caching feeds that
@@ -39,9 +42,11 @@ public interface FeedLoaderType
    */
 
   FluentFuture<FeedLoaderResult> fetchURIRefreshing(
+    AccountID account,
     URI uri,
     OptionType<HTTPAuthType> auth,
-    String method);
+    String method
+  );
 
   /**
    * Load a feed from the given URI, caching feeds that are successfully
@@ -56,8 +61,10 @@ public interface FeedLoaderType
    */
 
   FluentFuture<FeedLoaderResult> fetchURIWithBookRegistryEntries(
+    AccountID account,
     URI uri,
-    OptionType<HTTPAuthType> auth);
+    OptionType<HTTPAuthType> auth
+  );
 
   /**
    * Invalidate the cached feed for URI {@code uri}, if any.

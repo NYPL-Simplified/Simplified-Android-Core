@@ -46,12 +46,13 @@ class AudioBookViewer : ViewerProviderType {
 
     val params =
       AudioBookPlayerParameters(
-        userAgent = HTTP.userAgent(),
+        accountID = book.account,
+        bookID = book.id,
         manifestContentType = format.contentType.fullType,
         manifestFile = manifest.manifestFile,
         manifestURI = manifest.manifestURI,
-        bookID = book.id,
-        opdsEntry = book.entry
+        opdsEntry = book.entry,
+        userAgent = HTTP.userAgent()
       )
 
     AudioBookPlayerActivity.startActivity(activity, params)

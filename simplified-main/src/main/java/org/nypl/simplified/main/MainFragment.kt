@@ -22,6 +22,7 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
@@ -152,6 +153,8 @@ class MainFragment : Fragment() {
     this.uiThread.runOnUIThread {
       this.navigationControllerDirectory.updateNavigationController(
         CatalogNavigationControllerType::class.java, this.bottomNavigator)
+      this.navigationControllerDirectory.updateNavigationController(
+        AccountNavigationControllerType::class.java, this.bottomNavigator)
       this.navigationControllerDirectory.updateNavigationController(
         SettingsNavigationControllerType::class.java, this.bottomNavigator)
       this.navigationControllerDirectory.updateNavigationController(

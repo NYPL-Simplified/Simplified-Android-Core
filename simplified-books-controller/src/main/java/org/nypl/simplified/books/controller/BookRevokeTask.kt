@@ -297,8 +297,12 @@ class BookRevokeTask(
      */
 
     val feedResult = try {
-      this.feedLoader.fetchURIRefreshing(targetURI, httpAuth, "PUT")
-        .get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
+      this.feedLoader.fetchURIRefreshing(
+        this.account.id,
+        targetURI,
+        httpAuth,
+        "PUT"
+      ).get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
       val message = this.revokeStrings.revokeServerNotifyFeedTimedOut
       this.steps.currentStepFailed(
@@ -541,7 +545,7 @@ class BookRevokeTask(
     this.publishRequestingRevokeStatus()
 
     val credentials =
-      this.someOrNull(this.getRequiredAccountCredentials().adobePostActivationCredentials())
+      this.getRequiredAccountCredentials().adobeCredentials?.postActivationCredentials
 
     if (credentials == null) {
       val exception = BookRevokeExceptionDeviceNotActivated()
