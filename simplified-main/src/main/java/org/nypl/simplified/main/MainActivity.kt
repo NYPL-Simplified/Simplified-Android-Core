@@ -216,11 +216,15 @@ class MainActivity :
     val profilesController =
       Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
         .requireService(ProfilesControllerType::class.java)
+    val brandingSplashService =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+        .requireService(BrandingSplashServiceType::class.java)
 
     return when (profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
         val profile = profilesController.profileCurrent()
-        if (!profile.preferences().hasSeenLibrarySelectionScreen) {
+        if (!profile.preferences().hasSeenLibrarySelectionScreen &&
+          brandingSplashService.shouldShowLibrarySelectionScreen) {
           this.openLibrarySelectionScreen()
         } else {
           this.openCatalog()

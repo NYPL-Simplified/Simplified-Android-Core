@@ -19,6 +19,7 @@ import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnimplementedCodeException
@@ -119,18 +120,18 @@ class AccountFragment : Fragment() {
   private lateinit var signUpButton: Button
   private lateinit var signUpLabel: TextView
   private lateinit var uiThread: UIThreadServiceType
+  private lateinit var viewModel: AccountFragmentViewModel
   private val cardCreatorResultCode = 101
   private val closing = AtomicBoolean(false)
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
   private var accountSubscription: Disposable? = null
   private var cardCreatorService: CardCreatorServiceType? = null
-  private var loginRequested: Boolean = false
   private var profileSubscription: Disposable? = null
 
   companion object {
 
     private const val PARAMETERS_ID =
-      "org.nypl.simplified.ui.accounts.SettingsFragmentAccount.parameters"
+      "org.nypl.simplified.ui.accounts.AccountFragment.parameters"
 
     /**
      * Create a new account fragment for the given parameters.
@@ -163,6 +164,10 @@ class AccountFragment : Fragment() {
       services.requireService(UIThreadServiceType::class.java)
     this.buildConfig =
       services.requireService(BuildConfigurationServiceType::class.java)
+
+    this.viewModel =
+      ViewModelProviders.of(this)
+        .get(AccountFragmentViewModel::class.java)
   }
 
   override fun onCreateView(
@@ -516,6 +521,7 @@ class AccountFragment : Fragment() {
   private fun onTryOAuthLogin(
     authenticationDescription: AccountProviderAuthenticationDescription.OAuthWithIntermediary
   ) {
+    this.viewModel.loginExplicitlyRequested = true
     this.profilesController.profileAccountLogin(
       OAuthWithIntermediaryInitiate(
         accountId = this.account.id,
@@ -732,7 +738,6 @@ class AccountFragment : Fragment() {
       }
 
       is AccountLoginFailed -> {
-        this.loginRequested = false
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginFormUnlock()
@@ -776,8 +781,11 @@ class AccountFragment : Fragment() {
         })
         this.authenticationAlternativesHide()
 
-        if (this.loginRequested && this.parameters.closeOnLoginSuccess) {
-          this.explicitlyClose()
+        if (this.viewModel.loginExplicitlyRequested && this.parameters.closeOnLoginSuccess) {
+          this.logger.debug("scheduling explicit close of account fragment")
+          this.uiThread.runOnUIThreadDelayed({
+            this.explicitlyClose()
+          }, 2_000L)
           return
         } else {
           // Doing nothing.
@@ -785,7 +793,6 @@ class AccountFragment : Fragment() {
       }
 
       is AccountLoggingOut -> {
-        this.loginRequested = false
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
             this.authenticationBasicUser.setText(creds.userName.value)
@@ -804,7 +811,6 @@ class AccountFragment : Fragment() {
       }
 
       is AccountLogoutFailed -> {
-        this.loginRequested = false
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
             this.authenticationBasicUser.setText(creds.userName.value)
@@ -1000,7 +1006,7 @@ class AccountFragment : Fragment() {
   }
 
   private fun tryLogin() {
-    this.loginRequested = true
+    this.viewModel.loginExplicitlyRequested = true
 
     return when (val description = this.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->

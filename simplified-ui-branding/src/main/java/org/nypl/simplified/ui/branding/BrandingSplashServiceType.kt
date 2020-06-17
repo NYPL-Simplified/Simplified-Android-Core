@@ -19,4 +19,10 @@ interface BrandingSplashServiceType {
 
   @androidx.annotation.DrawableRes
   fun splashImageTitleResource(): Int
+
+  /**
+   * Should the splash screen show the library selection screen?
+   */
+
+  val shouldShowLibrarySelectionScreen: Boolean
 }

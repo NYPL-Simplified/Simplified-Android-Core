@@ -23,6 +23,7 @@ import org.nypl.simplified.ui.accounts.AccountFragment
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountsFragment
+import org.nypl.simplified.ui.accounts.AccountsFragmentParameters
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
@@ -33,6 +34,7 @@ import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
+import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
 import org.nypl.simplified.ui.settings.SettingsFragmentMain
 import org.nypl.simplified.ui.settings.SettingsFragmentVersion
@@ -49,6 +51,7 @@ import org.slf4j.LoggerFactory
  */
 
 class TabbedNavigationController private constructor(
+  private val settingsConfiguration: SettingsConfigurationServiceType,
   private val profilesController: ProfilesControllerType,
   private val navigator: BottomNavigator
 ) : SettingsNavigationControllerType, CatalogNavigationControllerType {
@@ -68,6 +71,7 @@ class TabbedNavigationController private constructor(
     fun create(
       activity: FragmentActivity,
       profilesController: ProfilesControllerType,
+      settingsConfiguration: SettingsConfigurationServiceType,
       @IdRes fragmentContainerId: Int,
       navigationView: BottomNavigationView
     ): TabbedNavigationController {
@@ -107,8 +111,9 @@ class TabbedNavigationController private constructor(
       navigationView.labelVisibilityMode = LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 
       return TabbedNavigationController(
+        navigator = navigator,
         profilesController = profilesController,
-        navigator = navigator
+        settingsConfiguration = settingsConfiguration
       )
     }
 
@@ -118,7 +123,11 @@ class TabbedNavigationController private constructor(
       val profile = profilesController.profileCurrent()
       val mostRecentId = profile.preferences().mostRecentAccount
       if (mostRecentId != null) {
-        return profile.account(mostRecentId)
+        try {
+          return profile.account(mostRecentId)
+        } catch (e: Exception) {
+          this.logger.error("stale account: ", e)
+        }
       }
       for (account in profile.accounts().values) {
         return account
@@ -208,7 +217,11 @@ class TabbedNavigationController private constructor(
 
   override fun openSettingsAccounts() {
     this.navigator.addFragment(
-      fragment = AccountsFragment(),
+      fragment = AccountsFragment.create(
+        AccountsFragmentParameters(
+          shouldShowLibraryRegistryMenu = this.settingsConfiguration.allowAccountsRegistryAccess
+        )
+      ),
       tab = this.navigator.currentTab()
     )
   }

@@ -55,29 +55,29 @@ internal class Profile internal constructor(
     get() = this.owner?.currentProfile()?.map { p -> p.id } == Option.some(this.id)
 
   override fun accounts(): SortedMap<AccountID, AccountType> {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts.accounts()
   }
 
   override fun accountsByProvider(): SortedMap<URI, AccountType> {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts.accountsByProvider()
   }
 
   @Throws(AccountsDatabaseNonexistentException::class)
   override fun account(accountId: AccountID): AccountType {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts()[accountId]
       ?: throw AccountsDatabaseNonexistentException("Nonexistent account: $accountId")
   }
 
   override fun accountsDatabase(): AccountsDatabaseType {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts
   }
 
   override fun setDescription(newDescription: ProfileDescription) {
-    checkNotDeleted()
+    this.checkNotDeleted()
     synchronized(this.descriptionLock) {
       val newNameNormal =
         this.normalizeDisplayName(newDescription.displayName)
@@ -108,14 +108,29 @@ internal class Profile internal constructor(
 
   @Throws(AccountsDatabaseException::class)
   override fun createAccount(accountProvider: AccountProviderType): AccountType {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts.createAccount(accountProvider)
   }
 
   @Throws(AccountsDatabaseException::class)
   override fun deleteAccountByProvider(accountProvider: URI): AccountID {
-    checkNotDeleted()
-    return this.accounts.deleteAccountByProvider(accountProvider)
+    this.checkNotDeleted()
+    val deleted = this.accounts.deleteAccountByProvider(accountProvider)
+    val mostRecent = this.descriptionCurrent.preferences.mostRecentAccount
+    if (mostRecent == deleted) {
+      this.clearMostRecentAccount()
+    }
+    return deleted
+  }
+
+  private fun clearMostRecentAccount() {
+    this.setDescription(
+      this.descriptionCurrent.copy(
+        preferences = this.descriptionCurrent.preferences.copy(
+          mostRecentAccount = null
+        )
+      )
+    )
   }
 
   override fun compareTo(other: ProfileReadableType): Int {
@@ -123,7 +138,7 @@ internal class Profile internal constructor(
   }
 
   override fun description(): ProfileDescription {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return synchronized(this.descriptionLock) {
       this.descriptionCurrent
     }

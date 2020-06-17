@@ -104,6 +104,7 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
 import org.nypl.simplified.tenprint.TenPrintGenerator
 import org.nypl.simplified.tenprint.TenPrintGeneratorType
 import org.nypl.simplified.threads.NamedThreadPools
+import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogCoverBadgeImages
@@ -400,18 +401,18 @@ internal object MainServices {
     }
   }
 
-  private fun cardCreatorCredentials(
-    context: Context
-  ): AccountBundledCredentialsType {
-    return try {
-      this.createBundledCredentials(context.assets)
-    } catch (e: FileNotFoundException) {
-      this.logger.warn("could not initialize bundled credentials: ", e)
-      AccountBundledCredentialsEmpty.getInstance()
-    } catch (e: IOException) {
-      this.logger.warn("could not initialize bundled credentials: ", e)
-      throw IllegalStateException("could not initialize bundled credentials", e)
+  private fun createBrandingSplashService(): BrandingSplashServiceType {
+    val clazz = BrandingSplashServiceType::class.java
+    val available = ServiceLoader.load(clazz).toList()
+
+    if (available.isEmpty()) {
+      this.logger.debug("no available implementations of type ${clazz.canonicalName}")
+      throw IllegalStateException("no available implementations of type ${clazz.canonicalName}")
     }
+
+    val brandingService = available[0]
+    this.logger.debug("using branding service {}", brandingService)
+    return brandingService
   }
 
   @Throws(ProfileDatabaseException::class)
@@ -607,8 +608,8 @@ internal object MainServices {
 
     this.logger.debug("returning fallback settings configuration service")
     return object : SettingsConfigurationServiceType {
-      override val allowAccountsAccess: Boolean
-        get() = true
+      override val allowAccountsAccess: Boolean = true
+      override val allowAccountsRegistryAccess: Boolean = true
     }
   }
 
@@ -1041,6 +1042,11 @@ internal object MainServices {
 
     publishEvent(strings.bootingBrandingServices)
     val brandingThemeOverride = this.loadOptionalBrandingThemeOverride()
+
+    addService(
+      message = "Booting splash branding service",
+      interfaceType = BrandingSplashServiceType::class.java,
+      serviceConstructor = { this.createBrandingSplashService() })
 
     addService(
       message = strings.bootingThemeService,
