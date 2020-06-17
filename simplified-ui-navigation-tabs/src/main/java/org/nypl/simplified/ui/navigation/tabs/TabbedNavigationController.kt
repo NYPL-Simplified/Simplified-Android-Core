@@ -123,7 +123,11 @@ class TabbedNavigationController private constructor(
       val profile = profilesController.profileCurrent()
       val mostRecentId = profile.preferences().mostRecentAccount
       if (mostRecentId != null) {
-        return profile.account(mostRecentId)
+        try {
+          return profile.account(mostRecentId)
+        } catch (e: Exception) {
+          this.logger.error("stale account: ", e)
+        }
       }
       for (account in profile.accounts().values) {
         return account

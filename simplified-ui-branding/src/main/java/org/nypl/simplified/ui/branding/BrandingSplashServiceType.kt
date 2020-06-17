@@ -26,4 +26,3 @@ interface BrandingSplashServiceType {
 
   val shouldShowLibrarySelectionScreen: Boolean
 }
-

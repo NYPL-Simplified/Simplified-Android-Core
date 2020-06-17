@@ -35,14 +35,12 @@ import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.tests.MockBooksController
 import org.nypl.simplified.tests.MockDocumentStore
 import org.nypl.simplified.tests.MutableServiceDirectory
-import org.nypl.simplified.ui.accounts.AccountFragment
+import org.nypl.simplified.ui.accounts.AccountsFragment
+import org.nypl.simplified.ui.accounts.AccountsFragmentParameters
 import org.nypl.simplified.ui.images.ImageLoader
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountsFragment
-import org.nypl.simplified.ui.accounts.AccountsFragmentParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import java.io.IOException

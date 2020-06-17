@@ -8,10 +8,13 @@ import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
-import org.joda.time.DateTime
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedFacet
@@ -62,6 +65,7 @@ class CatalogFeedViewModel(
 
   private var feedWithoutGroupsViewState: Parcelable? = null
   private var feedWithGroupsViewState: Parcelable? = null
+  private var accountLoginSubscription: Disposable? = null
 
   /**
    * The stack of feeds that lead to the current feed. The current feed is the feed on top
@@ -234,10 +238,67 @@ class CatalogFeedViewModel(
     state: CatalogFeedState,
     result: FeedLoaderResult.FeedLoaderFailure
   ): CatalogFeedState.CatalogFeedLoadFailed {
+
+    /*
+     * If the failure is due to bad credentials, then subscribe to events for the account
+     * and try refreshing the feed when an account login has occurred.
+     */
+
+    if (result is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication) {
+      when (val ownership = state.arguments.ownership) {
+        is CatalogFeedOwnership.OwnedByAccount ->
+          this.subscribeToLoginEvents(
+            accountId = ownership.accountId,
+            runOnSuccess = {
+              this.logger.debug("reloading feed due to successful login")
+              this.reloadFeed(state.arguments)
+            }
+          )
+        CatalogFeedOwnership.CollectedFromAccounts -> {
+          // We can't log in if we don't know which account owns the feed.
+        }
+      }
+    }
+
     return CatalogFeedState.CatalogFeedLoadFailed(
       arguments = state.arguments,
       failure = result
     )
+  }
+
+  private fun subscribeToLoginEvents(
+    accountId: AccountID,
+    runOnSuccess: () -> Unit
+  ) {
+    this.accountLoginSubscription =
+      this.profilesController.accountEvents()
+        .ofType(AccountEventLoginStateChanged::class.java)
+        .filter { event -> event.accountID == accountId }
+        .subscribe { event ->
+          when (event.state) {
+            AccountLoginState.AccountNotLoggedIn,
+            is AccountLoginState.AccountLoggingIn,
+            is AccountLoginState.AccountLoggingInWaitingForExternalAuthentication,
+            is AccountLoginState.AccountLoggingOut -> {
+              // Still in progress!
+            }
+
+            is AccountLoginState.AccountLogoutFailed,
+            is AccountLoginState.AccountLoginFailed -> {
+              this.unsubscribeFromAccountEvents()
+            }
+
+            is AccountLoginState.AccountLoggedIn -> {
+              this.unsubscribeFromAccountEvents()
+              runOnSuccess()
+            }
+          }
+        }
+  }
+
+  private fun unsubscribeFromAccountEvents() {
+    this.accountLoginSubscription?.dispose()
+    this.accountLoginSubscription = null
   }
 
   private fun onReceivedFeedWithGroups(
@@ -308,6 +369,7 @@ class CatalogFeedViewModel(
   override fun onCleared() {
     super.onCleared()
     this.logger.debug("[{}]: deleting viewmodel", this.instanceId)
+    this.unsubscribeFromAccountEvents()
   }
 
   private class CatalogFacetPseudoTitleProvider(
@@ -478,16 +540,6 @@ class CatalogFeedViewModel(
           }
         }
       }
-    }
-  }
-
-  private fun currentAge(): Int {
-    return try {
-      val profile = profilesController.profileCurrent()
-      profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
-    } catch (e: Exception) {
-      this.logger.error("could not retrieve profile age: ", e)
-      1
     }
   }
 }

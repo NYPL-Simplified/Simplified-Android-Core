@@ -43,7 +43,9 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacets
 import org.nypl.simplified.feeds.api.FeedGroup
-import org.nypl.simplified.feeds.api.FeedLoaderResult
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
 import org.nypl.simplified.futures.FluentFutureExtensions
@@ -54,6 +56,7 @@ import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
@@ -615,6 +618,42 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
+    /*
+     * If the feed can't be loaded due to an authentication failure, then open
+     * the account screen (if possible).
+     */
+
+    when (feedState.failure) {
+      is FeedLoaderFailedGeneral -> {
+        // Display the error.
+      }
+      is FeedLoaderFailedAuthentication -> {
+        when (val ownership = this.parameters.ownership) {
+          is CatalogFeedOwnership.OwnedByAccount -> {
+
+            /*
+             * Explicitly deferring the opening of the fragment is required due to the
+             * tabbed navigation controller eagerly instantiating fragments and causing
+             * fragment transaction exceptions. This will go away when we have a replacement
+             * for the navigator library.
+             */
+
+            this.uiThread.runOnUIThread {
+              this.findNavigationController()
+                .openSettingsAccount(AccountFragmentParameters(
+                  accountId = ownership.accountId,
+                  closeOnLoginSuccess = true,
+                  showPleaseLogInTitle = true
+                ))
+            }
+          }
+          CatalogFeedOwnership.CollectedFromAccounts -> {
+            // Nothing we can do here! We don't know which account owns the feed.
+          }
+        }
+      }
+    }
+
     this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.VISIBLE
@@ -1045,8 +1084,8 @@ class CatalogFragmentFeed : Fragment() {
     )
 
   private fun errorPageParameters(
-    failure: FeedLoaderResult.FeedLoaderFailure
-  ): ErrorPageParameters<FeedLoaderResult.FeedLoaderFailure> {
+    failure: FeedLoaderFailure
+  ): ErrorPageParameters<FeedLoaderFailure> {
     val step =
       TaskStep(
         description = this.resources.getString(R.string.catalogFeedLoading),

@@ -223,8 +223,8 @@ class MainActivity :
     return when (profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
         val profile = profilesController.profileCurrent()
-        if (!profile.preferences().hasSeenLibrarySelectionScreen
-          && brandingSplashService.shouldShowLibrarySelectionScreen) {
+        if (!profile.preferences().hasSeenLibrarySelectionScreen &&
+          brandingSplashService.shouldShowLibrarySelectionScreen) {
           this.openLibrarySelectionScreen()
         } else {
           this.openCatalog()

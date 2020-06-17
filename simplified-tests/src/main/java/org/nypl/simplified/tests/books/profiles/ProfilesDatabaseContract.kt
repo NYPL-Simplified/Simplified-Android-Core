@@ -701,6 +701,47 @@ abstract class ProfilesDatabaseContract {
   }
 
   /**
+   * If the deleted account was the most recent account, the most recent account preference
+   * is cleared.
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testDeleteClearsMostRecent() {
+    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
+    val fileProfiles = File(fileTemp, "profiles")
+
+    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.analytics,
+      this.accountEvents,
+      MockAccountProviders.fakeAccountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
+      this.accountsDatabases(),
+      fileProfiles)
+
+    val acc0 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
+    val acc1 =
+      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
+
+    val p0 = db0.createProfile(acc0, "Kermit")
+    db0.setProfileCurrent(p0.id)
+
+    val acci1 = p0.createAccount(acc1)
+    p0.setDescription(p0.description().copy(
+      preferences = p0.preferences().copy(
+        mostRecentAccount = acci1.id
+      )
+    ))
+
+    Assert.assertEquals(acci1.id, p0.preferences().mostRecentAccount)
+    p0.deleteAccountByProvider(acc1.id)
+    Assert.assertEquals(null, p0.preferences().mostRecentAccount)
+  }
+
+  /**
    * Trying to fetch the anonymous profile outside of anonymous mode, fails.
    */
 
