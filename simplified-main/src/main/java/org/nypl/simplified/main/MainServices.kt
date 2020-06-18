@@ -401,20 +401,6 @@ internal object MainServices {
     }
   }
 
-  private fun createBrandingSplashService(): BrandingSplashServiceType {
-    val clazz = BrandingSplashServiceType::class.java
-    val available = ServiceLoader.load(clazz).toList()
-
-    if (available.isEmpty()) {
-      this.logger.debug("no available implementations of type ${clazz.canonicalName}")
-      throw IllegalStateException("no available implementations of type ${clazz.canonicalName}")
-    }
-
-    val brandingService = available[0]
-    this.logger.debug("using branding service {}", brandingService)
-    return brandingService
-  }
-
   @Throws(ProfileDatabaseException::class)
   private fun createProfileDatabase(
     context: Context,
@@ -1042,11 +1028,6 @@ internal object MainServices {
 
     publishEvent(strings.bootingBrandingServices)
     val brandingThemeOverride = this.loadOptionalBrandingThemeOverride()
-
-    addService(
-      message = "Booting splash branding service",
-      interfaceType = BrandingSplashServiceType::class.java,
-      serviceConstructor = { this.createBrandingSplashService() })
 
     addService(
       message = strings.bootingThemeService,

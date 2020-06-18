@@ -44,6 +44,12 @@ data class SplashParameters(
    * The email address to which migration reports will be sent.
    */
 
-  val splashMigrationReportEmail: String? = null
+  val splashMigrationReportEmail: String? = null,
+
+  /**
+   * `true` if the library selection fragment should be shown.
+   */
+
+  val showLibrarySelection: Boolean
 
 ) : Serializable

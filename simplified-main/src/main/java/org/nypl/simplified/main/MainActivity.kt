@@ -198,7 +198,8 @@ class MainActivity :
         splashMigrationReportEmail = migrationReportingEmail,
         splashImageResource = splashService.splashImageResource(),
         splashImageTitleResource = splashService.splashImageTitleResource(),
-        splashImageSeconds = 2L
+        splashImageSeconds = 2L,
+        showLibrarySelection = splashService.shouldShowLibrarySelectionScreen
       )
 
     this.splashMainFragment =
@@ -213,18 +214,16 @@ class MainActivity :
   private fun onStartupFinished() {
     this.logger.debug("onStartupFinished")
 
+    val services =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
     val profilesController =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
-        .requireService(ProfilesControllerType::class.java)
-    val brandingSplashService =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
-        .requireService(BrandingSplashServiceType::class.java)
+      services.requireService(ProfilesControllerType::class.java)
 
     return when (profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
         val profile = profilesController.profileCurrent()
         if (!profile.preferences().hasSeenLibrarySelectionScreen &&
-          brandingSplashService.shouldShowLibrarySelectionScreen) {
+          this.splashParameters.showLibrarySelection) {
           this.openLibrarySelectionScreen()
         } else {
           this.openCatalog()
