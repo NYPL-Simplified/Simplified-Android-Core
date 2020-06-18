@@ -104,7 +104,6 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
 import org.nypl.simplified.tenprint.TenPrintGenerator
 import org.nypl.simplified.tenprint.TenPrintGeneratorType
 import org.nypl.simplified.threads.NamedThreadPools
-import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogCoverBadgeImages
