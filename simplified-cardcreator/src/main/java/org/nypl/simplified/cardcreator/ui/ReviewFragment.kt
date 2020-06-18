@@ -15,9 +15,14 @@ import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentReviewBinding
-import org.nypl.simplified.cardcreator.models.Patron
+import org.nypl.simplified.cardcreator.model.BarcodeParent
+import org.nypl.simplified.cardcreator.model.Patron
+import org.nypl.simplified.cardcreator.model.UsernameParent
 import org.nypl.simplified.cardcreator.utils.Cache
-import org.nypl.simplified.cardcreator.viewmodels.PatronViewModel
+import org.nypl.simplified.cardcreator.utils.getCache
+import org.nypl.simplified.cardcreator.utils.isBarcode
+import org.nypl.simplified.cardcreator.viewmodel.PatronViewModel
+import org.nypl.simplified.cardcreator.viewmodel.PlatformViewModel
 import org.slf4j.LoggerFactory
 
 class ReviewFragment : Fragment() {
@@ -37,6 +42,7 @@ class ReviewFragment : Fragment() {
   private val policyTypeDefault = "web_applicant"
 
   private val viewModel: PatronViewModel by viewModels()
+  private val platformViewModel: PlatformViewModel by viewModels()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -53,11 +59,19 @@ class ReviewFragment : Fragment() {
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
     cache = Cache(requireContext())
 
-    setReviewData()
+    if (getCache().isJuvenileCard!!) {
+      setJuvenileReviewData()
+    } else {
+      setReviewData()
+    }
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
-      createPatron()
+      if (getCache().isJuvenileCard!!) {
+        createJuvenilePatron()
+      } else {
+        createPatron()
+      }
     }
 
     // Go to previous screen
@@ -83,6 +97,24 @@ class ReviewFragment : Fragment() {
       }
     })
 
+    platformViewModel.juvenilePatronResponse.observe(viewLifecycleOwner, Observer { response ->
+      showLoading(false)
+      Toast.makeText(activity, "Card created", Toast.LENGTH_SHORT).show()
+      if (response.status == 200) {
+        logger.debug("User navigated to the next screen")
+        logger.debug("Card granted")
+        nextAction = ReviewFragmentDirections.actionNext(
+          response.data.dependent.username,
+          response.data.dependent.barcode,
+          response.data.dependent.pin,
+          "dependent",
+          false,
+          "Card created",
+          "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}")
+        navController.navigate(nextAction)
+      }
+    })
+
     viewModel.apiError.observe(viewLifecycleOwner, Observer {
       showLoading(false)
       var error = getString(R.string.create_card_general_error)
@@ -103,13 +135,58 @@ class ReviewFragment : Fragment() {
       val alert = dialogBuilder.create()
       alert.show()
     })
+
+    platformViewModel.apiError.observe(viewLifecycleOwner, Observer {
+      showLoading(false)
+      var error = getString(R.string.create_card_general_error)
+      if (it != null) {
+        error = getString(R.string.create_card_error, it)
+      }
+      val dialogBuilder = AlertDialog.Builder(requireContext())
+      dialogBuilder.setMessage(error)
+        .setCancelable(false)
+        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+          createJuvenilePatron()
+        }
+        .setNegativeButton(getString(R.string.quit)) { _, _ ->
+          Cache(requireContext()).clear()
+          requireActivity().setResult(Activity.RESULT_CANCELED)
+          requireActivity().finish()
+        }
+      val alert = dialogBuilder.create()
+      alert.show()
+    })
   }
 
   private fun createPatron() {
     showLoading(true)
-    viewModel.createPatron(getPatron(),
+    viewModel.createPatron(
+      getPatron(),
       requireActivity().intent.extras.getString("username"),
       requireActivity().intent.extras.getString("password"))
+  }
+
+  private fun createJuvenilePatron() {
+    showLoading(true)
+    if (isBarcode(requireActivity().intent.extras.getString("userIdentifier"))) {
+      platformViewModel.createJuvenileCard(
+        BarcodeParent(
+          requireActivity().intent.extras.getString("userIdentifier"),
+          getCache().getPersonalInformation().firstName,
+          getCache().getAccountInformation().username,
+          getCache().getAccountInformation().pin
+        ),
+        getCache().token!!)
+    } else {
+      platformViewModel.createJuvenileCard(
+        UsernameParent(
+          requireActivity().intent.extras.getString("userIdentifier"),
+          getCache().getPersonalInformation().firstName,
+          getCache().getAccountInformation().username,
+          getCache().getAccountInformation().pin
+        ),
+        getCache().token!!)
+    }
   }
 
   private fun getPatron(): Patron {
@@ -189,10 +266,29 @@ class ReviewFragment : Fragment() {
       }
     }
     val personalInformation = cache.getPersonalInformation()
-    binding.nameTv.text = "${personalInformation.firstName} ${personalInformation.lastName}"
     binding.emailTv.text = personalInformation.email
+    setAccountInfo()
+  }
+
+  private fun setJuvenileReviewData() {
+    binding.emailTv.visibility = View.GONE
+    binding.schoolAddressData.visibility = View.GONE
+    binding.workAddressData.visibility = View.GONE
+    binding.addressHomeTv1.visibility = View.GONE
+    binding.addressHomeTv2.visibility = View.GONE
+    setAccountInfo()
+  }
+
+  private fun setAccountInfo() {
+    val personalInformation = cache.getPersonalInformation()
+    binding.nameTv.text = "${personalInformation.firstName} ${personalInformation.lastName}"
     val accountInformation = cache.getAccountInformation()
     binding.usernameTv.text = accountInformation.username
     binding.pinTv.text = accountInformation.pin
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 }

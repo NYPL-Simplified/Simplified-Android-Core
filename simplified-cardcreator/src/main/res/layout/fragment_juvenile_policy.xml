@@ -4,50 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.AgeFragment">
+    tools:context=".ui.JuvenilePolicyFragment">
 
     <TextView
         android:id="@+id/description_tv"
         style="@style/WizardDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
-        android:text="@string/age_description"
+        android:layout_marginTop="32dp"
+        android:gravity="start"
+        android:text="@string/juvenile_policy"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <RadioGroup
-        android:id="@+id/age_rg"
-        android:layout_width="match_parent"
+    <CheckBox
+        android:id="@+id/policy_checkbox"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:checked="false"
+        android:text="@string/juvenile_policy_checkbox"
+        android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/description_tv">
-
-        <RadioButton
-            android:id="@+id/under_13_rb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginRight="25dp"
-            android:layout_marginBottom="20dp"
-            android:layout_weight="1"
-            android:text="@string/under_13" />
-
-        <RadioButton
-            android:id="@+id/older_13_rb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginRight="25dp"
-            android:layout_marginBottom="20dp"
-            android:layout_weight="1"
-            android:text="@string/over_13" />
-    </RadioGroup>
+        app:layout_constraintTop_toBottomOf="@id/description_tv" />
 
     <CheckBox
         android:id="@+id/eula_checkbox"
@@ -55,10 +35,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:checked="false"
-        android:text="@string/eula_checkbox"
+        android:text="@string/read_eula"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/age_rg" />
+        app:layout_constraintTop_toBottomOf="@id/policy_checkbox" />
 
     <TextView
         android:id="@+id/error"
@@ -76,23 +56,31 @@
         style="?android:attr/buttonBarButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:enabled="false"
         android:gravity="center"
-        android:text="@string/next"
+        android:text="@string/cancel"
         android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
+        android:id="@+id/eula"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/eula"
         android:gravity="center"
         android:text="@string/eula"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/eula_checkbox"
-        />
+        app:layout_constraintTop_toBottomOf="@id/eula_checkbox" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

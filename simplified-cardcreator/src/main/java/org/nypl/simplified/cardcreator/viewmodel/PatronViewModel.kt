@@ -1,11 +1,11 @@
-package org.nypl.simplified.cardcreator.viewmodels
+package org.nypl.simplified.cardcreator.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.nypl.simplified.cardcreator.models.CreatePatronResponse
-import org.nypl.simplified.cardcreator.models.Patron
+import org.nypl.simplified.cardcreator.model.CreatePatronResponse
+import org.nypl.simplified.cardcreator.model.Patron
 import org.nypl.simplified.cardcreator.network.CardCreatorService
 import org.slf4j.LoggerFactory
 import retrofit2.HttpException

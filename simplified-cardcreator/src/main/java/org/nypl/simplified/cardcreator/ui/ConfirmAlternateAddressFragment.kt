@@ -10,8 +10,8 @@ import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentConfirmAlternateAddressBinding
-import org.nypl.simplified.cardcreator.models.AddressDetails
-import org.nypl.simplified.cardcreator.models.AddressType
+import org.nypl.simplified.cardcreator.model.AddressDetails
+import org.nypl.simplified.cardcreator.model.AddressType
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.slf4j.LoggerFactory
 
@@ -70,5 +70,10 @@ class ConfirmAlternateAddressFragment : Fragment() {
     binding.prevBtn.setOnClickListener {
       navController.popBackStack()
     }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 }

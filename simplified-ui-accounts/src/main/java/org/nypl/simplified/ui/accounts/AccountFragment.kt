@@ -26,9 +26,12 @@ import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountUsername
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
@@ -36,10 +39,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
-import org.nypl.simplified.accounts.api.AccountPassword
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
-import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
@@ -409,7 +409,13 @@ class AccountFragment : Fragment() {
       if (cardCreator == null) {
         this.logger.error("Card creator not configured")
       } else {
-        cardCreator.openCardCreatorActivity(this, this.activity, this.cardCreatorResultCode)
+        cardCreator.openCardCreatorActivity(
+          this,
+          this.activity,
+          this.cardCreatorResultCode,
+          this.account.loginState is AccountLoggedIn,
+          this.authenticationBasicUser.text.toString().trim()
+        )
       }
     }
 
@@ -862,11 +868,13 @@ class AccountFragment : Fragment() {
     return when (status) {
       is AsLoginButtonEnabled -> {
         this.loginButton.setText(R.string.accountLogin)
+        this.signUpLabel.text = getString(R.string.accountCardCreatorLabel)
         this.loginButton.isEnabled = true
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       AsLoginButtonDisabled -> {
         this.loginButton.setText(R.string.accountLogin)
+        this.signUpLabel.text = getString(R.string.accountCardCreatorLabel)
         this.loginButton.isEnabled = false
       }
       is AsCancelButtonEnabled -> {
@@ -876,11 +884,13 @@ class AccountFragment : Fragment() {
       }
       is AsLogoutButtonEnabled -> {
         this.loginButton.setText(R.string.accountLogout)
+        this.signUpLabel.text = "Want a card for your child?"
         this.loginButton.isEnabled = true
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       AsLogoutButtonDisabled -> {
         this.loginButton.setText(R.string.accountLogout)
+        this.signUpLabel.text = "Want a card for your child?"
         this.loginButton.isEnabled = false
       }
       AsCancelButtonDisabled -> {

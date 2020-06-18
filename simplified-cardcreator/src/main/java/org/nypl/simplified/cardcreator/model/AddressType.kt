@@ -1,4 +1,4 @@
-package org.nypl.simplified.cardcreator.models
+package org.nypl.simplified.cardcreator.model
 
 /**
  * Three types of address types

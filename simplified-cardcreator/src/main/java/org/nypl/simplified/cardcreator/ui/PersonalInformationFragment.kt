@@ -17,7 +17,7 @@ import androidx.navigation.Navigation
 import org.joda.time.format.DateTimeFormat
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentPersonalInformationBinding
-import org.nypl.simplified.cardcreator.models.PersonalInformation
+import org.nypl.simplified.cardcreator.model.PersonalInformation
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.hideKeyboard
 import org.slf4j.LoggerFactory
@@ -155,7 +155,12 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
   }
 
   override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
-    birthDate = "$month/$dayOfMonth/$year"
+    birthDate = "${month + 1}/$dayOfMonth/$year"
     binding.birthDateEt.setText(birthDate, TextView.BufferType.EDITABLE)
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 }

@@ -3,6 +3,7 @@ package org.nypl.simplified.cardcreator
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.nypl.simplified.cardcreator.databinding.ActivityCardCreatorBinding
+import org.nypl.simplified.cardcreator.utils.Cache
 
 /**
  * Main view responsible for patrons to create library cards
@@ -16,5 +17,14 @@ class CardCreatorActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     binding = ActivityCardCreatorBinding.inflate(layoutInflater)
     setContentView(binding.root)
+    if (intent.extras.getBoolean("isLoggedIn")) {
+      Cache(this).isJuvenileCard = true
+      binding.toolbarTitleTv.text = getString(R.string.create_child_card)
+    }
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    Cache(this).clear()
   }
 }

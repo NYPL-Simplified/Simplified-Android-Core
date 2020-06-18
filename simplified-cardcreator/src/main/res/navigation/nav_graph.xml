@@ -15,6 +15,14 @@
             app:destination="@id/destination_location"
             app:enterAnim="@anim/enter_right"
             app:exitAnim="@anim/exit_left" />
+        <action
+            android:id="@+id/action_eula"
+            app:destination="@id/destination_eula"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+        <action
+            android:id="@+id/action_juvenile_policy"
+            app:destination="@id/destination_juvenile_policy" />
     </fragment>
 
     <fragment
@@ -25,6 +33,11 @@
         <action
             android:id="@+id/action_next"
             app:destination="@id/destination_home_address"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+        <action
+            android:id="@+id/action_juvenile_information"
+            app:destination="@id/destination_juvenile_information"
             app:enterAnim="@anim/enter_right"
             app:exitAnim="@anim/exit_left" />
     </fragment>
@@ -87,7 +100,7 @@
             app:exitAnim="@anim/exit_left" />
         <argument
             android:name="address_type"
-            app:argType="org.nypl.simplified.cardcreator.models.AddressType" />
+            app:argType="org.nypl.simplified.cardcreator.model.AddressType" />
 
     </fragment>
 
@@ -104,7 +117,7 @@
             app:exitAnim="@anim/exit_left" />
         <argument
             android:name="address_type"
-            app:argType="org.nypl.simplified.cardcreator.models.AddressType" />
+            app:argType="org.nypl.simplified.cardcreator.model.AddressType" />
 
     </fragment>
 
@@ -144,14 +157,14 @@
 
         <action
             android:id="@+id/action_next"
-            app:destination="@id/destination_confirrmation"
+            app:destination="@id/destination_confirmation"
             app:enterAnim="@anim/enter_right"
             app:exitAnim="@anim/exit_left" />
 
     </fragment>
 
     <fragment
-        android:id="@+id/destination_confirrmation"
+        android:id="@+id/destination_confirmation"
         android:name="org.nypl.simplified.cardcreator.ui.ConfirmationFragment"
         android:label="fragment_confirmation"
         tools:layout="@layout/fragment_confirmation">
@@ -177,6 +190,40 @@
         <argument
             android:name="name"
             app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/destination_eula"
+        android:name="org.nypl.simplified.cardcreator.ui.EULAFragment"
+        android:label="fragment_eula"
+        tools:layout="@layout/fragment_eula" />
+
+    <fragment
+        android:id="@+id/destination_juvenile_policy"
+        android:name="org.nypl.simplified.cardcreator.ui.JuvenilePolicyFragment"
+        android:label="fragment_juvenile_policy"
+        tools:layout="@layout/fragment_juvenile_policy">
+        <action
+            android:id="@+id/action_eula"
+            app:destination="@id/destination_eula"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+        <action
+            android:id="@+id/action_location"
+            app:destination="@id/destination_location"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
+    </fragment>
+    <fragment
+        android:id="@+id/destination_juvenile_information"
+        android:name="org.nypl.simplified.cardcreator.ui.JuvenileInformationFragment"
+        android:label="fragment_juvenile_information"
+        tools:layout="@layout/fragment_juvenile_information">
+        <action
+            android:id="@+id/action_next"
+            app:destination="@id/destination_account_information"
+            app:enterAnim="@anim/enter_right"
+            app:exitAnim="@anim/exit_left" />
     </fragment>
 
 </navigation>
