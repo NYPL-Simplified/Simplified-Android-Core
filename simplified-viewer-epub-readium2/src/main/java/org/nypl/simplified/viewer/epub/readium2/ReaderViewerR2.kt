@@ -24,7 +24,7 @@ class ReaderViewerR2 : ViewerProviderType {
   override fun open(activity: Activity, book: Book, format: BookFormat) {
     val bookId = book.id
     val file = (format as BookFormat.BookFormatEPUB).file!!
-    val entry = FeedEntry.FeedEntryOPDS(book.entry)
+    val entry = FeedEntry.FeedEntryOPDS(book.account, book.entry)
 
     ReaderActivity.startActivity(activity, bookId, file, entry)
   }
