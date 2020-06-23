@@ -396,7 +396,14 @@ class AccountFragment : Fragment() {
      * Conditionally enable sign up button
      */
 
-    if (this.account.provider.cardCreatorURI != null && this.cardCreatorService != null) {
+    if (this.account.provider.cardCreatorURI != null &&
+      this.cardCreatorService != null &&
+      this.account.provider.cardCreatorURI?.scheme.equals(nyplCardCreatorScheme)
+    ) {
+      this.signUpButton.isEnabled = true
+      this.signUpLabel.isEnabled = true
+    } else if (this.account.provider.cardCreatorURI != null &&
+      !this.account.provider.cardCreatorURI?.scheme.equals(nyplCardCreatorScheme)) {
       this.signUpButton.isEnabled = true
       this.signUpLabel.isEnabled = true
     }
@@ -407,18 +414,21 @@ class AccountFragment : Fragment() {
 
     this.signUpButton.setOnClickListener {
       val cardCreator = this.cardCreatorService
-      if (cardCreator == null) {
-        this.logger.error("Card creator not configured")
-      } else {
-        // Launch NYPL card creator
         if (this.account.provider.cardCreatorURI?.scheme.equals(nyplCardCreatorScheme)) {
-          cardCreator.openCardCreatorActivity(
-            this,
-            this.activity,
-            this.cardCreatorResultCode,
-            this.account.loginState is AccountLoggedIn,
-            this.authenticationBasicUser.text.toString().trim()
-          )
+          if (cardCreator != null) {
+            // Launch NYPL card creator
+            cardCreator.openCardCreatorActivity(
+              this,
+              this.activity,
+              this.cardCreatorResultCode,
+              this.account.loginState is AccountLoggedIn,
+              this.authenticationBasicUser.text.toString().trim()
+            )
+          } else {
+            this.logger.error("Card creator not configured")
+            this.signUpButton.isEnabled = false
+            this.signUpLabel.isEnabled = false
+          }
           // Launch external card creator
         } else {
           val webCardCreator = Intent(
@@ -426,7 +436,6 @@ class AccountFragment : Fragment() {
             Uri.parse(this.account.provider.cardCreatorURI.toString()))
           startActivity(webCardCreator)
         }
-      }
     }
 
     /*
