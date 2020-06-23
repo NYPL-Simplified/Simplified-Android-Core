@@ -10,7 +10,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentOutOfStateBinding
-import org.nypl.simplified.cardcreator.models.AddressType
+import org.nypl.simplified.cardcreator.model.AddressType
 import org.slf4j.LoggerFactory
 
 class OutOfStateFragment : Fragment() {
@@ -61,5 +61,10 @@ class OutOfStateFragment : Fragment() {
     binding.prevBtn.setOnClickListener {
       navController.popBackStack()
     }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 }

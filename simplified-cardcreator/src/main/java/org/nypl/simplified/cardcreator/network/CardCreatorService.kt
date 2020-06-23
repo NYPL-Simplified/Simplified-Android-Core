@@ -4,12 +4,12 @@ import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.nypl.simplified.cardcreator.models.Address
-import org.nypl.simplified.cardcreator.models.ValidateAddressResponse
-import org.nypl.simplified.cardcreator.models.Username
-import org.nypl.simplified.cardcreator.models.ValidateUsernameResponse
-import org.nypl.simplified.cardcreator.models.Patron
-import org.nypl.simplified.cardcreator.models.CreatePatronResponse
+import org.nypl.simplified.cardcreator.model.Address
+import org.nypl.simplified.cardcreator.model.ValidateAddressResponse
+import org.nypl.simplified.cardcreator.model.Username
+import org.nypl.simplified.cardcreator.model.ValidateUsernameResponse
+import org.nypl.simplified.cardcreator.model.Patron
+import org.nypl.simplified.cardcreator.model.CreatePatronResponse
 import org.nypl.simplified.cardcreator.utils.Constants
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -54,11 +54,9 @@ internal interface CardCreatorService {
 
   companion object {
     operator fun invoke(authUsername: String, authPassword: String): CardCreatorService {
-      val logging = run {
-        val httpLoggingInterceptor = HttpLoggingInterceptor()
-        httpLoggingInterceptor.apply {
-          httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BASIC
-        }
+
+      val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.HEADERS
       }
 
       val auth = Interceptor {

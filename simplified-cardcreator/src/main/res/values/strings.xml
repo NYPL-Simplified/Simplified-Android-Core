@@ -131,6 +131,15 @@
     <string name="eula_checkbox">I agree to the terms of the End User License Agreement.</string>
     <string name="age_error">You are not old enough to sign up for a library card.</string>
     <string name="validating_location">Validating your location</string>
+    <string name="eula"><u>End User License Agreement</u></string>
+
+    <!-- Juvenile Policy -->
+    <string name="juvenile_policy">To apply for a card for your under-13 child, you must be the parent/legal guardian of the minor in question and be physically present in New York State at the time of sign-up.\n\n
+    Please check the box below to confirm you are the legal guardian of the minor child for whom the card will be used.
+    </string>
+    <string name="juvenile_policy_checkbox">By checking this box, I confirm that I am the parent / legal guardian of the minor for whom I am creating a library card account.</string>
+    <string name="read_eula">I have read and agree to the End User License Agreement.</string>
+    <string name="create_child_card">Create Card for your Child</string>
 
     <!-- Location -->
     <string name="checking_location">Checking location&#8230;</string>

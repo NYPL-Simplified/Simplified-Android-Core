@@ -181,4 +181,9 @@ class ConfirmationFragment : Fragment() {
     Cache(requireContext()).clear()
     requireActivity().finish()
   }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
+  }
 }
