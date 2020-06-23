@@ -10,7 +10,6 @@ import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
 import org.nypl.simplified.cardcreator.network.NYPLPlatformService
 import org.slf4j.LoggerFactory
 import retrofit2.HttpException
-import java.lang.Double.parseDouble
 import java.lang.Exception
 
 class PlatformViewModel : ViewModel() {

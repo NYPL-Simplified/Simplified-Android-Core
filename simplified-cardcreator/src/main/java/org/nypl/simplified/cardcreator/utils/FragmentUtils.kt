@@ -1,7 +1,6 @@
 package org.nypl.simplified.cardcreator.utils
 
 import androidx.fragment.app.Fragment
-import java.lang.Double
 
 /**
  * Gets Cache object

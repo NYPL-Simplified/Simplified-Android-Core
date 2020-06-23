@@ -126,6 +126,7 @@ class AccountFragment : Fragment() {
   private var cardCreatorService: CardCreatorServiceType? = null
   private var loginRequested: Boolean = false
   private var profileSubscription: Disposable? = null
+  private val nyplCardCreatorScheme = "nypl.card-creator"
 
   companion object {
 
@@ -409,13 +410,22 @@ class AccountFragment : Fragment() {
       if (cardCreator == null) {
         this.logger.error("Card creator not configured")
       } else {
-        cardCreator.openCardCreatorActivity(
-          this,
-          this.activity,
-          this.cardCreatorResultCode,
-          this.account.loginState is AccountLoggedIn,
-          this.authenticationBasicUser.text.toString().trim()
-        )
+        // Launch NYPL card creator
+        if (this.account.provider.cardCreatorURI?.scheme.equals(nyplCardCreatorScheme)) {
+          cardCreator.openCardCreatorActivity(
+            this,
+            this.activity,
+            this.cardCreatorResultCode,
+            this.account.loginState is AccountLoggedIn,
+            this.authenticationBasicUser.text.toString().trim()
+          )
+          // Launch external card creator
+        } else {
+          val webCardCreator = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(this.account.provider.cardCreatorURI.toString()))
+          startActivity(webCardCreator)
+        }
       }
     }
 
