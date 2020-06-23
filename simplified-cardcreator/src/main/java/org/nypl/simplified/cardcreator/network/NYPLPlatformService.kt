@@ -58,11 +58,8 @@ internal interface NYPLPlatformService {
         it.proceed(request)
       }
 
-      val logging = run {
-        val httpLoggingInterceptor = HttpLoggingInterceptor()
-        httpLoggingInterceptor.apply {
-          httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.HEADERS
-        }
+      val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.HEADERS
       }
 
       val client = OkHttpClient.Builder()

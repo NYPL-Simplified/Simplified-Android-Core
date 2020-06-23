@@ -30,11 +30,8 @@ internal interface NYPLISSOService {
   companion object {
     operator fun invoke(): NYPLISSOService {
 
-      val logging = run {
-        val httpLoggingInterceptor = HttpLoggingInterceptor()
-        httpLoggingInterceptor.apply {
-          httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.HEADERS
-        }
+      val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.HEADERS
       }
 
       val client = OkHttpClient.Builder()

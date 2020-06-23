@@ -13,8 +13,8 @@
   <string name="accountDelete">Delete</string>
   <string name="accountEULAStatement">I agree to the terms of the End User License Agreement.</string>
   <string name="accountLogin">Log in</string>
-<!--  <string name="accountWantChildCard">Want a card for your child?</string>-->
-<!--  <string name="accountCreateCard">Create Card</string>-->
+  <string name="accountWantChildCard">Want a card for your child?</string>
+  <string name="accountCreateCard">Create Card</string>
   <string name="accountLoginAlternatives">Alternative Login Methods</string>
   <string name="accountLoginRequired">Please log in to continue.</string>
   <string name="accountLoginWith">Log in with %1$s</string>

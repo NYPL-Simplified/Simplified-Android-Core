@@ -65,11 +65,7 @@ class PlatformViewModel : ViewModel() {
   /**
    * Determines whether or not the user identifier is a barcode or username
    */
-  fun isBarcode(identifier: String): Boolean {
-    return try {
-      parseDouble(identifier); true
-    } catch (e: NumberFormatException) {
-      false
-    }
+  private fun isBarcode(identifier: String): Boolean {
+    return identifier.toDoubleOrNull() != null
   }
 }

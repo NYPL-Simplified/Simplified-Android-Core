@@ -15,9 +15,5 @@ fun Fragment.getCache(): Cache {
  * Determines whether or not the user identifier is a barcode or username
  */
 fun Fragment.isBarcode(identifier: String): Boolean {
-  return try {
-    Double.parseDouble(identifier); true
-  } catch (e: NumberFormatException) {
-    false
-  }
+  return identifier.toDoubleOrNull() != null
 }

@@ -54,11 +54,9 @@ internal interface CardCreatorService {
 
   companion object {
     operator fun invoke(authUsername: String, authPassword: String): CardCreatorService {
-      val logging = run {
-        val httpLoggingInterceptor = HttpLoggingInterceptor()
-        httpLoggingInterceptor.apply {
-          httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.HEADERS
-        }
+
+      val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.HEADERS
       }
 
       val auth = Interceptor {

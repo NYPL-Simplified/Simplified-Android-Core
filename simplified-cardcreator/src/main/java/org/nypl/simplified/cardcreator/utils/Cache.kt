@@ -190,7 +190,7 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
     }
     set(value) {
       field = value
-      sharedPreferences.edit { putBoolean(KEY_JUVENILE_CARD, value!!) }
+      sharedPreferences.edit { putBoolean(KEY_JUVENILE_CARD, value ?: false) }
     }
 
   /**

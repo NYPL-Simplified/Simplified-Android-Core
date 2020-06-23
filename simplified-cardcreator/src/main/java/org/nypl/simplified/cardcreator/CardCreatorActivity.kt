@@ -19,7 +19,7 @@ class CardCreatorActivity : AppCompatActivity() {
     setContentView(binding.root)
     if (intent.extras.getBoolean("isLoggedIn")) {
       Cache(this).isJuvenileCard = true
-      binding.toolbarTitleTv.text = getString(R.string.create_child_card)
+      binding.toolbarTitleTv.setText(R.string.create_child_card)
     }
   }
 

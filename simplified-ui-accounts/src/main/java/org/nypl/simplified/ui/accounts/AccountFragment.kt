@@ -884,13 +884,13 @@ class AccountFragment : Fragment() {
       }
       is AsLogoutButtonEnabled -> {
         this.loginButton.setText(R.string.accountLogout)
-        this.signUpLabel.text = "Want a card for your child?"
+        this.signUpLabel.setText(R.string.accountWantChildCard)
         this.loginButton.isEnabled = true
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       AsLogoutButtonDisabled -> {
         this.loginButton.setText(R.string.accountLogout)
-        this.signUpLabel.text = "Want a card for your child?"
+        this.signUpLabel.setText(R.string.accountWantChildCard)
         this.loginButton.isEnabled = false
       }
       AsCancelButtonDisabled -> {
