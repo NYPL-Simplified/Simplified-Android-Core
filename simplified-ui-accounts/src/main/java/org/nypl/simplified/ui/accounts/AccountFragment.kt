@@ -902,13 +902,13 @@ class AccountFragment : Fragment() {
     return when (status) {
       is AsLoginButtonEnabled -> {
         this.loginButton.setText(R.string.accountLogin)
-        this.signUpLabel.text = getString(R.string.accountCardCreatorLabel)
+        this.signUpLabel.setText(R.string.accountCardCreatorLabel)
         this.loginButton.isEnabled = true
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       AsLoginButtonDisabled -> {
         this.loginButton.setText(R.string.accountLogin)
-        this.signUpLabel.text = getString(R.string.accountCardCreatorLabel)
+        this.signUpLabel.setText(R.string.accountCardCreatorLabel)
         this.loginButton.isEnabled = false
       }
       is AsCancelButtonEnabled -> {
