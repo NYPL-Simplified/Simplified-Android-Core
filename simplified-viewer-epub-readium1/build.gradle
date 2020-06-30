@@ -17,6 +17,7 @@ dependencies {
   compileOnly libraries.autoValue
 
   implementation libraries.androidAsync
+  implementation libraries.androidXActivity
   implementation libraries.androidXAppCompat
   implementation libraries.googleAndroidMaterial
   implementation libraries.kotlinStdlib

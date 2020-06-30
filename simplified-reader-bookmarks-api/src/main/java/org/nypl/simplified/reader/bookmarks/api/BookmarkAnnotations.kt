@@ -75,7 +75,6 @@ object BookmarkAnnotations {
       kind = BookmarkKind.ofMotivation(annotation.motivation),
       time = ISODateTimeFormat.dateTimeParser().parseLocalDateTime(annotation.body.timestamp),
       chapterTitle = annotation.body.chapterTitle ?: "",
-      chapterProgress = annotation.body.chapterProgress?.toDouble() ?: 0.0,
       bookProgress = annotation.body.bookProgress?.toDouble() ?: 0.0,
       uri = if (annotation.id != null) URI.create(annotation.id) else null,
       deviceID = annotation.body.device

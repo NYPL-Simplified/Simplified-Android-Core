@@ -603,8 +603,7 @@ class ReaderBookmarkService private constructor(
       ReaderBookmarkPolicy.evaluatePolicy(
         ReaderBookmarkPolicy.getAccountState(event.accountID),
         this.policyState
-      )
-        .result
+      ).result
 
     val accountState =
       ReaderBookmarkPolicyAccountState(

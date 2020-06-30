@@ -11,7 +11,10 @@ class ReaderViewerR2 : ViewerProviderType {
   override val name =
     "org.nypl.simplified.viewer.epub.readium2.ReaderViewerR2"
 
-  override fun canSupport(book: Book, format: BookFormat): Boolean {
+  override fun canSupport(
+    book: Book,
+    format: BookFormat
+  ): Boolean {
     return when (format) {
       is BookFormat.BookFormatAudioBook -> false
       is BookFormat.BookFormatEPUB -> {
@@ -21,11 +24,21 @@ class ReaderViewerR2 : ViewerProviderType {
     }
   }
 
-  override fun open(activity: Activity, book: Book, format: BookFormat) {
+  override fun open(
+    activity: Activity,
+    book: Book,
+    format: BookFormat
+  ) {
     val bookId = book.id
     val file = (format as BookFormat.BookFormatEPUB).file!!
     val entry = FeedEntry.FeedEntryOPDS(book.account, book.entry)
 
-    ReaderActivity.startActivity(activity, bookId, file, entry)
+    ReaderActivity.startActivity(
+      accountId = book.account,
+      bookId = bookId,
+      context = activity,
+      entry = entry,
+      file = file
+    )
   }
 }
