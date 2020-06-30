@@ -5,7 +5,6 @@ import android.os.Environment
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Option
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
@@ -641,15 +640,13 @@ class MigrationFrom3Master(
 
     return try {
       val bookLocation =
-        BookLocation.create(Option.none(), "x")
+        BookLocation(null,null,"x")
       val kind =
         BookmarkKind.ofMotivation(annotation.motivation)
       val time =
         formatter.parseLocalDateTime(annotation.body.timestamp)
       val chapterTitle =
         annotation.body.chapterTitle ?: ""
-      val chapterProgress =
-        annotation.body.chapterProgress?.toDouble() ?: 0.0
       val bookProgress =
         annotation.body.bookProgress?.toDouble() ?: 0.0
       val deviceId =
@@ -663,7 +660,6 @@ class MigrationFrom3Master(
         kind = kind,
         time = time,
         chapterTitle = chapterTitle,
-        chapterProgress = chapterProgress,
         bookProgress = bookProgress,
         deviceID = deviceId,
         uri = uri

@@ -1,5 +1,6 @@
 package org.nypl.simplified.viewer.epub.readium1;
 
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -33,7 +34,7 @@ import org.nypl.simplified.books.api.BookLocation;
     final BookLocation location)
   {
     NullCheck.notNull(location);
-    return new FromElementCFIAndIDRef(location.idRef(), location.contentCFI());
+    return new FromElementCFIAndIDRef(location.getIdRef(), Option.of(location.getContentCFI()));
   }
 
   /**
