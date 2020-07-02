@@ -140,6 +140,7 @@
     <string name="juvenile_policy_checkbox">By checking this box, I confirm that I am the parent / legal guardian of the minor for whom I am creating a library card account.</string>
     <string name="read_eula">I have read and agree to the End User License Agreement.</string>
     <string name="create_child_card">Create Card for your Child</string>
+    <string name="legal_disclaimer">I have read and agree to the End User License Agreement and the Legal Disclaimer.</string>
 
     <!-- Location -->
     <string name="checking_location">Checking location&#8230;</string>

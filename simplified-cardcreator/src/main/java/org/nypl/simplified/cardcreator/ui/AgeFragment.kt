@@ -12,6 +12,7 @@ import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAgeBinding
 import org.nypl.simplified.cardcreator.utils.Cache
+import org.nypl.simplified.cardcreator.utils.Constants
 import org.slf4j.LoggerFactory
 
 /**
@@ -81,7 +82,7 @@ class AgeFragment : Fragment() {
     }
 
     binding.eula.setOnClickListener {
-      nextAction = AgeFragmentDirections.actionEula()
+      nextAction = AgeFragmentDirections.actionEula(Constants.EULA)
       navController.navigate(nextAction)
     }
   }
