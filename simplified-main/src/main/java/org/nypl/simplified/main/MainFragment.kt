@@ -267,6 +267,8 @@ class MainFragment : Fragment() {
     this.navigationControllerDirectory.removeNavigationController(
       CatalogNavigationControllerType::class.java)
     this.navigationControllerDirectory.removeNavigationController(
+      AccountNavigationControllerType::class.java)
+    this.navigationControllerDirectory.removeNavigationController(
       SettingsNavigationControllerType::class.java)
     this.navigationControllerDirectory.removeNavigationController(
       NavigationControllerType::class.java)

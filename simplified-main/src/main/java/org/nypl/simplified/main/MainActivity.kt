@@ -46,6 +46,8 @@ import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerUnreachable
 import org.nypl.simplified.ui.accounts.AccountRegistryFragment
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
@@ -58,7 +60,6 @@ import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsNavigationControllerUnreachable
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashParameters
@@ -510,8 +511,8 @@ class MainActivity :
      */
 
     this.navigationControllerDirectory.updateNavigationController(
-      SettingsNavigationControllerType::class.java,
-      object : SettingsNavigationControllerUnreachable() {
+      AccountNavigationControllerType::class.java,
+      object : AccountNavigationControllerUnreachable() {
         override fun popBackStack(): Boolean {
           this@MainActivity.openCatalog()
           return true
