@@ -11,6 +11,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomnavigation.LabelVisibilityMode
 import com.io7m.junreachable.UnreachableCodeException
 import com.pandora.bottomnavigator.BottomNavigator
+import org.joda.time.DateTime
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
@@ -117,6 +118,18 @@ class TabbedNavigationController private constructor(
       )
     }
 
+    private fun currentAge(
+      profilesController: ProfilesControllerType
+    ): Int {
+      return try {
+        val profile = profilesController.profileCurrent()
+        profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
+      } catch (e: Exception) {
+        this.logger.error("could not retrieve profile age: ", e)
+        1
+      }
+    }
+
     private fun pickDefaultAccount(
       profilesController: ProfilesControllerType
     ): AccountType {
@@ -138,11 +151,12 @@ class TabbedNavigationController private constructor(
     private fun catalogFeedArguments(
       profilesController: ProfilesControllerType
     ): CatalogFeedArguments.CatalogFeedArgumentsRemote {
+      val age = this.currentAge(profilesController)
       val account = this.pickDefaultAccount(profilesController)
       return CatalogFeedArguments.CatalogFeedArgumentsRemote(
         title = account.provider.displayName,
         ownership = CatalogFeedOwnership.OwnedByAccount(account.id),
-        feedURI = account.provider.catalogURI,
+        feedURI = account.provider.catalogURIForAge(age),
         isSearchResults = false
       )
     }
