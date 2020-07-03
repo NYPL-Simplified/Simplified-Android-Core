@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import org.nypl.simplified.cardcreator.databinding.FragmentEulaBinding
-import org.nypl.simplified.cardcreator.utils.Constants
 
 /**
  * Screen for viewing the End User License Agreement
@@ -27,7 +26,10 @@ class EULAFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    binding.webview.loadUrl(Constants.EULA)
+
+    arguments?.let {
+      binding.webview.loadUrl(EULAFragmentArgs.fromBundle(it).url)
+    }
   }
 
   override fun onDestroyView() {

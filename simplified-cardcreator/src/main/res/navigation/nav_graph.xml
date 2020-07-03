@@ -196,7 +196,11 @@
         android:id="@+id/destination_eula"
         android:name="org.nypl.simplified.cardcreator.ui.EULAFragment"
         android:label="fragment_eula"
-        tools:layout="@layout/fragment_eula" />
+        tools:layout="@layout/fragment_eula" >
+        <argument
+            android:name="url"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/destination_juvenile_policy"

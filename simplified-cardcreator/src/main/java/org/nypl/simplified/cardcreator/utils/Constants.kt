@@ -8,6 +8,7 @@ object Constants {
   const val LIBRARY_SIMPLIFIED_QA_BASE_URL = "http://qa.patrons.librarysimplified.org/"
 
   const val EULA = "https://librarysimplified.org/EULA/"
+  const val LEGAL_DISCLAIMER = "https://www.nypl.org/help/library-card/terms-conditions"
 
   const val NYPL_ISSO_BASE_URL = "https://isso.nypl.org/oauth/"
 

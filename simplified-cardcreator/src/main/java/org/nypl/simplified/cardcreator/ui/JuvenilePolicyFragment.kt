@@ -1,10 +1,16 @@
 package org.nypl.simplified.cardcreator.ui
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView.BufferType
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -14,6 +20,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentJuvenilePolicyBinding
+import org.nypl.simplified.cardcreator.utils.Constants
 import org.nypl.simplified.cardcreator.utils.getCache
 import org.nypl.simplified.cardcreator.viewmodel.PlatformViewModel
 import org.nypl.simplified.cardcreator.viewmodel.TokenViewModel
@@ -57,10 +64,30 @@ class JuvenilePolicyFragment : Fragment() {
       validateForm()
     }
 
-    binding.eula.setOnClickListener {
-      nextAction = JuvenilePolicyFragmentDirections.actionEula()
-      navController.navigate(nextAction)
+    val agreement = SpannableString(getString(R.string.legal_disclaimer))
+
+    val eulaLink: ClickableSpan = object : ClickableSpan() {
+      override fun onClick(textView: View) {
+        nextAction = JuvenilePolicyFragmentDirections.actionEula(Constants.EULA)
+        navController.navigate(nextAction)
+      }
     }
+
+    val legalLink: ClickableSpan = object : ClickableSpan() {
+      override fun onClick(textView: View) {
+        nextAction = JuvenilePolicyFragmentDirections.actionEula(Constants.LEGAL_DISCLAIMER)
+        navController.navigate(nextAction)
+      }
+    }
+
+    agreement.setSpan(eulaLink, 29, 55, 0)
+    agreement.setSpan(legalLink, 64, 80, 0)
+    agreement.setSpan(ForegroundColorSpan(Color.BLUE), 29, 55, 0)
+    agreement.setSpan(ForegroundColorSpan(Color.BLUE), 64, 80, 0)
+
+    binding.eula.movementMethod = LinkMovementMethod.getInstance()
+    binding.eula.setText(agreement, BufferType.SPANNABLE)
+    binding.eula.isSelected = true
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
