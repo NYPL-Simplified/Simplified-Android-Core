@@ -22,6 +22,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginMissingInformation
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.eula.EULAType
@@ -219,12 +220,23 @@ class MainActivity :
       Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
     val profilesController =
       services.requireService(ProfilesControllerType::class.java)
+    val accountProviders =
+      services.requireService(AccountProviderRegistryType::class.java)
 
     return when (profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
         val profile = profilesController.profileCurrent()
-        if (!profile.preferences().hasSeenLibrarySelectionScreen &&
-          this.splashParameters.showLibrarySelection) {
+        val defaultProvider = accountProviders.defaultProvider
+
+        val hasNonDefaultAccount =
+          profile.accounts().values.count { it.provider.id != defaultProvider.id } > 0
+        this.logger.debug("hasNonDefaultAccount=$hasNonDefaultAccount")
+
+        val shouldShowLibrarySelectionScreen =
+          this.splashParameters.showLibrarySelection && !profile.preferences().hasSeenLibrarySelectionScreen
+        this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
+
+        if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
           this.openLibrarySelectionScreen()
         } else {
           this.openCatalog()
@@ -237,20 +249,6 @@ class MainActivity :
   }
 
   private fun openLibrarySelectionScreen() {
-    val profilesController =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
-        .requireService(ProfilesControllerType::class.java)
-
-    /*
-     * Store the fact that we've seen the selection screen.
-     */
-
-    profilesController.profileUpdate { profileDescription ->
-      profileDescription.copy(
-        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
-      )
-    }
-
     val fragment = SplashSelectionFragment.newInstance(this.splashParameters)
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
@@ -514,7 +512,7 @@ class MainActivity :
       AccountNavigationControllerType::class.java,
       object : AccountNavigationControllerUnreachable() {
         override fun popBackStack(): Boolean {
-          this@MainActivity.openCatalog()
+          onStartupFinished()
           return true
         }
 
@@ -529,14 +527,26 @@ class MainActivity :
       }
     )
 
-    val fragment =
-      AccountRegistryFragment()
     manager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, fragment, "MAIN")
+      .replace(R.id.mainFragmentHolder, AccountRegistryFragment(), "MAIN")
+      .addToBackStack(null)
       .commit()
   }
 
   override fun onSplashLibrarySelectionNotWanted() {
+    val profilesController =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+        .requireService(ProfilesControllerType::class.java)
+
+    /*
+     * Store the fact that we've seen the selection screen.
+     */
+
+    profilesController.profileUpdate { profileDescription ->
+      profileDescription.copy(
+        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
+      )
+    }
     this.openCatalog()
   }
 
