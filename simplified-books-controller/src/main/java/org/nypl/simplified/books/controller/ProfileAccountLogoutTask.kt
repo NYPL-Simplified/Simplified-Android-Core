@@ -6,8 +6,11 @@ import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData.AccountLogoutDRMFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData.AccountLogoutUnexpectedException
@@ -68,12 +71,12 @@ class ProfileAccountLogoutTask(
 
     this.credentials =
       when (val state = this.account.loginState) {
-        is AccountLoginState.AccountLoggedIn -> state.credentials
+        is AccountLoggedIn -> state.credentials
         is AccountLogoutFailed -> state.credentials
-        AccountNotLoggedIn,
-        is AccountLoginState.AccountLoggingIn,
-        is AccountLoginState.AccountLoginFailed,
-        is AccountLoginState.AccountLoggingInWaitingForExternalAuthentication,
+        is AccountNotLoggedIn,
+        is AccountLoggingIn,
+        is AccountLoginFailed,
+        is AccountLoggingInWaitingForExternalAuthentication,
         is AccountLoggingOut -> {
           this.warn("attempted to log out with account in state {}", state.javaClass.canonicalName)
           this.steps.currentStepSucceeded(this.logoutStrings.logoutNotLoggedIn)

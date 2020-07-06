@@ -1139,27 +1139,20 @@ class AccountFragment : Fragment() {
 
   /**
    * A click listener for the age checkbox. If the user wants to change their age, then
-   * this must trigger an account logout. If the user cancels the dialog, the checkbox must
-   * be set to the opposite of what it was previously set to. This looks strange but it's actually
-   * because the checkbox will be checked/unchecked when the user initially clicks it, and then
-   * when the dialog is cancelled, the checkbox must be unchecked/checked again to return it to
-   * the original state it was in.
+   * this must trigger an account logout.
    */
 
   private fun onAgeCheckboxClicked(): (View) -> Unit = {
+    val isOver13 = this.isOver13()
     AlertDialog.Builder(this.requireContext())
       .setTitle(R.string.accountCOPPADeleteBooks)
       .setMessage(R.string.accountCOPPADeleteBooksConfirm)
       .setNegativeButton(R.string.accountCancel) { _, _ ->
-        this.authenticationCOPPAOver13.isChecked = !this.authenticationCOPPAOver13.isChecked
+        this.authenticationCOPPAOver13.isChecked = isOver13
       }
       .setPositiveButton(R.string.accountDelete) { _, _ ->
         this.loginFormLock()
-        if (this.authenticationCOPPAOver13.isChecked) {
-          this.setOver13()
-        } else {
-          this.setUnder13()
-        }
+        if (!isOver13) this.setOver13() else this.setUnder13()
         this.tryLogout()
       }
       .create()
