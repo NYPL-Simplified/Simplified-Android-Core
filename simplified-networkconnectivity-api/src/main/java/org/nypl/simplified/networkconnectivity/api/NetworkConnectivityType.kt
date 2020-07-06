@@ -7,13 +7,13 @@ package org.nypl.simplified.networkconnectivity.api
 interface NetworkConnectivityType {
 
   /**
-   * @return `true` iff network connectivity is available.
+   * @return `true` if network connectivity is available.
    */
 
   val isNetworkAvailable: Boolean
 
   /**
-   * @return `true` iff WIFI network connectivity is available.
+   * @return `true` if WIFI network connectivity is available.
    */
 
   val isWifiAvailable: Boolean

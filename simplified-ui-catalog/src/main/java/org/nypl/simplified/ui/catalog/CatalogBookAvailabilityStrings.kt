@@ -216,8 +216,8 @@ object CatalogBookAvailabilityStrings {
    * Construct a time interval string based on the given times. The string
    * will be a localized form of:
    *
-   *  * `less than an hour` iff the period is under one hour
-   *  * `n hours` iff the period is under one day
+   *  * `less than an hour` if the period is under one hour
+   *  * `n hours` if the period is under one day
    *  * `n days` otherwise
    *
    * @param resources The application resources

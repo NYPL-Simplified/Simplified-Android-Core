@@ -98,7 +98,7 @@ sealed class BookFormat {
   abstract val contentType: MIMEType
 
   /**
-   * @return `true` iff the book data for the format is downloaded
+   * @return `true` if the book data for the format is downloaded
    */
 
   abstract val isDownloaded: Boolean
