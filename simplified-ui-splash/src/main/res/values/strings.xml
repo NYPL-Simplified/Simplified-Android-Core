@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
   <!-- EULA strings -->
   <string name="eula_disagree">Disagree</string>
   <string name="eula_agree">Agree</string>
 
   <!-- Migration strings -->
-  <string name="migrationFailure">There were one or more problems migrating your data…</string>
+  <string name="migrationFailure">There were one or more problems migrating your data&#8230;</string>
   <string name="migrationSuccess">Your data was migrated successfully!</string>
   <string name="migrationSendReport">Send Report</string>
   <string name="migrationOK">OK</string>
@@ -13,7 +14,6 @@
   <!-- Library selection screen strings -->
   <string name="selectionTitle">Read E-Books from Your Library</string>
   <string name="selectionButton">Find Your Library</string>
-  <string name="selectionAlternateTitle">The SimplyE Collection</string>
+  <string name="selectionAlternateTitle">Browse the SimplyE Collection</string>
   <string name="selectionAlternateButton">Add a Library Later</string>
-
 </resources>

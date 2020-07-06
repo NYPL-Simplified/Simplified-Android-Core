@@ -1,30 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  android:gravity="center"
+  android:orientation="vertical">
 
   <ImageView
     android:id="@+id/selectionImage"
-    android:layout_width="350dp"
-    android:layout_height="100dp"
-    android:layout_marginBottom="32dp"
-    app:layout_constraintBottom_toTopOf="@id/selectionTitle"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
-
-  <TextView
-    android:id="@+id/selectionTitle"
-    android:layout_width="wrap_content"
+    android:layout_width="272dp"
     android:layout_height="wrap_content"
-    android:text="@string/selectionTitle"
-    android:textSize="18sp"
-    android:textStyle="bold"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    android:layout_marginBottom="32dp"
+    android:adjustViewBounds="true"
+    android:contentDescription="@null"
+    android:scaleType="centerInside" />
 
   <Button
     android:id="@+id/selectionButton"
@@ -33,22 +23,15 @@
     android:layout_marginTop="16dp"
     android:text="@string/selectionButton"
     android:textSize="18sp"
-    android:textStyle="bold"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/selectionTitle" />
+    android:textStyle="bold" />
 
   <TextView
-    android:id="@+id/selectionAlternateTitle"
+    android:id="@+id/selectionTitle"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:text="@string/selectionAlternateTitle"
-    android:textSize="18sp"
-    android:textStyle="bold"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/selectionButton" />
+    android:layout_marginTop="4dp"
+    android:text="@string/selectionTitle"
+    android:textAppearance="@android:style/TextAppearance.Small" />
 
   <Button
     android:id="@+id/selectionAlternateButton"
@@ -57,9 +40,13 @@
     android:layout_marginTop="16dp"
     android:text="@string/selectionAlternateButton"
     android:textSize="18sp"
-    android:textStyle="bold"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/selectionAlternateTitle" />
+    android:textStyle="bold" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+  <TextView
+    android:id="@+id/selectionAlternateTitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:text="@string/selectionAlternateTitle"
+    android:textAppearance="@android:style/TextAppearance.Small" />
+</LinearLayout>
