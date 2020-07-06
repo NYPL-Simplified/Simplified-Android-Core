@@ -13,6 +13,7 @@ import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -47,6 +48,7 @@ class MainFragment : Fragment() {
   private lateinit var bottomView: BottomNavigationView
   private lateinit var catalogConfig: CatalogConfigurationServiceType
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
+  private lateinit var accountProviders: AccountProviderRegistryType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var settingsConfiguration: SettingsConfigurationServiceType
   private lateinit var uiThread: UIThreadServiceType
@@ -64,6 +66,8 @@ class MainFragment : Fragment() {
 
     val services = Services.serviceDirectory()
 
+    this.accountProviders =
+      services.requireService(AccountProviderRegistryType::class.java)
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
     this.settingsConfiguration =
@@ -116,6 +120,7 @@ class MainFragment : Fragment() {
       this.bottomNavigator =
         TabbedNavigationController.create(
           activity = this.requireActivity(),
+          accountProviders = this.accountProviders,
           profilesController = this.profilesController,
           settingsConfiguration = this.settingsConfiguration,
           fragmentContainerId = R.id.tabbedFragmentHolder,

@@ -12,7 +12,9 @@ import com.google.android.material.bottomnavigation.LabelVisibilityMode
 import com.io7m.junreachable.UnreachableCodeException
 import com.pandora.bottomnavigator.BottomNavigator
 import org.joda.time.DateTime
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedBooksSelection
@@ -53,7 +55,6 @@ import org.slf4j.LoggerFactory
 
 class TabbedNavigationController private constructor(
   private val settingsConfiguration: SettingsConfigurationServiceType,
-  private val profilesController: ProfilesControllerType,
   private val navigator: BottomNavigator
 ) : SettingsNavigationControllerType, CatalogNavigationControllerType {
 
@@ -71,6 +72,7 @@ class TabbedNavigationController private constructor(
 
     fun create(
       activity: FragmentActivity,
+      accountProviders: AccountProviderRegistryType,
       profilesController: ProfilesControllerType,
       settingsConfiguration: SettingsConfigurationServiceType,
       @IdRes fragmentContainerId: Int,
@@ -87,7 +89,10 @@ class TabbedNavigationController private constructor(
               this.createCatalogFragment(
                 context = activity,
                 id = R.id.tabCatalog,
-                feedArguments = catalogFeedArguments(profilesController)
+                feedArguments = catalogFeedArguments(
+                  profilesController,
+                  accountProviders.defaultProvider
+                )
               )
             },
             R.id.tabBooks to {
@@ -113,7 +118,6 @@ class TabbedNavigationController private constructor(
 
       return TabbedNavigationController(
         navigator = navigator,
-        profilesController = profilesController,
         settingsConfiguration = settingsConfiguration
       )
     }
@@ -131,7 +135,8 @@ class TabbedNavigationController private constructor(
     }
 
     private fun pickDefaultAccount(
-      profilesController: ProfilesControllerType
+      profilesController: ProfilesControllerType,
+      defaultProvider: AccountProviderType
     ): AccountType {
       val profile = profilesController.profileCurrent()
       val mostRecentId = profile.preferences().mostRecentAccount
@@ -142,17 +147,30 @@ class TabbedNavigationController private constructor(
           this.logger.error("stale account: ", e)
         }
       }
-      for (account in profile.accounts().values) {
-        return account
+
+      val accounts = profile.accounts().values
+      return when {
+        accounts.size > 1 -> {
+          // Return the first account created from a non-default provider
+          accounts.first { it.provider.id != defaultProvider.id }
+        }
+        accounts.size == 1 -> {
+          // Return the first account
+          accounts.first()
+        }
+        else -> {
+          // There should always be at least one account
+          throw UnreachableCodeException()
+        }
       }
-      throw UnreachableCodeException()
     }
 
     private fun catalogFeedArguments(
-      profilesController: ProfilesControllerType
+      profilesController: ProfilesControllerType,
+      defaultProvider: AccountProviderType
     ): CatalogFeedArguments.CatalogFeedArgumentsRemote {
       val age = this.currentAge(profilesController)
-      val account = this.pickDefaultAccount(profilesController)
+      val account = this.pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFeedArguments.CatalogFeedArgumentsRemote(
         title = account.provider.displayName,
         ownership = CatalogFeedOwnership.OwnedByAccount(account.id),
