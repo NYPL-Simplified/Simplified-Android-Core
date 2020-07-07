@@ -171,8 +171,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
         } else {
           auth.under13
         }
-
-      AccountProviderAuthenticationDescription.Anonymous,
+      is AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.Basic,
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
         this.catalogURI
