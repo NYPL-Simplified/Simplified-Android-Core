@@ -36,7 +36,7 @@ data class AccountAuthenticationAdobePreActivationCredentials(
   val deviceManagerURI: URI?,
 
   /**
-   * The post activation credentials that resulted from device activation, if any device activation has been performed
+   * The post activation credentials that resulted from device activation, iff any device activation has been performed
    */
 
   val postActivationCredentials: AccountAuthenticationAdobePostActivationCredentials?

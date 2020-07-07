@@ -22,7 +22,7 @@ import java.util.SortedMap
 interface ProfileReadableType : Comparable<ProfileReadableType> {
 
   /**
-   * @return `true` if this profile is the anonymous profile
+   * @return `true` iff this profile is the anonymous profile
    */
 
   val isAnonymous: Boolean

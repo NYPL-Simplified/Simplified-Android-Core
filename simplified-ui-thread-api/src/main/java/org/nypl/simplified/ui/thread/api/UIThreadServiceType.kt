@@ -22,7 +22,7 @@ interface UIThreadServiceType {
   }
 
   /**
-   * @return `true` if the current thread is the UI thread.
+   * @return `true` iff the current thread is the UI thread.
    */
 
   fun isUIThread(): Boolean {

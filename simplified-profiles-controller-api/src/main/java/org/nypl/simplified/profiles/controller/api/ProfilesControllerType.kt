@@ -167,7 +167,7 @@ interface ProfilesControllerType {
   ): FluentFuture<TaskResult<AccountDeleteErrorDetails, Unit>>
 
   /**
-   * Find an account in the current profile using the given provider.
+   * Find an account int the current profile using the given provider.
    *
    * @param provider The account provider ID
    * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected

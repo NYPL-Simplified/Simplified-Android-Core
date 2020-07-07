@@ -65,7 +65,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val authenticationAlternatives: List<AccountProviderAuthenticationDescription>
 
   /**
-   * @return `true` if the SimplyE synchronization is supported
+   * @return `true` iff the SimplyE synchronization is supported
    * @see .annotationsURI
    * @see .patronSettingsURI
    */
@@ -73,7 +73,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val supportsSimplyESynchronization: Boolean
 
   /**
-   * @return `true` if reservations are supported
+   * @return `true` iff reservations are supported
    */
 
   val supportsReservations: Boolean
@@ -85,7 +85,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val loansURI: URI?
 
   /**
-   * @return The URI of the card creator if card creation is supported
+   * @return The URI of the card creator iff card creation is supported
    */
 
   val cardCreatorURI: URI?
@@ -133,7 +133,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val mainColor: String
 
   /**
-   * @return `true` if the account should be added by default
+   * @return `true` iff the account should be added by default
    */
 
   val addAutomatically: Boolean

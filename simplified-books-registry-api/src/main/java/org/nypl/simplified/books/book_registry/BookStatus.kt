@@ -50,7 +50,7 @@ sealed class BookStatus {
     abstract val endDate: DateTime?
 
     /**
-     * @return `true` if the hold is revocable
+     * @return `true` iff the hold is revocable
      */
 
     abstract val isRevocable: Boolean

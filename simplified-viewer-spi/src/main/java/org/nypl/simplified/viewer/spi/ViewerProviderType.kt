@@ -19,7 +19,7 @@ interface ViewerProviderType {
 
   /**
    * Determine if the current provider can support the given book. Implementations are
-   * expected to return `true` if they can support a book, and consumers of this API
+   * expected to return `true` iff they can support a book, and consumers of this API
    * are expected to implement some sort of intelligent selection strategy to pick the
    * "best" provider they know about. Iff `true` is returned, then it is safe to call
    * [open] with the given book.
