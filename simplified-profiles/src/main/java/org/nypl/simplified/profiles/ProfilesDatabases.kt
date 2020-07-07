@@ -474,12 +474,12 @@ object ProfilesDatabases {
         )
 
         /*
-         * Do not create an account if the automatic accounts already caused it to be created.
+         * Create an account, unless one already exists for this provider
          */
 
-        val account =
-          accounts.accountsByProvider()[accountProvider.id]
-            ?: accounts.createAccount(accountProvider)
+        accounts.accountsByProvider()[accountProvider.id] ?: run {
+          accounts.createAccount(accountProvider)
+        }
 
         val profile =
           Profile(
