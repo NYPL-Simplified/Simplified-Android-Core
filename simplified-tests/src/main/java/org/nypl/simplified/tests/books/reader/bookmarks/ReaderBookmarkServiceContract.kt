@@ -9,13 +9,13 @@ import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
@@ -62,9 +62,12 @@ abstract class ReaderBookmarkServiceContract {
   private var readerBookmarkService: ReaderBookmarkServiceType? = null
 
   private val accountCredentials =
-    AccountAuthenticationCredentials.builder(
-      AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-      .build()
+    AccountAuthenticationCredentials.Basic(
+      userName = AccountUsername("abcd"),
+      password = AccountPassword("1234"),
+      adobeCredentials = null,
+      authenticationDescription = null
+    )
 
   private fun okResponse(text: String): HTTPResultType<InputStream> {
     val bytes = text.toByteArray(Charset.forName("UTF-8"))

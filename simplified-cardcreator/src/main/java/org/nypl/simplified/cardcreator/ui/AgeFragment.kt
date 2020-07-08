@@ -11,6 +11,8 @@ import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAgeBinding
+import org.nypl.simplified.cardcreator.utils.Cache
+import org.nypl.simplified.cardcreator.utils.Constants
 import org.slf4j.LoggerFactory
 
 /**
@@ -42,6 +44,14 @@ class AgeFragment : Fragment() {
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
+    /**
+     * User is already logged in, present with Juvenile Card Creator policy
+     */
+    if (Cache(requireActivity()).isJuvenileCard!!) {
+      nextAction = AgeFragmentDirections.actionJuvenilePolicy()
+      navController.navigate(nextAction)
+    }
+
     binding.older13Rb.setOnCheckedChangeListener { _, _ ->
       validateForm()
     }
@@ -70,6 +80,11 @@ class AgeFragment : Fragment() {
         requireActivity().finish()
       }
     }
+
+    binding.eula.setOnClickListener {
+      nextAction = AgeFragmentDirections.actionEula(Constants.EULA)
+      navController.navigate(nextAction)
+    }
   }
 
   /**
@@ -93,5 +108,10 @@ class AgeFragment : Fragment() {
       binding.nextBtn.text = getString(R.string.done)
       logger.debug("Age form invalid, user is under 13")
     }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 }

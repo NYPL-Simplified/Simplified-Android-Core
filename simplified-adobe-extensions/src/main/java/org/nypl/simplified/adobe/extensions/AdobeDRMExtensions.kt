@@ -56,8 +56,8 @@ object AdobeDRMExtensions {
         connector.activateDevice(
           receiver,
           vendorID,
-          clientToken.tokenUserName(),
-          clientToken.tokenPassword())
+          clientToken.userName,
+          clientToken.password)
         debug("activation finished")
 
         if (!receiver.failed) {
@@ -158,8 +158,8 @@ object AdobeDRMExtensions {
           receiver,
           vendorID,
           userID,
-          clientToken.tokenUserName(),
-          clientToken.tokenPassword())
+          clientToken.userName,
+          clientToken.password)
         debug("deactivation finished")
 
         if (errors.isNotEmpty()) {

@@ -18,7 +18,7 @@ import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAccountInformationBinding
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.hideKeyboard
-import org.nypl.simplified.cardcreator.viewmodels.UsernameViewModel
+import org.nypl.simplified.cardcreator.viewmodel.UsernameViewModel
 import org.slf4j.LoggerFactory
 
 class AccountInformationFragment : Fragment() {
@@ -138,5 +138,10 @@ class AccountInformationFragment : Fragment() {
     } else {
       binding.loading.visibility = View.GONE
     }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 }

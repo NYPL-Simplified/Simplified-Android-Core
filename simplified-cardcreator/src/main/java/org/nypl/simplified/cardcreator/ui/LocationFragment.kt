@@ -26,6 +26,7 @@ import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentLocationBinding
+import org.nypl.simplified.cardcreator.utils.getCache
 import org.nypl.simplified.cardcreator.utils.startEllipses
 import org.slf4j.LoggerFactory
 import java.util.Locale
@@ -81,8 +82,13 @@ class LocationFragment : Fragment(), LocationListener {
     binding.nextBtn.setOnClickListener {
       if (isNewYork || locationMock) {
         logger.debug("User navigated to the next screen")
-        nextAction = LocationFragmentDirections.actionNext()
-        navController.navigate(nextAction)
+        if (getCache().isJuvenileCard!!) {
+          nextAction = LocationFragmentDirections.actionJuvenileInformation()
+          navController.navigate(nextAction)
+        } else {
+          nextAction = LocationFragmentDirections.actionNext()
+          navController.navigate(nextAction)
+        }
       } else {
         val data = Intent()
         requireActivity().setResult(Activity.RESULT_CANCELED, data)
@@ -247,18 +253,18 @@ class LocationFragment : Fragment(), LocationListener {
       val address: Address?
 
       try {
-          address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
-          logger.debug("Region is: ${address.adminArea} ${address.countryCode} ")
-          binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
+        address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
+        logger.debug("Region is: ${address.adminArea} ${address.countryCode} ")
+        binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
 
-          if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
-            logger.debug("User is in New York")
-            logger.debug("Stopping location updates")
-            locationManager.removeUpdates(this)
-            enableNext(true)
-          } else {
-            enableNext(false)
-          }
+        if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
+          logger.debug("User is in New York")
+          logger.debug("Stopping location updates")
+          locationManager.removeUpdates(this)
+          enableNext(true)
+        } else {
+          enableNext(false)
+        }
       } catch (e: Exception) {
         logger.error("Error checking to see if user is in New York", e)
         enableNext(false)
@@ -286,7 +292,20 @@ class LocationFragment : Fragment(), LocationListener {
   }
 
   // These are not needed but were invited to the party by Google
-  override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) { logger.debug("location status changed") }
-  override fun onProviderEnabled(provider: String?) { logger.debug("location provider enabled") }
-  override fun onProviderDisabled(provider: String?) { logger.debug("location provider disabled") }
+  override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+    logger.debug("location status changed")
+  }
+
+  override fun onProviderEnabled(provider: String?) {
+    logger.debug("location provider enabled")
+  }
+
+  override fun onProviderDisabled(provider: String?) {
+    logger.debug("location provider disabled")
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
+  }
 }

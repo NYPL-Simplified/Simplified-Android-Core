@@ -18,11 +18,11 @@ import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentHomeAddressBinding
-import org.nypl.simplified.cardcreator.models.Address
-import org.nypl.simplified.cardcreator.models.AddressDetails
+import org.nypl.simplified.cardcreator.model.Address
+import org.nypl.simplified.cardcreator.model.AddressDetails
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.hideKeyboard
-import org.nypl.simplified.cardcreator.viewmodels.AddressViewModel
+import org.nypl.simplified.cardcreator.viewmodel.AddressViewModel
 import org.slf4j.LoggerFactory
 
 class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
@@ -194,5 +194,10 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
   override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     logger.debug(parent!!.getItemAtPosition(position).toString())
     validateForm()
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 }

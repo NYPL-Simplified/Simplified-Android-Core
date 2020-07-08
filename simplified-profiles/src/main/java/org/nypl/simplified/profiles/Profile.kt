@@ -19,7 +19,6 @@ import org.nypl.simplified.profiles.api.ProfileType
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URI
-import java.util.Objects
 import java.util.SortedMap
 import javax.annotation.concurrent.GuardedBy
 
@@ -33,8 +32,7 @@ internal class Profile internal constructor(
   override val directory: File,
   private val analytics: AnalyticsType,
   private val accounts: AccountsDatabaseType,
-  initialDescription: ProfileDescription,
-  initialAccountCurrent: AccountType
+  initialDescription: ProfileDescription
 ) : ProfileType {
 
   private val logger = LoggerFactory.getLogger(Profile::class.java)
@@ -46,21 +44,6 @@ internal class Profile internal constructor(
   @GuardedBy("descriptionLock")
   private var descriptionCurrent: ProfileDescription = initialDescription
 
-  private val accountCurrentLock: Any = Any()
-  @GuardedBy("accountCurrentLock")
-  private var accountCurrent: AccountType = initialAccountCurrent
-
-  init {
-    val mostRecentAccount = initialDescription.preferences.mostRecentAccount
-    if (mostRecentAccount != null) {
-      try {
-        this.setAccountCurrent(mostRecentAccount)
-      } catch (e: AccountsDatabaseNonexistentException) {
-        this.logger.debug("unable to restore current account {}: ", mostRecentAccount.uuid, e)
-      }
-    }
-  }
-
   internal fun setOwner(owner: ProfilesDatabase) {
     this.owner = owner
   }
@@ -71,37 +54,30 @@ internal class Profile internal constructor(
   override val isCurrent: Boolean
     get() = this.owner?.currentProfile()?.map { p -> p.id } == Option.some(this.id)
 
-  override fun accountCurrent(): AccountType {
-    checkNotDeleted()
-    synchronized(this.accountCurrentLock) {
-      return this.accountCurrent
-    }
-  }
-
   override fun accounts(): SortedMap<AccountID, AccountType> {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts.accounts()
   }
 
   override fun accountsByProvider(): SortedMap<URI, AccountType> {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts.accountsByProvider()
   }
 
   @Throws(AccountsDatabaseNonexistentException::class)
   override fun account(accountId: AccountID): AccountType {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts()[accountId]
       ?: throw AccountsDatabaseNonexistentException("Nonexistent account: $accountId")
   }
 
   override fun accountsDatabase(): AccountsDatabaseType {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts
   }
 
   override fun setDescription(newDescription: ProfileDescription) {
-    checkNotDeleted()
+    this.checkNotDeleted()
     synchronized(this.descriptionLock) {
       val newNameNormal =
         this.normalizeDisplayName(newDescription.displayName)
@@ -132,61 +108,37 @@ internal class Profile internal constructor(
 
   @Throws(AccountsDatabaseException::class)
   override fun createAccount(accountProvider: AccountProviderType): AccountType {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return this.accounts.createAccount(accountProvider)
   }
 
   @Throws(AccountsDatabaseException::class)
   override fun deleteAccountByProvider(accountProvider: URI): AccountID {
-    checkNotDeleted()
+    this.checkNotDeleted()
     val deleted = this.accounts.deleteAccountByProvider(accountProvider)
-    synchronized(this.accountCurrentLock) {
-      if (this.accountCurrent.id == deleted) {
-        this.accountCurrent = Objects.requireNonNull<AccountType>(this.accounts()[this.accounts().firstKey()])
-      }
-      return deleted
+    val mostRecent = this.descriptionCurrent.preferences.mostRecentAccount
+    if (mostRecent == deleted) {
+      this.clearMostRecentAccount()
     }
+    return deleted
   }
 
-  @Throws(AccountsDatabaseNonexistentException::class)
-  override fun selectAccount(accountProvider: URI): AccountType {
-    checkNotDeleted()
-    val account = this.accounts.accountsByProvider()[accountProvider]
-    if (account != null) {
-      this.setAccountCurrent(account.id)
-
-      val newPreferences =
-        this.descriptionCurrent.preferences.copy(mostRecentAccount = account.id)
-      val newDescription =
-        this.descriptionCurrent.copy(preferences = newPreferences)
-
-      this.setDescription(newDescription)
-      return account
-    }
-
-    throw AccountsDatabaseNonexistentException(
-      "No account with provider: $accountProvider")
+  private fun clearMostRecentAccount() {
+    this.setDescription(
+      this.descriptionCurrent.copy(
+        preferences = this.descriptionCurrent.preferences.copy(
+          mostRecentAccount = null
+        )
+      )
+    )
   }
 
   override fun compareTo(other: ProfileReadableType): Int {
     return this.displayName.compareTo(other.displayName)
   }
 
-  @Throws(AccountsDatabaseNonexistentException::class)
-  internal fun setAccountCurrent(id: AccountID) {
-    checkNotDeleted()
-    synchronized(this.accountCurrentLock) {
-      val account = this.accounts.accounts()[id]
-      if (account != null) {
-        this.accountCurrent = account
-      } else {
-        throw AccountsDatabaseNonexistentException("No such account: $id")
-      }
-    }
-  }
-
   override fun description(): ProfileDescription {
-    checkNotDeleted()
+    this.checkNotDeleted()
     return synchronized(this.descriptionLock) {
       this.descriptionCurrent
     }

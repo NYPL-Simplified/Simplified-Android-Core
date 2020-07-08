@@ -333,10 +333,6 @@ abstract class ProfilesDatabaseContract {
     Assert.assertFalse(p0.isCurrent)
     Assert.assertFalse(p1.isCurrent)
     Assert.assertFalse(p2.isCurrent)
-
-    Assert.assertEquals(accountProvider, p0.accountCurrent().provider)
-    Assert.assertEquals(accountProvider, p1.accountCurrent().provider)
-    Assert.assertEquals(accountProvider, p2.accountCurrent().provider)
     Assert.assertTrue(db.currentProfile().isNone)
   }
 
@@ -705,12 +701,13 @@ abstract class ProfilesDatabaseContract {
   }
 
   /**
-   * Setting an account as current works.
+   * If the deleted account was the most recent account, the most recent account preference
+   * is cleared.
    */
 
   @Test
   @Throws(Exception::class)
-  fun testSetCurrentAccount() {
+  fun testDeleteClearsMostRecent() {
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
 
@@ -732,42 +729,16 @@ abstract class ProfilesDatabaseContract {
     val p0 = db0.createProfile(acc0, "Kermit")
     db0.setProfileCurrent(p0.id)
 
-    val ac1 = p0.createAccount(acc1)
-    Assert.assertNotEquals(ac1, p0.accountCurrent())
-    p0.selectAccount(acc1.id)
-    Assert.assertEquals(ac1, p0.accountCurrent())
-  }
+    val acci1 = p0.createAccount(acc1)
+    p0.setDescription(p0.description().copy(
+      preferences = p0.preferences().copy(
+        mostRecentAccount = acci1.id
+      )
+    ))
 
-  /**
-   * Trying to set an account with an unknown provider as current, fails.
-   */
-
-  @Test
-  @Throws(Exception::class)
-  fun testSetCurrentAccountUnknown() {
-    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
-    val fileProfiles = File(fileTemp, "profiles")
-
-    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
-      this.context(),
-      this.analytics,
-      this.accountEvents,
-      MockAccountProviders.fakeAccountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialStore,
-      this.accountsDatabases(),
-      fileProfiles)
-
-    val acc0 =
-      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
-    val acc1 =
-      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
-
-    val p0 = db0.createProfile(acc0, "Kermit")
-    db0.setProfileCurrent(p0.id)
-
-    this.expected.expect(AccountsDatabaseNonexistentException::class.java)
-    p0.selectAccount(acc1.id)
+    Assert.assertEquals(acci1.id, p0.preferences().mostRecentAccount)
+    p0.deleteAccountByProvider(acc1.id)
+    Assert.assertEquals(null, p0.preferences().mostRecentAccount)
   }
 
   /**
@@ -1133,41 +1104,5 @@ abstract class ProfilesDatabaseContract {
 
     Assert.assertEquals("Big Bird", p0.displayName)
     Assert.assertEquals("Grouch", p1.displayName)
-  }
-
-  /**
-   * The most recently used account is stored as a preference.
-   */
-
-  @Test
-  @Throws(Exception::class)
-  fun testSetCurrentAccountPreference() {
-    val fileTemp = DirectoryUtilities.directoryCreateTemporary()
-    val fileProfiles = File(fileTemp, "profiles")
-
-    val db0 = ProfilesDatabases.openWithAnonymousProfileDisabled(
-      this.context(),
-      this.analytics,
-      this.accountEvents,
-      MockAccountProviders.fakeAccountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialStore,
-      this.accountsDatabases(),
-      fileProfiles)
-
-    val acc0 =
-      MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
-    val acc1 =
-      MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
-
-    val p0 = db0.createProfile(acc0, "Kermit")
-    db0.setProfileCurrent(p0.id)
-    val ac0 = p0.accountsByProvider()[acc0.id]!!
-    val ac1 = p0.createAccount(acc1)
-
-    p0.selectAccount(acc0.id)
-    Assert.assertEquals(p0.preferences().mostRecentAccount, ac0.id)
-    p0.selectAccount(acc1.id)
-    Assert.assertEquals(p0.preferences().mostRecentAccount, ac1.id)
   }
 }

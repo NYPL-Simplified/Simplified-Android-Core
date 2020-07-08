@@ -6,9 +6,8 @@ import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails.AccountCannotD
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails.AccountUnexpectedException
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
-import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException
-import org.nypl.simplified.profiles.api.ProfileAccountSelectEvent.ProfileAccountSelectSucceeded
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
@@ -37,27 +36,19 @@ class ProfileAccountDeleteTask(
   private fun publishProgressEvent(step: TaskStep<AccountDeleteErrorDetails>) =
     this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionInProgress(step.description))
 
-  private fun publishSuccessEvent(accountThen: AccountType) =
+  private fun publishSuccessEvent(accountThen: AccountID) =
     this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionSucceeded(
-      strings.deletionSucceeded, accountThen.id))
+      this.strings.deletionSucceeded, accountThen))
 
   override fun call(): TaskResult<AccountDeleteErrorDetails, Unit> {
     return try {
       this.logger.debug("deleting account for provider {}", this.accountProviderID)
       this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.deletingAccount))
 
-      val profile =
-        this.profiles.currentProfileUnsafe()
+      val profile = this.profiles.currentProfileUnsafe()
+      val account = profile.deleteAccountByProvider(this.accountProviderID)
 
-      val accountThen = profile.accountCurrent()
-      profile.deleteAccountByProvider(this.accountProviderID)
-      val accountNow = profile.accountCurrent()
-
-      if (accountNow.id != accountThen.id) {
-        this.profileEvents.onNext(ProfileAccountSelectSucceeded.of(accountThen.id, accountNow.id))
-      }
-
-      this.publishSuccessEvent(accountThen)
+      this.publishSuccessEvent(account)
       this.taskRecorder.finishSuccess(Unit)
     } catch (e: AccountsDatabaseLastAccountException) {
       this.publishFailureEvent(

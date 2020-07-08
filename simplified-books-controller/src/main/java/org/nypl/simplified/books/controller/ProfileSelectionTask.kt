@@ -50,7 +50,6 @@ class ProfileSelectionTask(
     this.analytics.publishEvent(
       AnalyticsEvent.ProfileLoggedIn(
         timestamp = LocalDateTime.now(),
-        credentials = profile.accountCurrent().loginState.credentials,
         profileUUID = profile.id.uuid,
         displayName = profile.displayName,
         birthDate = profile.preferences().dateOfBirth?.show(),

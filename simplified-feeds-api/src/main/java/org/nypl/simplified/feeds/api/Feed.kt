@@ -4,6 +4,7 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jnull.NullCheck
 import org.joda.time.DateTime
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.FeedSearch.FeedSearchOpen1_1
 import org.nypl.simplified.opds.core.OPDSAcquisition
@@ -115,6 +116,7 @@ sealed class Feed {
       Collections.unmodifiableList(this.facetsOrderData)
     val entriesByID: Map<BookID, FeedEntry> =
       Collections.unmodifiableMap(this.entriesData)
+
     val entriesInOrder: MutableList<FeedEntry> = object : AbstractMutableList<FeedEntry>() {
       override val size: Int
         get() = entriesOrderData.size
@@ -246,8 +248,15 @@ sealed class Feed {
       feedID: String,
       feedSearch: FeedSearch?,
       feedTitle: String,
-      feedURI: URI
+      feedURI: URI,
+      feedFacets: List<FeedFacet>,
+      feedFacetGroups: Map<String, List<FeedFacet>>
     ): FeedWithoutGroups {
+
+      val mutableGroups =
+        feedFacetGroups.mapValues { entry ->
+          entry.value.toMutableList()
+        }.toMutableMap()
 
       return FeedWithoutGroups(
         feedID = feedID,
@@ -260,27 +269,30 @@ sealed class Feed {
         feedPrivacyPolicy = null,
         feedLicenses = null,
         feedNext = null,
-        facetsOrderData = mutableListOf(),
-        facetsByGroupData = mutableMapOf())
+        facetsOrderData = feedFacets.toMutableList(),
+        facetsByGroupData = mutableGroups
+      )
     }
 
     /**
      * Construct a feed from the given acquisition feed.
      *
+     * @param accountId The account that owns the entries in the feed
      * @param feed The feed
      * @param search The search document
      * @return A new feed
      */
 
     fun fromAcquisitionFeed(
+      accountId: AccountID,
       feed: OPDSAcquisitionFeed,
       search: OPDSOpenSearch1_1?
     ): Feed {
 
       return if (feed.feedGroups.isEmpty()) {
-        withoutGroups(feed, search)
+        withoutGroups(accountId, feed, search)
       } else {
-        withGroups(feed, search)
+        withGroups(accountId, feed, search)
       }
     }
 
@@ -293,6 +305,7 @@ sealed class Feed {
     }
 
     private fun withoutGroups(
+      accountId: AccountID,
       feed: OPDSAcquisitionFeed,
       search: OPDSOpenSearch1_1?
     ): FeedWithoutGroups {
@@ -321,7 +334,8 @@ sealed class Feed {
           feedPrivacyPolicy = mapNull(feed.feedPrivacyPolicy),
           feedAbout = mapNull(feed.feedAbout),
           facetsByGroupData = facetsByGroup,
-          facetsOrderData = facetsOrder)
+          facetsOrderData = facetsOrder
+        )
 
       val entries = feed.feedEntries
       for (index in entries.indices) {
@@ -334,7 +348,7 @@ sealed class Feed {
             }
           }
           if (best != null) {
-            result.entriesInOrder.add(FeedEntry.FeedEntryOPDS(feedEntry))
+            result.entriesInOrder.add(FeedEntry.FeedEntryOPDS(accountId, feedEntry))
           }
         }
       }
@@ -343,6 +357,7 @@ sealed class Feed {
     }
 
     private fun withGroups(
+      accountId: AccountID,
       feed: OPDSAcquisitionFeed,
       search: OPDSOpenSearch1_1?
     ): FeedWithGroups {
@@ -372,8 +387,9 @@ sealed class Feed {
         feedNext = mapNull(feed.feedNext),
         facetsByGroupData = facetsByGroup,
         facetsOrderData = facetsOrder,
-        feedGroupsData = FeedGroup.fromOPDSGroups(feed.getFeedGroups()),
-        feedGroupsOrderData = feed.feedGroupsOrder)
+        feedGroupsData = FeedGroup.fromOPDSGroups(accountId, feed.getFeedGroups()),
+        feedGroupsOrderData = feed.feedGroupsOrder
+      )
     }
 
     private fun constructFacetsOrdered(f: OPDSAcquisitionFeed): MutableList<FeedFacet> {

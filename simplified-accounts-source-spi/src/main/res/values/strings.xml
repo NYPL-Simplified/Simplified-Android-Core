@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="resolvingAuthDocumentCOPPAAgeGateMalformed">The description of the COPPA age gate must specify Over-13 and Under-13 URIs.</string>
-  <string name="resolvingAuthDocumentNoUsableAuthenticationTypes">The account did not specify an authentication type that we can understand.</string>
-  <string name="resolvingAuthDocumentNoStartURI">The authentication document did not provide a starting catalog URI.</string>
-  <string name="resolvingAuthDocumentParseFailed">The authentication document was malformed and could not be parsed.</string>
-  <string name="resolvingAuthDocumentMissingURI">No URI was provided for an authentication document.</string>
   <string name="resolving">Resolving the account provider…</string>
   <string name="resolvingAuthDocument">Resolving the authentication document…</string>
+  <string name="resolvingAuthDocumentCOPPAAgeGateMalformed">The description of the COPPA age gate must specify Over-13 and Under-13 URIs.</string>
+  <string name="resolvingAuthDocumentMissingURI">No URI was provided for an authentication document.</string>
+  <string name="resolvingAuthDocumentNoStartURI">The authentication document did not provide a starting catalog URI.</string>
+  <string name="resolvingAuthDocumentNoUsableAuthenticationTypes">The account did not specify an authentication type that we can understand.</string>
+  <string name="resolvingAuthDocumentOAuthMalformed">The description of an OAuth system must contain an authentication URI.</string>
+  <string name="resolvingAuthDocumentParseFailed">The authentication document was malformed and could not be parsed.</string>
   <string name="resolvingAuthDocumentRetrievalFailed">The authentication document could not be retrieved from the server.</string>
-  <string name="resolvingUnexpectedException">Received an unexpected exception during resolution!</string>
   <string name="resolvingAuthDocumentUnusableLink">We couldn\'t understand the authentication document link.</string>
+  <string name="resolvingUnexpectedException">Received an unexpected exception during resolution!</string>
 </resources>

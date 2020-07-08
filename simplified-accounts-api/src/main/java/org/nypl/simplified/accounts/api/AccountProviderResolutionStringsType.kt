@@ -25,6 +25,12 @@ interface AccountProviderResolutionStringsType {
   val resolvingAuthDocumentCOPPAAgeGateMalformed: String
 
   /**
+   * The description of an OAuth system is malformed.
+   */
+
+  val resolvingAuthDocumentOAuthMalformed: String
+
+  /**
    * The authentication document contained authentication types but we couldn't understand any of them.
    */
 

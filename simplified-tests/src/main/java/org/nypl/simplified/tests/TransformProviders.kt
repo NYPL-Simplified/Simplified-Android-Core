@@ -34,7 +34,9 @@ class TransformProviders {
               passwordMaximumLength = entry.authPasscodeLength,
               passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.valueOf(entry.pinKeyboard ?: "DEFAULT"),
               description = "",
-              labels = mapOf())
+              labels = mapOf(),
+              logoURI = null
+            )
           } else {
             if (entry.catalogUrl13 != null) {
               AccountProviderAuthenticationDescription.COPPAAgeGate(
@@ -42,7 +44,7 @@ class TransformProviders {
                 under13 = URI.create(entry.catalogUrlUnder13)
               )
             } else {
-              null
+              AccountProviderAuthenticationDescription.Anonymous
             }
           }
 
@@ -52,6 +54,7 @@ class TransformProviders {
             annotationsURI = null,
             authenticationDocumentURI = null,
             authentication = authentication,
+            authenticationAlternatives = listOf(),
             catalogURI = URI.create(entry.catalogUrl),
             cardCreatorURI = null,
             displayName = entry.name!!,

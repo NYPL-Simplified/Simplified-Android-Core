@@ -1,6 +1,8 @@
 package org.nypl.simplified.main
 
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -15,9 +17,14 @@ import io.reactivex.Observable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
-import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginMissingInformation
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.boot.api.BootEvent
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.migration.api.Migrations
@@ -26,15 +33,23 @@ import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
+import org.nypl.simplified.oauth.OAuthParseResult
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerUnreachable
+import org.nypl.simplified.ui.accounts.AccountRegistryFragment
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
@@ -45,9 +60,7 @@ import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsFragmentAccountRegistry
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsNavigationControllerUnreachable
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashParameters
@@ -92,10 +105,48 @@ class MainActivity :
     profilesController: ProfilesControllerType,
     account: AccountType,
     credentials: AccountAuthenticationCredentials
-  ): TaskResult<AccountLoginState.AccountLoginErrorData, Unit> {
+  ): TaskResult<AccountLoginErrorData, Unit> {
     this.logger.debug("doLoginAccount")
-    return profilesController.profileAccountLogin(account.id, credentials)
-      .get(3L, TimeUnit.MINUTES)
+
+    val taskRecorder = TaskRecorder.create<AccountLoginErrorData>()
+    taskRecorder.beginNewStep("Logging in...")
+
+    if (account.provider.authenticationAlternatives.isEmpty()) {
+      when (val description = account.provider.authentication) {
+        is AccountProviderAuthenticationDescription.COPPAAgeGate,
+        AccountProviderAuthenticationDescription.Anonymous -> {
+          return taskRecorder.finishSuccess(Unit)
+        }
+        is AccountProviderAuthenticationDescription.Basic -> {
+          when (credentials) {
+            is AccountAuthenticationCredentials.Basic -> {
+              return profilesController.profileAccountLogin(
+                ProfileAccountLoginRequest.Basic(
+                  account.id,
+                  description,
+                  credentials.userName,
+                  credentials.password
+                )
+              ).get(3L, TimeUnit.MINUTES)
+            }
+            is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
+              val message = "Can't use OAuth authentication during migrations."
+              taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+              return taskRecorder.finishFailure()
+            }
+          }
+        }
+        is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
+          val message = "Can't use OAuth authentication during migrations."
+          taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+          return taskRecorder.finishFailure()
+        }
+      }
+    } else {
+      val message = "Can't determine which authentication method is required."
+      taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+      return taskRecorder.finishFailure()
+    }
   }
 
   private fun doCreateAccount(
@@ -149,7 +200,8 @@ class MainActivity :
         splashMigrationReportEmail = migrationReportingEmail,
         splashImageResource = splashService.splashImageResource(),
         splashImageTitleResource = splashService.splashImageTitleResource(),
-        splashImageSeconds = 2L
+        splashImageSeconds = 2L,
+        showLibrarySelection = splashService.shouldShowLibrarySelectionScreen
       )
 
     this.splashMainFragment =
@@ -164,14 +216,27 @@ class MainActivity :
   private fun onStartupFinished() {
     this.logger.debug("onStartupFinished")
 
-    val profilesController =
+    val services =
       Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
-        .requireService(ProfilesControllerType::class.java)
+    val profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    val accountProviders =
+      services.requireService(AccountProviderRegistryType::class.java)
 
     return when (profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
         val profile = profilesController.profileCurrent()
-        if (!profile.preferences().hasSeenLibrarySelectionScreen) {
+        val defaultProvider = accountProviders.defaultProvider
+
+        val hasNonDefaultAccount =
+          profile.accounts().values.count { it.provider.id != defaultProvider.id } > 0
+        this.logger.debug("hasNonDefaultAccount=$hasNonDefaultAccount")
+
+        val shouldShowLibrarySelectionScreen =
+          this.splashParameters.showLibrarySelection && !profile.preferences().hasSeenLibrarySelectionScreen
+        this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
+
+        if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
           this.openLibrarySelectionScreen()
         } else {
           this.openCatalog()
@@ -184,19 +249,6 @@ class MainActivity :
   }
 
   private fun openLibrarySelectionScreen() {
-    val profilesController =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
-        .requireService(ProfilesControllerType::class.java)
-
-    /*
-     * Store the fact that we've seen the selection screen.
-     */
-
-    profilesController.profileUpdate { profileDescription ->
-      profileDescription.copy(
-        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true))
-    }
-
     val fragment = SplashSelectionFragment.newInstance(this.splashParameters)
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
@@ -457,10 +509,10 @@ class MainActivity :
      */
 
     this.navigationControllerDirectory.updateNavigationController(
-      SettingsNavigationControllerType::class.java,
-      object : SettingsNavigationControllerUnreachable() {
+      AccountNavigationControllerType::class.java,
+      object : AccountNavigationControllerUnreachable() {
         override fun popBackStack(): Boolean {
-          this@MainActivity.openCatalog()
+          onStartupFinished()
           return true
         }
 
@@ -475,13 +527,26 @@ class MainActivity :
       }
     )
 
-    val fragment = SettingsFragmentAccountRegistry()
     manager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, fragment, "MAIN")
+      .replace(R.id.mainFragmentHolder, AccountRegistryFragment(), "MAIN")
+      .addToBackStack(null)
       .commit()
   }
 
   override fun onSplashLibrarySelectionNotWanted() {
+    val profilesController =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+        .requireService(ProfilesControllerType::class.java)
+
+    /*
+     * Store the fact that we've seen the selection screen.
+     */
+
+    profilesController.profileUpdate { profileDescription ->
+      profileDescription.copy(
+        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
+      )
+    }
     this.openCatalog()
   }
 
@@ -492,6 +557,52 @@ class MainActivity :
       subject = parameters.subject,
       body = parameters.body
     )
+  }
+
+  override fun onNewIntent(intent: Intent) {
+    if (Services.isInitialized()) {
+      if (this.tryToCompleteOAuthIntent(intent)) {
+        return
+      }
+    }
+    super.onNewIntent(intent)
+  }
+
+  private fun tryToCompleteOAuthIntent(
+    intent: Intent
+  ): Boolean {
+    this.logger.debug("attempting to parse incoming intent as OAuth token")
+
+    val buildConfiguration =
+      Services.serviceDirectory()
+        .requireService(BuildConfigurationServiceType::class.java)
+
+    val result = OAuthCallbackIntentParsing.processIntent(
+      intent = intent,
+      requiredScheme = buildConfiguration.oauthCallbackScheme.scheme,
+      parseUri = Uri::parse
+    )
+
+    if (result is OAuthParseResult.Failed) {
+      this.logger.warn("failed to parse incoming intent: {}", result.message)
+      return false
+    }
+
+    this.logger.debug("parsed OAuth token")
+    val accountId = AccountID((result as OAuthParseResult.Success).accountId)
+    val token = result.token
+
+    val profilesController =
+      Services.serviceDirectory()
+        .requireService(ProfilesControllerType::class.java)
+
+    profilesController.profileAccountLogin(
+      OAuthWithIntermediaryComplete(
+        accountId = accountId,
+        token = token
+      )
+    )
+    return true
   }
 
   override fun onUserInteraction() {

@@ -3,9 +3,9 @@ package org.nypl.simplified.cardcreator.utils
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import org.nypl.simplified.cardcreator.models.AccountInformation
-import org.nypl.simplified.cardcreator.models.AddressDetails
-import org.nypl.simplified.cardcreator.models.PersonalInformation
+import org.nypl.simplified.cardcreator.model.AccountInformation
+import org.nypl.simplified.cardcreator.model.AddressDetails
+import org.nypl.simplified.cardcreator.model.PersonalInformation
 
 /**
  * Util class for handling saving/retrieving address across card creator process
@@ -47,6 +47,8 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
 
     private const val KEY_USERNAME = "username"
     private const val KEY_PIN = "pin"
+    private const val KEY_JUVENILE_CARD = "juvenile_card"
+    private const val KEY_TOKEN = "token"
 
     private const val EMPTY = ""
   }
@@ -175,4 +177,34 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
       putString(KEY_PIN, pin)
     }
   }
+
+  /**
+   * Getter/Setter of whether or not we are creating a juvenile card
+   */
+  var isJuvenileCard: Boolean? = null
+    get() {
+      if (field == null) {
+        field = sharedPreferences.getBoolean(KEY_JUVENILE_CARD, false)
+      }
+      return field
+    }
+    set(value) {
+      field = value
+      sharedPreferences.edit { putBoolean(KEY_JUVENILE_CARD, value ?: false) }
+    }
+
+  /**
+   * Getter/Setter for ISSO token
+   */
+  var token: String? = null
+    get() {
+      if (field == null) {
+        field = sharedPreferences.getString(KEY_TOKEN, "")
+      }
+      return field
+    }
+    set(value) {
+      field = value
+      sharedPreferences.edit { putString(KEY_TOKEN, value) }
+    }
 }

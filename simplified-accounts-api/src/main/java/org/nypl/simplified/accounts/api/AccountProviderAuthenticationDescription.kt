@@ -15,20 +15,37 @@ sealed class AccountProviderAuthenticationDescription {
      * The type used to identify basic authentication.
      */
 
-    const val BASIC_TYPE = "http://opds-spec.org/auth/basic"
+    const val BASIC_TYPE =
+      "http://opds-spec.org/auth/basic"
 
     /**
      * The type used to identify COPPA age gate authentication.
      */
 
-    const val COPPA_TYPE = "http://librarysimplified.org/terms/authentication/gate/coppa"
+    const val COPPA_TYPE =
+      "http://librarysimplified.org/terms/authentication/gate/coppa"
 
     /**
      * The type used to identify anonymous access (no authentication).
      */
 
-    const val ANONYMOUS_TYPE = "http://librarysimplified.org/rel/auth/anonymous"
+    const val ANONYMOUS_TYPE =
+      "http://librarysimplified.org/rel/auth/anonymous"
+
+    /**
+     * The type used to identify OAuth with an intermediary. This is the authentication used
+     * by projects such as Open eBooks.
+     */
+
+    const val OAUTH_INTERMEDIARY_TYPE =
+      "http://librarysimplified.org/authtype/OAuth-with-intermediary"
   }
+
+  /**
+   * The authentication description.
+   */
+
+  abstract val description: String
 
   /**
    * A COPPA age gate that redirects users that are thirteen or older to one URI, and under 13s
@@ -55,6 +72,9 @@ sealed class AccountProviderAuthenticationDescription {
         "URIs ${this.greaterEqual13} and ${this.under13} must differ"
       )
     }
+
+    override val description: String =
+      COPPA_TYPE
   }
 
   /**
@@ -95,6 +115,7 @@ sealed class AccountProviderAuthenticationDescription {
    */
 
   data class Basic(
+    override val description: String,
 
     /**
      * The barcode format, if specified, such as "CODABAR". If this is unspecified, then
@@ -126,12 +147,6 @@ sealed class AccountProviderAuthenticationDescription {
     val passwordKeyboard: KeyboardInput,
 
     /**
-     * The description of the login dialog.
-     */
-
-    val description: String,
-
-    /**
      * The labels that should be used for login forms. This is typically a map such as:
      *
      * ```
@@ -140,7 +155,13 @@ sealed class AccountProviderAuthenticationDescription {
      * ```
      */
 
-    val labels: Map<String, String>
+    val labels: Map<String, String>,
+
+    /**
+     * The URI of the authentication logo.
+     */
+
+    val logoURI: URI?
   ) : AccountProviderAuthenticationDescription() {
 
     init {
@@ -148,5 +169,34 @@ sealed class AccountProviderAuthenticationDescription {
         this.barcodeFormat?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
         "Barcode format ${this.barcodeFormat} must be uppercase")
     }
+  }
+
+  /**
+   * OAuth with an intermediary.
+   */
+
+  data class OAuthWithIntermediary(
+    override val description: String,
+
+    /**
+     * The URI used to perform authentication.
+     */
+
+    val authenticate: URI,
+
+    /**
+     * The URI of the authentication logo.
+     */
+
+    val logoURI: URI?
+  ) : AccountProviderAuthenticationDescription()
+
+  /**
+   * Anonymous authentication (equivalent to no authentication)
+   */
+
+  object Anonymous : AccountProviderAuthenticationDescription() {
+    override val description: String =
+      ANONYMOUS_TYPE
   }
 }

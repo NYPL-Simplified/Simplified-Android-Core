@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.books.profiles
 
-import org.junit.Assert
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
@@ -16,15 +16,15 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
@@ -35,8 +35,8 @@ import org.nypl.simplified.http.core.HTTPResultType
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.tests.strings.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
+import org.nypl.simplified.tests.strings.MockAccountLogoutStringResources
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -129,7 +129,8 @@ abstract class ProfileAccountLogoutTaskContract {
         bookRegistry = this.bookRegistry,
         http = this.http,
         profile = this.profile,
-        logoutStrings = this.logoutStrings)
+        logoutStrings = this.logoutStrings
+      )
 
     val result = task.call()
     this.logger.debug("result: {}", result)
@@ -180,10 +181,12 @@ abstract class ProfileAccountLogoutTaskContract {
       .thenReturn(books)
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("abcd"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     this.account.setLoginState(AccountLoggedIn(credentials))
 
@@ -194,7 +197,8 @@ abstract class ProfileAccountLogoutTaskContract {
         bookRegistry = this.bookRegistry,
         http = this.http,
         profile = this.profile,
-        logoutStrings = this.logoutStrings)
+        logoutStrings = this.logoutStrings
+      )
 
     val result = task.call()
     this.logger.debug("result: {}", result)
@@ -252,18 +256,20 @@ abstract class ProfileAccountLogoutTaskContract {
       .thenReturn(books)
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .setAdobeCredentials(
-          AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("OmniConsumerProducts"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = URI("https://example.com/devices"),
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
-              userID = AdobeUserID("someone"))
-          )).build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("user"),
+        password = AccountPassword("pass"),
+        adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+          vendorID = AdobeVendorID("OmniConsumerProducts"),
+          clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+          deviceManagerURI = URI("https://example.com/devices"),
+          postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+            deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
+            userID = AdobeUserID("someone")
+          )
+        ),
+        authenticationDescription = null
+      )
 
     this.account.setLoginState(AccountLoggedIn(credentials))
 
@@ -274,7 +280,8 @@ abstract class ProfileAccountLogoutTaskContract {
         bookRegistry = this.bookRegistry,
         http = this.http,
         profile = this.profile,
-        logoutStrings = this.logoutStrings)
+        logoutStrings = this.logoutStrings
+      )
 
     val result = task.call()
     this.logger.debug("result: {}", result)
@@ -335,13 +342,15 @@ abstract class ProfileAccountLogoutTaskContract {
      * When the code calls deactivateDevice(), it fails if the connector returns an error.
      */
 
-    Mockito.`when`(this.adeptConnector.deactivateDevice(
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.deactivateDevice(
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptDeactivationReceiverType
       receiver.onDeactivationError("E_FAIL_OFTEN_AND_LOUDLY")
     }
@@ -353,18 +362,20 @@ abstract class ProfileAccountLogoutTaskContract {
       }
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .setAdobeCredentials(
-          AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("OmniConsumerProducts"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = URI("https://example.com/devices"),
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
-              userID = AdobeUserID("someone"))
-          )).build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("user"),
+        password = AccountPassword("pass"),
+        adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+          vendorID = AdobeVendorID("OmniConsumerProducts"),
+          clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+          deviceManagerURI = URI("https://example.com/devices"),
+          postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+            deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
+            userID = AdobeUserID("someone")
+          )
+        ),
+        authenticationDescription = null
+      )
 
     this.account.setLoginState(AccountLoggedIn(credentials))
 
@@ -375,7 +386,8 @@ abstract class ProfileAccountLogoutTaskContract {
         bookRegistry = this.bookRegistry,
         http = this.http,
         profile = this.profile,
-        logoutStrings = this.logoutStrings)
+        logoutStrings = this.logoutStrings
+      )
 
     val result = task.call()
     this.logger.debug("result: {}", result)
@@ -439,19 +451,22 @@ abstract class ProfileAccountLogoutTaskContract {
         0L,
         mutableMapOf(),
         0L
-      ) as HTTPResultType<InputStream>)
+      ) as HTTPResultType<InputStream>
+    )
 
     /*
      * When the code calls deactivateDevice(), it succeeds if the connector does not return an error.
      */
 
-    Mockito.`when`(this.adeptConnector.deactivateDevice(
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull(),
-      anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.deactivateDevice(
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull(),
+        anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptDeactivationReceiverType
       receiver.onDeactivationSucceeded()
     }
@@ -463,18 +478,20 @@ abstract class ProfileAccountLogoutTaskContract {
       }
 
     val credentials =
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("pin"),
-        AccountBarcode.create("barcode"))
-        .setAdobeCredentials(
-          AccountAuthenticationAdobePreActivationCredentials(
-            vendorID = AdobeVendorID("OmniConsumerProducts"),
-            clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-            deviceManagerURI = URI("https://example.com/devices"),
-            postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
-              deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
-              userID = AdobeUserID("someone"))
-          )).build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("user"),
+        password = AccountPassword("pass"),
+        adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+          vendorID = AdobeVendorID("OmniConsumerProducts"),
+          clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+          deviceManagerURI = URI("https://example.com/devices"),
+          postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+            deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
+            userID = AdobeUserID("someone")
+          )
+        ),
+        authenticationDescription = null
+      )
 
     this.account.setLoginState(AccountLoggedIn(credentials))
 
@@ -485,7 +502,8 @@ abstract class ProfileAccountLogoutTaskContract {
         bookRegistry = this.bookRegistry,
         http = this.http,
         profile = this.profile,
-        logoutStrings = this.logoutStrings)
+        logoutStrings = this.logoutStrings
+      )
 
     val result = task.call()
     this.logger.debug("result: {}", result)

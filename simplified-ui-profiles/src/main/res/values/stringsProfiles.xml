@@ -19,8 +19,8 @@
   <string name="profileName">Name</string>
   <string name="profilePlaceholder">Lorem ipsum dolor sit amet, probatus volutpat has at, vis adhuc iuvaret omittantur an, sadipscing conclusionemque his ad. Eam ut simul tempor. Primis consetetur appellantur vim eu, eum an iudico dolorum. Ad vis utamur honestatis, sanctus debitis referrentur an eam.</string>
   <string name="profileSelect">Please select a profile, or create a new one.</string>
-  <string name="profilesSwitch">Switch Profile</string>
-  <string name="profilesSwitchConfirm">Are you sure you want to switch profiles?</string>
+  <string name="profilesSwitch">Log Out</string>
+  <string name="profilesSwitchConfirm">Are you sure you want to log out?</string>
   <string name="profilesTimeOutSoon">The current profile will soon be logged out due to inactivity. Please touch the screen if you want to stay logged in.</string>
   <string name="profilesTimeOutSoonTitle">Profile Inactivity</string>
   <string name="profilesTitle">Profiles</string>

@@ -31,10 +31,10 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
@@ -141,17 +141,21 @@ abstract class BookBorrowTaskAdobeDRMContract {
   private val adobeCredentialsValid =
     AccountAuthenticationAdobePreActivationCredentials(
       vendorID = AdobeVendorID("OmniConsumerProducts"),
-      clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+      clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
       deviceManagerURI = URI("https://example.com/devices"),
       postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
         deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
-        userID = AdobeUserID("someone")))
+        userID = AdobeUserID("someone")
+      )
+    )
 
   private val accountCredentialsValid =
-    AccountAuthenticationCredentials
-      .builder(AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-      .setAdobeCredentials(this.adobeCredentialsValid)
-      .build()
+    AccountAuthenticationCredentials.Basic(
+      userName = AccountUsername("user"),
+      password = AccountPassword("password"),
+      adobeCredentials = this.adobeCredentialsValid,
+      authenticationDescription = null
+    )
 
   @Before
   @Throws(Exception::class)
@@ -165,9 +169,11 @@ abstract class BookBorrowTaskAdobeDRMContract {
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
-    this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.bundledContent =
+      BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.contentResolver = Mockito.mock(ContentResolver::class.java)
-    this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
+    this.downloader =
+      DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
 
     this.tempDirectory = TestDirectories.temporaryDirectory()
@@ -197,7 +203,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     this.services = MutableServiceDirectory()
     this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
-    this.services.putService(AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
+    this.services.putService(
+      AudioBookManifestStrategiesType::class.java,
+      this.audioBookManifestStrategies
+    )
     this.services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStrings)
     this.services.putService(BookRegistryReadableType::class.java, this.bookRegistry)
     this.services.putService(BookRegistryType::class.java, this.bookRegistry)
@@ -276,10 +285,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       this.adobeCredentialsValid
 
     val credentials =
-      AccountAuthenticationCredentials
-        .builder(AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-        .setAdobeCredentials(adobeCredentials)
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("user"),
+        password = AccountPassword("password"),
+        adobeCredentials = adobeCredentials,
+        authenticationDescription = null
+      )
 
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(credentials))
@@ -293,11 +304,13 @@ abstract class BookBorrowTaskAdobeDRMContract {
      * When the code calls fulfill(), it succeeds if the connector reports success.
      */
 
-    Mockito.`when`(this.adeptConnector.fulfillACSM(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.fulfillACSM(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptFulfillmentListenerType
       receiver.onFulfillmentProgress(0.0)
       receiver.onFulfillmentProgress(10.0)
@@ -331,7 +344,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/adobe-token.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/adobe-token.xml"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -341,24 +356,30 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.none(),
-        listOf(OPDSIndirectAcquisition(
-          mimeOf("application/vnd.adobe.adept+xml"),
-          listOf(OPDSIndirectAcquisition(mimeOf("application/epub+zip"), listOf()))
-        )))
+        listOf(
+          OPDSIndirectAcquisition(
+            mimeOf("application/vnd.adobe.adept+xml"),
+            listOf(OPDSIndirectAcquisition(mimeOf("application/epub+zip"), listOf()))
+          )
+        )
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -413,10 +434,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       this.adobeCredentialsValid
 
     val credentials =
-      AccountAuthenticationCredentials
-        .builder(AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-        .setAdobeCredentials(adobeCredentials)
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("user"),
+        password = AccountPassword("password"),
+        adobeCredentials = adobeCredentials,
+        authenticationDescription = null
+      )
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
@@ -436,7 +459,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/adobe-token.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/adobe-token.xml"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -446,21 +471,25 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/vnd.adobe.adept+xml")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -525,10 +554,12 @@ abstract class BookBorrowTaskAdobeDRMContract {
       this.adobeCredentialsValid
 
     val credentials =
-      AccountAuthenticationCredentials
-        .builder(AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-        .setAdobeCredentials(adobeCredentials)
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("user"),
+        password = AccountPassword("password"),
+        adobeCredentials = adobeCredentials,
+        authenticationDescription = null
+      )
 
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(credentials))
@@ -542,11 +573,13 @@ abstract class BookBorrowTaskAdobeDRMContract {
      * When the code calls fulfill(), it succeeds if the connector reports success.
      */
 
-    Mockito.`when`(this.adeptConnector.fulfillACSM(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.fulfillACSM(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptFulfillmentListenerType
       receiver.onFulfillmentProgress(0.0)
       receiver.onFulfillmentProgress(10.0)
@@ -580,7 +613,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/adobe-token-pdf.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/adobe-token-pdf.xml"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -590,21 +625,25 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/vnd.adobe.adept+xml")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -666,15 +705,18 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val adobeCredentials =
       AccountAuthenticationAdobePreActivationCredentials(
         vendorID = AdobeVendorID("OmniConsumerProducts"),
-        clientToken = AccountAuthenticationAdobeClientToken.create("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+        clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
         deviceManagerURI = URI("https://example.com/devices"),
-        postActivationCredentials = null)
+        postActivationCredentials = null
+      )
 
     val credentials =
-      AccountAuthenticationCredentials
-        .builder(AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-        .setAdobeCredentials(adobeCredentials)
-        .build()
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("user"),
+        password = AccountPassword("password"),
+        adobeCredentials = adobeCredentials,
+        authenticationDescription = null
+      )
 
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(credentials))
@@ -690,7 +732,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/adobe-token-pdf.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/adobe-token-pdf.xml"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -700,21 +744,25 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/vnd.adobe.adept+xml")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -785,7 +833,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/4096.bin"),
         this.resourceSize("/org/nypl/simplified/tests/books/4096.bin"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -795,21 +845,25 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/vnd.adobe.adept+xml")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -873,11 +927,13 @@ abstract class BookBorrowTaskAdobeDRMContract {
      * When the code calls fulfill(), it succeeds if the connector reports success.
      */
 
-    Mockito.`when`(this.adeptConnector.fulfillACSM(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.fulfillACSM(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptFulfillmentListenerType
       receiver.onFulfillmentCancelled()
       Unit
@@ -900,7 +956,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/adobe-token.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/adobe-token.xml"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -910,21 +968,25 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/vnd.adobe.adept+xml")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -983,11 +1045,13 @@ abstract class BookBorrowTaskAdobeDRMContract {
      * When the code calls fulfill(), it succeeds if the connector reports success.
      */
 
-    Mockito.`when`(this.adeptConnector.fulfillACSM(
-      this.anyNonNull(),
-      this.anyNonNull(),
-      this.anyNonNull()
-    )).then { invocation ->
+    Mockito.`when`(
+      this.adeptConnector.fulfillACSM(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
       val receiver = invocation.arguments[0] as AdobeAdeptFulfillmentListenerType
       receiver.onFulfillmentFailure("E_TYPICAL")
       Unit
@@ -1010,7 +1074,9 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/adobe-token.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/adobe-token.xml"),
         headers,
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       "http://www.example.com/0.feed",
@@ -1020,21 +1086,25 @@ abstract class BookBorrowTaskAdobeDRMContract {
         this.resource("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         this.resourceSize("/org/nypl/simplified/tests/books/borrow-acsm-epub-0.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     val acquisition =
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         Option.some(mimeOf("application/vnd.adobe.adept+xml")),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntry =

@@ -369,14 +369,17 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       addAutomatically = false,
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Basic(
-        "CODABAR",
-        AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        20,
-        AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        "Basic Auth",
+        description = "Basic Auth",
+        barcodeFormat = "CODABAR",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+        passwordMaximumLength = 20,
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         labels = mapOf(
           Pair("LOGIN", "LOGIN!"),
-          Pair("PASSWORD", "PASSWORD!"))),
+          Pair("PASSWORD", "PASSWORD!")),
+        logoURI = null
+      ),
+      authenticationAlternatives = listOf(),
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),
@@ -522,6 +525,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         greaterEqual13 = URI("http://www.example.com/feed-13.xml"),
         under13 = URI("http://www.example.com/feed-under-13.xml")
       ),
+      authenticationAlternatives = listOf(),
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),
@@ -649,7 +653,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
     val provider = AccountProvider(
       addAutomatically = false,
       annotationsURI = null,
-      authentication = null,
+      authentication = AccountProviderAuthenticationDescription.Anonymous,
+      authenticationAlternatives = listOf(),
       authenticationDocumentURI = URI("http://www.example.com/auth"),
       cardCreatorURI = URI("http://www.example.com/card.xml"),
       catalogURI = URI("http://www.example.com/feed.xml"),

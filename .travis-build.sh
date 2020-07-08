@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------
 # Execute the build
 
-./gradlew clean test assemble \
+./gradlew clean ktlint test assemble \
   -Dorg.gradle.internal.publish.checksums.insecure=true                 \
   -Porg.librarysimplified.keyAlias=nypl                                 \
   -Porg.librarysimplified.keyPassword=${NYPL_SIGNING_KEY_PASSWORD}      \

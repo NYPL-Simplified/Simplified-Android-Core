@@ -8,7 +8,7 @@
   <string name="settingsAccountCreationFailed">Account creation failed</string>
   <string name="settingsAccountCreationFailedMessage">The account could not be created.</string>
   <string name="settingsAccountCurrent">Current Account</string>
-  <string name="settingsAccountDelete">@string/settingsDelete</string>
+  <string name="settingsAccountDelete">@string/accountDelete</string>
   <string name="settingsAccountDeleteConfirm">Are you sure you want to remove your \"%1$s\" account from this device?</string>
   <string name="settingsAccountDeleteConfirmTitle">Remove account?</string>
   <string name="settingsAccountDeletionFailed">Account deletion failed</string>
@@ -45,6 +45,8 @@
   <string name="settingsLicense">License</string>
   <string name="settingsLicenseSummary">Software license information</string>
   <string name="settingsLogin">Log in</string>
+  <string name="settingsLoginWith">Log in with %1$s</string>
+  <string name="settingsLoginAlternatives">Alternative Login Methods</string>
   <string name="settingsLogout">Log out</string>
   <string name="settingsPassword">Password</string>
   <string name="settingsPasswordHide">Hide password</string>

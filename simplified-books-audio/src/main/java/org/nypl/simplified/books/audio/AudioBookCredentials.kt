@@ -14,4 +14,12 @@ sealed class AudioBookCredentials {
     val userName: String,
     val password: String
   ) : AudioBookCredentials()
+
+  /**
+   * Credentials represented by a bearer token.
+   */
+
+  data class BearerToken(
+    val accessToken: String
+  ) : AudioBookCredentials()
 }

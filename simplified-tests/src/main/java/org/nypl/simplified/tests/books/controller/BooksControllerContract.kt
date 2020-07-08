@@ -15,14 +15,14 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.AccountBundledCredentialsEmpty
 import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -145,9 +145,12 @@ abstract class BooksControllerContract {
     MockAnalytics()
 
   private fun correctCredentials(): AccountAuthenticationCredentials {
-    return AccountAuthenticationCredentials.builder(
-      AccountPIN.create("1234"), AccountBarcode.create("abcd"))
-      .build()
+    return AccountAuthenticationCredentials.Basic(
+      userName = AccountUsername("abcd"),
+      password = AccountPassword("1234"),
+      adobeCredentials = null,
+      authenticationDescription = null
+    )
   }
 
   private fun createController(
@@ -300,7 +303,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -346,7 +349,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -391,7 +394,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeProvider("urn:fake:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     Assert.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState)
@@ -426,7 +429,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
 
     Assert.assertEquals(AccountNotLoggedIn, account.loginState)
     controller.booksSync(account).get()
@@ -460,7 +463,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -505,7 +508,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -575,7 +578,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     /*
@@ -679,7 +682,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
@@ -761,7 +764,7 @@ abstract class BooksControllerContract {
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountCurrent()
+    val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(

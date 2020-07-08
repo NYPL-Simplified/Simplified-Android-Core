@@ -7,16 +7,21 @@ import androidx.lifecycle.ViewModel
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.google.common.util.concurrent.FluentFuture
-import com.io7m.jfunctional.Option
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
-import org.joda.time.DateTime
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedFacet
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FilteringForAccount
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting
+import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -27,7 +32,6 @@ import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
-import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
@@ -54,8 +58,6 @@ class CatalogFeedViewModel(
 
   private val feedLoader: FeedLoaderType =
     this.services.requireService(FeedLoaderType::class.java)
-  private val configurationService: CatalogConfigurationServiceType =
-    this.services.requireService(CatalogConfigurationServiceType::class.java)
   private val profilesController: ProfilesControllerType =
     this.services.requireService(ProfilesControllerType::class.java)
   private val instanceId =
@@ -63,6 +65,7 @@ class CatalogFeedViewModel(
 
   private var feedWithoutGroupsViewState: Parcelable? = null
   private var feedWithGroupsViewState: Parcelable? = null
+  private var accountLoginSubscription: Disposable? = null
 
   /**
    * The stack of feeds that lead to the current feed. The current feed is the feed on top
@@ -70,6 +73,7 @@ class CatalogFeedViewModel(
    */
 
   private val stateLock = Any()
+
   @GuardedBy("stateLock")
   private var state: CatalogFeedState? = null
 
@@ -81,8 +85,6 @@ class CatalogFeedViewModel(
         this.doLoadRemoteFeed(arguments)
       is CatalogFeedArgumentsLocalBooks ->
         this.doLoadLocalFeed(arguments)
-      is CatalogFeedArgumentsRemoteAccountDefault ->
-        this.doLoadRemoteFeedAccountDefault(arguments)
     }
   }
 
@@ -96,48 +98,27 @@ class CatalogFeedViewModel(
     this.logger.debug("[{}]: loading local feed {}", this.instanceId, arguments.selection)
 
     val booksUri = URI.create("Books")
-    val account = this.profilesController.profileAccountCurrent()
-
-    val showAllCollections =
-      this.configurationService.showAllCollectionsInLocalFeeds
-
-    val filterAccountID =
-      if (!showAllCollections) {
-        this.profilesController.profileAccountCurrent().id
-      } else {
-        null
-      }
 
     val request =
       ProfileFeedRequest(
-        facetActive = arguments.facetType,
-        facetGroup = this.context.getString(R.string.feedSortBy),
         facetTitleProvider = CatalogFacetPseudoTitleProvider(this.context.resources),
         feedSelection = arguments.selection,
-        filterByAccountID = filterAccountID,
+        filterByAccountID = null,
         search = arguments.searchTerms,
+        sortBy = arguments.sortBy,
         title = this.context.getString(R.string.feedTitleBooks),
-        uri = booksUri)
+        uri = booksUri
+      )
 
     val future =
       this.profilesController.profileFeed(request)
         .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
         .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
 
-    return this.createNewStatus(arguments, future, account.id)
-  }
-
-  private fun doLoadRemoteFeedAccountDefault(
-    arguments: CatalogFeedArgumentsRemoteAccountDefault
-  ): CatalogFeedState {
-    this.logger.debug("[{}]: loading remote feed for account default", this.instanceId)
-    val age = this.currentAge()
-    val account = this.profilesController.profileAccountCurrent()
-    return doLoadRemoteFeed(CatalogFeedArgumentsRemote(
-      title = arguments.title,
-      feedURI = account.provider.catalogURIForAge(age),
-      isSearchResults = false
-    ))
+    return this.createNewStatus(
+      arguments = arguments,
+      future = future
+    )
   }
 
   /**
@@ -149,8 +130,10 @@ class CatalogFeedViewModel(
   ): CatalogFeedState {
     this.logger.debug("[{}]: loading remote feed {}", this.instanceId, arguments.feedURI)
 
-    val profile = this.profilesController.profileCurrent()
-    val account = this.profilesController.profileAccountCurrent()
+    val profile =
+      this.profilesController.profileCurrent()
+    val account =
+      profile.account(arguments.ownership.accountId)
 
     /*
      * If the remote feed has an age gate, and we haven't given an age, then display an
@@ -162,7 +145,7 @@ class CatalogFeedViewModel(
         val dateOfBirth = profile.preferences().dateOfBirth
         if (dateOfBirth == null) {
           this.logger.debug("[{}]: showing age gate", this.instanceId)
-          val newState = CatalogFeedState.CatalogFeedAgeGate(account.id, this.feedArguments)
+          val newState = CatalogFeedState.CatalogFeedAgeGate(this.feedArguments)
           synchronized(this.stateLock) {
             this.state = newState
           }
@@ -170,26 +153,23 @@ class CatalogFeedViewModel(
           return newState
         }
       }
-      is AccountProviderAuthenticationDescription.Basic,
-      null -> {
-      }
     }
 
-    val loginState = account.loginState
+    val loginState =
+      account.loginState
     val authentication =
-      if (loginState.credentials != null) {
-        Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(loginState.credentials))
-      } else {
-        Option.none()
-      }
+      AccountAuthenticatedHTTP.createAuthenticatedHTTPOptional(loginState.credentials)
 
     val future =
-      this.feedLoader.fetchURIWithBookRegistryEntries(arguments.feedURI, authentication)
+      this.feedLoader.fetchURIWithBookRegistryEntries(
+        account.id,
+        arguments.feedURI,
+        authentication
+      )
 
     return this.createNewStatus(
       arguments = arguments,
-      future = future,
-      accountID = account.id
+      future = future
     )
   }
 
@@ -200,14 +180,12 @@ class CatalogFeedViewModel(
 
   private fun createNewStatus(
     arguments: CatalogFeedArguments,
-    future: FluentFuture<FeedLoaderResult>,
-    accountID: AccountID
+    future: FluentFuture<FeedLoaderResult>
   ): CatalogFeedState.CatalogFeedLoading {
     val newState =
       CatalogFeedState.CatalogFeedLoading(
         arguments = arguments,
-        future = future,
-        accountID = accountID
+        future = future
       )
 
     synchronized(this.stateLock) {
@@ -260,11 +238,67 @@ class CatalogFeedViewModel(
     state: CatalogFeedState,
     result: FeedLoaderResult.FeedLoaderFailure
   ): CatalogFeedState.CatalogFeedLoadFailed {
+
+    /*
+     * If the failure is due to bad credentials, then subscribe to events for the account
+     * and try refreshing the feed when an account login has occurred.
+     */
+
+    if (result is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication) {
+      when (val ownership = state.arguments.ownership) {
+        is CatalogFeedOwnership.OwnedByAccount ->
+          this.subscribeToLoginEvents(
+            accountId = ownership.accountId,
+            runOnSuccess = {
+              this.logger.debug("reloading feed due to successful login")
+              this.reloadFeed(state.arguments)
+            }
+          )
+        CatalogFeedOwnership.CollectedFromAccounts -> {
+          // We can't log in if we don't know which account owns the feed.
+        }
+      }
+    }
+
     return CatalogFeedState.CatalogFeedLoadFailed(
-      accountID = state.accountID,
       arguments = state.arguments,
       failure = result
     )
+  }
+
+  private fun subscribeToLoginEvents(
+    accountId: AccountID,
+    runOnSuccess: () -> Unit
+  ) {
+    this.accountLoginSubscription =
+      this.profilesController.accountEvents()
+        .ofType(AccountEventLoginStateChanged::class.java)
+        .filter { event -> event.accountID == accountId }
+        .subscribe { event ->
+          when (event.state) {
+            AccountLoginState.AccountNotLoggedIn,
+            is AccountLoginState.AccountLoggingIn,
+            is AccountLoginState.AccountLoggingInWaitingForExternalAuthentication,
+            is AccountLoginState.AccountLoggingOut -> {
+              // Still in progress!
+            }
+
+            is AccountLoginState.AccountLogoutFailed,
+            is AccountLoginState.AccountLoginFailed -> {
+              this.unsubscribeFromAccountEvents()
+            }
+
+            is AccountLoginState.AccountLoggedIn -> {
+              this.unsubscribeFromAccountEvents()
+              runOnSuccess()
+            }
+          }
+        }
+  }
+
+  private fun unsubscribeFromAccountEvents() {
+    this.accountLoginSubscription?.dispose()
+    this.accountLoginSubscription = null
   }
 
   private fun onReceivedFeedWithGroups(
@@ -273,7 +307,6 @@ class CatalogFeedViewModel(
   ): CatalogFeedLoaded {
     if (feed.size == 0) {
       return CatalogFeedEmpty(
-        accountID = state.accountID,
         arguments = state.arguments,
         search = feed.feedSearch,
         title = feed.feedTitle
@@ -281,7 +314,6 @@ class CatalogFeedViewModel(
     }
 
     return CatalogFeedWithGroups(
-      accountID = state.accountID,
       arguments = state.arguments,
       feed = feed
     )
@@ -294,7 +326,6 @@ class CatalogFeedViewModel(
 
     if (feed.entriesInOrder.isEmpty()) {
       return CatalogFeedEmpty(
-        accountID = state.accountID,
         arguments = state.arguments,
         search = feed.feedSearch,
         title = feed.feedTitle
@@ -309,6 +340,7 @@ class CatalogFeedViewModel(
       CatalogPagedDataSourceFactory(
         feedLoader = this.feedLoader,
         initialFeed = feed,
+        ownership = this.feedArguments.ownership,
         profilesController = this.profilesController
       )
 
@@ -325,7 +357,6 @@ class CatalogFeedViewModel(
         .build()
 
     return CatalogFeedWithoutGroups(
-      accountID = state.accountID,
       arguments = state.arguments,
       entries = pagedList,
       facetsInOrder = feed.facetsOrder,
@@ -338,19 +369,22 @@ class CatalogFeedViewModel(
   override fun onCleared() {
     super.onCleared()
     this.logger.debug("[{}]: deleting viewmodel", this.instanceId)
+    this.unsubscribeFromAccountEvents()
   }
 
   private class CatalogFacetPseudoTitleProvider(
     val resources: Resources
   ) : FeedFacetPseudoTitleProviderType {
-    override fun getTitle(t: FeedFacet.FeedFacetPseudo.FacetType): String {
-      return when (t) {
-        FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_AUTHOR ->
-          this.resources.getString(R.string.feedByAuthor)
-        FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE ->
-          this.resources.getString(R.string.feedByTitle)
-      }
-    }
+    override val sortByTitle: String
+      get() = this.resources.getString(R.string.feedByTitle)
+    override val sortByAuthor: String
+      get() = this.resources.getString(R.string.feedByAuthor)
+    override val collection: String
+      get() = this.resources.getString(R.string.feedCollection)
+    override val collectionAll: String
+      get() = this.resources.getString(R.string.feedCollectionAll)
+    override val sortBy: String
+      get() = this.resources.getString(R.string.feedSortBy)
   }
 
   private val feedStatusSource =
@@ -372,28 +406,17 @@ class CatalogFeedViewModel(
     uri: URI,
     isSearchResults: Boolean
   ): CatalogFeedArguments {
-    val age = this.currentAge()
     return when (val arguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote ->
         CatalogFeedArgumentsRemote(
-          title = title,
           feedURI = arguments.feedURI.resolve(uri).normalize(),
-          isSearchResults = isSearchResults
+          isSearchResults = isSearchResults,
+          ownership = arguments.ownership,
+          title = title
         )
+
       is CatalogFeedArgumentsLocalBooks ->
-        CatalogFeedArgumentsRemote(
-          title = title,
-          feedURI = uri,
-          isSearchResults = isSearchResults
-        )
-      is CatalogFeedArgumentsRemoteAccountDefault -> {
-        val account = profilesController.profileAccountCurrent()
-        CatalogFeedArgumentsRemote(
-          title = title,
-          feedURI = account.provider.catalogURIForAge(age).resolve(uri).normalize(),
-          isSearchResults = isSearchResults
-        )
-      }
+        throw IllegalStateException("Cannot transition from a local feed to a remote feed.")
     }
   }
 
@@ -407,48 +430,44 @@ class CatalogFeedViewModel(
   override fun resolveFacet(
     facet: FeedFacet
   ): CatalogFeedArguments {
-    val age = this.currentAge()
     return when (val currentArguments = this.feedArguments) {
       is CatalogFeedArgumentsRemote ->
         when (facet) {
           is FeedFacet.FeedFacetOPDS ->
             CatalogFeedArgumentsRemote(
-              title = facet.title,
               feedURI = currentArguments.feedURI.resolve(facet.opdsFacet.uri).normalize(),
-              isSearchResults = currentArguments.isSearchResults
+              isSearchResults = currentArguments.isSearchResults,
+              ownership = currentArguments.ownership,
+              title = facet.title
             )
-          is FeedFacet.FeedFacetPseudo ->
-            currentArguments
-        }
 
-      is CatalogFeedArgumentsRemoteAccountDefault -> {
-        val account = profilesController.profileAccountCurrent()
-        when (facet) {
-          is FeedFacet.FeedFacetOPDS ->
-            CatalogFeedArgumentsRemote(
-              title = facet.title,
-              feedURI = account.provider.catalogURIForAge(age).resolve(facet.opdsFacet.uri).normalize(),
-              isSearchResults = currentArguments.isSearchResults
-            )
-          is FeedFacet.FeedFacetPseudo ->
+          is FeedFacetPseudo ->
             currentArguments
         }
-      }
 
       is CatalogFeedArgumentsLocalBooks -> {
         when (facet) {
           is FeedFacet.FeedFacetOPDS ->
-            CatalogFeedArgumentsRemote(
-              title = facet.title,
-              feedURI = facet.opdsFacet.uri,
-              isSearchResults = currentArguments.isSearchResults
-            )
-          is FeedFacet.FeedFacetPseudo ->
+            throw IllegalStateException("Cannot transition from a local feed to a remote feed.")
+
+          is Sorting ->
             CatalogFeedArgumentsLocalBooks(
-              title = facet.title,
-              facetType = facet.type,
+              filterAccount = null,
+              ownership = currentArguments.ownership,
+              searchTerms = currentArguments.searchTerms,
               selection = currentArguments.selection,
-              searchTerms = currentArguments.searchTerms
+              sortBy = facet.sortBy,
+              title = facet.title
+            )
+
+          is FilteringForAccount ->
+            CatalogFeedArgumentsLocalBooks(
+              filterAccount = facet.account,
+              ownership = currentArguments.ownership,
+              searchTerms = currentArguments.searchTerms,
+              selection = currentArguments.selection,
+              sortBy = SortBy.SORT_BY_TITLE,
+              title = facet.title
             )
         }
       }
@@ -475,42 +494,23 @@ class CatalogFeedViewModel(
     search: FeedSearch,
     query: String
   ): CatalogFeedArguments {
-    val age = this.currentAge()
     return when (val currentArguments = this.feedArguments) {
-      is CatalogFeedArgumentsRemoteAccountDefault -> {
-        val account = profilesController.profileAccountCurrent()
-        when (search) {
-          FeedSearch.FeedSearchLocal -> {
-            CatalogFeedArgumentsRemote(
-              title = currentArguments.title,
-              feedURI = account.provider.catalogURIForAge(age),
-              isSearchResults = true
-            )
-          }
-          is FeedSearch.FeedSearchOpen1_1 -> {
-            CatalogFeedArgumentsRemote(
-              title = currentArguments.title,
-              feedURI = search.search.getQueryURIForTerms(query),
-              isSearchResults = true
-            )
-          }
-        }
-      }
-
       is CatalogFeedArgumentsRemote -> {
         when (search) {
           FeedSearch.FeedSearchLocal -> {
             CatalogFeedArgumentsRemote(
-              title = currentArguments.title,
               feedURI = currentArguments.feedURI,
-              isSearchResults = true
+              isSearchResults = true,
+              ownership = currentArguments.ownership,
+              title = currentArguments.title
             )
           }
           is FeedSearch.FeedSearchOpen1_1 -> {
             CatalogFeedArgumentsRemote(
-              title = currentArguments.title,
               feedURI = search.search.getQueryURIForTerms(query),
-              isSearchResults = true
+              isSearchResults = true,
+              ownership = currentArguments.ownership,
+              title = currentArguments.title
             )
           }
         }
@@ -520,32 +520,26 @@ class CatalogFeedViewModel(
         when (search) {
           FeedSearch.FeedSearchLocal -> {
             CatalogFeedArgumentsLocalBooks(
-              title = currentArguments.title,
-              facetType = currentArguments.facetType,
+              filterAccount = currentArguments.filterAccount,
+              ownership = currentArguments.ownership,
               searchTerms = query,
-              selection = currentArguments.selection
+              selection = currentArguments.selection,
+              sortBy = currentArguments.sortBy,
+              title = currentArguments.title
             )
           }
           is FeedSearch.FeedSearchOpen1_1 -> {
             CatalogFeedArgumentsLocalBooks(
-              title = currentArguments.title,
-              facetType = currentArguments.facetType,
+              filterAccount = currentArguments.filterAccount,
+              ownership = currentArguments.ownership,
               searchTerms = query,
-              selection = currentArguments.selection
+              selection = currentArguments.selection,
+              sortBy = currentArguments.sortBy,
+              title = currentArguments.title
             )
           }
         }
       }
-    }
-  }
-
-  private fun currentAge(): Int {
-    return try {
-      val profile = profilesController.profileCurrent()
-      profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
-    } catch (e: Exception) {
-      this.logger.error("could not retrieve profile age: ", e)
-      1
     }
   }
 }

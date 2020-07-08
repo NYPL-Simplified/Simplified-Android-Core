@@ -14,6 +14,7 @@ import java.net.URI
 class CatalogPagedDataSourceFactory(
   private val feedLoader: FeedLoaderType,
   private val initialFeed: FeedWithoutGroups,
+  private val ownership: CatalogFeedOwnership,
   private val profilesController: ProfilesControllerType
 ) : DataSource.Factory<URI, FeedEntry>() {
 
@@ -21,6 +22,7 @@ class CatalogPagedDataSourceFactory(
     return CatalogPagedDataSource(
       feedLoader = this.feedLoader,
       initialFeed = this.initialFeed,
+      ownership = this.ownership,
       profilesController = this.profilesController
     )
   }

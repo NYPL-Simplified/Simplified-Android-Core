@@ -3,9 +3,7 @@ package org.nypl.simplified.profiles
 import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Some
 import io.reactivex.subjects.Subject
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
@@ -402,8 +400,7 @@ object ProfilesDatabases {
         directory = profileDir,
         analytics = analytics,
         accounts = accounts,
-        initialDescription = desc,
-        initialAccountCurrent = account
+        initialDescription = desc
       )
     } catch (e: AccountsDatabaseException) {
       this.logger.error("[{}]: error opening accounts: ", profileId.uuid, e)
@@ -477,12 +474,12 @@ object ProfilesDatabases {
         )
 
         /*
-         * Do not create an account if the automatic accounts already caused it to be created.
+         * Create an account, unless one already exists for this provider
          */
 
-        val account =
-          accounts.accountsByProvider()[accountProvider.id]
-            ?: accounts.createAccount(accountProvider)
+        accounts.accountsByProvider()[accountProvider.id] ?: run {
+          accounts.createAccount(accountProvider)
+        }
 
         val profile =
           Profile(
@@ -491,8 +488,7 @@ object ProfilesDatabases {
             directory = profileDir,
             analytics = analytics,
             accounts = accounts,
-            initialDescription = description,
-            initialAccountCurrent = account
+            initialDescription = description
           )
 
         this.writeDescription(profileDir, description)
@@ -547,16 +543,12 @@ object ProfilesDatabases {
             accounts.createAccount(autoProvider)
           }
 
-        val credentialsOpt =
+        val credentials =
           accountBundledCredentials.bundledCredentialsFor(id)
 
-        if (credentialsOpt.isSome) {
+        if (credentials != null) {
           this.logger.debug("[{}]: credentials for automatic account {} were provided", pId, id)
-          autoAccount.setLoginState(
-            AccountLoginState.AccountLoggedIn(
-              (credentialsOpt as Some<AccountAuthenticationCredentials>).get()
-            )
-          )
+          autoAccount.setLoginState(AccountLoginState.AccountLoggedIn(credentials))
         } else {
           this.logger.debug("[{}]: credentials for automatic account {} were not provided", pId, id)
         }

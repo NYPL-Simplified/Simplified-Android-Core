@@ -179,7 +179,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -227,7 +227,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -254,7 +254,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -306,7 +306,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals(
@@ -356,7 +356,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals("I/O error", result.steps.last().resolution.exception!!.message)
@@ -381,7 +381,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -417,7 +417,7 @@ abstract class BookRevokeTaskContract {
       .thenReturn(bookDatabaseEntry)
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
-    Mockito.`when`(bookDatabaseEntry.writeOPDSEntry(anyNonNull()))
+    Mockito.`when`(bookDatabaseEntry.writeOPDSEntry(this.anyNonNull()))
       .then {
         throw IOException("I/O error")
       }
@@ -430,18 +430,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -454,7 +460,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Failure
 
     Assert.assertEquals("I/O error", result.steps.last().resolution.exception!!.message)
@@ -481,7 +487,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -526,18 +532,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -550,7 +562,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -577,7 +589,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -625,18 +637,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -649,7 +667,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -676,7 +694,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -730,7 +748,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -757,7 +775,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -807,18 +825,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -831,7 +855,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -858,7 +882,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -908,18 +932,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -932,7 +962,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -959,7 +989,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1008,18 +1038,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -1032,7 +1068,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -1059,7 +1095,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1114,7 +1150,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -1141,7 +1177,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1186,18 +1222,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -1210,7 +1252,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -1237,7 +1279,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1282,18 +1324,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryCorrupt(bookId, IOException())
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryCorrupt(account.id, bookId, IOException()))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -1306,7 +1354,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals(
@@ -1336,7 +1384,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1384,8 +1432,14 @@ abstract class BookRevokeTaskContract {
         attributesInitial = mapOf()
       )
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -1398,7 +1452,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals(
@@ -1428,7 +1482,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1468,8 +1522,14 @@ abstract class BookRevokeTaskContract {
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(SettableFuture.create()))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(SettableFuture.create()))
 
     val task =
       BookRevokeTask(
@@ -1483,7 +1543,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals(
@@ -1515,7 +1575,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1555,8 +1615,14 @@ abstract class BookRevokeTaskContract {
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
 
     val task =
       BookRevokeTask(
@@ -1570,7 +1636,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals(
@@ -1604,7 +1670,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1676,13 +1742,19 @@ abstract class BookRevokeTaskContract {
     val rawFeed =
       feedBuilder.build()
     val feed =
-      Feed.fromAcquisitionFeed(rawFeed, null) as Feed.FeedWithGroups
+      Feed.fromAcquisitionFeed(account.id, rawFeed, null) as Feed.FeedWithGroups
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -1695,7 +1767,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals(
@@ -1725,7 +1797,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1765,8 +1837,14 @@ abstract class BookRevokeTaskContract {
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
 
     val task =
       BookRevokeTask(
@@ -1780,7 +1858,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals(
@@ -1814,7 +1892,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        Option.some(this.mimeOf("application/epub+zip")),
         listOf()
       )
 
@@ -1854,8 +1932,14 @@ abstract class BookRevokeTaskContract {
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
 
     val task =
       BookRevokeTask(
@@ -1869,7 +1953,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
     Assert.assertEquals(
@@ -1913,7 +1997,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/audiobook+json")),
+        Option.some(this.mimeOf("application/audiobook+json")),
         listOf()
       )
 
@@ -1960,18 +2044,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -1984,7 +2074,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
@@ -2021,7 +2111,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/pdf")),
+        Option.some(this.mimeOf("application/pdf")),
         listOf()
       )
 
@@ -2068,18 +2158,24 @@ abstract class BookRevokeTaskContract {
         feedID = "x",
         feedSearch = null,
         feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed")
+        feedURI = URI("http://www.example.com/0.feed"),
+        feedFacets = listOf(),
+        feedFacetGroups = mapOf()
       )
 
-    feed.entriesInOrder.add(
-      FeedEntry.FeedEntryOPDS(opdsEntry)
-    )
+    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
-    Mockito.`when`(feedLoader.fetchURIRefreshing(anyNonNull(), anyNonNull(), anyNonNull()))
-      .thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+    Mockito.`when`(
+      feedLoader.fetchURIRefreshing(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
     val task =
       BookRevokeTask(
@@ -2092,7 +2188,7 @@ abstract class BookRevokeTaskContract {
       )
 
     val result = task.call()
-    TaskDumps.dump(logger, result)
+    TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))

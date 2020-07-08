@@ -14,4 +14,7 @@ class BrandingSplashService : BrandingSplashServiceType {
   override fun splashImageTitleResource(): Int {
     return R.drawable.main_splash_title
   }
+
+  override val shouldShowLibrarySelectionScreen: Boolean =
+    true
 }

@@ -35,8 +35,6 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
-import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -45,10 +43,11 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacets
 import org.nypl.simplified.feeds.api.FeedGroup
-import org.nypl.simplified.feeds.api.FeedLoaderResult
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
+import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
-import org.nypl.simplified.futures.FluentFutureExtensions
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
@@ -56,6 +55,7 @@ import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
@@ -101,6 +101,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var analytics: AnalyticsType
   private lateinit var bookCovers: BookCoverProviderType
   private lateinit var bookRegistry: BookRegistryReadableType
+  private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var configurationService: CatalogConfigurationServiceType
   private lateinit var feedCOPPAGate: ViewGroup
@@ -131,7 +132,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var feedWithoutGroupsScrollListener: RecyclerView.OnScrollListener
   private lateinit var feedWithoutGroupsTabs: RadioGroup
   private lateinit var imageLoader: ImageLoaderType
-  private lateinit var loginDialogModel: CatalogLoginViewModel
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
@@ -144,9 +144,7 @@ class CatalogFragmentFeed : Fragment() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    FluentFutureExtensions.fluentFutureOfValue(23)
-
-    this.parameters = this.arguments!![this.parametersId] as CatalogFeedArguments
+    this.parameters = this.requireArguments()[this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
 
     val services = Services.serviceDirectory()
@@ -254,11 +252,10 @@ class CatalogFragmentFeed : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.feedModel = this.createOrGetFeedModel()
-
-    this.loginDialogModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(CatalogLoginViewModel::class.java)
+    this.feedModel =
+      this.createOrGetFeedModel()
+    this.borrowViewModel =
+      CatalogBorrowViewModelFactory.get(this)
 
     /*
      * Configure the lanes based on the viewmodel.
@@ -281,9 +278,11 @@ class CatalogFragmentFeed : Fragment() {
       }
 
     this.feedWithGroupsList.layoutManager!!.onRestoreInstanceState(
-      this.feedModel.restoreFeedWithGroupsViewState())
+      this.feedModel.restoreFeedWithGroupsViewState()
+    )
     this.feedWithoutGroupsList.layoutManager!!.onRestoreInstanceState(
-      this.feedModel.restoreFeedWithoutGroupsViewState())
+      this.feedModel.restoreFeedWithoutGroupsViewState()
+    )
 
     this.feedWithoutGroupsScrollListener = CatalogScrollListener(this.bookCovers)
     this.feedWithoutGroupsList.addOnScrollListener(this.feedWithoutGroupsScrollListener)
@@ -330,8 +329,8 @@ class CatalogFragmentFeed : Fragment() {
         context = this.requireContext(),
         services = Services.serviceDirectory(),
         feedArguments = this.parameters
-      ))
-      .get(CatalogFeedViewModel::class.java)
+      )
+    ).get(CatalogFeedViewModel::class.java)
   }
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
@@ -376,9 +375,11 @@ class CatalogFragmentFeed : Fragment() {
     super.onStop()
 
     this.feedModel.saveFeedWithGroupsViewState(
-      this.feedWithGroupsList.layoutManager!!.onSaveInstanceState())
+      this.feedWithGroupsList.layoutManager!!.onSaveInstanceState()
+    )
     this.feedModel.saveFeedWithoutGroupsViewState(
-      this.feedWithoutGroupsList.layoutManager!!.onSaveInstanceState())
+      this.feedWithoutGroupsList.layoutManager!!.onSaveInstanceState()
+    )
 
     /*
      * We aggressively unset adapters here in order to try to encourage prompt unsubscription
@@ -411,7 +412,7 @@ class CatalogFragmentFeed : Fragment() {
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
       search = feedState.search,
-      accountId = feedState.accountID
+      ownership = feedState.arguments.ownership
     )
 
     this.feedCOPPAOver13.setOnClickListener {
@@ -474,7 +475,7 @@ class CatalogFragmentFeed : Fragment() {
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
       search = feedState.search,
-      accountId = feedState.accountID
+      ownership = feedState.arguments.ownership
     )
   }
 
@@ -497,7 +498,7 @@ class CatalogFragmentFeed : Fragment() {
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
       search = feedState.search,
-      accountId = feedState.accountID
+      ownership = feedState.arguments.ownership
     )
   }
 
@@ -520,7 +521,7 @@ class CatalogFragmentFeed : Fragment() {
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
       search = feedState.search,
-      accountId = feedState.accountID
+      ownership = feedState.arguments.ownership
     )
   }
 
@@ -543,7 +544,7 @@ class CatalogFragmentFeed : Fragment() {
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
       search = feedState.search,
-      accountId = feedState.accountID
+      ownership = feedState.arguments.ownership
     )
 
     this.configureFacets(
@@ -551,14 +552,14 @@ class CatalogFragmentFeed : Fragment() {
       facetTabs = this.feedWithoutGroupsTabs,
       facetLayoutScroller = this.feedWithoutGroupsFacetsScroll,
       facetLayout = this.feedWithoutGroupsFacets,
-      facetsByGroup = feedState.facetsByGroup)
+      facetsByGroup = feedState.facetsByGroup
+    )
 
     this.feedWithoutGroupsAdapter =
       CatalogPagedAdapter(
+        borrowViewModel = this.borrowViewModel,
         buttonCreator = this.buttonCreator,
         context = activity,
-        fragmentManager = activity.supportFragmentManager,
-        loginViewModel = this.loginDialogModel,
         navigation = this::findNavigationController,
         onBookSelected = this::onBookSelected,
         services = Services.serviceDirectory()
@@ -591,7 +592,7 @@ class CatalogFragmentFeed : Fragment() {
       toolbarHost = this.requireActivity() as ToolbarHostType,
       title = feedState.title,
       search = feedState.search,
-      accountId = feedState.accountID
+      ownership = feedState.arguments.ownership
     )
 
     this.configureFacets(
@@ -599,7 +600,8 @@ class CatalogFragmentFeed : Fragment() {
       facetTabs = this.feedWithGroupsTabs,
       facetLayoutScroller = this.feedWithGroupsFacetsScroll,
       facetLayout = this.feedWithGroupsFacets,
-      facetsByGroup = feedState.feed.facetsByGroup)
+      facetsByGroup = feedState.feed.facetsByGroup
+    )
 
     this.feedWithGroupsData.clear()
     this.feedWithGroupsData.addAll(feedState.feed.feedGroupsInOrder)
@@ -613,6 +615,42 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
+    /*
+     * If the feed can't be loaded due to an authentication failure, then open
+     * the account screen (if possible).
+     */
+
+    when (feedState.failure) {
+      is FeedLoaderFailedGeneral -> {
+        // Display the error.
+      }
+      is FeedLoaderFailedAuthentication -> {
+        when (val ownership = this.parameters.ownership) {
+          is CatalogFeedOwnership.OwnedByAccount -> {
+
+            /*
+             * Explicitly deferring the opening of the fragment is required due to the
+             * tabbed navigation controller eagerly instantiating fragments and causing
+             * fragment transaction exceptions. This will go away when we have a replacement
+             * for the navigator library.
+             */
+
+            this.uiThread.runOnUIThread {
+              this.findNavigationController()
+                .openSettingsAccount(AccountFragmentParameters(
+                  accountId = ownership.accountId,
+                  closeOnLoginSuccess = true,
+                  showPleaseLogInTitle = true
+                ))
+            }
+          }
+          CatalogFeedOwnership.CollectedFromAccounts -> {
+            // Nothing we can do here! We don't know which account owns the feed.
+          }
+        }
+      }
+    }
+
     this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.VISIBLE
@@ -625,7 +663,7 @@ class CatalogFragmentFeed : Fragment() {
       toolbarHost = activity as ToolbarHostType,
       title = feedState.title,
       search = feedState.search,
-      accountId = feedState.accountID
+      ownership = feedState.arguments.ownership
     )
 
     this.feedErrorRetry.isEnabled = true
@@ -644,13 +682,13 @@ class CatalogFragmentFeed : Fragment() {
   @UiThread
   private fun configureToolbar(
     toolbarHost: ToolbarHostType,
-    accountId: AccountID,
+    ownership: CatalogFeedOwnership,
     title: String,
     search: FeedSearch?
   ) {
     val context = this.requireContext()
     val toolbar = toolbarHost.findToolbar()
-    this.configureToolbarTitles(context, toolbar, accountId, title)
+    this.configureToolbarTitles(context, toolbar, ownership, title)
     this.configureToolbarMenu(context, toolbar, search, title)
 
     toolbarHost.toolbarSetBackArrowConditionally(
@@ -673,8 +711,6 @@ class CatalogFragmentFeed : Fragment() {
       toolbar.menu.findItem(R.id.catalogMenuActionSearch)
     val menuReload =
       toolbar.menu.findItem(R.id.catalogMenuActionReload)
-    val menuAccounts =
-      toolbar.menu.findItem(R.id.catalogMenuActionAccounts)
 
     if (search != null) {
       menuSearch.title = context.getString(R.string.catalogSearchIn, title)
@@ -693,80 +729,42 @@ class CatalogFragmentFeed : Fragment() {
       this.feedModel.reloadFeed(this.feedModel.feedState().arguments)
       true
     }
-
-    if (this.hasOtherAccounts()) {
-      menuAccounts.title = context.getString(R.string.catalogAccounts)
-      menuAccounts.setOnMenuItemClickListener {
-        CatalogAccountsDialog.openAccountsDialog(
-          context = context,
-          toolbar = toolbar,
-          profilesController = this.profilesController,
-          imageLoader = this.imageLoader,
-          onAccountSelected = this@CatalogFragmentFeed::onAccountSelected
-        )
-        true
-      }
-    } else {
-      menuAccounts.isVisible = false
-    }
-  }
-
-  private fun onAccountSelected(account: AccountType) {
-    this.findNavigationController()
-      .openFeed(when (val arguments = this.parameters) {
-        is CatalogFeedArguments.CatalogFeedArgumentsRemote ->
-          CatalogFeedArguments.CatalogFeedArgumentsRemote(
-            title = account.provider.displayName,
-            feedURI = account.provider.catalogURI,
-            isSearchResults = false
-          )
-        is CatalogFeedArguments.CatalogFeedArgumentsLocalBooks ->
-          CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
-            title = account.provider.displayName,
-            facetType = FeedFacet.FeedFacetPseudo.FacetType.SORT_BY_TITLE,
-            searchTerms = null,
-            selection = arguments.selection
-          )
-        is CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault ->
-          CatalogFeedArguments.CatalogFeedArgumentsRemoteAccountDefault(
-            title = account.provider.displayName)
-      })
-  }
-
-  private fun hasOtherAccounts(): Boolean {
-    return try {
-      this.profilesController.profileCurrent().accounts().size > 1
-    } catch (e: Exception) {
-      this.logger.error("could not fetch current account/profile: ", e)
-      false
-    }
   }
 
   @UiThread
   private fun configureToolbarTitles(
     context: Context,
     toolbar: Toolbar,
-    accountId: AccountID,
+    ownership: CatalogFeedOwnership,
     title: String
   ) {
     try {
-      val accountProvider =
-        this.profilesController.profileCurrent()
-          .account(accountId)
-          .provider
+      when (ownership) {
+        is CatalogFeedOwnership.OwnedByAccount -> {
+          val accountProvider =
+            this.profilesController.profileCurrent()
+              .account(ownership.accountId)
+              .provider
 
-      when {
-        title.isBlank() -> {
-          toolbar.title = accountProvider.displayName
-          toolbar.subtitle = accountProvider.subtitle
+          when {
+            title.isBlank() -> {
+              toolbar.title = accountProvider.displayName
+              toolbar.subtitle = accountProvider.subtitle
+            }
+            title == accountProvider.displayName -> {
+              toolbar.title = title
+              toolbar.subtitle = accountProvider.subtitle
+            }
+            else -> {
+              toolbar.title = title
+              toolbar.subtitle = accountProvider.displayName
+            }
+          }
         }
-        title == accountProvider.displayName -> {
+
+        is CatalogFeedOwnership.CollectedFromAccounts -> {
           toolbar.title = title
-          toolbar.subtitle = accountProvider.subtitle
-        }
-        else -> {
-          toolbar.title = title
-          toolbar.subtitle = accountProvider.displayName
+          toolbar.subtitle = ""
         }
       }
     } catch (e: Exception) {
@@ -807,16 +805,26 @@ class CatalogFragmentFeed : Fragment() {
 
   private fun logSearchToAnalytics(query: String) {
     try {
-      val account = this.profilesController.profileAccountCurrent()
       val profile = this.profilesController.profileCurrent()
-      this.analytics.publishEvent(AnalyticsEvent.CatalogSearched(
-        timestamp = LocalDateTime.now(),
-        credentials = account.loginState.credentials,
-        profileUUID = profile.id.uuid,
-        accountProvider = account.provider.id,
-        accountUUID = account.id.uuid,
-        searchQuery = query
-      ))
+      val accountId =
+        when (val ownership = this.parameters.ownership) {
+          is CatalogFeedOwnership.OwnedByAccount -> ownership.accountId
+          is CatalogFeedOwnership.CollectedFromAccounts -> null
+        }
+
+      if (accountId != null) {
+        val account = profile.account(accountId)
+        this.analytics.publishEvent(
+          AnalyticsEvent.CatalogSearched(
+            timestamp = LocalDateTime.now(),
+            credentials = account.loginState.credentials,
+            profileUUID = profile.id.uuid,
+            accountProvider = account.provider.id,
+            accountUUID = account.id.uuid,
+            searchQuery = query
+          )
+        )
+      }
     } catch (e: Exception) {
       this.logger.error("could not log to analytics: ", e)
     }
@@ -875,19 +883,22 @@ class CatalogFragmentFeed : Fragment() {
     val buttonLayoutParams =
       LinearLayout.LayoutParams(
         this.screenInformation.dpToPixels(96).toInt(),
-        LinearLayout.LayoutParams.WRAP_CONTENT)
+        LinearLayout.LayoutParams.WRAP_CONTENT
+      )
 
     val textLayoutParams =
       LinearLayout.LayoutParams(
         LinearLayout.LayoutParams.WRAP_CONTENT,
-        LinearLayout.LayoutParams.WRAP_CONTENT)
+        LinearLayout.LayoutParams.WRAP_CONTENT
+      )
 
     textLayoutParams.gravity = Gravity.END or Gravity.CENTER_VERTICAL
 
     val spacerLayoutParams =
       LinearLayout.LayoutParams(
         this.screenInformation.dpToPixels(8).toInt(),
-        LinearLayout.LayoutParams.MATCH_PARENT)
+        LinearLayout.LayoutParams.MATCH_PARENT
+      )
 
     val sortedNames = remainingGroups.keys.sorted()
     val context = this.requireContext()
@@ -962,7 +973,8 @@ class CatalogFragmentFeed : Fragment() {
         LinearLayout.LayoutParams(
           this.screenInformation.dpToPixels(160).toInt(),
           ViewGroup.LayoutParams.MATCH_PARENT,
-          1.0f / size.toFloat())
+          1.0f / size.toFloat()
+        )
 
       button.layoutParams = buttonLayout
       button.gravity = Gravity.CENTER
@@ -1020,12 +1032,14 @@ class CatalogFragmentFeed : Fragment() {
     val states =
       arrayOf(
         intArrayOf(android.R.attr.state_checked),
-        intArrayOf(-android.R.attr.state_checked))
+        intArrayOf(-android.R.attr.state_checked)
+      )
 
     val colors =
       intArrayOf(
         ContextCompat.getColor(activity, R.color.simplifiedColorBackground),
-        ThemeControl.resolveColorAttribute(activity.theme, R.attr.colorPrimary))
+        ThemeControl.resolveColorAttribute(activity.theme, R.attr.colorPrimary)
+      )
 
     return ColorStateList(states, colors)
   }
@@ -1067,8 +1081,8 @@ class CatalogFragmentFeed : Fragment() {
     )
 
   private fun errorPageParameters(
-    failure: FeedLoaderResult.FeedLoaderFailure
-  ): ErrorPageParameters<FeedLoaderResult.FeedLoaderFailure> {
+    failure: FeedLoaderFailure
+  ): ErrorPageParameters<FeedLoaderFailure> {
     val step =
       TaskStep(
         description = this.resources.getString(R.string.catalogFeedLoading),
@@ -1077,13 +1091,15 @@ class CatalogFragmentFeed : Fragment() {
           message = failure.message,
           errorValue = failure,
           exception = failure.exception
-        ))
+        )
+      )
 
     return ErrorPageParameters(
       emailAddress = this.configurationService.supportErrorReportEmailAddress,
       body = "",
       subject = this.configurationService.supportErrorReportSubject,
       attributes = failure.attributes.toSortedMap(),
-      taskSteps = listOf(step))
+      taskSteps = listOf(step)
+    )
   }
 }

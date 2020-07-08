@@ -5,6 +5,7 @@ import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.audio.AudioBookCredentials
 import org.nypl.simplified.books.audio.AudioBookManifestRequest
@@ -46,6 +47,12 @@ data class AudioBookPlayerParameters(
   val manifestURI: URI,
 
   /**
+   * The account to which the book belongs.
+   */
+
+  val accountID: AccountID,
+
+  /**
    * The book ID.
    */
 
@@ -74,13 +81,16 @@ data class AudioBookPlayerParameters(
       PlayerUserAgent(this.userAgent)
 
     val audioBookCredentials =
-      if (credentials != null) {
-        AudioBookCredentials.UsernamePassword(
-          userName = credentials.barcode().value(),
-          password = credentials.pin().value()
-        )
-      } else {
-        null
+      when (credentials) {
+        is AccountAuthenticationCredentials.Basic ->
+          AudioBookCredentials.UsernamePassword(
+            userName = credentials.userName.value,
+            password = credentials.password.value
+          )
+        is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+          AudioBookCredentials.BearerToken(credentials.accessToken)
+        null ->
+          null
       }
 
     val request =

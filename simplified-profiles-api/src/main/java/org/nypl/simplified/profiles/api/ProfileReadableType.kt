@@ -59,12 +59,6 @@ interface ProfileReadableType : Comparable<ProfileReadableType> {
   fun description(): ProfileDescription
 
   /**
-   * @return The current account
-   */
-
-  fun accountCurrent(): AccountType
-
-  /**
    * @return A read-only map of the accounts for this profile
    */
 

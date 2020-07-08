@@ -46,12 +46,16 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabases
+import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed
 import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_DISPLAY_NAME_ALREADY_USED
 import org.nypl.simplified.profiles.api.ProfileCreationEvent.ProfileCreationSucceeded
 import org.nypl.simplified.profiles.api.ProfileDatabaseException
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
+import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
@@ -142,7 +146,8 @@ abstract class ProfilesControllerContract {
 
     val parser =
       OPDSFeedParser.newParser(
-        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()))
+        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
+      )
     val transport =
       FeedHTTPTransport.newTransport(this.http)
     val bundledContent = BundledContentResolverType { uri ->
@@ -162,49 +167,70 @@ abstract class ProfilesControllerContract {
 
     val services = MutableServiceDirectory()
     services.putService(
-      AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
+      AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies
+    )
     services.putService(
-      AnalyticsType::class.java, this.analyticsLogger)
+      AnalyticsType::class.java, this.analyticsLogger
+    )
     services.putService(
-      AccountLoginStringResourcesType::class.java, this.accountLoginStringResources)
+      AccountLoginStringResourcesType::class.java, this.accountLoginStringResources
+    )
     services.putService(
-      AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources)
+      AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources
+    )
     services.putService(
-      AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings)
+      AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings
+    )
     services.putService(
-      AccountProviderRegistryType::class.java, accountProviders)
+      AccountProviderRegistryType::class.java, accountProviders
+    )
     services.putService(
-      AuthenticationDocumentParsersType::class.java, this.authDocumentParsers)
+      AuthenticationDocumentParsersType::class.java, this.authDocumentParsers
+    )
     services.putService(
-      BookRegistryType::class.java, this.bookRegistry)
+      BookRegistryType::class.java, this.bookRegistry
+    )
     services.putService(
-      BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources)
+      BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources
+    )
     services.putService(
-      BundledContentResolverType::class.java, bundledContent)
+      BundledContentResolverType::class.java, bundledContent
+    )
     services.putService(
-      DownloaderType::class.java, this.downloader)
+      DownloaderType::class.java, this.downloader
+    )
     services.putService(
-      FeedLoaderType::class.java, feedLoader)
+      FeedLoaderType::class.java, feedLoader
+    )
     services.putService(
-      OPDSFeedParserType::class.java, parser)
+      OPDSFeedParserType::class.java, parser
+    )
     services.putService(
-      HTTPType::class.java, this.http)
+      HTTPType::class.java, this.http
+    )
     services.putService(
-      PatronUserProfileParsersType::class.java, this.patronUserProfileParsers)
+      PatronUserProfileParsersType::class.java, this.patronUserProfileParsers
+    )
     services.putService(
       ProfileAccountCreationStringResourcesType::class.java,
-      this.profileAccountCreationStringResources)
+      this.profileAccountCreationStringResources
+    )
     services.putService(
       ProfileAccountDeletionStringResourcesType::class.java,
-      this.profileAccountDeletionStringResources)
+      this.profileAccountDeletionStringResources
+    )
     services.putService(
-      ProfilesDatabaseType::class.java, profiles)
+      ProfilesDatabaseType::class.java, profiles
+    )
     services.putService(
-      BookRevokeStringResourcesType::class.java, this.bookRevokeStringResources)
+      BookRevokeStringResourcesType::class.java, this.bookRevokeStringResources
+    )
     services.putService(
-      ProfileIdleTimerType::class.java, InoperableIdleTimer())
+      ProfileIdleTimerType::class.java, InoperableIdleTimer()
+    )
     services.putService(
-      ClockType::class.java, Clock)
+      ClockType::class.java, Clock
+    )
 
     return Controller.createFromServiceDirectory(
       services = services,
@@ -239,7 +265,8 @@ abstract class ProfilesControllerContract {
     this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.readerBookmarkEvents = PublishSubject.create()
     this.bookRegistry = BookRegistry.create()
-    this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
+    this.downloader =
+      DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.patronUserProfileParsers = Mockito.mock(PatronUserProfileParsersType::class.java)
   }
 
@@ -250,6 +277,34 @@ abstract class ProfilesControllerContract {
     this.executorFeeds.shutdown()
     this.executorDownloads.shutdown()
     this.executorTimer.shutdown()
+  }
+
+  private fun descriptionOf(
+    displayName: String,
+    gender: String,
+    dateOfBirth: DateTime
+  ): ProfileDescription {
+    val preferences =
+      ProfilePreferences(
+        dateOfBirth = ProfileDateOfBirth(dateOfBirth, true),
+        showTestingLibraries = true,
+        hasSeenLibrarySelectionScreen = false,
+        readerPreferences = ReaderPreferences.builder().build(),
+        mostRecentAccount = null
+      )
+
+    val attributes =
+      ProfileAttributes(
+        sortedMapOf(
+          Pair(ProfileAttributes.GENDER_ATTRIBUTE_KEY, gender)
+        )
+      )
+
+    return ProfileDescription(
+      displayName,
+      preferences,
+      attributes
+    )
   }
 
   /**
@@ -267,7 +322,8 @@ abstract class ProfilesControllerContract {
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = MockAccountProviders.fakeAccountProviders())
+        accountProviders = MockAccountProviders.fakeAccountProviders()
+      )
 
     this.expected.expect(ProfileNoneCurrentException::class.java)
     controller.profileCurrent()
@@ -293,9 +349,11 @@ abstract class ProfilesControllerContract {
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = accountProviders)
+        accountProviders = accountProviders
+      )
 
-    controller.profileCreate(accountProvider, "Kermit", "Female", DateTime.now()).get()
+    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", DateTime.now()))
+      .get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
@@ -332,14 +390,18 @@ abstract class ProfilesControllerContract {
 
     val date = DateTime.now()
 
-    controller.profileCreate(accountProvider, "Kermit", "Female", date).get()
-    controller.profileCreate(accountProvider, "Kermit", "Female", date).get()
+    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", date)).get()
+    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", date)).get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
 
     EventAssertions.isType(ProfileCreationSucceeded::class.java, this.profileEventsReceived, 0)
-    EventAssertions.isTypeAndMatches(ProfileCreationFailed::class.java, this.profileEventsReceived, 1) { e -> Assert.assertEquals(ERROR_DISPLAY_NAME_ALREADY_USED, e.errorCode()) }
+    EventAssertions.isTypeAndMatches(
+      ProfileCreationFailed::class.java,
+      this.profileEventsReceived,
+      1
+    ) { e -> Assert.assertEquals(ERROR_DISPLAY_NAME_ALREADY_USED, e.errorCode()) }
   }
 
   /**
@@ -361,9 +423,11 @@ abstract class ProfilesControllerContract {
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = accountProviders)
+        accountProviders = accountProviders
+      )
 
-    controller.profileCreate(accountProvider, "Kermit", "Female", DateTime.now()).get()
+    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", DateTime.now()))
+      .get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(accountProvider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
@@ -372,24 +436,34 @@ abstract class ProfilesControllerContract {
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
 
-    EventAssertions.isTypeAndMatches(ProfileUpdated.Succeeded::class.java, this.profileEventsReceived, 0) { e ->
+    EventAssertions.isTypeAndMatches(
+      ProfileUpdated.Succeeded::class.java,
+      this.profileEventsReceived,
+      0
+    ) { e ->
       Assert.assertTrue("Preferences must not have changed", e.oldDescription == e.newDescription)
     }
 
     this.profileEventsReceived.clear()
     controller.profileUpdate { description ->
-      description.copy(preferences =
-      description.preferences.copy(
-        readerPreferences = ReaderPreferences.builder()
-          .setBrightness(0.2)
-          .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
-          .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
-          .setFontScale(2.0)
-          .build()
-      ))
+      description.copy(
+        preferences =
+        description.preferences.copy(
+          readerPreferences = ReaderPreferences.builder()
+            .setBrightness(0.2)
+            .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
+            .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
+            .setFontScale(2.0)
+            .build()
+        )
+      )
     }.get()
 
-    EventAssertions.isTypeAndMatches(ProfileUpdated.Succeeded::class.java, this.profileEventsReceived, 0) { e ->
+    EventAssertions.isTypeAndMatches(
+      ProfileUpdated.Succeeded::class.java,
+      this.profileEventsReceived,
+      0
+    ) { e ->
       Assert.assertTrue("Preferences must have changed", e.oldDescription != e.newDescription)
     }
   }
@@ -414,9 +488,11 @@ abstract class ProfilesControllerContract {
     val controller =
       this.controller(
         profiles = profiles,
-        accountProviders = accountProviders)
+        accountProviders = accountProviders
+      )
 
-    controller.profileCreate(accountProvider, "Kermit", "Female", DateTime.now()).get()
+    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", DateTime.now()))
+      .get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(accountProvider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
@@ -426,9 +502,19 @@ abstract class ProfilesControllerContract {
         ProfileFeedRequest(
           uri = URI.create("Books"),
           title = "Books",
-          facetGroup = "Sort by",
-          facetTitleProvider = FeedFacetPseudoTitleProviderType { t -> "Sort by title" }))
-        .get()
+          facetTitleProvider = object : FeedFacetPseudoTitleProviderType {
+            override val collection: String
+              get() = "Collection"
+            override val collectionAll: String
+              get() = "All"
+            override val sortBy: String
+              get() = "Sort By"
+            override val sortByAuthor: String
+              get() = "Author"
+            override val sortByTitle: String
+              get() = "Title"
+          })
+      ).get()
 
     Assert.assertEquals(0L, feed.size.toLong())
   }
@@ -443,7 +529,8 @@ abstract class ProfilesControllerContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialsStore,
       AccountsDatabases,
-      dir_profiles)
+      dir_profiles
+    )
   }
 
   private fun onAccountResolution(

@@ -11,10 +11,10 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountBarcode
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountPIN
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.AccountsDatabase
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseDuplicateProviderException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseException
@@ -107,7 +107,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
   }
 
   private fun bookDatabases(): BookDatabases {
@@ -147,7 +148,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
   }
 
   @Test
@@ -172,7 +174,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
   }
 
   @Test
@@ -200,7 +203,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
   }
 
   @Test
@@ -220,7 +224,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
 
     Assert.assertEquals(0, db.accounts().size.toLong())
     Assert.assertEquals(f_acc, db.directory())
@@ -246,7 +251,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
 
     val provider0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -261,17 +267,21 @@ abstract class AccountsDatabaseContract {
 
     Assert.assertTrue(
       "Account 0 file exists",
-      File(acc0.directory, "account.json").isFile())
+      File(acc0.directory, "account.json").isFile()
+    )
     Assert.assertTrue(
       "Account 1 file exists",
-      File(acc1.directory, "account.json").isFile())
+      File(acc1.directory, "account.json").isFile()
+    )
 
     Assert.assertEquals(
       provider0,
-      acc0.provider)
+      acc0.provider
+    )
     Assert.assertEquals(
       provider1,
-      acc1.provider)
+      acc1.provider
+    )
 
     Assert.assertNotEquals(acc0.id, acc1.id)
     Assert.assertNotEquals(acc0.directory, acc1.directory)
@@ -298,7 +308,8 @@ abstract class AccountsDatabaseContract {
         this.bookDatabases(),
         this.credentialStore,
         this.accountProviders,
-        f_acc)
+        f_acc
+      )
 
     val provider0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -325,7 +336,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
 
     val provider0 =
       MockAccountProviders.fakeProvider("urn:fake:0")
@@ -341,7 +353,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
 
     val acr0 = db1.accounts()[acc0.id]!!
     val acr1 = db1.accounts()[acc1.id]!!
@@ -371,16 +384,20 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
 
     val provider0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
     val acc0 = db0.createAccount(provider0)
 
-    val creds = AccountAuthenticationCredentials.builder(
-      AccountPIN.create("1234"),
-      AccountBarcode.create("1234"))
-      .build()
+    val creds =
+      AccountAuthenticationCredentials.Basic(
+        userName = AccountUsername("abcd"),
+        password = AccountPassword("1234"),
+        adobeCredentials = null,
+        authenticationDescription = null
+      )
 
     acc0.setLoginState(AccountLoginState.AccountLoggedIn(creds))
     Assert.assertEquals(AccountLoginState.AccountLoggedIn(creds), acc0.loginState)
@@ -403,7 +420,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
 
     val provider0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -433,7 +451,8 @@ abstract class AccountsDatabaseContract {
       this.bookDatabases(),
       this.credentialStore,
       this.accountProviders,
-      f_acc)
+      f_acc
+    )
 
     val provider0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")

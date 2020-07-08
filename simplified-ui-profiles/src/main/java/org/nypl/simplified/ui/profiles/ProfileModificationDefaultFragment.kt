@@ -2,9 +2,11 @@ package org.nypl.simplified.ui.profiles
 
 import android.content.Context
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.annotation.UiThread
@@ -18,16 +20,19 @@ import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
-import android.os.IBinder
-import android.view.inputmethod.InputMethodManager
 
 class ProfileModificationDefaultFragment : Fragment() {
 
@@ -91,11 +96,29 @@ class ProfileModificationDefaultFragment : Fragment() {
   }
 
   private fun profileCreate(name: String) {
+    val preferences =
+      ProfilePreferences(
+        dateOfBirth = ProfileDateOfBirth(DateTime.now(), true),
+        showTestingLibraries = false,
+        hasSeenLibrarySelectionScreen = false,
+        readerPreferences = ReaderPreferences.builder().build(),
+        mostRecentAccount = null
+      )
+
+    val attributes =
+      ProfileAttributes(
+        sortedMapOf(
+          Pair(ProfileAttributes.GENDER_ATTRIBUTE_KEY, "")
+        )
+      )
+
     this.profilesController.profileCreate(
       accountProvider = this.accountProviderRegistry.defaultProvider,
-      displayName = name,
-      gender = "",
-      date = DateTime.now()
+      description = ProfileDescription(
+        displayName = name,
+        preferences = preferences,
+        attributes = attributes
+      )
     )
   }
 
@@ -116,13 +139,19 @@ class ProfileModificationDefaultFragment : Fragment() {
       }
       is ProfileCreationEvent.ProfileCreationSucceeded -> {
         this.uiThread.runOnUIThread {
-          NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
+          NavigationControllers.find(
+            this.requireActivity(),
+            ProfilesNavigationControllerType::class.java
+          )
             .popBackStack()
         }
       }
       is ProfileUpdated.Succeeded -> {
         this.uiThread.runOnUIThread {
-          NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
+          NavigationControllers.find(
+            this.requireActivity(),
+            ProfilesNavigationControllerType::class.java
+          )
             .popBackStack()
         }
       }
@@ -143,12 +172,14 @@ class ProfileModificationDefaultFragment : Fragment() {
     val context = this.requireContext()
     AlertDialog.Builder(context)
       .setTitle(R.string.profileCreationError)
-      .setMessage(when (event.errorCode()) {
-        ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_DISPLAY_NAME_ALREADY_USED ->
-          context.getString(R.string.profileCreationErrorNameAlreadyUsed)
-        null, ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_GENERAL ->
-          context.getString(R.string.profileCreationErrorGeneral, someOrEmpty(event.exception()))
-      })
+      .setMessage(
+        when (event.errorCode()) {
+          ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_DISPLAY_NAME_ALREADY_USED ->
+            context.getString(R.string.profileCreationErrorNameAlreadyUsed)
+          null, ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_GENERAL ->
+            context.getString(R.string.profileCreationErrorGeneral, someOrEmpty(event.exception()))
+        }
+      )
       .setIcon(R.drawable.profile_failure)
       .create()
       .show()
@@ -217,7 +248,10 @@ class ProfileModificationDefaultFragment : Fragment() {
       layout.findViewById(R.id.profileButtonCreate)
 
     this.cancel.setOnClickListener {
-      NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
+      NavigationControllers.find(
+        this.requireActivity(),
+        ProfilesNavigationControllerType::class.java
+      )
         .popBackStack()
     }
 

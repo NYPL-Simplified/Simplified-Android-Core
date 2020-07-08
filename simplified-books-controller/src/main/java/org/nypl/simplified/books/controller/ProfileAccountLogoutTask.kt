@@ -2,13 +2,15 @@ package org.nypl.simplified.books.controller
 
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.Some
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData.AccountLogoutDRMFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData.AccountLogoutUnexpectedException
@@ -69,11 +71,12 @@ class ProfileAccountLogoutTask(
 
     this.credentials =
       when (val state = this.account.loginState) {
-        is AccountLoginState.AccountLoggedIn -> state.credentials
+        is AccountLoggedIn -> state.credentials
         is AccountLogoutFailed -> state.credentials
-        AccountNotLoggedIn,
-        is AccountLoginState.AccountLoggingIn,
-        is AccountLoginState.AccountLoginFailed,
+        is AccountNotLoggedIn,
+        is AccountLoggingIn,
+        is AccountLoginFailed,
+        is AccountLoggingInWaitingForExternalAuthentication,
         is AccountLoggingOut -> {
           this.warn("attempted to log out with account in state {}", state.javaClass.canonicalName)
           this.steps.currentStepSucceeded(this.logoutStrings.logoutNotLoggedIn)
@@ -105,9 +108,9 @@ class ProfileAccountLogoutTask(
     this.steps.beginNewStep(this.logoutStrings.logoutDeactivatingDeviceAdobe)
     this.updateLoggingOutState()
 
-    val adobeCredentialsOpt = this.credentials.adobeCredentials()
-    if (adobeCredentialsOpt is Some<AccountAuthenticationAdobePreActivationCredentials>) {
-      this.runDeviceDeactivationAdobe(adobeCredentialsOpt.get())
+    val adobeCredentialsMaybe = this.credentials.adobeCredentials
+    if (adobeCredentialsMaybe != null) {
+      this.runDeviceDeactivationAdobe(adobeCredentialsMaybe)
       return
     }
   }
@@ -161,11 +164,7 @@ class ProfileAccountLogoutTask(
       throw e
     }
 
-    this.credentials =
-      this.credentials.toBuilder()
-        .setAdobeCredentials(adobeCredentials.copy(postActivationCredentials = null))
-        .build()
-
+    this.credentials = this.credentials.withoutAdobePostActivationCredentials()
     this.steps.currentStepSucceeded(this.logoutStrings.logoutDeactivatingDeviceAdobeDeactivated)
 
     adobeCredentials.deviceManagerURI?.let { uri ->
