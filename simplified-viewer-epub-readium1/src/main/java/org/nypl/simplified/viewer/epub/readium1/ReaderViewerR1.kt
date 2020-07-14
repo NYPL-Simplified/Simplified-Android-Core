@@ -17,9 +17,7 @@ class ReaderViewerR1 : ViewerProviderType {
   ): Boolean {
     return when (format) {
       is BookFormat.BookFormatAudioBook -> false
-      is BookFormat.BookFormatEPUB -> {
-        format.adobeRights != null
-      }
+      is BookFormat.BookFormatEPUB -> false
       is BookFormat.BookFormatPDF -> false
     }
   }

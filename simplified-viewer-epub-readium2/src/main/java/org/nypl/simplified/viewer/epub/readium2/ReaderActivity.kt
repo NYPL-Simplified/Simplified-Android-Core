@@ -64,6 +64,8 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       "org.nypl.simplified.app.ReaderActivity.book"
     private const val ARG_FILE =
       "org.nypl.simplified.app.ReaderActivity.file"
+    private const val ARG_ADOBE_RIGHTS_FILE =
+      "org.nypl.simplified.app.ReaderActivity.adobeRightsFile"
     private const val ARG_ENTRY =
       "org.nypl.simplified.app.ReaderActivity.entry"
 
@@ -77,6 +79,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       accountId: AccountID,
       bookId: BookID,
       file: File,
+      adobeRightsFile: File?,
       entry: FeedEntry.FeedEntryOPDS
     ) {
       val intent = Intent(context, ReaderActivity::class.java)
@@ -85,6 +88,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         this.putSerializable(this@Companion.ARG_ACCOUNT_ID, accountId)
         this.putSerializable(this@Companion.ARG_BOOK_ID, bookId)
         this.putSerializable(this@Companion.ARG_FILE, file)
+        this.putSerializable(this@Companion.ARG_ADOBE_RIGHTS_FILE, adobeRightsFile)
         this.putSerializable(this@Companion.ARG_ENTRY, entry)
       }
       intent.putExtras(bundle)
@@ -138,8 +142,10 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         this.setDisplayHomeAsUpEnabled(true)
       }
 
+      val adobeRightsFile = this.intent?.extras?.getSerializable(ARG_ADOBE_RIGHTS_FILE) as File?
+
       val fragment =
-        SR2ReaderFragment.create(SR2ReaderFragmentParameters(this.bookFile))
+        SR2ReaderFragment.create(SR2ReaderFragmentParameters(this.bookFile, adobeRightsFile))
 
       this.supportFragmentManager
         .beginTransaction()

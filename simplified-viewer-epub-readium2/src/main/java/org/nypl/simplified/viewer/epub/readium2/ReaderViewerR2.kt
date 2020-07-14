@@ -17,9 +17,7 @@ class ReaderViewerR2 : ViewerProviderType {
   ): Boolean {
     return when (format) {
       is BookFormat.BookFormatAudioBook -> false
-      is BookFormat.BookFormatEPUB -> {
-        format.adobeRights == null
-      }
+      is BookFormat.BookFormatEPUB -> true
       is BookFormat.BookFormatPDF -> false
     }
   }
@@ -31,6 +29,7 @@ class ReaderViewerR2 : ViewerProviderType {
   ) {
     val bookId = book.id
     val file = (format as BookFormat.BookFormatEPUB).file!!
+    val adobeRightsFile = format.adobeRightsFile
     val entry = FeedEntry.FeedEntryOPDS(book.account, book.entry)
 
     ReaderActivity.startActivity(
@@ -38,7 +37,8 @@ class ReaderViewerR2 : ViewerProviderType {
       bookId = bookId,
       context = activity,
       entry = entry,
-      file = file
+      file = file,
+      adobeRightsFile = adobeRightsFile
     )
   }
 }
