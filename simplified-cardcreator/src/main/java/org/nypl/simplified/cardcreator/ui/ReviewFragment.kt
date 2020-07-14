@@ -169,19 +169,19 @@ class ReviewFragment : Fragment() {
   private fun createJuvenilePatron() {
     showLoading(true)
     if (isBarcode(requireActivity().intent.extras.getString("userIdentifier"))) {
-      platformViewModel.createJuvenileCard(
+      platformViewModel.createJuvenileCardWithBarcodeParent(
         BarcodeParent(
-          requireActivity().intent.extras.getString("userIdentifier"),
           getCache().getPersonalInformation().firstName,
+          requireActivity().intent.extras.getString("userIdentifier"),
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
         ),
         getCache().token!!)
     } else {
-      platformViewModel.createJuvenileCard(
+      platformViewModel.createJuvenileCardWithUsernameParent(
         UsernameParent(
-          requireActivity().intent.extras.getString("userIdentifier"),
           getCache().getPersonalInformation().firstName,
+          requireActivity().intent.extras.getString("userIdentifier"),
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
         ),

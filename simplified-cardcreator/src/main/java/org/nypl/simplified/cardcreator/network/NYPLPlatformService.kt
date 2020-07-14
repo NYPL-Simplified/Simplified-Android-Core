@@ -3,9 +3,10 @@ package org.nypl.simplified.cardcreator.network
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.nypl.simplified.cardcreator.model.BarcodeParent
 import org.nypl.simplified.cardcreator.model.DependentEligibilityData
-import org.nypl.simplified.cardcreator.model.JuvenilePatron
 import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
+import org.nypl.simplified.cardcreator.model.UsernameParent
 import org.nypl.simplified.cardcreator.utils.Constants
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -43,8 +44,13 @@ internal interface NYPLPlatformService {
    * Docs: https://platformdocs.nypl.org/#/patrons/patrons_dependentsV03
    */
   @POST("patrons/dependents")
-  suspend fun createJuvenilePatron(
-    @Body juvenilePatron: JuvenilePatron
+  suspend fun createJuvenilePatronWithBarcodeParent(
+    @Body juvenilePatron: BarcodeParent
+  ): JuvenilePatronResponse
+
+  @POST("patrons/dependents")
+  suspend fun createJuvenilePatronWithUsernameParent(
+    @Body juvenilePatron: UsernameParent
   ): JuvenilePatronResponse
 
   companion object {
