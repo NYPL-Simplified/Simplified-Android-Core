@@ -5,7 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.nypl.simplified.cardcreator.model.DependentEligibilityData
-import org.nypl.simplified.cardcreator.model.JuvenilePatron
+import org.nypl.simplified.cardcreator.model.BarcodeParent
+import org.nypl.simplified.cardcreator.model.UsernameParent
 import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
 import org.nypl.simplified.cardcreator.network.NYPLPlatformService
 import org.slf4j.LoggerFactory
@@ -44,12 +45,29 @@ class PlatformViewModel : ViewModel() {
     }
   }
 
-  fun createJuvenileCard(juvenilePatron: JuvenilePatron, token: String) {
+  fun createJuvenileCardWithUsernameParent(juvenilePatron: UsernameParent, token: String) {
     viewModelScope.launch {
       try {
         val nyplPlatformService = NYPLPlatformService(token)
         val response =
-          nyplPlatformService.createJuvenilePatron(juvenilePatron)
+          nyplPlatformService.createJuvenilePatronWithUsernameParent(juvenilePatron)
+        juvenilePatronResponse.postValue(response)
+      } catch (e: Exception) {
+        logger.error("attempt to create a juvenile patron call failed!", e)
+        when (e) {
+          is HttpException -> { apiError.postValue(e.code()) }
+          else -> { apiError.postValue(null) }
+        }
+      }
+    }
+  }
+
+  fun createJuvenileCardWithBarcodeParent(juvenilePatron: BarcodeParent, token: String) {
+    viewModelScope.launch {
+      try {
+        val nyplPlatformService = NYPLPlatformService(token)
+        val response =
+          nyplPlatformService.createJuvenilePatronWithBarcodeParent(juvenilePatron)
         juvenilePatronResponse.postValue(response)
       } catch (e: Exception) {
         logger.error("attempt to create a juvenile patron call failed!", e)
