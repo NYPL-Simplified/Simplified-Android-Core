@@ -192,8 +192,8 @@ class CatalogFragmentBookDetail : Fragment() {
       layout.findViewById(R.id.bookDetailButtons)
     this.related =
       layout.findViewById(R.id.bookDetailRelated)
-//    this.report =
-//      layout.findViewById(R.id.bookDetailReport)
+    this.report =
+      layout.findViewById(R.id.bookDetailReport)
 
     this.debugStatus =
       layout.findViewById(R.id.bookDetailDebugStatus)
