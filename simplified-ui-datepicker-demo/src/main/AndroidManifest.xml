@@ -7,7 +7,7 @@
       android:allowBackup="true">
 
     <activity
-        android:name="org.nypl.simplified.datepicker.ui.demo.DatePickerDemo"
+        android:name="org.nypl.simplified.ui.datepicker.demo.DatePickerDemo"
         android:configChanges="orientation|screenSize">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>

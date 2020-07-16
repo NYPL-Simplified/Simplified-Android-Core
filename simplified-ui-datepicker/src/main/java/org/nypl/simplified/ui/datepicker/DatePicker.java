@@ -10,6 +10,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.util.Objects;
+
 /**
  * A trivial three-part date picker.
  */
@@ -72,6 +74,49 @@ public final class DatePicker extends RelativeLayout {
     this.year.setValue(date.getYear());
     this.month.setValue(date.getMonthOfYear());
     this.day.setValue(date.getDayOfMonth());
+  }
+
+  /**
+   * Set the lower and upper bound for the date picker.
+   *
+   * @param lower The lower bound
+   * @param upper The upper bound
+   */
+
+  public void setRangeLimits(
+    final LocalDate lower,
+    final LocalDate upper)
+  {
+    Objects.requireNonNull(lower, "Lower");
+    Objects.requireNonNull(upper, "Upper");
+
+    if (lower.compareTo(upper) > 0) {
+      throw new IllegalArgumentException(String.format("Date %s must be before %s", lower, upper));
+    }
+
+    this.year.setMinValue(lower.getYear());
+    this.year.setMaxValue(upper.getYear());
+
+    final int yearNow = this.year.getValue();
+    if (yearNow < lower.getYear()) {
+      this.year.setValue(lower.getYear());
+    }
+    if (yearNow > upper.getYear()) {
+      this.year.setValue(upper.getYear());
+    }
+
+    this.month.setMinValue(lower.getMonthOfYear());
+    this.month.setMaxValue(upper.getMonthOfYear());
+
+    final int monthNow = this.month.getValue();
+    if (monthNow < lower.getYear()) {
+      this.month.setValue(lower.getMonthOfYear());
+    }
+    if (monthNow > upper.getYear()) {
+      this.month.setValue(upper.getMonthOfYear());
+    }
+
+    this.setMaximumDayValue();
   }
 
   private void init() {

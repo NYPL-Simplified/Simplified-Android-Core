@@ -1,3 +1,11 @@
 dependencies {
   implementation project(":simplified-ui-datepicker")
+  implementation project(":simplified-ui-theme")
+
+  implementation libraries.androidXActivity
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXConstraintLayout
+  implementation libraries.androidXLifecycle
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }
