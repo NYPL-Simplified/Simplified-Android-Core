@@ -291,8 +291,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.accounts](simplified-ui-accounts)|Accounts UI components|
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
 |[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
-|[org.librarysimplified.ui.datepicker](simplified-ui-datepicker)|Date picker UI component|
-|[org.librarysimplified.ui.datepicker.demo](simplified-ui-datepicker-demo)|Date picker UI component demo|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
 |[org.librarysimplified.ui.images](simplified-ui-images)|Image loader API for general image resources|
 |[org.librarysimplified.ui.navigation.api](simplified-ui-navigation-api)|Navigation API|
