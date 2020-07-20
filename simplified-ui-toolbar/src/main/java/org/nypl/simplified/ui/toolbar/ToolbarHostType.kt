@@ -88,6 +88,7 @@ interface ToolbarHostType {
     try {
       if (shouldArrowBePresent()) {
         toolbar.navigationIcon = this.toolbarIconBackArrow(context)
+        toolbar.navigationContentDescription = null
         toolbar.setNavigationOnClickListener { onArrowClicked() }
       } else {
         this.toolbarUnsetArrow()
@@ -104,6 +105,7 @@ interface ToolbarHostType {
   fun toolbarUnsetArrow() {
     val toolbar = this.findToolbar()
     toolbar.navigationIcon = null
+    toolbar.navigationContentDescription = null
     toolbar.setNavigationOnClickListener(null)
   }
 }

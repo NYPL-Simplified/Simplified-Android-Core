@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="56dp"
+  android:background="?attr/selectableItemBackground"
+  android:clickable="true"
+  android:focusable="true"
+  android:paddingStart="16dp"
+  android:paddingEnd="16dp"
+  tools:ignore="UseCompoundDrawables">
+
+  <ImageView
+    android:id="@+id/accountIcon"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
+    android:layout_gravity="center_vertical"
+    android:layout_marginEnd="16dp"
+    android:contentDescription="@null"
+    android:src="@drawable/account_default" />
+
+  <TextView
+    android:id="@+id/accountTitle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:ellipsize="end"
+    android:maxLines="2"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    tools:text="New York Public Library" />
+</LinearLayout>

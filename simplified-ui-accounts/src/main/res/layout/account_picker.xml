@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical">
+
+  <TextView
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:fontFamily="sans-serif-medium"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:text="@string/accountPick"
+    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+    android:textSize="14sp" />
+
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/recyclerView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:listitem="@layout/account_picker_item" />
+</LinearLayout>
