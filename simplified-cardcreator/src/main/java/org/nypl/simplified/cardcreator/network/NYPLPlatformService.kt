@@ -8,6 +8,7 @@ import org.nypl.simplified.cardcreator.model.DependentEligibilityData
 import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
 import org.nypl.simplified.cardcreator.model.UsernameParent
 import org.nypl.simplified.cardcreator.utils.Constants
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
@@ -26,7 +27,7 @@ internal interface NYPLPlatformService {
   @GET("patrons/dependent-eligibility")
   suspend fun getDependentEligibilityWithBarcode(
     @Query("barcode") barcode: String
-  ): DependentEligibilityData
+  ): Response<DependentEligibilityData>
 
   /**
    * Gets whether or not user can create juvenile cards using username
@@ -36,7 +37,7 @@ internal interface NYPLPlatformService {
   @GET("patrons/dependent-eligibility")
   suspend fun getDependentEligibilityWithUsername(
     @Query("username") username: String
-  ): DependentEligibilityData
+  ): Response<DependentEligibilityData>
 
   /**
    * Creates juvenile card
