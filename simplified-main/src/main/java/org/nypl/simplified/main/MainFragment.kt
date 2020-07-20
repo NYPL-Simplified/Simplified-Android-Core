@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.Disposable
+import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
@@ -18,6 +19,7 @@ import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
@@ -25,6 +27,8 @@ import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
+import org.nypl.simplified.ui.catalog.CatalogFeedArguments
+import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.profiles.ProfileDialogs
@@ -175,19 +179,18 @@ class MainFragment : Fragment() {
       this.profilesController.accountEvents()
         .subscribe(this::onAccountEvent)
 
+    this.profileSubscription =
+      this.profilesController.profileEvents()
+        .subscribe(this::onProfileEvent)
+
     /*
      * If named profiles are enabled, subscribe to profile timer events so that users are
      * logged out after a period of inactivity.
      */
 
     when (this.profilesController.profileAnonymousEnabled()) {
-      ANONYMOUS_PROFILE_ENABLED -> {
-      }
+      ANONYMOUS_PROFILE_ENABLED -> {}
       ANONYMOUS_PROFILE_DISABLED -> {
-        this.profileSubscription =
-          this.profilesController.profileEvents()
-            .subscribe(this::onProfileEvent)
-
         this.profilesController.profileIdleTimer().start()
       }
     }
@@ -220,6 +223,10 @@ class MainFragment : Fragment() {
 
   private fun onProfileEvent(event: ProfileEvent) {
     return when (event) {
+      is ProfileUpdated.Succeeded ->
+        this.uiThread.runOnUIThread {
+          this.onProfileUpdateSucceeded(event)
+        }
       is ProfileIdleTimeOutSoon ->
         this.uiThread.runOnUIThread {
           this.showTimeOutSoonDialog()
@@ -228,7 +235,31 @@ class MainFragment : Fragment() {
         this.uiThread.runOnUIThread {
           this.onIdleTimedOut()
         }
-      else -> {
+      else -> {}
+    }
+  }
+
+  @UiThread
+  private fun onProfileUpdateSucceeded(event: ProfileUpdated.Succeeded) {
+    val oldAccountId = event.oldDescription.preferences.mostRecentAccount
+    val newAccountId = event.newDescription.preferences.mostRecentAccount
+    this.logger.debug("oldAccountId={}, newAccountId={}", oldAccountId, newAccountId)
+
+    // Reload the catalog feed, the patron's account preference has changed
+
+    if (oldAccountId != newAccountId) {
+      newAccountId?.let { id ->
+        val profile = this.profilesController.profileCurrent()
+        val account = profile.account(id)
+        val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
+        this.bottomNavigator.clearHistory()
+        this.bottomNavigator.popBackStack()
+        this.bottomNavigator.openFeed(CatalogFeedArguments.CatalogFeedArgumentsRemote(
+          title = account.provider.displayName,
+          ownership = CatalogFeedOwnership.OwnedByAccount(id),
+          feedURI = account.provider.catalogURIForAge(age),
+          isSearchResults = false
+        ))
       }
     }
   }

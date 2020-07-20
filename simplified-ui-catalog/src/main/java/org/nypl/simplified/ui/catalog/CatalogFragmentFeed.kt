@@ -35,6 +35,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -56,6 +57,9 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
+import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
+import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.OwnedByAccount
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
@@ -302,12 +306,6 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun onAccountEvent(event: AccountEvent) {
-
-    /*
-     * When an account is created or deleted, refresh the feed if the current feed refers
-     * to local books.
-     */
-
     return when (event) {
       is AccountEventCreation.AccountEventCreationSucceeded,
       is AccountEventDeletion.AccountEventDeletionSucceeded -> {
@@ -317,8 +315,7 @@ class CatalogFragmentFeed : Fragment() {
           // No reload necessary
         }
       }
-      else -> {
-      }
+      else -> {}
     }
   }
 
@@ -423,6 +420,7 @@ class CatalogFragmentFeed : Fragment() {
         this.synthesizeDateOfBirthDescription(description, 14)
       }.map {
         this.logger.debug("age updated")
+        // FIXME: This won't work as expected because the parameters have the old feed URI.
         this.uiThread.runOnUIThread { this.feedModel.reloadFeed(this.parameters) }
       }
     }
@@ -435,6 +433,7 @@ class CatalogFragmentFeed : Fragment() {
         this.synthesizeDateOfBirthDescription(description, 0)
       }.map {
         this.logger.debug("age updated")
+        // FIXME: This won't work as expected because the parameters have the old feed URI.
         this.uiThread.runOnUIThread { this.feedModel.reloadFeed(this.parameters) }
       }
     }
@@ -687,23 +686,54 @@ class CatalogFragmentFeed : Fragment() {
     search: FeedSearch?
   ) {
     val context = this.requireContext()
-    val toolbar = toolbarHost.findToolbar()
-    this.configureToolbarTitles(context, toolbar, ownership, title)
-    this.configureToolbarMenu(context, toolbar, search, title)
+    this.configureToolbarNavigation(context, toolbarHost, ownership)
+    this.configureToolbarTitles(context, toolbarHost, ownership, title)
+    this.configureToolbarMenu(context, toolbarHost, search, title)
+  }
 
-    toolbarHost.toolbarSetBackArrowConditionally(
-      context = context,
-      shouldArrowBePresent = { this.findNavigationController().backStackSize() > 1 },
-      onArrowClicked = { this.findNavigationController().popBackStack() })
+  @UiThread
+  private fun configureToolbarNavigation(
+    context: Context,
+    toolbarHost: ToolbarHostType,
+    ownership: CatalogFeedOwnership
+  ) {
+    val toolbar = toolbarHost.findToolbar()
+    try {
+      val navigationController = this.findNavigationController()
+      val isRoot = navigationController.backStackSize() == 1
+
+      if (isRoot) {
+        when (ownership) {
+          is OwnedByAccount -> {
+            toolbar.navigationIcon = context.getDrawable(R.drawable.accounts)
+            toolbar.navigationContentDescription = context.getString(R.string.catalogAccounts)
+            toolbar.setNavigationOnClickListener {
+              this.openAccountPickerDialog(ownership.accountId)
+            }
+          }
+          else -> toolbarHost.toolbarUnsetArrow()
+        }
+      } else {
+        toolbar.navigationIcon = toolbarHost.toolbarIconBackArrow(context)
+        toolbar.navigationContentDescription = null
+        toolbar.setNavigationOnClickListener { navigationController.popBackStack() }
+      }
+    } catch (e: Exception) {
+      // Note: The call to findNavigationController may throw an IllegalArgumentException.
+      toolbarHost.toolbarUnsetArrow()
+    }
   }
 
   @UiThread
   private fun configureToolbarMenu(
     context: Context,
-    toolbar: Toolbar,
+    toolbarHost: ToolbarHostType,
     search: FeedSearch?,
     title: String
   ) {
+    val toolbar = toolbarHost.findToolbar().apply {
+      overflowIcon = toolbarHost.toolbarIconOverflow(context)
+    }
     toolbar.menu.clear()
     toolbar.inflateMenu(R.menu.catalog)
 
@@ -734,13 +764,14 @@ class CatalogFragmentFeed : Fragment() {
   @UiThread
   private fun configureToolbarTitles(
     context: Context,
-    toolbar: Toolbar,
+    toolbarHost: ToolbarHostType,
     ownership: CatalogFeedOwnership,
     title: String
   ) {
+    val toolbar = toolbarHost.findToolbar()
     try {
       when (ownership) {
-        is CatalogFeedOwnership.OwnedByAccount -> {
+        is OwnedByAccount -> {
           val accountProvider =
             this.profilesController.profileCurrent()
               .account(ownership.accountId)
@@ -762,7 +793,7 @@ class CatalogFragmentFeed : Fragment() {
           }
         }
 
-        is CatalogFeedOwnership.CollectedFromAccounts -> {
+        is CollectedFromAccounts -> {
           toolbar.title = title
           toolbar.subtitle = ""
         }
@@ -776,6 +807,17 @@ class CatalogFragmentFeed : Fragment() {
       toolbar.setTitleTextColor(color)
       toolbar.setSubtitleTextColor(color)
     }
+  }
+
+  @UiThread
+  private fun openAccountPickerDialog(
+    currentId: AccountID
+  ) {
+    val fm = requireActivity().supportFragmentManager
+    val dialog = AccountPickerDialogFragment.create(
+      currentId
+    )
+    dialog.show(fm, dialog.tag)
   }
 
   @UiThread

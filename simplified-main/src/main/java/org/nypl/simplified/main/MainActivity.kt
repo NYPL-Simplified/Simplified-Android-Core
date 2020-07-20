@@ -346,6 +346,7 @@ class MainActivity :
       .clearHistory = true
 
     val mainFragment = MainFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
       .commit()
