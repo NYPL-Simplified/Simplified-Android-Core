@@ -36,6 +36,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -53,11 +54,14 @@ import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDescription
+import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
+import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.OwnedByAccount
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
@@ -143,6 +147,7 @@ class CatalogFragmentFeed : Fragment() {
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
   private var accountSubscription: Disposable? = null
+  private var profileSubscription: Disposable? = null
   private var feedStatusSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -295,6 +300,9 @@ class CatalogFragmentFeed : Fragment() {
     this.accountSubscription =
       this.profilesController.accountEvents()
         .subscribe(this::onAccountEvent)
+    this.profileSubscription =
+      this.profilesController.profileEvents()
+        .subscribe(this::onProfileEvent)
 
     /*
      * Refresh the feed if it is locally generated.
@@ -313,6 +321,23 @@ class CatalogFragmentFeed : Fragment() {
           this.feedModel.reloadFeed(this.parameters)
         } else {
           // No reload necessary
+        }
+      }
+      else -> {}
+    }
+  }
+
+  private fun onProfileEvent(event: ProfileEvent) {
+    return when (event) {
+      is ProfileUpdated.Succeeded -> {
+        val feedState = this.feedModel.feedState()
+        when (val ownership = feedState.arguments.ownership) {
+          is OwnedByAccount -> {
+            val provider = this.profilesController.profileCurrent()
+              .account(ownership.accountId)
+              .provider
+            onAgeUpdateSuccess(provider, ownership, event)
+          } else -> {}
         }
       }
       else -> {}
@@ -388,6 +413,7 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithGroupsList.adapter = null
     this.feedStatusSubscription?.dispose()
     this.accountSubscription?.dispose()
+    this.profileSubscription?.dispose()
   }
 
   @UiThread
@@ -418,10 +444,6 @@ class CatalogFragmentFeed : Fragment() {
 
       this.profilesController.profileUpdate { description ->
         this.synthesizeDateOfBirthDescription(description, 14)
-      }.map {
-        this.logger.debug("age updated")
-        // FIXME: This won't work as expected because the parameters have the old feed URI.
-        this.uiThread.runOnUIThread { this.feedModel.reloadFeed(this.parameters) }
       }
     }
 
@@ -431,11 +453,28 @@ class CatalogFragmentFeed : Fragment() {
 
       this.profilesController.profileUpdate { description ->
         this.synthesizeDateOfBirthDescription(description, 0)
-      }.map {
-        this.logger.debug("age updated")
-        // FIXME: This won't work as expected because the parameters have the old feed URI.
-        this.uiThread.runOnUIThread { this.feedModel.reloadFeed(this.parameters) }
       }
+    }
+  }
+
+  private fun onAgeUpdateSuccess(
+    provider: AccountProviderType,
+    ownership: OwnedByAccount,
+    result: ProfileUpdated.Succeeded
+  ) {
+    val now = DateTime.now()
+    val oldAge = result.oldDescription.preferences.dateOfBirth?.yearsOld(now)
+    val newAge = result.newDescription.preferences.dateOfBirth?.yearsOld(now)
+    this.logger.debug("age updated from {} to {}", oldAge, newAge)
+
+    newAge?.let { age ->
+      val newParameters = CatalogFeedArgumentsRemote(
+        title = this.parameters.title,
+        ownership = ownership,
+        feedURI = provider.catalogURIForAge(age),
+        isSearchResults = false
+      )
+      this.uiThread.runOnUIThread { this.feedModel.reloadFeed(newParameters) }
     }
   }
 
