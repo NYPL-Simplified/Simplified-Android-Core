@@ -27,6 +27,7 @@ dependencies {
   implementation libraries.androidXLifecycle
   implementation libraries.androidXPaging
   implementation libraries.androidXRecyclerView
+  implementation libraries.googleAndroidMaterial
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 }

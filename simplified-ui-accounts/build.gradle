@@ -18,6 +18,7 @@ dependencies {
   implementation libraries.androidXConstraintLayout
   implementation libraries.androidXLifecycle
   implementation libraries.androidXRecyclerView
+  implementation libraries.googleAndroidMaterial
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 }

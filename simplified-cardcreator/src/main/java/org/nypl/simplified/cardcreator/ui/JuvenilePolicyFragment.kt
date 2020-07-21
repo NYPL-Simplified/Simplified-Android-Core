@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView.BufferType
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -122,6 +123,21 @@ class JuvenilePolicyFragment : Fragment() {
       }
     })
 
+    platformViewModel.apiErrorMessage.observe(viewLifecycleOwner, Observer {
+      binding.progress.visibility = View.GONE
+      val dialogBuilder = AlertDialog.Builder(requireContext())
+      dialogBuilder.setMessage("$it")
+        .setCancelable(false)
+        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+          getToken()
+        }
+        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+          dialog.cancel()
+        }
+      val alert = dialogBuilder.create()
+      alert.show()
+    })
+
     platformViewModel.apiError.observe(viewLifecycleOwner, Observer {
       binding.progress.visibility = View.GONE
       val dialogBuilder = AlertDialog.Builder(requireContext())
@@ -151,6 +167,12 @@ class JuvenilePolicyFragment : Fragment() {
       val alert = dialogBuilder.create()
       alert.show()
     })
+
+    val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+      requireActivity().setResult(Activity.RESULT_CANCELED)
+      requireActivity().finish()
+    }
+    callback.isEnabled = true
   }
 
   /**

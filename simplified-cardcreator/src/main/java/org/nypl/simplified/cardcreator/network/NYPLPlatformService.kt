@@ -3,10 +3,12 @@ package org.nypl.simplified.cardcreator.network
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.nypl.simplified.cardcreator.model.BarcodeParent
 import org.nypl.simplified.cardcreator.model.DependentEligibilityData
-import org.nypl.simplified.cardcreator.model.JuvenilePatron
 import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
+import org.nypl.simplified.cardcreator.model.UsernameParent
 import org.nypl.simplified.cardcreator.utils.Constants
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
@@ -25,7 +27,7 @@ internal interface NYPLPlatformService {
   @GET("patrons/dependent-eligibility")
   suspend fun getDependentEligibilityWithBarcode(
     @Query("barcode") barcode: String
-  ): DependentEligibilityData
+  ): Response<DependentEligibilityData>
 
   /**
    * Gets whether or not user can create juvenile cards using username
@@ -35,7 +37,7 @@ internal interface NYPLPlatformService {
   @GET("patrons/dependent-eligibility")
   suspend fun getDependentEligibilityWithUsername(
     @Query("username") username: String
-  ): DependentEligibilityData
+  ): Response<DependentEligibilityData>
 
   /**
    * Creates juvenile card
@@ -43,8 +45,13 @@ internal interface NYPLPlatformService {
    * Docs: https://platformdocs.nypl.org/#/patrons/patrons_dependentsV03
    */
   @POST("patrons/dependents")
-  suspend fun createJuvenilePatron(
-    @Body juvenilePatron: JuvenilePatron
+  suspend fun createJuvenilePatronWithBarcodeParent(
+    @Body juvenilePatron: BarcodeParent
+  ): JuvenilePatronResponse
+
+  @POST("patrons/dependents")
+  suspend fun createJuvenilePatronWithUsernameParent(
+    @Body juvenilePatron: UsernameParent
   ): JuvenilePatronResponse
 
   companion object {

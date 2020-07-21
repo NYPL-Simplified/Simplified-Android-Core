@@ -28,6 +28,7 @@
   <string name="accountRegistryRetrieving">Retrieving accounts from registry…</string>
   <string name="accountRegistrySelect">Please select a library…</string>
   <string name="accountReportIssue">Report an issue…</string>
+  <string name="accountPick">Pick account</string>
   <string name="accounts">Accounts</string>
   <string name="accountsDelete">@string/accountDelete</string>
   <string name="accountsDeleteConfirm">Are you sure you want to remove your \"%1$s\" account from this device?</string>

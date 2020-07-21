@@ -30,6 +30,7 @@ class AccountInformationFragment : Fragment() {
 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
+  private var back = false
 
   private val minPinChars = 4
   private val usernameMinChars = 5
@@ -49,6 +50,10 @@ class AccountInformationFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+
+    arguments?.let {
+      back = AccountInformationFragmentArgs.fromBundle(it).back
+    }
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
@@ -73,6 +78,7 @@ class AccountInformationFragment : Fragment() {
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       hideKeyboard()
+      back = false
       validateUsername()
     }
 
@@ -82,15 +88,17 @@ class AccountInformationFragment : Fragment() {
     }
 
     viewModel.validateUsernameResponse.observe(viewLifecycleOwner, Observer { response ->
-      showLoading(false)
-      if (response.type == usernameAvailable) {
-        logger.debug("Username is valid")
-        Cache(requireContext()).setAccountInformation(binding.usernameEt.text.toString(),
-          binding.pinEt.text.toString())
-        nextAction = AccountInformationFragmentDirections.actionNext()
-        navController.navigate(nextAction)
-      } else {
-        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+      if (!back) {
+        showLoading(false)
+        if (response.type == usernameAvailable) {
+          logger.debug("Username is valid")
+          Cache(requireContext()).setAccountInformation(binding.usernameEt.text.toString(),
+            binding.pinEt.text.toString())
+          nextAction = AccountInformationFragmentDirections.actionNext()
+          navController.navigate(nextAction)
+        } else {
+          Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+        }
       }
     })
 

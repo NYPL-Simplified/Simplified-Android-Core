@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -76,7 +77,7 @@ class ReviewFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      navController.popBackStack()
+      goBack()
     }
 
     viewModel.createPatronResponse.observe(viewLifecycleOwner, Observer { response ->
@@ -156,6 +157,16 @@ class ReviewFragment : Fragment() {
       val alert = dialogBuilder.create()
       alert.show()
     })
+
+    val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+      goBack()
+    }
+    callback.isEnabled = true
+  }
+
+  private fun goBack() {
+    nextAction = ReviewFragmentDirections.actionBack(true)
+    navController.navigate(nextAction)
   }
 
   private fun createPatron() {
@@ -169,19 +180,19 @@ class ReviewFragment : Fragment() {
   private fun createJuvenilePatron() {
     showLoading(true)
     if (isBarcode(requireActivity().intent.extras.getString("userIdentifier"))) {
-      platformViewModel.createJuvenileCard(
+      platformViewModel.createJuvenileCardWithBarcodeParent(
         BarcodeParent(
-          requireActivity().intent.extras.getString("userIdentifier"),
           getCache().getPersonalInformation().firstName,
+          requireActivity().intent.extras.getString("userIdentifier"),
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
         ),
         getCache().token!!)
     } else {
-      platformViewModel.createJuvenileCard(
+      platformViewModel.createJuvenileCardWithUsernameParent(
         UsernameParent(
-          requireActivity().intent.extras.getString("userIdentifier"),
           getCache().getPersonalInformation().firstName,
+          requireActivity().intent.extras.getString("userIdentifier"),
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
         ),

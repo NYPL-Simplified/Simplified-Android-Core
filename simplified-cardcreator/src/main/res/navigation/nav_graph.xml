@@ -40,6 +40,12 @@
             app:destination="@id/destination_juvenile_information"
             app:enterAnim="@anim/enter_right"
             app:exitAnim="@anim/exit_left" />
+        <action
+            android:id="@+id/action_juvenile_back"
+            app:destination="@id/destination_juvenile_policy" />
+        <action
+            android:id="@+id/action_back"
+            app:destination="@id/destination_age" />
     </fragment>
 
     <fragment
@@ -146,6 +152,10 @@
             app:destination="@id/destination_review"
             app:enterAnim="@anim/enter_right"
             app:exitAnim="@anim/exit_left" />
+        <argument
+            android:name="back"
+            app:argType="boolean"
+            android:defaultValue="false" />
 
     </fragment>
 
@@ -160,6 +170,9 @@
             app:destination="@id/destination_confirmation"
             app:enterAnim="@anim/enter_right"
             app:exitAnim="@anim/exit_left" />
+        <action
+            android:id="@+id/action_back"
+            app:destination="@id/destination_account_information" />
 
     </fragment>
 
