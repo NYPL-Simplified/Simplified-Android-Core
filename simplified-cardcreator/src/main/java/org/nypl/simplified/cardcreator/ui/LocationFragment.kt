@@ -17,6 +17,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -98,7 +99,22 @@ class LocationFragment : Fragment(), LocationListener {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      navController.popBackStack()
+      goBack()
+    }
+
+    val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+      goBack()
+    }
+    callback.isEnabled = true
+  }
+
+  private fun goBack() {
+    if (requireActivity().intent.extras.getBoolean("isLoggedIn")) {
+      nextAction = LocationFragmentDirections.actionJuvenileBack()
+      navController.navigate(nextAction)
+    } else {
+      nextAction = LocationFragmentDirections.actionBack()
+      navController.navigate(nextAction)
     }
   }
 
