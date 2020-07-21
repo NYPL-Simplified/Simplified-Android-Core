@@ -109,7 +109,7 @@ class LocationFragment : Fragment(), LocationListener {
   }
 
   private fun goBack() {
-    if(requireActivity().intent.extras.getBoolean("isLoggedIn")) {
+    if (requireActivity().intent.extras.getBoolean("isLoggedIn")) {
       nextAction = LocationFragmentDirections.actionJuvenileBack()
       navController.navigate(nextAction)
     } else {
