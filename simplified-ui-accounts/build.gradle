@@ -21,4 +21,8 @@ dependencies {
   implementation libraries.googleAndroidMaterial
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
+
+  testImplementation libraries.junit
+  testImplementation libraries.mockito
+  testImplementation libraries.mockitoKotlin
 }

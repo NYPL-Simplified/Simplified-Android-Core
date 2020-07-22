@@ -52,12 +52,11 @@ class AccountPickerDialogFragment : BottomSheetDialogFragment(), OnAccountClickL
     imageLoader = services.requireService(ImageLoaderType::class.java)
     profilesController = services.requireService(ProfilesControllerType::class.java)
 
-    val sortedAccounts =
+    val accountsMap =
       profilesController.profileCurrent().accounts()
 
-    // TODO: Lexicographic sort using a Collator and Normalizer.
-    //       Make this order consistent with other places we list accounts.
-    accounts = sortedAccounts.values.toList().sortedBy { it.provider.displayName }
+    accounts = accountsMap.values.toList()
+      .sortedWith(AccountComparator())
   }
 
   override fun onCreateView(
