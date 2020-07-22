@@ -6,6 +6,7 @@
   android:background="?attr/selectableItemBackground"
   android:clickable="true"
   android:focusable="true"
+  android:orientation="horizontal"
   android:paddingStart="16dp"
   android:paddingEnd="16dp"
   tools:ignore="UseCompoundDrawables">
@@ -19,13 +20,31 @@
     android:contentDescription="@null"
     android:src="@drawable/account_default" />
 
-  <TextView
-    android:id="@+id/accountTitle"
+  <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    android:ellipsize="end"
-    android:maxLines="2"
-    android:textAppearance="@style/TextAppearance.AppCompat.Small"
-    tools:text="New York Public Library" />
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/accountTitle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:singleLine="true"
+      android:textAppearance="@style/TextAppearance.AppCompat.Small"
+      tools:text="New York Public Library" />
+
+    <TextView
+      android:id="@+id/activeAccount"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/currentlyBrowsing"
+      android:textAppearance="@style/TextAppearance.AppCompat.Small"
+      android:textSize="12sp"
+      android:textStyle="italic"
+      android:visibility="gone"
+      tools:visibility="visible" />
+  </LinearLayout>
 </LinearLayout>

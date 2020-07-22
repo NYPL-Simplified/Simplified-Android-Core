@@ -114,6 +114,7 @@ class AccountViewHolder(
   private val listener: OnAccountClickListener
 ) : RecyclerView.ViewHolder(view) {
   private val titleView: TextView = view.findViewById(R.id.accountTitle)
+  private val activeView: View = view.findViewById(R.id.activeAccount)
   private val iconView: ImageView = view.findViewById(R.id.accountIcon)
 
   var account: AccountType? = null
@@ -128,10 +129,13 @@ class AccountViewHolder(
     this.account = account
 
     titleView.text = account.provider.displayName
-    titleView.typeface = if (isCurrent) {
-      Typeface.DEFAULT_BOLD
+
+    if (isCurrent) {
+      titleView.typeface = Typeface.DEFAULT_BOLD
+      activeView.visibility = View.VISIBLE
     } else {
-      Typeface.DEFAULT
+      titleView.typeface = Typeface.DEFAULT
+      activeView.visibility = View.GONE
     }
 
     ImageAccountIcons.loadAccountLogoIntoView(
