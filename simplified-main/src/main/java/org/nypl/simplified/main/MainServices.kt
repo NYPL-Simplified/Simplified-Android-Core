@@ -13,7 +13,6 @@ import com.io7m.jfunctional.Some
 import com.squareup.picasso.Picasso
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
-import org.librarysimplified.instabug.spi.InstabugType
 import org.librarysimplified.services.api.ServiceDirectory
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
@@ -723,11 +722,6 @@ internal object MainServices {
       message = strings.bootingStrings("book revocation"),
       interfaceType = BookRevokeStringResourcesType::class.java,
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) })
-
-    addServiceOptionally(
-      message = strings.bootingInstabug,
-      interfaceType = InstabugType::class.java,
-      serviceConstructor = { MainInstabugService.create(MainApplication.application) })
 
     addService(
       message = strings.bootingCatalogConfiguration,
