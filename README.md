@@ -253,7 +253,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.files](simplified-files)|File utilities|
 |[org.librarysimplified.futures](simplified-futures)|Guava Future extensions|
 |[org.librarysimplified.http.core](simplified-http-core)|HTTP API|
-|[org.librarysimplified.instabug.spi](simplified-instabug-spi)|Instabug SPI|
 |[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
 |[org.librarysimplified.links](simplified-links)|Link types|
 |[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|
