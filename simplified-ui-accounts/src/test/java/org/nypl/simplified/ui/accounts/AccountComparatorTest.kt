@@ -20,7 +20,8 @@ class AccountComparatorTest {
 
   @Test
   fun testSortedWith() {
-    val actual = expected.sortedWith(comparator)
+    val shuffled = expected.shuffled()
+    val actual = shuffled.sortedWith(comparator)
     assertEquals(expected, actual)
   }
 }
