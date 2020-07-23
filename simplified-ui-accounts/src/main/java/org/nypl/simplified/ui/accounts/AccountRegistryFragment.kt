@@ -111,11 +111,6 @@ class AccountRegistryFragment : Fragment() {
         .toMutableList()
 
     availableAccountProviders.removeAll(usedAccountProviders)
-    availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
-      val name0 = provider0.title.removePrefix("The ")
-      val name1 = provider1.title.removePrefix("The ")
-      name0.toUpperCase().compareTo(name1.toUpperCase())
-    })
 
     this.logger.debug("returning {} available providers", availableAccountProviders.size)
     return availableAccountProviders
