@@ -74,6 +74,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
+import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
@@ -143,6 +144,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
+  private lateinit var settingsController: SettingsConfigurationServiceType
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
@@ -176,6 +178,8 @@ class CatalogFragmentFeed : Fragment() {
       services.requireService(UIThreadServiceType::class.java)
     this.imageLoader =
       services.requireService(ImageLoaderType::class.java)
+    this.settingsController =
+      services.requireService(SettingsConfigurationServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -854,7 +858,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     val fm = requireActivity().supportFragmentManager
     val dialog = AccountPickerDialogFragment.create(
-      currentId
+      currentId, settingsController.allowAccountsAccess
     )
     dialog.show(fm, dialog.tag)
   }

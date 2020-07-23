@@ -38,13 +38,16 @@ class AccountPickerDialogFragment : BottomSheetDialogFragment(), OnAccountClickL
 
   companion object {
     private const val ARG_CURRENT_ID = "org.nypl.simplified.ui.accounts.CURRENT_ID"
+    private const val ARG_ADD_ACCOUNT = "org.nypl.simplified.ui.accounts.ADD_ACCOUNT"
 
     fun create(
-      currentId: AccountID
+      currentId: AccountID,
+      showAddAccount: Boolean
     ): AccountPickerDialogFragment {
       return AccountPickerDialogFragment().apply {
         arguments = Bundle().apply {
           putSerializable(ARG_CURRENT_ID, currentId)
+          putBoolean(ARG_ADD_ACCOUNT, showAddAccount)
         }
       }
     }
@@ -73,13 +76,19 @@ class AccountPickerDialogFragment : BottomSheetDialogFragment(), OnAccountClickL
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     val currentId = requireArguments().getSerializable(ARG_CURRENT_ID) as AccountID
+    val showAddAccount = requireArguments().getBoolean(ARG_ADD_ACCOUNT, false)
 
     recyclerView = view.findViewById(R.id.recyclerView)
     recyclerView.apply {
       setHasFixedSize(true)
       layoutManager = LinearLayoutManager(requireContext())
-      adapter =
-        AccountPickerAdapter(accounts, currentId, imageLoader, this@AccountPickerDialogFragment)
+      adapter = AccountPickerAdapter(
+        accounts,
+        currentId,
+        imageLoader,
+        showAddAccount,
+        this@AccountPickerDialogFragment
+      )
     }
   }
 
@@ -171,6 +180,7 @@ class AccountPickerAdapter(
   private val accounts: List<AccountType>,
   private val currentId: AccountID,
   private val imageLoader: ImageLoaderType,
+  private val showAddAccount: Boolean,
   private val listener: OnAccountClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -188,7 +198,11 @@ class AccountPickerAdapter(
     }
   }
 
-  override fun getItemCount() = accounts.size + 1 // Include the 'add account' footer
+  override fun getItemCount() = if (showAddAccount) {
+    accounts.size + 1 // Show the 'add account' footer
+  } else {
+    accounts.size
+  }
 
   override fun getItemViewType(position: Int) = when (position) {
     accounts.size -> LIST_FOOTER
