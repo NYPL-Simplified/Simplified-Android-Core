@@ -254,7 +254,7 @@ class TabbedNavigationController private constructor(
           shouldShowLibraryRegistryMenu = this.settingsConfiguration.allowAccountsRegistryAccess
         )
       ),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 
@@ -273,7 +273,7 @@ class TabbedNavigationController private constructor(
   override fun openSettingsVersion() {
     this.navigator.addFragment(
       fragment = SettingsFragmentVersion(),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 
@@ -302,7 +302,7 @@ class TabbedNavigationController private constructor(
   override fun openSettingsAccount(parameters: AccountFragmentParameters) {
     this.navigator.addFragment(
       fragment = AccountFragment.create(parameters),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 
@@ -332,7 +332,7 @@ class TabbedNavigationController private constructor(
   override fun openSettingsAccountRegistry() {
     this.navigator.addFragment(
       fragment = AccountRegistryFragment(),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 

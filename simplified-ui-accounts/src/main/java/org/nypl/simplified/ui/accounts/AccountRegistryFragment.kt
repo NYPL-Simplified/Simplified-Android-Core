@@ -243,7 +243,7 @@ class AccountRegistryFragment : Fragment() {
     if (host is ToolbarHostType) {
       host.toolbarClearMenu()
       host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.accounts),
+        title = this.requireContext().getString(R.string.accountAdd),
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(

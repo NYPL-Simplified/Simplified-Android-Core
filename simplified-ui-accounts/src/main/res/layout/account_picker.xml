@@ -12,7 +12,7 @@
     android:gravity="center_vertical"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
-    android:text="@string/accountPick"
+    android:text="@string/accountPickerTitle"
     android:textAppearance="@style/TextAppearance.AppCompat.Caption"
     android:textSize="14sp" />
 
