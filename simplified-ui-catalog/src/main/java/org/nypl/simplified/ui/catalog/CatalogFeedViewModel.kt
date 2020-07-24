@@ -106,7 +106,7 @@ class CatalogFeedViewModel(
         filterByAccountID = null,
         search = arguments.searchTerms,
         sortBy = arguments.sortBy,
-        title = this.context.getString(R.string.feedTitleBooks),
+        title = arguments.title,
         uri = booksUri
       )
 
