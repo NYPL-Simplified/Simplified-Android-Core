@@ -1,10 +1,10 @@
-package org.nypl.simplified.ui.settings
+package org.nypl.simplified.buildconfig.api
 
 /**
- * Configuration values for the settings views.
+ * Configuration values related to accounts.
  */
 
-interface SettingsConfigurationServiceType {
+interface BuildConfigurationAccountsType {
 
   /**
    * If set to `true`, then users are allowed access to the accounts panel and

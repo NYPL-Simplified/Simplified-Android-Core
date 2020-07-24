@@ -25,12 +25,6 @@ internal class MainServicesStrings(
   val bootingIdleTimerConfigurationService: String =
     this.resources.getString(R.string.bootingIdleTimerConfigurationService)
 
-  val bootingCatalogConfiguration: String =
-    this.resources.getString(R.string.bootingCatalogConfigurationService)
-
-  val bootingSettingsConfiguration: String =
-    this.resources.getString(R.string.bootingSettingsConfigurationService)
-
   val bootingBuildConfigurationService: String =
     this.resources.getString(R.string.bootingBuildConfigurationService)
 

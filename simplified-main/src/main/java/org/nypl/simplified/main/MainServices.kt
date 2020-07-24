@@ -104,14 +104,12 @@ import org.nypl.simplified.tenprint.TenPrintGenerator
 import org.nypl.simplified.tenprint.TenPrintGeneratorType
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
-import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogCoverBadgeImages
 import org.nypl.simplified.ui.images.ImageAccountIconRequestHandler
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
-import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
@@ -582,42 +580,6 @@ internal object MainServices {
     }
   }
 
-  private fun findSettingsConfiguration(): SettingsConfigurationServiceType {
-    val existing =
-      this.optionalFromServiceLoader(SettingsConfigurationServiceType::class.java)
-
-    if (existing != null) {
-      return existing
-    }
-
-    this.logger.debug("returning fallback settings configuration service")
-    return object : SettingsConfigurationServiceType {
-      override val allowAccountsAccess: Boolean = true
-      override val allowAccountsRegistryAccess: Boolean = true
-    }
-  }
-
-  private fun findCatalogConfiguration(): CatalogConfigurationServiceType {
-    val existing =
-      this.optionalFromServiceLoader(CatalogConfigurationServiceType::class.java)
-
-    if (existing != null) {
-      return existing
-    }
-
-    this.logger.debug("returning fallback catalog configuration service")
-    return object : CatalogConfigurationServiceType {
-      override val showSettingsTab: Boolean
-        get() = true
-      override val showHoldsTab: Boolean
-        get() = true
-      override val supportErrorReportEmailAddress: String
-        get() = ""
-      override val supportErrorReportSubject: String
-        get() = "[error report]"
-    }
-  }
-
   private fun findBuildConfiguration(): BuildConfigurationServiceType {
     val existing =
       this.optionalFromServiceLoader(BuildConfigurationServiceType::class.java)
@@ -722,16 +684,6 @@ internal object MainServices {
       message = strings.bootingStrings("book revocation"),
       interfaceType = BookRevokeStringResourcesType::class.java,
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) })
-
-    addService(
-      message = strings.bootingCatalogConfiguration,
-      interfaceType = CatalogConfigurationServiceType::class.java,
-      serviceConstructor = { this.findCatalogConfiguration() })
-
-    addService(
-      message = strings.bootingSettingsConfiguration,
-      interfaceType = SettingsConfigurationServiceType::class.java,
-      serviceConstructor = { this.findSettingsConfiguration() })
 
     val clock =
       addService(
