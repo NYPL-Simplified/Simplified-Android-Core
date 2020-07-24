@@ -99,7 +99,7 @@ class TabbedNavigationController private constructor(
               this.createBooksFragment(activity, R.id.tabBooks)
             },
             R.id.tabHolds to {
-              this.createHoldsFragment(activity, R.id.tabBooks)
+              this.createHoldsFragment(activity, R.id.tabHolds)
             },
             R.id.tabSettings to {
               this.createSettingsFragment(R.id.tabSettings)
