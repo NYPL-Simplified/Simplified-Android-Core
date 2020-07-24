@@ -17,6 +17,7 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy.SORT_BY_TITLE
@@ -37,7 +38,6 @@ import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
-import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
 import org.nypl.simplified.ui.settings.SettingsFragmentMain
 import org.nypl.simplified.ui.settings.SettingsFragmentVersion
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory
  */
 
 class TabbedNavigationController private constructor(
-  private val settingsConfiguration: SettingsConfigurationServiceType,
+  private val settingsConfiguration: BuildConfigurationServiceType,
   private val navigator: BottomNavigator
 ) : SettingsNavigationControllerType, CatalogNavigationControllerType {
 
@@ -74,7 +74,7 @@ class TabbedNavigationController private constructor(
       activity: FragmentActivity,
       accountProviders: AccountProviderRegistryType,
       profilesController: ProfilesControllerType,
-      settingsConfiguration: SettingsConfigurationServiceType,
+      settingsConfiguration: BuildConfigurationServiceType,
       @IdRes fragmentContainerId: Int,
       navigationView: BottomNavigationView
     ): TabbedNavigationController {

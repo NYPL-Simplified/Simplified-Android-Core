@@ -230,7 +230,7 @@ class AccountsFragment : Fragment() {
 
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.errorReportEmail,
+        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
         body = "",
         subject = "[simplye-error-report]",
         attributes = accountEvent.attributes.toSortedMap(),

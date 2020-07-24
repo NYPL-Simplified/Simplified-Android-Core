@@ -6,6 +6,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.io7m.jfunctional.Some
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
@@ -16,7 +17,7 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 class SettingsFragmentMain : PreferenceFragmentCompat() {
 
-  private lateinit var configuration: SettingsConfigurationServiceType
+  private lateinit var configuration: BuildConfigurationServiceType
   private lateinit var documents: DocumentStoreType
 
   override fun onCreatePreferences(
@@ -30,7 +31,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     this.documents =
       services.requireService(DocumentStoreType::class.java)
     this.configuration =
-      services.requireService(SettingsConfigurationServiceType::class.java)
+      services.requireService(BuildConfigurationServiceType::class.java)
 
     val settingsAbout =
       this.findPreference<Preference>("settingsAbout")!!

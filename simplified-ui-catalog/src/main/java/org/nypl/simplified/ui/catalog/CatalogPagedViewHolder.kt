@@ -22,6 +22,7 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
@@ -58,8 +59,8 @@ class CatalogPagedViewHolder(
     this.services.requireService(BookCoverProviderType::class.java)
   private val bookRegistry: BookRegistryReadableType =
     this.services.requireService(BookRegistryReadableType::class.java)
-  private val configurationService: CatalogConfigurationServiceType =
-    this.services.requireService(CatalogConfigurationServiceType::class.java)
+  private val configurationService: BuildConfigurationServiceType =
+    this.services.requireService(BuildConfigurationServiceType::class.java)
   private val uiThread: UIThreadServiceType =
     this.services.requireService(UIThreadServiceType::class.java)
 

@@ -41,6 +41,7 @@ import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacets
@@ -50,7 +51,6 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
-import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDescription
@@ -74,7 +74,6 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
-import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
@@ -112,7 +111,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
-  private lateinit var configurationService: CatalogConfigurationServiceType
+  private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var feedCOPPAGate: ViewGroup
   private lateinit var feedCOPPAOver13: Button
   private lateinit var feedCOPPAUnder13: Button
@@ -144,7 +143,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
-  private lateinit var settingsController: SettingsConfigurationServiceType
   private lateinit var uiThread: UIThreadServiceType
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
@@ -171,15 +169,13 @@ class CatalogFragmentFeed : Fragment() {
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
     this.configurationService =
-      services.requireService(CatalogConfigurationServiceType::class.java)
+      services.requireService(BuildConfigurationServiceType::class.java)
     this.feedLoader =
       services.requireService(FeedLoaderType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
     this.imageLoader =
       services.requireService(ImageLoaderType::class.java)
-    this.settingsController =
-      services.requireService(SettingsConfigurationServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -857,9 +853,8 @@ class CatalogFragmentFeed : Fragment() {
     currentId: AccountID
   ) {
     val fm = requireActivity().supportFragmentManager
-    val dialog = AccountPickerDialogFragment.create(
-      currentId, settingsController.allowAccountsAccess
-    )
+    val dialog =
+      AccountPickerDialogFragment.create(currentId, this.configurationService.allowAccountsAccess)
     dialog.show(fm, dialog.tag)
   }
 

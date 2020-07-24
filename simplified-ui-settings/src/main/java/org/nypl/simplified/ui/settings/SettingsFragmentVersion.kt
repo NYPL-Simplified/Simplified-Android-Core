@@ -199,7 +199,7 @@ class SettingsFragmentVersion : Fragment() {
     this.sendReportButton.setOnClickListener {
       Reports.sendReportsDefault(
         context = this.requireContext(),
-        address = this.buildConfig.errorReportEmail,
+        address = this.buildConfig.supportErrorReportEmailAddress,
         subject = "[simplye-error-report] ${this.versionText.text}",
         body = ""
       )
@@ -358,7 +358,7 @@ class SettingsFragmentVersion : Fragment() {
 
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.errorReportEmail,
+        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
         body = "",
         subject = "[simplye-error-report] ${this.versionText.text}",
         attributes = attributes,

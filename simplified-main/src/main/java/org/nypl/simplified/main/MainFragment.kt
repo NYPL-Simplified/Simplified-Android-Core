@@ -15,6 +15,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -26,14 +27,12 @@ import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
-import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
@@ -50,11 +49,10 @@ class MainFragment : Fragment() {
 
   private lateinit var bottomNavigator: TabbedNavigationController
   private lateinit var bottomView: BottomNavigationView
-  private lateinit var catalogConfig: CatalogConfigurationServiceType
+  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var accountProviders: AccountProviderRegistryType
   private lateinit var profilesController: ProfilesControllerType
-  private lateinit var settingsConfiguration: SettingsConfigurationServiceType
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var viewModel: MainFragmentViewModel
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
@@ -74,12 +72,10 @@ class MainFragment : Fragment() {
       services.requireService(AccountProviderRegistryType::class.java)
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
-    this.settingsConfiguration =
-      services.requireService(SettingsConfigurationServiceType::class.java)
+    this.buildConfig =
+      services.requireService(BuildConfigurationServiceType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
-    this.catalogConfig =
-      services.requireService(CatalogConfigurationServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -126,7 +122,7 @@ class MainFragment : Fragment() {
           activity = this.requireActivity(),
           accountProviders = this.accountProviders,
           profilesController = this.profilesController,
-          settingsConfiguration = this.settingsConfiguration,
+          settingsConfiguration = this.buildConfig,
           fragmentContainerId = R.id.tabbedFragmentHolder,
           navigationView = this.bottomView
         )
@@ -142,12 +138,12 @@ class MainFragment : Fragment() {
      */
 
     val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
-    holdsItem.isVisible = this.catalogConfig.showHoldsTab
-    holdsItem.isEnabled = this.catalogConfig.showHoldsTab
+    holdsItem.isVisible = this.buildConfig.showHoldsTab
+    holdsItem.isEnabled = this.buildConfig.showHoldsTab
 
     val settingsItem = this.bottomView.menu.findItem(R.id.tabSettings)
-    settingsItem.isVisible = this.catalogConfig.showSettingsTab
-    settingsItem.isEnabled = this.catalogConfig.showSettingsTab
+    settingsItem.isVisible = this.buildConfig.showSettingsTab
+    settingsItem.isEnabled = this.buildConfig.showSettingsTab
 
     val profilesVisible =
       this.profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED

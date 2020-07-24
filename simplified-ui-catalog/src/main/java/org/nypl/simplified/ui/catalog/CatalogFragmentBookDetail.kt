@@ -31,6 +31,7 @@ import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -88,7 +89,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var buttons: LinearLayout
-  private lateinit var configurationService: CatalogConfigurationServiceType
+  private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var cover: ImageView
   private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
@@ -112,7 +113,6 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var uiThread: UIThreadServiceType
   private val parametersId = PARAMETERS_ID
   private var bookRegistrySubscription: Disposable? = null
-  private var debugService: CatalogDebuggingServiceType? = null
 
   private val dateFormatter =
     DateTimeFormatterBuilder()
@@ -146,9 +146,7 @@ class CatalogFragmentBookDetail : Fragment() {
     val services = Services.serviceDirectory()
 
     this.configurationService =
-      services.requireService(CatalogConfigurationServiceType::class.java)
-    this.debugService =
-      services.optionalService(CatalogDebuggingServiceType::class.java)
+      services.requireService(BuildConfigurationServiceType::class.java)
     this.bookRegistry =
       services.requireService(BookRegistryReadableType::class.java)
     this.uiThread =
@@ -222,7 +220,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusFailed.visibility = View.INVISIBLE
 
     this.debugStatus.visibility =
-      if (this.debugService?.showBookDetailStatus == true) {
+      if (this.configurationService.showDebugBookDetailStatus) {
         View.VISIBLE
       } else {
         View.INVISIBLE
