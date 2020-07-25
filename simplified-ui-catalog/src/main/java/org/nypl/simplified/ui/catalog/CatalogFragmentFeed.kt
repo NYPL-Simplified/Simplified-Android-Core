@@ -1121,32 +1121,20 @@ class CatalogFragmentFeed : Fragment() {
     groupName: String,
     group: List<FeedFacet>
   ) {
-    val names =
-      group.map { facet -> facet.title }
-        .toTypedArray()
-    val initiallyChecked =
-      group.indexOfFirst(FeedFacet::isActive)
+    val choices = group.sortedBy { it.title }
+    val names = choices.map { it.title }.toTypedArray()
+    val checkedItem = choices.indexOfFirst { it.isActive }
 
+    // Build the dialog
     val alertBuilder = AlertDialog.Builder(this.requireContext())
     alertBuilder.setTitle(groupName)
-    alertBuilder.setSingleChoiceItems(names, initiallyChecked) { dialog, checked ->
-
-      /*
-       * Wait a second in order to give the dialog list time to animate the selection.
-       */
-
-      val selected = group[checked]
-      this.logger.debug("selected facet {}", selected)
-
-      this.uiThread.runOnUIThreadDelayed({
-        dialog.dismiss()
-        this.findNavigationController()
-          .openFeed(this.feedModel.resolveFacet(selected))
-      }, 1_000L)
+    alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
+      val selected = choices[checked]
+      this.logger.debug("selected facet: {}", selected)
+      this.findNavigationController().openFeed(this.feedModel.resolveFacet(selected))
+      dialog.dismiss()
     }
-
-    alertBuilder.create()
-      .show()
+    alertBuilder.create().show()
   }
 
   private fun findNavigationController() =
