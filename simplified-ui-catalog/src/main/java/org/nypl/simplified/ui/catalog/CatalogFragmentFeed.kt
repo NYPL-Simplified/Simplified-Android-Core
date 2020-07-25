@@ -600,7 +600,8 @@ class CatalogFragmentFeed : Fragment() {
         context = activity,
         navigation = this::findNavigationController,
         onBookSelected = this::onBookSelected,
-        services = Services.serviceDirectory()
+        services = Services.serviceDirectory(),
+        ownership = feedState.arguments.ownership
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
