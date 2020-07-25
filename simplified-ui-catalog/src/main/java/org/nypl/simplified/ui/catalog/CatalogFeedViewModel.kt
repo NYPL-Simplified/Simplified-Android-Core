@@ -451,7 +451,7 @@ class CatalogFeedViewModel(
 
           is Sorting ->
             CatalogFeedArgumentsLocalBooks(
-              filterAccount = null,
+              filterAccount = currentArguments.filterAccount,
               ownership = currentArguments.ownership,
               searchTerms = currentArguments.searchTerms,
               selection = currentArguments.selection,
@@ -465,7 +465,7 @@ class CatalogFeedViewModel(
               ownership = currentArguments.ownership,
               searchTerms = currentArguments.searchTerms,
               selection = currentArguments.selection,
-              sortBy = SortBy.SORT_BY_TITLE,
+              sortBy = currentArguments.sortBy,
               title = facet.title
             )
         }
