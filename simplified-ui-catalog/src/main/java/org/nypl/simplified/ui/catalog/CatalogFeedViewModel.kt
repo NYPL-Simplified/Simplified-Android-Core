@@ -103,7 +103,7 @@ class CatalogFeedViewModel(
       ProfileFeedRequest(
         facetTitleProvider = CatalogFacetPseudoTitleProvider(this.context.resources),
         feedSelection = arguments.selection,
-        filterByAccountID = null,
+        filterByAccountID = arguments.filterAccount,
         search = arguments.searchTerms,
         sortBy = arguments.sortBy,
         title = arguments.title,
@@ -199,7 +199,6 @@ class CatalogFeedViewModel(
 
     future.map { feedLoaderResult ->
       this.onFeedStatusUpdated(feedLoaderResult, newState)
-      feedLoaderResult
     }
     return newState
   }
