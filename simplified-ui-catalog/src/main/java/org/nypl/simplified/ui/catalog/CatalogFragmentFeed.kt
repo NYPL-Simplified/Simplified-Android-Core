@@ -600,7 +600,8 @@ class CatalogFragmentFeed : Fragment() {
         context = activity,
         navigation = this::findNavigationController,
         onBookSelected = this::onBookSelected,
-        services = Services.serviceDirectory()
+        services = Services.serviceDirectory(),
+        ownership = feedState.arguments.ownership
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
@@ -816,31 +817,23 @@ class CatalogFragmentFeed : Fragment() {
               .account(ownership.accountId)
               .provider
 
-          when {
-            title.isBlank() -> {
-              toolbar.title = accountProvider.displayName
-              toolbar.subtitle = accountProvider.subtitle
-            }
-            title == accountProvider.displayName -> {
-              toolbar.title = title
-              toolbar.subtitle = accountProvider.subtitle
-            }
-            else -> {
-              toolbar.title = title
-              toolbar.subtitle = accountProvider.displayName
-            }
+          toolbar.title = when {
+            accountProvider.displayName == title -> this.parameters.title
+            title.isBlank() -> this.parameters.title
+            else -> title
           }
+          toolbar.subtitle = accountProvider.displayName
         }
 
         is CollectedFromAccounts -> {
           toolbar.title = title
-          toolbar.subtitle = ""
+          toolbar.subtitle = null
         }
       }
     } catch (e: Exception) {
       this.logger.error("could not fetch current account/profile: ", e)
-      toolbar.title = ""
-      toolbar.subtitle = ""
+      toolbar.title = title
+      toolbar.subtitle = null
     } finally {
       val color = ContextCompat.getColor(context, R.color.simplifiedColorBackground)
       toolbar.setTitleTextColor(color)
@@ -1129,29 +1122,20 @@ class CatalogFragmentFeed : Fragment() {
     groupName: String,
     group: List<FeedFacet>
   ) {
-    val names =
-      group.map { facet -> facet.title }
-        .toTypedArray()
-    val initiallyChecked =
-      group.indexOfFirst(FeedFacet::isActive)
+    val choices = group.sortedBy { it.title }
+    val names = choices.map { it.title }.toTypedArray()
+    val checkedItem = choices.indexOfFirst { it.isActive }
 
+    // Build the dialog
     val alertBuilder = AlertDialog.Builder(this.requireContext())
     alertBuilder.setTitle(groupName)
-    alertBuilder.setSingleChoiceItems(names, initiallyChecked) { dialog, checked ->
-
-      /*
-       * Wait a second in order to give the dialog list time to animate the selection.
-       */
-
-      this.uiThread.runOnUIThreadDelayed({
-        dialog.dismiss()
-        this.findNavigationController()
-          .openFeed(this.feedModel.resolveFacet(group[checked]))
-      }, 1_000L)
+    alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
+      val selected = choices[checked]
+      this.logger.debug("selected facet: {}", selected)
+      this.findNavigationController().openFeed(this.feedModel.resolveFacet(selected))
+      dialog.dismiss()
     }
-
-    alertBuilder.create()
-      .show()
+    alertBuilder.create().show()
   }
 
   private fun findNavigationController() =

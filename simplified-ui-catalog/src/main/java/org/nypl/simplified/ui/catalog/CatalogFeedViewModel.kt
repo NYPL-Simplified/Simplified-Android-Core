@@ -21,7 +21,6 @@ import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FilteringForAccount
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting
-import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -103,10 +102,10 @@ class CatalogFeedViewModel(
       ProfileFeedRequest(
         facetTitleProvider = CatalogFacetPseudoTitleProvider(this.context.resources),
         feedSelection = arguments.selection,
-        filterByAccountID = null,
+        filterByAccountID = arguments.filterAccount,
         search = arguments.searchTerms,
         sortBy = arguments.sortBy,
-        title = this.context.getString(R.string.feedTitleBooks),
+        title = arguments.title,
         uri = booksUri
       )
 
@@ -199,7 +198,6 @@ class CatalogFeedViewModel(
 
     future.map { feedLoaderResult ->
       this.onFeedStatusUpdated(feedLoaderResult, newState)
-      feedLoaderResult
     }
     return newState
   }
@@ -452,7 +450,7 @@ class CatalogFeedViewModel(
 
           is Sorting ->
             CatalogFeedArgumentsLocalBooks(
-              filterAccount = null,
+              filterAccount = currentArguments.filterAccount,
               ownership = currentArguments.ownership,
               searchTerms = currentArguments.searchTerms,
               selection = currentArguments.selection,
@@ -466,7 +464,7 @@ class CatalogFeedViewModel(
               ownership = currentArguments.ownership,
               searchTerms = currentArguments.searchTerms,
               selection = currentArguments.selection,
-              sortBy = SortBy.SORT_BY_TITLE,
+              sortBy = currentArguments.sortBy,
               title = facet.title
             )
         }

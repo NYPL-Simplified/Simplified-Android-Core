@@ -58,7 +58,7 @@ sealed class CatalogFeedArguments : Serializable {
   data class CatalogFeedArgumentsLocalBooks(
     override val title: String,
     override val ownership: CatalogFeedOwnership.CollectedFromAccounts,
-    val sortBy: SortBy,
+    val sortBy: SortBy = SortBy.SORT_BY_TITLE,
     val searchTerms: String?,
     val selection: FeedBooksSelection,
     val filterAccount: AccountID?

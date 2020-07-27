@@ -90,6 +90,7 @@ class TabbedNavigationController private constructor(
                 context = activity,
                 id = R.id.tabCatalog,
                 feedArguments = catalogFeedArguments(
+                  activity,
                   profilesController,
                   accountProviders.defaultProvider
                 )
@@ -99,7 +100,7 @@ class TabbedNavigationController private constructor(
               this.createBooksFragment(activity, R.id.tabBooks)
             },
             R.id.tabHolds to {
-              this.createHoldsFragment(activity, R.id.tabBooks)
+              this.createHoldsFragment(activity, R.id.tabHolds)
             },
             R.id.tabSettings to {
               this.createSettingsFragment(R.id.tabSettings)
@@ -166,16 +167,17 @@ class TabbedNavigationController private constructor(
     }
 
     private fun catalogFeedArguments(
+      context: Context,
       profilesController: ProfilesControllerType,
       defaultProvider: AccountProviderType
     ): CatalogFeedArguments.CatalogFeedArgumentsRemote {
       val age = this.currentAge(profilesController)
       val account = this.pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFeedArguments.CatalogFeedArgumentsRemote(
-        title = account.provider.displayName,
         ownership = CatalogFeedOwnership.OwnedByAccount(account.id),
         feedURI = account.provider.catalogURIForAge(age),
-        isSearchResults = false
+        isSearchResults = false,
+        title = context.getString(R.string.tabCatalog)
       )
     }
 

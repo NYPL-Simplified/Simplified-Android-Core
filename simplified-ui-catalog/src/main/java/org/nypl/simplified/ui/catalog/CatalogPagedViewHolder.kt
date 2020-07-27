@@ -17,6 +17,7 @@ import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
@@ -28,9 +29,11 @@ import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
@@ -49,7 +52,8 @@ class CatalogPagedViewHolder(
   private val onBookSelected: (FeedEntryOPDS) -> Unit,
   private val parent: View,
   private val registrySubscriptions: CompositeDisposable,
-  private val services: ServiceDirectoryType
+  private val services: ServiceDirectoryType,
+  private val ownership: CatalogFeedOwnership
 ) : RecyclerView.ViewHolder(parent) {
 
   private val logger =
@@ -61,6 +65,8 @@ class CatalogPagedViewHolder(
     this.services.requireService(BookRegistryReadableType::class.java)
   private val configurationService: BuildConfigurationServiceType =
     this.services.requireService(BuildConfigurationServiceType::class.java)
+  private val profilesController: ProfilesControllerType =
+    this.services.requireService(ProfilesControllerType::class.java)
   private val uiThread: UIThreadServiceType =
     this.services.requireService(UIThreadServiceType::class.java)
 
@@ -82,6 +88,8 @@ class CatalogPagedViewHolder(
     this.parent.findViewById<ProgressBar>(R.id.bookCellIdleCoverProgress)!!
   private val idleTitle =
     this.idle.findViewById<TextView>(R.id.bookCellIdleTitle)!!
+  private val idleMeta =
+    this.idle.findViewById<TextView>(R.id.bookCellIdleMeta)!!
   private val idleAuthor =
     this.idle.findViewById<TextView>(R.id.bookCellIdleAuthor)!!
   private val idleButtons =
@@ -191,6 +199,26 @@ class CatalogPagedViewHolder(
     this.idleTitle.text = item.feedEntry.title
     this.idleAuthor.text = item.feedEntry.authorsCommaSeparated
     this.errorTitle.text = item.feedEntry.title
+
+    this.idleMeta.text = when (item.probableFormat) {
+      null,
+      BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB ->
+        context.getString(R.string.catalogBookFormatEPUB)
+      BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO ->
+        context.getString(R.string.catalogBookFormatAudioBook)
+      BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
+        context.getString(R.string.catalogBookFormatPDF)
+    }
+
+    when (this.ownership) {
+      is CollectedFromAccounts -> {
+        val accountProvider =
+          this.profilesController.profileCurrent()
+            .account(item.accountID)
+            .provider
+        this.idleMeta.text = "${this.idleMeta.text} from ${accountProvider.displayName}"
+      }
+    }
 
     val targetHeight =
       this.parent.resources.getDimensionPixelSize(R.dimen.cover_thumbnail_height)
