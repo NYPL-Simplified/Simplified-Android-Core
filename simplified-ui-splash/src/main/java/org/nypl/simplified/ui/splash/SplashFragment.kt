@@ -12,7 +12,6 @@ import android.view.animation.AnimationUtils
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -241,7 +240,7 @@ class SplashFragment : Fragment() {
     this.viewsForEULA.eulaWebView.settings.allowUniversalAccessFromFileURLs = false
     this.viewsForEULA.eulaWebView.settings.javaScriptEnabled = false
 
-    this.viewsForEULA.eulaWebView.webViewClient = object : WebViewClient() {
+    this.viewsForEULA.eulaWebView.webViewClient = object : MailtoWebViewClient(requireActivity()) {
       override fun onReceivedError(
         view: WebView?,
         errorCode: Int,
