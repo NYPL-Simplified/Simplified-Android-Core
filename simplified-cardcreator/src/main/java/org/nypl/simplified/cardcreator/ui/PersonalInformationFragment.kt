@@ -101,6 +101,8 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
     // Either label or EditText can launch birthday picker
     binding.birthDateEt.setOnClickListener { showDatePickerDialog() }
     binding.birthDateLabel.setOnClickListener { showDatePickerDialog() }
+
+    restoreViewData()
   }
 
   private fun validateForm() {
@@ -162,5 +164,17 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  /**
+   * Restores cached data
+   */
+  private fun restoreViewData() {
+    val personalInformation = Cache(requireContext()).getPersonalInformation()
+    binding.firstNameEt.setText(personalInformation.firstName, TextView.BufferType.EDITABLE)
+    binding.middleNameEt.setText(personalInformation.middleName, TextView.BufferType.EDITABLE)
+    binding.lastNameEt.setText(personalInformation.lastName, TextView.BufferType.EDITABLE)
+    binding.emailEt.setText(personalInformation.email, TextView.BufferType.EDITABLE)
+    binding.birthDateEt.setText(personalInformation.birthDate, TextView.BufferType.EDITABLE)
   }
 }

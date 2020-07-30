@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -100,7 +101,14 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
     binding.prevBtn.setOnClickListener {
       navController.popBackStack()
     }
+    restoreViewData()
+  }
 
+  /**
+   * Validates entered address
+   */
+  private fun validateAddress() {
+    showLoading(true)
     viewModel.validateAddressResponse.observe(viewLifecycleOwner, Observer { response ->
       showLoading(false)
       if (response.type == validAddress || response.type == alternateAddress) {
@@ -136,13 +144,6 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
       val alert = dialogBuilder.create()
       alert.show()
     })
-  }
-
-  /**
-   * Validates entered address
-   */
-  private fun validateAddress() {
-    showLoading(true)
     viewModel.validateAddress(Address(AddressDetails(binding.etCity.text.toString(),
       binding.etStreet1.text.toString(),
       getStateAbbreviation(binding.spState.selectedItem.toString()),
@@ -199,5 +200,15 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  /**
+   * Restores cached data
+   */
+  private fun restoreViewData() {
+    val homeAddress = Cache(requireContext()).getHomeAddress()
+    binding.etZip.setText(homeAddress.zip, TextView.BufferType.EDITABLE)
+    binding.etStreet1.setText(homeAddress.line_1, TextView.BufferType.EDITABLE)
+    binding.etCity.setText(homeAddress.city, TextView.BufferType.EDITABLE)
   }
 }
