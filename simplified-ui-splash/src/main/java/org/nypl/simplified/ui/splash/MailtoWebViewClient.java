@@ -25,19 +25,15 @@ public class MailtoWebViewClient extends WebViewClient {
         if (url.startsWith(MailTo.MAILTO_SCHEME)) {
             final Activity activity = mActivityRef.get();
             if (activity != null) {
-                try {
-                    MailTo mt = MailTo.parse(url);
-                    Intent i = newEmailIntent(activity, mt.getTo(), mt.getSubject());
-                    if (i.resolveActivity(activity.getPackageManager()) != null) {
-                        activity.startActivity(i);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                MailTo mt = MailTo.parse(url);
+                Intent i = newEmailIntent(activity, mt.getTo(), mt.getSubject());
+                if (i.resolveActivity(activity.getPackageManager()) != null) {
+                    activity.startActivity(i);
                 }
                 return true;
             }
         } else {
-            view.loadUrl(url);
+            return false;
         }
         return true;
     }
