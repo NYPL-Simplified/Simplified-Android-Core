@@ -210,16 +210,6 @@ class CatalogPagedViewHolder(
         context.getString(R.string.catalogBookFormatPDF)
     }
 
-    when (this.ownership) {
-      is CollectedFromAccounts -> {
-        val accountProvider =
-          this.profilesController.profileCurrent()
-            .account(item.accountID)
-            .provider
-        this.idleMeta.text = "${this.idleMeta.text} from ${accountProvider.displayName}"
-      }
-    }
-
     val targetHeight =
       this.parent.resources.getDimensionPixelSize(R.dimen.cover_thumbnail_height)
     val targetWidth = 0

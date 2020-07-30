@@ -97,10 +97,20 @@ class TabbedNavigationController private constructor(
               )
             },
             R.id.tabBooks to {
-              this.createBooksFragment(activity, R.id.tabBooks)
+              this.createBooksFragment(
+                context = activity,
+                id = R.id.tabBooks,
+                profilesController = profilesController,
+                defaultProvider = accountProviders.defaultProvider
+              )
             },
             R.id.tabHolds to {
-              this.createHoldsFragment(activity, R.id.tabHolds)
+              this.createHoldsFragment(
+                context = activity,
+                id = R.id.tabHolds,
+                profilesController = profilesController,
+                defaultProvider = accountProviders.defaultProvider
+              )
             },
             R.id.tabSettings to {
               this.createSettingsFragment(R.id.tabSettings)
@@ -204,12 +214,20 @@ class TabbedNavigationController private constructor(
 
     private fun createHoldsFragment(
       context: Context,
-      id: Int
+      id: Int,
+      profilesController: ProfilesControllerType,
+      defaultProvider: AccountProviderType
     ): Fragment {
       this.logger.debug("[{}]: creating holds fragment", id)
+
+      /*
+       * SIMPLY-2923: Filter by the default account until 'All' view is approved by UX.
+       */
+
+      val account = pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFragmentFeed.create(
         CatalogFeedArgumentsLocalBooks(
-          filterAccount = null,
+          filterAccount = account.id,
           ownership = CatalogFeedOwnership.CollectedFromAccounts,
           searchTerms = null,
           selection = FeedBooksSelection.BOOKS_FEED_HOLDS,
@@ -221,12 +239,20 @@ class TabbedNavigationController private constructor(
 
     private fun createBooksFragment(
       context: Context,
-      id: Int
+      id: Int,
+      profilesController: ProfilesControllerType,
+      defaultProvider: AccountProviderType
     ): Fragment {
       this.logger.debug("[{}]: creating books fragment", id)
+
+      /*
+       * SIMPLY-2923: Filter by the default account until 'All' view is approved by UX.
+       */
+
+      val account = pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFragmentFeed.create(
         CatalogFeedArgumentsLocalBooks(
-          filterAccount = null,
+          filterAccount = account.id,
           ownership = CatalogFeedOwnership.CollectedFromAccounts,
           searchTerms = null,
           selection = FeedBooksSelection.BOOKS_FEED_LOANED,
