@@ -944,9 +944,16 @@ class CatalogFragmentFeed : Fragment() {
      * bar.
      */
 
-    val remainingGroups = facetsByGroup.filter { entry ->
-      !FeedFacets.facetGroupIsEntryPointTyped(entry.value)
-    }
+    val remainingGroups = facetsByGroup
+      .filter { entry ->
+        /*
+         * SIMPLY-2923: Hide the 'Collection' Facet until approved by UX.
+         */
+        entry.key != "Collection"
+      }
+      .filter { entry ->
+        !FeedFacets.facetGroupIsEntryPointTyped(entry.value)
+      }
 
     if (remainingGroups.isEmpty()) {
       facetLayoutScroller.visibility = View.GONE

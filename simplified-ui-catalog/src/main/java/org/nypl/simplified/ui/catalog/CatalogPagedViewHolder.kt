@@ -33,7 +33,6 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
@@ -208,16 +207,6 @@ class CatalogPagedViewHolder(
         context.getString(R.string.catalogBookFormatAudioBook)
       BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
         context.getString(R.string.catalogBookFormatPDF)
-    }
-
-    when (this.ownership) {
-      is CollectedFromAccounts -> {
-        val accountProvider =
-          this.profilesController.profileCurrent()
-            .account(item.accountID)
-            .provider
-        this.idleMeta.text = "${this.idleMeta.text} from ${accountProvider.displayName}"
-      }
     }
 
     val targetHeight =
