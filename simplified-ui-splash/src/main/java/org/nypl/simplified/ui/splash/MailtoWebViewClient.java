@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.MailTo;
+import android.net.Uri;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -21,13 +22,18 @@ public class MailtoWebViewClient extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        if (url.startsWith("mailto:")) {
+        if (url.startsWith(MailTo.MAILTO_SCHEME)) {
             final Activity activity = mActivityRef.get();
             if (activity != null) {
-                MailTo mt = MailTo.parse(url);
-                Intent i = newEmailIntent(activity, mt.getTo(), mt.getSubject(), mt.getBody(), mt.getCc());
-                activity.startActivity(i);
-                view.reload();
+                try {
+                    MailTo mt = MailTo.parse(url);
+                    Intent i = newEmailIntent(activity, mt.getTo(), mt.getSubject());
+                    if (i.resolveActivity(activity.getPackageManager()) != null) {
+                        activity.startActivity(i);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
             }
         } else {
@@ -36,13 +42,11 @@ public class MailtoWebViewClient extends WebViewClient {
         return true;
     }
 
-    private Intent newEmailIntent(Context context, String address, String subject, String body, String cc) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[] { address });
-        intent.putExtra(Intent.EXTRA_TEXT, body);
+    private Intent newEmailIntent(Context context, String address, String subject) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{address});
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra(Intent.EXTRA_CC, cc);
-        intent.setType("message/rfc822");
         return intent;
     }
 }
