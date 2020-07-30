@@ -241,7 +241,7 @@ class SplashFragment : Fragment() {
     this.viewsForEULA.eulaWebView.settings.allowUniversalAccessFromFileURLs = false
     this.viewsForEULA.eulaWebView.settings.javaScriptEnabled = false
 
-    this.viewsForEULA.eulaWebView.webViewClient = object : WebViewClient() {
+    this.viewsForEULA.eulaWebView.webViewClient = object : MailtoWebViewClient(requireActivity()) {
       override fun onReceivedError(
         view: WebView?,
         errorCode: Int,
