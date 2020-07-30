@@ -140,6 +140,8 @@ class BookBorrowTask(
     MIMEParser.parseRaisingException("application/epub+zip")
   private val contentTypeOctetStream =
     MIMEParser.parseRaisingException("application/octet-stream")
+  private val contentTypeJson =
+    MIMEParser.parseRaisingException("application/json")
 
   private val adobeACS =
     "Adobe ACS"
@@ -1168,6 +1170,35 @@ class BookBorrowTask(
       !expectedContentTypes.isEmpty(),
       "At least one expected content type"
     )
+
+    /*
+     * SIMPLY-2928: Overdrive may return a type of 'application/json' instead of
+     *   the expected 'application/vnd.overdrive.circulation.api+json' type. Handle this
+     *   as an override.
+     */
+
+    val isOverdrive = expectedContentTypes
+      .intersect(BookFormats.audioBookOverdriveMimeTypes())
+      .isNotEmpty()
+
+    if (isOverdrive) {
+      when (receivedContentType.fullType) {
+        this.contentTypeJson.fullType -> {
+          this.debug(
+            "expected one of {} but received {} (acceptable)",
+            expectedContentTypes,
+            receivedContentType
+          )
+
+          this.steps.currentStepSucceeded(this.services.borrowStrings.borrowBookSavingCheckingContentTypeOK)
+          return expectedContentTypes.first()
+        }
+      }
+    }
+
+    /*
+     * Handle the type 'application/octet-stream' as an override.
+     */
 
     if (receivedContentType == this.contentTypeOctetStream) {
       this.debug(
