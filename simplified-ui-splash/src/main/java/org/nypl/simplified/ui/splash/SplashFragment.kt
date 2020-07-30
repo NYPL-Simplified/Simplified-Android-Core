@@ -12,7 +12,6 @@ import android.view.animation.AnimationUtils
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
