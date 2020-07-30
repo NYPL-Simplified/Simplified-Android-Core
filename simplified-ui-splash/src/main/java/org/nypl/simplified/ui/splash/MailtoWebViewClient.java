@@ -29,13 +29,11 @@ public class MailtoWebViewClient extends WebViewClient {
                 Intent i = newEmailIntent(activity, mt.getTo(), mt.getSubject());
                 if (i.resolveActivity(activity.getPackageManager()) != null) {
                     activity.startActivity(i);
+                    return true;
                 }
-                return true;
             }
-        } else {
-            return false;
         }
-        return true;
+        return false;
     }
 
     private Intent newEmailIntent(Context context, String address, String subject) {
