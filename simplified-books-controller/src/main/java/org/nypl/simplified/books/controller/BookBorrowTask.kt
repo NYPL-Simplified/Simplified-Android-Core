@@ -686,7 +686,7 @@ class BookBorrowTask(
           this@BookBorrowTask.publishBookStatus(
             BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
           )
-          return java.lang.Boolean.TRUE
+          return true
         }
 
         /**
@@ -699,7 +699,7 @@ class BookBorrowTask(
           this@BookBorrowTask.publishBookStatus(
             BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
           )
-          return java.lang.Boolean.TRUE
+          return true
         }
 
         /**
@@ -712,18 +712,10 @@ class BookBorrowTask(
         }
       })
 
-    return if (wantFulfill) {
+    if (wantFulfill) {
       this.runAcquisitionFulfill(feedEntry.feedEntry)
     } else {
-      val exception = IllegalStateException()
-      val message =
-        this.services.borrowStrings.borrowBookBorrowAvailabilityInappropriate(availability)
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = WrongAvailability(message, this.currentAttributesWith()),
-        exception = exception
-      )
-      throw exception
+      this.steps.currentStepSucceeded("Borrow succeeded with availability $availability.")
     }
   }
 
