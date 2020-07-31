@@ -58,7 +58,6 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.Un
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnusableAcquisitions
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.WrongAvailability
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadCancelled
@@ -108,6 +107,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.lang.IllegalStateException
 import java.net.URI
 import java.util.concurrent.Callable
 import java.util.concurrent.CancellationException
@@ -659,9 +659,7 @@ class BookBorrowTask(
          */
 
         override fun onHoldable(a: OPDSAvailabilityHoldable): Boolean {
-          this@BookBorrowTask.debug("book is holdable, cannot continue!")
-          this@BookBorrowTask.publishBookStatus(BookStatus.Holdable(this@BookBorrowTask.bookId))
-          return false
+          throw IllegalStateException("book is holdable, cannot continue!")
         }
 
         /**
@@ -673,8 +671,7 @@ class BookBorrowTask(
          */
 
         override fun onLoanable(a: OPDSAvailabilityLoanable): Boolean {
-          this@BookBorrowTask.debug("book is loanable, this is a server bug!")
-          return false
+          throw IllegalStateException("book is loanable, this is a server bug!")
         }
 
         /**
@@ -686,7 +683,7 @@ class BookBorrowTask(
           this@BookBorrowTask.publishBookStatus(
             BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
           )
-          return java.lang.Boolean.TRUE
+          return true
         }
 
         /**
@@ -699,7 +696,7 @@ class BookBorrowTask(
           this@BookBorrowTask.publishBookStatus(
             BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
           )
-          return java.lang.Boolean.TRUE
+          return true
         }
 
         /**
@@ -712,18 +709,10 @@ class BookBorrowTask(
         }
       })
 
-    return if (wantFulfill) {
+    if (wantFulfill) {
       this.runAcquisitionFulfill(feedEntry.feedEntry)
     } else {
-      val exception = IllegalStateException()
-      val message =
-        this.services.borrowStrings.borrowBookBorrowAvailabilityInappropriate(availability)
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = WrongAvailability(message, this.currentAttributesWith()),
-        exception = exception
-      )
-      throw exception
+      this.steps.currentStepSucceeded("Borrow succeeded with availability $availability.")
     }
   }
 
