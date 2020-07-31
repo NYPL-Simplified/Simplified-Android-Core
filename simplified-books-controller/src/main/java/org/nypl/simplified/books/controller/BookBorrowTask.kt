@@ -58,7 +58,6 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.Un
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnusableAcquisitions
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.WrongAvailability
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadCancelled
