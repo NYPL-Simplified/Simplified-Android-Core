@@ -107,6 +107,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.lang.IllegalStateException
 import java.net.URI
 import java.util.concurrent.Callable
 import java.util.concurrent.CancellationException
@@ -658,9 +659,7 @@ class BookBorrowTask(
          */
 
         override fun onHoldable(a: OPDSAvailabilityHoldable): Boolean {
-          this@BookBorrowTask.debug("book is holdable, cannot continue!")
-          this@BookBorrowTask.publishBookStatus(BookStatus.Holdable(this@BookBorrowTask.bookId))
-          return false
+          throw IllegalStateException("book is holdable, cannot continue!")
         }
 
         /**
@@ -672,8 +671,7 @@ class BookBorrowTask(
          */
 
         override fun onLoanable(a: OPDSAvailabilityLoanable): Boolean {
-          this@BookBorrowTask.debug("book is loanable, this is a server bug!")
-          return false
+          throw IllegalStateException("book is loanable, this is a server bug!")
         }
 
         /**
