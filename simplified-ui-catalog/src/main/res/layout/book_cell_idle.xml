@@ -83,33 +83,45 @@
     app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
     app:layout_constraintBottom_toBottomOf="parent">
 
+    <!-- These views are removed at runtime and are just present for the sake of the UI editor preview -->
+
     <Button
       android:layout_width="0dp"
       android:layout_height="@dimen/catalogFeedCellButtonsHeight"
       android:layout_weight="1"
       android:maxWidth="64dp"
-      android:text="@string/catalogDismiss" />
+      android:visibility="gone"
+      tools:text="@string/catalogDismiss"
+      tools:visibility="visible" />
 
     <Space
       android:layout_width="16dp"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      tools:visibility="visible" />
 
     <Button
       android:layout_width="0dp"
       android:layout_height="@dimen/catalogFeedCellButtonsHeight"
       android:layout_weight="1"
       android:maxWidth="64dp"
-      android:text="@string/catalogDetails" />
+      android:visibility="gone"
+      tools:text="@string/catalogDetails"
+      tools:visibility="visible" />
 
     <Space
       android:layout_width="16dp"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      tools:visibility="visible" />
 
     <Button
       android:layout_width="0dp"
       android:layout_height="@dimen/catalogFeedCellButtonsHeight"
       android:layout_weight="1"
       android:maxWidth="64dp"
-      android:text="@string/catalogRetry" />
+      android:visibility="gone"
+      tools:text="@string/catalogRetry"
+      tools:visibility="visible" />
   </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
