@@ -429,6 +429,7 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
     this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
 
+    this.idleButtons.removeAllViews()
     if (status.isRevocable) {
       this.idleButtons.addView(
         this.buttonCreator.createRevokeHoldButton {
