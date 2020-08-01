@@ -23,4 +23,7 @@ dependencies {
   implementation libraries.nyplDRMCore
   implementation libraries.readium
   implementation libraries.readiumSharedJS
+
+  testImplementation libraries.junit
+  testImplementation libraries.mockito
 }
