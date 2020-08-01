@@ -142,7 +142,7 @@ class CatalogPagedViewHolder(
 
         val status =
           this.bookRegistry.bookOrNull(item.bookID)
-            ?: this.synthesizeFakeBookStatus(item)
+            ?: this.synthesizeBookWithStatus(item)
 
         this.onBookWithStatus(status)
         this.checkSomethingIsVisible()
@@ -157,7 +157,7 @@ class CatalogPagedViewHolder(
     }
   }
 
-  private fun synthesizeFakeBookStatus(
+  private fun synthesizeBookWithStatus(
     item: FeedEntryOPDS
   ): BookWithStatus {
     val book = Book(
@@ -168,7 +168,9 @@ class CatalogPagedViewHolder(
       entry = item.feedEntry,
       formats = listOf()
     )
-    return BookWithStatus(book, BookStatus.fromBook(book))
+    val status = BookStatus.fromBook(book)
+    this.logger.debug("Synthesizing {} with status {}", book.id, status)
+    return BookWithStatus(book, status)
   }
 
   private fun setVisibilityIfNecessary(
@@ -229,8 +231,22 @@ class CatalogPagedViewHolder(
   }
 
   private fun onBookChanged(event: BookStatusEvent) {
+    val previousEntry =
+      this.feedEntry as FeedEntryOPDS
+
+    val bookWithStatus =
+      this.bookRegistry.bookOrNull(event.book())
+        ?: this.synthesizeBookWithStatus(previousEntry)
+
+    // Update the cached parameters with the feed entry. We'll need this later if the availability
+    // has changed but it's been removed from the registry (e.g. when revoking a hold).
+    this.feedEntry = FeedEntryOPDS(
+      accountID = previousEntry.accountID,
+      feedEntry = bookWithStatus.book.entry
+    )
+
     this.uiThread.runOnUIThread {
-      this.onBookChangedUI(event)
+      this.onBookChangedUI(bookWithStatus)
       this.checkSomethingIsVisible()
     }
   }
@@ -246,23 +262,11 @@ class CatalogPagedViewHolder(
   }
 
   @UiThread
-  private fun onBookChangedUI(event: BookStatusEvent) {
+  private fun onBookChangedUI(book: BookWithStatus) {
     this.uiThread.checkIsUIThread()
-
-    val book = this.bookRegistry.bookOrNull(event.book())
-    val status = book?.status
-    if (status == null) {
-      val previousEntry = this.feedEntry
-      if (previousEntry != null) {
-        this.bindTo(previousEntry)
-      } else {
-        // XXX: Not clear what we can do here. Is this code even reachable?
-      }
-      return
-    }
-
-    this.onFeedEntryOPDSUI(FeedEntryOPDS(book.book.account, book.book.entry))
-    return this.onBookWithStatus(book)
+    this.bindTo(this.feedEntry)
+    this.onFeedEntryOPDSUI(this.feedEntry as FeedEntryOPDS)
+    this.onBookWithStatus(book)
   }
 
   @UiThread
