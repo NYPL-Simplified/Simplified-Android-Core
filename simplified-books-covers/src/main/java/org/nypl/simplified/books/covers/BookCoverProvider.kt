@@ -10,7 +10,6 @@ import com.io7m.jfunctional.Some
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
-import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,7 +28,7 @@ class BookCoverProvider private constructor(
   private val badgeLookup: BookCoverBadgeLookupType
 ) : BookCoverProviderType {
 
-  private val log: Logger = LoggerFactory.getLogger(BookCoverProvider::class.java)
+  private val logger: Logger = LoggerFactory.getLogger(BookCoverProvider::class.java)
   private val coverTag: String = "cover"
   private val thumbnailTag: String = "thumbnail"
 
@@ -81,7 +80,7 @@ class BookCoverProvider private constructor(
 
     val badgePainter = BookCoverBadgePainter(entry, this.badgeLookup)
     if (uriSpecified != null) {
-      this.log.debug("{}: {}: loading specified uri {}", tag, entry.bookID, uriSpecified)
+      this.logger.debug("{}: {}: loading specified uri {}", tag, entry.bookID, uriSpecified)
 
       val fallbackToGeneration = object : Callback {
         override fun onSuccess() {
@@ -89,7 +88,7 @@ class BookCoverProvider private constructor(
         }
 
         override fun onError(e: Exception) {
-          this@BookCoverProvider.log.debug(
+          this@BookCoverProvider.logger.debug(
             "{}: {}: failed to load uri {}, falling back to generation: ",
             tag,
             entry.bookID,
@@ -114,7 +113,7 @@ class BookCoverProvider private constructor(
         .transform(badgePainter)
         .into(imageView, fallbackToGeneration)
     } else {
-      this.log.debug("{}: {}: loading generated uri {}", tag, entry.bookID, uriGenerated)
+      this.logger.debug("{}: {}: loading generated uri {}", tag, entry.bookID, uriGenerated)
 
       this.picasso.load(uriGenerated.toString())
         .tag(tag)
@@ -129,21 +128,15 @@ class BookCoverProvider private constructor(
   }
 
   private fun coverURIOf(entry: FeedEntry.FeedEntryOPDS): URI? {
-    val bookOpt = this.bookRegistry.book(entry.bookID)
-    if (bookOpt is Some<BookWithStatus>) {
-      val book = bookOpt.get()
-      return book.book.cover?.toURI()
-    }
-    return mapOptionToNull(entry.feedEntry.cover)
+    val bookWithStatus =
+      this.bookRegistry.bookOrNull(entry.bookID)
+    return bookWithStatus?.book?.cover?.toURI() ?: mapOptionToNull(entry.feedEntry.cover)
   }
 
   private fun thumbnailURIOf(entry: FeedEntry.FeedEntryOPDS): URI? {
-    val bookOpt = this.bookRegistry.book(entry.bookID)
-    if (bookOpt is Some<BookWithStatus>) {
-      val book = bookOpt.get()
-      return book.book.cover?.toURI()
-    }
-    return mapOptionToNull(entry.feedEntry.thumbnail)
+    val bookWithStatus =
+      this.bookRegistry.bookOrNull(entry.bookID)
+    return bookWithStatus?.book?.thumbnail?.toURI() ?: mapOptionToNull(entry.feedEntry.thumbnail)
   }
 
   override fun loadThumbnailInto(
