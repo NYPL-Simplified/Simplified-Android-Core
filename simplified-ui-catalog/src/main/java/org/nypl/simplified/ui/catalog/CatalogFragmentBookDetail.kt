@@ -32,7 +32,7 @@ import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
@@ -249,9 +249,9 @@ class CatalogFragmentBookDetail : Fragment() {
 
     val status =
       this.bookRegistry.bookOrNull(this.parameters.bookID)
-        ?: this.synthesizeBookWithStatus()
+        ?: this.synthesizeBookWithStatus(this.parameters.feedEntry)
 
-    this.onBookStatusUI(status)
+    this.onBookChangedUI(status)
     this.onOPDSFeedEntryUI(this.parameters.feedEntry)
 
     val toolbarHost = this.activity
@@ -264,19 +264,23 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.bookRegistrySubscription =
       this.bookRegistry.bookEvents()
-        .subscribe(this::onBookStatusEvent)
+        .subscribe(this::onBookChanged)
   }
 
-  private fun synthesizeBookWithStatus(): BookWithStatus {
+  private fun synthesizeBookWithStatus(
+    item: FeedEntryOPDS
+  ): BookWithStatus {
     val book = Book(
-      id = this.parameters.bookID,
-      account = this.parameters.feedEntry.accountID,
+      id = item.bookID,
+      account = item.accountID,
       cover = null,
       thumbnail = null,
-      entry = this.parameters.feedEntry.feedEntry,
+      entry = item.feedEntry,
       formats = listOf()
     )
-    return BookWithStatus(book, BookStatus.fromBook(book))
+    val status = BookStatus.fromBook(book)
+    this.logger.debug("Synthesizing {} with status {}", book.id, status)
+    return BookWithStatus(book, status)
   }
 
   private fun configureToolbar(
@@ -311,25 +315,30 @@ class CatalogFragmentBookDetail : Fragment() {
     }
   }
 
-  private fun onBookStatusEvent(event: BookStatusEvent) {
-    if (event.book() != this.parameters.bookID) {
-      return
-    }
-
+  private fun onBookChanged(event: BookStatusEvent) {
     val bookWithStatus =
-      this.bookRegistry.bookOrNull(this.parameters.bookID)
-        ?: this.synthesizeBookWithStatus()
+      this.bookRegistry.bookOrNull(event.book())
+        ?: synthesizeBookWithStatus(this.parameters.feedEntry)
 
-    this.uiThread.runOnUIThread { this.onBookStatusUI(bookWithStatus) }
+    // Update the cached parameters with the feed entry. We'll need this later if the availability
+    // has changed but it's been removed from the registry (e.g. when revoking a hold).
+    this.parameters = this.parameters.copy(
+      feedEntry = FeedEntryOPDS(
+        accountID = this.parameters.feedEntry.accountID,
+        feedEntry = bookWithStatus.book.entry
+      )
+    )
+
+    this.uiThread.runOnUIThread { this.onBookChangedUI(bookWithStatus) }
     this.onOPDSFeedEntry(
-      FeedEntry.FeedEntryOPDS(
+      FeedEntryOPDS(
         bookWithStatus.book.account,
         bookWithStatus.book.entry
       )
     )
   }
 
-  private fun onOPDSFeedEntry(entry: FeedEntry.FeedEntryOPDS) {
+  private fun onOPDSFeedEntry(entry: FeedEntryOPDS) {
     this.uiThread.runOnUIThread {
       this.parameters = this.parameters.copy(feedEntry = entry)
       this.onOPDSFeedEntryUI(entry)
@@ -337,7 +346,7 @@ class CatalogFragmentBookDetail : Fragment() {
   }
 
   @UiThread
-  private fun onOPDSFeedEntryUI(feedEntry: FeedEntry.FeedEntryOPDS) {
+  private fun onOPDSFeedEntryUI(feedEntry: FeedEntryOPDS) {
     this.uiThread.checkIsUIThread()
 
     val opds = feedEntry.feedEntry
@@ -468,7 +477,7 @@ class CatalogFragmentBookDetail : Fragment() {
   }
 
   @UiThread
-  private fun onBookStatusUI(book: BookWithStatus) {
+  private fun onBookChangedUI(book: BookWithStatus) {
     this.uiThread.checkIsUIThread()
     this.debugStatus.text = book.javaClass.simpleName
 
