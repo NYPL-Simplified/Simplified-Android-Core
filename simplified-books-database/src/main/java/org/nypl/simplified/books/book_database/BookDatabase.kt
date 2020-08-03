@@ -160,7 +160,7 @@ class BookDatabase private constructor(
   companion object {
 
     private val LOG = LoggerFactory.getLogger(BookDatabase::class.java)
-    
+
     @Throws(BookDatabaseException::class)
     fun open(
       context: Context,
