@@ -58,7 +58,7 @@ class BookCoverFetchTask(
         COVER -> feedEntry.cover
         THUMBNAIL -> feedEntry.thumbnail
       }
-      this.logger.debug("fetching ${this.type}: {}", coverOpt)
+      this.logger.debug("fetching {}: {}", this.type, coverOpt)
 
       if (coverOpt is Some<URI>) {
         val cover = coverOpt.get()
@@ -76,7 +76,7 @@ class BookCoverFetchTask(
         this.taskRecorder.finishSuccess(Unit)
       }
     } catch (e: Throwable) {
-      this.logger.error("failed to fetch ${this.type}: ", e)
+      this.logger.error("failed to fetch {}: ", this.type, e)
 
       this.taskRecorder.currentStepFailedAppending(
         this.services.borrowStrings.borrowBookCoverUnexpectedException,
