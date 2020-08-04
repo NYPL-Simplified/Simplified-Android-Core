@@ -63,6 +63,7 @@ import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadCancelled
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadFailed
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadOK
+import org.nypl.simplified.books.controller.BookCoverFetchTask.Type
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionBadBorrowFeed
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionDeviceNotActivated
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
@@ -761,11 +762,12 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
     this.debug("fetching cover")
 
-    return when (val result =
+    when (val result =
       BookCoverFetchTask(
         services = this.services,
         databaseEntry = this.databaseEntry,
         feedEntry = opdsEntry,
+        type = Type.COVER,
         httpAuth = httpAuth
       ).call()) {
       is TaskResult.Success -> {
@@ -774,6 +776,27 @@ class BookBorrowTask(
       }
       is TaskResult.Failure -> {
         this.debug("failed to fetch cover")
+        this.steps.addAll(result.steps)
+      }
+    }
+
+    this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
+    this.debug("fetching thumbnail")
+
+    when (val result =
+      BookCoverFetchTask(
+        services = this.services,
+        databaseEntry = this.databaseEntry,
+        feedEntry = opdsEntry,
+        type = Type.THUMBNAIL,
+        httpAuth = httpAuth
+      ).call()) {
+      is TaskResult.Success -> {
+        this.debug("fetched thumbnail successfully")
+        this.steps.addAll(result.steps)
+      }
+      is TaskResult.Failure -> {
+        this.debug("failed to fetch thumbnail")
         this.steps.addAll(result.steps)
       }
     }

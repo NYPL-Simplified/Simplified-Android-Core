@@ -8,6 +8,8 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledURIs.BUNDLED_CONTENT_SCHEME
+import org.nypl.simplified.books.controller.BookCoverFetchTask.Type.COVER
+import org.nypl.simplified.books.controller.BookCoverFetchTask.Type.THUMBNAIL
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
@@ -20,6 +22,7 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URI
+import java.util.Locale
 import java.util.concurrent.Callable
 
 /**
@@ -30,8 +33,17 @@ class BookCoverFetchTask(
   private val services: BookTaskRequiredServices,
   private val databaseEntry: BookDatabaseEntryType,
   private val feedEntry: OPDSAcquisitionFeedEntry,
+  private val type: Type,
   private val httpAuth: OptionType<HTTPAuthType>
 ) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+
+  enum class Type {
+    COVER, THUMBNAIL;
+
+    override fun toString(): String {
+      return super.toString().toLowerCase(Locale.US)
+    }
+  }
 
   private val logger =
     LoggerFactory.getLogger(BookCoverFetchTask::class.java)
@@ -42,8 +54,11 @@ class BookCoverFetchTask(
     this.taskRecorder.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
 
     return try {
-      val coverOpt = this.feedEntry.cover
-      this.logger.debug("fetching cover: {}", coverOpt)
+      val coverOpt = when (this.type) {
+        COVER -> feedEntry.cover
+        THUMBNAIL -> feedEntry.thumbnail
+      }
+      this.logger.debug("fetching {}: {}", this.type, coverOpt)
 
       if (coverOpt is Some<URI>) {
         val cover = coverOpt.get()
@@ -61,7 +76,7 @@ class BookCoverFetchTask(
         this.taskRecorder.finishSuccess(Unit)
       }
     } catch (e: Throwable) {
-      this.logger.error("failed to fetch cover: ", e)
+      this.logger.error("failed to fetch {}: ", this.type, e)
 
       this.taskRecorder.currentStepFailedAppending(
         this.services.borrowStrings.borrowBookCoverUnexpectedException,
@@ -144,7 +159,11 @@ class BookCoverFetchTask(
     val file = this.databaseEntry.temporaryFile()
     FileOutputStream(file).use { stream ->
       inputStream.copyTo(stream)
-      this.databaseEntry.setCover(file)
+
+      when (this.type) {
+        COVER -> this.databaseEntry.setCover(file)
+        THUMBNAIL -> this.databaseEntry.setThumbnail(file)
+      }
     }
     return this.taskRecorder.finishSuccess(Unit)
   }

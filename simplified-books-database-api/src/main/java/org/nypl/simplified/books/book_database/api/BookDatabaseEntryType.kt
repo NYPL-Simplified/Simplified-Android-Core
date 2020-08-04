@@ -43,6 +43,16 @@ interface BookDatabaseEntryType {
   fun setCover(file: File)
 
   /**
+   * Copy the thumbnail file into the database.
+   *
+   * @param file The cover file
+   * @throws BookDatabaseException On errors
+   */
+
+  @Throws(BookDatabaseException::class)
+  fun setThumbnail(file: File)
+
+  /**
    * Copy the OPDS entry into the database.
    *
    * @param opdsEntry The OPDS entry
