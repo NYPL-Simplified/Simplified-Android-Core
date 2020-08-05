@@ -18,6 +18,9 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookFormats
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
@@ -33,6 +36,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.catalog.R.string
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
@@ -202,13 +206,13 @@ class CatalogPagedViewHolder(
     this.errorTitle.text = item.feedEntry.title
 
     this.idleMeta.text = when (item.probableFormat) {
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB ->
-        context.getString(R.string.catalogBookFormatEPUB)
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO ->
-        context.getString(R.string.catalogBookFormatAudioBook)
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
-        context.getString(R.string.catalogBookFormatPDF)
-      else -> ""
+      BOOK_FORMAT_EPUB ->
+        context.getString(string.catalogBookFormatEPUB)
+      BOOK_FORMAT_AUDIO ->
+        context.getString(string.catalogBookFormatAudioBook)
+      BOOK_FORMAT_PDF ->
+        context.getString(string.catalogBookFormatPDF)
+      null -> ""
     }
 
     val targetHeight =
