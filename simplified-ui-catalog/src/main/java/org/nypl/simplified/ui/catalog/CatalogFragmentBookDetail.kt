@@ -24,7 +24,6 @@ import org.joda.time.format.DateTimeFormatterBuilder
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
