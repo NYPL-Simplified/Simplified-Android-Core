@@ -1184,16 +1184,27 @@ class BookBorrowTask(
     )
 
     /*
-     * SIMPLY-2928: Overdrive may return a type of 'application/json' instead of
-     *   the expected 'application/vnd.overdrive.circulation.api+json' type. Handle this
-     *   as an override.
+     * Attempt to find our received type in our set of expected types.
      */
 
-    val isOverdrive = expectedContentTypes
-      .intersect(BookFormats.audioBookOverdriveMimeTypes())
+    for (expectedContentType in expectedContentTypes) {
+      if (expectedContentType.fullType == receivedContentType.fullType) {
+        return receivedContentType
+      }
+    }
+
+    /*
+     * Handle the 'application/json' type as an exception.
+     *
+     * SIMPLY-2928: Overdrive may return 'application/json' instead of
+     * the expected 'application/vnd.overdrive.circulation.api+json' type.
+     */
+
+    val isAudiobook = expectedContentTypes
+      .intersect(BookFormats.audioBookMimeTypes())
       .isNotEmpty()
 
-    if (isOverdrive) {
+    if (isAudiobook) {
       when (receivedContentType.fullType) {
         this.contentTypeJson.fullType -> {
           this.debug(
@@ -1209,7 +1220,7 @@ class BookBorrowTask(
     }
 
     /*
-     * Handle the type 'application/octet-stream' as an override.
+     * Handle the 'application/octet-stream' type as an exception.
      */
 
     if (receivedContentType == this.contentTypeOctetStream) {
@@ -1223,11 +1234,9 @@ class BookBorrowTask(
       return expectedContentTypes.first()
     }
 
-    for (expectedContentType in expectedContentTypes) {
-      if (expectedContentType.fullType == receivedContentType.fullType) {
-        return receivedContentType
-      }
-    }
+    /*
+     * No match found!
+     */
 
     this.debug(
       "expected {} but received {} (unacceptable)",
