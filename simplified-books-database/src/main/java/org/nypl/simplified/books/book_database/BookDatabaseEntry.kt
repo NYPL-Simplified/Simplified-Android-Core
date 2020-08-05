@@ -252,29 +252,36 @@ internal class BookDatabaseEntry internal constructor(
       contentTypes: Set<MIMEType>
     ) {
       for (contentType in contentTypes) {
-        for (formatDefinition in constructors.keys) {
-          val constructor = constructors[formatDefinition]!!
-          if (formatDefinition.supportedContentTypes().contains(contentType)) {
-            if (!existingFormats.containsKey(constructor.classType)) {
-              val bookID = owner.book.id
-              logger.debug("[{}]: instantiating format {} for content type {}",
-                bookID.brief(),
-                constructor.classType.simpleName,
-                contentType)
+        for ((format, constructor) in constructors) {
+          if (format.supports(contentType)) {
 
-              val params =
-                DatabaseFormatHandleParameters(
-                  context = context,
-                  bookID = owner.book.id,
-                  directory = ownerDirectory,
-                  onUpdated = onUpdate,
-                  entry = owner,
-                  contentType = contentType
-                )
-
-              existingFormats[constructor.classType] = constructor.constructor.invoke(params)
-              return
+            // Skip if handler already exists for type
+            if (existingFormats.containsKey(constructor.classType)) {
+              logger.debug(
+                "[{}]: skipping duplicate format {} for content type {}",
+                owner.book.id.brief(), constructor.classType.simpleName, contentType
+              )
+              continue
             }
+
+            // Add new handler for type
+            logger.debug(
+              "[{}]: instantiating format {} for content type {}",
+              owner.book.id.brief(), constructor.classType.simpleName, contentType
+            )
+
+            val params =
+              DatabaseFormatHandleParameters(
+                context = context,
+                bookID = owner.book.id,
+                directory = ownerDirectory,
+                onUpdated = onUpdate,
+                entry = owner,
+                contentType = contentType
+              )
+
+            existingFormats[constructor.classType] = constructor.constructor.invoke(params)
+            return
           }
         }
       }
