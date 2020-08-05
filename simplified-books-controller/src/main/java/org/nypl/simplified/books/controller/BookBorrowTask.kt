@@ -1189,11 +1189,11 @@ class BookBorrowTask(
      *   as an override.
      */
 
-    val isOverdrive = expectedContentTypes
-      .intersect(BookFormats.audioBookOverdriveMimeTypes())
+    val isAudiobook = expectedContentTypes
+      .intersect(BookFormats.audioBookMimeTypes())
       .isNotEmpty()
 
-    if (isOverdrive) {
+    if (isAudiobook) {
       when (receivedContentType.fullType) {
         this.contentTypeJson.fullType -> {
           this.debug(
