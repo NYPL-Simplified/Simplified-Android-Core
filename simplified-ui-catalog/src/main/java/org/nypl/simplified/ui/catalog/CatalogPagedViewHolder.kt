@@ -202,13 +202,13 @@ class CatalogPagedViewHolder(
     this.errorTitle.text = item.feedEntry.title
 
     this.idleMeta.text = when (item.probableFormat) {
-      null,
       BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB ->
         context.getString(R.string.catalogBookFormatEPUB)
       BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO ->
         context.getString(R.string.catalogBookFormatAudioBook)
       BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
         context.getString(R.string.catalogBookFormatPDF)
+      else -> ""
     }
 
     val targetHeight =

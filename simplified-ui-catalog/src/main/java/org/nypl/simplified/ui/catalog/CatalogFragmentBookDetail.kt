@@ -355,13 +355,13 @@ class CatalogFragmentBookDetail : Fragment() {
 
     val context = this.requireContext()
     this.format.text = when (feedEntry.probableFormat) {
-      null,
       BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB ->
         context.getString(R.string.catalogBookFormatEPUB)
       BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO ->
         context.getString(R.string.catalogBookFormatAudioBook)
       BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
         context.getString(R.string.catalogBookFormatPDF)
+      else -> ""
     }
 
     this.cover.contentDescription =
