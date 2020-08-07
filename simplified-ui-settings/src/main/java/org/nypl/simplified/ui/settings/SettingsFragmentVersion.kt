@@ -64,6 +64,7 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var customOPDS: Button
   private lateinit var developerOptions: ViewGroup
   private lateinit var drmTable: TableLayout
+  private lateinit var enableR2: Switch
   private lateinit var failNextBoot: Switch
   private lateinit var hasSeenLibrarySelection: Switch
   private lateinit var profilesController: ProfilesControllerType
@@ -144,6 +145,8 @@ class SettingsFragmentVersion : Fragment() {
       layout.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
     this.cardCreatorFakeLocation =
       layout.findViewById(R.id.settingsVersionDevCardCreatorLocationSwitch)
+    this.enableR2 =
+      layout.findViewById(R.id.settingsVersionDevEnableR2Switch)
     this.customOPDS =
       layout.findViewById(R.id.settingsVersionDevCustomOPDS)
 
@@ -266,6 +269,12 @@ class SettingsFragmentVersion : Fragment() {
         .preferences()
         .showTestingLibraries
 
+    this.enableR2.isChecked =
+      this.profilesController
+        .profileCurrent()
+        .preferences()
+        .useExperimentalR2
+
     /*
      * Configure the "fail next boot" switch to enable/disable boot failures.
      */
@@ -313,6 +322,17 @@ class SettingsFragmentVersion : Fragment() {
     this.cardCreatorFakeLocation.setOnCheckedChangeListener { button, checked ->
       this.logger.debug("card creator fake location: {}", checked)
       CardCreatorDebugging.fakeNewYorkLocation = checked
+    }
+
+    /*
+     * Update the current profile's preferences whenever the R2 switch is changed.
+     */
+
+    this.enableR2.setOnClickListener {
+      val r2 = this.enableR2.isChecked
+      this.profilesController.profileUpdate { description ->
+        description.copy(preferences = description.preferences.copy(useExperimentalR2 = r2))
+      }
     }
   }
 

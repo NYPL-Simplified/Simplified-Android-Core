@@ -4,28 +4,41 @@ import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.nypl.simplified.viewer.spi.ViewerProviderType
+import org.slf4j.LoggerFactory
 
 class ReaderViewerR2 : ViewerProviderType {
+
+  private val logger =
+    LoggerFactory.getLogger(ReaderViewerR2::class.java)
 
   override val name =
     "org.nypl.simplified.viewer.epub.readium2.ReaderViewerR2"
 
   override fun canSupport(
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   ): Boolean {
+    val enabled = preferences.flags["useExperimentalR2"] ?: false
+    if (!enabled) {
+      this.logger.warn("useExperimentalR2 is either false, or not set, so R2 is disabled")
+      return false
+    }
+
     return when (format) {
-      is BookFormat.BookFormatAudioBook -> false
-      is BookFormat.BookFormatEPUB -> {
+      is BookFormat.BookFormatPDF,
+      is BookFormat.BookFormatAudioBook ->
+        false
+      is BookFormat.BookFormatEPUB ->
         format.adobeRights == null
-      }
-      is BookFormat.BookFormatPDF -> false
     }
   }
 
   override fun open(
     activity: Activity,
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   ) {

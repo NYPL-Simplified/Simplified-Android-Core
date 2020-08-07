@@ -198,6 +198,15 @@
           android:enabled="true"
           android:text="Card Creator: Pretend the user is in New York" />
 
+      <Switch
+        android:id="@+id/settingsVersionDevEnableR2Switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:checked="false"
+        android:enabled="true"
+        android:text="Enable experimental R2 module for DRM-free books" />
+
       <Button
         android:id="@+id/settingsVersionDevCustomOPDS"
         android:layout_width="match_parent"

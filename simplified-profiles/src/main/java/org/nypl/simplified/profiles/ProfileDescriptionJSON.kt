@@ -179,6 +179,9 @@ object ProfileDescriptionJSON {
     val hasSeenLibrarySelectionScreen =
       JSONParserUtilities.getBooleanDefault(objectNode, "hasSeenLibrarySelectionScreen", true)
 
+    val useExperimentalR2 =
+      JSONParserUtilities.getBooleanDefault(objectNode, "useExperimentalR2", false)
+
     val readerPreferences =
       deserializeReaderPreferences(objectMapper, objectNode)
 
@@ -191,7 +194,8 @@ object ProfileDescriptionJSON {
       showTestingLibraries = showTestingLibraries,
       readerPreferences = readerPreferences,
       mostRecentAccount = mostRecentAccount,
-      hasSeenLibrarySelectionScreen = hasSeenLibrarySelectionScreen
+      hasSeenLibrarySelectionScreen = hasSeenLibrarySelectionScreen,
+      useExperimentalR2 = useExperimentalR2
     )
   }
 
@@ -381,6 +385,7 @@ object ProfileDescriptionJSON {
     val output = objectMapper.createObjectNode()
     output.put("showTestingLibraries", preferences.showTestingLibraries)
     output.put("hasSeenLibrarySelectionScreen", preferences.hasSeenLibrarySelectionScreen)
+    output.put("useExperimentalR2", preferences.useExperimentalR2)
 
     val mostRecentAccount = preferences.mostRecentAccount
     if (mostRecentAccount != null) {
