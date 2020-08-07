@@ -549,7 +549,6 @@ public final class ReaderActivity extends AppCompatActivity implements
         BookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
         LocalDateTime.now(),
         this.current_chapter_title,
-        currentChapterProgress(),
         currentBookProgress(),
         getDeviceIDString(),
         null);

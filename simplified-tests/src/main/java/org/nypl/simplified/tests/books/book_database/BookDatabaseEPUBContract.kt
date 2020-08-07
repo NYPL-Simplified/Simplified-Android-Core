@@ -7,6 +7,7 @@ import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
+import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
@@ -64,11 +65,14 @@ abstract class BookDatabaseEPUBContract {
       val bookmark =
         Bookmark(
           opdsId = "abcd",
-          location = BookLocation.create(Option.some("xyz"), "abc"),
+          location = BookLocation(
+            progress = BookChapterProgress(0, 0.5),
+            contentCFI = "xyz",
+            idRef = "abc"
+          ),
           time = LocalDateTime.now(),
           chapterTitle = "A title",
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
-          chapterProgress = 0.5,
           bookProgress = 0.25,
           uri = null,
           deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
@@ -102,11 +106,14 @@ abstract class BookDatabaseEPUBContract {
     val bookmark0 =
       Bookmark(
         opdsId = "abcd",
-        location = BookLocation.create(Option.some("xyz"), "abc"),
+        location = BookLocation(
+          progress = BookChapterProgress(0, 0.5),
+          contentCFI = "xyz",
+          idRef = "abc"
+        ),
         time = LocalDateTime.now(),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
-        chapterProgress = 0.5,
         bookProgress = 0.25,
         uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
@@ -114,11 +121,14 @@ abstract class BookDatabaseEPUBContract {
     val bookmark1 =
       Bookmark(
         opdsId = "abcd",
-        location = BookLocation.create(Option.some("xyz"), "abc"),
+        location = BookLocation(
+          progress = BookChapterProgress(0, 0.6),
+          contentCFI = "xyz",
+          idRef = "abc"
+        ),
         time = LocalDateTime.now(),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
-        chapterProgress = 0.6,
         bookProgress = 0.25,
         uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
@@ -126,11 +136,14 @@ abstract class BookDatabaseEPUBContract {
     val bookmark2 =
       Bookmark(
         opdsId = "abcd",
-        location = BookLocation.create(Option.some("xyz"), "abc"),
+        location = BookLocation(
+          progress = BookChapterProgress(0, 0.7),
+          contentCFI = "xyz",
+          idRef = "abc"
+        ),
         time = LocalDateTime.now(),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
-        chapterProgress = 0.7,
         bookProgress = 0.25,
         uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")

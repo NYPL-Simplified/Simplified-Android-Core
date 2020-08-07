@@ -43,5 +43,11 @@ data class ProfilePreferences(
    * The most recently used account provider.
    */
 
-  val mostRecentAccount: AccountID?
+  val mostRecentAccount: AccountID?,
+
+  /**
+   * Use the experimental R2 reader for DRM-free books.
+   */
+
+  val useExperimentalR2: Boolean = false
 )

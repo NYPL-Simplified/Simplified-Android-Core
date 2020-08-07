@@ -28,6 +28,7 @@ interface ViewerProviderType {
    */
 
   fun canSupport(
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   ): Boolean
@@ -41,6 +42,7 @@ interface ViewerProviderType {
 
   fun open(
     activity: Activity,
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   )

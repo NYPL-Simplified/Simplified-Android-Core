@@ -1,9 +1,9 @@
 package org.nypl.simplified.tests.books.reader.bookmarks
 
-import com.io7m.jfunctional.Option
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
+import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
@@ -24,11 +24,10 @@ open class ReaderBookmarkPolicyContract {
   val bookmark0 =
     Bookmark(
       opdsId = "opdsid",
-      location = BookLocation.create(Option.none(), "id"),
+      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
       time = LocalDateTime.now(),
       kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
-      chapterProgress = 0.5,
       bookProgress = 0.25,
       uri = null,
       deviceID = "urn:uuid:28cad755-2a0e-48bc-b5c8-1d43d57ac3e9")
@@ -36,11 +35,10 @@ open class ReaderBookmarkPolicyContract {
   val bookmark0Idle =
     Bookmark(
       opdsId = "opdsid",
-      location = BookLocation.create(Option.none(), "id"),
+      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
       time = LocalDateTime.now(),
       kind = BookmarkKind.ReaderBookmarkLastReadLocation,
       chapterTitle = "A Title",
-      chapterProgress = 0.5,
       bookProgress = 0.25,
       uri = null,
       deviceID = "urn:uuid:28cad755-2a0e-48bc-b5c8-1d43d57ac3e9")
@@ -48,11 +46,10 @@ open class ReaderBookmarkPolicyContract {
   val bookmark1 =
     Bookmark(
       opdsId = "opdsid-x",
-      location = BookLocation.create(Option.none(), "id"),
+      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
       time = LocalDateTime.now(),
       kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
-      chapterProgress = 0.5,
       bookProgress = 0.25,
       uri = null,
       deviceID = "urn:uuid:28cad755-2a0e-48bc-b5c8-1d43d57ac3e9")

@@ -1,0 +1,16 @@
+dependencies {
+  implementation project(":simplified-feeds-api")
+  implementation project(":simplified-reader-bookmarks-api")
+  implementation project(":simplified-services-api")
+  implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-viewer-spi")
+
+  implementation libraries.androidXActivity
+  implementation libraries.androidXAppCompat
+  implementation libraries.androidXLifecycle
+  implementation libraries.androidXLifecycleViewmodel
+  implementation libraries.kotlinStdlib
+  implementation libraries.nyplR2API
+  implementation libraries.nyplR2Vanilla
+  implementation libraries.nyplR2Views
+}

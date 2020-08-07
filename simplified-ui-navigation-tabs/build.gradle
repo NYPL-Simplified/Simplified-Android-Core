@@ -9,6 +9,7 @@ dependencies {
 
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-viewer-api")
+  implementation project(":simplified-viewer-spi")
 
   api libraries.bottomNavigator
 
