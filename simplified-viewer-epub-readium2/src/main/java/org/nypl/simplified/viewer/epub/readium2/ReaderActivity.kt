@@ -219,7 +219,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       }
 
       is SR2WebViewInaccessible -> {
-
+        // Unused
       }
 
       is SR2OnCenterTapped -> {
@@ -231,7 +231,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       }
 
       is SR2ReadingPositionChanged -> {
-
+        // Unused
       }
 
       is SR2BookmarkCreated -> {
@@ -243,11 +243,11 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       }
 
       is SR2BookmarkDeleted -> {
-
+        // Unused
       }
 
       SR2BookmarksLoaded -> {
-
+        // Unused
       }
     }
   }
