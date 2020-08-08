@@ -55,8 +55,8 @@ class CirculationAnalyticsSystem(
         } else {
           this.logger.debug(
             "no analytics URI available for book {} ({})",
-            event.bookOPDSId,
-            event.bookTitle)
+            event.opdsEntry.id,
+            event.opdsEntry.title)
         }
       }
     }
