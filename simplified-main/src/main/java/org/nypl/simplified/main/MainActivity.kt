@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.ListenableFuture
@@ -80,13 +81,40 @@ class MainActivity :
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
 
-  private lateinit var splashParameters: SplashParameters
+  private val migrationExecutor: ListeningScheduledExecutorService =
+    NamedThreadPools.namedThreadPool(1, "migrations", 19)
+
   private lateinit var mainViewModel: MainFragmentViewModel
-  private lateinit var migrationExecutor: ListeningScheduledExecutorService
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesNavigationController: ProfilesNavigationController
-  private lateinit var splashMainFragment: SplashFragment
   private lateinit var toolbar: Toolbar
+
+  private fun getSplashService(): BrandingSplashServiceType {
+    return ServiceLoader
+      .load(BrandingSplashServiceType::class.java)
+      .firstOrNull()
+      ?: throw IllegalStateException(
+        "No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
+      )
+  }
+
+  private fun getSplashParams(): SplashParameters {
+    val migrationReportEmail =
+      this.resources.getString(R.string.featureErrorEmail)
+        .trim()
+        .ifEmpty { null }
+
+    val splashService = getSplashService()
+    return SplashParameters(
+      textColor = ContextCompat.getColor(this, ThemeControl.themeFallback.color),
+      background = Color.WHITE,
+      splashMigrationReportEmail = migrationReportEmail,
+      splashImageResource = splashService.splashImageResource(),
+      splashImageTitleResource = splashService.splashImageTitleResource(),
+      splashImageSeconds = 2L,
+      showLibrarySelection = splashService.shouldShowLibrarySelectionScreen
+    )
+  }
 
   private fun getAvailableEULA(): EULAType? {
     val eulaOpt =
@@ -171,45 +199,11 @@ class MainActivity :
   private fun showSplashScreen() {
     this.logger.debug("showSplashScreen")
 
-    this.migrationExecutor =
-      NamedThreadPools.namedThreadPool(1, "migrations", 19)
-
-    /*
-     * Look up and use the first available splash service.
-     */
-
-    val splashService =
-      ServiceLoader.load(BrandingSplashServiceType::class.java)
-        .toList()
-        .firstOrNull()
-        ?: throw IllegalStateException(
-          "Application is misconfigured: No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
-        )
-
-    this.logger.debug("using splash service: ${splashService.javaClass.canonicalName}")
-
-    val migrationReportingEmail =
-      this.resources.getString(R.string.featureErrorEmail)
-        .trim()
-        .let { text -> if (text.isEmpty()) null else text }
-
-    this.splashParameters =
-      SplashParameters(
-        textColor = this.resources.getColor(ThemeControl.themeFallback.color),
-        background = Color.WHITE,
-        splashMigrationReportEmail = migrationReportingEmail,
-        splashImageResource = splashService.splashImageResource(),
-        splashImageTitleResource = splashService.splashImageTitleResource(),
-        splashImageSeconds = 2L,
-        showLibrarySelection = splashService.shouldShowLibrarySelectionScreen
-      )
-
-    this.splashMainFragment =
-      SplashFragment.newInstance(this.splashParameters)
+    val splashMainFragment = SplashFragment.newInstance(getSplashParams())
 
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, this.splashMainFragment, "SPLASH_MAIN")
+      .replace(R.id.mainFragmentHolder, splashMainFragment, "SPLASH_MAIN")
       .commit()
   }
 
@@ -222,6 +216,7 @@ class MainActivity :
       services.requireService(ProfilesControllerType::class.java)
     val accountProviders =
       services.requireService(AccountProviderRegistryType::class.java)
+    val splashService = getSplashService()
 
     return when (profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
@@ -233,7 +228,7 @@ class MainActivity :
         this.logger.debug("hasNonDefaultAccount=$hasNonDefaultAccount")
 
         val shouldShowLibrarySelectionScreen =
-          this.splashParameters.showLibrarySelection && !profile.preferences().hasSeenLibrarySelectionScreen
+          splashService.shouldShowLibrarySelectionScreen && !profile.preferences().hasSeenLibrarySelectionScreen
         this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
 
         if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
@@ -249,7 +244,8 @@ class MainActivity :
   }
 
   private fun openLibrarySelectionScreen() {
-    val fragment = SplashSelectionFragment.newInstance(this.splashParameters)
+    val fragment =
+      SplashSelectionFragment.newInstance(getSplashParams())
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, fragment, "SPLASH_MAIN")
