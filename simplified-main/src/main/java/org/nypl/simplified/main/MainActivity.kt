@@ -337,6 +337,10 @@ class MainActivity :
   }
 
   private fun openCatalog() {
+    // Sanity check; we were seeing some crashes on startup when performing a
+    // transaction after the fragment manager had been destroyed.
+    if (this.isFinishing || this.supportFragmentManager.isDestroyed) return
+
     ViewModelProviders.of(this)
       .get(MainFragmentViewModel::class.java)
       .clearHistory = true
