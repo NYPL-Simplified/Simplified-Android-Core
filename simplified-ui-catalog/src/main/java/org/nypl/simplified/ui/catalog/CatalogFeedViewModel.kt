@@ -37,6 +37,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.Locale
 import java.util.UUID
 import javax.annotation.concurrent.GuardedBy
 
@@ -413,8 +414,13 @@ class CatalogFeedViewModel(
           title = title
         )
 
-      is CatalogFeedArgumentsLocalBooks ->
-        throw IllegalStateException("Cannot transition from a local feed to a remote feed.")
+      is CatalogFeedArgumentsLocalBooks -> {
+        val oldTitle = this.feedArguments.title
+        val newTitle = title
+        throw IllegalStateException(String.format(
+          Locale.US, "Can't transition local to remote feed: {} -> {}", oldTitle, newTitle
+        ))
+      }
     }
   }
 
