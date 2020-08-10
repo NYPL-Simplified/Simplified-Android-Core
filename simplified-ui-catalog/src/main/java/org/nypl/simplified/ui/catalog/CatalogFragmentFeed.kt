@@ -144,8 +144,17 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
+
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
+
+  private val navigationController by lazy<CatalogNavigationControllerType> {
+    NavigationControllers.find(
+      this.requireActivity(),
+      interfaceType = CatalogNavigationControllerType::class.java
+    )
+  }
+
   private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
   private var feedStatusSubscription: Disposable? = null
@@ -356,12 +365,12 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.findNavigationController()
+    this.navigationController
       .openBookDetail(this.parameters, opdsEntry)
   }
 
   private fun onFeedSelected(title: String, uri: URI) {
-    this.findNavigationController()
+    this.navigationController
       .openFeed(this.feedModel.resolveFeed(title, uri, false))
   }
 
@@ -598,7 +607,7 @@ class CatalogFragmentFeed : Fragment() {
         borrowViewModel = this.borrowViewModel,
         buttonCreator = this.buttonCreator,
         context = activity,
-        navigation = this::findNavigationController,
+        navigation = this::navigationController,
         onBookSelected = this::onBookSelected,
         services = Services.serviceDirectory(),
         ownership = feedState.arguments.ownership
@@ -675,7 +684,7 @@ class CatalogFragmentFeed : Fragment() {
              */
 
             this.uiThread.runOnUIThread {
-              this.findNavigationController()
+              this.navigationController
                 .openSettingsAccount(AccountFragmentParameters(
                   accountId = ownership.accountId,
                   closeOnLoginSuccess = true,
@@ -713,7 +722,7 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedErrorDetails.isEnabled = true
     this.feedErrorDetails.setOnClickListener {
-      this.findNavigationController()
+      this.navigationController
         .openErrorPage(this.errorPageParameters(feedState.failure))
     }
   }
@@ -739,7 +748,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     val toolbar = toolbarHost.findToolbar()
     try {
-      val navigationController = this.findNavigationController()
+      val navigationController = this.navigationController
       val isRoot = navigationController.backStackSize() == 1
 
       if (isRoot) {
@@ -870,7 +879,7 @@ class CatalogFragmentFeed : Fragment() {
     alertBuilder.setPositiveButton(R.string.catalogSearch) { dialog, _ ->
       val query = searchText(editText)
       this.logSearchToAnalytics(query)
-      this.findNavigationController().openFeed(this.feedModel.resolveSearch(search, query))
+      this.navigationController.openFeed(this.feedModel.resolveSearch(search, query))
       dialog.dismiss()
     }
     alertBuilder.create().show()
@@ -1083,7 +1092,7 @@ class CatalogFragmentFeed : Fragment() {
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener {
         this.logger.debug("selected entry point facet: {}", facet.title)
-        this.findNavigationController().openFeed(this.feedModel.resolveFacet(facet))
+        this.navigationController.openFeed(this.feedModel.resolveFacet(facet))
       }
       facetTabs.addView(button)
     }
@@ -1139,17 +1148,11 @@ class CatalogFragmentFeed : Fragment() {
     alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
       val selected = choices[checked]
       this.logger.debug("selected facet: {}", selected)
-      this.findNavigationController().openFeed(this.feedModel.resolveFacet(selected))
+      this.navigationController.openFeed(this.feedModel.resolveFacet(selected))
       dialog.dismiss()
     }
     alertBuilder.create().show()
   }
-
-  private fun findNavigationController() =
-    NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = CatalogNavigationControllerType::class.java
-    )
 
   private fun errorPageParameters(
     failure: FeedLoaderFailure
