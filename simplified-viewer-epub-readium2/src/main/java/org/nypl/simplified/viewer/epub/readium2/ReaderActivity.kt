@@ -99,8 +99,12 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
   private lateinit var bookmarkService: ReaderBookmarkServiceType
   private lateinit var profiles: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
+  private lateinit var readerFragment: SR2ReaderFragment
+
   private val handler = Handler(Looper.getMainLooper())
+  private val hideSystemUiRunnable = Runnable { this.hideSystemUi() }
   private val logger = LoggerFactory.getLogger(ReaderActivity::class.java)
+
   private var controller: SR2ControllerType? = null
   private var controllerSubscription: Disposable? = null
 
@@ -135,16 +139,19 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
       this.supportActionBar?.apply {
         this.title = this@ReaderActivity.bookEntry.feedEntry.title
-        this.setDisplayHomeAsUpEnabled(true)
+        this.setDisplayHomeAsUpEnabled(false)
       }
 
-      val fragment =
+      this.readerFragment =
         SR2ReaderFragment.create(SR2ReaderFragmentParameters(this.bookFile))
 
       this.supportFragmentManager
         .beginTransaction()
-        .replace(R.id.reader_container, fragment)
+        .replace(R.id.reader_container, readerFragment)
         .commit()
+    } else {
+      this.readerFragment =
+        this.supportFragmentManager.findFragmentById(R.id.reader_container) as SR2ReaderFragment
     }
 
     // Enable webview debugging for debug builds
@@ -199,15 +206,25 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
   }
 
   override fun onNavigationOpenTableOfContents() {
+    this.cancelSystemUiDelayed()
     this.supportFragmentManager.beginTransaction()
-      .replace(R.id.reader_container, SR2TOCFragment())
+      .replace(R.id.fragment_container, SR2TOCFragment())
+      .hide(this.readerFragment)
       .addToBackStack(null)
       .commit()
   }
 
+  /** Cancel any pending tasks to hide the system ui. */
+
+  private fun cancelSystemUiDelayed() {
+    this.handler.removeCallbacks(this.hideSystemUiRunnable)
+  }
+
+  /** Post a delayed task to switch to immersive mode and hide the system ui. */
+
   private fun hideSystemUiDelayed() {
-    this.handler.removeCallbacksAndMessages(null)
-    this.handler.postDelayed({ this.hideSystemUi() }, SYSTEM_UI_DELAY_MILLIS)
+    this.cancelSystemUiDelayed()
+    this.handler.postDelayed(this.hideSystemUiRunnable, SYSTEM_UI_DELAY_MILLIS)
   }
 
   private fun onControllerEvent(event: SR2Event) {
