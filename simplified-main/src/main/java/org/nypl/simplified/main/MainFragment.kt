@@ -119,19 +119,21 @@ class MainFragment : Fragment() {
         .get(MainFragmentViewModel::class.java)
 
     this.uiThread.runOnUIThread {
-      this.bottomNavigator =
-        TabbedNavigationController.create(
-          activity = this.requireActivity(),
-          accountProviders = this.accountProviders,
-          profilesController = this.profilesController,
-          settingsConfiguration = this.buildConfig,
-          fragmentContainerId = R.id.tabbedFragmentHolder,
-          navigationView = this.bottomView
-        )
+      this.activity?.let {
+        this.bottomNavigator =
+          TabbedNavigationController.create(
+            activity = it,
+            accountProviders = this.accountProviders,
+            profilesController = this.profilesController,
+            settingsConfiguration = this.buildConfig,
+            fragmentContainerId = R.id.tabbedFragmentHolder,
+            navigationView = this.bottomView
+          )
 
-      if (this.viewModel.clearHistory) {
-        this.bottomNavigator.clearHistory()
-        this.viewModel.clearHistory = false
+        if (this.viewModel.clearHistory) {
+          this.bottomNavigator.clearHistory()
+          this.viewModel.clearHistory = false
+        }
       }
     }
 
