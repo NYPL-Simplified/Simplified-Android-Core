@@ -413,8 +413,11 @@ class CatalogFeedViewModel(
           title = title
         )
 
-      is CatalogFeedArgumentsLocalBooks ->
-        throw IllegalStateException("Cannot transition from a local feed to a remote feed.")
+      is CatalogFeedArgumentsLocalBooks -> {
+        throw IllegalStateException(
+          "Can't transition local to remote feed: ${this.feedArguments.title} -> $title"
+        )
+      }
     }
   }
 

@@ -59,6 +59,13 @@ class AccountRegistryFragment : Fragment() {
   private var accountCreationSubscription: Disposable? = null
   private var accountRegistrySubscription: Disposable? = null
 
+  private val navigationController by lazy<AccountNavigationControllerType> {
+    NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = AccountNavigationControllerType::class.java
+    )
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -147,7 +154,7 @@ class AccountRegistryFragment : Fragment() {
         })
 
       is AccountEventCreation.AccountEventCreationSucceeded -> {
-        this.findNavigationController().popBackStack()
+        this.navigationController.popBackStack()
         Unit
       }
 
@@ -207,10 +214,13 @@ class AccountRegistryFragment : Fragment() {
     return layout
   }
 
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
+    this.configureToolbar()
+  }
+
   override fun onStart() {
     super.onStart()
-
-    this.configureToolbar()
 
     this.backgroundExecutor =
       NamedThreadPools.namedThreadPool(1, "simplified-registry-io", 19)
@@ -249,10 +259,10 @@ class AccountRegistryFragment : Fragment() {
       host.toolbarSetBackArrowConditionally(
         context = host,
         shouldArrowBePresent = {
-          this.findNavigationController().backStackSize() > 1
+          this.navigationController.backStackSize() > 1
         },
         onArrowClicked = {
-          this.findNavigationController().popBackStack()
+          this.navigationController.popBackStack()
         })
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
@@ -318,13 +328,6 @@ class AccountRegistryFragment : Fragment() {
     this.accountRegistrySubscription?.dispose()
   }
 
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = AccountNavigationControllerType::class.java
-    )
-  }
-
   @UiThread
   private fun showAccountCreationFailedDialog(accountEvent: AccountEventCreation.AccountEventCreationFailed) {
     this.uiThread.checkIsUIThread()
@@ -359,6 +362,6 @@ class AccountRegistryFragment : Fragment() {
         taskSteps = accountEvent.taskResult.steps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.navigationController.openErrorPage(parameters)
   }
 }

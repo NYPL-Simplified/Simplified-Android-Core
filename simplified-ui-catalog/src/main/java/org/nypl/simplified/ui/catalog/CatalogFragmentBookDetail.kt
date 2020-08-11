@@ -352,11 +352,14 @@ class CatalogFragmentBookDetail : Fragment() {
   private fun onOPDSFeedEntryUI(feedEntry: FeedEntryOPDS) {
     this.uiThread.checkIsUIThread()
 
+    // Sanity check; ensure we're attached to a valid context. We've seen some lifecycle related
+    // crashes related to being detached when this method executes.
+    val context = this.context ?: return
+
     val opds = feedEntry.feedEntry
     this.title.text = opds.title
     this.authors.text = opds.authorsCommaSeparated
 
-    val context = this.requireContext()
     this.format.text = when (feedEntry.probableFormat) {
       BOOK_FORMAT_EPUB ->
         context.getString(string.catalogBookFormatEPUB)
