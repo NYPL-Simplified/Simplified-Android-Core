@@ -99,8 +99,11 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
   private lateinit var bookmarkService: ReaderBookmarkServiceType
   private lateinit var profiles: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
+  private lateinit var readerFragment: SR2ReaderFragment
+
   private val handler = Handler(Looper.getMainLooper())
   private val logger = LoggerFactory.getLogger(ReaderActivity::class.java)
+
   private var controller: SR2ControllerType? = null
   private var controllerSubscription: Disposable? = null
 
@@ -138,13 +141,16 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         this.setDisplayHomeAsUpEnabled(false)
       }
 
-      val fragment =
+      this.readerFragment =
         SR2ReaderFragment.create(SR2ReaderFragmentParameters(this.bookFile))
 
       this.supportFragmentManager
         .beginTransaction()
-        .replace(R.id.reader_container, fragment)
+        .replace(R.id.reader_container, readerFragment)
         .commit()
+    } else {
+      this.readerFragment =
+        this.supportFragmentManager.findFragmentById(R.id.reader_container) as SR2ReaderFragment
     }
 
     // Enable webview debugging for debug builds
@@ -200,7 +206,8 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
   override fun onNavigationOpenTableOfContents() {
     this.supportFragmentManager.beginTransaction()
-      .replace(R.id.reader_container, SR2TOCFragment())
+      .replace(R.id.fragment_container, SR2TOCFragment())
+      .hide(this.readerFragment)
       .addToBackStack(null)
       .commit()
   }
