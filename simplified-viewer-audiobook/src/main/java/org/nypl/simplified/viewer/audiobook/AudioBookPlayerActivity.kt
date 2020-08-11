@@ -404,12 +404,16 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      */
 
     this.uiThread.runOnUIThread {
-      this.playerFragment = PlayerFragment.newInstance(PlayerFragmentParameters())
+      // Sanity check; Verify the state of the lifecycle before continuing as it's possible the
+      // activity could be finishing.
+      if (!this.isFinishing && !this.supportFragmentManager.isDestroyed) {
+        this.playerFragment = PlayerFragment.newInstance(PlayerFragmentParameters())
 
-      this.supportFragmentManager
-        .beginTransaction()
-        .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
-        .commit()
+        this.supportFragmentManager
+          .beginTransaction()
+          .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
+          .commit()
+      }
     }
   }
 
