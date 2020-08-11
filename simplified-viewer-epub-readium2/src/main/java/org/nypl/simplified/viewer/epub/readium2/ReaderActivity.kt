@@ -102,6 +102,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
   private lateinit var readerFragment: SR2ReaderFragment
 
   private val handler = Handler(Looper.getMainLooper())
+  private val hideSystemUiRunnable = Runnable { this.hideSystemUi() }
   private val logger = LoggerFactory.getLogger(ReaderActivity::class.java)
 
   private var controller: SR2ControllerType? = null
@@ -205,6 +206,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
   }
 
   override fun onNavigationOpenTableOfContents() {
+    this.cancelSystemUiDelayed()
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.fragment_container, SR2TOCFragment())
       .hide(this.readerFragment)
@@ -212,9 +214,17 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       .commit()
   }
 
+  /** Cancel any pending tasks to hide the system ui. */
+
+  private fun cancelSystemUiDelayed() {
+    this.handler.removeCallbacks(this.hideSystemUiRunnable)
+  }
+
+  /** Post a delayed task to switch to immersive mode and hide the system ui. */
+
   private fun hideSystemUiDelayed() {
-    this.handler.removeCallbacksAndMessages(null)
-    this.handler.postDelayed({ this.hideSystemUi() }, SYSTEM_UI_DELAY_MILLIS)
+    this.cancelSystemUiDelayed()
+    this.handler.postDelayed(this.hideSystemUiRunnable, SYSTEM_UI_DELAY_MILLIS)
   }
 
   private fun onControllerEvent(event: SR2Event) {
