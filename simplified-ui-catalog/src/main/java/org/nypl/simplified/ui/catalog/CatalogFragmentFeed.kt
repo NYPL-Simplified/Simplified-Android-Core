@@ -748,8 +748,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     val toolbar = toolbarHost.findToolbar()
     try {
-      val navigationController = this.navigationController
-      val isRoot = navigationController.backStackSize() == 1
+      val isRoot = this.navigationController.backStackSize() == 1
 
       if (isRoot) {
         when (ownership) {
@@ -765,7 +764,7 @@ class CatalogFragmentFeed : Fragment() {
       } else {
         toolbar.navigationIcon = toolbarHost.toolbarIconBackArrow(context)
         toolbar.navigationContentDescription = null
-        toolbar.setNavigationOnClickListener { navigationController.popBackStack() }
+        toolbar.setNavigationOnClickListener { this.navigationController.popBackStack() }
       }
     } catch (e: Exception) {
       // Note: The call to findNavigationController may throw an IllegalArgumentException.
