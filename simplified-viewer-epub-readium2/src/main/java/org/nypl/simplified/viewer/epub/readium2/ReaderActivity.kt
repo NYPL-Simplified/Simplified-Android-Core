@@ -135,7 +135,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
       this.supportActionBar?.apply {
         this.title = this@ReaderActivity.bookEntry.feedEntry.title
-        this.setDisplayHomeAsUpEnabled(true)
+        this.setDisplayHomeAsUpEnabled(false)
       }
 
       val fragment =
