@@ -68,9 +68,5 @@ dependencies {
   api libraries.kotlinStdlib
   api libraries.slf4j
 
-  api libraries.logbackAndroidCore
-  api(libraries.logbackAndroidClassic) {
-    // https://github.com/tony19/logback-android/issues/73
-    exclude group: "com.google.android", module: "android"
-  }
+  api libraries.logbackAndroid
 }
