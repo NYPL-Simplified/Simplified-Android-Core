@@ -115,6 +115,7 @@ ext.libraries = [
   autoValue                        : "com.google.auto.value:auto-value-annotations:1.7",
   autoValueProcessor               : "com.google.auto.value:auto-value:1.7",
   bottomNavigator                  : "com.pandora.bottomnavigator:bottom-navigator:1.7",
+  firebaseCrashlytics              : "com.google.firebase:firebase-crashlytics:17.1.1",
   googleAndroidMaterial            : "com.google.android.material:material:1.0.0",
   googleGuava                      : "com.google.guava:guava:23.6.1-android",
   iharderBase64                    : "net.iharder:base64:2.3.9",
