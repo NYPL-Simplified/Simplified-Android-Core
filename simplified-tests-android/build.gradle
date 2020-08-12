@@ -12,14 +12,9 @@ dependencies {
   implementation libraries.androidXTestRules
   implementation libraries.androidXTestRunner
   implementation libraries.kotlinStdlib
-  implementation libraries.logbackAndroidCore
+  implementation libraries.logbackAndroid
   implementation libraries.mockitoAndroid
   implementation libraries.slf4j
-
-  implementation(libraries.logbackAndroidClassic) {
-    // https://github.com/tony19/logback-android/issues/73
-    exclude group: "com.google.android", module: "android"
-  }
 
   androidTestImplementation libraries.androidXAppCompat
   androidTestImplementation libraries.androidXFragmentTesting
