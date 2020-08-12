@@ -180,7 +180,7 @@ class AudioBookManifestStrategy(
             Option.some(problemReport)
           )
         } else {
-          String.format("%s: %s %s", serverData.uri, serverData.code)
+          "${serverData.uri}: ${serverData.code}"
         }
     }
   }
