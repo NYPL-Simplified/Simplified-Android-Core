@@ -55,7 +55,7 @@
     android:layout_height="wrap_content"
     android:layout_marginEnd="16dp"
     android:importantForAutofill="no"
-    android:inputType="textPersonName"
+    android:inputType="text"
     android:label="@id/authBasicUserNameLabel"
     android:textSize="14sp"
     android:theme="@style/SimplifiedEditText"

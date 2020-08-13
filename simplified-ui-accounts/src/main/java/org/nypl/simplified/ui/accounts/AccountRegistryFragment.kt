@@ -154,8 +154,9 @@ class AccountRegistryFragment : Fragment() {
         })
 
       is AccountEventCreation.AccountEventCreationSucceeded -> {
-        this.navigationController.popBackStack()
-        Unit
+        this.uiThread.runOnUIThread {
+          this.navigationController.popBackStack()
+        }
       }
 
       is AccountEventCreation.AccountEventCreationFailed ->

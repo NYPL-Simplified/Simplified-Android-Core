@@ -91,6 +91,34 @@ class MainFragment : Fragment() {
     this.bottomView =
       layout.findViewById(R.id.bottomNavigator)
 
+    this.viewModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(MainFragmentViewModel::class.java)
+
+    /*
+     * Hide various tabs based on build configuration and other settings.
+     */
+
+    val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
+    holdsItem.isVisible = this.buildConfig.showHoldsTab
+    holdsItem.isEnabled = this.buildConfig.showHoldsTab
+
+    val settingsItem = this.bottomView.menu.findItem(R.id.tabSettings)
+    settingsItem.isVisible = this.buildConfig.showSettingsTab
+    settingsItem.isEnabled = this.buildConfig.showSettingsTab
+
+    val profilesVisible =
+      this.profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED
+
+    val profilesItem = this.bottomView.menu.findItem(R.id.tabProfile)
+    profilesItem.isVisible = profilesVisible
+    profilesItem.isEnabled = profilesVisible
+    return layout
+  }
+
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
+
     /*
      * This extremely unfortunate workaround (delaying the creation of the navigator by scheduling
      * the creation on the UI thread) is necessary because the bottom navigator
@@ -114,48 +142,22 @@ class MainFragment : Fragment() {
      * foreground/background switches.
      */
 
-    this.viewModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(MainFragmentViewModel::class.java)
-
     this.uiThread.runOnUIThread {
-      this.activity?.let {
-        this.bottomNavigator =
-          TabbedNavigationController.create(
-            activity = it,
-            accountProviders = this.accountProviders,
-            profilesController = this.profilesController,
-            settingsConfiguration = this.buildConfig,
-            fragmentContainerId = R.id.tabbedFragmentHolder,
-            navigationView = this.bottomView
-          )
+      this.bottomNavigator =
+        TabbedNavigationController.create(
+          activity = this.requireActivity(),
+          accountProviders = this.accountProviders,
+          profilesController = this.profilesController,
+          settingsConfiguration = this.buildConfig,
+          fragmentContainerId = R.id.tabbedFragmentHolder,
+          navigationView = this.bottomView
+        )
 
-        if (this.viewModel.clearHistory) {
-          this.bottomNavigator.clearHistory()
-          this.viewModel.clearHistory = false
-        }
+      if (this.viewModel.clearHistory) {
+        this.bottomNavigator.clearHistory()
+        this.viewModel.clearHistory = false
       }
     }
-
-    /*
-     * Hide various tabs based on build configuration and other settings.
-     */
-
-    val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
-    holdsItem.isVisible = this.buildConfig.showHoldsTab
-    holdsItem.isEnabled = this.buildConfig.showHoldsTab
-
-    val settingsItem = this.bottomView.menu.findItem(R.id.tabSettings)
-    settingsItem.isVisible = this.buildConfig.showSettingsTab
-    settingsItem.isEnabled = this.buildConfig.showSettingsTab
-
-    val profilesVisible =
-      this.profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED
-
-    val profilesItem = this.bottomView.menu.findItem(R.id.tabProfile)
-    profilesItem.isVisible = profilesVisible
-    profilesItem.isEnabled = profilesVisible
-    return layout
   }
 
   override fun onStart() {
