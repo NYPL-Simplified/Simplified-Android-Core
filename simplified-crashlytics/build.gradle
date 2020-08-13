@@ -1,0 +1,6 @@
+dependencies {
+  api project(":simplified-crashlytics-api")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.firebaseCrashlytics
+}
