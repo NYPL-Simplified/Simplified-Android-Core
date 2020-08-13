@@ -5,6 +5,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.books.bundled.api.BundledURIs
 import java.io.IOException
 import java.net.URI
 
@@ -15,8 +16,7 @@ class BookCoverBundledRequestHandler(
   override fun canHandleRequest(
     data: Request
   ): Boolean {
-    val uri = URI.create(data.uri.toString())
-    return "simplified-bundled" == uri.scheme
+    return BundledURIs.isBundledURI(URI.create(data.uri.toString()))
   }
 
   override fun load(
