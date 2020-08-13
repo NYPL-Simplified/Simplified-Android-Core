@@ -10,6 +10,7 @@ import com.io7m.jfunctional.Some
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -192,6 +193,7 @@ class BookCoverProvider private constructor(
      *
      * @param context The application context
      * @param badgeLookup A function used to look up badge images
+     * @param bundledContentResolver A bundled content resolver
      * @param bookRegistry The book registry
      * @param coverGenerator A cover generator
      * @param executor An executor
@@ -204,6 +206,7 @@ class BookCoverProvider private constructor(
       bookRegistry: BookRegistryReadableType,
       coverGenerator: BookCoverGeneratorType,
       badgeLookup: BookCoverBadgeLookupType,
+      bundledContentResolver: BundledContentResolverType,
       executor: ExecutorService,
       debugCacheIndicators: Boolean,
       debugLogging: Boolean
@@ -214,6 +217,7 @@ class BookCoverProvider private constructor(
       picassoBuilder.indicatorsEnabled(debugCacheIndicators)
       picassoBuilder.loggingEnabled(debugLogging)
       picassoBuilder.addRequestHandler(BookCoverGeneratorRequestHandler(coverGenerator))
+      picassoBuilder.addRequestHandler(BookCoverBundledRequestHandler(bundledContentResolver))
       picassoBuilder.executor(executor)
 
       val picasso = picassoBuilder.build()

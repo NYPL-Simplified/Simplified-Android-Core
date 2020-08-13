@@ -502,6 +502,7 @@ internal object MainServices {
   private fun createCoverProvider(
     context: Context,
     bookRegistry: BookRegistryReadableType,
+    bundledContentResolver: BundledContentResolverType,
     coverGenerator: BookCoverGeneratorType,
     badgeLookup: BookCoverBadgeLookupType
   ): BookCoverProviderType {
@@ -512,6 +513,7 @@ internal object MainServices {
       bookRegistry = bookRegistry,
       coverGenerator = coverGenerator,
       badgeLookup = badgeLookup,
+      bundledContentResolver = bundledContentResolver,
       executor = execCovers,
       debugCacheIndicators = false,
       debugLogging = false)
@@ -955,6 +957,7 @@ internal object MainServices {
         this.createCoverProvider(
           context = context,
           bookRegistry = bookRegistry,
+          bundledContentResolver = bundledContent,
           coverGenerator = coverGenerator,
           badgeLookup = badgeLookup
         )
