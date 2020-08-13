@@ -77,7 +77,7 @@ ext {
     useNYPLNexusDepend = true
   }
 
-  nyplAudioBookAPIVersion = "5.0.0"
+  nyplAudioBookAPIVersion = "5.0.1"
   nyplR2Version = "0.0.5"
 }
 
