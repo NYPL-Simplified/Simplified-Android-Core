@@ -149,6 +149,7 @@ ext.libraries = [
   nyplAudiobookManifestParserAPI   : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.api:${nyplAudioBookAPIVersion}",
   nyplAudiobookManifestWebPub      : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.webpub:${nyplAudioBookAPIVersion}",
   nyplAudiobookOpenAccess          : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access:${nyplAudioBookAPIVersion}",
+  nyplAudiobookRBDigital           : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.rbdigital:${nyplAudioBookAPIVersion}",
   nyplAudiobookViews               : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.views:${nyplAudioBookAPIVersion}",
   nyplDRMCore                      : "org.librarysimplified.drm:org.librarysimplified.drm.core:1.1.1",
   nyplPDFAPI                       : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.api:0.1.0",
