@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
   <color name="simplifiedColorPrimaryLight">#5472d3</color>
   <color name="simplifiedColorPrimary">#0d47a1</color>
@@ -97,9 +97,20 @@
   <style name="SimplifiedActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
     <item name="android:background">?attr/colorPrimary</item>
     <item name="android:displayOptions">homeAsUp|showTitle</item>
+
+    <item name="titleTextAppearance">@style/SimplifiedToolbarTitleAppearance</item>
+    <item name="subtitleTextAppearance">@style/SimplifiedToolbarSubtitleAppearance</item>
   </style>
 
   <style name="SimplifiedToolbarThemeOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+  <style name="SimplifiedToolbarTitleAppearance" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <item name="android:textSize" tools:ignore="SpUsage">18dp</item>
+  </style>
+
+  <style name="SimplifiedToolbarSubtitleAppearance" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+    <item name="android:textSize" tools:ignore="SpUsage">12dp</item>
+  </style>
 
   <style name="SimplifiedButton" parent="@android:style/Widget.Button">
     <item name="android:background">@drawable/simplified_button</item>
