@@ -310,6 +310,16 @@ class TabbedNavigationController private constructor(
     return this.navigator.pop()
   }
 
+  override fun popToRoot(): Boolean {
+    val isAtRootOfStack = (1 == this.navigator.currentStackSize())
+    if (isAtRootOfStack) {
+      return false // Nothing to do
+    }
+    val currentTab = this.navigator.currentTab()
+    this.navigator.reset(currentTab, false)
+    return true
+  }
+
   override fun openSettingsCustomOPDS() {
     this.navigator.addFragment(
       fragment = SettingsFragmentCustomOPDS(),

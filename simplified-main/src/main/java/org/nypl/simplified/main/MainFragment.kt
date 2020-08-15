@@ -35,7 +35,6 @@ import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
@@ -161,9 +160,7 @@ class MainFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
-    val toolbar = (this.requireActivity() as ToolbarHostType).findToolbar()
-    toolbar.visibility = View.VISIBLE
+    this.requireActivity().actionBar?.hide()
 
     this.uiThread.runOnUIThread {
       this.navigationControllerDirectory.updateNavigationController(

@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.profiles
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.os.IBinder
@@ -32,7 +33,6 @@ import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 class ProfileModificationDefaultFragment : Fragment() {
 
@@ -274,26 +274,7 @@ class ProfileModificationDefaultFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
-    val fragmentActivity = this.requireActivity()
-    val toolbarHost = fragmentActivity as ToolbarHostType
-    val toolbar = toolbarHost.findToolbar()
-    toolbarHost.toolbarClearMenu()
-    toolbarHost.toolbarUnsetArrow()
-    toolbar.visibility = View.VISIBLE
-    toolbar.setTitle(R.string.profilesTitle)
-    toolbar.subtitle = ""
-
-    toolbarHost.toolbarSetBackArrowConditionally(
-      context = fragmentActivity,
-      onArrowClicked = {
-        NavigationControllers.find(fragmentActivity, ProfilesNavigationControllerType::class.java)
-          .popBackStack()
-      },
-      shouldArrowBePresent = {
-        true
-      }
-    )
+    configureToolbar(this.requireActivity())
 
     this.profileSubscription =
       this.profilesController.profileEvents()
@@ -317,6 +298,13 @@ class ProfileModificationDefaultFragment : Fragment() {
     this.cancel.setOnClickListener(null)
 
     this.closeKeyboard(this.requireContext(), this.nameField.windowToken)
+  }
+
+  private fun configureToolbar(activity: Activity) {
+    activity.actionBar?.apply {
+      title = getString(R.string.profilesTitle)
+      subtitle = null
+    }
   }
 
   private fun closeKeyboard(

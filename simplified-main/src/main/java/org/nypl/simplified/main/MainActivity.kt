@@ -4,11 +4,12 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -29,10 +30,10 @@ import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
+import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
-import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
@@ -48,12 +49,8 @@ import org.nypl.simplified.ui.accounts.AccountNavigationControllerUnreachable
 import org.nypl.simplified.ui.accounts.AccountRegistryFragment
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
-import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.profiles.ProfileModificationDefaultFragment
-import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
-import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
@@ -62,16 +59,14 @@ import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashParameters
 import org.nypl.simplified.ui.splash.SplashSelectionFragment
 import org.nypl.simplified.ui.theme.ThemeControl
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.ServiceLoader
 import java.util.concurrent.TimeUnit
 
-class MainActivity :
-  AppCompatActivity(),
+class MainActivity : AppCompatActivity(),
+  OnBackStackChangedListener,
   SplashListenerType,
-  ToolbarHostType,
   ErrorPageListenerType {
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
@@ -82,7 +77,22 @@ class MainActivity :
   private lateinit var mainViewModel: MainFragmentViewModel
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesNavigationController: ProfilesNavigationController
-  private lateinit var toolbar: Toolbar
+
+  private val navigationController: NavigationControllerType?
+    get() {
+      val controllers = arrayListOf(
+        this.navigationControllerDirectory.navigationControllerIfAvailable(
+          CatalogNavigationControllerType::class.java
+        ),
+        this.navigationControllerDirectory.navigationControllerIfAvailable(
+          SettingsNavigationControllerType::class.java
+        ),
+        this.navigationControllerDirectory.navigationControllerIfAvailable(
+          ProfilesNavigationControllerType::class.java
+        )
+      )
+      return controllers.filterNotNull().firstOrNull()
+    }
 
   private fun getSplashService(): BrandingSplashServiceType {
     return ServiceLoader
@@ -240,80 +250,6 @@ class MainActivity :
       .commit()
   }
 
-  private class ProfilesNavigationController(
-    private val supportFragmentManager: FragmentManager,
-    private val mainViewModel: MainFragmentViewModel
-  ) : ProfilesNavigationControllerType {
-
-    private val logger =
-      LoggerFactory.getLogger(ProfilesNavigationController::class.java)
-
-    private fun openModificationFragment(
-      parameters: ProfileModificationFragmentParameters
-    ) {
-      val fragmentService =
-        Services.serviceDirectory()
-          .optionalService(ProfileModificationFragmentServiceType::class.java)
-
-      val fragment =
-        if (fragmentService != null) {
-          this.logger.debug("found a profile modification fragment service: {}", fragmentService)
-          fragmentService.createModificationFragment(parameters)
-        } else {
-          ProfileModificationDefaultFragment.create(parameters)
-        }
-
-      this.supportFragmentManager.beginTransaction()
-        .replace(R.id.mainFragmentHolder, fragment, "MAIN")
-        .addToBackStack(null)
-        .commit()
-    }
-
-    override fun openMain() {
-      this.logger.debug("openMain")
-      this.mainViewModel.clearHistory = true
-
-      val mainFragment = MainFragment()
-      this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-      this.supportFragmentManager.beginTransaction()
-        .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
-        .addToBackStack(null)
-        .commit()
-    }
-
-    override fun openProfileSelect() {
-      this.logger.debug("openProfileSelect")
-      this.mainViewModel.clearHistory = true
-
-      val newFragment = ProfileSelectionFragment()
-      this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-      this.supportFragmentManager.beginTransaction()
-        .replace(R.id.mainFragmentHolder, newFragment, "MAIN")
-        .commit()
-    }
-
-    override fun openProfileModify(id: ProfileID) {
-      this.logger.debug("openProfileModify: ${id.uuid}")
-      this.openModificationFragment(ProfileModificationFragmentParameters(id))
-    }
-
-    override fun openProfileCreate() {
-      this.logger.debug("openProfileCreate")
-      this.openModificationFragment(ProfileModificationFragmentParameters(null))
-    }
-
-    override fun popBackStack(): Boolean {
-      this.logger.debug("popBackStack")
-      this.supportFragmentManager.popBackStack()
-      return this.supportFragmentManager.backStackEntryCount > 0
-    }
-
-    override fun backStackSize(): Int {
-      this.logger.debug("backStackSize")
-      return this.supportFragmentManager.backStackEntryCount
-    }
-  }
-
   private fun openProfileScreen() {
     this.mainViewModel.clearHistory = true
 
@@ -348,8 +284,10 @@ class MainActivity :
     this.navigationControllerDirectory = NavigationControllers.findDirectory(this)
     this.setContentView(R.layout.main_host)
 
-    this.toolbar = this.findViewById(R.id.mainToolbar)
-    this.toolbar.visibility = View.GONE
+    val toolbar = this.findViewById(R.id.mainToolbar) as Toolbar
+    this.setSupportActionBar(toolbar)
+    actionBar?.setDisplayHomeAsUpEnabled(true)
+    actionBar?.setDisplayShowHomeEnabled(true)
 
     this.mainViewModel =
       ViewModelProviders.of(this)
@@ -368,40 +306,9 @@ class MainActivity :
   }
 
   override fun onBackPressed() {
-    val mainController =
-      this.navigationControllerDirectory.navigationControllerIfAvailable(
-        CatalogNavigationControllerType::class.java
-      )
-
-    if (mainController != null) {
-      this.logger.debug("delivering back press to catalog navigation controller")
-      if (!mainController.popBackStack()) {
-        super.onBackPressed()
-      }
-      return
-    }
-
-    val settingsNavigationController =
-      this.navigationControllerDirectory.navigationControllerIfAvailable(
-        SettingsNavigationControllerType::class.java
-      )
-
-    if (settingsNavigationController != null) {
-      this.logger.debug("delivering back press to settings navigation controller")
-      if (!settingsNavigationController.popBackStack()) {
-        super.onBackPressed()
-      }
-      return
-    }
-
-    val profilesNavigationController =
-      this.navigationControllerDirectory.navigationControllerIfAvailable(
-        ProfilesNavigationControllerType::class.java
-      )
-
-    if (profilesNavigationController != null) {
-      this.logger.debug("delivering back press to profiles navigation controller")
-      if (!profilesNavigationController.popBackStack()) {
+    this.navigationController?.let { controller ->
+      this.logger.debug("delivering back press to {}", controller::class.simpleName)
+      if (!controller.popBackStack()) {
         super.onBackPressed()
       }
       return
@@ -411,8 +318,26 @@ class MainActivity :
     super.onBackPressed()
   }
 
-  override fun findToolbar(): Toolbar {
-    return this.toolbar
+  override fun onBackStackChanged() {
+    this.navigationController?.let { controller ->
+      val showHome = controller.backStackSize() > 1
+      this.actionBar?.setDisplayShowHomeEnabled(showHome)
+    }
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      android.R.id.home -> {
+        this.navigationController?.let { controller ->
+          this.logger.debug("delivering home press to {}", controller::class.simpleName)
+          if (!controller.popToRoot()) {
+            super.onOptionsItemSelected(item)
+          }
+        }
+        true
+      }
+      else -> super.onOptionsItemSelected(item)
+    }
   }
 
   override fun onSplashWantBootFuture(): ListenableFuture<*> {
@@ -507,11 +432,8 @@ class MainActivity :
           return true
         }
 
-        override fun openErrorPage(parameters: ErrorPageParameters) {
-          val errorPage = ErrorPageFragment.create(parameters)
-          manager.beginTransaction()
-            .replace(R.id.mainFragmentHolder, errorPage, "MAIN")
-            .commit()
+        override fun popToRoot(): Boolean {
+          TODO("not implemented")
         }
       }
     )

@@ -24,7 +24,6 @@ dependencies {
   implementation project(":simplified-ui-navigation-api")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
-  implementation project(":simplified-ui-toolbar")
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
