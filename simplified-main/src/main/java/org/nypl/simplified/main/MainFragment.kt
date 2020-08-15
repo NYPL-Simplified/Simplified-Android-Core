@@ -256,7 +256,7 @@ class MainFragment : Fragment() {
         this.bottomNavigator.popBackStack()
         this.bottomNavigator.openFeed(
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
-            title = account.provider.displayName,
+            title = getString(R.string.tabCatalog),
             ownership = CatalogFeedOwnership.OwnedByAccount(id),
             feedURI = account.catalogURIForAge(age),
             isSearchResults = false
