@@ -3,6 +3,7 @@ dependencies {
   api libraries.androidXConstraintLayout
   api libraries.androidXRecyclerView
 
+  implementation project(":simplified-android-ktx")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
   implementation project(":simplified-ui-navigation-api")

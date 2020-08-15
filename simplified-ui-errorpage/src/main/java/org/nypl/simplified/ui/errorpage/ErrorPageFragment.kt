@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.slf4j.LoggerFactory
 
 /**
@@ -138,7 +139,7 @@ class ErrorPageFragment : Fragment() {
   }
 
   private fun configureToolbar(activity: Activity) {
-    activity.actionBar?.apply {
+    this.supportActionBar?.apply {
       title = getString(R.string.errorDetailsTitle)
       subtitle = null
     }

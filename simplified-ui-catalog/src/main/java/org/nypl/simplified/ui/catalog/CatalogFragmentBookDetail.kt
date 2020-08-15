@@ -21,6 +21,7 @@ import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
@@ -286,7 +287,7 @@ class CatalogFragmentBookDetail : Fragment() {
       null
     }
 
-    activity.actionBar?.apply {
+    this.supportActionBar?.apply {
       title = feedTitle
       subtitle = accountProvider?.displayName
     }

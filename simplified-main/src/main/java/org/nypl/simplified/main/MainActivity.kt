@@ -1,5 +1,6 @@
 package org.nypl.simplified.main
 
+import android.app.ActionBar
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -286,8 +287,8 @@ class MainActivity : AppCompatActivity(),
 
     val toolbar = this.findViewById(R.id.mainToolbar) as Toolbar
     this.setSupportActionBar(toolbar)
-    actionBar?.setDisplayHomeAsUpEnabled(true)
-    actionBar?.setDisplayShowHomeEnabled(true)
+    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    supportActionBar?.setDisplayShowHomeEnabled(true)
 
     this.mainViewModel =
       ViewModelProviders.of(this)
@@ -303,6 +304,10 @@ class MainActivity : AppCompatActivity(),
       this.mainViewModel.clearHistory = true
       this.showSplashScreen()
     }
+  }
+
+  override fun getActionBar(): ActionBar? {
+    throw UnsupportedOperationException("Use 'getSupportActionBar' instead")
   }
 
   override fun onBackPressed() {
@@ -321,7 +326,7 @@ class MainActivity : AppCompatActivity(),
   override fun onBackStackChanged() {
     this.navigationController?.let { controller ->
       val showHome = controller.backStackSize() > 1
-      this.actionBar?.setDisplayShowHomeEnabled(showHome)
+      this.supportActionBar?.setDisplayShowHomeEnabled(showHome)
     }
   }
 
@@ -330,11 +335,8 @@ class MainActivity : AppCompatActivity(),
       android.R.id.home -> {
         this.navigationController?.let { controller ->
           this.logger.debug("delivering home press to {}", controller::class.simpleName)
-          if (!controller.popToRoot()) {
-            super.onOptionsItemSelected(item)
-          }
-        }
-        true
+          controller.popToRoot()
+        } ?: false
       }
       else -> super.onOptionsItemSelected(item)
     }

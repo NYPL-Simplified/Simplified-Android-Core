@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -82,7 +83,7 @@ class ProfileTabFragment : Fragment() {
   }
 
   private fun configureToolbar(activity: Activity) {
-    activity.actionBar?.apply {
+    this.supportActionBar?.apply {
       title = getString(R.string.profileTitle)
       subtitle = null
     }

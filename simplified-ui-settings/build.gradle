@@ -9,6 +9,7 @@ dependencies {
 
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-analytics-api")
+  implementation project(":simplified-android-ktx")
   implementation project(":simplified-books-controller-api")
   implementation project(":simplified-boot-api")
   implementation project(":simplified-buildconfig-api")

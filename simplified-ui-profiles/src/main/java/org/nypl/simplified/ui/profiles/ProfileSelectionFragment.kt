@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -121,7 +122,7 @@ class ProfileSelectionFragment : Fragment() {
   }
 
   private fun configureToolbar(activity: Activity) {
-    activity.actionBar?.apply {
+    this.supportActionBar?.apply {
       title = getString(R.string.profilesTitle)
       subtitle = null
     }

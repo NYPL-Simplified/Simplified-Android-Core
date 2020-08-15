@@ -18,6 +18,7 @@ import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -113,7 +114,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
   }
 
   private fun configureToolbar(activity: Activity) {
-    activity.actionBar?.apply {
+    this.supportActionBar?.apply {
       title = getString(R.string.settingsCustomOPDS)
       subtitle = null
     }

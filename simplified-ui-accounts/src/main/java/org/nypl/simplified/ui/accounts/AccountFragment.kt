@@ -48,6 +48,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -605,7 +606,7 @@ class AccountFragment : Fragment() {
 
   private fun configureToolbar(activity: Activity) {
     val providerName = this.account.provider.displayName
-    activity.actionBar?.apply {
+    this.supportActionBar?.apply {
       title = getString(R.string.accounts)
       subtitle = providerName
     }
