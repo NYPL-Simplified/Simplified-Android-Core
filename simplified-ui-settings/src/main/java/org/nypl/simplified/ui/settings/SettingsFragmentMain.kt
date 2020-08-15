@@ -1,6 +1,5 @@
 package org.nypl.simplified.ui.settings
 
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Gravity
@@ -106,10 +105,10 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   override fun onStart() {
     super.onStart()
-    this.configureToolbar(this.requireActivity())
+    this.configureToolbar()
   }
 
-  private fun configureToolbar(activity: Activity) {
+  private fun configureToolbar() {
     this.supportActionBar?.apply {
       title = getString(R.string.settings)
       subtitle = null
