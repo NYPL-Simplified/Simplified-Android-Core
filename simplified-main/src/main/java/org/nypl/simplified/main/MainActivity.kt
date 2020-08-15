@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -66,7 +65,6 @@ import java.util.ServiceLoader
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(),
-  OnBackStackChangedListener,
   SplashListenerType,
   ErrorPageListenerType {
 
@@ -321,13 +319,6 @@ class MainActivity : AppCompatActivity(),
 
     this.logger.debug("delivering back press to activity")
     super.onBackPressed()
-  }
-
-  override fun onBackStackChanged() {
-    this.navigationController?.let { controller ->
-      val showHome = controller.backStackSize() > 1
-      this.supportActionBar?.setDisplayShowHomeEnabled(showHome)
-    }
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
