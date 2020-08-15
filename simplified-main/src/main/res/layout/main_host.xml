@@ -8,9 +8,9 @@
   <androidx.appcompat.widget.Toolbar
     android:id="@+id/mainToolbar"
     android:layout_width="match_parent"
-    style="@style/SimplifiedActionBar"
+    style="@style/Simplified.ActionBar"
     android:layout_height="?android:attr/actionBarSize"
-    app:theme="@style/SimplifiedToolbarThemeOverlay" />
+    app:theme="@style/Simplified.Toolbar" />
 
   <FrameLayout
     android:id="@+id/mainFragmentHolder"
