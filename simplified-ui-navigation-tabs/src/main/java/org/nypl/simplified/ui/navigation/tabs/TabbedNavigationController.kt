@@ -7,6 +7,7 @@ import android.graphics.Color
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomnavigation.LabelVisibilityMode
 import com.io7m.junreachable.UnreachableCodeException
@@ -56,10 +57,16 @@ import org.slf4j.LoggerFactory
 class TabbedNavigationController private constructor(
   private val settingsConfiguration: BuildConfigurationServiceType,
   private val profilesController: ProfilesControllerType,
-  private val navigator: BottomNavigator
+  private val navigator: BottomNavigator,
+  private val listener: OnBackStackChangedListener?
 ) : SettingsNavigationControllerType, CatalogNavigationControllerType {
 
   private val logger = LoggerFactory.getLogger(TabbedNavigationController::class.java)
+
+  private val infoStream = this.navigator.infoStream().subscribe {
+    this.logger.debug(it.toString())
+    this.listener?.onBackStackChanged()
+  }
 
   companion object {
 
@@ -130,7 +137,8 @@ class TabbedNavigationController private constructor(
       return TabbedNavigationController(
         navigator = navigator,
         settingsConfiguration = settingsConfiguration,
-        profilesController = profilesController
+        profilesController = profilesController,
+        listener = activity as? OnBackStackChangedListener
       )
     }
 
@@ -274,6 +282,7 @@ class TabbedNavigationController private constructor(
   }
 
   override fun openSettingsAbout() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsAccounts() {
@@ -288,15 +297,19 @@ class TabbedNavigationController private constructor(
   }
 
   override fun openSettingsAcknowledgements() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsEULA() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsFaq() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsLicense() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsVersion() {
@@ -323,7 +336,7 @@ class TabbedNavigationController private constructor(
   override fun openSettingsCustomOPDS() {
     this.navigator.addFragment(
       fragment = SettingsFragmentCustomOPDS(),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 
@@ -335,7 +348,16 @@ class TabbedNavigationController private constructor(
   }
 
   override fun backStackSize(): Int {
-    return this.navigator.stackSize(this.navigator.currentTab())
+    this.logger.debug(
+      "stack size: current={}, catalog={}, books={}, holds={}, settings={}, profile={}",
+      this.navigator.currentStackSize(),
+      this.navigator.stackSize(R.id.tabCatalog),
+      this.navigator.stackSize(R.id.tabBooks),
+      this.navigator.stackSize(R.id.tabHolds),
+      this.navigator.stackSize(R.id.tabSettings),
+      this.navigator.stackSize(R.id.tabProfile)
+    )
+    return this.navigator.currentStackSize()
   }
 
   override fun openSettingsAccount(parameters: AccountFragmentParameters) {
@@ -349,14 +371,13 @@ class TabbedNavigationController private constructor(
     feedArguments: CatalogFeedArguments,
     entry: FeedEntry.FeedEntryOPDS
   ) {
-    val parameters =
-      CatalogFragmentBookDetailParameters(
-        feedEntry = entry,
-        feedArguments = feedArguments
-      )
-
     this.navigator.addFragment(
-      fragment = CatalogFragmentBookDetail.create(parameters),
+      fragment = CatalogFragmentBookDetail.create(
+        CatalogFragmentBookDetailParameters(
+          feedEntry = entry,
+          feedArguments = feedArguments
+        )
+      ),
       tab = this.navigator.currentTab()
     )
   }

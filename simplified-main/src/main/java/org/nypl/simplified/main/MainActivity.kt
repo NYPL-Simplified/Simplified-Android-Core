@@ -336,13 +336,6 @@ class MainActivity : AppCompatActivity(),
     super.onBackPressed()
   }
 
-  override fun onBackStackChanged() {
-    this.navigationController?.let { controller ->
-      val showHomeAction = controller.backStackSize() > 1
-      this.supportActionBar?.setDisplayShowHomeEnabled(showHomeAction)
-    }
-  }
-
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       android.R.id.home -> {
@@ -352,6 +345,18 @@ class MainActivity : AppCompatActivity(),
         } ?: false
       }
       else -> super.onOptionsItemSelected(item)
+    }
+  }
+
+  override fun onBackStackChanged() {
+    this.navigationController?.let { controller ->
+      this.logger.debug("controller stack size changed [{}]", controller.backStackSize())
+      val isRoot = (1 == controller.backStackSize())
+      this.supportActionBar?.apply {
+        setHomeAsUpIndicator(null)
+        setHomeActionContentDescription(null)
+        setDisplayHomeAsUpEnabled(!isRoot)
+      }
     }
   }
 

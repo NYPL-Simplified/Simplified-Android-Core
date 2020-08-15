@@ -732,15 +732,6 @@ class CatalogFragmentFeed : Fragment() {
   @UiThread
   private fun configureToolbarNavigation() {
 
-    fun resetHomeAction(isVisible: Boolean) {
-      // Reset the 'Home Action' to default values.
-      this.supportActionBar?.apply {
-        setHomeAsUpIndicator(null)
-        setHomeActionContentDescription(null)
-        setDisplayHomeAsUpEnabled(isVisible)
-      }
-    }
-
     fun showAccountPickerAction() {
       // Configure the 'Home Action' in the Toolbar to show the account picker when tapped.
       this.supportActionBar?.apply {
@@ -751,18 +742,14 @@ class CatalogFragmentFeed : Fragment() {
     }
 
     try {
-      val isRoot =
-        (1 == this.navigationController.backStackSize())
+      val isRoot = (1 == this.navigationController.backStackSize())
       if (isRoot) {
         when (this.parameters.ownership) {
           is OwnedByAccount -> showAccountPickerAction()
-          is CollectedFromAccounts -> resetHomeAction(isVisible = false)
         }
-      } else {
-        resetHomeAction(isVisible = true)
       }
     } catch (e: Exception) {
-      resetHomeAction(isVisible = true)
+      // Nothing to do
     }
   }
 
