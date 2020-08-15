@@ -14,7 +14,6 @@ import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
@@ -91,7 +90,6 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var showErrorButton: Button
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
-  private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
 
   private var adeptExecutor: AdobeAdeptExecutorType? = null
