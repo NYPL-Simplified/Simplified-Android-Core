@@ -220,6 +220,11 @@ class SplashFragment : Fragment() {
   }
 
   private fun configureViewsForEULA(eula: EULAType) {
+    val activity = this.activity ?: return
+
+    // If the activity is finishing for some reason; return
+    if (activity.isFinishing) return
+
     this.viewsForEULA.eulaAgree.setOnClickListener {
       eula.eulaSetHasAgreed(true)
       this.onFinishEULASuccessfully()
@@ -240,7 +245,7 @@ class SplashFragment : Fragment() {
     this.viewsForEULA.eulaWebView.settings.allowUniversalAccessFromFileURLs = false
     this.viewsForEULA.eulaWebView.settings.javaScriptEnabled = false
 
-    this.viewsForEULA.eulaWebView.webViewClient = object : MailtoWebViewClient(requireActivity()) {
+    this.viewsForEULA.eulaWebView.webViewClient = object : MailtoWebViewClient(activity) {
       override fun onReceivedError(
         view: WebView?,
         errorCode: Int,
