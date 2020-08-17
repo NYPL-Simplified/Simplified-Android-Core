@@ -63,8 +63,8 @@ object Reports {
   ): Result {
 
     val directories = mutableListOf<File>()
-    context.externalCacheDir?.let { directories.add(it) }
-    context.externalCacheDir?.let { directories.add(File(it, "migrations")) }
+    context.cacheDir?.let { directories.add(it) }
+    context.cacheDir?.let { directories.add(File(it, "migrations")) }
 
     return sendReport(
       context = context,

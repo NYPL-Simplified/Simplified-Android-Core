@@ -60,8 +60,8 @@ class MainApplication : Application() {
         while (index.hasNext()) {
           val appender = index.next()
           if (appender is RollingFileAppender<*>) {
-            externalCacheDir?.mkdirs()
-            val path = File(externalCacheDir, "log.txt").absolutePath
+            cacheDir?.mkdirs()
+            val path = File(cacheDir, "log.txt").absolutePath
             (appender as RollingFileAppender<*>).file = path
             appender.start()
           }

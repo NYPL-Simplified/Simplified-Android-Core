@@ -544,7 +544,7 @@ class SplashFragment : Fragment() {
 
   private fun processMigrationReportSaveToDisk(report: MigrationReport): File? {
     return try {
-      val cacheDir = this.requireContext().externalCacheDir
+      val cacheDir = this.requireContext().cacheDir
       if (cacheDir == null) {
         AlertDialog.Builder(this.requireContext())
           .setTitle("Could not save migration report.")
