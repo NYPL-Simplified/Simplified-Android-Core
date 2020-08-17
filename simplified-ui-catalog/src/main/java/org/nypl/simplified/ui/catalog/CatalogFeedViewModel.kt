@@ -114,7 +114,6 @@ class CatalogFeedViewModel(
         uri = booksUri
       )
 
-
     val profile =
       this.profilesController.profileCurrent()
     val accountsToSync =
