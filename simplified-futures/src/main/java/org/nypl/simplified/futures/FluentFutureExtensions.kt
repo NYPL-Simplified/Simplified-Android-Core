@@ -63,7 +63,7 @@ object FluentFutureExtensions {
    */
 
   fun <A> fluentFutureOfAll(futures: List<FluentFuture<A>>) =
-    FluentFuture.from(Futures.allAsList(futures))
+    FluentFuture.from(Futures.successfulAsList(futures))
 
   /**
    * A future that completes immediately with the given value.
