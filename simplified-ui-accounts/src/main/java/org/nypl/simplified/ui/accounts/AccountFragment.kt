@@ -922,6 +922,7 @@ class AccountFragment : Fragment() {
       AsLoginButtonDisabled -> {
         this.loginButton.setText(R.string.accountLogin)
         this.signUpLabel.setText(R.string.accountCardCreatorLabel)
+        this.signUpLabel.isEnabled = true
         this.loginButton.isEnabled = false
       }
       is AsCancelButtonEnabled -> {
@@ -931,13 +932,16 @@ class AccountFragment : Fragment() {
       }
       is AsLogoutButtonEnabled -> {
         this.loginButton.setText(R.string.accountLogout)
-        this.signUpLabel.setText(R.string.accountWantChildCard)
         this.loginButton.isEnabled = true
+        this.signUpButton.isEnabled = isNypl()
+        this.signUpLabel.isEnabled = isNypl()
+        if (isNypl()) this.signUpLabel.setText(R.string.accountWantChildCard)
+        this.signUpLabel.isEnabled = isNypl()
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       AsLogoutButtonDisabled -> {
         this.loginButton.setText(R.string.accountLogout)
-        this.signUpLabel.setText(R.string.accountWantChildCard)
+        if (isNypl()) this.signUpLabel.setText(R.string.accountWantChildCard)
         this.loginButton.isEnabled = false
       }
       AsCancelButtonDisabled -> {
@@ -945,6 +949,18 @@ class AccountFragment : Fragment() {
         this.loginButton.isEnabled = false
       }
     }
+  }
+
+  /**
+   * Returns if the user is viewing the NYPL account
+   */
+  private fun isNypl(): Boolean {
+    var isNypl = false
+    val cardCreatorURI = this.account.provider.cardCreatorURI
+    if (cardCreatorURI != null) {
+      isNypl = cardCreatorURI.scheme == this.nyplCardCreatorScheme
+    }
+    return isNypl
   }
 
   private fun loadAuthenticationLogoIfNecessary(
@@ -1020,6 +1036,7 @@ class AccountFragment : Fragment() {
     val loginSatisfied = this.determineLoginIsSatisfied()
     this.setLoginButtonStatus(loginSatisfied)
     this.authenticationAlternativesShow()
+    this.signUpButton.isEnabled = true
   }
 
   private fun authenticationAlternativesMake() {
