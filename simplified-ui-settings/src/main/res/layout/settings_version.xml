@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:scrollbarAlwaysDrawHorizontalTrack="true">
@@ -51,14 +52,16 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_margin="16dp"
-      android:orientation="vertical">
+      android:orientation="vertical"
+      android:visibility="gone"
+      tools:visibility="visible">
 
       <TextView
         android:id="@+id/settingsVersionDevTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/settingsVersionDeveloper"
         android:layout_marginBottom="16dp"
+        android:text="@string/settingsVersionDeveloper"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -190,13 +193,13 @@
         android:text="User has seen library selection screen?" />
 
       <Switch
-          android:id="@+id/settingsVersionDevCardCreatorLocationSwitch"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_marginBottom="16dp"
-          android:checked="false"
-          android:enabled="true"
-          android:text="Card Creator: Pretend the user is in New York" />
+        android:id="@+id/settingsVersionDevCardCreatorLocationSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:checked="false"
+        android:enabled="true"
+        android:text="Card Creator: Pretend the user is in New York" />
 
       <Switch
         android:id="@+id/settingsVersionDevEnableR2Switch"
