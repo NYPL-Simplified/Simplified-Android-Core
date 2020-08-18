@@ -60,6 +60,7 @@ dependencies {
   api libraries.nyplAudiobookManifestFulfillBasic
   api libraries.nyplAudiobookManifestWebPub
   api libraries.nyplAudiobookOpenAccess
+  api libraries.nyplAudiobookRBDigital
   api libraries.nyplAudiobookViews
 
   implementation libraries.io7mJFunctional
