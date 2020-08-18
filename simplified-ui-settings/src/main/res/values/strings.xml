@@ -54,10 +54,11 @@
   <string name="settingsPlaceholder">Lorem ipsum dolor sit amet, probatus volutpat has at, vis adhuc iuvaret omittantur an, sadipscing conclusionemque his ad. Eam ut simul tempor. Primis consetetur appellantur vim eu, eum an iudico dolorum. Ad vis utamur honestatis, sanctus debitis referrentur an eam.</string>
   <string name="settingsReportIssue">Report an issue…</string>
   <string name="settingsSyncBookmarks">Sync bookmarks</string>
+  <string name="settingsTapToDebug">Debug mode in %1$d&#8230;</string>
   <string name="settingsUserName">User Name</string>
   <string name="settingsVersion">App version</string>
   <string name="settingsVersionBuild">Build</string>
-  <string name="settingsVersionDeveloper">Developer Options</string>
+  <string name="settingsVersionDeveloper">Debug Options</string>
   <string name="settingsVersionSummary" />
   <string name="settingsVersionVersion">Version</string>
 </resources>
