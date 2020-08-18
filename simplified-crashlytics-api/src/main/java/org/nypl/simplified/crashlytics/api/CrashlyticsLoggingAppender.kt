@@ -3,7 +3,6 @@ package org.nypl.simplified.crashlytics.api
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.classic.spi.ThrowableProxy
 import ch.qos.logback.core.AppenderBase
-import ch.qos.logback.core.status.InfoStatus
 import ch.qos.logback.core.status.WarnStatus
 import java.util.ServiceLoader
 
@@ -17,14 +16,11 @@ import java.util.ServiceLoader
  */
 
 class CrashlyticsLoggingAppender(
-  private var service: CrashlyticsServiceType? = null
+  var service: CrashlyticsServiceType? = null
 ) : AppenderBase<ILoggingEvent>() {
 
-  private fun initialize() {
+  init {
     if (this.service == null) {
-      addStatus(
-        InfoStatus("Loading ${CrashlyticsServiceType::class.qualifiedName}", this)
-      )
       val loader =
         ServiceLoader.load(CrashlyticsServiceType::class.java)
 
@@ -38,15 +34,12 @@ class CrashlyticsLoggingAppender(
   }
 
   override fun start() {
-    this.initialize()
-
     if (this.service == null) {
-      addStatus(
+      return addStatus(
         WarnStatus("Found no usable ${CrashlyticsServiceType::class.simpleName}!", this)
       )
-    } else {
-      this.started = true
     }
+    super.start()
   }
 
   override fun append(event: ILoggingEvent) {
