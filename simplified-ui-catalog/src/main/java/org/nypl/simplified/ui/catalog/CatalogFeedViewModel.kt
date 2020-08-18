@@ -16,6 +16,7 @@ import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo
@@ -25,6 +26,8 @@ import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
+import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
+import org.nypl.simplified.futures.FluentFutureExtensions.fluentFutureOfAll
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onAnyError
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
@@ -57,6 +60,8 @@ class CatalogFeedViewModel(
 
   private val feedLoader: FeedLoaderType =
     this.services.requireService(FeedLoaderType::class.java)
+  private val booksController: BooksControllerType =
+    this.services.requireService(BooksControllerType::class.java)
   private val profilesController: ProfilesControllerType =
     this.services.requireService(ProfilesControllerType::class.java)
   private val instanceId =
@@ -109,14 +114,29 @@ class CatalogFeedViewModel(
         uri = booksUri
       )
 
-    val future =
-      this.profilesController.profileFeed(request)
-        .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
-        .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
+    val profile =
+      this.profilesController.profileCurrent()
+    val accountsToSync =
+      if (request.filterByAccountID == null) {
+        // Sync all accounts
+        profile.accounts()
+      } else {
+        // Sync the account we're filtering on
+        profile.accounts().filterKeys { it == request.filterByAccountID }
+      }
+
+    val syncFuture =
+      fluentFutureOfAll(accountsToSync.values.map { account ->
+        this.booksController.booksSync(account)
+      })
+
+    val future = this.profilesController.profileFeed(request)
+      .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
+      .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
 
     return this.createNewStatus(
       arguments = arguments,
-      future = future
+      future = syncFuture.flatMap { future }
     )
   }
 
