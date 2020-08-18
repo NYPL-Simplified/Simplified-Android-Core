@@ -559,7 +559,7 @@ class SettingsFragmentVersion : Fragment() {
       if (this.tapToDebug < 6) {
         val message =
           context.getString(R.string.settingsTapToDebug, this.tapToDebug)
-        with (Toast.makeText(context, message, Toast.LENGTH_SHORT)) {
+        with(Toast.makeText(context, message, Toast.LENGTH_SHORT)) {
           this.setGravity(CENTER_HORIZONTAL or CENTER_VERTICAL, 0, 0)
           this.show()
         }
