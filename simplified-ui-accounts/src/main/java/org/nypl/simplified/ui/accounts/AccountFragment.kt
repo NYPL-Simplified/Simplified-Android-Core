@@ -1037,6 +1037,7 @@ class AccountFragment : Fragment() {
     this.setLoginButtonStatus(loginSatisfied)
     this.authenticationAlternativesShow()
     this.signUpButton.isEnabled = true
+    this.signUpLabel.isEnabled = true
   }
 
   private fun authenticationAlternativesMake() {
