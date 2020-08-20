@@ -1,6 +1,7 @@
 package org.nypl.simplified.main
 
 import android.app.Application
+import android.net.http.HttpResponseCache
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
@@ -14,6 +15,7 @@ import org.nypl.simplified.boot.api.BootLoader
 import org.nypl.simplified.boot.api.BootProcessType
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.IOException
 
 class MainApplication : Application() {
 
@@ -40,6 +42,7 @@ class MainApplication : Application() {
     super.onCreate()
 
     this.configureLogging()
+    this.configureHttpCache()
     this.configureStrictMode()
     this.logger.debug("starting app: pid {}", android.os.Process.myPid())
     this.bootFuture = this.boot.start(this)
@@ -70,6 +73,23 @@ class MainApplication : Application() {
       this.logger.debug("logging is configured")
     } catch (e: Exception) {
       this.logger.error("could not configure logging: ", e)
+    }
+  }
+
+  /**
+   * Install a global HTTP cache.
+   */
+
+  private fun configureHttpCache() {
+    if (BuildConfig.DEBUG) {
+      val httpCacheDir = File(cacheDir, "http")
+      val httpCacheSize = 10 * 1024 * 1024.toLong() // 10 MiB
+      try {
+        HttpResponseCache.install(httpCacheDir, httpCacheSize)
+        this.logger.debug("Installed HTTP cache to {}", httpCacheDir)
+      } catch (e: IOException) {
+        this.logger.warn("Failed to install HTTP cache!", e)
+      }
     }
   }
 
