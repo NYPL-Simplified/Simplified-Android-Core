@@ -312,7 +312,7 @@ class TabbedNavigationController private constructor(
     throw NotImplementedError()
   }
 
-  override fun openSettingsVersion() {
+  override fun openSettingsDebug() {
     this.navigator.addFragment(
       fragment = SettingsFragmentDebug(),
       tab = R.id.tabSettings
