@@ -43,13 +43,13 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
- * A fragment that shows the set of accounts in the current profile.
+ * A fragment that shows various debug options for testing app functionality at runtime.
  */
 
-class SettingsFragmentVersion : Fragment() {
+class SettingsFragmentDebug : Fragment() {
 
   private val logger =
-    LoggerFactory.getLogger(SettingsFragmentVersion::class.java)
+    LoggerFactory.getLogger(SettingsFragmentDebug::class.java)
 
   private val appVersion by lazy {
     try {
@@ -121,7 +121,7 @@ class SettingsFragmentVersion : Fragment() {
     savedInstanceState: Bundle?
   ): View {
     val view =
-      inflater.inflate(R.layout.settings_version, container, false)
+      inflater.inflate(R.layout.settings_debug, container, false)
 
     this.crashButton =
       view.findViewById(R.id.settingsVersionDevCrash)

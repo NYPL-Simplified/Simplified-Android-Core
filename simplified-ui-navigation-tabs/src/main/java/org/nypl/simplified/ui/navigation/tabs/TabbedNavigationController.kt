@@ -40,7 +40,7 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
 import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
 import org.nypl.simplified.ui.settings.SettingsFragmentMain
-import org.nypl.simplified.ui.settings.SettingsFragmentVersion
+import org.nypl.simplified.ui.settings.SettingsFragmentDebug
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.viewer.api.Viewers
@@ -303,7 +303,7 @@ class TabbedNavigationController private constructor(
 
   override fun openSettingsVersion() {
     this.navigator.addFragment(
-      fragment = SettingsFragmentVersion(),
+      fragment = SettingsFragmentDebug(),
       tab = R.id.tabSettings
     )
   }
