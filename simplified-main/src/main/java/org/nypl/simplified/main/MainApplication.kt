@@ -81,13 +81,15 @@ class MainApplication : Application() {
    */
 
   private fun configureHttpCache() {
-    val httpCacheDir = File(cacheDir, "http")
-    val httpCacheSize = 10 * 1024 * 1024.toLong() // 10 MiB
-    try {
-      HttpResponseCache.install(httpCacheDir, httpCacheSize)
-      this.logger.debug("Installed HTTP cache to {}", httpCacheDir)
-    } catch (e: IOException) {
-      this.logger.warn("Failed to install HTTP cache!", e)
+    if (BuildConfig.DEBUG) {
+      val httpCacheDir = File(cacheDir, "http")
+      val httpCacheSize = 10 * 1024 * 1024.toLong() // 10 MiB
+      try {
+        HttpResponseCache.install(httpCacheDir, httpCacheSize)
+        this.logger.debug("Installed HTTP cache to {}", httpCacheDir)
+      } catch (e: IOException) {
+        this.logger.warn("Failed to install HTTP cache!", e)
+      }
     }
   }
 
