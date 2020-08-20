@@ -8,11 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Switch
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.MoreExecutors
@@ -75,18 +75,18 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var booksController: BooksControllerType
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var cacheButton: Button
-  private lateinit var cardCreatorFakeLocation: Switch
+  private lateinit var cardCreatorFakeLocation: SwitchCompat
   private lateinit var crashButton: Button
   private lateinit var customOPDS: Button
   private lateinit var drmTable: TableLayout
-  private lateinit var enableR2: Switch
-  private lateinit var failNextBoot: Switch
-  private lateinit var hasSeenLibrarySelection: Switch
+  private lateinit var enableR2: SwitchCompat
+  private lateinit var failNextBoot: SwitchCompat
+  private lateinit var hasSeenLibrarySelection: SwitchCompat
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendAnalyticsButton: Button
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
-  private lateinit var showTesting: Switch
+  private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
   private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType

@@ -120,7 +120,7 @@
       android:textSize="24sp"
       android:textStyle="bold" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
       android:id="@+id/settingsVersionDevProductionLibrariesSwitch"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -129,7 +129,7 @@
       android:enabled="true"
       android:text="Show non-production libraries" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
       android:id="@+id/settingsVersionDevFailNextBootSwitch"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -138,7 +138,7 @@
       android:enabled="true"
       android:text="Cause the next application startup to fail" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
       android:id="@+id/settingsVersionDevSeenLibrarySelectionScreen"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -147,7 +147,7 @@
       android:enabled="true"
       android:text="User has seen library selection screen?" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
       android:id="@+id/settingsVersionDevCardCreatorLocationSwitch"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -156,7 +156,7 @@
       android:enabled="true"
       android:text="Card Creator: Pretend the user is in New York" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
       android:id="@+id/settingsVersionDevEnableR2Switch"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
