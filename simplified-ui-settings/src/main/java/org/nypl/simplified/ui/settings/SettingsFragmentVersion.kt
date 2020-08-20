@@ -180,11 +180,11 @@ class SettingsFragmentVersion : Fragment() {
       val context = this.requireContext()
       val message = StringBuilder(128)
       message.append("Cache directory is: ")
-      message.append(context.externalCacheDir)
+      message.append(context.cacheDir)
       message.append("\n")
       message.append("\n")
       message.append("Exists: ")
-      message.append(context.externalCacheDir?.isDirectory ?: false)
+      message.append(context.cacheDir?.isDirectory ?: false)
       message.append("\n")
 
       AlertDialog.Builder(context)
