@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools">
+  <PreferenceCategory android:title="Actions">
+    <Preference
+      android:key=""
+      android:summary=""
+      android:title="Send error logs" />
+    <Preference
+      android:key=""
+      android:summary=""
+      android:title="Show error page" />
+    <Preference
+      android:key=""
+      android:summary=""
+      android:title="Send analytics" />
+    <Preference
+      android:key=""
+      android:summary=""
+      android:title="Sync accounts" />
+    <Preference
+      android:key=""
+      android:summary=""
+      android:title="Add OPDS feed" />
+  </PreferenceCategory>
+
+  <PreferenceCategory android:title="Cache">
+    <Preference
+      android:key=""
+      android:title="Location"
+      app:enableCopying="true"
+      tools:summary="/data/user/0/org.nypl.simplified.vanilla/cache" />
+    <Preference
+      android:key=""
+      android:title="Size"
+      app:enableCopying="true"
+      tools:summary="3.7MB" />
+  </PreferenceCategory>
+
+  <PreferenceCategory android:title="Features">
+    <SwitchPreference
+      android:key=""
+      android:summary=""
+      android:title="Show non-production libraries" />
+    <SwitchPreference
+      android:key=""
+      android:summary=""
+      android:title="Patron has seen library selection prompt" />
+    <SwitchPreference
+      android:key=""
+      android:summary=""
+      android:title="Locate patron in New York" />
+    <SwitchPreference
+      android:key=""
+      android:summary=""
+      android:title="Enable Readium2 (Alpha)" />
+  </PreferenceCategory>
+
+  <PreferenceCategory android:title="Modules">
+    <!--
+      Enabled | Not supported
+    -->
+    <Preference
+      android:enabled="false"
+      android:key=""
+      android:summary="Not supported"
+      android:title="Adobe ACS" />
+  </PreferenceCategory>
+</PreferenceScreen>
