@@ -25,6 +25,17 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   private val logger =
     LoggerFactory.getLogger(SettingsFragmentMain::class.java)
 
+  private val appVersion by lazy {
+    try {
+      val context = requireContext()
+      val pkgManager = context.packageManager
+      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
+      "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+    } catch (e: PackageManager.NameNotFoundException) {
+      "Unknown"
+    }
+  }
+
   private val showDebugSettings: Boolean
     get() = this.profilesController
       .profileCurrent()
@@ -122,18 +133,11 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureVersion(preference: Preference) {
-    try {
-      val context = requireContext()
-      val pkgManager = context.packageManager
-      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      preference.summary = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
-    } catch (e: PackageManager.NameNotFoundException) {
-      //  Nothing to do
-    }
+    preference.setSummaryProvider { this.appVersion }
   }
 
   private fun configureBuild(preference: Preference) {
-    preference.summary = this.buildConfig.vcsCommit
+    preference.setSummaryProvider { this.buildConfig.vcsCommit }
 
     if (!this.showDebugSettings) {
       preference.setOnPreferenceClickListener {
