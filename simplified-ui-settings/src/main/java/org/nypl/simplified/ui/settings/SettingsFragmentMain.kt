@@ -2,6 +2,9 @@ package org.nypl.simplified.ui.settings
 
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.Gravity
+import android.widget.Toast
+import androidx.core.view.postDelayed
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.io7m.jfunctional.Some
@@ -9,7 +12,9 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
+import org.slf4j.LoggerFactory
 
 /**
  * The main settings page containing links to other settings pages.
@@ -17,8 +22,46 @@ import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 class SettingsFragmentMain : PreferenceFragmentCompat() {
 
-  private lateinit var configuration: BuildConfigurationServiceType
-  private lateinit var documents: DocumentStoreType
+  private val logger =
+    LoggerFactory.getLogger(SettingsFragmentMain::class.java)
+
+  private val showDebugSettings: Boolean
+    get() = this.profilesController
+      .profileCurrent()
+      .preferences()
+      .showDebugSettings
+
+  private val buildConfig by lazy {
+    Services.serviceDirectory()
+      .requireService(BuildConfigurationServiceType::class.java)
+  }
+  private val documents by lazy {
+    Services.serviceDirectory()
+      .requireService(DocumentStoreType::class.java)
+  }
+  private val profilesController by lazy {
+    Services.serviceDirectory()
+      .requireService(ProfilesControllerType::class.java)
+  }
+  private val navigationController by lazy {
+    NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
+  }
+
+  private lateinit var settingsAbout: Preference
+  private lateinit var settingsAcknowledgements: Preference
+  private lateinit var settingsAccounts: Preference
+  private lateinit var settingsBuild: Preference
+  private lateinit var settingsDebug: Preference
+  private lateinit var settingsEULA: Preference
+  private lateinit var settingsFaq: Preference
+  private lateinit var settingsLicense: Preference
+  private lateinit var settingsVersion: Preference
+
+  private var toast: Toast? = null
+  private var tapToDebugSettings = 7
 
   override fun onCreatePreferences(
     savedInstanceState: Bundle?,
@@ -26,35 +69,25 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   ) {
     this.setPreferencesFromResource(R.xml.settings, rootKey)
 
-    val services =
-      Services.serviceDirectory()
-    this.documents =
-      services.requireService(DocumentStoreType::class.java)
-    this.configuration =
-      services.requireService(BuildConfigurationServiceType::class.java)
+    this.settingsAbout = this.findPreference("settingsAbout")!!
+    this.settingsAcknowledgements = this.findPreference("settingsAcknowledgements")!!
+    this.settingsAccounts = this.findPreference("settingsAccounts")!!
+    this.settingsBuild = this.findPreference("settingsBuild")!!
+    this.settingsDebug = this.findPreference("settingsDebug")!!
+    this.settingsEULA = this.findPreference("settingsEULA")!!
+    this.settingsFaq = this.findPreference("settingsFaq")!!
+    this.settingsLicense = this.findPreference("settingsLicense")!!
+    this.settingsVersion = this.findPreference("settingsVersion")!!
 
-    val settingsAbout =
-      this.findPreference<Preference>("settingsAbout")!!
-    val settingsAcknowledgements =
-      this.findPreference<Preference>("settingsAcknowledgements")!!
-    val settingsAccounts =
-      this.findPreference<Preference>("settingsAccounts")!!
-    val settingsEULA =
-      this.findPreference<Preference>("settingsEULA")!!
-    val settingsFaq =
-      this.findPreference<Preference>("settingsFaq")!!
-    val settingsLicense =
-      this.findPreference<Preference>("settingsLicense")!!
-    val settingsVersion =
-      this.findPreference<Preference>("settingsVersion")!!
-
-    this.configureAbout(settingsAbout)
-    this.configureAcknowledgements(settingsAcknowledgements)
-    this.configureAccounts(settingsAccounts)
-    this.configureEULA(settingsEULA)
-    this.configureFaq(settingsFaq)
-    this.configureLicense(settingsLicense)
-    this.configureVersion(settingsVersion)
+    this.configureAbout(this.settingsAbout)
+    this.configureAcknowledgements(this.settingsAcknowledgements)
+    this.configureAccounts(this.settingsAccounts)
+    this.configureBuild(this.settingsBuild)
+    this.configureDebug(this.settingsDebug)
+    this.configureEULA(this.settingsEULA)
+    this.configureFaq(this.settingsFaq)
+    this.configureLicense(this.settingsLicense)
+    this.configureVersion(this.settingsVersion)
   }
 
   override fun onStart() {
@@ -72,8 +105,8 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       )
       host.toolbarSetBackArrowConditionally(
         context = host,
-        shouldArrowBePresent = { this.findNavigationController().backStackSize() > 1 },
-        onArrowClicked = { this.findNavigationController().popBackStack() })
+        shouldArrowBePresent = { this.navigationController.backStackSize() > 1 },
+        onArrowClicked = { this.navigationController.popBackStack() })
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
     }
@@ -83,7 +116,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.documents.acknowledgements is Some
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsAcknowledgements()
+        this.navigationController.openSettingsAcknowledgements()
         true
       }
   }
@@ -95,20 +128,36 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
       preference.summary = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
     } catch (e: PackageManager.NameNotFoundException) {
-      //  Pass
+      //  Nothing to do
     }
-    preference.onPreferenceClickListener =
-      Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsVersion()
+  }
+
+  private fun configureBuild(preference: Preference) {
+    preference.summary = this.buildConfig.vcsCommit
+
+    if (!this.showDebugSettings) {
+      preference.setOnPreferenceClickListener {
+        this.onTapToDebugSettings(it)
         true
       }
+    }
+  }
+
+  private fun configureDebug(preference: Preference) {
+    preference.setOnPreferenceClickListener {
+      this.navigationController.openSettingsVersion()
+      true
+    }
+
+    // Show the debug settings menu, if enabled
+    preference.isVisible = this.showDebugSettings
   }
 
   private fun configureLicense(preference: Preference) {
     preference.isEnabled = this.documents.licenses is Some
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsLicense()
+        this.navigationController.openSettingsLicense()
         true
       }
   }
@@ -117,7 +166,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = false
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsFaq()
+        this.navigationController.openSettingsFaq()
         true
       }
   }
@@ -126,17 +175,17 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.documents.eula is Some
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsEULA()
+        this.navigationController.openSettingsEULA()
         true
       }
   }
 
   private fun configureAccounts(preference: Preference) {
-    if (this.configuration.allowAccountsAccess) {
+    if (this.buildConfig.allowAccountsAccess) {
       preference.isEnabled = true
       preference.onPreferenceClickListener =
         Preference.OnPreferenceClickListener {
-          this.findNavigationController().openSettingsAccounts()
+          this.navigationController.openSettingsAccounts()
           true
         }
     } else {
@@ -149,15 +198,53 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.documents.about is Some
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsAbout()
+        this.navigationController.openSettingsAbout()
         true
       }
   }
 
-  private fun findNavigationController(): SettingsNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = SettingsNavigationControllerType::class.java
-    )
+  private fun onTapToDebugSettings(preference: Preference) {
+    val context = this.context ?: return
+
+    if (this.tapToDebugSettings == 0) {
+      this.profilesController.profileUpdate { description ->
+        description.copy(
+          preferences = description.preferences.copy(
+            showDebugSettings = true
+          )
+        )
+      }
+      this.settingsDebug.isVisible = true
+
+      // Cancel the toast
+      this.toast?.cancel()
+
+      // Reveal the preference, if hidden
+      this.listView.run {
+        postDelayed(400L) {
+          smoothScrollToPosition(adapter!!.itemCount)
+        }
+      }
+
+      // Unset our click listener
+      preference.onPreferenceClickListener = null
+    } else {
+      if (this.tapToDebugSettings < 6) {
+        val message =
+          context.getString(R.string.settingsTapToDebug, this.tapToDebugSettings)
+
+        val toast =
+          this.toast ?: Toast.makeText(context, message, Toast.LENGTH_LONG)
+
+        this.toast = toast.apply {
+          this.setText(message)
+          if (!this.view.isShown) {
+            this.setGravity(Gravity.CENTER_HORIZONTAL or Gravity.CENTER_VERTICAL, 0, 0)
+            this.show()
+          }
+        }
+      }
+      this.tapToDebugSettings -= 1
+    }
   }
 }

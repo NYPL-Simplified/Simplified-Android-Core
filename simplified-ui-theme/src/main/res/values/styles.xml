@@ -62,7 +62,7 @@
     <item name="android:dialogTheme">@style/SimplifiedDialog</item>
     <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="preferenceTheme">@style/SimplifiedPreferenceTheme</item>
     <item name="toolbarStyle">@style/SimplifiedToolBarStyle</item>
 
     <item name="windowActionBar">false</item>
@@ -95,7 +95,7 @@
     <item name="android:dialogTheme">@style/SimplifiedDialog</item>
     <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="preferenceTheme">@style/SimplifiedPreferenceTheme</item>
     <item name="toolbarStyle">@style/SimplifiedToolBarStyle</item>
   </style>
 
@@ -137,6 +137,10 @@
   <style name="SimplifiedToolBarStyle" parent="Widget.AppCompat.Toolbar">
     <item name="titleTextAppearance">@style/SimplifiedTitleTextAppearance</item>
     <item name="subtitleTextAppearance">@style/SimplifiedSubTitleTextAppearance</item>
+  </style>
+
+  <style name="SimplifiedPreferenceTheme" parent="@style/PreferenceThemeOverlay.v14.Material">
+    <item name="android:tint">?android:attr/textColorTertiary</item>
   </style>
 
   <style name="SimplifiedTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">

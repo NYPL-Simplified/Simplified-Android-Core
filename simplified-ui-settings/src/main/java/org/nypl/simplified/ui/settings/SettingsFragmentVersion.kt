@@ -1,11 +1,9 @@
 package org.nypl.simplified.ui.settings
 
 import android.app.AlertDialog
-import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Color
 import android.os.Bundle
-import android.view.Gravity.CENTER_HORIZONTAL
-import android.view.Gravity.CENTER_VERTICAL
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,18 +51,33 @@ class SettingsFragmentVersion : Fragment() {
   private val logger =
     LoggerFactory.getLogger(SettingsFragmentVersion::class.java)
 
+  private val appVersion by lazy {
+    try {
+      val context = this.requireContext()
+      val pkgManager = context.packageManager
+      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
+      "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+    } catch (e: NameNotFoundException) {
+      "Unavailable"
+    }
+  }
+
+  private val navigationController by lazy {
+    NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
+  }
+
   private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var adobeDRMActivationTable: TableLayout
   private lateinit var analytics: AnalyticsType
   private lateinit var booksController: BooksControllerType
   private lateinit var buildConfig: BuildConfigurationServiceType
-  private lateinit var buildText: TextView
-  private lateinit var buildTitle: TextView
   private lateinit var cacheButton: Button
   private lateinit var cardCreatorFakeLocation: Switch
   private lateinit var crashButton: Button
   private lateinit var customOPDS: Button
-  private lateinit var debugSettings: ViewGroup
   private lateinit var drmTable: TableLayout
   private lateinit var enableR2: Switch
   private lateinit var failNextBoot: Switch
@@ -77,10 +90,7 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var syncAccountsButton: Button
   private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
-  private lateinit var versionText: TextView
-  private lateinit var versionTitle: TextView
 
-  private var tapToDebug = 7
   private var adeptExecutor: AdobeAdeptExecutorType? = null
   private var profileEventSubscription: Disposable? = null
 
@@ -109,68 +119,45 @@ class SettingsFragmentVersion : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
-    val layout =
+  ): View {
+    val view =
       inflater.inflate(R.layout.settings_version, container, false)
 
-    this.debugSettings =
-      layout.findViewById(R.id.settingsVersionDev)
     this.crashButton =
-      this.debugSettings.findViewById(R.id.settingsVersionDevCrash)
+      view.findViewById(R.id.settingsVersionDevCrash)
     this.cacheButton =
-      this.debugSettings.findViewById(R.id.settingsVersionDevShowCacheDir)
+      view.findViewById(R.id.settingsVersionDevShowCacheDir)
     this.sendReportButton =
-      this.debugSettings.findViewById(R.id.settingsVersionDevSendReports)
+      view.findViewById(R.id.settingsVersionDevSendReports)
     this.showErrorButton =
-      this.debugSettings.findViewById(R.id.settingsVersionDevShowError)
+      view.findViewById(R.id.settingsVersionDevShowError)
     this.sendAnalyticsButton =
-      this.debugSettings.findViewById(R.id.settingsVersionDevSyncAnalytics)
+      view.findViewById(R.id.settingsVersionDevSyncAnalytics)
     this.syncAccountsButton =
-      this.debugSettings.findViewById(R.id.settingsVersionDevSyncAccounts)
-
-    this.buildTitle =
-      layout.findViewById(R.id.settingsVersionBuildTitle)
-    this.buildText =
-      layout.findViewById(R.id.settingsVersionBuild)
-    this.versionTitle =
-      layout.findViewById(R.id.settingsVersionVersionTitle)
-    this.versionText =
-      layout.findViewById(R.id.settingsVersionVersion)
+      view.findViewById(R.id.settingsVersionDevSyncAccounts)
     this.drmTable =
-      layout.findViewById(R.id.settingsVersionDrmSupport)
+      view.findViewById(R.id.settingsVersionDrmSupport)
     this.adobeDRMActivationTable =
-      layout.findViewById(R.id.settingsVersionDrmAdobeActivations)
+      view.findViewById(R.id.settingsVersionDrmAdobeActivations)
     this.showTesting =
-      layout.findViewById(R.id.settingsVersionDevProductionLibrariesSwitch)
+      view.findViewById(R.id.settingsVersionDevProductionLibrariesSwitch)
     this.failNextBoot =
-      layout.findViewById(R.id.settingsVersionDevFailNextBootSwitch)
+      view.findViewById(R.id.settingsVersionDevFailNextBootSwitch)
     this.hasSeenLibrarySelection =
-      layout.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
+      view.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
     this.cardCreatorFakeLocation =
-      layout.findViewById(R.id.settingsVersionDevCardCreatorLocationSwitch)
+      view.findViewById(R.id.settingsVersionDevCardCreatorLocationSwitch)
     this.enableR2 =
-      layout.findViewById(R.id.settingsVersionDevEnableR2Switch)
+      view.findViewById(R.id.settingsVersionDevEnableR2Switch)
     this.customOPDS =
-      layout.findViewById(R.id.settingsVersionDevCustomOPDS)
+      view.findViewById(R.id.settingsVersionDevCustomOPDS)
 
-    return layout
+    return view
   }
 
   override fun onStart() {
     super.onStart()
     this.configureToolbar()
-
-    val showDebugSettings =
-      this.profilesController
-        .profileCurrent()
-        .preferences()
-        .showDebugSettings
-    if (showDebugSettings) {
-      this.debugSettings.visibility = View.VISIBLE
-    } else {
-      this.buildTitle.setOnClickListener { this.onTapToDebug() }
-      this.buildText.setOnClickListener { this.onTapToDebug() }
-    }
 
     this.crashButton.setOnClickListener {
       throw OutOfMemoryError("Pretending to have run out of memory!")
@@ -193,20 +180,11 @@ class SettingsFragmentVersion : Fragment() {
         .show()
     }
 
-    try {
-      val context = this.requireContext()
-      val pkgManager = context.packageManager
-      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      this.versionText.text = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
-    } catch (e: PackageManager.NameNotFoundException) {
-      this.versionText.text = "Unavailable"
-    }
-
     this.sendReportButton.setOnClickListener {
       Reports.sendReportsDefault(
         context = this.requireContext(),
         address = this.buildConfig.supportErrorReportEmailAddress,
-        subject = "[simplye-error-report] ${this.versionText.text}",
+        subject = "[simplye-error-report] ${this.appVersion}",
         body = ""
       )
     }
@@ -253,8 +231,6 @@ class SettingsFragmentVersion : Fragment() {
         this.logger.error("ouch: ", e)
       }
     }
-
-    this.buildText.text = this.buildConfig.vcsCommit
 
     this.drmTable.removeAllViews()
     this.drmTable.addView(this.drmACSSupportRow())
@@ -306,7 +282,7 @@ class SettingsFragmentVersion : Fragment() {
      */
 
     this.customOPDS.setOnClickListener {
-      this.findNavigationController().openSettingsCustomOPDS()
+      this.navigationController.openSettingsCustomOPDS()
     }
 
     /*
@@ -321,7 +297,7 @@ class SettingsFragmentVersion : Fragment() {
     }
 
     this.cardCreatorFakeLocation.isChecked = CardCreatorDebugging.fakeNewYorkLocation
-    this.cardCreatorFakeLocation.setOnCheckedChangeListener { button, checked ->
+    this.cardCreatorFakeLocation.setOnCheckedChangeListener { _, checked ->
       this.logger.debug("card creator fake location: {}", checked)
       CardCreatorDebugging.fakeNewYorkLocation = checked
     }
@@ -343,16 +319,16 @@ class SettingsFragmentVersion : Fragment() {
     if (host is ToolbarHostType) {
       host.toolbarClearMenu()
       host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.settingsVersion),
+        title = this.requireContext().getString(R.string.settingsDebug),
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
         context = host,
         shouldArrowBePresent = {
-          this.findNavigationController().backStackSize() > 1
+          this.navigationController.backStackSize() > 1
         },
         onArrowClicked = {
-          this.findNavigationController().popBackStack()
+          this.navigationController.popBackStack()
         })
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
@@ -365,7 +341,7 @@ class SettingsFragmentVersion : Fragment() {
 
   private fun showErrorPage() {
     val attributes = sortedMapOf(
-      Pair("Version", "${this.versionText.text}")
+      Pair("Version", this.appVersion)
     )
 
     val taskSteps =
@@ -382,12 +358,12 @@ class SettingsFragmentVersion : Fragment() {
       ErrorPageParameters(
         emailAddress = this.buildConfig.supportErrorReportEmailAddress,
         body = "",
-        subject = "[simplye-error-report] ${this.versionText.text}",
+        subject = "[simplye-error-report] ${this.appVersion}",
         attributes = attributes,
         taskSteps = taskSteps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.navigationController.openErrorPage(parameters)
   }
 
   private fun enableBootFailures(enabled: Boolean) {
@@ -530,8 +506,6 @@ class SettingsFragmentVersion : Fragment() {
     super.onStop()
 
     this.profileEventSubscription?.dispose()
-
-    this.buildTitle.setOnClickListener(null)
     this.cacheButton.setOnClickListener(null)
     this.crashButton.setOnClickListener(null)
     this.customOPDS.setOnClickListener(null)
@@ -539,39 +513,5 @@ class SettingsFragmentVersion : Fragment() {
     this.sendReportButton.setOnClickListener(null)
     this.showErrorButton.setOnClickListener(null)
     this.showTesting.setOnClickListener(null)
-  }
-
-  private fun onTapToDebug() {
-    val context = this.context ?: return
-
-    if (this.tapToDebug == 0) {
-      this.profilesController.profileUpdate { description ->
-        description.copy(
-          preferences = description.preferences.copy(
-            showDebugSettings = true
-          )
-        )
-      }
-      this.debugSettings.visibility = View.VISIBLE
-      this.buildTitle.setOnClickListener(null)
-      this.buildText.setOnClickListener(null)
-    } else {
-      if (this.tapToDebug < 6) {
-        val message =
-          context.getString(R.string.settingsTapToDebug, this.tapToDebug)
-        with(Toast.makeText(context, message, Toast.LENGTH_SHORT)) {
-          this.setGravity(CENTER_HORIZONTAL or CENTER_VERTICAL, 0, 0)
-          this.show()
-        }
-      }
-      this.tapToDebug -= 1
-    }
-  }
-
-  private fun findNavigationController(): SettingsNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = SettingsNavigationControllerType::class.java
-    )
   }
 }
