@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:scrollbarAlwaysDrawHorizontalTrack="true">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/settingsVersionDevTitle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="@string/settingsDebug"
+      android:textSize="24sp"
+      android:textStyle="bold" />
+
+    <Button
+      android:id="@+id/settingsVersionDevCrash"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Crash" />
+
+    <Button
+      android:id="@+id/settingsVersionDevShowCacheDir"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Show Cache Directory" />
+
+    <Button
+      android:id="@+id/settingsVersionDevSendReports"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Send Error Logs" />
+
+    <Button
+      android:id="@+id/settingsVersionDevShowError"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Show Error Page" />
+
+    <Button
+      android:id="@+id/settingsVersionDevSyncAnalytics"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Send Analytics" />
+
+    <Button
+      android:id="@+id/settingsVersionDevSyncAccounts"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Sync Accounts" />
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="DRM Support"
+      android:textSize="24sp"
+      android:textStyle="bold" />
+
+    <TableLayout
+      android:id="@+id/settingsVersionDrmSupport"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"></TableLayout>
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Adobe DRM Activations"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
+    <HorizontalScrollView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:scrollbarAlwaysDrawHorizontalTrack="true"
+      android:scrollbarAlwaysDrawVerticalTrack="true"
+      android:scrollbars="vertical|horizontal">
+
+      <TableLayout
+        android:id="@+id/settingsVersionDrmAdobeActivations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow>
+
+          <TextView android:text="Placeholder" />
+
+          <TextView android:text="Placeholder" />
+
+          <TextView android:text="Placeholder" />
+
+          <TextView android:text="Placeholder" />
+
+          <TextView android:text="Placeholder" />
+        </TableRow>
+      </TableLayout>
+    </HorizontalScrollView>
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Testing Features"
+      android:textSize="24sp"
+      android:textStyle="bold" />
+
+    <androidx.appcompat.widget.SwitchCompat
+      android:id="@+id/settingsVersionDevProductionLibrariesSwitch"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:checked="false"
+      android:enabled="true"
+      android:text="Show non-production libraries" />
+
+    <androidx.appcompat.widget.SwitchCompat
+      android:id="@+id/settingsVersionDevFailNextBootSwitch"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:checked="false"
+      android:enabled="true"
+      android:text="Cause the next application startup to fail" />
+
+    <androidx.appcompat.widget.SwitchCompat
+      android:id="@+id/settingsVersionDevSeenLibrarySelectionScreen"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:checked="false"
+      android:enabled="true"
+      android:text="User has seen library selection screen?" />
+
+    <androidx.appcompat.widget.SwitchCompat
+      android:id="@+id/settingsVersionDevCardCreatorLocationSwitch"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:checked="false"
+      android:enabled="true"
+      android:text="Card Creator: Pretend the user is in New York" />
+
+    <androidx.appcompat.widget.SwitchCompat
+      android:id="@+id/settingsVersionDevEnableR2Switch"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:checked="false"
+      android:enabled="true"
+      android:text="Enable experimental R2 module for DRM-free books" />
+
+    <Button
+      android:id="@+id/settingsVersionDevCustomOPDS"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Add Custom OPDS Feed" />
+  </LinearLayout>
+</ScrollView>
