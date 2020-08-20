@@ -36,12 +36,6 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     }
   }
 
-  private val showDebugSettings: Boolean
-    get() = this.profilesController
-      .profileCurrent()
-      .preferences()
-      .showDebugSettings
-
   private val buildConfig by lazy {
     Services.serviceDirectory()
       .requireService(BuildConfigurationServiceType::class.java)
@@ -60,6 +54,12 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       interfaceType = SettingsNavigationControllerType::class.java
     )
   }
+
+  private val showDebugSettings: Boolean
+    get() = this.profilesController
+      .profileCurrent()
+      .preferences()
+      .showDebugSettings
 
   private lateinit var settingsAbout: Preference
   private lateinit var settingsAcknowledgements: Preference
