@@ -13,7 +13,6 @@ import com.io7m.jfunctional.Some
 import com.squareup.picasso.Picasso
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
-import org.librarysimplified.instabug.spi.InstabugType
 import org.librarysimplified.services.api.ServiceDirectory
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
@@ -105,14 +104,12 @@ import org.nypl.simplified.tenprint.TenPrintGenerator
 import org.nypl.simplified.tenprint.TenPrintGeneratorType
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
-import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogCoverBadgeImages
 import org.nypl.simplified.ui.images.ImageAccountIconRequestHandler
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
-import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.theme.ThemeServiceType
 import org.nypl.simplified.ui.theme.ThemeValue
@@ -505,6 +502,7 @@ internal object MainServices {
   private fun createCoverProvider(
     context: Context,
     bookRegistry: BookRegistryReadableType,
+    bundledContentResolver: BundledContentResolverType,
     coverGenerator: BookCoverGeneratorType,
     badgeLookup: BookCoverBadgeLookupType
   ): BookCoverProviderType {
@@ -515,6 +513,7 @@ internal object MainServices {
       bookRegistry = bookRegistry,
       coverGenerator = coverGenerator,
       badgeLookup = badgeLookup,
+      bundledContentResolver = bundledContentResolver,
       executor = execCovers,
       debugCacheIndicators = false,
       debugLogging = false)
@@ -580,42 +579,6 @@ internal object MainServices {
       analytics.publishEvent(event)
     } catch (e: PackageManager.NameNotFoundException) {
       this.logger.debug("could not get package info for analytics: ", e)
-    }
-  }
-
-  private fun findSettingsConfiguration(): SettingsConfigurationServiceType {
-    val existing =
-      this.optionalFromServiceLoader(SettingsConfigurationServiceType::class.java)
-
-    if (existing != null) {
-      return existing
-    }
-
-    this.logger.debug("returning fallback settings configuration service")
-    return object : SettingsConfigurationServiceType {
-      override val allowAccountsAccess: Boolean = true
-      override val allowAccountsRegistryAccess: Boolean = true
-    }
-  }
-
-  private fun findCatalogConfiguration(): CatalogConfigurationServiceType {
-    val existing =
-      this.optionalFromServiceLoader(CatalogConfigurationServiceType::class.java)
-
-    if (existing != null) {
-      return existing
-    }
-
-    this.logger.debug("returning fallback catalog configuration service")
-    return object : CatalogConfigurationServiceType {
-      override val showSettingsTab: Boolean
-        get() = true
-      override val showHoldsTab: Boolean
-        get() = true
-      override val supportErrorReportEmailAddress: String
-        get() = ""
-      override val supportErrorReportSubject: String
-        get() = "[error report]"
     }
   }
 
@@ -723,21 +686,6 @@ internal object MainServices {
       message = strings.bootingStrings("book revocation"),
       interfaceType = BookRevokeStringResourcesType::class.java,
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) })
-
-    addServiceOptionally(
-      message = strings.bootingInstabug,
-      interfaceType = InstabugType::class.java,
-      serviceConstructor = { MainInstabugService.create(MainApplication.application) })
-
-    addService(
-      message = strings.bootingCatalogConfiguration,
-      interfaceType = CatalogConfigurationServiceType::class.java,
-      serviceConstructor = { this.findCatalogConfiguration() })
-
-    addService(
-      message = strings.bootingSettingsConfiguration,
-      interfaceType = SettingsConfigurationServiceType::class.java,
-      serviceConstructor = { this.findSettingsConfiguration() })
 
     val clock =
       addService(
@@ -1009,6 +957,7 @@ internal object MainServices {
         this.createCoverProvider(
           context = context,
           bookRegistry = bookRegistry,
+          bundledContentResolver = bundledContent,
           coverGenerator = coverGenerator,
           badgeLookup = badgeLookup
         )

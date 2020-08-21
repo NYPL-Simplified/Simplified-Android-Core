@@ -230,7 +230,7 @@ class AccountsFragment : Fragment() {
 
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.errorReportEmail,
+        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
         body = "",
         subject = "[simplye-error-report]",
         attributes = accountEvent.attributes.toSortedMap(),
@@ -251,7 +251,7 @@ class AccountsFragment : Fragment() {
       profile
         .accounts()
         .values
-        .sortedBy { account -> account.provider.displayName }
+        .sortedWith(AccountComparator())
 
     this.accountListData.clear()
     this.accountListData.addAll(accountList)

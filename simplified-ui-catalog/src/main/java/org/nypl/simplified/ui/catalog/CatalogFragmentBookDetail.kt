@@ -24,14 +24,17 @@ import org.joda.time.format.DateTimeFormatterBuilder
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.book_database.api.BookFormats
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
+import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
@@ -48,6 +51,7 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepSucceeded
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.catalog.R.string
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -88,7 +92,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var buttons: LinearLayout
-  private lateinit var configurationService: CatalogConfigurationServiceType
+  private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var cover: ImageView
   private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
@@ -112,7 +116,6 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var uiThread: UIThreadServiceType
   private val parametersId = PARAMETERS_ID
   private var bookRegistrySubscription: Disposable? = null
-  private var debugService: CatalogDebuggingServiceType? = null
 
   private val dateFormatter =
     DateTimeFormatterBuilder()
@@ -146,9 +149,7 @@ class CatalogFragmentBookDetail : Fragment() {
     val services = Services.serviceDirectory()
 
     this.configurationService =
-      services.requireService(CatalogConfigurationServiceType::class.java)
-    this.debugService =
-      services.optionalService(CatalogDebuggingServiceType::class.java)
+      services.requireService(BuildConfigurationServiceType::class.java)
     this.bookRegistry =
       services.requireService(BookRegistryReadableType::class.java)
     this.uiThread =
@@ -222,7 +223,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusFailed.visibility = View.INVISIBLE
 
     this.debugStatus.visibility =
-      if (this.debugService?.showBookDetailStatus == true) {
+      if (this.configurationService.showDebugBookDetailStatus) {
         View.VISIBLE
       } else {
         View.INVISIBLE
@@ -251,9 +252,9 @@ class CatalogFragmentBookDetail : Fragment() {
 
     val status =
       this.bookRegistry.bookOrNull(this.parameters.bookID)
-        ?: this.synthesizeBookWithStatus()
+        ?: this.synthesizeBookWithStatus(this.parameters.feedEntry)
 
-    this.onBookStatusUI(status)
+    this.onBookChangedUI(status)
     this.onOPDSFeedEntryUI(this.parameters.feedEntry)
 
     val toolbarHost = this.activity
@@ -266,19 +267,23 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.bookRegistrySubscription =
       this.bookRegistry.bookEvents()
-        .subscribe(this::onBookStatusEvent)
+        .subscribe(this::onBookChanged)
   }
 
-  private fun synthesizeBookWithStatus(): BookWithStatus {
+  private fun synthesizeBookWithStatus(
+    item: FeedEntryOPDS
+  ): BookWithStatus {
     val book = Book(
-      id = this.parameters.bookID,
-      account = this.parameters.feedEntry.accountID,
+      id = item.bookID,
+      account = item.accountID,
       cover = null,
       thumbnail = null,
-      entry = this.parameters.feedEntry.feedEntry,
+      entry = item.feedEntry,
       formats = listOf()
     )
-    return BookWithStatus(book, BookStatus.fromBook(book))
+    val status = BookStatus.fromBook(book)
+    this.logger.debug("Synthesizing {} with status {}", book.id, status)
+    return BookWithStatus(book, status)
   }
 
   private fun configureToolbar(
@@ -313,25 +318,30 @@ class CatalogFragmentBookDetail : Fragment() {
     }
   }
 
-  private fun onBookStatusEvent(event: BookStatusEvent) {
-    if (event.book() != this.parameters.bookID) {
-      return
-    }
-
+  private fun onBookChanged(event: BookStatusEvent) {
     val bookWithStatus =
-      this.bookRegistry.bookOrNull(this.parameters.bookID)
-        ?: this.synthesizeBookWithStatus()
+      this.bookRegistry.bookOrNull(event.book())
+        ?: synthesizeBookWithStatus(this.parameters.feedEntry)
 
-    this.uiThread.runOnUIThread { this.onBookStatusUI(bookWithStatus) }
+    // Update the cached parameters with the feed entry. We'll need this later if the availability
+    // has changed but it's been removed from the registry (e.g. when revoking a hold).
+    this.parameters = this.parameters.copy(
+      feedEntry = FeedEntryOPDS(
+        accountID = this.parameters.feedEntry.accountID,
+        feedEntry = bookWithStatus.book.entry
+      )
+    )
+
+    this.uiThread.runOnUIThread { this.onBookChangedUI(bookWithStatus) }
     this.onOPDSFeedEntry(
-      FeedEntry.FeedEntryOPDS(
+      FeedEntryOPDS(
         bookWithStatus.book.account,
         bookWithStatus.book.entry
       )
     )
   }
 
-  private fun onOPDSFeedEntry(entry: FeedEntry.FeedEntryOPDS) {
+  private fun onOPDSFeedEntry(entry: FeedEntryOPDS) {
     this.uiThread.runOnUIThread {
       this.parameters = this.parameters.copy(feedEntry = entry)
       this.onOPDSFeedEntryUI(entry)
@@ -339,22 +349,25 @@ class CatalogFragmentBookDetail : Fragment() {
   }
 
   @UiThread
-  private fun onOPDSFeedEntryUI(feedEntry: FeedEntry.FeedEntryOPDS) {
+  private fun onOPDSFeedEntryUI(feedEntry: FeedEntryOPDS) {
     this.uiThread.checkIsUIThread()
+
+    // Sanity check; ensure we're attached to a valid context. We've seen some lifecycle related
+    // crashes related to being detached when this method executes.
+    val context = this.context ?: return
 
     val opds = feedEntry.feedEntry
     this.title.text = opds.title
     this.authors.text = opds.authorsCommaSeparated
 
-    val context = this.requireContext()
     this.format.text = when (feedEntry.probableFormat) {
-      null,
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB ->
-        context.getString(R.string.catalogBookFormatEPUB)
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO ->
-        context.getString(R.string.catalogBookFormatAudioBook)
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
-        context.getString(R.string.catalogBookFormatPDF)
+      BOOK_FORMAT_EPUB ->
+        context.getString(string.catalogBookFormatEPUB)
+      BOOK_FORMAT_AUDIO ->
+        context.getString(string.catalogBookFormatAudioBook)
+      BOOK_FORMAT_PDF ->
+        context.getString(string.catalogBookFormatPDF)
+      null -> ""
     }
 
     this.cover.contentDescription =
@@ -470,7 +483,7 @@ class CatalogFragmentBookDetail : Fragment() {
   }
 
   @UiThread
-  private fun onBookStatusUI(book: BookWithStatus) {
+  private fun onBookChangedUI(book: BookWithStatus) {
     this.uiThread.checkIsUIThread()
     this.debugStatus.text = book.javaClass.simpleName
 

@@ -191,13 +191,28 @@ internal class BookDatabaseEntry internal constructor(
     synchronized(this.bookLock) {
       Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
-      val fileCover = File(this.bookDir, "cover.jpg")
-      val fileCoverTmp = File(this.bookDir, "cover.jpg.tmp")
+      val fileCover = File(this.bookDir, COVER_FILENAME)
+      val fileCoverTmp = File(this.bookDir, "$COVER_FILENAME.tmp")
 
       FileUtilities.fileCopy(file, fileCoverTmp)
       FileUtilities.fileRename(fileCoverTmp, fileCover)
 
       this.bookRef = this.bookRef.copy(cover = fileCover)
+    }
+  }
+
+  @Throws(IOException::class)
+  override fun setThumbnail(file: File) {
+    synchronized(this.bookLock) {
+      Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
+
+      val fileThumb = File(this.bookDir, THUMB_FILENAME)
+      val fileThumbTmp = File(this.bookDir, "$THUMB_FILENAME.tmp")
+
+      FileUtilities.fileCopy(file, fileThumbTmp)
+      FileUtilities.fileRename(fileThumbTmp, fileThumb)
+
+      this.bookRef = this.bookRef.copy(thumbnail = fileThumb)
     }
   }
 
@@ -218,6 +233,8 @@ internal class BookDatabaseEntry internal constructor(
   }
 
   companion object {
+    const val COVER_FILENAME = "cover.jpg"
+    const val THUMB_FILENAME = "thumb.jpg"
 
     /**
      * Create a format handle if required. This checks to see if there is a content type that is
@@ -235,29 +252,36 @@ internal class BookDatabaseEntry internal constructor(
       contentTypes: Set<MIMEType>
     ) {
       for (contentType in contentTypes) {
-        for (formatDefinition in constructors.keys) {
-          val constructor = constructors[formatDefinition]!!
-          if (formatDefinition.supportedContentTypes().contains(contentType)) {
-            if (!existingFormats.containsKey(constructor.classType)) {
-              val bookID = owner.book.id
-              logger.debug("[{}]: instantiating format {} for content type {}",
-                bookID.brief(),
-                constructor.classType.simpleName,
-                contentType)
+        for ((format, constructor) in constructors) {
+          if (format.supports(contentType)) {
 
-              val params =
-                DatabaseFormatHandleParameters(
-                  context = context,
-                  bookID = owner.book.id,
-                  directory = ownerDirectory,
-                  onUpdated = onUpdate,
-                  entry = owner,
-                  contentType = contentType
-                )
-
-              existingFormats[constructor.classType] = constructor.constructor.invoke(params)
-              return
+            // Skip if handler already exists for type
+            if (existingFormats.containsKey(constructor.classType)) {
+              logger.debug(
+                "[{}]: skipping duplicate format {} for content type {}",
+                owner.book.id.brief(), constructor.classType.simpleName, contentType
+              )
+              continue
             }
+
+            // Add new handler for type
+            logger.debug(
+              "[{}]: instantiating format {} for content type {}",
+              owner.book.id.brief(), constructor.classType.simpleName, contentType
+            )
+
+            val params =
+              DatabaseFormatHandleParameters(
+                context = context,
+                bookID = owner.book.id,
+                directory = ownerDirectory,
+                onUpdated = onUpdate,
+                entry = owner,
+                contentType = contentType
+              )
+
+            existingFormats[constructor.classType] = constructor.constructor.invoke(params)
+            return
           }
         }
       }

@@ -1,7 +1,6 @@
 package org.nypl.simplified.tests.books.reader.bookmarks
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.io7m.jfunctional.Option
 import io.reactivex.subjects.Subject
 import org.joda.time.LocalDateTime
 import org.junit.After
@@ -16,6 +15,7 @@ import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
+import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
@@ -466,11 +466,10 @@ abstract class ReaderBookmarkServiceContract {
     val startingBookmarks =
       listOf(Bookmark(
         opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-        location = BookLocation.create(Option.none(), "x"),
+        location = BookLocation(BookChapterProgress(0, 0.5), null, "x"),
         kind = BookmarkKind.ReaderBookmarkLastReadLocation,
         time = LocalDateTime.now(),
         chapterTitle = "A Title",
-        chapterProgress = 0.5,
         bookProgress = 0.5,
         deviceID = "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",
         uri = null))

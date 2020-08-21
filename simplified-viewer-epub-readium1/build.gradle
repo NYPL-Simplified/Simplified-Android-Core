@@ -17,10 +17,14 @@ dependencies {
   compileOnly libraries.autoValue
 
   implementation libraries.androidAsync
+  implementation libraries.androidXActivity
   implementation libraries.androidXAppCompat
   implementation libraries.googleAndroidMaterial
   implementation libraries.kotlinStdlib
   implementation libraries.nyplDRMCore
   implementation libraries.readium
   implementation libraries.readiumSharedJS
+
+  testImplementation libraries.junit
+  testImplementation libraries.mockito
 }

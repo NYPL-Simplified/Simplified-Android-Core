@@ -47,6 +47,13 @@ class BookDatabase private constructor(
     internal val entries: ConcurrentSkipListMap<BookID, BookDatabaseEntry> =
       ConcurrentSkipListMap()
 
+    internal fun contains(key: BookID): Boolean {
+      synchronized(mapsLock) {
+        LOG.debug("BookMaps.contains")
+        return this.entries.containsKey(key)
+      }
+    }
+
     internal fun clear() {
       synchronized(this.mapsLock) {
         LOG.debug("BookMaps.clear")
@@ -97,12 +104,20 @@ class BookDatabase private constructor(
   ): BookDatabaseEntryType {
 
     synchronized(this.maps.mapsLock) {
+      if (this.maps.contains(id)) {
+        LOG.debug("Updating entry for {}", id)
+      } else {
+        LOG.debug("Adding entry for {}", id)
+      }
       try {
         val bookDir = File(this.directory, id.value())
         DirectoryUtilities.directoryCreate(bookDir)
 
         val fileMeta = File(bookDir, "meta.json")
         val fileMetaTmp = File(bookDir, "meta.json.tmp")
+
+        val cover = fileOrNull(directory, BookDatabaseEntry.COVER_FILENAME)
+        val thumb = fileOrNull(directory, BookDatabaseEntry.THUMB_FILENAME)
 
         FileUtilities.fileWriteUTF8Atomically(
           fileMeta,
@@ -113,8 +128,8 @@ class BookDatabase private constructor(
           Book(
             id = id,
             account = this.owner,
-            cover = null,
-            thumbnail = null,
+            cover = cover,
+            thumbnail = thumb,
             entry = entry,
             formats = listOf())
 
@@ -233,18 +248,8 @@ class BookDatabase private constructor(
             parser.parseAcquisitionFeedEntryFromStream(stream)
           }
 
-        val fileCover = File(directory, "cover.jpg")
-        val cover = if (fileCover.isFile) {
-          fileCover
-        } else {
-          null
-        }
-        val fileThumb = File(directory, "thumb.jpg")
-        val thumb = if (fileThumb.isFile) {
-          fileThumb
-        } else {
-          null
-        }
+        val cover = fileOrNull(directory, BookDatabaseEntry.COVER_FILENAME)
+        val thumb = fileOrNull(directory, BookDatabaseEntry.THUMB_FILENAME)
 
         val book =
           Book(
@@ -268,3 +273,10 @@ class BookDatabase private constructor(
     }
   }
 }
+
+/** Return the file, or null if it does not exist or is not a file. */
+
+private fun fileOrNull(bookDir: File, filename: String) = File(bookDir, filename)
+  .run {
+    if (isFile) this else null
+  }

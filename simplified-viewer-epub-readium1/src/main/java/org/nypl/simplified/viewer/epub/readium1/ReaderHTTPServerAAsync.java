@@ -18,6 +18,7 @@ import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
 import org.nypl.simplified.http.core.HTTPRangeType;
 import org.nypl.simplified.http.core.HTTPRanges;
+import org.readium.sdk.android.ManifestItem;
 import org.readium.sdk.android.Package;
 import org.readium.sdk.android.util.ResourceInputStream;
 import org.slf4j.Logger;
@@ -161,7 +162,7 @@ public final class ReaderHTTPServerAAsync
        */
 
       final String path = request.getPath();
-      final String type = this.mime.guessMimeTypeForURI(path);
+      String type = this.mime.guessMimeTypeForURI(path);
 
       /**
        * First, try looking at the available Android assets.
@@ -229,6 +230,19 @@ public final class ReaderHTTPServerAAsync
         }
 
         if (size >= 0) {
+          /**
+           * Try to get the mime type from the package manifest.
+           */
+
+          ManifestItem manifestItem = pack.getManifestItem(relative);
+
+          if (manifestItem != null) {
+            String manifestItemType = manifestItem.getMediaType();
+
+            if (manifestItemType != null) {
+              type = manifestItemType;
+            }
+          }
 
           /**
            * Return a byte range stream that allows for very fine-grained

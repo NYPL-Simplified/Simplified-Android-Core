@@ -43,7 +43,7 @@ class AccountProviderRegistry private constructor(
   @Volatile
   private var statusRef: AccountProviderRegistryStatus = Idle
 
-  private val descriptions = ConcurrentHashMap<URI, AccountProviderDescription>()
+  private val descriptions = Collections.synchronizedMap(LinkedHashMap<URI, AccountProviderDescription>())
   private val descriptionsReadOnly = Collections.unmodifiableMap(this.descriptions)
   private val resolved = ConcurrentHashMap<URI, AccountProviderType>()
   private val resolvedReadOnly = Collections.unmodifiableMap(this.resolved)

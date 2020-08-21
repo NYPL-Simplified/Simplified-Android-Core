@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -87,6 +88,11 @@ class AccountInformationFragment : Fragment() {
       navController.popBackStack()
     }
 
+    restoreViewData()
+  }
+
+  private fun validateUsername() {
+    showLoading(true)
     viewModel.validateUsernameResponse.observe(viewLifecycleOwner, Observer { response ->
       if (!back) {
         showLoading(false)
@@ -120,10 +126,6 @@ class AccountInformationFragment : Fragment() {
       val alert = dialogBuilder.create()
       alert.show()
     })
-  }
-
-  private fun validateUsername() {
-    showLoading(true)
     viewModel.validateUsername(
       binding.usernameEt.text.toString(),
       requireActivity().intent.extras.getString("username"),
@@ -151,5 +153,14 @@ class AccountInformationFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  /**
+   * Restores cached data
+   */
+  private fun restoreViewData() {
+    val accountInformation = Cache(requireContext()).getAccountInformation()
+    binding.pinEt.setText(accountInformation.pin, TextView.BufferType.EDITABLE)
+    binding.usernameEt.setText(accountInformation.username, TextView.BufferType.EDITABLE)
   }
 }

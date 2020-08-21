@@ -24,6 +24,16 @@ android {
     setProperty("archivesBaseName", "${versionName}-${versionCode}")
   }
 
+  packagingOptions {
+    doNotStrip 'lib/**/*.so'
+
+    // Readium and the PDF reader both provide this shared library. This causes
+    // the build to fail with an error because Gradle doesn't know which to pick.
+    pickFirst 'lib/x86/libc++_shared.so'
+    pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+  }
+
   signingConfigs {
     release {
       keyAlias findProperty("org.librarysimplified.keyAlias")
@@ -35,9 +45,11 @@ android {
 
   buildTypes {
     debug {
+      ndk { abiFilters 'x86', 'arm64-v8a', 'armeabi-v7a' }
       versionNameSuffix '-debug'
     }
     release {
+      ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
       signingConfig signingConfigs.release
     }
   }
@@ -52,16 +64,6 @@ android {
       dimension 'mode'
       applicationIdSuffix ".with_profiles"
     }
-  }
-
-  packagingOptions {
-    exclude "META-INF/LICENSE"
-
-    // The PDF library and Readium both provide this shared library. This will
-    // cause the build to fail because Gradle doesn't know which one to pick.
-    pickFirst "lib/arm64-v8a/libc++_shared.so"
-    pickFirst "lib/armeabi-v7a/libc++_shared.so"
-    pickFirst "lib/x86/libc++_shared.so"
   }
 }
 

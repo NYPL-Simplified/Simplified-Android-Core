@@ -33,7 +33,8 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
-  private lateinit var birthDate: String
+
+  private var birthDate: String? = null
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -85,7 +86,7 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
           binding.firstNameEt.text.toString(),
           binding.middleNameEt.text.toString(),
           binding.lastNameEt.text.toString(),
-          birthDate,
+          birthDate!!,
           binding.emailEt.text.toString()
         ))
         hideKeyboard()
@@ -101,6 +102,8 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
     // Either label or EditText can launch birthday picker
     binding.birthDateEt.setOnClickListener { showDatePickerDialog() }
     binding.birthDateLabel.setOnClickListener { showDatePickerDialog() }
+
+    restoreViewData()
   }
 
   private fun validateForm() {
@@ -120,7 +123,7 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
    * Check to see if date is over 13 years
    */
   private fun isOver13(): Boolean {
-    return if (birthDate.isNotEmpty()) {
+    return if (!birthDate.isNullOrEmpty()) {
       val formatter = DateTimeFormat.forPattern("MM/dd/yy")
       val birthDateObj = formatter.parseDateTime(birthDate)
       if (birthDateObj.plusYears(13).isAfterNow) {
@@ -162,5 +165,17 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  /**
+   * Restores cached data
+   */
+  private fun restoreViewData() {
+    val personalInformation = Cache(requireContext()).getPersonalInformation()
+    binding.firstNameEt.setText(personalInformation.firstName, TextView.BufferType.EDITABLE)
+    binding.middleNameEt.setText(personalInformation.middleName, TextView.BufferType.EDITABLE)
+    binding.lastNameEt.setText(personalInformation.lastName, TextView.BufferType.EDITABLE)
+    binding.emailEt.setText(personalInformation.email, TextView.BufferType.EDITABLE)
+    binding.birthDateEt.setText(personalInformation.birthDate, TextView.BufferType.EDITABLE)
   }
 }

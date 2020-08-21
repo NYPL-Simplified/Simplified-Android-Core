@@ -17,19 +17,25 @@ import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.catalog.R.string
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
@@ -48,7 +54,8 @@ class CatalogPagedViewHolder(
   private val onBookSelected: (FeedEntryOPDS) -> Unit,
   private val parent: View,
   private val registrySubscriptions: CompositeDisposable,
-  private val services: ServiceDirectoryType
+  private val services: ServiceDirectoryType,
+  private val ownership: CatalogFeedOwnership
 ) : RecyclerView.ViewHolder(parent) {
 
   private val logger =
@@ -58,8 +65,10 @@ class CatalogPagedViewHolder(
     this.services.requireService(BookCoverProviderType::class.java)
   private val bookRegistry: BookRegistryReadableType =
     this.services.requireService(BookRegistryReadableType::class.java)
-  private val configurationService: CatalogConfigurationServiceType =
-    this.services.requireService(CatalogConfigurationServiceType::class.java)
+  private val configurationService: BuildConfigurationServiceType =
+    this.services.requireService(BuildConfigurationServiceType::class.java)
+  private val profilesController: ProfilesControllerType =
+    this.services.requireService(ProfilesControllerType::class.java)
   private val uiThread: UIThreadServiceType =
     this.services.requireService(UIThreadServiceType::class.java)
 
@@ -81,6 +90,8 @@ class CatalogPagedViewHolder(
     this.parent.findViewById<ProgressBar>(R.id.bookCellIdleCoverProgress)!!
   private val idleTitle =
     this.idle.findViewById<TextView>(R.id.bookCellIdleTitle)!!
+  private val idleMeta =
+    this.idle.findViewById<TextView>(R.id.bookCellIdleMeta)!!
   private val idleAuthor =
     this.idle.findViewById<TextView>(R.id.bookCellIdleAuthor)!!
   private val idleButtons =
@@ -134,7 +145,7 @@ class CatalogPagedViewHolder(
 
         val status =
           this.bookRegistry.bookOrNull(item.bookID)
-            ?: this.synthesizeFakeBookStatus(item)
+            ?: this.synthesizeBookWithStatus(item)
 
         this.onBookWithStatus(status)
         this.checkSomethingIsVisible()
@@ -149,7 +160,7 @@ class CatalogPagedViewHolder(
     }
   }
 
-  private fun synthesizeFakeBookStatus(
+  private fun synthesizeBookWithStatus(
     item: FeedEntryOPDS
   ): BookWithStatus {
     val book = Book(
@@ -160,7 +171,9 @@ class CatalogPagedViewHolder(
       entry = item.feedEntry,
       formats = listOf()
     )
-    return BookWithStatus(book, BookStatus.fromBook(book))
+    val status = BookStatus.fromBook(book)
+    this.logger.debug("Synthesizing {} with status {}", book.id, status)
+    return BookWithStatus(book, status)
   }
 
   private fun setVisibilityIfNecessary(
@@ -191,6 +204,16 @@ class CatalogPagedViewHolder(
     this.idleAuthor.text = item.feedEntry.authorsCommaSeparated
     this.errorTitle.text = item.feedEntry.title
 
+    this.idleMeta.text = when (item.probableFormat) {
+      BOOK_FORMAT_EPUB ->
+        context.getString(string.catalogBookFormatEPUB)
+      BOOK_FORMAT_AUDIO ->
+        context.getString(string.catalogBookFormatAudioBook)
+      BOOK_FORMAT_PDF ->
+        context.getString(string.catalogBookFormatPDF)
+      null -> ""
+    }
+
     val targetHeight =
       this.parent.resources.getDimensionPixelSize(R.dimen.cover_thumbnail_height)
     val targetWidth = 0
@@ -211,8 +234,22 @@ class CatalogPagedViewHolder(
   }
 
   private fun onBookChanged(event: BookStatusEvent) {
+    val previousEntry =
+      this.feedEntry as FeedEntryOPDS
+
+    val bookWithStatus =
+      this.bookRegistry.bookOrNull(event.book())
+        ?: this.synthesizeBookWithStatus(previousEntry)
+
+    // Update the cached parameters with the feed entry. We'll need this later if the availability
+    // has changed but it's been removed from the registry (e.g. when revoking a hold).
+    this.feedEntry = FeedEntryOPDS(
+      accountID = previousEntry.accountID,
+      feedEntry = bookWithStatus.book.entry
+    )
+
     this.uiThread.runOnUIThread {
-      this.onBookChangedUI(event)
+      this.onBookChangedUI(bookWithStatus)
       this.checkSomethingIsVisible()
     }
   }
@@ -228,23 +265,11 @@ class CatalogPagedViewHolder(
   }
 
   @UiThread
-  private fun onBookChangedUI(event: BookStatusEvent) {
+  private fun onBookChangedUI(book: BookWithStatus) {
     this.uiThread.checkIsUIThread()
-
-    val book = this.bookRegistry.bookOrNull(event.book())
-    val status = book?.status
-    if (status == null) {
-      val previousEntry = this.feedEntry
-      if (previousEntry != null) {
-        this.bindTo(previousEntry)
-      } else {
-        // XXX: Not clear what we can do here. Is this code even reachable?
-      }
-      return
-    }
-
-    this.onFeedEntryOPDSUI(FeedEntryOPDS(book.book.account, book.book.entry))
-    return this.onBookWithStatus(book)
+    this.bindTo(this.feedEntry)
+    this.onFeedEntryOPDSUI(this.feedEntry as FeedEntryOPDS)
+    this.onBookWithStatus(book)
   }
 
   @UiThread
@@ -411,6 +436,7 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
     this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
 
+    this.idleButtons.removeAllViews()
     if (status.isRevocable) {
       this.idleButtons.addView(
         this.buttonCreator.createRevokeHoldButton {

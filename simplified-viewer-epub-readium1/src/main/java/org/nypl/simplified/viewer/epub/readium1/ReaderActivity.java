@@ -549,7 +549,6 @@ public final class ReaderActivity extends AppCompatActivity implements
         BookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
         LocalDateTime.now(),
         this.current_chapter_title,
-        currentChapterProgress(),
         currentBookProgress(),
         getDeviceIDString(),
         null);
@@ -617,8 +616,7 @@ public final class ReaderActivity extends AppCompatActivity implements
             .getUuid(),
           this.current_account.getProvider().getId(),
           this.current_account.getId().getUuid(),
-          this.feed_entry.getID(),
-          this.feed_entry.getTitle()));
+          this.feed_entry));
     } catch (ProfileNoneCurrentException ex) {
       LOG.error("profile is not current: ", ex);
     }
@@ -916,8 +914,7 @@ public final class ReaderActivity extends AppCompatActivity implements
                 .getUuid(),
               this.current_account.getProvider().getId(),
               this.current_account.getId().getUuid(),
-              this.feed_entry.getID(),
-              this.feed_entry.getTitle(),
+              this.feed_entry,
               this.current_page_index,
               this.current_page_count,
               this.current_chapter_title));

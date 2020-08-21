@@ -59,6 +59,13 @@ class AccountRegistryFragment : Fragment() {
   private var accountCreationSubscription: Disposable? = null
   private var accountRegistrySubscription: Disposable? = null
 
+  private val navigationController by lazy<AccountNavigationControllerType> {
+    NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = AccountNavigationControllerType::class.java
+    )
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -111,11 +118,6 @@ class AccountRegistryFragment : Fragment() {
         .toMutableList()
 
     availableAccountProviders.removeAll(usedAccountProviders)
-    availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
-      val name0 = provider0.title.removePrefix("The ")
-      val name1 = provider1.title.removePrefix("The ")
-      name0.toUpperCase().compareTo(name1.toUpperCase())
-    })
 
     this.logger.debug("returning {} available providers", availableAccountProviders.size)
     return availableAccountProviders
@@ -152,8 +154,9 @@ class AccountRegistryFragment : Fragment() {
         })
 
       is AccountEventCreation.AccountEventCreationSucceeded -> {
-        this.findNavigationController().popBackStack()
-        Unit
+        this.uiThread.runOnUIThread {
+          this.navigationController.popBackStack()
+        }
       }
 
       is AccountEventCreation.AccountEventCreationFailed ->
@@ -212,10 +215,13 @@ class AccountRegistryFragment : Fragment() {
     return layout
   }
 
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
+    this.configureToolbar()
+  }
+
   override fun onStart() {
     super.onStart()
-
-    this.configureToolbar()
 
     this.backgroundExecutor =
       NamedThreadPools.namedThreadPool(1, "simplified-registry-io", 19)
@@ -248,16 +254,16 @@ class AccountRegistryFragment : Fragment() {
     if (host is ToolbarHostType) {
       host.toolbarClearMenu()
       host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.accounts),
+        title = this.requireContext().getString(R.string.accountAdd),
         subtitle = ""
       )
       host.toolbarSetBackArrowConditionally(
         context = host,
         shouldArrowBePresent = {
-          this.findNavigationController().backStackSize() > 1
+          this.navigationController.backStackSize() > 1
         },
         onArrowClicked = {
-          this.findNavigationController().popBackStack()
+          this.navigationController.popBackStack()
         })
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
@@ -323,13 +329,6 @@ class AccountRegistryFragment : Fragment() {
     this.accountRegistrySubscription?.dispose()
   }
 
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = AccountNavigationControllerType::class.java
-    )
-  }
-
   @UiThread
   private fun showAccountCreationFailedDialog(accountEvent: AccountEventCreation.AccountEventCreationFailed) {
     this.uiThread.checkIsUIThread()
@@ -357,13 +356,13 @@ class AccountRegistryFragment : Fragment() {
 
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.errorReportEmail,
+        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
         body = "",
         subject = "[simplye-error-report]",
         attributes = accountEvent.attributes.toSortedMap(),
         taskSteps = accountEvent.taskResult.steps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.navigationController.openErrorPage(parameters)
   }
 }

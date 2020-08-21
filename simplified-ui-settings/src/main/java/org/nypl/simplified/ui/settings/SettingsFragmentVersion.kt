@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity.CENTER_HORIZONTAL
+import android.view.Gravity.CENTER_VERTICAL
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,8 +64,9 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var cardCreatorFakeLocation: Switch
   private lateinit var crashButton: Button
   private lateinit var customOPDS: Button
-  private lateinit var developerOptions: ViewGroup
+  private lateinit var debugSettings: ViewGroup
   private lateinit var drmTable: TableLayout
+  private lateinit var enableR2: Switch
   private lateinit var failNextBoot: Switch
   private lateinit var hasSeenLibrarySelection: Switch
   private lateinit var profilesController: ProfilesControllerType
@@ -76,8 +79,9 @@ class SettingsFragmentVersion : Fragment() {
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var versionText: TextView
   private lateinit var versionTitle: TextView
+
+  private var tapToDebug = 7
   private var adeptExecutor: AdobeAdeptExecutorType? = null
-  private var buildClicks = 1
   private var profileEventSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,20 +113,20 @@ class SettingsFragmentVersion : Fragment() {
     val layout =
       inflater.inflate(R.layout.settings_version, container, false)
 
-    this.developerOptions =
+    this.debugSettings =
       layout.findViewById(R.id.settingsVersionDev)
     this.crashButton =
-      this.developerOptions.findViewById(R.id.settingsVersionDevCrash)
+      this.debugSettings.findViewById(R.id.settingsVersionDevCrash)
     this.cacheButton =
-      this.developerOptions.findViewById(R.id.settingsVersionDevShowCacheDir)
+      this.debugSettings.findViewById(R.id.settingsVersionDevShowCacheDir)
     this.sendReportButton =
-      this.developerOptions.findViewById(R.id.settingsVersionDevSendReports)
+      this.debugSettings.findViewById(R.id.settingsVersionDevSendReports)
     this.showErrorButton =
-      this.developerOptions.findViewById(R.id.settingsVersionDevShowError)
+      this.debugSettings.findViewById(R.id.settingsVersionDevShowError)
     this.sendAnalyticsButton =
-      this.developerOptions.findViewById(R.id.settingsVersionDevSyncAnalytics)
+      this.debugSettings.findViewById(R.id.settingsVersionDevSyncAnalytics)
     this.syncAccountsButton =
-      this.developerOptions.findViewById(R.id.settingsVersionDevSyncAccounts)
+      this.debugSettings.findViewById(R.id.settingsVersionDevSyncAccounts)
 
     this.buildTitle =
       layout.findViewById(R.id.settingsVersionBuildTitle)
@@ -144,6 +148,8 @@ class SettingsFragmentVersion : Fragment() {
       layout.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
     this.cardCreatorFakeLocation =
       layout.findViewById(R.id.settingsVersionDevCardCreatorLocationSwitch)
+    this.enableR2 =
+      layout.findViewById(R.id.settingsVersionDevEnableR2Switch)
     this.customOPDS =
       layout.findViewById(R.id.settingsVersionDevCustomOPDS)
 
@@ -152,18 +158,18 @@ class SettingsFragmentVersion : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
     this.configureToolbar()
 
-    this.buildTitle.setOnClickListener {
-      if (this.buildClicks >= 7) {
-        this.developerOptions.visibility = View.VISIBLE
-      }
-      ++this.buildClicks
-    }
-
-    if (this.buildClicks >= 7) {
-      this.developerOptions.visibility = View.VISIBLE
+    val showDebugSettings =
+      this.profilesController
+        .profileCurrent()
+        .preferences()
+        .showDebugSettings
+    if (showDebugSettings) {
+      this.debugSettings.visibility = View.VISIBLE
+    } else {
+      this.buildTitle.setOnClickListener { this.onTapToDebug() }
+      this.buildText.setOnClickListener { this.onTapToDebug() }
     }
 
     this.crashButton.setOnClickListener {
@@ -199,7 +205,7 @@ class SettingsFragmentVersion : Fragment() {
     this.sendReportButton.setOnClickListener {
       Reports.sendReportsDefault(
         context = this.requireContext(),
-        address = this.buildConfig.errorReportEmail,
+        address = this.buildConfig.supportErrorReportEmailAddress,
         subject = "[simplye-error-report] ${this.versionText.text}",
         body = ""
       )
@@ -248,7 +254,6 @@ class SettingsFragmentVersion : Fragment() {
       }
     }
 
-    this.developerOptions.visibility = View.GONE
     this.buildText.text = this.buildConfig.vcsCommit
 
     this.drmTable.removeAllViews()
@@ -265,6 +270,12 @@ class SettingsFragmentVersion : Fragment() {
         .profileCurrent()
         .preferences()
         .showTestingLibraries
+
+    this.enableR2.isChecked =
+      this.profilesController
+        .profileCurrent()
+        .preferences()
+        .useExperimentalR2
 
     /*
      * Configure the "fail next boot" switch to enable/disable boot failures.
@@ -314,6 +325,17 @@ class SettingsFragmentVersion : Fragment() {
       this.logger.debug("card creator fake location: {}", checked)
       CardCreatorDebugging.fakeNewYorkLocation = checked
     }
+
+    /*
+     * Update the current profile's preferences whenever the R2 switch is changed.
+     */
+
+    this.enableR2.setOnClickListener {
+      val r2 = this.enableR2.isChecked
+      this.profilesController.profileUpdate { description ->
+        description.copy(preferences = description.preferences.copy(useExperimentalR2 = r2))
+      }
+    }
   }
 
   private fun configureToolbar() {
@@ -358,7 +380,7 @@ class SettingsFragmentVersion : Fragment() {
 
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.errorReportEmail,
+        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
         body = "",
         subject = "[simplye-error-report] ${this.versionText.text}",
         attributes = attributes,
@@ -517,6 +539,33 @@ class SettingsFragmentVersion : Fragment() {
     this.sendReportButton.setOnClickListener(null)
     this.showErrorButton.setOnClickListener(null)
     this.showTesting.setOnClickListener(null)
+  }
+
+  private fun onTapToDebug() {
+    val context = this.context ?: return
+
+    if (this.tapToDebug == 0) {
+      this.profilesController.profileUpdate { description ->
+        description.copy(
+          preferences = description.preferences.copy(
+            showDebugSettings = true
+          )
+        )
+      }
+      this.debugSettings.visibility = View.VISIBLE
+      this.buildTitle.setOnClickListener(null)
+      this.buildText.setOnClickListener(null)
+    } else {
+      if (this.tapToDebug < 6) {
+        val message =
+          context.getString(R.string.settingsTapToDebug, this.tapToDebug)
+        with(Toast.makeText(context, message, Toast.LENGTH_SHORT)) {
+          this.setGravity(CENTER_HORIZONTAL or CENTER_VERTICAL, 0, 0)
+          this.show()
+        }
+      }
+      this.tapToDebug -= 1
+    }
   }
 
   private fun findNavigationController(): SettingsNavigationControllerType {

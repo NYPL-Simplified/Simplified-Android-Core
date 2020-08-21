@@ -40,7 +40,7 @@ class ReviewFragment : Fragment() {
 
   private val nyState = "NY"
   private val cardGranted = "card-granted"
-  private val policyTypeDefault = "web_applicant"
+  private val policyTypeDefault = "simplye"
 
   private val viewModel: PatronViewModel by viewModels()
   private val platformViewModel: PlatformViewModel by viewModels()
@@ -165,8 +165,7 @@ class ReviewFragment : Fragment() {
   }
 
   private fun goBack() {
-    nextAction = ReviewFragmentDirections.actionBack(true)
-    navController.navigate(nextAction)
+    navController.popBackStack()
   }
 
   private fun createPatron() {
@@ -182,8 +181,8 @@ class ReviewFragment : Fragment() {
     if (isBarcode(requireActivity().intent.extras.getString("userIdentifier"))) {
       platformViewModel.createJuvenileCardWithBarcodeParent(
         BarcodeParent(
-          getCache().getPersonalInformation().firstName,
           requireActivity().intent.extras.getString("userIdentifier"),
+          getCache().getPersonalInformation().firstName,
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
         ),

@@ -47,7 +47,7 @@ internal interface NYPLPlatformService {
   @POST("patrons/dependents")
   suspend fun createJuvenilePatronWithBarcodeParent(
     @Body juvenilePatron: BarcodeParent
-  ): JuvenilePatronResponse
+  ): Response<JuvenilePatronResponse>
 
   @POST("patrons/dependents")
   suspend fun createJuvenilePatronWithUsernameParent(

@@ -58,12 +58,12 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.Un
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnusableAcquisitions
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.WrongAvailability
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadCancelled
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadFailed
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadOK
+import org.nypl.simplified.books.controller.BookCoverFetchTask.Type
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionBadBorrowFeed
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionDeviceNotActivated
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
@@ -108,6 +108,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.lang.IllegalStateException
 import java.net.URI
 import java.util.concurrent.Callable
 import java.util.concurrent.CancellationException
@@ -140,6 +141,8 @@ class BookBorrowTask(
     MIMEParser.parseRaisingException("application/epub+zip")
   private val contentTypeOctetStream =
     MIMEParser.parseRaisingException("application/octet-stream")
+  private val contentTypeJson =
+    MIMEParser.parseRaisingException("application/json")
 
   private val adobeACS =
     "Adobe ACS"
@@ -657,9 +660,7 @@ class BookBorrowTask(
          */
 
         override fun onHoldable(a: OPDSAvailabilityHoldable): Boolean {
-          this@BookBorrowTask.debug("book is holdable, cannot continue!")
-          this@BookBorrowTask.publishBookStatus(BookStatus.Holdable(this@BookBorrowTask.bookId))
-          return false
+          throw IllegalStateException("book is holdable, cannot continue!")
         }
 
         /**
@@ -671,8 +672,7 @@ class BookBorrowTask(
          */
 
         override fun onLoanable(a: OPDSAvailabilityLoanable): Boolean {
-          this@BookBorrowTask.debug("book is loanable, this is a server bug!")
-          return false
+          throw IllegalStateException("book is loanable, this is a server bug!")
         }
 
         /**
@@ -684,7 +684,7 @@ class BookBorrowTask(
           this@BookBorrowTask.publishBookStatus(
             BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
           )
-          return java.lang.Boolean.TRUE
+          return true
         }
 
         /**
@@ -697,7 +697,7 @@ class BookBorrowTask(
           this@BookBorrowTask.publishBookStatus(
             BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
           )
-          return java.lang.Boolean.TRUE
+          return true
         }
 
         /**
@@ -710,18 +710,10 @@ class BookBorrowTask(
         }
       })
 
-    return if (wantFulfill) {
+    if (wantFulfill) {
       this.runAcquisitionFulfill(feedEntry.feedEntry)
     } else {
-      val exception = IllegalStateException()
-      val message =
-        this.services.borrowStrings.borrowBookBorrowAvailabilityInappropriate(availability)
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = WrongAvailability(message, this.currentAttributesWith()),
-        exception = exception
-      )
-      throw exception
+      this.steps.currentStepSucceeded("Borrow succeeded with availability $availability.")
     }
   }
 
@@ -770,11 +762,12 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
     this.debug("fetching cover")
 
-    return when (val result =
+    when (val result =
       BookCoverFetchTask(
         services = this.services,
         databaseEntry = this.databaseEntry,
         feedEntry = opdsEntry,
+        type = Type.COVER,
         httpAuth = httpAuth
       ).call()) {
       is TaskResult.Success -> {
@@ -783,6 +776,27 @@ class BookBorrowTask(
       }
       is TaskResult.Failure -> {
         this.debug("failed to fetch cover")
+        this.steps.addAll(result.steps)
+      }
+    }
+
+    this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
+    this.debug("fetching thumbnail")
+
+    when (val result =
+      BookCoverFetchTask(
+        services = this.services,
+        databaseEntry = this.databaseEntry,
+        feedEntry = opdsEntry,
+        type = Type.THUMBNAIL,
+        httpAuth = httpAuth
+      ).call()) {
+      is TaskResult.Success -> {
+        this.debug("fetched thumbnail successfully")
+        this.steps.addAll(result.steps)
+      }
+      is TaskResult.Failure -> {
+        this.debug("failed to fetch thumbnail")
         this.steps.addAll(result.steps)
       }
     }
@@ -1169,6 +1183,46 @@ class BookBorrowTask(
       "At least one expected content type"
     )
 
+    /*
+     * Attempt to find our received type in our set of expected types.
+     */
+
+    for (expectedContentType in expectedContentTypes) {
+      if (expectedContentType.fullType == receivedContentType.fullType) {
+        return receivedContentType
+      }
+    }
+
+    /*
+     * Handle the 'application/json' type as an exception.
+     *
+     * SIMPLY-2928: Overdrive may return 'application/json' instead of
+     * the expected 'application/vnd.overdrive.circulation.api+json' type.
+     */
+
+    val isAudiobook = expectedContentTypes
+      .intersect(BookFormats.audioBookMimeTypes())
+      .isNotEmpty()
+
+    if (isAudiobook) {
+      when (receivedContentType.fullType) {
+        this.contentTypeJson.fullType -> {
+          this.debug(
+            "expected one of {} but received {} (acceptable)",
+            expectedContentTypes,
+            receivedContentType
+          )
+
+          this.steps.currentStepSucceeded(this.services.borrowStrings.borrowBookSavingCheckingContentTypeOK)
+          return expectedContentTypes.first()
+        }
+      }
+    }
+
+    /*
+     * Handle the 'application/octet-stream' type as an exception.
+     */
+
     if (receivedContentType == this.contentTypeOctetStream) {
       this.debug(
         "expected one of {} but received {} (acceptable)",
@@ -1180,11 +1234,9 @@ class BookBorrowTask(
       return expectedContentTypes.first()
     }
 
-    for (expectedContentType in expectedContentTypes) {
-      if (expectedContentType.fullType == receivedContentType.fullType) {
-        return receivedContentType
-      }
-    }
+    /*
+     * No match found!
+     */
 
     this.debug(
       "expected {} but received {} (unacceptable)",

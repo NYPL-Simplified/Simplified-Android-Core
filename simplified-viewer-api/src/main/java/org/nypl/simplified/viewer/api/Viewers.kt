@@ -3,6 +3,7 @@ package org.nypl.simplified.viewer.api
 import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.nypl.simplified.viewer.spi.ViewerProviderType
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
@@ -23,6 +24,7 @@ object Viewers {
 
   fun openViewer(
     activity: Activity,
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   ) {
@@ -41,11 +43,11 @@ object Viewers {
     this.logger.debug("trying all providers...")
     for (index in providers.indices) {
       val viewerProvider = providers[index]
-      val supported = viewerProvider.canSupport(book, format)
+      val supported = viewerProvider.canSupport(preferences, book, format)
       if (supported) {
         this.logger.debug(
           "[{}] viewer provider {} supports the book, using it!", index, viewerProvider.name)
-        viewerProvider.open(activity, book, format)
+        viewerProvider.open(activity, preferences, book, format)
         return
       } else {
         this.logger.debug(

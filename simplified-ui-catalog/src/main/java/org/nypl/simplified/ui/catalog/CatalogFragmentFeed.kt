@@ -41,6 +41,7 @@ import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacets
@@ -50,7 +51,6 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
-import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDescription
@@ -111,7 +111,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var bookRegistry: BookRegistryReadableType
   private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
-  private lateinit var configurationService: CatalogConfigurationServiceType
+  private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var feedCOPPAGate: ViewGroup
   private lateinit var feedCOPPAOver13: Button
   private lateinit var feedCOPPAUnder13: Button
@@ -144,8 +144,17 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
+
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
+
+  private val navigationController by lazy<CatalogNavigationControllerType> {
+    NavigationControllers.find(
+      this.requireActivity(),
+      interfaceType = CatalogNavigationControllerType::class.java
+    )
+  }
+
   private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
   private var feedStatusSubscription: Disposable? = null
@@ -169,7 +178,7 @@ class CatalogFragmentFeed : Fragment() {
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
     this.configurationService =
-      services.requireService(CatalogConfigurationServiceType::class.java)
+      services.requireService(BuildConfigurationServiceType::class.java)
     this.feedLoader =
       services.requireService(FeedLoaderType::class.java)
     this.uiThread =
@@ -356,12 +365,12 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.findNavigationController()
+    this.navigationController
       .openBookDetail(this.parameters, opdsEntry)
   }
 
   private fun onFeedSelected(title: String, uri: URI) {
-    this.findNavigationController()
+    this.navigationController
       .openFeed(this.feedModel.resolveFeed(title, uri, false))
   }
 
@@ -598,9 +607,10 @@ class CatalogFragmentFeed : Fragment() {
         borrowViewModel = this.borrowViewModel,
         buttonCreator = this.buttonCreator,
         context = activity,
-        navigation = this::findNavigationController,
+        navigation = this::navigationController,
         onBookSelected = this::onBookSelected,
-        services = Services.serviceDirectory()
+        services = Services.serviceDirectory(),
+        ownership = feedState.arguments.ownership
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
@@ -674,7 +684,7 @@ class CatalogFragmentFeed : Fragment() {
              */
 
             this.uiThread.runOnUIThread {
-              this.findNavigationController()
+              this.navigationController
                 .openSettingsAccount(AccountFragmentParameters(
                   accountId = ownership.accountId,
                   closeOnLoginSuccess = true,
@@ -712,7 +722,7 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedErrorDetails.isEnabled = true
     this.feedErrorDetails.setOnClickListener {
-      this.findNavigationController()
+      this.navigationController
         .openErrorPage(this.errorPageParameters(feedState.failure))
     }
   }
@@ -738,8 +748,7 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     val toolbar = toolbarHost.findToolbar()
     try {
-      val navigationController = this.findNavigationController()
-      val isRoot = navigationController.backStackSize() == 1
+      val isRoot = this.navigationController.backStackSize() == 1
 
       if (isRoot) {
         when (ownership) {
@@ -755,7 +764,7 @@ class CatalogFragmentFeed : Fragment() {
       } else {
         toolbar.navigationIcon = toolbarHost.toolbarIconBackArrow(context)
         toolbar.navigationContentDescription = null
-        toolbar.setNavigationOnClickListener { navigationController.popBackStack() }
+        toolbar.setNavigationOnClickListener { this.navigationController.popBackStack() }
       }
     } catch (e: Exception) {
       // Note: The call to findNavigationController may throw an IllegalArgumentException.
@@ -816,31 +825,23 @@ class CatalogFragmentFeed : Fragment() {
               .account(ownership.accountId)
               .provider
 
-          when {
-            title.isBlank() -> {
-              toolbar.title = accountProvider.displayName
-              toolbar.subtitle = accountProvider.subtitle
-            }
-            title == accountProvider.displayName -> {
-              toolbar.title = title
-              toolbar.subtitle = accountProvider.subtitle
-            }
-            else -> {
-              toolbar.title = title
-              toolbar.subtitle = accountProvider.displayName
-            }
+          toolbar.title = when {
+            accountProvider.displayName == title -> this.parameters.title
+            title.isBlank() -> this.parameters.title
+            else -> title
           }
+          toolbar.subtitle = accountProvider.displayName
         }
 
         is CollectedFromAccounts -> {
           toolbar.title = title
-          toolbar.subtitle = ""
+          toolbar.subtitle = null
         }
       }
     } catch (e: Exception) {
       this.logger.error("could not fetch current account/profile: ", e)
-      toolbar.title = ""
-      toolbar.subtitle = ""
+      toolbar.title = title
+      toolbar.subtitle = null
     } finally {
       val color = ContextCompat.getColor(context, R.color.simplifiedColorBackground)
       toolbar.setTitleTextColor(color)
@@ -853,9 +854,8 @@ class CatalogFragmentFeed : Fragment() {
     currentId: AccountID
   ) {
     val fm = requireActivity().supportFragmentManager
-    val dialog = AccountPickerDialogFragment.create(
-      currentId
-    )
+    val dialog =
+      AccountPickerDialogFragment.create(currentId, this.configurationService.allowAccountsAccess)
     dialog.show(fm, dialog.tag)
   }
 
@@ -878,7 +878,7 @@ class CatalogFragmentFeed : Fragment() {
     alertBuilder.setPositiveButton(R.string.catalogSearch) { dialog, _ ->
       val query = searchText(editText)
       this.logSearchToAnalytics(query)
-      this.findNavigationController().openFeed(this.feedModel.resolveSearch(search, query))
+      this.navigationController.openFeed(this.feedModel.resolveSearch(search, query))
       dialog.dismiss()
     }
     alertBuilder.create().show()
@@ -952,9 +952,16 @@ class CatalogFragmentFeed : Fragment() {
      * bar.
      */
 
-    val remainingGroups = facetsByGroup.filter { entry ->
-      !FeedFacets.facetGroupIsEntryPointTyped(entry.value)
-    }
+    val remainingGroups = facetsByGroup
+      .filter { entry ->
+        /*
+         * SIMPLY-2923: Hide the 'Collection' Facet until approved by UX.
+         */
+        entry.key != "Collection"
+      }
+      .filter { entry ->
+        !FeedFacets.facetGroupIsEntryPointTyped(entry.value)
+      }
 
     if (remainingGroups.isEmpty()) {
       facetLayoutScroller.visibility = View.GONE
@@ -1084,7 +1091,7 @@ class CatalogFragmentFeed : Fragment() {
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener {
         this.logger.debug("selected entry point facet: {}", facet.title)
-        this.findNavigationController().openFeed(this.feedModel.resolveFacet(facet))
+        this.navigationController.openFeed(this.feedModel.resolveFacet(facet))
       }
       facetTabs.addView(button)
     }
@@ -1130,36 +1137,21 @@ class CatalogFragmentFeed : Fragment() {
     groupName: String,
     group: List<FeedFacet>
   ) {
-    val names =
-      group.map { facet -> facet.title }
-        .toTypedArray()
-    val initiallyChecked =
-      group.indexOfFirst(FeedFacet::isActive)
+    val choices = group.sortedBy { it.title }
+    val names = choices.map { it.title }.toTypedArray()
+    val checkedItem = choices.indexOfFirst { it.isActive }
 
+    // Build the dialog
     val alertBuilder = AlertDialog.Builder(this.requireContext())
     alertBuilder.setTitle(groupName)
-    alertBuilder.setSingleChoiceItems(names, initiallyChecked) { dialog, checked ->
-
-      /*
-       * Wait a second in order to give the dialog list time to animate the selection.
-       */
-
-      this.uiThread.runOnUIThreadDelayed({
-        dialog.dismiss()
-        this.findNavigationController()
-          .openFeed(this.feedModel.resolveFacet(group[checked]))
-      }, 1_000L)
+    alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
+      val selected = choices[checked]
+      this.logger.debug("selected facet: {}", selected)
+      this.navigationController.openFeed(this.feedModel.resolveFacet(selected))
+      dialog.dismiss()
     }
-
-    alertBuilder.create()
-      .show()
+    alertBuilder.create().show()
   }
-
-  private fun findNavigationController() =
-    NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = CatalogNavigationControllerType::class.java
-    )
 
   private fun errorPageParameters(
     failure: FeedLoaderFailure

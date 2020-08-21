@@ -123,9 +123,8 @@ object BookFormats {
   fun inferFormat(entry: OPDSAcquisitionFeedEntry): BookFormatDefinition? {
     for (acquisition in entry.acquisitions) {
       for (format in formats) {
-        val formatContentTypes = format.supportedContentTypes()
-        val bookAvailable = acquisition.availableFinalContentTypes()
-        if (formatContentTypes.intersect(bookAvailable).isNotEmpty()) {
+        val available = acquisition.availableFinalContentTypes()
+        if (available.any { format.supports(it) }) {
           return format
         }
       }
