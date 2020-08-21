@@ -2,7 +2,6 @@ package org.nypl.simplified.reports
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.core.content.FileProvider
 import org.nypl.simplified.reports.Reports.Result.NoFiles
 import org.nypl.simplified.reports.Reports.Result.RaisedException
@@ -12,7 +11,6 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.util.ArrayList
 import java.util.zip.GZIPOutputStream
 
 /**
@@ -62,13 +60,13 @@ object Reports {
     body: String
   ): Result {
 
-    val directories = mutableListOf<File>()
-    context.externalCacheDir?.let { directories.add(it) }
-    context.externalCacheDir?.let { directories.add(File(it, "migrations")) }
+    val directories: List<File> = context.cacheDir?.let { cacheDir ->
+      arrayListOf(cacheDir, File(cacheDir, "migrations"))
+    } ?: emptyList()
 
     return sendReport(
       context = context,
-      baseDirectories = directories.toList(),
+      baseDirectories = directories,
       address = address,
       subject = subject,
       body = body,
@@ -80,7 +78,7 @@ object Reports {
     if (name.startsWith("report-") && name.endsWith(".xml")) {
       return true
     }
-    return name.startsWith("log.txt") && (!name.endsWith(".gz"))
+    return name.startsWith("log.txt")
   }
 
   /**
@@ -107,7 +105,7 @@ object Reports {
       val contentUris =
         compressedFiles.map { file -> this.mapFileToContentURI(context, file) }
 
-      this.logger.debug("compressed {} files", compressedFiles.size)
+      this.logger.debug("attaching {} files", compressedFiles.size)
 
       return if (compressedFiles.isNotEmpty()) {
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
@@ -115,8 +113,7 @@ object Reports {
           this.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
           this.putExtra(Intent.EXTRA_SUBJECT, subject)
           this.putExtra(Intent.EXTRA_TEXT, body)
-          val attachments = ArrayList<Uri>(contentUris)
-          this.putExtra(Intent.EXTRA_STREAM, attachments)
+          this.putExtra(Intent.EXTRA_STREAM, arrayListOf(contentUris))
           this.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(intent)
@@ -140,7 +137,7 @@ object Reports {
   ): MutableList<File> {
     val files = mutableListOf<File>()
     for (baseDirectory in baseDirectories) {
-      val list = baseDirectory.absoluteFile.list() ?: arrayOf<String>()
+      val list = baseDirectory.absoluteFile.list() ?: emptyArray()
       for (file in list) {
         val filePath = File(baseDirectory, file)
         if (includeFile.invoke(file) && filePath.isFile) {
@@ -158,6 +155,8 @@ object Reports {
 
   @JvmStatic
   private fun compressFile(file: File): File? {
+    if (file.name.endsWith(".gz")) return file
+
     return try {
       val parent = file.parentFile
       val fileGz = File(parent, file.name + ".gz")
@@ -169,13 +168,14 @@ object Reports {
               inputStream.copyTo(zStream)
               zStream.finish()
               zStream.flush()
+              this.logger.debug("compressed {}", file)
               fileGz
             }
           }
         }
       }
     } catch (e: Exception) {
-      logger.error("could not compress: {}: ", file, e)
+      this.logger.error("could not compress: {}: ", file, e)
       null
     }
   }

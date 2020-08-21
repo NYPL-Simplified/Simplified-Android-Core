@@ -105,7 +105,7 @@ ext.libraries = [
   androidXLifecycle                : "androidx.lifecycle:lifecycle-extensions:2.1.0",
   androidXLifecycleViewmodel       : "androidx.lifecycle:lifecycle-viewmodel:2.1.0",
   androidXPaging                   : "androidx.paging:paging-runtime-ktx:2.1.0",
-  androidXPreference               : "androidx.preference:preference-ktx:1.1.0",
+  androidXPreference               : "androidx.preference:preference-ktx:1.1.1",
   androidXRecyclerView             : "androidx.recyclerview:recyclerview:1.1.0",
   androidXTestEspressoCore         : "androidx.test.espresso:espresso-core:3.1.0",
   androidXTestExtensions           : "androidx.test.ext:junit:1.1.1",
