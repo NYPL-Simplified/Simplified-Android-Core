@@ -3,6 +3,7 @@ dependencies {
 
   api libraries.googleGuava
   api libraries.rxjava2
+  api libraries.rxjava2android
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

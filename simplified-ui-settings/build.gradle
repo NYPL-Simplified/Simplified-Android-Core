@@ -4,6 +4,8 @@ dependencies {
 
   api libraries.androidXAppCompat
   api libraries.androidXConstraintLayout
+  api libraries.androidXLifecycleViewModel
+  api libraries.androidXLifecycleLiveData
   api libraries.androidXPreference
   api libraries.androidXRecyclerView
 

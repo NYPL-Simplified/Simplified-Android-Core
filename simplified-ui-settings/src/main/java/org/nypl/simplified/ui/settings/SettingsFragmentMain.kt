@@ -1,10 +1,11 @@
 package org.nypl.simplified.ui.settings
 
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
 import android.widget.Toast
 import androidx.core.view.postDelayed
+import androidx.fragment.app.viewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.librarysimplified.documents.DocumentStoreType
@@ -24,15 +25,9 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   private val logger =
     LoggerFactory.getLogger(SettingsFragmentMain::class.java)
 
-  private val appVersion by lazy {
-    try {
-      val context = requireContext()
-      val pkgManager = context.packageManager
-      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      "${pkgInfo.versionName} (${pkgInfo.versionCode})"
-    } catch (e: PackageManager.NameNotFoundException) {
-      "Unknown"
-    }
+  private val profileViewModel: ProfileViewModel by viewModels()
+  private val settingsViewModel: SettingsViewModel by viewModels {
+    SettingsViewModel.getFactory(this.requireActivity().application)
   }
 
   private val buildConfig by lazy {
@@ -90,6 +85,12 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     this.settingsLicense = this.findPreference("settingsLicense")!!
     this.settingsVersion = this.findPreference("settingsVersion")!!
     this.settingsVersionCore = this.findPreference("settingsVersionCore")!!
+  }
+
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+
+    /** Set initial values */
 
     this.configureAbout(this.settingsAbout)
     this.configureAcknowledgements(this.settingsAcknowledgements)
@@ -125,7 +126,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureVersion(preference: Preference) {
-    preference.setSummaryProvider { this.appVersion }
+    preference.setSummaryProvider { this.settingsViewModel.appVersion }
   }
 
   private fun configureVersionCore(preference: Preference) {
@@ -207,7 +208,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     val context = this.context ?: return
 
     if (this.tapToDebugSettings == 0) {
-      this.profilesController.profileUpdate { description ->
+      this.profileViewModel.profileUpdate { description ->
         description.copy(
           preferences = description.preferences.copy(
             showDebugSettings = true

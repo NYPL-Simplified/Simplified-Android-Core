@@ -6,6 +6,7 @@ dependencies {
   api libraries.jodaTime
   api libraries.nyplDRMCore
   api libraries.rxjava2
+  api libraries.rxjava2android
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

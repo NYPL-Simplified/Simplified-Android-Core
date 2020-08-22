@@ -64,4 +64,43 @@
   <string name="settingsVersionSummary" />
   <string name="settingsVersionCore">Core version</string>
   <string name="settingsVersionCoreSummary" />
+
+  <!-- Debug settings -->
+  <string name="pref_category_actions">Actions</string>
+  <string name="pref_category_cache">Cache</string>
+  <string name="pref_category_features">Features</string>
+  <string name="pref_category_modules">Modules</string>
+
+  <string name="pref_title_error_page">Show error page</string>
+  <string name="pref_summary_error_page"/>
+
+  <string name="pref_title_error_logs">Send error logs</string>
+  <string name="pref_summary_error_logs"/>
+
+  <string name="pref_title_send_analytics">Send analytics</string>
+  <string name="pref_summary_send_analytics"/>
+
+  <string name="pref_title_sync_accounts">Sync accounts</string>
+  <string name="pref_summary_sync_accounts" />
+
+  <string name="pref_title_add_feed">Add OPDS feed</string>
+  <string name="pref_summary_add_feed" />
+
+  <string name="pref_title_cache_location">Location</string>
+  <string name="pref_title_cache_size">Size</string>
+
+  <string name="pref_title_location_nyc">Force location to New York</string>
+  <string name="pref_summary_location_nyc">Card Creator</string>
+
+  <string name="pref_title_testing_libraries">Show non-production libraries</string>
+  <string name="pref_summary_testing_libraries" />
+
+  <string name="pref_title_library_selection">Show library selection</string>
+  <string name="pref_summary_library_selection" />
+
+  <string name="pref_title_readium2">Enable Readium2</string>
+  <string name="pref_summary_readium2" />
+
+  <string name="pref_module_enabled">Enabled</string>
+  <string name="pref_module_disabled">Not supported</string>
 </resources>

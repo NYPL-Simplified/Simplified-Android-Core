@@ -3,6 +3,7 @@ dependencies {
   api project(":simplified-taskrecorder-api")
 
   api libraries.rxjava2
+  api libraries.rxjava2android
 
   implementation libraries.slf4j
 

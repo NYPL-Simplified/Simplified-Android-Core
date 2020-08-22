@@ -2,69 +2,67 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools">
-  <PreferenceCategory android:title="Actions">
+
+  <PreferenceCategory android:title="@string/pref_category_actions">
     <Preference
-      android:key=""
-      android:summary=""
-      android:title="Send error logs" />
+      android:key="pref_key_show_error_page"
+      android:summary="@string/pref_summary_error_page"
+      android:title="@string/pref_title_error_page" />
     <Preference
-      android:key=""
-      android:summary=""
-      android:title="Show error page" />
+      android:key="pref_key_send_error_logs"
+      android:summary="@string/pref_summary_error_logs"
+      android:title="@string/pref_title_error_logs" />
     <Preference
-      android:key=""
-      android:summary=""
-      android:title="Send analytics" />
+      android:key="pref_key_send_analytics"
+      android:summary="@string/pref_summary_send_analytics"
+      android:title="@string/pref_title_send_analytics" />
     <Preference
-      android:key=""
-      android:summary=""
-      android:title="Sync accounts" />
+      android:key="pref_key_sync_accounts"
+      android:summary="@string/pref_summary_sync_accounts"
+      android:title="@string/pref_title_sync_accounts" />
     <Preference
-      android:key=""
-      android:summary=""
-      android:title="Add OPDS feed" />
+      android:key="pref_key_add_feed"
+      android:summary="@string/pref_summary_add_feed"
+      android:title="@string/pref_title_add_feed" />
   </PreferenceCategory>
 
-  <PreferenceCategory android:title="Cache">
+  <PreferenceCategory android:title="@string/pref_category_cache">
     <Preference
-      android:key=""
-      android:title="Location"
+      android:key="pref_key_cache_location"
+      android:title="@string/pref_title_cache_location"
       app:enableCopying="true"
       tools:summary="/data/user/0/org.nypl.simplified.vanilla/cache" />
     <Preference
-      android:key=""
-      android:title="Size"
+      android:key="pref_key_cache_size"
+      android:title="@string/pref_title_cache_size"
       app:enableCopying="true"
-      tools:summary="3.7MB" />
+      tools:summary="3.7 MB" />
   </PreferenceCategory>
 
-  <PreferenceCategory android:title="Features">
+  <PreferenceCategory android:title="@string/pref_category_features">
     <SwitchPreference
-      android:key=""
-      android:summary=""
-      android:title="Show non-production libraries" />
+      android:key="pref_key_location_nyc"
+      android:summary="@string/pref_summary_location_nyc"
+      android:title="@string/pref_title_location_nyc" />
     <SwitchPreference
-      android:key=""
-      android:summary=""
-      android:title="Patron has seen library selection prompt" />
+      android:key="pref_key_library_selection"
+      android:summary="@string/pref_summary_library_selection"
+      android:title="@string/pref_title_library_selection" />
     <SwitchPreference
-      android:key=""
-      android:summary=""
-      android:title="Locate patron in New York" />
+      android:key="pref_key_testing_libraries"
+      android:summary="@string/pref_summary_testing_libraries"
+      android:title="@string/pref_title_testing_libraries" />
     <SwitchPreference
-      android:key=""
-      android:summary=""
-      android:title="Enable Readium2 (Alpha)" />
+      android:key="pref_key_readium2"
+      android:summary="@string/pref_summary_readium2"
+      android:title="@string/pref_title_readium2" />
   </PreferenceCategory>
 
-  <PreferenceCategory android:title="Modules">
-    <!--
-      Enabled | Not supported
-    -->
+  <PreferenceCategory android:title="@string/pref_category_modules">
     <Preference
       android:enabled="false"
-      android:key=""
-      android:summary="Not supported"
+      android:key="pref_key_adobe_acs"
+      android:summary="@string/pref_module_disabled"
       android:title="Adobe ACS" />
   </PreferenceCategory>
 </PreferenceScreen>

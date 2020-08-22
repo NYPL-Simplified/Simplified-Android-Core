@@ -8,8 +8,7 @@ dependencies {
 
   implementation libraries.androidXActivity
   implementation libraries.androidXAppCompat
-  implementation libraries.androidXLifecycle
-  implementation libraries.androidXLifecycleViewmodel
+  implementation libraries.androidXLifecycleViewModel
   implementation libraries.kotlinStdlib
   implementation libraries.nyplR2API
   implementation libraries.nyplR2Vanilla

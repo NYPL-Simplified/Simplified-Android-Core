@@ -133,7 +133,8 @@ ext.libraries = [
   androidXLegacyPreferenceV14      : "androidx.legacy:legacy-preference-v14:1.0.0",
   androidXLegacySupport            : "androidx.legacy:legacy-support-v4:1.0.0",
   androidXLifecycle                : "androidx.lifecycle:lifecycle-extensions:2.2.0",
-  androidXLifecycleViewmodel       : "androidx.lifecycle:lifecycle-viewmodel:2.2.0",
+  androidXLifecycleViewModel       : "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0",
+  androidXLifecycleLiveData        : "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0",
   androidXPaging                   : "androidx.paging:paging-runtime-ktx:2.1.0",
   androidXPreference               : "androidx.preference:preference-ktx:1.1.1",
   androidXRecyclerView             : "androidx.recyclerview:recyclerview:1.1.0",
@@ -197,8 +198,14 @@ ext.libraries = [
   picasso                          : "com.squareup.picasso:picasso:2.71828",
   readium                          : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
   readiumSharedJS                  : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",
-  rxjava2                          : "io.reactivex.rxjava2:rxjava:2.1.13",
   slf4j                            : "org.slf4j:slf4j-api:1.7.25",
+
+  // FIXME: Major version update available
+  rxjava2                          : "io.reactivex.rxjava2:rxjava:2.2.19",
+  rxjava2android                   : "io.reactivex.rxjava2:rxandroid:2.1.1",
+
+  // FIXME: Deprecated
+  androidXLifecycle                : "androidx.lifecycle:lifecycle-extensions:2.1.0",
 ]
 
 allprojects {
@@ -262,6 +269,9 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
           sourceCompatibility JavaVersion.VERSION_1_8
           targetCompatibility JavaVersion.VERSION_1_8
         }
+        kotlinOptions {
+          jvmTarget = JavaVersion.VERSION_1_8.toString()
+        }
       }
       break
 
@@ -286,6 +296,9 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
           encoding 'UTF-8'
           sourceCompatibility JavaVersion.VERSION_1_8
           targetCompatibility JavaVersion.VERSION_1_8
+        }
+        kotlinOptions {
+          jvmTarget = JavaVersion.VERSION_1_8.toString()
         }
         testOptions {
           execution 'ANDROIDX_TEST_ORCHESTRATOR'

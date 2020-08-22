@@ -1,66 +1,32 @@
 package org.nypl.simplified.ui.settings
 
 import android.app.Activity
-import android.app.AlertDialog
-import android.content.pm.PackageManager.NameNotFoundException
-import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.text.format.Formatter
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TableLayout
-import android.widget.TableRow
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.widget.SwitchCompat
-import androidx.fragment.app.Fragment
-import com.google.common.util.concurrent.MoreExecutors
-import io.reactivex.disposables.Disposable
-import org.joda.time.LocalDateTime
-import org.librarysimplified.services.api.Services
-import org.nypl.drm.core.AdobeAdeptExecutorType
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
-import org.nypl.simplified.analytics.api.AnalyticsEvent
-import org.nypl.simplified.analytics.api.AnalyticsType
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.boot.api.BootFailureTesting
-import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
-import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
-import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfileUpdated.Succeeded
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.reports.Reports
-import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
 /**
  * A fragment that shows various debug options for testing app functionality at runtime.
  */
 
-class SettingsFragmentDebug : Fragment() {
+class SettingsFragmentDebug : PreferenceFragmentCompat() {
 
   private val logger =
     LoggerFactory.getLogger(SettingsFragmentDebug::class.java)
 
-  private val appVersion by lazy {
-    try {
-      val context = this.requireContext()
-      val pkgManager = context.packageManager
-      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      "${pkgInfo.versionName} (${pkgInfo.versionCode})"
-    } catch (e: NameNotFoundException) {
-      "Unavailable"
-    }
+  private val profileViewModel: ProfileViewModel by viewModels()
+  private val settingsViewModel: SettingsViewModel by viewModels {
+    SettingsViewModel.getFactory(this.requireActivity().application)
   }
 
   private val navigationController by lazy {
@@ -70,29 +36,145 @@ class SettingsFragmentDebug : Fragment() {
     )
   }
 
-  private lateinit var accountRegistry: AccountProviderRegistryType
-  private lateinit var adobeDRMActivationTable: TableLayout
-  private lateinit var analytics: AnalyticsType
-  private lateinit var booksController: BooksControllerType
-  private lateinit var buildConfig: BuildConfigurationServiceType
-  private lateinit var cacheButton: Button
-  private lateinit var cardCreatorFakeLocation: SwitchCompat
-  private lateinit var crashButton: Button
-  private lateinit var customOPDS: Button
-  private lateinit var drmTable: TableLayout
-  private lateinit var enableR2: SwitchCompat
-  private lateinit var failNextBoot: SwitchCompat
-  private lateinit var feedLoader: FeedLoaderType
-  private lateinit var showOnlySupportedBooks: SwitchCompat
-  private lateinit var hasSeenLibrarySelection: SwitchCompat
-  private lateinit var profilesController: ProfilesControllerType
-  private lateinit var sendAnalyticsButton: Button
-  private lateinit var sendReportButton: Button
-  private lateinit var showErrorButton: Button
-  private lateinit var showTesting: SwitchCompat
-  private lateinit var syncAccountsButton: Button
-  private lateinit var uiThread: UIThreadServiceType
+  private lateinit var showErrorPage: Preference
+  private lateinit var sendErrorLogs: Preference
+  private lateinit var sendAnalytics: Preference
+  private lateinit var syncAccounts: Preference
+  private lateinit var addOpdsFeed: Preference
+  private lateinit var cacheLocation: Preference
+  private lateinit var cacheSize: Preference
+  private lateinit var showLibrarySelection: SwitchPreference
+  private lateinit var showTestingLibraries: SwitchPreference
+  private lateinit var locationNyc: SwitchPreference
+  private lateinit var enableR2: SwitchPreference
+  private lateinit var adobeAcsModule: Preference
 
+  override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+    this.setPreferencesFromResource(R.xml.settings_debug, rootKey)
+
+    // Do not use SharedPreferences as a data store; instead, we'll handle each
+    // preference's data individually.
+    this.preferenceManager.preferenceDataStore = NoOpSettingsDataStore()
+
+    this.showErrorPage = this.findPreference("pref_key_show_error_page")!!
+    this.sendErrorLogs = this.findPreference("pref_key_send_error_logs")!!
+    this.sendAnalytics = this.findPreference("pref_key_send_analytics")!!
+    this.syncAccounts = this.findPreference("pref_key_sync_accounts")!!
+    this.addOpdsFeed = this.findPreference("pref_key_add_feed")!!
+    this.cacheLocation = this.findPreference("pref_key_cache_location")!!
+    this.cacheSize = this.findPreference("pref_key_cache_size")!!
+    this.showLibrarySelection = this.findPreference("pref_key_library_selection")!!
+    this.showTestingLibraries = this.findPreference("pref_key_testing_libraries")!!
+    this.locationNyc = this.findPreference("pref_key_location_nyc")!!
+    this.enableR2 = this.findPreference("pref_key_readium2")!!
+    this.adobeAcsModule = this.findPreference("pref_key_adobe_acs")!!
+  }
+
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+
+    /** Set initial values */
+
+    this.locationNyc.isChecked = CardCreatorDebugging.fakeNewYorkLocation
+
+    /** Listen for updates from our view models */
+
+    this.profileViewModel.profileEvents.observe(this.viewLifecycleOwner,
+      Observer { event ->
+        when (event) {
+          is Succeeded -> {
+            val old = event.oldDescription.preferences
+            val new = event.newDescription.preferences
+
+            // Reset the account registry if the 'showTestingLibraries'
+            // preference has changed.
+            if (old.showTestingLibraries != new.showTestingLibraries) {
+              // this.accountRegistry.clear()
+              // this.accountRegistry.refresh(
+              //   includeTestingLibraries = new.showTestingLibraries
+              // )
+              TODO()
+            }
+          }
+        }
+      })
+    this.profileViewModel.profilePreferences.observe(this.viewLifecycleOwner,
+      Observer {
+        it?.let { newPreferences ->
+          this.showLibrarySelection.isChecked = !newPreferences.hasSeenLibrarySelectionScreen
+          this.showTestingLibraries.isChecked = newPreferences.showTestingLibraries
+          this.enableR2.isChecked = newPreferences.useExperimentalR2
+        }
+      })
+    this.settingsViewModel.cacheDir.observe(this.viewLifecycleOwner,
+      Observer { newFile ->
+        this.cacheLocation.summary = newFile.absolutePath
+      }
+    )
+    this.settingsViewModel.cacheSize.observe(this.viewLifecycleOwner,
+      Observer { newSize ->
+        this.cacheSize.summary = Formatter.formatFileSize(requireContext(), newSize)
+      })
+
+    /** Handle user interactions */
+
+    this.showErrorPage.setOnPreferenceClickListener { TODO() }
+    this.sendErrorLogs.setOnPreferenceClickListener { TODO() }
+    this.sendAnalytics.setOnPreferenceClickListener { TODO() }
+    this.syncAccounts.setOnPreferenceClickListener { TODO() }
+    this.addOpdsFeed.setOnPreferenceClickListener { TODO() }
+    this.adobeAcsModule.setOnPreferenceClickListener { TODO() }
+
+    this.locationNyc.setOnPreferenceClickListener {
+      CardCreatorDebugging.fakeNewYorkLocation = this.locationNyc.isChecked
+      true
+    }
+    this.showLibrarySelection.setOnPreferenceClickListener {
+      this.profileViewModel.profileUpdate {
+        it.copy(
+          preferences = it.preferences.copy(
+            hasSeenLibrarySelectionScreen = !this.showLibrarySelection.isChecked
+          )
+        )
+      }
+      true
+    }
+    this.showTestingLibraries.setOnPreferenceClickListener {
+      this.profileViewModel.profileUpdate {
+        it.copy(
+          preferences = it.preferences.copy(
+            showTestingLibraries = this.showTestingLibraries.isChecked
+          )
+        )
+      }
+      true
+    }
+    this.enableR2.setOnPreferenceClickListener {
+      this.profileViewModel.profileUpdate {
+        it.copy(
+          preferences = it.preferences.copy(
+            useExperimentalR2 = this.enableR2.isChecked
+          )
+        )
+      }
+      true
+    }
+  }
+
+  override fun onStart() {
+    super.onStart()
+    this.configureToolbar(this.requireActivity())
+  }
+
+  private fun configureToolbar(activity: Activity) {
+    this.supportActionBar?.apply {
+      title = getString(R.string.settingsVersion)
+      subtitle = null
+    }
+  }
+
+
+  /*
   private var adeptExecutor: AdobeAdeptExecutorType? = null
   private var profileEventSubscription: Disposable? = null
 
@@ -103,14 +185,8 @@ class SettingsFragmentDebug : Fragment() {
 
     this.booksController =
       services.requireService(BooksControllerType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    this.accountRegistry =
-      services.requireService(AccountProviderRegistryType::class.java)
     this.analytics =
       services.requireService(AnalyticsType::class.java)
-    this.feedLoader =
-      services.requireService(FeedLoaderType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
     this.buildConfig =
@@ -119,72 +195,9 @@ class SettingsFragmentDebug : Fragment() {
       services.optionalService(AdobeAdeptExecutorType::class.java)
   }
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View {
-    val view =
-      inflater.inflate(R.layout.settings_debug, container, false)
-
-    this.crashButton =
-      view.findViewById(R.id.settingsVersionDevCrash)
-    this.cacheButton =
-      view.findViewById(R.id.settingsVersionDevShowCacheDir)
-    this.sendReportButton =
-      view.findViewById(R.id.settingsVersionDevSendReports)
-    this.showErrorButton =
-      view.findViewById(R.id.settingsVersionDevShowError)
-    this.sendAnalyticsButton =
-      view.findViewById(R.id.settingsVersionDevSyncAnalytics)
-    this.syncAccountsButton =
-      view.findViewById(R.id.settingsVersionDevSyncAccounts)
-    this.drmTable =
-      view.findViewById(R.id.settingsVersionDrmSupport)
-    this.adobeDRMActivationTable =
-      view.findViewById(R.id.settingsVersionDrmAdobeActivations)
-    this.showTesting =
-      view.findViewById(R.id.settingsVersionDevProductionLibrariesSwitch)
-    this.failNextBoot =
-      view.findViewById(R.id.settingsVersionDevFailNextBootSwitch)
-    this.hasSeenLibrarySelection =
-      view.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
-    this.cardCreatorFakeLocation =
-      view.findViewById(R.id.settingsVersionDevCardCreatorLocationSwitch)
-    this.enableR2 =
-      view.findViewById(R.id.settingsVersionDevEnableR2Switch)
-    this.showOnlySupportedBooks =
-      view.findViewById(R.id.settingsVersionDevShowOnlySupported)
-    this.customOPDS =
-      view.findViewById(R.id.settingsVersionDevCustomOPDS)
-
-    return view
-  }
-
   override fun onStart() {
     super.onStart()
-    this.configureToolbar(this.requireActivity())
-
-    this.crashButton.setOnClickListener {
-      throw OutOfMemoryError("Pretending to have run out of memory!")
-    }
-
-    this.cacheButton.setOnClickListener {
-      val context = this.requireContext()
-      val message = StringBuilder(128)
-      message.append("Cache directory is: ")
-      message.append(context.cacheDir)
-      message.append("\n")
-      message.append("\n")
-      message.append("Exists: ")
-      message.append(context.cacheDir?.isDirectory ?: false)
-      message.append("\n")
-
-      AlertDialog.Builder(context)
-        .setTitle("Cache Directory")
-        .setMessage(message.toString())
-        .show()
-    }
+    this.configureToolbar()
 
     this.sendReportButton.setOnClickListener {
       Reports.sendReportsDefault(
@@ -247,92 +260,12 @@ class SettingsFragmentDebug : Fragment() {
         .profileEvents()
         .subscribe(this::onProfileEvent)
 
-    this.showTesting.isChecked =
-      this.profilesController
-        .profileCurrent()
-        .preferences()
-        .showTestingLibraries
-
-    this.enableR2.isChecked =
-      this.profilesController
-        .profileCurrent()
-        .preferences()
-        .useExperimentalR2
-
-    /*
-     * Configure the "fail next boot" switch to enable/disable boot failures.
-     */
-
-    this.failNextBoot.isChecked = isBootFailureEnabled()
-    this.failNextBoot.setOnCheckedChangeListener { _, checked ->
-      enableBootFailures(checked)
-    }
-
-    /*
-     * Configure the "has seen library selection" switch
-     */
-
-    this.hasSeenLibrarySelection.isChecked =
-      this.profilesController
-        .profileCurrent()
-        .preferences()
-        .hasSeenLibrarySelectionScreen
-    this.hasSeenLibrarySelection.setOnCheckedChangeListener { _, isChecked ->
-      this.profilesController.profileUpdate { description ->
-        description.copy(preferences = description.preferences.copy(hasSeenLibrarySelectionScreen = isChecked))
-      }
-    }
-
     /*
      * Configure the custom OPDS button.
      */
 
     this.customOPDS.setOnClickListener {
       this.navigationController.openSettingsCustomOPDS()
-    }
-
-    /*
-     * Update the current profile's preferences whenever the testing switch is changed.
-     */
-
-    this.showTesting.setOnClickListener {
-      val show = this.showTesting.isChecked
-      this.profilesController.profileUpdate { description ->
-        description.copy(preferences = description.preferences.copy(showTestingLibraries = show))
-      }
-    }
-
-    this.cardCreatorFakeLocation.isChecked = CardCreatorDebugging.fakeNewYorkLocation
-    this.cardCreatorFakeLocation.setOnCheckedChangeListener { _, checked ->
-      this.logger.debug("card creator fake location: {}", checked)
-      CardCreatorDebugging.fakeNewYorkLocation = checked
-    }
-
-    /*
-     * Update the current profile's preferences whenever the R2 switch is changed.
-     */
-
-    this.enableR2.setOnClickListener {
-      val r2 = this.enableR2.isChecked
-      this.profilesController.profileUpdate { description ->
-        description.copy(preferences = description.preferences.copy(useExperimentalR2 = r2))
-      }
-    }
-
-    /*
-     * Update the feed loader when filtering options are changed.
-     */
-
-    this.showOnlySupportedBooks.isChecked = this.feedLoader.showOnlySupportedBooks
-    this.showOnlySupportedBooks.setOnClickListener {
-      this.feedLoader.showOnlySupportedBooks = this.showOnlySupportedBooks.isChecked
-    }
-  }
-
-  private fun configureToolbar(activity: Activity) {
-    this.supportActionBar?.apply {
-      title = getString(R.string.settingsVersion)
-      subtitle = null
     }
   }
 
@@ -346,7 +279,7 @@ class SettingsFragmentDebug : Fragment() {
     )
 
     val taskSteps =
-      mutableListOf<TaskStep>()
+      mutableListOf<TaskStep<ExampleError>>()
 
     taskSteps.add(
       TaskStep(
@@ -367,27 +300,15 @@ class SettingsFragmentDebug : Fragment() {
     this.navigationController.openErrorPage(parameters)
   }
 
-  private fun enableBootFailures(enabled: Boolean) {
-    BootFailureTesting.enableBootFailures(
-      context = this.requireContext(),
-      enabled = enabled
-    )
-  }
-
-  private fun isBootFailureEnabled(): Boolean {
-    return BootFailureTesting.isBootFailureEnabled(this.requireContext())
-  }
 
   private fun onProfileEvent(event: ProfileEvent) {
     if (event is ProfileUpdated) {
-      this.uiThread.runOnUIThread(
-        Runnable {
-          this.showTesting.isChecked = this.profilesController
-            .profileCurrent()
-            .preferences()
-            .showTestingLibraries
-        }
-      )
+      this.uiThread.runOnUIThread(Runnable {
+        this.showTesting.isChecked = this.profilesController
+          .profileCurrent()
+          .preferences()
+          .showTestingLibraries
+      })
 
       if (event is Succeeded) {
         val old = event.oldDescription.preferences
@@ -429,20 +350,17 @@ class SettingsFragmentDebug : Fragment() {
       AdobeDRMExtensions.getDeviceActivations(
         executor,
         { message -> this.logger.error("DRM: {}", message) },
-        { message -> this.logger.debug("DRM: {}", message) }
-      )
+        { message -> this.logger.debug("DRM: {}", message) })
 
     adeptFuture.addListener(
       Runnable {
-        this.uiThread.runOnUIThread(
-          Runnable {
-            try {
-              this.onAdobeDRMReceivedActivations(adeptFuture.get())
-            } catch (e: Exception) {
-              this.onAdobeDRMReceivedActivationsError(e)
-            }
+        this.uiThread.runOnUIThread(Runnable {
+          try {
+            this.onAdobeDRMReceivedActivations(adeptFuture.get())
+          } catch (e: Exception) {
+            this.onAdobeDRMReceivedActivationsError(e)
           }
-        )
+        })
       },
       MoreExecutors.directExecutor()
     )
@@ -507,17 +425,5 @@ class SettingsFragmentDebug : Fragment() {
       this.adobeDRMActivationTable.addView(row)
     }
   }
-
-  override fun onStop() {
-    super.onStop()
-
-    this.profileEventSubscription?.dispose()
-    this.cacheButton.setOnClickListener(null)
-    this.crashButton.setOnClickListener(null)
-    this.customOPDS.setOnClickListener(null)
-    this.failNextBoot.setOnCheckedChangeListener(null)
-    this.sendReportButton.setOnClickListener(null)
-    this.showErrorButton.setOnClickListener(null)
-    this.showTesting.setOnClickListener(null)
-  }
+  */
 }
