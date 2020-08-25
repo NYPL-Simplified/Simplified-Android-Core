@@ -143,6 +143,8 @@ object BookFormats {
      */
 
     BOOK_FORMAT_EPUB {
+      override val shortName: String = "epub"
+
       override fun supportedContentTypes(): Set<MIMEType> {
         return epubMimeTypes()
       }
@@ -153,6 +155,8 @@ object BookFormats {
      */
 
     BOOK_FORMAT_AUDIO {
+      override val shortName: String = "audiobook"
+
       override fun supportedContentTypes(): Set<MIMEType> {
         return audioBookMimeTypes()
       }
@@ -163,10 +167,18 @@ object BookFormats {
      */
 
     BOOK_FORMAT_PDF {
+      override val shortName: String = "pdf"
+
       override fun supportedContentTypes(): Set<MIMEType> {
         return pdfMimeTypes()
       }
     };
+
+    /**
+     * The short name of the format
+     */
+
+    abstract val shortName: String
 
     /**
      * The content types supported by this format.

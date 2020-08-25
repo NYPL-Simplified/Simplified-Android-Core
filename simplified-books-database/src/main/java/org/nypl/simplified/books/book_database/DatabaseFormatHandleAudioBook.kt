@@ -32,7 +32,8 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
   private val parameters: DatabaseFormatHandleParameters
 ) : BookDatabaseEntryFormatHandleAudioBook() {
 
-  private val log = LoggerFactory.getLogger(DatabaseFormatHandleAudioBook::class.java)
+  private val log =
+    LoggerFactory.getLogger(DatabaseFormatHandleAudioBook::class.java)
 
   private val fileManifest: File =
     File(this.parameters.directory, "audiobook-manifest.json")
