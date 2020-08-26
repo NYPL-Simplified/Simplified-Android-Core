@@ -510,9 +510,7 @@ public final class ReaderActivity extends AppCompatActivity implements
   }
 
   private void applyReaderPreferences(final ReaderPreferences preferences) {
-    LOG.debug("applyReaderPreferences: scheduling task to run later");
-
-    uiThread.runOnUIThreadDelayed(() -> {
+    uiThread.runOnUIThread(() -> {
       LOG.debug("applyReaderPreferences: executing now");
 
       // Get the CFI from the ReadiumSDK before applying the new
@@ -529,7 +527,7 @@ public final class ReaderActivity extends AppCompatActivity implements
 
       this.readium_js_api.getCurrentPage(this);
       this.readium_js_api.mediaOverlayIsAvailable(this);
-    }, 300L);
+    });
   }
 
   @Override
@@ -804,17 +802,6 @@ public final class ReaderActivity extends AppCompatActivity implements
     in_progress_bar.setVisibility(View.VISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
 
-    try {
-      this.applyReaderPreferences(
-        Services.INSTANCE.serviceDirectory()
-          .requireService(ProfilesControllerType.class)
-          .profileCurrent()
-          .preferences()
-          .getReaderPreferences());
-    } catch (final ProfileNoneCurrentException e) {
-      throw new IllegalStateException(e);
-    }
-
     uiThread.runOnUIThread(() -> {
       in_media_play.setOnClickListener(view -> {
         LOG.debug("toggling media overlay");
@@ -844,6 +831,27 @@ public final class ReaderActivity extends AppCompatActivity implements
       "Unable to initialize Readium",
       e,
       this::finish);
+  }
+
+  @Override
+  public void onReadiumContentDocumentLoaded() {
+    LOG.debug("onReadiumContentDocumentLoaded");
+
+    try {
+      this.applyReaderPreferences(
+        Services.INSTANCE.serviceDirectory()
+          .requireService(ProfilesControllerType.class)
+          .profileCurrent()
+          .preferences()
+          .getReaderPreferences());
+    } catch (final ProfileNoneCurrentException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  @Override
+  public void onReadiumContentDocumentLoadedError(final Throwable e) {
+    LOG.error("onReadiumContentDocumentLoadedError: {}", e.getMessage(), e);
   }
 
   /**
