@@ -2,6 +2,7 @@ package org.nypl.simplified.viewer.epub.readium2
 
 import android.app.Activity
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.viewer.spi.ViewerPreferences
@@ -32,7 +33,11 @@ class ReaderViewerR2 : ViewerProviderType {
       is BookFormat.BookFormatAudioBook ->
         false
       is BookFormat.BookFormatEPUB ->
-        format.adobeRights == null
+        when (format.drmInformation) {
+          is BookDRMInformation.ACS -> false
+          is BookDRMInformation.LCP -> true
+          BookDRMInformation.None -> true
+        }
     }
   }
 

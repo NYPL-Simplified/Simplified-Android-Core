@@ -11,6 +11,12 @@ import java.io.File
 sealed class BookDRMInformation {
 
   /**
+   * The kind of DRM
+   */
+
+  abstract val kind: BookDRMKind
+
+  /**
    * The Adobe ACS information associated with a book.
    */
 
@@ -27,7 +33,9 @@ sealed class BookDRMInformation {
      */
 
     val rights: Pair<File, AdobeAdeptLoan>?
-  ) : BookDRMInformation()
+  ) : BookDRMInformation() {
+    override val kind: BookDRMKind = BookDRMKind.ACS
+  }
 
   /**
    * The LCP information associated with a book.
@@ -41,12 +49,16 @@ sealed class BookDRMInformation {
      */
 
     private val unused: Unit = Unit
-  ) : BookDRMInformation()
+  ) : BookDRMInformation() {
+    override val kind: BookDRMKind = BookDRMKind.LCP
+  }
 
   /**
    * The book either has no DRM, or uses some kind of external DRM system that the book database
    * doesn't know about (such as proprietary AudioBook DRM).
    */
 
-  object None : BookDRMInformation()
+  object None : BookDRMInformation() {
+    override val kind: BookDRMKind = BookDRMKind.NONE
+  }
 }

@@ -43,6 +43,7 @@ class BookDatabase private constructor(
   private class BookMaps internal constructor() {
 
     internal val mapsLock: Any = Any()
+
     @GuardedBy("mapsLock")
     internal val entries: ConcurrentSkipListMap<BookID, BookDatabaseEntry> =
       ConcurrentSkipListMap()

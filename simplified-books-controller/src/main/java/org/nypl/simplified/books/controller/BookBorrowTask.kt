@@ -29,9 +29,11 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillmentException
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.audio.AudioBookCredentials
 import org.nypl.simplified.books.audio.AudioBookManifestRequest
+import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
@@ -108,7 +110,6 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
-import java.lang.IllegalStateException
 import java.net.URI
 import java.util.concurrent.Callable
 import java.util.concurrent.CancellationException
@@ -170,6 +171,9 @@ class BookBorrowTask(
 
   @Volatile
   private lateinit var fulfillURI: URI
+
+  @Volatile
+  private var drmKind = BookDRMKind.NONE
 
   /**
    * The initial book value. Note that this is a synthesized value because we need to be
@@ -1133,10 +1137,22 @@ class BookBorrowTask(
     }
 
     return if (formatHandle != null) {
+      formatHandle.setDRMKind(this.drmKind)
+
+      when (val drmHandle = formatHandle.drmInformationHandle) {
+        is BookDRMInformationHandle.ACSHandle -> {
+          drmHandle.setAdobeRightsInformation(this.adobeLoan)
+          Unit
+        }
+        is BookDRMInformationHandle.LCPHandle,
+        is BookDRMInformationHandle.NoneHandle -> {
+          // Nothing required
+        }
+      }
+
       when (formatHandle) {
         is BookDatabaseEntryFormatHandleEPUB -> {
           formatHandle.copyInBook(file)
-          formatHandle.setAdobeRightsInformation(this.adobeLoan)
           updateStatus()
         }
         is BookDatabaseEntryFormatHandlePDF -> {
@@ -1298,6 +1314,7 @@ class BookBorrowTask(
       unconditional = true
     )
 
+    this.drmKind = BookDRMKind.ACS
     val adept = this.services.adobeDRM
     return if (adept != null) {
       this.debug("DRM support is available, using DRM connector")

@@ -36,6 +36,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
@@ -414,7 +415,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       bookDatabase.entry(bookId).findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
 
-    Assert.assertEquals(loan, formatHandle.format.adobeRights)
+    Assert.assertEquals(loan, (formatHandle.format.drmInformation as BookDRMInformation.ACS).rights!!.second)
     Assert.assertNotEquals(null, formatHandle.format.file)
   }
 

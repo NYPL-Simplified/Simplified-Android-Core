@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
 import org.nypl.simplified.books.api.BookDRMInformation
+import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.files.FileUtilities
@@ -13,28 +14,59 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer
+import java.util.concurrent.atomic.AtomicBoolean
+
+/**
+ * An information handle for Adobe ACS DRM.
+ */
 
 class BookDRMInformationHandleACS(
   private val directory: File,
-  format: BookFormats.BookFormatDefinition
-) : BookDRMInformationHandle.ACSHandle() {
+  format: BookFormats.BookFormatDefinition,
+  private val onUpdate: () -> Unit
+) : BookDRMInformationHandle.ACSHandle(), BookDRMInformationHandleBase {
 
   private val objectMapper = ObjectMapper()
+  private val closed = AtomicBoolean(false)
+
+  companion object {
+    fun nameRights(format: BookFormats.BookFormatDefinition): String =
+      "${format.shortName}-rights_adobe.xml"
+
+    fun nameACSM(format: BookFormats.BookFormatDefinition): String =
+      "${format.shortName}-meta_adobe.acsm"
+
+    fun nameMetaJSON(format: BookFormats.BookFormatDefinition) =
+      "${format.shortName}-meta_adobe.json"
+
+    fun names(format: BookFormats.BookFormatDefinition) =
+      listOf(
+        nameRights(format),
+        nameACSM(format),
+        nameMetaJSON(format)
+      )
+  }
+
+  init {
+    BookDRMInformationHandles.writeDRMInfo(
+      directory = this.directory,
+      format = format,
+      kind = BookDRMKind.ACS
+    )
+  }
 
   private val fileAdobeRights: File =
-    File(this.directory, "${format.shortName}-rights_adobe.xml")
+    File(this.directory, nameRights(format))
   private val fileAdobeRightsTmp: File =
-    File(this.directory, "${format.shortName}-rights_adobe.xml.tmp")
-
+    File(this.directory, nameRights(format) + ".tmp")
   private val fileAdobeACSM: File =
-    File(this.directory, "${format.shortName}-meta_adobe.acsm")
+    File(this.directory, nameACSM(format))
   private val fileAdobeACSMTmp: File =
-    File(this.directory, "${format.shortName}-meta_adobe.acsm.tmp")
-
+    File(this.directory, nameACSM(format) + ".tmp")
   private val fileAdobeMeta: File =
-    File(this.directory, "${format.shortName}-meta_adobe.json")
+    File(this.directory, nameMetaJSON(format))
   private val fileAdobeMetaTmp: File =
-    File(this.directory, "${format.shortName}-meta_adobe.json.tmp")
+    File(this.directory, nameMetaJSON(format) + ".tmp")
 
   private val infoLock: Any = Any()
   private var infoRef: BookDRMInformation.ACS =
@@ -84,64 +116,85 @@ class BookDRMInformationHandleACS(
   }
 
   override val info: BookDRMInformation.ACS
-    get() = synchronized(this.infoLock) { this.infoRef }
+    get() {
+      check(!this.closed.get()) { "Handle must not have been closed" }
+      return synchronized(this.infoLock) { this.infoRef }
+    }
 
+  @Throws(IOException::class)
   override fun setACSMFile(
     acsm: File?
   ): BookDRMInformation.ACS {
-    return synchronized(this.infoLock) {
-      if (acsm != null) {
-        FileUtilities.fileWriteBytesAtomically(
-          this.fileAdobeACSM,
-          this.fileAdobeACSMTmp,
-          FileUtilities.fileReadBytes(acsm)
-        )
-        this.infoRef = this.infoRef.copy(acsmFile = this.fileAdobeACSM)
-        this.infoRef
-      } else {
-        FileUtilities.fileDelete(this.fileAdobeACSM)
-        FileUtilities.fileDelete(this.fileAdobeACSMTmp)
-        this.infoRef = this.infoRef.copy(acsmFile = null)
-        this.infoRef
+    check(!this.closed.get()) { "Handle must not have been closed" }
+
+    return try {
+      synchronized(this.infoLock) {
+        if (acsm != null) {
+          FileUtilities.fileWriteBytesAtomically(
+            this.fileAdobeACSM,
+            this.fileAdobeACSMTmp,
+            FileUtilities.fileReadBytes(acsm)
+          )
+          this.infoRef = this.infoRef.copy(acsmFile = this.fileAdobeACSM)
+          this.infoRef
+        } else {
+          FileUtilities.fileDelete(this.fileAdobeACSM)
+          FileUtilities.fileDelete(this.fileAdobeACSMTmp)
+          this.infoRef = this.infoRef.copy(acsmFile = null)
+          this.infoRef
+        }
       }
+    } finally {
+      this.onUpdate.invoke()
     }
   }
 
+  @Throws(IOException::class)
   override fun setAdobeRightsInformation(
     loan: AdobeAdeptLoan?
   ): BookDRMInformation.ACS {
-    return synchronized(this.infoLock) {
-      if (loan != null) {
-        FileUtilities.fileWriteBytesAtomically(
-          this.fileAdobeRights,
-          this.fileAdobeRightsTmp,
-          loan.serialized.array()
-        )
+    check(!this.closed.get()) { "Handle must not have been closed" }
 
-        val o = this.objectMapper.createObjectNode()
-        o.put("loan-id", loan.id.value)
-        o.put("returnable", loan.isReturnable)
-
-        ByteArrayOutputStream().use { stream ->
-          JSONSerializerUtilities.serialize(o, stream)
-          FileUtilities.fileWriteUTF8Atomically(
-            this.fileAdobeMeta,
-            this.fileAdobeMetaTmp,
-            stream.toString("UTF-8")
+    return try {
+      synchronized(this.infoLock) {
+        if (loan != null) {
+          FileUtilities.fileWriteBytesAtomically(
+            this.fileAdobeRights,
+            this.fileAdobeRightsTmp,
+            loan.serialized.array()
           )
+
+          val o = this.objectMapper.createObjectNode()
+          o.put("loan-id", loan.id.value)
+          o.put("returnable", loan.isReturnable)
+
+          ByteArrayOutputStream().use { stream ->
+            JSONSerializerUtilities.serialize(o, stream)
+            FileUtilities.fileWriteUTF8Atomically(
+              this.fileAdobeMeta,
+              this.fileAdobeMetaTmp,
+              stream.toString("UTF-8")
+            )
+          }
+
+          this.infoRef = this.infoRef.copy(rights = Pair(this.fileAdobeRights, loan))
+          this.infoRef
+        } else {
+          FileUtilities.fileDelete(this.fileAdobeMeta)
+          FileUtilities.fileDelete(this.fileAdobeMetaTmp)
+          FileUtilities.fileDelete(this.fileAdobeRights)
+          FileUtilities.fileDelete(this.fileAdobeRightsTmp)
+
+          this.infoRef = this.infoRef.copy(rights = null)
+          this.infoRef
         }
-
-        this.infoRef = this.infoRef.copy(rights = Pair(this.fileAdobeRights, loan))
-        this.infoRef
-      } else {
-        FileUtilities.fileDelete(this.fileAdobeMeta)
-        FileUtilities.fileDelete(this.fileAdobeMetaTmp)
-        FileUtilities.fileDelete(this.fileAdobeRights)
-        FileUtilities.fileDelete(this.fileAdobeRightsTmp)
-
-        this.infoRef = this.infoRef.copy(rights = null)
-        this.infoRef
       }
+    } finally {
+      this.onUpdate.invoke()
     }
+  }
+
+  override fun close() {
+    this.closed.compareAndSet(false, true)
   }
 }

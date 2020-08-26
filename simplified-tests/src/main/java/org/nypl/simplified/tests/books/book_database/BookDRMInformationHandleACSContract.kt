@@ -13,15 +13,12 @@ import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinit
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.tests.TestDirectories
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.ByteBuffer
 
 abstract class BookDRMInformationHandleACSContract {
 
-  private val logger =
-    LoggerFactory.getLogger(BookDRMInformationHandleACSContract::class.java)
-
+  private var updates: Int = 0
   private lateinit var directory1: File
   private lateinit var directory0: File
 
@@ -29,12 +26,17 @@ abstract class BookDRMInformationHandleACSContract {
   fun testSetup() {
     this.directory0 = TestDirectories.temporaryDirectory()
     this.directory1 = TestDirectories.temporaryDirectory()
+    this.updates = 0
   }
 
   @After
   fun testTearDown() {
     DirectoryUtilities.directoryDelete(this.directory0)
     DirectoryUtilities.directoryDelete(this.directory1)
+  }
+
+  private fun countUpdateCalls() {
+    this.updates += 1
   }
 
   /**
@@ -48,8 +50,10 @@ abstract class BookDRMInformationHandleACSContract {
     val handle =
       BookDRMInformationHandleACS(
         directory = this.directory0,
-        format = BOOK_FORMAT_EPUB
+        format = BOOK_FORMAT_EPUB,
+        onUpdate = this::countUpdateCalls
       )
+    assertEquals("ACS", File(this.directory0, "epub-drm.txt").readText())
 
     assertEquals(null, handle.info.acsmFile)
     assertEquals(null, handle.info.rights)
@@ -66,8 +70,10 @@ abstract class BookDRMInformationHandleACSContract {
     val handle0 =
       BookDRMInformationHandleACS(
         directory = this.directory0,
-        format = BOOK_FORMAT_EPUB
+        format = BOOK_FORMAT_EPUB,
+        onUpdate = this::countUpdateCalls
       )
+    assertEquals("ACS", File(this.directory0, "epub-drm.txt").readText())
 
     val acsm = this.resource("adobe-token.xml")
 
@@ -81,7 +87,8 @@ abstract class BookDRMInformationHandleACSContract {
       val handle1 =
         BookDRMInformationHandleACS(
           directory = this.directory0,
-          format = BOOK_FORMAT_EPUB
+          format = BOOK_FORMAT_EPUB,
+          onUpdate = this::countUpdateCalls
         )
       assertEquals(info0, handle1.info)
     }
@@ -95,7 +102,8 @@ abstract class BookDRMInformationHandleACSContract {
       val handle1 =
         BookDRMInformationHandleACS(
           directory = this.directory0,
-          format = BOOK_FORMAT_EPUB
+          format = BOOK_FORMAT_EPUB,
+          onUpdate = this::countUpdateCalls
         )
       assertEquals(info1, handle1.info)
     }
@@ -112,8 +120,10 @@ abstract class BookDRMInformationHandleACSContract {
     val handle0 =
       BookDRMInformationHandleACS(
         directory = this.directory0,
-        format = BOOK_FORMAT_PDF
+        format = BOOK_FORMAT_PDF,
+        onUpdate = this::countUpdateCalls
       )
+    assertEquals("ACS", File(this.directory0, "pdf-drm.txt").readText())
 
     val acsm = this.resource("adobe-token.xml")
 
@@ -127,7 +137,8 @@ abstract class BookDRMInformationHandleACSContract {
       val handle1 =
         BookDRMInformationHandleACS(
           directory = this.directory0,
-          format = BOOK_FORMAT_PDF
+          format = BOOK_FORMAT_PDF,
+          onUpdate = this::countUpdateCalls
         )
       assertEquals(info0, handle1.info)
     }
@@ -141,7 +152,8 @@ abstract class BookDRMInformationHandleACSContract {
       val handle1 =
         BookDRMInformationHandleACS(
           directory = this.directory0,
-          format = BOOK_FORMAT_PDF
+          format = BOOK_FORMAT_PDF,
+          onUpdate = this::countUpdateCalls
         )
       assertEquals(info1, handle1.info)
     }
@@ -158,8 +170,10 @@ abstract class BookDRMInformationHandleACSContract {
     val handle0 =
       BookDRMInformationHandleACS(
         directory = this.directory0,
-        format = BOOK_FORMAT_EPUB
+        format = BOOK_FORMAT_EPUB,
+        onUpdate = this::countUpdateCalls
       )
+    assertEquals("ACS", File(this.directory0, "epub-drm.txt").readText())
 
     val data =
       ByteBuffer.allocate(23)
@@ -179,7 +193,8 @@ abstract class BookDRMInformationHandleACSContract {
       val handle1 =
         BookDRMInformationHandleACS(
           directory = this.directory0,
-          format = BOOK_FORMAT_EPUB
+          format = BOOK_FORMAT_EPUB,
+          onUpdate = this::countUpdateCalls
         )
       assertEquals(info0, handle1.info)
     }
@@ -193,7 +208,8 @@ abstract class BookDRMInformationHandleACSContract {
       val handle1 =
         BookDRMInformationHandleACS(
           directory = this.directory0,
-          format = BOOK_FORMAT_EPUB
+          format = BOOK_FORMAT_EPUB,
+          onUpdate = this::countUpdateCalls
         )
       assertEquals(info1, handle1.info)
     }
@@ -210,8 +226,10 @@ abstract class BookDRMInformationHandleACSContract {
     val handle0 =
       BookDRMInformationHandleACS(
         directory = this.directory0,
-        format = BOOK_FORMAT_PDF
+        format = BOOK_FORMAT_PDF,
+        onUpdate = this::countUpdateCalls
       )
+    assertEquals("ACS", File(this.directory0, "pdf-drm.txt").readText())
 
     val data =
       ByteBuffer.allocate(23)
@@ -231,7 +249,8 @@ abstract class BookDRMInformationHandleACSContract {
       val handle1 =
         BookDRMInformationHandleACS(
           directory = this.directory0,
-          format = BOOK_FORMAT_PDF
+          format = BOOK_FORMAT_PDF,
+          onUpdate = this::countUpdateCalls
         )
       assertEquals(info0, handle1.info)
     }
@@ -245,7 +264,8 @@ abstract class BookDRMInformationHandleACSContract {
       val handle1 =
         BookDRMInformationHandleACS(
           directory = this.directory0,
-          format = BOOK_FORMAT_PDF
+          format = BOOK_FORMAT_PDF,
+          onUpdate = this::countUpdateCalls
         )
       assertEquals(info1, handle1.info)
     }

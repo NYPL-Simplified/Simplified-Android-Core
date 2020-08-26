@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.book_database
 
 import android.content.Context
+import com.fasterxml.jackson.databind.ObjectMapper
 import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -49,5 +50,11 @@ internal data class DatabaseFormatHandleParameters(
    * The MIME type of the format handle.
    */
 
-  val contentType: MIMEType
+  val contentType: MIMEType,
+
+  /**
+   * A JSON object mapper.
+   */
+
+  val objectMapper: ObjectMapper
 )

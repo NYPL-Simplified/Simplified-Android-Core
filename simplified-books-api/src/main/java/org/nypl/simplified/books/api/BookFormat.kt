@@ -2,7 +2,6 @@ package org.nypl.simplified.books.api
 
 import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerPosition
-import org.nypl.drm.core.AdobeAdeptLoan
 import java.io.File
 import java.net.URI
 
@@ -12,6 +11,12 @@ import java.net.URI
  */
 
 sealed class BookFormat {
+
+  /**
+   * @return The DRM information
+   */
+
+  abstract val drmInformation: BookDRMInformation
 
   /**
    * @return The content type of the book format
@@ -30,20 +35,7 @@ sealed class BookFormat {
    */
 
   data class BookFormatEPUB(
-
-    /**
-     * The file containing Adobe DRM rights information. Only present if the book has been
-     * fulfilled via the DRM system.
-     */
-
-    val adobeRightsFile: File?,
-
-    /**
-     * The Adobe DRM rights information. Only present if the book has been fulfilled via the DRM
-     * system.
-     */
-
-    val adobeRights: AdobeAdeptLoan?,
+    override val drmInformation: BookDRMInformation,
 
     /**
      * The EPUB file on disk, if one has been downloaded.
@@ -94,6 +86,7 @@ sealed class BookFormat {
    */
 
   data class BookFormatAudioBook(
+    override val drmInformation: BookDRMInformation,
 
     /**
      * The current audio book manifest.
@@ -123,6 +116,7 @@ sealed class BookFormat {
    */
 
   data class BookFormatPDF(
+    override val drmInformation: BookDRMInformation,
 
     /**
      * The last read location of the PDF book, if any.

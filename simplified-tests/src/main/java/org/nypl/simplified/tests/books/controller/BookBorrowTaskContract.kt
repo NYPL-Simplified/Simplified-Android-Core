@@ -334,7 +334,6 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       bookDatabase.entry(bookId).findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
 
-    Assert.assertEquals(null, formatHandle.format.adobeRights)
     Assert.assertNotEquals(null, formatHandle.format.file)
   }
 
@@ -697,8 +696,6 @@ abstract class BookBorrowTaskContract {
      */
 
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(tempFile)
   }
 
@@ -889,8 +886,6 @@ abstract class BookBorrowTaskContract {
      */
 
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
 
@@ -991,8 +986,6 @@ abstract class BookBorrowTaskContract {
      * Check that the book was saved to the database.
      */
 
-    Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
     Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
@@ -1109,8 +1102,6 @@ abstract class BookBorrowTaskContract {
      * Check that the book was saved to the database.
      */
 
-    Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
     Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
@@ -2350,8 +2341,6 @@ abstract class BookBorrowTaskContract {
      */
 
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000002.data"))
   }
 
@@ -2990,8 +2979,6 @@ abstract class BookBorrowTaskContract {
     Mockito.verify(bookDatabaseEntry, Mockito.times(1))
       .setCover(tempCoverFile)
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
 
@@ -3112,8 +3099,6 @@ abstract class BookBorrowTaskContract {
 
     Mockito.verify(bookDatabaseEntry, Mockito.times(0))
       .setCover(tempCoverFile)
-    Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
     Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
