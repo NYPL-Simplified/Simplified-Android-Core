@@ -137,8 +137,8 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
     val contentProtections =
       ServiceLoader.load(ContentProtectionProvider::class.java)
-        .map {
-          it.create(this).also { cp ->
+        .mapNotNull {
+          it.create(this)?.also { cp ->
             this.logger.debug("created content protection of class ${cp::class.java.canonicalName}")
           }
         }
