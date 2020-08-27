@@ -35,6 +35,8 @@ import org.librarysimplified.r2.views.SR2ReaderFragment
 import org.librarysimplified.r2.views.SR2ReaderFragmentParameters
 import org.librarysimplified.r2.views.SR2TOCFragment
 import org.librarysimplified.services.api.Services
+import org.nypl.drm.core.ContentProtectionProvider
+import org.nypl.drm.core.DRMProtectedFile
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookID
@@ -52,6 +54,7 @@ import org.readium.r2.streamer.Streamer
 import org.readium.r2.streamer.parser.epub.EpubParser
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.ServiceLoader
 import java.util.concurrent.TimeUnit
 
 /**
@@ -132,7 +135,13 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
     this.bookEntry =
       this.intent?.extras?.getSerializable(ARG_ENTRY) as FeedEntry.FeedEntryOPDS
 
-    val contentProtections = listOfNotNull<ContentProtection>()
+    val contentProtections =
+      ServiceLoader.load(ContentProtectionProvider::class.java)
+        .map {
+          it.create(this).also { cp ->
+            this.logger.debug("created content protection of class ${cp::class.java.canonicalName}")
+          }
+        }
 
     val streamer = Streamer(
       context = this,
@@ -143,7 +152,9 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
     val adobeRightsFile = this.intent?.extras?.getSerializable(ARG_ADOBE_RIGHTS_FILE) as File?
 
-    val fragmentParameters = SR2ReaderFragmentParameters(streamer, bookFile, adobeRightsFile)
+    val drmProtectedFile = DRMProtectedFile(bookFile, adobeRightsFile)
+
+    val fragmentParameters = SR2ReaderFragmentParameters(streamer, drmProtectedFile)
     supportFragmentManager.fragmentFactory = SR2ReaderFragment.createFactory(fragmentParameters)
 
     if (savedInstanceState == null) {
