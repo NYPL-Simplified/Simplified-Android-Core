@@ -49,6 +49,7 @@ $(document).ready(function()
             ReadiumSDK.reader.on(ReadiumSDK.Events.MEDIA_OVERLAY_TTS_STOP, this.onMediaOverlayTTSStop, this);
             ReadiumSDK.reader.on(ReadiumSDK.Events.PAGINATION_CHANGED, this.onPaginationChanged, this);
             ReadiumSDK.reader.on(ReadiumSDK.Events.SETTINGS_APPLIED, this.onSettingsApplied, this);
+            ReadiumSDK.reader.on(ReadiumSDK.Events.CONTENT_DOCUMENT_LOADED, this.onContentDocumentLoaded, this);
 
             window.location.href = "readium:initialize";
           },
@@ -81,6 +82,10 @@ $(document).ready(function()
         this.onMediaOverlayTTSStop = function()
         {
           window.location.href = "readium:media-overlay-tts-stop";
+        };
+
+        this.onContentDocumentLoaded = function() {
+          window.location.href = "readium:content-document-loaded";
         };
       }();
 
