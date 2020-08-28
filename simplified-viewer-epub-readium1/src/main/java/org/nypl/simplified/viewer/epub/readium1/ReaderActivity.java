@@ -1096,16 +1096,29 @@ public final class ReaderActivity extends AppCompatActivity implements
   private void navigateTo(final OptionType<Bookmark> location) {
     LOG.debug("navigateTo: {}", location);
 
-    OptionType<ReaderOpenPageRequestType> page_request = location.map((actual) -> {
-      LOG.debug("navigateTo: Creating Page Req for: {}", actual);
-      this.current_location = actual;
-      return ReaderOpenPageRequest.fromBookLocation(actual.getLocation());
-    });
+    OptionType<ReaderOpenPageRequestType> page_request;
+    if (location.isSome()) {
+      final Bookmark locReal = ((Some<Bookmark>) location).get();
+
+      try {
+        LOG.debug("navigateTo: Creating Page Req for: {}", locReal);
+        final ReaderOpenPageRequestType request =
+          ReaderOpenPageRequest.fromBookLocation(locReal.getLocation());
+        this.current_location = locReal;
+        page_request = Option.of(request);
+      } catch (Exception e) {
+        LOG.error("navigateTo: failed to create page request: ", e);
+        page_request = Option.none();
+      }
+    } else {
+      page_request = Option.none();
+    }
 
     this.readium_js_api.openBook(
       this.epub_container.getDefaultPackage(),
       this.viewer_settings,
-      page_request);
+      page_request
+    );
   }
 
   @Override
