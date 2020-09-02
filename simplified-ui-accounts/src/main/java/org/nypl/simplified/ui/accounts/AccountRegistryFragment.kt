@@ -24,7 +24,6 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -97,37 +96,22 @@ class AccountRegistryFragment : Fragment() {
    */
 
   private fun determineAvailableAccountProviderDescriptions(): List<AccountProviderDescription> {
-
-    val profileCurrent =
-      this.profilesController.profileCurrent()
-    val preferences =
-      profileCurrent.preferences()
-
     val usedAccountProviders =
       this.profilesController
         .profileCurrentlyUsedAccountProviders()
         .map { p -> p.toDescription() }
 
-    this.logger.debug("should show testing providers: {}", preferences.showTestingLibraries)
     this.logger.debug("profile is using {} providers", usedAccountProviders.size)
 
     val availableAccountProviders =
       this.accountRegistry.accountProviderDescriptions()
         .values
-        .filter { provider -> this.shouldShowProvider(provider, preferences) }
         .toMutableList()
-
     availableAccountProviders.removeAll(usedAccountProviders)
 
     this.logger.debug("returning {} available providers", availableAccountProviders.size)
     return availableAccountProviders
   }
-
-  private fun shouldShowProvider(
-    provider: AccountProviderDescription,
-    preferences: ProfilePreferences
-  ) =
-    provider.isProduction || preferences.showTestingLibraries
 
   @UiThread
   private fun onAccountClicked(account: AccountProviderDescription) {
