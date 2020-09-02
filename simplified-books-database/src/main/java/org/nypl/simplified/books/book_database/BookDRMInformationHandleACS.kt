@@ -106,7 +106,7 @@ class BookDRMInformationHandleACS(
     fileAdobeRights: File,
     fileAdobeMeta: File
   ): Pair<File, AdobeAdeptLoan>? {
-    val serialized = FileUtilities.fileReadBytes(fileAdobeRights)
+    val serialized = fileAdobeRights.readBytes()
     val jn = this.objectMapper.readTree(fileAdobeMeta)
     val o = JSONParserUtilities.checkObject(null, jn)
     val loanID = AdobeLoanID(JSONParserUtilities.getString(o, "loan-id"))
