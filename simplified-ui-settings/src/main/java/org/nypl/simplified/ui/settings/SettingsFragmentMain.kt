@@ -70,6 +70,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   private lateinit var settingsFaq: Preference
   private lateinit var settingsLicense: Preference
   private lateinit var settingsVersion: Preference
+  private lateinit var settingsVersionCore: Preference
 
   private var toast: Toast? = null
   private var tapToDebugSettings = 7
@@ -89,6 +90,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     this.settingsFaq = this.findPreference("settingsFaq")!!
     this.settingsLicense = this.findPreference("settingsLicense")!!
     this.settingsVersion = this.findPreference("settingsVersion")!!
+    this.settingsVersionCore = this.findPreference("settingsVersionCore")!!
 
     this.configureAbout(this.settingsAbout)
     this.configureAcknowledgements(this.settingsAcknowledgements)
@@ -99,6 +101,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     this.configureFaq(this.settingsFaq)
     this.configureLicense(this.settingsLicense)
     this.configureVersion(this.settingsVersion)
+    this.configureVersionCore(this.settingsVersionCore)
   }
 
   override fun onStart() {
@@ -134,6 +137,10 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private fun configureVersion(preference: Preference) {
     preference.setSummaryProvider { this.appVersion }
+  }
+
+  private fun configureVersionCore(preference: Preference) {
+    preference.setSummaryProvider { this.buildConfig.simplifiedVersion }
   }
 
   private fun configureBuild(preference: Preference) {
