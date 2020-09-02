@@ -46,6 +46,13 @@
       tools:summary="5.0.1-debug (4164)" />
 
     <Preference
+      android:key="settingsVersionCore"
+      android:summary="@string/settingsVersionCoreSummary"
+      android:title="@string/settingsVersionCore"
+      app:enableCopying="true"
+      tools:summary="6.2.0-SNAPSHOT" />
+
+    <Preference
       android:icon="@drawable/ic_settings_build"
       android:key="settingsBuild"
       android:summary="@string/settingsBuildSummary"

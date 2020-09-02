@@ -60,6 +60,8 @@
   <string name="settingsSyncBookmarks">Sync bookmarks</string>
   <string name="settingsTapToDebug">Debug mode in %1$d&#8230;</string>
   <string name="settingsUserName">User Name</string>
-  <string name="settingsVersion">Version</string>
+  <string name="settingsVersion">App version</string>
   <string name="settingsVersionSummary" />
+  <string name="settingsVersionCore">Core version</string>
+  <string name="settingsVersionCoreSummary" />
 </resources>
