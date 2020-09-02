@@ -30,10 +30,10 @@ class BookDRMInformationHandleACS(
   private val closed = AtomicBoolean(false)
 
   companion object {
-    fun nameRights(format: BookFormats.BookFormatDefinition): String =
+    fun nameRights(format: BookFormats.BookFormatDefinition) =
       "${format.shortName}-rights_adobe.xml"
 
-    fun nameACSM(format: BookFormats.BookFormatDefinition): String =
+    fun nameACSM(format: BookFormats.BookFormatDefinition) =
       "${format.shortName}-meta_adobe.acsm"
 
     fun nameMetaJSON(format: BookFormats.BookFormatDefinition) =
