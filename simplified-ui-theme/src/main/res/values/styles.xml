@@ -108,6 +108,12 @@
     <item name="android:background">@drawable/simplified_button</item>
     <item name="android:textColor">@drawable/simplified_button_text</item>
     <item name="android:textSize">12sp</item>
+
+    <!--
+      The scroll indicator will briefly appear on programmatically created buttons unless the
+      'scrollbars' attribute is set to 'none'.
+    -->
+    <item name="android:scrollbars">none</item>
   </style>
 
   <style name="SimplifiedAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
