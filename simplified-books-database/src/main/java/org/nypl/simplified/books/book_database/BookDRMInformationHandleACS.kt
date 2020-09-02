@@ -55,17 +55,17 @@ class BookDRMInformationHandleACS(
     )
   }
 
-  private val fileAdobeRights: File =
+  private val fileAdobeRights =
     File(this.directory, nameRights(format))
-  private val fileAdobeRightsTmp: File =
+  private val fileAdobeRightsTmp =
     File(this.directory, nameRights(format) + ".tmp")
-  private val fileAdobeACSM: File =
+  private val fileAdobeACSM =
     File(this.directory, nameACSM(format))
-  private val fileAdobeACSMTmp: File =
+  private val fileAdobeACSMTmp =
     File(this.directory, nameACSM(format) + ".tmp")
-  private val fileAdobeMeta: File =
+  private val fileAdobeMeta =
     File(this.directory, nameMetaJSON(format))
-  private val fileAdobeMetaTmp: File =
+  private val fileAdobeMetaTmp =
     File(this.directory, nameMetaJSON(format) + ".tmp")
 
   private val infoLock: Any = Any()
