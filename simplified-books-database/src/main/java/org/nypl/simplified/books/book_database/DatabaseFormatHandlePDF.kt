@@ -1,9 +1,12 @@
 package org.nypl.simplified.books.book_database
 
+import net.jcip.annotations.GuardedBy
 import one.irradia.mime.api.MIMEType
+import org.nypl.simplified.books.api.BookDRMInformation
+import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.files.FileUtilities
 import java.io.File
 import java.io.IOException
@@ -23,24 +26,60 @@ internal class DatabaseFormatHandlePDF internal constructor(
   private val fileLastReadTmp: File =
     File(this.parameters.directory, "pdf-meta_last_read.json.tmp")
 
-  private val formatLock: Any = Any()
+  private val dataLock: Any = Any()
+
+  @GuardedBy("dataLock")
+  private var drmHandleRef =
+    BookDRMInformationHandles.open(
+      directory = this.parameters.directory,
+      format = this.formatDefinition,
+      onUpdate = this::onDRMUpdated
+    )
+
+  @GuardedBy("dataLock")
   private var formatRef: BookFormat.BookFormatPDF =
-    synchronized(this.formatLock) {
+    synchronized(this.dataLock) {
       loadInitial(
         fileBook = this.fileBook,
         fileLastRead = this.fileLastRead,
-        contentType = this.parameters.contentType
+        contentType = this.parameters.contentType,
+        drmInfo = this.drmInformationHandle.info
       )
     }
 
-  override val format: BookFormat.BookFormatPDF
-    get() = synchronized(this.formatLock) { this.formatRef }
+  private fun onDRMUpdated() {
+    this.parameters.onUpdated.invoke(this.refreshDRM())
+  }
 
-  override val formatDefinition: BookFormats.BookFormatDefinition
-    get() = BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
+  private fun refreshDRM(): BookFormat.BookFormatPDF {
+    return synchronized(this.dataLock) {
+      this.formatRef = this.formatRef.copy(drmInformation = this.drmInformationHandle.info)
+      this.formatRef
+    }
+  }
+
+  override val format: BookFormat.BookFormatPDF
+    get() = synchronized(this.dataLock, this::formatRef)
+
+  override val drmInformationHandle: BookDRMInformationHandle
+    get() = synchronized(this.dataLock, this::drmHandleRef)
+
+  override fun setDRMKind(kind: BookDRMKind) {
+    synchronized(this.dataLock) {
+      val oldRef = (this.drmHandleRef as BookDRMInformationHandleBase)
+      this.drmHandleRef = BookDRMInformationHandles.create(
+        directory = this.parameters.directory,
+        format = this.formatDefinition,
+        drmKind = kind,
+        onUpdate = this::onDRMUpdated
+      )
+      oldRef.close()
+      this.onDRMUpdated()
+    }
+  }
 
   override fun deleteBookData() {
-    val newFormat = synchronized(this.formatLock) {
+    val newFormat = synchronized(this.dataLock) {
       FileUtilities.fileDelete(this.fileBook)
       this.formatRef = this.formatRef.copy(file = null)
       this.formatRef
@@ -50,7 +89,7 @@ internal class DatabaseFormatHandlePDF internal constructor(
   }
 
   override fun copyInBook(file: File) {
-    val newFormat = synchronized(this.formatLock) {
+    val newFormat = synchronized(this.dataLock) {
       FileUtilities.fileCopy(file, this.fileBook)
       this.formatRef = this.formatRef.copy(file = this.fileBook)
       this.formatRef
@@ -60,7 +99,7 @@ internal class DatabaseFormatHandlePDF internal constructor(
   }
 
   override fun setLastReadLocation(pageNumber: Int?) {
-    val newFormat = synchronized(this.formatLock) {
+    val newFormat = synchronized(this.dataLock) {
       if (pageNumber != null) {
         FileUtilities.fileWriteUTF8Atomically(
           this.fileLastRead,
@@ -84,12 +123,14 @@ internal class DatabaseFormatHandlePDF internal constructor(
     private fun loadInitial(
       fileBook: File,
       fileLastRead: File,
-      contentType: MIMEType
+      contentType: MIMEType,
+      drmInfo: BookDRMInformation
     ): BookFormat.BookFormatPDF {
       return BookFormat.BookFormatPDF(
         file = if (fileBook.isFile) fileBook else null,
         lastReadLocation = loadLastReadLocationIfPresent(fileLastRead),
-        contentType = contentType
+        contentType = contentType,
+        drmInformation = drmInfo
       )
     }
 

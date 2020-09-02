@@ -5,6 +5,7 @@ import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.http.core.HTTPHasProblemReportType
@@ -350,7 +351,7 @@ sealed class BookStatus {
 
     fun fromBook(book: Book): BookStatus {
       val downloaded = book.isDownloaded
-      val adobeReturnable = this.isAdobeReturnable(book)
+      val drmReturnable = this.isDRMReturnable(book)
       val availability = book.entry.availability
       return availability.matchAvailability(
         object : OPDSAvailabilityMatcherType<BookStatus, UnreachableCodeException> {
@@ -367,7 +368,7 @@ sealed class BookStatus {
           }
 
           override fun onLoaned(a: OPDSAvailabilityLoaned): BookStatus {
-            return this@Companion.onIsLoaned(a, adobeReturnable, downloaded, book)
+            return this@Companion.onIsLoaned(a, drmReturnable, downloaded, book)
           }
 
           override fun onLoanable(a: OPDSAvailabilityLoanable): BookStatus {
@@ -416,12 +417,12 @@ sealed class BookStatus {
 
     private fun onIsLoaned(
       a: OPDSAvailabilityLoaned,
-      adobeReturnable: Boolean,
+      drmReturnable: Boolean,
       downloaded: Boolean,
       book: Book
     ): BookStatus {
       val hasRevoke = a.revoke.isSome
-      val returnable = hasRevoke && adobeReturnable || hasRevoke && downloaded
+      val returnable = hasRevoke && drmReturnable || hasRevoke && downloaded
       return if (downloaded) {
         Loaned.LoanedDownloaded(
           id = book.id,
@@ -465,15 +466,24 @@ sealed class BookStatus {
       )
     }
 
-    private fun isAdobeReturnable(book: Book): Boolean {
+    private fun isDRMReturnable(book: Book): Boolean {
       val format = book.findFormat(BookFormat.BookFormatEPUB::class.java)
-      if (format != null) {
-        val adobe = format.adobeRights
-        if (adobe != null) {
-          return adobe.isReturnable
+      return format?.let {
+
+        /*
+         * XXX: I have no idea if this is correct. Does LCP have a means to "return" loans
+         * outside of the Circulation Manager?
+         */
+
+        when (val info = it.drmInformation) {
+          is BookDRMInformation.ACS ->
+            info.acsmFile != null
+          is BookDRMInformation.LCP ->
+            true
+          BookDRMInformation.None ->
+            false
         }
-      }
-      return false
+      } ?: false
     }
 
     private fun <T> someOrNull(x: OptionType<T>): T? {

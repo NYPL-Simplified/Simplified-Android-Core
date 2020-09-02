@@ -37,9 +37,11 @@ import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.book_database.BookDRMInformationHandleACS
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
@@ -116,6 +118,26 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
   private val bookRevokeStrings = MockRevokeStringResources()
 
+  private val basicDRMInformationReturnable =
+    BookDRMInformation.ACS(
+      acsmFile = null,
+      rights = Pair(File("loan"), AdobeAdeptLoan(
+        AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
+        ByteBuffer.allocate(32),
+        true
+      ))
+    )
+
+  private val basicDRMInformationNotReturnable =
+    BookDRMInformation.ACS(
+      acsmFile = null,
+      rights = Pair(File("loan"), AdobeAdeptLoan(
+        AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
+        ByteBuffer.allocate(32),
+        false
+      ))
+    )
+
   @Before
   @Throws(Exception::class)
   fun setUp() {
@@ -188,15 +210,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+    val drmHandle =
+      Mockito.mock(BookDRMInformationHandleACS::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          false
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -253,6 +272,10 @@ abstract class BookRevokeTaskAdobeDRMContract {
       .thenReturn(bookDatabaseFormatHandle)
     Mockito.`when`(bookDatabaseFormatHandle.format)
       .thenReturn(bookFormat)
+    Mockito.`when`(bookDatabaseFormatHandle.drmInformationHandle)
+      .thenReturn(drmHandle)
+    Mockito.`when`(drmHandle.info)
+      .thenReturn(this.basicDRMInformationNotReturnable)
 
     val task =
       BookRevokeTask(
@@ -271,8 +294,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(1))
-      .setAdobeRightsInformation(null)
   }
 
   /**
@@ -289,15 +310,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+    val drmHandle =
+      Mockito.mock(BookDRMInformationHandleACS::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          true
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -351,6 +369,10 @@ abstract class BookRevokeTaskAdobeDRMContract {
       .thenReturn(bookDatabaseFormatHandle)
     Mockito.`when`(bookDatabaseFormatHandle.format)
       .thenReturn(bookFormat)
+    Mockito.`when`(bookDatabaseFormatHandle.drmInformationHandle)
+      .thenReturn(drmHandle)
+    Mockito.`when`(drmHandle.info)
+      .thenReturn(this.basicDRMInformationReturnable)
 
     val task =
       BookRevokeTask(
@@ -369,8 +391,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(1))
-      .setAdobeRightsInformation(null)
   }
 
   /**
@@ -388,15 +408,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+    val drmHandle =
+      Mockito.mock(BookDRMInformationHandleACS::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          true
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -470,6 +487,10 @@ abstract class BookRevokeTaskAdobeDRMContract {
       .thenReturn(bookDatabaseFormatHandle)
     Mockito.`when`(bookDatabaseFormatHandle.format)
       .thenReturn(bookFormat)
+    Mockito.`when`(bookDatabaseFormatHandle.drmInformationHandle)
+      .thenReturn(drmHandle)
+    Mockito.`when`(drmHandle.info)
+      .thenReturn(this.basicDRMInformationReturnable)
 
     /*
      * When the code tells the connector to return the loan, it succeeds if the connector reports
@@ -511,8 +532,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(1))
-      .setAdobeRightsInformation(null)
+    Mockito.verify(drmHandle, Times(1)).setAdobeRightsInformation(null)
   }
 
   /**
@@ -529,15 +549,10 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          true
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -648,8 +663,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     result as TaskResult.Failure
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(0))
-      .setAdobeRightsInformation(null)
   }
 
   /**
@@ -666,15 +679,10 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          true
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -784,8 +792,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     result as TaskResult.Failure
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(0))
-      .setAdobeRightsInformation(null)
   }
 
   /**
@@ -802,15 +808,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+    val drmHandle =
+      Mockito.mock(BookDRMInformationHandleACS::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          true
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -882,6 +885,10 @@ abstract class BookRevokeTaskAdobeDRMContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.findPreferredFormatHandle())
       .thenReturn(bookDatabaseFormatHandle)
+    Mockito.`when`(bookDatabaseFormatHandle.drmInformationHandle)
+      .thenReturn(drmHandle)
+    Mockito.`when`(drmHandle.info)
+      .thenReturn(this.basicDRMInformationReturnable)
     Mockito.`when`(bookDatabaseFormatHandle.format)
       .thenReturn(bookFormat)
 
@@ -910,7 +917,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     val task =
       BookRevokeTask(
         account = account,
-        adobeDRM = adobeExecutor,
+        adobeDRM = this.adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
@@ -931,8 +938,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(0))
-      .setAdobeRightsInformation(null)
   }
 
   /**
@@ -949,15 +954,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+    val drmHandle =
+      Mockito.mock(BookDRMInformationHandleACS::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          true
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -1026,6 +1028,10 @@ abstract class BookRevokeTaskAdobeDRMContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.findPreferredFormatHandle())
       .thenReturn(bookDatabaseFormatHandle)
+    Mockito.`when`(bookDatabaseFormatHandle.drmInformationHandle)
+      .thenReturn(drmHandle)
+    Mockito.`when`(drmHandle.info)
+      .thenReturn(this.basicDRMInformationReturnable)
     Mockito.`when`(bookDatabaseFormatHandle.format)
       .thenReturn(bookFormat)
 
@@ -1049,8 +1055,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(0))
-      .setAdobeRightsInformation(null)
   }
 
   /**
@@ -1067,15 +1071,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+    val drmHandle =
+      Mockito.mock(BookDRMInformationHandleACS::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          true
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -1130,6 +1131,10 @@ abstract class BookRevokeTaskAdobeDRMContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.findPreferredFormatHandle())
       .thenReturn(bookDatabaseFormatHandle)
+    Mockito.`when`(bookDatabaseFormatHandle.drmInformationHandle)
+      .thenReturn(drmHandle)
+    Mockito.`when`(drmHandle.info)
+      .thenReturn(this.basicDRMInformationReturnable)
     Mockito.`when`(bookDatabaseFormatHandle.format)
       .thenReturn(bookFormat)
 
@@ -1153,8 +1158,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(0))
-      .setAdobeRightsInformation(null)
   }
 
   /**
@@ -1171,15 +1174,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookDatabaseFormatHandle =
       Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+    val drmHandle =
+      Mockito.mock(BookDRMInformationHandleACS::class.java)
+
     val bookFormat =
       BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights =
-        AdobeAdeptLoan(
-          AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
-          true
-        ),
+        drmInformation = this.basicDRMInformationReturnable,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -1251,12 +1251,14 @@ abstract class BookRevokeTaskAdobeDRMContract {
       .thenReturn(book)
     Mockito.`when`(bookDatabaseEntry.findPreferredFormatHandle())
       .thenReturn(bookDatabaseFormatHandle)
+    Mockito.`when`(bookDatabaseFormatHandle.drmInformationHandle)
+      .thenReturn(drmHandle)
+    Mockito.`when`(drmHandle.info)
+      .thenReturn(this.basicDRMInformationReturnable)
+    Mockito.`when`(drmHandle.setAdobeRightsInformation(Mockito.any()))
+      .thenThrow(IOException("Ouch!"))
     Mockito.`when`(bookDatabaseFormatHandle.format)
       .thenReturn(bookFormat)
-    Mockito.`when`(bookDatabaseFormatHandle.setAdobeRightsInformation(Mockito.any()))
-      .then {
-        throw IOException("I/O error")
-      }
 
     /*
      * When the code tells the connector to return the loan, it succeeds if the connector reports
@@ -1265,11 +1267,12 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     Mockito.`when`(
       this.adobeConnector.loanReturn(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
+        Mockito.any(),
+        Mockito.any(),
+        Mockito.any()
       )
     ).then { invocation ->
+      this.logger.debug("executing loanReturn: {}", invocation)
       val receiver = invocation.arguments[0] as AdobeAdeptLoanReturnListenerType
       receiver.onLoanReturnSuccess()
       Unit
@@ -1277,6 +1280,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
     Mockito.`when`(this.adobeExecutor.execute(anyNonNull()))
       .then { invocation ->
+        this.logger.debug("executing procedure: {}", invocation)
         val procedure = invocation.arguments[0] as AdobeAdeptProcedureType
         procedure.executeWith(this.adobeConnector)
       }
@@ -1301,8 +1305,6 @@ abstract class BookRevokeTaskAdobeDRMContract {
     )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
-    Mockito.verify(bookDatabaseFormatHandle, Times(1))
-      .setAdobeRightsInformation(null)
   }
 
   private fun <T> optionUnsafe(opt: OptionType<T>): T {

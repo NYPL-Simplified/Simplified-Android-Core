@@ -671,8 +671,6 @@ abstract class MigrationFrom3MasterContract {
     File(accountsDir, "account.json").writeBytes(this.resource("account.json"))
     File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
 
-    Mockito.`when`(bookDatabaseEntryFormatHandle.setAdobeRightsInformation(Mockito.any()))
-      .thenThrow(IOException("Bad rights"))
     Mockito.`when`(bookDatabaseEntryFormatHandle.setBookmarks(Mockito.anyList()))
       .thenThrow(IOException("Bad bookmarks"))
     Mockito.`when`(bookDatabaseEntryFormatHandle.copyInBook(bookEPUBFile))
@@ -683,14 +681,13 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(7, report.events.size)
+    Assert.assertEquals(6, report.events.size)
     Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
     Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
     Assert.assertEquals("errorBookCopyFailure: Bossypants", report.events[2].message)
     Assert.assertEquals("errorBookmarksCopyFailure: Bossypants", report.events[3].message)
-    Assert.assertEquals("errorBookAdobeDRMCopyFailure: Bossypants", report.events[4].message)
-    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[5].message)
-    Assert.assertEquals("successDeletedOldData", report.events[6].message)
+    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
+    Assert.assertEquals("successDeletedOldData", report.events[5].message)
 
     Assert.assertFalse(bookDatabase.books().contains(bookId))
 

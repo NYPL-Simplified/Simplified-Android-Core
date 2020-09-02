@@ -193,7 +193,6 @@ abstract class BookDatabaseContract {
       Assert.assertTrue("Format is present", epubFormat != null)
 
       epubFormat!!
-      Assert.assertTrue("No Adobe rights", epubFormat.adobeRights == null)
       Assert.assertTrue("No book data", epubFormat.file == null)
       Assert.assertFalse("Book is not downloaded", epubFormat.isDownloaded)
 
@@ -225,7 +224,6 @@ abstract class BookDatabaseContract {
       Assert.assertTrue("Format is present", epubFormat != null)
 
       epubFormat!!
-      Assert.assertTrue("No Adobe rights", epubFormat.adobeRights == null)
       Assert.assertTrue("No book data", epubFormat.file == null)
       Assert.assertFalse("Book is not downloaded", epubFormat.isDownloaded)
 

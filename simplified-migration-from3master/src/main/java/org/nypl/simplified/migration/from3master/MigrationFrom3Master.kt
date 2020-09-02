@@ -28,6 +28,7 @@ import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
+import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
@@ -467,7 +468,14 @@ class MigrationFrom3Master(
     }
 
     try {
-      handle.setAdobeRightsInformation(book.epubAdobeLoan)
+      when (val drm = handle.drmInformationHandle) {
+        is BookDRMInformationHandle.ACSHandle ->
+          drm.setAdobeRightsInformation(book.epubAdobeLoan)
+        is BookDRMInformationHandle.LCPHandle,
+        is BookDRMInformationHandle.NoneHandle -> {
+          // Nothing required
+        }
+      }
     } catch (e: Exception) {
       this.logger.error("failed to copy adobe DRM information: ", e)
       this.publishStepError(MigrationStepError(

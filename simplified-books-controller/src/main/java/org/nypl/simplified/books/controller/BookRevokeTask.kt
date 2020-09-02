@@ -15,6 +15,7 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
+import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
@@ -421,11 +422,19 @@ class BookRevokeTask(
     this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("EPUB"))
     this.publishRequestingRevokeStatus()
 
-    val adobeRights = handle.format.adobeRights
-    if (adobeRights != null) {
-      this.revokeFormatHandleEPUBAdobe(handle, adobeRights)
-    } else {
-      this.debug("no Adobe rights, nothing to do!")
+    return when (val drm = handle.drmInformationHandle) {
+      is BookDRMInformationHandle.ACSHandle -> {
+        val adobeRights = drm.info.rights
+        if (adobeRights != null) {
+          this.revokeFormatHandleEPUBAdobe(handle, adobeRights.second)
+        } else {
+          this.debug("no Adobe rights, nothing to do!")
+        }
+      }
+      is BookDRMInformationHandle.LCPHandle,
+      is BookDRMInformationHandle.NoneHandle -> {
+        // Nothing required
+      }
     }
   }
 
@@ -578,7 +587,14 @@ class BookRevokeTask(
     this.publishRequestingRevokeStatus()
 
     try {
-      handle.setAdobeRightsInformation(null)
+      when (val drm = handle.drmInformationHandle) {
+        is BookDRMInformationHandle.ACSHandle ->
+          drm.setAdobeRightsInformation(null)
+        is BookDRMInformationHandle.LCPHandle,
+        is BookDRMInformationHandle.NoneHandle -> {
+          // Nothing required
+        }
+      }
     } catch (e: Exception) {
       this.steps.currentStepFailed(
         this.revokeStrings.revokeACSDeleteRightsFailed, UnexpectedException(e), e)

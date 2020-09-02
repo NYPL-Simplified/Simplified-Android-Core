@@ -1,15 +1,16 @@
 package org.nypl.simplified.books.book_database
 
 import android.content.Context
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
-import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookFormats
-import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -91,6 +92,7 @@ internal class BookDatabaseEntry internal constructor(
         }
     }
 
+    val objectMapper = ObjectMapper()
     synchronized(this.bookLock) {
       this.bookRef.entry.acquisitions.forEach { acquisition ->
         createFormatHandleIfRequired(
@@ -101,7 +103,9 @@ internal class BookDatabaseEntry internal constructor(
           ownerDirectory = this.bookDir,
           onUpdate = { format -> this.onFormatUpdated(format) },
           existingFormats = this.formatHandlesRef,
-          contentTypes = acquisition.availableFinalContentTypes())
+          contentTypes = acquisition.availableFinalContentTypes(),
+          objectMapper = objectMapper
+        )
       }
 
       this.bookRef =
@@ -244,6 +248,7 @@ internal class BookDatabaseEntry internal constructor(
     private fun createFormatHandleIfRequired(
       context: Context,
       logger: Logger,
+      objectMapper: ObjectMapper,
       constructors: EnumMap<BookFormats.BookFormatDefinition, DatabaseBookFormatHandleConstructor>,
       ownerDirectory: File,
       owner: BookDatabaseEntryType,
@@ -277,7 +282,8 @@ internal class BookDatabaseEntry internal constructor(
                 directory = ownerDirectory,
                 onUpdated = onUpdate,
                 entry = owner,
-                contentType = contentType
+                contentType = contentType,
+                objectMapper = objectMapper
               )
 
             existingFormats[constructor.classType] = constructor.constructor.invoke(params)
