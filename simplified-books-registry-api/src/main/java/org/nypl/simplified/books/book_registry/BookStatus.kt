@@ -468,14 +468,14 @@ sealed class BookStatus {
 
     private fun isDRMReturnable(book: Book): Boolean {
       val format = book.findFormat(BookFormat.BookFormatEPUB::class.java)
-      return if (format != null) {
+      return format?.let {
 
         /*
          * XXX: I have no idea if this is correct. Does LCP have a means to "return" loans
          * outside of the Circulation Manager?
          */
 
-        when (val info = format.drmInformation) {
+        when (val info = it.drmInformation) {
           is BookDRMInformation.ACS ->
             info.acsmFile != null
           is BookDRMInformation.LCP ->
@@ -483,9 +483,7 @@ sealed class BookStatus {
           BookDRMInformation.None ->
             false
         }
-      } else {
-        false
-      }
+      } ?: false
     }
 
     private fun <T> someOrNull(x: OptionType<T>): T? {
