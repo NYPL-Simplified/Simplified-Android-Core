@@ -28,12 +28,12 @@ import androidx.fragment.app.FragmentManager;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.librarysimplified.services.api.Services;
+import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials;
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
@@ -43,6 +43,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentExce
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.reader.ReaderColorSchemes;
+import org.nypl.simplified.books.api.BookDRMInformation;
 import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
@@ -87,6 +88,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.reactivex.disposables.Disposable;
+import kotlin.Pair;
+
 import static org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import static org.nypl.simplified.viewer.epub.readium1.ReaderReadiumViewerSettings.ScrollMode.AUTO;
 import static org.nypl.simplified.viewer.epub.readium1.ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE;
@@ -484,13 +487,24 @@ public final class ReaderActivity extends AppCompatActivity implements
       Services.INSTANCE.serviceDirectory().requireService(ReaderReadiumEPUBLoaderType.class);
     final ReaderReadiumEPUBLoadRequest request =
       ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
-        .setAdobeRightsFile(Option.of(format.getAdobeRightsFile()))
+        .setAdobeRightsFile(getAdobeRightsFrom(format))
         .build();
 
     LOG.debug("onCreate: loading EPUB");
     loader.loadEPUB(request, this);
     LOG.debug("onCreate: applying viewer color filters");
     this.applyViewerColorFilters();
+  }
+
+  private OptionType<File> getAdobeRightsFrom(final BookFormat.BookFormatEPUB format) {
+    final BookDRMInformation info = format.getDrmInformation();
+    if (info instanceof BookDRMInformation.ACS) {
+      final Pair<File, AdobeAdeptLoan> rights = ((BookDRMInformation.ACS) info).getRights();
+      if (rights != null) {
+        return Option.of(rights.component1());
+      }
+    }
+    return Option.none();
   }
 
   private void onProfileEvent(final ProfileEvent event) {

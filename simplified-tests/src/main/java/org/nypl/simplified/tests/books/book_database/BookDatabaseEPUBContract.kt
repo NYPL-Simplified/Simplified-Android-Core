@@ -7,11 +7,18 @@ import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookChapterProgress
+import org.nypl.simplified.books.api.BookDRMInformation
+import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
+import org.nypl.simplified.books.book_database.BookDRMInformationHandleACS
+import org.nypl.simplified.books.book_database.BookDRMInformationHandleLCP
+import org.nypl.simplified.books.book_database.BookDRMInformationHandleNone
+import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.opds.core.OPDSAcquisition
@@ -27,9 +34,8 @@ abstract class BookDatabaseEPUBContract {
 
   private val logger =
     LoggerFactory.getLogger(BookDatabaseEPUBContract::class.java)
-
   private val accountID =
-    org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
   protected abstract fun context(): Context
 
@@ -45,8 +51,7 @@ abstract class BookDatabaseEPUBContract {
     val parser = OPDSJSONParser.newParser()
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
-    val database0 =
-      org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
+    val database0 = BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookIDs.newFromText("abcd")
@@ -96,8 +101,7 @@ abstract class BookDatabaseEPUBContract {
     val parser = OPDSJSONParser.newParser()
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
-    val database0 =
-      org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
+    val database0 = BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookIDs.newFromText("abcd")
@@ -169,7 +173,7 @@ abstract class BookDatabaseEPUBContract {
     }
 
     val database1 =
-      org.nypl.simplified.books.book_database.BookDatabase.open(context(), parser, serializer, accountID, directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
     val databaseEntry1 =
       database1.createOrUpdate(bookID, feedEntry)
 
@@ -182,6 +186,42 @@ abstract class BookDatabaseEPUBContract {
 
       formatHandle!!
       Assert.assertEquals(bookmarks1, formatHandle.format.bookmarks)
+    }
+  }
+
+  /**
+   * Setting and unsetting DRM works.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  fun testEntryDRM() {
+    val parser = OPDSJSONParser.newParser()
+    val serializer = OPDSJSONSerializer.newSerializer()
+    val directory = DirectoryUtilities.directoryCreateTemporary()
+    val database0 = BookDatabase.open(context(), parser, serializer, accountID, directory)
+
+    val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
+    val bookID = BookIDs.newFromText("abcd")
+    val entry = database0.createOrUpdate(bookID, feedEntry)
+
+    this.run {
+      val formatHandle = entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
+      formatHandle.drmInformationHandle as BookDRMInformationHandleNone
+
+      this.logger.debug("setting DRM to LCP")
+      formatHandle.setDRMKind(BookDRMKind.LCP)
+      formatHandle.drmInformationHandle as BookDRMInformationHandleLCP
+      formatHandle.format.drmInformation as BookDRMInformation.LCP
+      this.logger.debug("setting DRM to ACS")
+      formatHandle.setDRMKind(BookDRMKind.ACS)
+      formatHandle.drmInformationHandle as BookDRMInformationHandleACS
+      formatHandle.format.drmInformation as BookDRMInformation.ACS
+      this.logger.debug("setting DRM to NONE")
+      formatHandle.setDRMKind(BookDRMKind.NONE)
+      formatHandle.drmInformationHandle as BookDRMInformationHandleNone
+      formatHandle.format.drmInformation as BookDRMInformation.None
     }
   }
 

@@ -16,6 +16,7 @@ import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.books.api.BookChapterProgress
+import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
@@ -280,8 +281,7 @@ abstract class ReaderBookmarkServiceContract {
 
     val format =
       BookFormat.BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights = null,
+        drmInformation = BookDRMInformation.None,
         file = null,
         lastReadLocation = null,
         bookmarks = listOf(),
@@ -476,8 +476,7 @@ abstract class ReaderBookmarkServiceContract {
 
     val format =
       BookFormat.BookFormatEPUB(
-        adobeRightsFile = null,
-        adobeRights = null,
+        drmInformation = BookDRMInformation.None,
         file = null,
         lastReadLocation = null,
         bookmarks = startingBookmarks,
