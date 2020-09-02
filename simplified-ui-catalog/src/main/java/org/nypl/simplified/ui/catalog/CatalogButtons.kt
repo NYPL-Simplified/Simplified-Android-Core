@@ -9,6 +9,8 @@ import android.widget.Space
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
+import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatTextView
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 
 /**
@@ -31,7 +33,7 @@ class CatalogButtons(
   fun createCenteredTextForButtons(
     @StringRes res: Int
   ): TextView {
-    val text = TextView(this.context)
+    val text = AppCompatTextView(this.context)
     text.gravity = Gravity.CENTER
     text.text = this.context.getString(res)
     return text
@@ -44,7 +46,7 @@ class CatalogButtons(
     description: Int,
     onClick: (Button) -> Unit
   ): Button {
-    val button = Button(this.context)
+    val button = AppCompatButton(this.context)
     button.text = context.getString(text)
     button.contentDescription = context.getString(description)
     button.layoutParams = this.buttonLayoutParameters()

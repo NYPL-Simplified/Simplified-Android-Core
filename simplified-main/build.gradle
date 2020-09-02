@@ -10,6 +10,7 @@ def getGitHash = { ->
 android {
   defaultConfig {
     buildConfigField "String", "GIT_COMMIT", "\"${getGitHash()}\""
+    buildConfigField "String", "SIMPLIFIED_VERSION", "\"${rootProject.ext["VERSION_NAME"]}\""
   }
 }
 

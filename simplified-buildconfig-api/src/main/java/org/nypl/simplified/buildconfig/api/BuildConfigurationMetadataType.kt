@@ -12,6 +12,10 @@ interface BuildConfigurationMetadataType {
 
   val vcsCommit: String
 
+  /** The version of Simplified Core used in this build. */
+
+  val simplifiedVersion: String
+
   /**
    * The email address to which to send error reports. On most devices, users will be
    * able to override this as the address is passed to the external Android

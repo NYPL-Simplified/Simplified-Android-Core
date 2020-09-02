@@ -17,6 +17,8 @@ class VanillaBuildConfigurationService : BuildConfigurationServiceType {
     get() = true
   override val vcsCommit: String
     get() = BuildConfig.GIT_COMMIT
+  override val simplifiedVersion: String
+    get() = BuildConfig.SIMPLIFIED_VERSION
   override val supportErrorReportEmailAddress: String
     get() = "simplyemigrationreports@nypl.org"
   override val supportErrorReportSubject: String
