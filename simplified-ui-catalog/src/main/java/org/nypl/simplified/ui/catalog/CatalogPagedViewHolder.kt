@@ -189,10 +189,10 @@ class CatalogPagedViewHolder(
   private fun onFeedEntryOPDSUI(item: FeedEntryOPDS) {
     this.uiThread.checkIsUIThread()
 
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.setVisibilityIfNecessary(this.idleCover, View.INVISIBLE)
     this.idleCover.setImageDrawable(null)
@@ -299,9 +299,9 @@ class CatalogPagedViewHolder(
       is BookStatus.RequestingRevoke,
       is BookStatus.RequestingLoan,
       is BookStatus.RequestingDownload -> {
-        this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-        this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
-        this.setVisibilityIfNecessary(this.idle, View.INVISIBLE)
+        this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+        this.setVisibilityIfNecessary(this.error, View.GONE)
+        this.setVisibilityIfNecessary(this.idle, View.GONE)
         this.setVisibilityIfNecessary(this.progress, View.VISIBLE)
 
         this.progressText.text = book.book.entry.title
@@ -318,10 +318,10 @@ class CatalogPagedViewHolder(
     bookStatus: BookStatus.FailedRevoke,
     book: Book
   ) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.idle, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.idle, View.GONE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.errorDismiss.setOnClickListener {
       this.borrowViewModel.tryDismissRevokeError(book.account, book.id)
@@ -339,10 +339,10 @@ class CatalogPagedViewHolder(
     bookStatus: BookStatus.FailedDownload,
     book: Book
   ) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.idle, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.idle, View.GONE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.errorDismiss.setOnClickListener {
       this.borrowViewModel.tryDismissBorrowError(book.account, book.id)
@@ -361,10 +361,10 @@ class CatalogPagedViewHolder(
     bookStatus: BookStatus.FailedLoan,
     book: Book
   ) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.idle, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.idle, View.GONE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.errorDismiss.setOnClickListener {
       this.borrowViewModel.tryDismissBorrowError(book.account, book.id)
@@ -380,10 +380,10 @@ class CatalogPagedViewHolder(
 
   @UiThread
   private fun onBookStatusLoanedNotDownloaded(book: Book) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
     this.idleButtons.addView(this.buttonCreator.createDownloadButton {
@@ -396,10 +396,10 @@ class CatalogPagedViewHolder(
 
   @UiThread
   private fun onBookStatusLoanable(book: Book) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
     this.idleButtons.addView(this.buttonCreator.createGetButton {
@@ -412,10 +412,10 @@ class CatalogPagedViewHolder(
 
   @UiThread
   private fun onBookStatusHoldable(book: Book) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
     this.idleButtons.addView(this.buttonCreator.createReserveButton {
@@ -431,10 +431,10 @@ class CatalogPagedViewHolder(
     status: BookStatus.Held.HeldReady,
     book: Book
   ) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
     if (status.isRevocable) {
@@ -454,10 +454,10 @@ class CatalogPagedViewHolder(
     status: BookStatus.Held.HeldInQueue,
     book: Book
   ) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
     if (status.isRevocable) {
@@ -476,10 +476,10 @@ class CatalogPagedViewHolder(
 
   @UiThread
   private fun onBookStatusLoanedDownloaded(book: Book) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
 
@@ -507,10 +507,10 @@ class CatalogPagedViewHolder(
   @Suppress("UNUSED_PARAMETER")
   @UiThread
   private fun onBookStatusRevoked(book: BookWithStatus) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
   }
@@ -520,9 +520,9 @@ class CatalogPagedViewHolder(
     book: BookWithStatus,
     status: BookStatus.Downloading
   ) {
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.idle, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
+    this.setVisibilityIfNecessary(this.idle, View.GONE)
     this.setVisibilityIfNecessary(this.progress, View.VISIBLE)
 
     this.progressText.text = book.book.entry.title
@@ -536,10 +536,10 @@ class CatalogPagedViewHolder(
     this.unsubscribeFromBookRegistry()
     this.unsubscribeFromLogin()
 
-    this.setVisibilityIfNecessary(this.corrupt, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.error, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.idle, View.INVISIBLE)
-    this.setVisibilityIfNecessary(this.progress, View.INVISIBLE)
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
+    this.setVisibilityIfNecessary(this.idle, View.GONE)
+    this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.errorDetails.setOnClickListener(null)
     this.errorDismiss.setOnClickListener(null)
