@@ -88,14 +88,6 @@ abstract class AccountProviderNYPLRegistryContract {
     val success = result as SourceSucceeded
 
     Assert.assertEquals(43, success.results.size)
-    Assert.assertEquals(
-      "The correct number of providers are in production",
-      43,
-      success.results.values.filter { p -> p.isProduction }.size)
-    Assert.assertEquals(
-      "The correct number of providers are not in production",
-      0,
-      success.results.values.filter { p -> !p.isProduction }.size)
   }
 
   /**
@@ -138,14 +130,6 @@ abstract class AccountProviderNYPLRegistryContract {
     val success = result as SourceSucceeded
 
     Assert.assertEquals(182, success.results.size)
-    Assert.assertEquals(
-      "The correct number of providers are in production",
-      43,
-      success.results.values.filter { p -> p.isProduction }.size)
-    Assert.assertEquals(
-      "The correct number of providers are not in production",
-      139,
-      success.results.values.filter { p -> !p.isProduction }.size)
   }
 
   /**
@@ -219,15 +203,6 @@ abstract class AccountProviderNYPLRegistryContract {
     val success = result as SourceSucceeded
 
     Assert.assertEquals(182, success.results.size)
-    Assert.assertEquals(
-      "The correct number of providers are in production",
-      43,
-      success.results.values.filter { p -> p.isProduction }.size)
-    Assert.assertEquals(
-      "The correct number of providers are not in production",
-      139,
-      success.results.values.filter { p -> !p.isProduction }.size)
-
     Assert.assertNotEquals("Nonsense!", cacheFile.readText())
   }
 
