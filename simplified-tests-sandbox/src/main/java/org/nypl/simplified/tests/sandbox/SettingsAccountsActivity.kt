@@ -100,6 +100,8 @@ class SettingsAccountsActivity : AppCompatActivity(), ServiceDirectoryProviderTy
         get() = true
       override val vcsCommit: String =
         "abcd"
+      override val simplifiedVersion: String
+        get() = "zyxw"
       override val supportErrorReportEmailAddress: String
         get() = "errors@example.com"
       override val supportErrorReportSubject: String
