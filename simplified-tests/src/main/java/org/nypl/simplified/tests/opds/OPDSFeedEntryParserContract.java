@@ -67,7 +67,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityLoanable expected = OPDSAvailabilityLoanable.get();
     Assert.assertEquals(expected, availability);
 
-    Assert.assertEquals(0, e.getAcquisitions().size());
+    Assert.assertEquals(1, e.getAcquisitions().size());
   }
 
   @Test
@@ -97,12 +97,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
   }
 
   @Test
@@ -133,16 +127,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    LOG.debug("available: {}", available_content_types);
-    Assert.assertEquals(2, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
-    Assert.assertTrue(
-      "text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media is available",
-      available_content_types.contains(mimeOf("text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media")));
   }
 
   @Test
@@ -165,12 +149,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
   }
 
   @Test
@@ -201,12 +179,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
   }
 
   @Test
@@ -238,12 +210,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
   }
 
   @Test
@@ -274,12 +240,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
   }
 
   @Test
@@ -311,12 +271,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
   }
 
   @Test
@@ -344,12 +298,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
   }
 
   @Test
@@ -378,12 +326,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
   }
 
   @Test
@@ -406,16 +348,7 @@ public abstract class OPDSFeedEntryParserContract {
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
     Assert.assertEquals(0, acquisition.getIndirectAcquisitions().size());
-    Assert.assertTrue(acquisition.getType().isSome());
-    Assert.assertEquals(
-      mimeOf("application/epub+zip"),
-      ((Some<MIMEType>) acquisition.getType()).get());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
+    Assert.assertEquals(mimeOf("application/epub+zip"), acquisition.getType());
   }
 
   @Test
@@ -444,22 +377,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
-  }
-
-  @Test
-  public void testEntryNoSupportedFormats()
-    throws Exception {
-    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
-    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
-      OPDSFeedEntryParserContract.getResource("entry-no-supported-format.xml"));
-
-    Assert.assertTrue("No available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -469,7 +386,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserContract.getResource("entry-with-formats-0.xml"));
 
-    Assert.assertEquals(2, e.getAcquisitions().size());
+    Assert.assertEquals(3, e.getAcquisitions().size());
 
     {
       final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
@@ -478,12 +395,6 @@ public abstract class OPDSFeedEntryParserContract {
         OPDSIndirectAcquisition.Companion.findTypeInOptional(
           mimeOf("application/epub+zip"),
           acquisition.getIndirectAcquisitions()).isSome());
-
-      final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-      Assert.assertEquals(1, available_content_types.size());
-      Assert.assertTrue(
-        "application/epub+zip is available",
-        available_content_types.contains(mimeOf("application/epub+zip")));
     }
 
     {
@@ -493,12 +404,15 @@ public abstract class OPDSFeedEntryParserContract {
         OPDSIndirectAcquisition.Companion.findTypeInOptional(
           mimeOf("application/pdf"),
           acquisition.getIndirectAcquisitions()).isSome());
+    }
 
-      final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-      Assert.assertEquals(1, available_content_types.size());
+    {
+      final OPDSAcquisition acquisition = e.getAcquisitions().get(2);
       Assert.assertTrue(
-        "application/pdf is available",
-        available_content_types.contains(mimeOf("application/pdf")));
+        "text/html is available",
+        OPDSIndirectAcquisition.Companion.findTypeInOptional(
+          mimeOf("text/html"),
+          acquisition.getIndirectAcquisitions()).isSome());
     }
   }
 
@@ -517,19 +431,6 @@ public abstract class OPDSFeedEntryParserContract {
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
         acquisition.getIndirectAcquisitions()).isSome());
-
-    final Set<MIMEType> available_content_types = acquisition.availableFinalContentTypes();
-    LOG.debug("available: {}", available_content_types);
-    Assert.assertEquals(3, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains(mimeOf("application/epub+zip")));
-    Assert.assertTrue(
-      "application/pdf is available",
-      available_content_types.contains(mimeOf("application/pdf")));
-    Assert.assertTrue(
-      "text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media is available",
-      available_content_types.contains(mimeOf("text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media")));
   }
 
   @Test
@@ -555,7 +456,7 @@ public abstract class OPDSFeedEntryParserContract {
   }
 
   private OPDSAcquisitionFeedEntryParserType getParser() {
-    return OPDSAcquisitionFeedEntryParser.newParser(BookFormats.INSTANCE.supportedBookMimeTypes());
+    return OPDSAcquisitionFeedEntryParser.newParser();
   }
 
   private MIMEType mimeOf(String text) {

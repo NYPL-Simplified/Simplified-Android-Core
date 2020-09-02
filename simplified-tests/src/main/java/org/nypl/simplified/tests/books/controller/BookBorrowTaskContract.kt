@@ -42,7 +42,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -53,9 +52,14 @@ import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
 import org.nypl.simplified.books.controller.BookTaskRequiredServices
+import org.nypl.simplified.books.controller.api.BookBorrowExceptionBadBorrowFeed
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookUnexpectedTypeException
+import org.nypl.simplified.books.formats.BookFormatAudioSupportParameters
+import org.nypl.simplified.books.formats.BookFormatSupport
+import org.nypl.simplified.books.formats.BookFormatSupportParameters
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloadListenerType
@@ -64,6 +68,7 @@ import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedHTTPTransportException
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderResult
@@ -128,9 +133,10 @@ abstract class BookBorrowTaskContract {
 
   private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookRegistry: BookRegistryType
-  private lateinit var booksDirectory: File
   private lateinit var bookTaskRequiredServices: BookTaskRequiredServices
+  private lateinit var booksDirectory: File
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
   private lateinit var clock: () -> Instant
@@ -174,6 +180,19 @@ abstract class BookBorrowTaskContract {
       Mockito.mock(ProfileType::class.java)
     this.downloader =
       Mockito.mock(DownloaderType::class.java)
+
+    this.bookFormatSupport =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = true,
+          supportsAdobeDRM = true,
+          supportsAudioBooks = BookFormatAudioSupportParameters(
+            supportsOverdriveAudioBooks = true,
+            supportsFindawayAudioBooks = true,
+            supportsDPLAAudioBooks = true
+          )
+        )
+      )
 
     Mockito.`when`(this.profilesDatabase.currentProfileUnsafe())
       .thenReturn(this.profile)
@@ -235,22 +254,23 @@ abstract class BookBorrowTaskContract {
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
     val entryParser =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
+      OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
       OPDSFeedParser.newParser(entryParser)
     val searchParser =
       OPDSSearchParser.newParser()
     val transport =
-      org.nypl.simplified.feeds.api.FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport.newTransport(this.http)
 
     return FeedLoader.create(
+      bookFormatSupport = this.bookFormatSupport,
+      bookRegistry = this.bookRegistry,
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver,
       exec = executorFeeds,
       parser = parser,
       searchParser = searchParser,
-      transport = transport,
-      bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent,
-      contentResolver = this.contentResolver
+      transport = transport
     )
   }
 
@@ -287,7 +307,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -375,7 +395,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.pdf"),
-        Option.some(this.mimeOf("application/pdf")),
+        this.mimeOf("application/pdf"),
         listOf()
       )
 
@@ -478,7 +498,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.json"),
-        Option.some(this.mimeOf("application/audiobook+json")),
+        this.mimeOf("application/audiobook+json"),
         listOf()
       )
 
@@ -627,7 +647,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("simplified-bundled:0.epub"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -727,7 +747,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("simplified-bundled:0.epub"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -828,7 +848,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -931,7 +951,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_GENERIC,
         URI.create("http://example.com/fulfill/0"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1049,7 +1069,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1148,7 +1168,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1251,7 +1271,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1353,7 +1373,12 @@ abstract class BookBorrowTaskContract {
     val rawFeed =
       feedBuilder.build()
     val feed =
-      Feed.fromAcquisitionFeed(account.id, rawFeed, null) as Feed.FeedWithGroups
+      Feed.fromAcquisitionFeed(
+        accountId = account.id,
+        feed = rawFeed,
+        filter = { true },
+        search = null
+      ) as Feed.FeedWithGroups
 
     feed.feedGroupsInOrder[0].groupEntries[0] =
       FeedEntry.FeedEntryCorrupt(
@@ -1379,7 +1404,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1475,7 +1500,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1577,7 +1602,12 @@ abstract class BookBorrowTaskContract {
     val rawFeed =
       feedBuilder.build()
     val feed =
-      Feed.fromAcquisitionFeed(account.id, rawFeed, null) as Feed.FeedWithGroups
+      Feed.fromAcquisitionFeed(
+        accountId = account.id,
+        feed = rawFeed,
+        filter = { true },
+        search = null
+      ) as Feed.FeedWithGroups
 
     feed.feedGroupsInOrder[0].groupEntries[0] =
       FeedEntry.FeedEntryCorrupt(
@@ -1602,7 +1632,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1685,7 +1715,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1767,7 +1797,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1861,7 +1891,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1959,7 +1989,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2067,7 +2097,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2180,7 +2210,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2226,10 +2256,10 @@ abstract class BookBorrowTaskContract {
 
     val bookStatus =
       (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get().status
-        as BookStatus.FailedLoan
+        as BookStatus.FailedDownload
 
     val exception =
-      bookStatus.result.steps.last().resolution.exception as IllegalStateException
+      bookStatus.result.steps.last().resolution.exception as BookBorrowExceptionBadBorrowFeed
   }
 
   /**
@@ -2288,7 +2318,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2411,7 +2441,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2542,7 +2572,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2669,7 +2699,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2744,7 +2774,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BUY,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2821,7 +2851,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_BUY,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -2920,7 +2950,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -3044,7 +3074,7 @@ abstract class BookBorrowTaskContract {
       OPDSAcquisition(
         ACQUISITION_OPEN_ACCESS,
         URI.create("http://www.example.com/0.epub"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 

@@ -33,6 +33,7 @@
   <published>2014-04-01T00:00:00Z</published>
   <link
     href="http://circulation.alpha.librarysimplified.org/works/3M/arzopz9/borrow"
+    type="application/atom+xml;relation=entry;profile=opds-catalog"
     rel="http://opds-spec.org/acquisition/borrow">
     <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
       <opds:indirectAcquisition type="application/epub+zip"/>

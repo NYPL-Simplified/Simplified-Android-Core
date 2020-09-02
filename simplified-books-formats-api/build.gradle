@@ -1,0 +1,7 @@
+dependencies {
+  api libraries.irradiaMimeAPI
+  api libraries.irradiaMimeVanilla
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
+}

@@ -15,6 +15,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_A
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import java.net.URI
 import java.util.ArrayList
@@ -119,30 +120,30 @@ sealed class Feed {
 
     val entriesInOrder: MutableList<FeedEntry> = object : AbstractMutableList<FeedEntry>() {
       override val size: Int
-        get() = entriesOrderData.size
+        get() = this@FeedWithoutGroups.entriesOrderData.size
 
       override fun add(index: Int, element: FeedEntry) {
-        if (!entriesData.containsKey(element.bookID)) {
-          entriesOrderData.add(index, element.bookID)
-          entriesData.put(element.bookID, element)
+        if (!this@FeedWithoutGroups.entriesData.containsKey(element.bookID)) {
+          this@FeedWithoutGroups.entriesOrderData.add(index, element.bookID)
+          this@FeedWithoutGroups.entriesData.put(element.bookID, element)
         }
       }
 
       override fun get(index: Int): FeedEntry {
-        return entriesData[entriesOrderData.get(index)]!!
+        return this@FeedWithoutGroups.entriesData[this@FeedWithoutGroups.entriesOrderData.get(index)]!!
       }
 
       override fun removeAt(index: Int): FeedEntry {
-        val bookID = entriesOrderData.get(index)
-        val removed = entriesData.remove(bookID)
-        entriesOrderData.removeAt(index)
+        val bookID = this@FeedWithoutGroups.entriesOrderData.get(index)
+        val removed = this@FeedWithoutGroups.entriesData.remove(bookID)
+        this@FeedWithoutGroups.entriesOrderData.removeAt(index)
         return removed!!
       }
 
       override fun set(index: Int, element: FeedEntry): FeedEntry {
-        val bookID = entriesOrderData.get(index)
-        val old = entriesData[bookID]
-        entriesData[bookID] = element
+        val bookID = this@FeedWithoutGroups.entriesOrderData.get(index)
+        val old = this@FeedWithoutGroups.entriesData[bookID]
+        this@FeedWithoutGroups.entriesData[bookID] = element
         return old!!
       }
     }
@@ -207,29 +208,29 @@ sealed class Feed {
     val feedGroupsInOrder: MutableList<FeedGroup> =
       object : AbstractMutableList<FeedGroup>() {
         override val size: Int
-          get() = feedGroupsOrderData.size
+          get() = this@FeedWithGroups.feedGroupsOrderData.size
 
         override fun add(index: Int, element: FeedGroup) {
           val name = element.groupTitle
-          feedGroupsOrderData.add(index, name)
-          feedGroupsData.put(name, element)
+          this@FeedWithGroups.feedGroupsOrderData.add(index, name)
+          this@FeedWithGroups.feedGroupsData.put(name, element)
         }
 
         override fun get(index: Int): FeedGroup {
-          return feedGroupsData[feedGroupsOrderData.get(index)]!!
+          return this@FeedWithGroups.feedGroupsData[this@FeedWithGroups.feedGroupsOrderData.get(index)]!!
         }
 
         override fun removeAt(index: Int): FeedGroup {
-          val name = feedGroupsOrderData.get(index)
-          val removed = feedGroupsData.remove(name)
-          feedGroupsOrderData.removeAt(index)
+          val name = this@FeedWithGroups.feedGroupsOrderData.get(index)
+          val removed = this@FeedWithGroups.feedGroupsData.remove(name)
+          this@FeedWithGroups.feedGroupsOrderData.removeAt(index)
           return removed!!
         }
 
         override fun set(index: Int, element: FeedGroup): FeedGroup {
-          val name = feedGroupsOrderData.get(index)
-          val old = feedGroupsData[name]
-          feedGroupsData[name] = element
+          val name = this@FeedWithGroups.feedGroupsOrderData.get(index)
+          val old = this@FeedWithGroups.feedGroupsData[name]
+          this@FeedWithGroups.feedGroupsData[name] = element
           return old!!
         }
       }
@@ -279,6 +280,7 @@ sealed class Feed {
      *
      * @param accountId The account that owns the entries in the feed
      * @param feed The feed
+     * @param filter A function that, given a feed entry, yields a `true` value iff the entry should appear in the resulting feed
      * @param search The search document
      * @return A new feed
      */
@@ -286,13 +288,14 @@ sealed class Feed {
     fun fromAcquisitionFeed(
       accountId: AccountID,
       feed: OPDSAcquisitionFeed,
+      filter: (OPDSAcquisitionFeedEntry) -> Boolean,
       search: OPDSOpenSearch1_1?
     ): Feed {
 
       return if (feed.feedGroups.isEmpty()) {
-        withoutGroups(accountId, feed, search)
+        this.withoutGroups(accountId, feed, filter, search)
       } else {
-        withGroups(accountId, feed, search)
+        this.withGroups(accountId, feed, search)
       }
     }
 
@@ -307,13 +310,14 @@ sealed class Feed {
     private fun withoutGroups(
       accountId: AccountID,
       feed: OPDSAcquisitionFeed,
+      filter: (OPDSAcquisitionFeedEntry) -> Boolean,
       search: OPDSOpenSearch1_1?
     ): FeedWithoutGroups {
 
       val facetsByGroup =
-        constructFacetGroups(feed)
+        this.constructFacetGroups(feed)
       val facetsOrder =
-        constructFacetsOrdered(feed)
+        this.constructFacetsOrdered(feed)
       val actualSearch =
         if (search != null) {
           FeedSearchOpen1_1(search)
@@ -324,15 +328,15 @@ sealed class Feed {
       val result =
         FeedWithoutGroups(
           feedID = feed.feedID,
-          feedNext = mapNull(feed.feedNext),
-          feedLicenses = mapNull(feed.feedLicenses),
+          feedNext = this.mapNull(feed.feedNext),
+          feedLicenses = this.mapNull(feed.feedLicenses),
           feedSearch = actualSearch,
           feedTitle = feed.feedTitle,
           feedUpdated = feed.feedUpdated,
           feedURI = feed.feedURI,
-          feedTermsOfService = mapNull(feed.feedTermsOfService),
-          feedPrivacyPolicy = mapNull(feed.feedPrivacyPolicy),
-          feedAbout = mapNull(feed.feedAbout),
+          feedTermsOfService = this.mapNull(feed.feedTermsOfService),
+          feedPrivacyPolicy = this.mapNull(feed.feedPrivacyPolicy),
+          feedAbout = this.mapNull(feed.feedAbout),
           facetsByGroupData = facetsByGroup,
           facetsOrderData = facetsOrder
         )
@@ -340,16 +344,11 @@ sealed class Feed {
       val entries = feed.feedEntries
       for (index in entries.indices) {
         val feedEntry = entries[index]
-        if (!feedEntry.acquisitions.isEmpty()) {
-          var best = feedEntry.acquisitions[0]
-          for (current in feedEntry.acquisitions) {
-            if (priority(current) > priority(best)) {
-              best = current
-            }
-          }
-          if (best != null) {
-            result.entriesInOrder.add(FeedEntry.FeedEntryOPDS(accountId, feedEntry))
-          }
+        if (feedEntry.acquisitions.isEmpty()) {
+          continue
+        }
+        if (filter.invoke(feedEntry)) {
+          result.entriesInOrder.add(FeedEntry.FeedEntryOPDS(accountId, feedEntry))
         }
       }
 
@@ -363,9 +362,9 @@ sealed class Feed {
     ): FeedWithGroups {
 
       val facetsByGroup =
-        constructFacetGroups(feed)
+        this.constructFacetGroups(feed)
       val facetsOrder =
-        constructFacetsOrdered(feed)
+        this.constructFacetsOrdered(feed)
 
       val actualSearch =
         if (search != null) {
@@ -380,14 +379,14 @@ sealed class Feed {
         feedTitle = feed.feedTitle,
         feedUpdated = feed.feedUpdated,
         feedURI = feed.feedURI,
-        feedTermsOfService = mapNull(feed.feedTermsOfService),
-        feedPrivacyPolicy = mapNull(feed.feedPrivacyPolicy),
-        feedAbout = mapNull(feed.feedAbout),
-        feedLicenses = mapNull(feed.feedLicenses),
-        feedNext = mapNull(feed.feedNext),
+        feedTermsOfService = this.mapNull(feed.feedTermsOfService),
+        feedPrivacyPolicy = this.mapNull(feed.feedPrivacyPolicy),
+        feedAbout = this.mapNull(feed.feedAbout),
+        feedLicenses = this.mapNull(feed.feedLicenses),
+        feedNext = this.mapNull(feed.feedNext),
         facetsByGroupData = facetsByGroup,
         facetsOrderData = facetsOrder,
-        feedGroupsData = FeedGroup.fromOPDSGroups(accountId, feed.getFeedGroups()),
+        feedGroupsData = FeedGroup.fromOPDSGroups(accountId, feed.feedGroups),
         feedGroupsOrderData = feed.feedGroupsOrder
       )
     }

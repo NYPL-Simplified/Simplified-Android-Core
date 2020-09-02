@@ -5,7 +5,6 @@ import android.content.Context
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
 import one.irradia.mime.api.MIMEType
 import one.irradia.mime.vanilla.MIMEParser
@@ -42,7 +41,6 @@ import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -56,10 +54,15 @@ import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
 import org.nypl.simplified.books.controller.BookTaskRequiredServices
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
+import org.nypl.simplified.books.formats.BookFormatAudioSupportParameters
+import org.nypl.simplified.books.formats.BookFormatSupport
+import org.nypl.simplified.books.formats.BookFormatSupportParameters
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
@@ -115,9 +118,10 @@ abstract class BookBorrowTaskAdobeDRMContract {
   private lateinit var adeptExecutor: AdobeAdeptExecutorType
   private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookRegistry: BookRegistryType
-  private lateinit var booksDirectory: File
   private lateinit var bookTaskRequiredServices: BookTaskRequiredServices
+  private lateinit var booksDirectory: File
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
   private lateinit var clock: () -> Instant
@@ -171,7 +175,16 @@ abstract class BookBorrowTaskAdobeDRMContract {
     this.bookRegistry = BookRegistry.create()
     this.bundledContent =
       BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
-    this.contentResolver = Mockito.mock(ContentResolver::class.java)
+    this.bookFormatSupport =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = true,
+          supportsAdobeDRM = true,
+          supportsAudioBooks = null
+        )
+      )
+    this.contentResolver =
+      Mockito.mock(ContentResolver::class.java)
     this.downloader =
       DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
@@ -200,6 +213,19 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     Mockito.`when`(this.profilesDatabase.currentProfileUnsafe())
       .thenReturn(this.profile)
+
+    this.bookFormatSupport =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsAdobeDRM = true,
+          supportsPDF = true,
+          supportsAudioBooks = BookFormatAudioSupportParameters(
+            supportsDPLAAudioBooks = false,
+            supportsFindawayAudioBooks = false,
+            supportsOverdriveAudioBooks = false
+          )
+        )
+      )
 
     this.services = MutableServiceDirectory()
     this.services.putService(AdobeAdeptExecutorType::class.java, this.adeptExecutor)
@@ -245,13 +271,13 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
     val entryParser =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
+      OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
       OPDSFeedParser.newParser(entryParser)
     val searchParser =
       OPDSSearchParser.newParser()
     val transport =
-      org.nypl.simplified.feeds.api.FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport.newTransport(this.http)
 
     return FeedLoader.create(
       exec = executorFeeds,
@@ -260,7 +286,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
       transport = transport,
       bookRegistry = this.bookRegistry,
       bundledContent = this.bundledContent,
-      contentResolver = this.contentResolver
+      contentResolver = this.contentResolver,
+      bookFormatSupport = this.bookFormatSupport
     )
   }
 
@@ -364,7 +391,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.none(),
+        mimeOf("application/atom+xml;relation=entry;profile=opds-catalog"),
         listOf(
           OPDSIndirectAcquisition(
             mimeOf("application/vnd.adobe.adept+xml"),
@@ -479,7 +506,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
+        mimeOf("application/vnd.adobe.adept+xml"),
         listOf()
       )
 
@@ -633,7 +660,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
+        mimeOf("application/vnd.adobe.adept+xml"),
         listOf()
       )
 
@@ -752,7 +779,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
+        mimeOf("application/vnd.adobe.adept+xml"),
         listOf()
       )
 
@@ -853,7 +880,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
+        mimeOf("application/vnd.adobe.adept+xml"),
         listOf()
       )
 
@@ -976,7 +1003,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
+        mimeOf("application/vnd.adobe.adept+xml"),
         listOf()
       )
 
@@ -1094,7 +1121,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
       OPDSAcquisition(
         ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/vnd.adobe.adept+xml")),
+        mimeOf("application/vnd.adobe.adept+xml"),
         listOf()
       )
 

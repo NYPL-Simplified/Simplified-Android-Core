@@ -197,7 +197,7 @@ abstract class BookDatabaseEPUBContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some(MIMEParser.parseRaisingException("application/epub+zip")),
+        MIMEParser.parseRaisingException("application/epub+zip"),
         emptyList()))
     return eb.build()
   }

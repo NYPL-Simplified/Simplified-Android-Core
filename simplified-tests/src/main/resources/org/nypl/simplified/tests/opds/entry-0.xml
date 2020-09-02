@@ -37,6 +37,7 @@
   <published>2014-11-14T20:14:29Z</published>
   <link
     href="http://circulation.alpha.librarysimplified.org/works/Overdrive/64647fbc-2dd2-45ba-9080-a5820afd0e9a/borrow"
+    type="application/atom+xml;profile=opds-catalog;kind=acquisition"
     rel="http://opds-spec.org/acquisition/borrow" />
   <link rel="http://librarysimplified.org/terms/rel/revoke"
         href="http://example.com/revoke"/>

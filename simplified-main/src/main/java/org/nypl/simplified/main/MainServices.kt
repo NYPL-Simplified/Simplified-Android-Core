@@ -42,7 +42,6 @@ import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.audio.AudioBookManifests
 import org.nypl.simplified.books.audio.AudioBookOverdriveSecretServiceType
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -56,6 +55,7 @@ import org.nypl.simplified.books.covers.BookCoverGenerator
 import org.nypl.simplified.books.covers.BookCoverGeneratorType
 import org.nypl.simplified.books.covers.BookCoverProvider
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
@@ -443,6 +443,7 @@ internal object MainServices {
     context: Context,
     http: HTTPType,
     opdsFeedParser: OPDSFeedParserType,
+    bookFormatSupport: BookFormatSupportType,
     bookRegistry: BookRegistryType,
     bundledContent: BundledContentResolverType
   ): FeedLoaderType {
@@ -452,7 +453,9 @@ internal object MainServices {
       OPDSSearchParser.newParser()
     val feedTransport =
       FeedHTTPTransport.newTransport(http)
+
     return FeedLoader.create(
+      bookFormatSupport = bookFormatSupport,
       bookRegistry = bookRegistry,
       bundledContent = bundledContent,
       contentResolver = context.contentResolver,
@@ -464,8 +467,7 @@ internal object MainServices {
   }
 
   private fun createFeedParser(): OPDSFeedParserType {
-    return OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-      BookFormats.supportedBookMimeTypes()))
+    return OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
   }
 
   private fun <T : Any> optionalFromServiceLoader(interfaceType: Class<T>): T? {
@@ -697,10 +699,11 @@ internal object MainServices {
     val directories = this.initializeDirectories(context)
 
     val adobeConfiguration = this.findAdobeConfiguration(context.resources)
-    addServiceOptionally(
-      message = strings.bootingAdobeDRM,
-      interfaceType = AdobeAdeptExecutorType::class.java,
-      serviceConstructor = { AdobeDRMServices.newAdobeDRMOrNull(context, adobeConfiguration) })
+    val adobeDRM =
+      addServiceOptionally(
+        message = strings.bootingAdobeDRM,
+        interfaceType = AdobeAdeptExecutorType::class.java,
+        serviceConstructor = { AdobeDRMServices.newAdobeDRMOrNull(context, adobeConfiguration) })
 
     val screenSize =
       addService(
@@ -856,11 +859,37 @@ internal object MainServices {
         }
       )
 
+    val feedbooksSecretService =
+      addServiceOptionally(
+        message = strings.bootingFeedbooksSecretService,
+        interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
+        serviceConstructor = { MainFeedbooksSecretService.createConditionally(context) })
+
+    val overdriveSecretService =
+      addServiceOptionally(
+        message = strings.bootingOverdriveSecretService,
+        interfaceType = AudioBookOverdriveSecretServiceType::class.java,
+        serviceConstructor = { MainOverdriveSecretService.createConditionally(context) })
+
+    val bookFormatService =
+      addService(
+        message = strings.bootingBookFormatSupport,
+        interfaceType = BookFormatSupportType::class.java,
+        serviceConstructor = {
+          MainBookFormatSupport.createBookFormatSupport(
+            adobeDRM = adobeDRM,
+            feedbooksSecretService = feedbooksSecretService,
+            overdriveSecretService = overdriveSecretService
+          )
+        }
+      )
+
     addService(
       message = strings.bootingFeedLoader,
       interfaceType = FeedLoaderType::class.java,
       serviceConstructor = {
         this.createFeedLoader(
+          bookFormatSupport = bookFormatService,
           bookRegistry = bookRegistry,
           bundledContent = bundledContent,
           context = context,
@@ -890,16 +919,6 @@ internal object MainServices {
       message = strings.bootingAudioBookManifestStrategiesService,
       interfaceType = AudioBookManifestStrategiesType::class.java,
       serviceConstructor = { return@addService AudioBookManifests })
-
-    addServiceOptionally(
-      message = strings.bootingFeedbooksSecretService,
-      interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
-      serviceConstructor = { MainFeedbooksSecretService.createConditionally(context) })
-
-    addServiceOptionally(
-      message = strings.bootingOverdriveSecretService,
-      interfaceType = AudioBookOverdriveSecretServiceType::class.java,
-      serviceConstructor = { MainOverdriveSecretService.createConditionally(context) })
 
     val bookController = this.run {
       publishEvent(strings.bootingBookController)

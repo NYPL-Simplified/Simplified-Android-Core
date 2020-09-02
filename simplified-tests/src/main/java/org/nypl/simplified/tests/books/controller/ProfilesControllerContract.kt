@@ -22,13 +22,13 @@ import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
@@ -101,6 +101,7 @@ abstract class ProfilesControllerContract {
   private lateinit var accountEventsReceived: MutableList<AccountEvent>
   private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
+  private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var cacheDirectory: File
   private lateinit var contentResolver: ContentResolver
@@ -145,9 +146,7 @@ abstract class ProfilesControllerContract {
   ): ProfilesControllerType {
 
     val parser =
-      OPDSFeedParser.newParser(
-        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
-      )
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
     val transport =
       FeedHTTPTransport.newTransport(this.http)
     val bundledContent = BundledContentResolverType { uri ->
@@ -156,10 +155,11 @@ abstract class ProfilesControllerContract {
 
     val feedLoader =
       FeedLoader.create(
+        bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
         bundledContent = bundledContent,
-        exec = this.executorFeeds,
         contentResolver = this.contentResolver,
+        exec = this.executorFeeds,
         parser = parser,
         searchParser = OPDSSearchParser.newParser(),
         transport = transport
@@ -268,6 +268,7 @@ abstract class ProfilesControllerContract {
     this.downloader =
       DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.patronUserProfileParsers = Mockito.mock(PatronUserProfileParsersType::class.java)
+    this.bookFormatSupport = Mockito.mock(BookFormatSupportType::class.java)
   }
 
   @After

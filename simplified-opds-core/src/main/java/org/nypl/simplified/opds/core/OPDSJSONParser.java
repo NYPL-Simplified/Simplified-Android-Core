@@ -82,17 +82,13 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
        * book database. Luckily, old book databases can only contain epub files.
        */
 
-      OptionType<MIMEType> type;
+      MIMEType type;
       if (o.has(CONTENT_TYPE_FIELD)) {
-        type = Option.some(
-          MIMEParser.Companion.parseRaisingException(
-            JSONParserUtilities.getString(o, CONTENT_TYPE_FIELD)));
+        type = MIMEParser.Companion.parseRaisingException(
+          JSONParserUtilities.getString(o, CONTENT_TYPE_FIELD)
+        );
       } else {
-        if (indirects.isEmpty()) {
-          type = Option.of(MIMEParser.Companion.parseRaisingException("application/epub+zip"));
-        } else {
-          type = Option.none();
-        }
+        type = MIMEParser.Companion.parseRaisingException("application/epub+zip");
       }
 
       return new OPDSAcquisition(relation, uri, type, indirects);

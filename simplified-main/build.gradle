@@ -25,6 +25,8 @@ dependencies {
   api project(":simplified-books-audio")
   api project(":simplified-books-controller")
   api project(":simplified-books-controller-api")
+  api project(":simplified-books-formats")
+  api project(":simplified-books-formats-api")
   api project(":simplified-boot-api")
   api project(":simplified-buildconfig-api")
   api project(":simplified-cardcreator")

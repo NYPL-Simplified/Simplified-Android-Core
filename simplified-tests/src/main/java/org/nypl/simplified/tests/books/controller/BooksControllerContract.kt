@@ -30,7 +30,6 @@ import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -40,6 +39,7 @@ import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
@@ -108,6 +108,7 @@ abstract class BooksControllerContract {
   private lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
   private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var cacheDirectory: File
   private lateinit var contentResolver: ContentResolver
@@ -167,8 +168,8 @@ abstract class BooksControllerContract {
     patronUserProfileParsers: PatronUserProfileParsersType
   ): BooksControllerType {
 
-    val parser = OPDSFeedParser.newParser(
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()))
+    val parser =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
     val transport =
       FeedHTTPTransport.newTransport(http)
 
@@ -177,13 +178,14 @@ abstract class BooksControllerContract {
 
     val feedLoader =
       FeedLoader.create(
+        bookFormatSupport = this.bookFormatSupport,
+        bookRegistry = books,
+        bundledContent = bundledContent,
+        contentResolver = this.contentResolver,
         exec = feedExecutor,
         parser = parser,
         searchParser = OPDSSearchParser.newParser(),
-        transport = transport,
-        bookRegistry = books,
-        bundledContent = bundledContent,
-        contentResolver = this.contentResolver
+        transport = transport
       )
 
     val services = MutableServiceDirectory()
@@ -246,6 +248,7 @@ abstract class BooksControllerContract {
     this.audioBookManifestStrategies = Mockito.mock(AudioBookManifestStrategiesType::class.java)
     this.credentialsStore = FakeAccountCredentialStorage()
     this.http = MockingHTTP()
+    this.bookFormatSupport = Mockito.mock(BookFormatSupportType::class.java)
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
     this.executorDownloads = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorBooks = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())

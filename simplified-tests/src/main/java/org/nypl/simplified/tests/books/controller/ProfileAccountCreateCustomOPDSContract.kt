@@ -24,13 +24,14 @@ import org.nypl.simplified.accounts.registry.AccountProviderRegistry
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.ProfileAccountCreateCustomOPDSTask
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
@@ -85,6 +86,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   private lateinit var accountProviderResolutionStrings: MockAccountProviderResolutionStrings
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
   private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
@@ -124,6 +126,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
+    this.bookFormatSupport = Mockito.mock(BookFormatSupportType::class.java)
     this.bundledContent = BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
@@ -434,22 +437,23 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
     val entryParser =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
+      OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
       OPDSFeedParser.newParser(entryParser)
     val searchParser =
       OPDSSearchParser.newParser()
     val transport =
-      org.nypl.simplified.feeds.api.FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport.newTransport(this.http)
 
     return FeedLoader.create(
+      bookFormatSupport = this.bookFormatSupport,
+      bookRegistry = this.bookRegistry,
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver,
       exec = executorFeeds,
       parser = parser,
       searchParser = searchParser,
-      transport = transport,
-      bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent,
-      contentResolver = this.contentResolver
+      transport = transport
     )
   }
 

@@ -12,6 +12,7 @@
   <updated>2015-08-17T20:37:53Z</updated>
   <published>2014-08-29T10:46:42Z</published>
   <link href="http://example.com/Holdable"
+        type="application/atom+xml;relation=entry;profile=opds-catalog"
         rel="http://opds-spec.org/acquisition/borrow">
     <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
       <opds:indirectAcquisition type="application/epub+zip"/>

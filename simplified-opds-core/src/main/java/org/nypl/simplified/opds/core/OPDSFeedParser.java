@@ -449,7 +449,13 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final String title = "Entry";
     final OPDSAcquisitionFeedBuilderType b =
       OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
-    b.addEntry(this.entry_parser.parseEntry(uri, e));
+    final OPDSAcquisitionFeedEntry entry =
+      this.entry_parser.parseEntry(uri, e);
+
+    if (!entry.getAcquisitions().isEmpty()) {
+      b.addEntry(entry);
+    }
+
     return b.build();
   }
 
@@ -641,7 +647,10 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
 
         if (OPDSXML.nodeHasName((Element) child, ATOM_URI, "entry")) {
           final Element e = OPDSXML.nodeAsElement(child);
-          builder.addEntry(this.entry_parser.parseEntry(uri, e));
+          final OPDSAcquisitionFeedEntry entry = this.entry_parser.parseEntry(uri, e);
+          if (!entry.getAcquisitions().isEmpty()) {
+            builder.addEntry(entry);
+          }
         }
       }
     }

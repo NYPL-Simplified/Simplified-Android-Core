@@ -37,10 +37,12 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
@@ -89,6 +91,7 @@ abstract class BookRevokeTaskContract {
   protected abstract val logger: Logger
 
   private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
@@ -120,6 +123,7 @@ abstract class BookRevokeTaskContract {
     this.bookRegistry = BookRegistry.create()
     this.bundledContent =
       BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
+    this.bookFormatSupport = Mockito.mock(BookFormatSupportType::class.java)
     this.contentResolver = Mockito.mock(ContentResolver::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
@@ -141,22 +145,23 @@ abstract class BookRevokeTaskContract {
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
     val entryParser =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
+      OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
       OPDSFeedParser.newParser(entryParser)
     val searchParser =
       OPDSSearchParser.newParser()
     val transport =
-      org.nypl.simplified.feeds.api.FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport.newTransport(this.http)
 
     return FeedLoader.create(
+      bookFormatSupport = this.bookFormatSupport,
+      bookRegistry = this.bookRegistry,
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver,
       exec = executorFeeds,
       parser = parser,
       searchParser = searchParser,
-      transport = transport,
-      bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent,
-      contentResolver = this.contentResolver
+      transport = transport
     )
   }
 
@@ -179,7 +184,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -254,7 +259,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -381,7 +386,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -487,7 +492,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -589,7 +594,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -694,7 +699,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -775,7 +780,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -882,7 +887,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -989,7 +994,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1095,7 +1100,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1177,7 +1182,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1279,7 +1284,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1384,7 +1389,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1482,7 +1487,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1575,7 +1580,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1670,7 +1675,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1742,7 +1747,12 @@ abstract class BookRevokeTaskContract {
     val rawFeed =
       feedBuilder.build()
     val feed =
-      Feed.fromAcquisitionFeed(account.id, rawFeed, null) as Feed.FeedWithGroups
+      Feed.fromAcquisitionFeed(
+        accountId = account.id,
+        feed = rawFeed,
+        filter = { true },
+        search = null
+      ) as Feed.FeedWithGroups
 
     val feedResult =
       FeedLoaderResult.FeedLoaderSuccess(feed)
@@ -1797,7 +1807,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1892,7 +1902,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/epub+zip")),
+        this.mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1997,7 +2007,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/audiobook+json")),
+        this.mimeOf("application/audiobook+json"),
         listOf()
       )
 
@@ -2111,7 +2121,7 @@ abstract class BookRevokeTaskContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(this.mimeOf("application/pdf")),
+        this.mimeOf("application/pdf"),
         listOf()
       )
 

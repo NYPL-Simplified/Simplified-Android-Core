@@ -49,6 +49,7 @@
     <simplified:active_holds>0</simplified:active_holds>
     <link
       href="http://circulation.alpha.librarysimplified.org/works/Overdrive/64647fbc-2dd2-45ba-9080-a5820afd0e9a/borrow"
+      type="application/atom+xml;relation=entry;profile=opds-catalog"
       rel="http://opds-spec.org/acquisition/borrow" />
   </entry>
 </feed>

@@ -670,7 +670,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some(mimeOf("application/pdf")),
+        mimeOf("application/pdf"),
         emptyList()))
     return eb.build()
   }
@@ -686,7 +686,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some(mimeOf("application/audiobook+json")),
+        mimeOf("application/audiobook+json"),
         emptyList()))
     return eb.build()
   }
@@ -703,7 +703,7 @@ abstract class BookDatabaseContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         emptyList()))
     return eb.build()
   }

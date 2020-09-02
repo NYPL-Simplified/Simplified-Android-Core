@@ -1,7 +1,5 @@
 package org.nypl.simplified.opds.core
 
-import com.google.common.base.Preconditions
-import com.io7m.jfunctional.OptionType
 import one.irradia.mime.api.MIMEType
 import java.io.Serializable
 import java.net.URI
@@ -30,7 +28,7 @@ data class OPDSAcquisition(
    * The MIME type of immediately retrievable content, if any.
    */
 
-  val type: OptionType<MIMEType>,
+  val type: MIMEType,
 
   /**
    * The set of indirect acquisitions
@@ -39,23 +37,17 @@ data class OPDSAcquisition(
   val indirectAcquisitions: List<OPDSIndirectAcquisition>
 ) : Serializable {
 
-  init {
-    if (this.type.isNone) {
-      Preconditions.checkArgument(
-        !this.indirectAcquisitions.isEmpty(),
-        "If no acquisition type is provided, a set of indirect acquisitions must be provided")
-    }
-  }
-
   /**
    * @return The set of final content types. That is, the set of content types that are accessible
-   * if all (possibly indirect) acquisitions are followed to their conclusions
+   * if all acquisition paths are followed to their conclusions
    */
 
   fun availableFinalContentTypes(): Set<MIMEType> {
     val set = mutableSetOf<MIMEType>()
-    this.type.map { t -> set.add(t) }
-    set.addAll(OPDSIndirectAcquisition.availableFinalContentTypesIn(this.indirectAcquisitions))
+    val paths = OPDSAcquisitionPaths.linearize(this)
+    for (path in paths) {
+      set.add(path.elements.last().mimeType)
+    }
     return set
   }
 

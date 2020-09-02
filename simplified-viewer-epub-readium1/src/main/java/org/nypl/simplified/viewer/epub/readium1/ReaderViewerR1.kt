@@ -1,6 +1,7 @@
 package org.nypl.simplified.viewer.epub.readium1
 
 import android.app.Activity
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -41,6 +42,10 @@ class ReaderViewerR1 : ViewerProviderType {
         }
       }
     }
+  }
+
+  override fun canPotentiallySupportType(type: MIMEType): Boolean {
+    return type.fullType == "application/epub+zip"
   }
 
   override fun open(

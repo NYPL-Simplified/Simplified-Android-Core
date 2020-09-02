@@ -52,8 +52,10 @@ import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRME
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NoCredentialsAvailable
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
@@ -93,23 +95,24 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
   protected abstract val logger: Logger
 
-  private lateinit var contentResolver: ContentResolver
-  private lateinit var adobeExecutor: AdobeAdeptExecutorType
   private lateinit var adobeConnector: AdobeAdeptConnectorType
-  private lateinit var executorFeeds: ListeningExecutorService
-  private lateinit var executorDownloads: ListeningExecutorService
-  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var adobeExecutor: AdobeAdeptExecutorType
+  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var bookFormatSupport: BookFormatSupportType
+  private lateinit var bookRegistry: BookRegistryType
+  private lateinit var bundledContent: BundledContentResolverType
+  private lateinit var cacheDirectory: File
+  private lateinit var clock: () -> Instant
+  private lateinit var contentResolver: ContentResolver
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
-  private lateinit var http: MockingHTTP
   private lateinit var downloader: DownloaderType
-  private lateinit var bookRegistry: BookRegistryType
-  private lateinit var bookEvents: MutableList<BookEvent>
+  private lateinit var executorBooks: ListeningExecutorService
+  private lateinit var executorDownloads: ListeningExecutorService
+  private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
-  private lateinit var bundledContent: BundledContentResolverType
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var clock: () -> Instant
-  private lateinit var cacheDirectory: File
+  private lateinit var http: MockingHTTP
 
   private val bookRevokeStrings = MockRevokeStringResources()
 
@@ -127,6 +130,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
+    this.bookFormatSupport = Mockito.mock(BookFormatSupportType::class.java)
     this.bundledContent =
       BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.contentResolver = Mockito.mock(ContentResolver::class.java)
@@ -150,22 +154,23 @@ abstract class BookRevokeTaskAdobeDRMContract {
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
     val entryParser =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
+      OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
       OPDSFeedParser.newParser(entryParser)
     val searchParser =
       OPDSSearchParser.newParser()
     val transport =
-      org.nypl.simplified.feeds.api.FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport.newTransport(this.http)
 
     return FeedLoader.create(
+      bookFormatSupport = this.bookFormatSupport,
+      bookRegistry = this.bookRegistry,
+      bundledContent = this.bundledContent,
+      contentResolver = this.contentResolver,
       exec = executorFeeds,
       parser = parser,
       searchParser = searchParser,
-      transport = transport,
-      bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent,
-      contentResolver = this.contentResolver
+      transport = transport
     )
   }
 
@@ -208,7 +213,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -306,7 +311,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -405,7 +410,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -546,7 +551,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -683,7 +688,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -819,7 +824,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -966,7 +971,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1084,7 +1089,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 
@@ -1188,7 +1193,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(mimeOf("application/epub+zip")),
+        mimeOf("application/epub+zip"),
         listOf()
       )
 

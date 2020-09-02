@@ -8,13 +8,15 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.feeds.api.FeedLoaderResult
+import org.nypl.simplified.feeds.api.FeedLoaderType
 import java.net.URI
 import java.util.UUID
 import java.util.concurrent.Executors
 
 abstract class FeedLoaderContract {
 
-  abstract fun createFeedLoader(exec: ListeningExecutorService): org.nypl.simplified.feeds.api.FeedLoaderType
+  abstract fun createFeedLoader(exec: ListeningExecutorService): FeedLoaderType
 
   abstract fun resource(name: String): URI
 
@@ -47,8 +49,30 @@ abstract class FeedLoaderContract {
     val result =
       future.get()
 
-    Assert.assertTrue(result is org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess)
-    val feed = (result as org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess).feed
+    Assert.assertTrue(result is FeedLoaderResult.FeedLoaderSuccess)
+    val feed = (result as FeedLoaderResult.FeedLoaderSuccess).feed
+    Assert.assertEquals(0, feed.size)
+  }
+
+  /**
+   * An entry with no usable acquisitions should not appear in a feed at all.
+   */
+
+  @Test
+  fun testFeedWithOnlyBuyAcquisitions() {
+    val loader =
+      this.createFeedLoader(this.exec)
+    val future =
+      loader.fetchURI(
+        AccountID(UUID.randomUUID()),
+        resource("feed-only-buy-acquisitions.xml"),
+        Option.none()
+      )
+    val result =
+      future.get()
+
+    Assert.assertTrue(result is FeedLoaderResult.FeedLoaderSuccess)
+    val feed = (result as FeedLoaderResult.FeedLoaderSuccess).feed
     Assert.assertEquals(0, feed.size)
   }
 }

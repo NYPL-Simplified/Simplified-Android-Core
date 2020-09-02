@@ -3,6 +3,7 @@ package org.nypl.simplified.tests.opds;
 import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.books.book_database.api.BookFormats;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
@@ -39,7 +40,7 @@ public abstract class OPDSJSONSerializerContract {
   public void testRoundTrip0()
     throws Exception {
     final OPDSAcquisitionFeedEntryParserType p =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.INSTANCE.supportedBookMimeTypes());
+      OPDSAcquisitionFeedEntryParser.newParser();
 
     final OPDSJSONParserType jp = OPDSJSONParser.newParser();
 
@@ -57,7 +58,19 @@ public abstract class OPDSJSONSerializerContract {
       jp.parseAcquisitionFeedEntryFromStream(rs1);
 
     {
-      Assert.assertEquals(e0.getAcquisitions(), e1.getAcquisitions());
+      final List<OPDSAcquisition> e0a = e0.getAcquisitions();
+      final List<OPDSAcquisition> e1a = e1.getAcquisitions();
+      Assert.assertEquals(e0a.size(), e1a.size());
+
+      for (int index = 0; index < e0a.size(); ++index) {
+        final OPDSAcquisition a0 = e0a.get(index);
+        final OPDSAcquisition a1 = e1a.get(index);
+        Assert.assertEquals(a0.getRelation(), a1.getRelation());
+        Assert.assertEquals(a0.getType().getFullType(), a1.getType().getFullType());
+        Assert.assertEquals(a0.getUri(), a1.getUri());
+        Assert.assertEquals(a0.getIndirectAcquisitions(), a1.getIndirectAcquisitions());
+      }
+
       Assert.assertEquals(e0.getAvailability(), e1.getAvailability());
       Assert.assertEquals(e0.getAuthors(), e1.getAuthors());
       Assert.assertEquals(e0.getCategories(), e1.getCategories());
@@ -69,9 +82,7 @@ public abstract class OPDSJSONSerializerContract {
       Assert.assertEquals(e0.getSummary(), e1.getSummary());
       Assert.assertEquals(e0.getThumbnail(), e1.getThumbnail());
       Assert.assertEquals(e0.getTitle(), e1.getTitle());
-      // Forget comparing instances of Calendar, no implementation gets this
-      // right
-      // Assert.assertEquals(e0.getUpdated(), e1.getUpdated());
+      Assert.assertEquals(e0.getUpdated(), e1.getUpdated());
     }
   }
 
@@ -79,7 +90,7 @@ public abstract class OPDSJSONSerializerContract {
   public void testRoundTrip1()
     throws Exception {
     final OPDSAcquisitionFeedEntryParserType ep =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.INSTANCE.supportedBookMimeTypes());
+      OPDSAcquisitionFeedEntryParser.newParser();
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(ep);
     final OPDSJSONParserType jp = OPDSJSONParser.newParser();

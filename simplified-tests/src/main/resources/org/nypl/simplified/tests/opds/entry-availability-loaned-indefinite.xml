@@ -14,6 +14,7 @@
 
   <link
       href="https://example.com/borrow"
+      type="application/atom+xml;relation=entry;profile=opds-catalog"
       rel="http://opds-spec.org/acquisition">
     <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
       <opds:indirectAcquisition type="application/epub+zip"/>

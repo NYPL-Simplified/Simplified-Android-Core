@@ -4,9 +4,12 @@ import android.content.ContentResolver
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.OptionType
 import org.mockito.Mockito
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.books.formats.BookFormatSupport
+import org.nypl.simplified.books.formats.BookFormatSupportParameters
 import org.nypl.simplified.feeds.api.FeedLoader
+import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -18,10 +21,12 @@ import java.net.URI
 
 class FeedLoaderTest : FeedLoaderContract() {
 
-  override fun createFeedLoader(exec: ListeningExecutorService): org.nypl.simplified.feeds.api.FeedLoaderType {
+  override fun createFeedLoader(
+    exec: ListeningExecutorService
+  ): FeedLoaderType {
 
     val entryParser =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
+      OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
       OPDSFeedParser.newParser(entryParser)
     val transport = OPDSFeedTransportType<OptionType<HTTPAuthType>> { context, uri, method ->
@@ -30,19 +35,29 @@ class FeedLoaderTest : FeedLoaderContract() {
 
     val searchParser = OPDSSearchParser.newParser()
     val bookRegistry = BookRegistry.create()
-    val bundledContent = org.nypl.simplified.books.bundled.api.BundledContentResolverType { uri ->
+    val bundledContent = BundledContentResolverType { uri ->
       throw FileNotFoundException(uri.toASCIIString())
     }
 
-    val contentResolver = Mockito.mock(ContentResolver::class.java)
+    val bookFormatSupport =
+      BookFormatSupport.create(BookFormatSupportParameters(
+        supportsPDF = false,
+        supportsAdobeDRM = false,
+        supportsAudioBooks = null
+      ))
+
+    val contentResolver =
+      Mockito.mock(ContentResolver::class.java)
+
     return FeedLoader.create(
+      bookFormatSupport = bookFormatSupport,
+      bookRegistry = bookRegistry,
+      bundledContent = bundledContent,
       contentResolver = contentResolver,
       exec = exec,
       parser = parser,
       searchParser = searchParser,
-      transport = transport,
-      bookRegistry = bookRegistry,
-      bundledContent = bundledContent
+      transport = transport
     )
   }
 

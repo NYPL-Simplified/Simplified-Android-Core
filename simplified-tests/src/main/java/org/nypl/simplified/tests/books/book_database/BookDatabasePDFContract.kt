@@ -78,7 +78,7 @@ abstract class BookDatabasePDFContract {
                 OPDSAcquisition(
                         ACQUISITION_BORROW,
                         URI.create("http://example.com"),
-                        Option.some(MIMEParser.parseRaisingException("application/pdf")),
+                        MIMEParser.parseRaisingException("application/pdf"),
                         emptyList()
                 )
         )

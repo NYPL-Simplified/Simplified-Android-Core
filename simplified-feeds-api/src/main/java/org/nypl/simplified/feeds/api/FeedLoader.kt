@@ -13,12 +13,23 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
 import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.http.core.HTTPAuthType
+import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_GENERIC
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
+import org.nypl.simplified.opds.core.OPDSAcquisitionPaths
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSFeedTransportType
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
@@ -39,14 +50,15 @@ import java.util.concurrent.TimeUnit
  */
 
 class FeedLoader private constructor(
+  private val bookFormatSupport: BookFormatSupportType,
+  private val bookRegistry: BookRegistryReadableType,
+  private val bundledContent: BundledContentResolverType,
   private val cache: ExpiringMap<URI, Feed>,
   private val contentResolver: ContentResolver,
   private val exec: ListeningExecutorService,
   private val parser: OPDSFeedParserType,
   private val searchParser: OPDSSearchParserType,
-  private val transport: OPDSFeedTransportType<OptionType<HTTPAuthType>>,
-  private val bookRegistry: BookRegistryReadableType,
-  private val bundledContent: BundledContentResolverType
+  private val transport: OPDSFeedTransportType<OptionType<HTTPAuthType>>
 ) : FeedLoaderType, ExpirationListener<URI, Feed> {
 
   init {
@@ -127,6 +139,31 @@ class FeedLoader private constructor(
     this.log.debug("expired feed: {}", key)
   }
 
+  private fun isEntrySupported(
+    entry: OPDSAcquisitionFeedEntry
+  ): Boolean {
+    val linearizedPaths = OPDSAcquisitionPaths.linearize(entry)
+    for (path in linearizedPaths) {
+      if (this.isRelationSupported(path.source.relation) && this.isTypePathSupported(path)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  private fun isRelationSupported(relation: OPDSAcquisition.Relation): Boolean =
+    when (relation) {
+      ACQUISITION_BORROW -> true
+      ACQUISITION_BUY -> false
+      ACQUISITION_GENERIC -> true
+      ACQUISITION_OPEN_ACCESS -> true
+      ACQUISITION_SAMPLE -> false
+      ACQUISITION_SUBSCRIBE -> false
+    }
+
+  private fun isTypePathSupported(path: OPDSAcquisitionPath) =
+    this.bookFormatSupport.isSupportedPath(path.asMIMETypes())
+
   private fun fetchSynchronously(
     accountId: AccountID,
     uri: URI,
@@ -164,7 +201,12 @@ class FeedLoader private constructor(
       val search =
         this.fetchSearchLink(opdsFeed, auth, method)
       val feed =
-        Feed.fromAcquisitionFeed(accountId, opdsFeed, search)
+        Feed.fromAcquisitionFeed(
+          accountId = accountId,
+          feed = opdsFeed,
+          filter = this::isEntrySupported,
+          search = search
+        )
 
       /*
        * Replace entries in the feed with those from the book registry, if requested.
@@ -214,7 +256,8 @@ class FeedLoader private constructor(
         FeedLoaderSuccess(Feed.fromAcquisitionFeed(
           accountId = accountId,
           feed = this.parser.parse(uri, stream),
-          search = null
+          search = null,
+          filter = this::isEntrySupported
         ))
       }
     } else {
@@ -252,7 +295,12 @@ class FeedLoader private constructor(
     uri: URI
   ): FeedLoaderSuccess {
     return this.bundledContent.resolve(uri).use { stream ->
-      FeedLoaderSuccess(Feed.fromAcquisitionFeed(accountId, this.parser.parse(uri, stream), null))
+      FeedLoaderSuccess(Feed.fromAcquisitionFeed(
+        accountId = accountId,
+        feed = this.parser.parse(uri, stream),
+        filter = this::isEntrySupported,
+        search = null
+      ))
     }
   }
 
@@ -319,6 +367,7 @@ class FeedLoader private constructor(
      */
 
     fun create(
+      bookFormatSupport: BookFormatSupportType,
       contentResolver: ContentResolver,
       exec: ListeningExecutorService,
       parser: OPDSFeedParserType,
@@ -335,14 +384,15 @@ class FeedLoader private constructor(
           .build<URI, Feed>()
 
       return FeedLoader(
+        bookFormatSupport = bookFormatSupport,
+        bookRegistry = bookRegistry,
+        bundledContent = bundledContent,
         cache = cache,
         contentResolver = contentResolver,
         exec = exec,
         parser = parser,
         searchParser = searchParser,
-        transport = transport,
-        bookRegistry = bookRegistry,
-        bundledContent = bundledContent
+        transport = transport
       )
     }
   }
