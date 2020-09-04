@@ -10,17 +10,16 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
+import org.nypl.simplified.accounts.api.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
@@ -36,11 +35,11 @@ import org.nypl.simplified.tests.MockBooksController
 import org.nypl.simplified.tests.MockDocumentStore
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.ui.accounts.AccountFragment
+import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.images.ImageLoader
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import java.io.IOException
@@ -207,7 +206,14 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
     val recorder =
       TaskRecorder.create<AccountLoginErrorData>()
     recorder.beginNewStep("Started")
-    recorder.currentStepFailed("Failed", AccountLoginConnectionFailure("Failed!"), IOException())
+    recorder.currentStepFailed(
+      message = "Failed",
+      errorValue = AccountLoginErrorData(
+        message = "Failed!",
+        errorCode = "failed"
+      ),
+      exception = IOException()
+    )
     return AccountLoginFailed(recorder.finishFailure<String>())
   }
 
@@ -216,9 +222,12 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
       TaskRecorder.create<AccountLogoutErrorData>()
     recorder.beginNewStep("Started")
     recorder.currentStepFailed(
-      "Failed",
-      AccountLogoutErrorData.AccountLogoutUnexpectedException(IOException()),
-      IOException()
+      message = "Failed",
+      errorValue = AccountLogoutErrorData(
+        message = "Failed!",
+        errorCode = "failed"
+      ),
+      exception = IOException()
     )
     return AccountLogoutFailed(recorder.finishFailure<String>(), this.credentials)
   }

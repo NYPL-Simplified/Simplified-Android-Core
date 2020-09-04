@@ -5,7 +5,7 @@ import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
+import org.nypl.simplified.accounts.api.AccountLoginErrorData
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import java.net.URI

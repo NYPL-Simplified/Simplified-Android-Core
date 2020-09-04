@@ -10,17 +10,16 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
+import org.nypl.simplified.accounts.api.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
@@ -202,21 +201,23 @@ class SettingsAccountsActivity : AppCompatActivity(), ServiceDirectoryProviderTy
   }
 
   private fun loginFailed(): AccountLoginState {
-    val recorder =
-      TaskRecorder.create<AccountLoginErrorData>()
+    val recorder = TaskRecorder.create<AccountLoginErrorData>()
     recorder.beginNewStep("Started")
-    recorder.currentStepFailed("Failed", AccountLoginConnectionFailure("Failed!"), IOException())
+    recorder.currentStepFailed(
+      message = "Failed",
+      errorValue = AccountLoginErrorData(message = "Login failed!", errorCode = "loginFailed"),
+      exception = IOException()
+    )
     return AccountLoginFailed(recorder.finishFailure<String>())
   }
 
   private fun logoutFailed(): AccountLoginState {
-    val recorder =
-      TaskRecorder.create<AccountLogoutErrorData>()
+    val recorder = TaskRecorder.create<AccountLogoutErrorData>()
     recorder.beginNewStep("Started")
     recorder.currentStepFailed(
-      "Failed",
-      AccountLogoutErrorData.AccountLogoutUnexpectedException(IOException()),
-      IOException()
+      message = "Failed",
+      errorValue = AccountLogoutErrorData(message = "Logout failed!", errorCode = "logoutFailed"),
+      exception = IOException()
     )
     return AccountLogoutFailed(recorder.finishFailure<String>(), this.credentials)
   }

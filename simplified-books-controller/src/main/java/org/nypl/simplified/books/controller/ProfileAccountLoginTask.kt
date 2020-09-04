@@ -11,20 +11,11 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthentic
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMTooManyActivations
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginMissingInformation
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
@@ -33,6 +24,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
+import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOKType
@@ -107,6 +99,49 @@ class ProfileAccountLoginTask(
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
+  private fun errorDetailsFor(
+    message: String,
+    errorCode: String,
+    exception: Throwable? = null,
+    attributes: Map<String, String> = mapOf(),
+    problemReport: HTTPProblemReport? = null
+  ): AccountLoginErrorData {
+    return AccountLoginErrorData(
+      attributes = attributes,
+      errorCode = errorCode,
+      exception = exception,
+      message = message,
+      problemReport = problemReport
+    )
+  }
+
+  private fun errorDetailsForUnexpectedException(
+    exception: Throwable,
+    attributes: Map<String, String> = mapOf()
+  ): AccountLoginErrorData {
+    return this.errorDetailsFor(
+      attributes = attributes,
+      errorCode = "unexpectedException",
+      exception = exception,
+      message = exception.message ?: exception.javaClass.name
+    )
+  }
+
+  private fun errorDetailsForDRM(
+    message: String,
+    drmSystem: String,
+    errorCode: String,
+    exception: Throwable,
+    attributes: Map<String, String> = mapOf()
+  ): AccountLoginErrorData {
+    return this.errorDetailsFor(
+      attributes = attributes,
+      errorCode = "$drmSystem: $errorCode",
+      exception = exception,
+      message = message
+    )
+  }
+
   private fun run(): TaskResult<AccountLoginErrorData, Unit> {
     return try {
       if (!this.updateLoggingInState(
@@ -118,7 +153,7 @@ class ProfileAccountLoginTask(
 
       if (!this.validateRequest()) {
         this.debug("account does not support the given authentication")
-        val details = AccountLoginNotRequired(this.loginStrings.loginAuthNotRequired)
+        val details = errorDetailsFor(this.loginStrings.loginAuthNotRequired, "unsupported")
         this.steps.currentStepFailed(details.message, details)
         this.account.setLoginState(AccountLoginFailed(this.steps.finishFailure<Unit>()))
         return this.steps.finishFailure()
@@ -141,7 +176,7 @@ class ProfileAccountLoginTask(
 
       this.steps.currentStepFailedAppending(
         message = this.loginStrings.loginUnexpectedException,
-        errorValue = AccountLoginUnexpectedException(this.loginStrings.loginUnexpectedException, e),
+        errorValue = this.errorDetailsForUnexpectedException(e),
         exception = e
       )
 
@@ -342,21 +377,36 @@ class ProfileAccountLoginTask(
       is AdobeDRMExtensions.AdobeDRMLoginNoActivationsException -> {
         this.steps.currentStepFailed(
           text,
-          AccountLoginDRMTooManyActivations(text),
+          this.errorDetailsForDRM(
+            message = text,
+            drmSystem = "Adobe ACS",
+            errorCode = "drmNoAvailableActivations",
+            exception = ex
+          ),
           ex
         )
       }
       is AdobeDRMExtensions.AdobeDRMLoginConnectorException -> {
         this.steps.currentStepFailed(
           text,
-          AccountLoginDRMFailure(text, ex.errorCode),
+          this.errorDetailsForDRM(
+            message = text,
+            drmSystem = "Adobe ACS",
+            errorCode = ex.errorCode,
+            exception = ex
+          ),
           ex
         )
       }
       else -> {
         this.steps.currentStepFailed(
           text,
-          AccountLoginUnexpectedException(text, ex),
+          this.errorDetailsForDRM(
+            message = text,
+            drmSystem = "Adobe ACS",
+            errorCode = "drmUnspecifiedError",
+            exception = ex
+          ),
           ex
         )
       }
@@ -425,9 +475,10 @@ class ProfileAccountLoginTask(
 
     val patronSettingsURI = this.account.provider.patronSettingsURI
     if (patronSettingsURI == null) {
+      val message = this.loginStrings.loginPatronSettingsRequestNoURI
       this.steps.currentStepFailed(
-        this.loginStrings.loginPatronSettingsRequestNoURI,
-        AccountLoginMissingInformation(this.loginStrings.loginPatronSettingsRequestNoURI)
+        message,
+        this.errorDetailsFor(message, "noPatronURI")
       )
       throw Exception()
     }
@@ -475,11 +526,7 @@ class ProfileAccountLoginTask(
             )
           this.steps.currentStepFailed(
             message = message,
-            errorValue = AccountLoginServerParseError(
-              message = message,
-              warnings = parseResult.warnings,
-              errors = parseResult.errors
-            )
+            errorValue = this.errorDetailsFor(message, "parseErrorPatronSettings")
           )
           throw Exception()
         }
@@ -542,7 +589,7 @@ class ProfileAccountLoginTask(
     val message = this.loginStrings.loginPatronSettingsConnectionFailed
     this.steps.currentStepFailed(
       message = message,
-      errorValue = AccountLoginConnectionFailure(message),
+      errorValue = this.errorDetailsFor(message, "connectionFailed"),
       exception = result.error
     )
     throw result.error
@@ -559,7 +606,7 @@ class ProfileAccountLoginTask(
         val message = this.loginStrings.loginPatronSettingsInvalidCredentials
         this.steps.currentStepFailed(
           message = message,
-          errorValue = AccountLoginCredentialsIncorrect(message)
+          errorValue = this.errorDetailsFor(message, "invalidCredentials")
         )
         throw Exception()
       }
@@ -567,11 +614,9 @@ class ProfileAccountLoginTask(
         val message = this.loginStrings.loginServerError(result.status, result.message)
         this.steps.currentStepFailed(
           message = message,
-          errorValue = AccountLoginServerError(
+          errorValue = this.errorDetailsFor(
             message = message,
-            uri = patronSettingsURI,
-            statusCode = result.status,
-            errorMessage = result.message,
+            errorCode = "httpError ${result.status} $patronSettingsURI",
             problemReport = this.someOrNull(result.problemReport)
           )
         )

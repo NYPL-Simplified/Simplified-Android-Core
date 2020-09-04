@@ -21,12 +21,6 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
@@ -164,10 +158,8 @@ abstract class ProfileAccountLoginTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    val state =
-      this.account.loginState as AccountLoginFailed
-
-    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginNotRequired)
+    val state = this.account.loginState as AccountLoginFailed
+    Assert.assertEquals("unsupported", state.taskResult.errors().last().errorCode)
   }
 
   /**
@@ -247,10 +239,8 @@ abstract class ProfileAccountLoginTaskContract {
     val result = task.call()
     TaskDumps.dump(logger, result)
 
-    val state =
-      this.account.loginState as AccountLoginFailed
-
-    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginCredentialsIncorrect)
+    val state = this.account.loginState as AccountLoginFailed
+    Assert.assertEquals("invalidCredentials", state.taskResult.errors().last().errorCode)
   }
 
   /**
@@ -330,18 +320,8 @@ abstract class ProfileAccountLoginTaskContract {
     val result = task.call()
     TaskDumps.dump(logger, result)
 
-    val state =
-      this.account.loginState as AccountLoginFailed
-
-    Assert.assertEquals(
-      AccountLoginServerError(
-        "loginServerError 404 NOT FOUND",
-        URI.create("urn:patron"),
-        404,
-        "NOT FOUND",
-        null
-      ), state.taskResult.errors().last()
-    )
+    val state = this.account.loginState as AccountLoginFailed
+    Assert.assertEquals("httpError 404 urn:patron", state.taskResult.errors().last().errorCode)
   }
 
   /**
@@ -416,10 +396,8 @@ abstract class ProfileAccountLoginTaskContract {
     val result = task.call()
     TaskDumps.dump(logger, result)
 
-    val state =
-      this.account.loginState as AccountLoginFailed
-
-    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginConnectionFailure)
+    val state = this.account.loginState as AccountLoginFailed
+    Assert.assertEquals("connectionFailed", state.taskResult.errors().last().errorCode)
   }
 
   /**
@@ -599,16 +577,9 @@ abstract class ProfileAccountLoginTaskContract {
     val result = task.call()
     TaskDumps.dump(logger, result)
 
-    val state =
-      this.account.loginState as AccountLoginFailed
-
-    val expected = AccountLoginServerParseError(
-      "loginPatronSettingsRequestParseFailed",
-      parseWarnings,
-      parseErrors
-    )
+    val state = this.account.loginState as AccountLoginFailed
     val received = state.taskResult.errors().last()
-    Assert.assertEquals(expected, received)
+    Assert.assertEquals("parseErrorPatronSettings", received.errorCode)
   }
 
   /**
@@ -1285,8 +1256,8 @@ abstract class ProfileAccountLoginTaskContract {
       this.account.loginState as AccountLoginFailed
 
     Assert.assertEquals(
-      AccountLoginDRMFailure("loginDeviceActivationFailed", "E_FAIL_OFTEN_AND_LOUDLY"),
-      state.taskResult.errors().last()
+      "Adobe ACS: E_FAIL_OFTEN_AND_LOUDLY",
+      state.taskResult.errors().last().errorCode
     )
   }
 
@@ -1357,10 +1328,8 @@ abstract class ProfileAccountLoginTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    val state =
-      this.account.loginState as AccountLoginFailed
-
-    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginNotRequired)
+    val state = this.account.loginState as AccountLoginFailed
+    Assert.assertEquals("unsupported", state.taskResult.errors().last().errorCode)
   }
 
   /**
@@ -1428,10 +1397,8 @@ abstract class ProfileAccountLoginTaskContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    val state =
-      this.account.loginState as AccountLoginFailed
-
-    Assert.assertTrue(state.taskResult.errors().last() is AccountLoginNotRequired)
+    val state = this.account.loginState as AccountLoginFailed
+    Assert.assertEquals("unsupported", state.taskResult.errors().last().errorCode)
   }
 
   /**

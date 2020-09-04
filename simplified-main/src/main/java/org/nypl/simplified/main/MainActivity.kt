@@ -19,8 +19,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginMissingInformation
+import org.nypl.simplified.accounts.api.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -159,20 +158,29 @@ class MainActivity :
             }
             is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
               val message = "Can't use OAuth authentication during migrations."
-              taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+              taskRecorder.currentStepFailed(message, AccountLoginErrorData(
+                message = message,
+                errorCode = "missingInformation"
+              ))
               return taskRecorder.finishFailure()
             }
           }
         }
         is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
           val message = "Can't use OAuth authentication during migrations."
-          taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+          taskRecorder.currentStepFailed(message, AccountLoginErrorData(
+            message = message,
+            errorCode = "missingInformation"
+          ))
           return taskRecorder.finishFailure()
         }
       }
     } else {
       val message = "Can't determine which authentication method is required."
-      taskRecorder.currentStepFailed(message, AccountLoginMissingInformation(message))
+      taskRecorder.currentStepFailed(message, AccountLoginErrorData(
+        message = message,
+        errorCode = "missingInformation"
+      ))
       return taskRecorder.finishFailure()
     }
   }

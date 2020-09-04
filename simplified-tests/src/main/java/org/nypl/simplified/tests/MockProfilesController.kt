@@ -10,7 +10,8 @@ import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountLoginErrorData
+import org.nypl.simplified.accounts.api.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
@@ -103,7 +104,7 @@ class MockProfilesController(
 
   override fun profileAccountLogin(
     request: ProfileAccountLoginRequest
-  ): FluentFuture<TaskResult<AccountLoginState.AccountLoginErrorData, Unit>> {
+  ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>> {
     this.profileAccountLogins.add(request)
     return FluentFuture.from(SettableFuture.create())
   }
@@ -138,7 +139,7 @@ class MockProfilesController(
 
   val profileAccountLogouts = mutableListOf<AccountID>()
 
-  override fun profileAccountLogout(account: AccountID): FluentFuture<TaskResult<AccountLoginState.AccountLogoutErrorData, Unit>> {
+  override fun profileAccountLogout(account: AccountID): FluentFuture<TaskResult<AccountLogoutErrorData, Unit>> {
     this.profileAccountLogouts.add(account)
     return FluentFuture.from(SettableFuture.create())
   }
