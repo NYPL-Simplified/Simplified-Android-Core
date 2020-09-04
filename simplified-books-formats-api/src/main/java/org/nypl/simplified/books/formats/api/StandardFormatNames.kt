@@ -77,4 +77,38 @@ object StandardFormatNames {
 
   val genericPDFFiles =
     this.mimeOf("application/pdf")
+
+  /**
+   * The MIME type used for OPDS feeds.
+   */
+
+  val opdsFeed =
+    this.mimeOf("application/atom+xml")
+
+  /**
+   * The MIME type used for OPDS feeds.
+   */
+
+  val opdsFeedCatalog =
+    this.mimeOf("application/atom+xml;profile=opds-catalog")
+
+  /**
+   * The MIME type used for OPDS feed entries.
+   */
+
+  val opdsAcquisitionFeedEntry =
+    this.mimeOf("application/atom+xml;relation=entry;profile=opds-catalog")
+
+  /**
+   * The union of all of the known standard format names used for OPDS feeds.
+   */
+
+  val allOPDSFeeds: Set<MIMEType> =
+    this.run {
+      val types = mutableSetOf<MIMEType>()
+      types.add(this.opdsFeed)
+      types.add(this.opdsFeedCatalog)
+      types.add(this.opdsAcquisitionFeedEntry)
+      types.toSet()
+    }
 }

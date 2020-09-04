@@ -27,6 +27,8 @@ class BookFormatSupport private constructor(
   private fun collectKnownTypes(): Set<MIMEType> {
     val types = mutableSetOf<MIMEType>()
     types.add(StandardFormatNames.genericEPUBFiles)
+    types.addAll(StandardFormatNames.allOPDSFeeds)
+
     this.collectSupportedAudioBookTypesInto(types)
 
     if (this.parameters.supportsAdobeDRM) {
@@ -84,6 +86,14 @@ class BookFormatSupport private constructor(
   override fun isSupportedPath(
     typePath: List<MIMEType>
   ): Boolean {
+
+    /*
+     * An empty path is trivially unsupported.
+     */
+
+    if (typePath.isEmpty()) {
+      return false
+    }
 
     /*
      * Check that all of the types in the path are known.
