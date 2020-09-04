@@ -11,6 +11,7 @@ import org.nypl.simplified.books.bundled.api.BundledURIs.BUNDLED_CONTENT_SCHEME
 import org.nypl.simplified.books.controller.BookCoverFetchTask.Type.COVER
 import org.nypl.simplified.books.controller.BookCoverFetchTask.Type.THUMBNAIL
 import org.nypl.simplified.http.core.HTTPAuthType
+import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
@@ -50,6 +51,34 @@ class BookCoverFetchTask(
   private val taskRecorder =
     TaskRecorder.create<BookStatusDownloadErrorDetails>()
 
+  private fun errorDetailsFor(
+    message: String,
+    errorCode: String,
+    exception: Throwable? = null,
+    attributes: Map<String, String> = mapOf(),
+    problemReport: HTTPProblemReport? = null
+  ): BookStatusDownloadErrorDetails {
+    return BookStatusDownloadErrorDetails(
+      attributes = attributes,
+      errorCode = errorCode,
+      exception = exception,
+      message = message,
+      problemReport = problemReport
+    )
+  }
+
+  private fun errorDetailsForUnexpectedException(
+    exception: Throwable,
+    attributes: Map<String, String> = mapOf()
+  ): BookStatusDownloadErrorDetails {
+    return this.errorDetailsFor(
+      attributes = attributes,
+      errorCode = "unexpectedException",
+      exception = exception,
+      message = exception.message ?: exception.javaClass.name
+    )
+  }
+
   override fun call(): TaskResult<BookStatusDownloadErrorDetails, Unit> {
     this.taskRecorder.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
 
@@ -80,7 +109,7 @@ class BookCoverFetchTask(
 
       this.taskRecorder.currentStepFailedAppending(
         this.services.borrowStrings.borrowBookCoverUnexpectedException,
-        BookStatusDownloadErrorDetails.UnexpectedException(e),
+        this.errorDetailsForUnexpectedException(e),
         e)
       this.taskRecorder.finishFailure()
     } finally {
@@ -110,7 +139,10 @@ class BookCoverFetchTask(
       val message = this.services.borrowStrings.borrowBookContentCopyFailed
       this.taskRecorder.currentStepFailed(
         message = message,
-        errorValue = BookStatusDownloadErrorDetails.ContentCopyFailed(message, mapOf()),
+        errorValue = this.errorDetailsFor(
+          message = message,
+          errorCode = "contentCopyFailed"
+        ),
         exception = FileNotFoundException(cover.toString()))
       return this.taskRecorder.finishFailure()
     }
@@ -120,25 +152,25 @@ class BookCoverFetchTask(
   private fun fetchCoverHTTP(
     cover: URI
   ): TaskResult<BookStatusDownloadErrorDetails, Unit> {
+    val message = this.services.borrowStrings.borrowBookCoverUnexpectedException
     return when (val result = this.services.http.get(this.httpAuth, cover, 0L)) {
       is HTTPResultOK -> {
         this.saveCoverHTTP(result)
       }
       is HTTPResultError -> {
         this.taskRecorder.currentStepFailed(
-          this.services.borrowStrings.borrowBookCoverUnexpectedException,
-          BookStatusDownloadErrorDetails.HTTPRequestFailed(
-            status = result.status,
-            problemReport = this.someOrNull(result.problemReport),
-            message = result.message,
-            attributesInitial = mapOf()
+          message,
+          errorValue = this.errorDetailsFor(
+            message = message,
+            errorCode = "httpRequestFailed ${result.status}",
+            problemReport = this.someOrNull(result.problemReport)
           ))
         this.taskRecorder.finishFailure()
       }
       is HTTPResultException -> {
         this.taskRecorder.currentStepFailed(
-          this.services.borrowStrings.borrowBookCoverUnexpectedException,
-          BookStatusDownloadErrorDetails.UnexpectedException(result.error),
+          message,
+          this.errorDetailsForUnexpectedException(result.error),
           result.error)
         this.taskRecorder.finishFailure()
       }

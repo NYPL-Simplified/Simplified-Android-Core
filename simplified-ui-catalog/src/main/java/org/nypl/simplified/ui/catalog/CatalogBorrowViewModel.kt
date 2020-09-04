@@ -254,7 +254,13 @@ class CatalogBorrowViewModel(
       this.logger.error("failed to start borrow task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
         BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e) { ex ->
-          BookStatusDownloadErrorDetails.UnexpectedException(ex)
+          BookStatusDownloadErrorDetails(
+            problemReport = null,
+            errorCode = "unexpectedException",
+            message = ex.message ?: ex.javaClass.name,
+            attributes = mapOf(),
+            exception = ex
+          )
         }))
       )
     }
@@ -295,7 +301,13 @@ class CatalogBorrowViewModel(
       this.logger.error("failed to start borrow task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
         BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e) { ex ->
-          BookStatusDownloadErrorDetails.UnexpectedException(ex)
+          BookStatusDownloadErrorDetails(
+            problemReport = null,
+            errorCode = "unexpectedException",
+            message = ex.message ?: ex.javaClass.name,
+            attributes = mapOf(),
+            exception = ex
+          )
         }))
       )
     }

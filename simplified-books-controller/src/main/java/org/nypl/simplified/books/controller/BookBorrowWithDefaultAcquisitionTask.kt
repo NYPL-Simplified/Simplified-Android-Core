@@ -55,13 +55,14 @@ class BookBorrowWithDefaultAcquisitionTask(
     if (acquisition == null) {
       this.logger.error("[{}]: no usable acquisition!", this.bookId.brief())
 
+      val message = this.services.borrowStrings.borrowBookFulfillNoUsableAcquisitions
       val failure =
         TaskResult.fail<BookStatusDownloadErrorDetails, Unit>(
           description = this.services.borrowStrings.borrowBookSelectingAcquisition,
-          resolution = this.services.borrowStrings.borrowBookFulfillNoUsableAcquisitions,
-          errorValue = BookStatusDownloadErrorDetails.UnusableAcquisitions(
-            message = this.services.borrowStrings.borrowBookFulfillNoUsableAcquisitions,
-            attributes = mapOf()
+          resolution = message,
+          errorValue = BookStatusDownloadErrorDetails(
+            errorCode = "noUsableAcquisitions",
+            message = message
           )
         ) as TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
 

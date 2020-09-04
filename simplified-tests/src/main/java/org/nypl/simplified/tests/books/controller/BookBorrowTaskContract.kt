@@ -46,8 +46,6 @@ import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.HTTPRequestFailed
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
@@ -2728,10 +2726,8 @@ abstract class BookBorrowTaskContract {
     val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
-    val errorData =
-      results.errors().last() as HTTPRequestFailed
-
-    Assert.assertEquals(404, errorData.status)
+    val errorData = results.errors().last()
+    Assert.assertTrue(errorData.errorCode.contains("404"))
     Assert.assertEquals(report, errorData.problemReport)
 
     /*
@@ -2803,10 +2799,8 @@ abstract class BookBorrowTaskContract {
     val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
-    val errorData =
-      results.errors().last() as UnsupportedAcquisition
-
-    Assert.assertEquals(ACQUISITION_BUY, errorData.type)
+    val errorData = results.errors().last()
+    Assert.assertEquals("unsupportedAcquisition", errorData.errorCode)
 
     /*
      * Check that the download failed.

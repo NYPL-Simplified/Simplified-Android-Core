@@ -167,9 +167,9 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
           listOf(
             TaskStep(
               "Did something",
-              TaskStepResolution.TaskStepFailed<BookStatusDownloadErrorDetails>(
+              TaskStepResolution.TaskStepFailed(
                 message = "Failed at it",
-                errorValue = BookStatusDownloadErrorDetails.TimedOut("Timed out", mapOf()),
+                errorValue = BookStatusDownloadErrorDetails(message = "Timed out", errorCode = "timedOut"),
                 exception = null
               )
             )
@@ -204,9 +204,9 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
           listOf(
             TaskStep(
               "Did something",
-              TaskStepResolution.TaskStepFailed<BookStatusDownloadErrorDetails>(
+              TaskStepResolution.TaskStepFailed(
                 message = "Failed at it",
-                errorValue = BookStatusDownloadErrorDetails.TimedOut("Timed out", mapOf()),
+                errorValue = BookStatusDownloadErrorDetails(message = "Timed out", errorCode = "timedOut"),
                 exception = null
               )
             )

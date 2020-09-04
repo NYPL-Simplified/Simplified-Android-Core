@@ -46,10 +46,6 @@ import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMDeviceNotActive
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedContentType
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.DRMError.DRMUnsupportedSystem
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
@@ -548,10 +544,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
 
-    val errorData =
-      results.errors().last() as DRMUnsupportedSystem
-
-    Assert.assertEquals("Adobe ACS", errorData.system)
+    val errorData = results.errors().last()
+    Assert.assertEquals("Adobe ACS: drmUnsupported", errorData.errorCode)
 
     /*
      * Check that the download failed.
@@ -699,11 +693,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
 
-    val error =
-      results.errors().last() as DRMUnsupportedContentType
-
-    Assert.assertEquals("Adobe ACS", error.system)
-    Assert.assertEquals(mimeOf("application/pdf"), error.contentType)
+    val error = results.errors().last()
+    Assert.assertEquals("Adobe ACS: drmUnsupportedContentType application/pdf", error.errorCode)
 
     /*
      * Check that the download failed.
@@ -818,10 +809,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
 
-    val error =
-      results.errors().last() as DRMDeviceNotActive
-
-    Assert.assertEquals("Adobe ACS", error.system)
+    val error = results.errors().last()
+    Assert.assertEquals("Adobe ACS: drmDeviceNotActive", error.errorCode)
 
     /*
      * Check that the download failed.
@@ -919,10 +908,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
 
-    val error =
-      results.errors().last() as DRMError.DRMUnparseableACSM
-
-    Assert.assertEquals("Adobe ACS", error.system)
+    val error = results.errors().last()
+    Assert.assertEquals("Adobe ACS: drmUnreadableACSM", error.errorCode)
 
     /*
      * Check that the download failed.
@@ -1160,11 +1147,8 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
 
-    val error =
-      results.errors().last() as DRMError.DRMFailure
-
-    Assert.assertEquals("Adobe ACS", error.system)
-    Assert.assertEquals("E_TYPICAL", error.errorCode)
+    val error = results.errors().last()
+    Assert.assertEquals("Adobe ACS: E_TYPICAL", error.errorCode)
 
     /*
      * Check that the download failed.

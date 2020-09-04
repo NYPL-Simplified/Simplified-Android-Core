@@ -189,13 +189,11 @@ sealed class BookStatus {
     override val problemReport: HTTPProblemReport?
       get() {
         val resolution = this.result.steps.lastOrNull()?.resolution
-        if (resolution is TaskStepFailed) {
-          val errorValue = resolution.errorValue
-          if (errorValue is HTTPHasProblemReportType) {
-            return errorValue.problemReport
-          }
+        return if (resolution is TaskStepFailed) {
+          resolution.errorValue.problemReport
+        } else {
+          null
         }
-        return null
       }
   }
 
