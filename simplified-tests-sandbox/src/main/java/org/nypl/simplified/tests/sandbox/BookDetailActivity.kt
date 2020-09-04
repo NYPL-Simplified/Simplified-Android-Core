@@ -151,7 +151,7 @@ class BookDetailActivity : AppCompatActivity(), ServiceDirectoryProviderType {
               "Did something",
               TaskStepResolution.TaskStepFailed<BookStatusRevokeErrorDetails>(
                 message = "Failed at it",
-                errorValue = BookStatusRevokeErrorDetails.NotRevocable("Not revocable"),
+                errorValue = BookStatusRevokeErrorDetails(message = "Not revocable", errorCode = "notRevocable"),
                 exception = null
               )
             )

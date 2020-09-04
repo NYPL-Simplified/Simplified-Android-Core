@@ -280,7 +280,13 @@ class CatalogBorrowViewModel(
       this.logger.error("failed to start revocation task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
         BookWithStatus(book, BookStatus.FailedRevoke(book.id, this.failMinimal(e) { ex ->
-          BookStatusRevokeErrorDetails.UnexpectedException(ex)
+          BookStatusRevokeErrorDetails(
+            problemReport = null,
+            errorCode = "unexpectedException",
+            message = ex.message ?: ex.javaClass.name,
+            attributes = mapOf(),
+            exception = ex
+          )
         }))
       )
     }

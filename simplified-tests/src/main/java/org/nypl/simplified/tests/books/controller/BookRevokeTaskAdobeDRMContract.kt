@@ -49,9 +49,6 @@ import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.DRMDeviceNotActive
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError.DRMFailure
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NoCredentialsAvailable
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
@@ -928,15 +925,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals(
-      DRMFailure(
-        system = "Adobe ACS",
-        errorCode = "E_DEFECTIVE",
-        message = "revokeBookACSConnectorFailed"
-      ),
-      result.errors().last()
-    )
-
+    Assert.assertEquals("Adobe ACS: E_DEFECTIVE", result.errors().last().errorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 
@@ -1050,8 +1039,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
     result as TaskResult.Failure
 
     Assert.assertEquals(
-      DRMDeviceNotActive("Adobe ACS", "revokeACSGettingDeviceCredentialsNotActivated"),
-      result.errors().last()
+      "Adobe ACS: drmDeviceNotActive",
+      result.errors().last().errorCode
     )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
@@ -1152,11 +1141,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals(
-      NoCredentialsAvailable("revokeCredentialsRequired"),
-      result.errors().last()
-    )
-
+    Assert.assertEquals("revokeCredentialsRequired", result.errors().last().errorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 

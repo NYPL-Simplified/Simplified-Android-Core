@@ -23,15 +23,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.Cancelled
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.DRMError
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.FeedCorrupted
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.FeedLoaderFailed
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.FeedUnusable
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NoCredentialsAvailable
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.NotRevocable
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.TimedOut
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails.UnexpectedException
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionBadFeed
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionDeviceNotActivated
@@ -47,6 +38,7 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPHasProblemReportType
+import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
@@ -91,6 +83,49 @@ class BookRevokeTask(
 
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}] $message", this.bookID.brief(), *arguments)
+
+  private fun errorDetailsFor(
+    message: String,
+    errorCode: String,
+    exception: Throwable? = null,
+    attributes: Map<String, String> = mapOf(),
+    problemReport: HTTPProblemReport? = null
+  ): BookStatusRevokeErrorDetails {
+    return BookStatusRevokeErrorDetails(
+      attributes = attributes,
+      errorCode = errorCode,
+      exception = exception,
+      message = message,
+      problemReport = problemReport
+    )
+  }
+
+  private fun errorDetailsForUnexpectedException(
+    exception: Throwable,
+    attributes: Map<String, String> = mapOf()
+  ): BookStatusRevokeErrorDetails {
+    return this.errorDetailsFor(
+      attributes = attributes,
+      errorCode = "unexpectedException",
+      exception = exception,
+      message = exception.message ?: exception.javaClass.name
+    )
+  }
+
+  private fun errorDetailsForDRM(
+    message: String,
+    drmSystem: String,
+    errorCode: String,
+    exception: Throwable,
+    attributes: Map<String, String> = mapOf()
+  ): BookStatusRevokeErrorDetails {
+    return this.errorDetailsFor(
+      attributes = attributes,
+      errorCode = "$drmSystem: $errorCode",
+      exception = exception,
+      message = message
+    )
+  }
 
   private fun publishBookStatus(status: BookStatus) {
     val book =
@@ -151,7 +186,7 @@ class BookRevokeTask(
       this.error("revoke failed: ", e)
 
       this.steps.currentStepFailedAppending(
-        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e)
+        this.revokeStrings.revokeUnexpectedException, errorDetailsForUnexpectedException(e), e)
 
       val failure = this.steps.finishFailure<Unit>()
       this.publishBookStatus(BookStatus.FailedRevoke(this.bookID, failure))
@@ -198,7 +233,7 @@ class BookRevokeTask(
           this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName)
         this.steps.currentStepFailed(
           message,
-          NotRevocable(message),
+          errorDetailsFor(message, "notRevocable"),
           exception)
         throw exception
       }
@@ -220,7 +255,7 @@ class BookRevokeTask(
           this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName)
         this.steps.currentStepFailed(
           message,
-          NotRevocable(message),
+          errorDetailsFor(message, "notRevocable"),
           exception)
         throw exception
       }
@@ -269,7 +304,7 @@ class BookRevokeTask(
       this.databaseEntry.writeOPDSEntry(entry.feedEntry)
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeServerNotifySavingEntryFailed, UnexpectedException(e), e)
+        this.revokeStrings.revokeServerNotifySavingEntryFailed, errorDetailsForUnexpectedException(e), e)
       throw e
     }
   }
@@ -283,7 +318,7 @@ class BookRevokeTask(
       this.databaseEntry.delete()
     } catch (e: Throwable) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e)
+        this.revokeStrings.revokeUnexpectedException, errorDetailsForUnexpectedException(e), e)
       throw e
     }
   }
@@ -308,7 +343,11 @@ class BookRevokeTask(
       val message = this.revokeStrings.revokeServerNotifyFeedTimedOut
       this.steps.currentStepFailed(
         message = message,
-        errorValue = TimedOut(message),
+        errorValue = errorDetailsFor(
+          message = message,
+          errorCode = "timedOut",
+          exception = e
+        ),
         exception = e
       )
       throw e
@@ -322,7 +361,16 @@ class BookRevokeTask(
         }
 
       val message = this.revokeStrings.revokeServerNotifyFeedTimedOut
-      this.steps.currentStepFailed(message, FeedLoaderFailed(message, problemReport, ex), ex)
+      this.steps.currentStepFailed(
+        message = message,
+        errorValue = this.errorDetailsFor(
+          message = message,
+          errorCode = "feedLoaderFailed",
+          exception = ex,
+          problemReport = problemReport
+        ),
+        exception = ex
+      )
       throw ex
     }
 
@@ -335,24 +383,30 @@ class BookRevokeTask(
       is FeedLoaderFailedGeneral -> {
         val message = this.revokeStrings.revokeServerNotifyFeedFailed
         this.steps.currentStepFailed(
-          message,
-          FeedLoaderFailed(
+          message = message,
+          errorValue = this.errorDetailsFor(
             message = message,
+            errorCode = "feedLoaderFailed",
             problemReport = feedResult.problemReport,
             exception = feedResult.exception
-          ))
+          ),
+          exception = feedResult.exception
+        )
         throw feedResult.exception
       }
 
       is FeedLoaderFailedAuthentication -> {
         val message = this.revokeStrings.revokeServerNotifyFeedFailed
         this.steps.currentStepFailed(
-          message,
-          FeedLoaderFailed(
+          message = message,
+          errorValue = this.errorDetailsFor(
             message = message,
+            errorCode = "feedLoaderFailed",
             problemReport = feedResult.problemReport,
             exception = feedResult.exception
-          ))
+          ),
+          exception = feedResult.exception
+        )
         throw feedResult.exception
       }
     }
@@ -366,7 +420,7 @@ class BookRevokeTask(
     if (feed.size == 0) {
       val exception = BookRevokeExceptionBadFeed()
       val message = this.revokeStrings.revokeServerNotifyFeedEmpty
-      this.steps.currentStepFailed(message, FeedUnusable(message), exception)
+      this.steps.currentStepFailed(message, this.errorDetailsFor(message, "feedLoaderFailed"), exception)
       throw exception
     }
 
@@ -375,9 +429,10 @@ class BookRevokeTask(
         when (val feedEntry = feed.entriesInOrder[0]) {
           is FeedEntryCorrupt -> {
             val exception = BookRevokeExceptionBadFeed()
+            val message = this.revokeStrings.revokeServerNotifyFeedCorrupt
             this.steps.currentStepFailed(
-              message = this.revokeStrings.revokeServerNotifyFeedCorrupt,
-              errorValue = FeedCorrupted(feedEntry.error),
+              message = message,
+              errorValue = this.errorDetailsFor(message, "feedCorrupted", feedEntry.error),
               exception = exception)
             throw exception
           }
@@ -390,7 +445,7 @@ class BookRevokeTask(
         val message = this.revokeStrings.revokeServerNotifyFeedWithGroups
         this.steps.currentStepFailed(
           message = message,
-          errorValue = FeedUnusable(message),
+          errorValue = this.errorDetailsFor(message, "feedUnusable"),
           exception = exception)
         throw exception
       }
@@ -499,7 +554,11 @@ class BookRevokeTask(
       val message = this.revokeStrings.revokeACSTimedOut
       this.steps.currentStepFailed(
         message = message,
-        errorValue = TimedOut(message),
+        errorValue = errorDetailsFor(
+          message = message,
+          errorCode = "timedOut",
+          exception = e
+        ),
         exception = e)
       throw e
     } catch (e: ExecutionException) {
@@ -508,7 +567,7 @@ class BookRevokeTask(
           val message = this.revokeStrings.revokeBookCancelled
           this.steps.currentStepFailed(
             message = message,
-            errorValue = Cancelled(message),
+            errorValue = this.errorDetailsFor(message, "cancelled"),
             exception = cause)
           cause
         }
@@ -516,10 +575,11 @@ class BookRevokeTask(
           val message = this.revokeStrings.revokeBookACSConnectorFailed(cause.errorCode)
           this.steps.currentStepFailed(
             message = message,
-            errorValue = DRMError.DRMFailure(
-              system = this.adobeACS,
+            errorValue = this.errorDetailsForDRM(
+              message = message,
+              drmSystem = this.adobeACS,
               errorCode = cause.errorCode,
-              message = message
+              exception = cause
             ),
             exception = cause)
           cause
@@ -527,7 +587,7 @@ class BookRevokeTask(
         else -> {
           this.steps.currentStepFailed(
             message = this.revokeStrings.revokeBookACSFailed,
-            errorValue = UnexpectedException(cause),
+            errorValue = errorDetailsForUnexpectedException(cause),
             exception = cause)
           cause
         }
@@ -535,7 +595,7 @@ class BookRevokeTask(
     } catch (e: Throwable) {
       this.steps.currentStepFailed(
         message = this.revokeStrings.revokeBookACSFailed,
-        errorValue = UnexpectedException(e),
+        errorValue = errorDetailsForUnexpectedException(e),
         exception = e)
       throw e
     }
@@ -561,9 +621,11 @@ class BookRevokeTask(
       val message = this.revokeStrings.revokeACSGettingDeviceCredentialsNotActivated
       this.steps.currentStepFailed(
         message,
-        errorValue = DRMError.DRMDeviceNotActive(
-          system = this.adobeACS,
-          message = message
+        errorValue = this.errorDetailsForDRM(
+          message = message,
+          drmSystem = this.adobeACS,
+          errorCode = "drmDeviceNotActive",
+          exception = exception
         ),
         exception = exception)
       throw exception
@@ -597,7 +659,7 @@ class BookRevokeTask(
       }
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeACSDeleteRightsFailed, UnexpectedException(e), e)
+        this.revokeStrings.revokeACSDeleteRightsFailed, errorDetailsForUnexpectedException(e), e)
       throw e
     }
   }
@@ -633,7 +695,7 @@ class BookRevokeTask(
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeBookDatabaseLookupFailed, UnexpectedException(e), e)
+        this.revokeStrings.revokeBookDatabaseLookupFailed, errorDetailsForUnexpectedException(e), e)
       throw e
     }
   }
@@ -667,7 +729,7 @@ class BookRevokeTask(
       val message = this.revokeStrings.revokeCredentialsRequired
       this.steps.currentStepFailed(
         message = message,
-        errorValue = NoCredentialsAvailable(message),
+        errorValue = errorDetailsFor(message, "revokeCredentialsRequired"),
         exception = exception)
       throw exception
     }
