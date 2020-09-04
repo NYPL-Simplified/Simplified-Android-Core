@@ -102,6 +102,8 @@ class AccountProviderRegistry private constructor(
   }
 
   override fun clear() {
+    this.descriptions.clear()
+    this.resolved.clear()
     for (source in this.sources) {
       source.clear(this.context)
     }

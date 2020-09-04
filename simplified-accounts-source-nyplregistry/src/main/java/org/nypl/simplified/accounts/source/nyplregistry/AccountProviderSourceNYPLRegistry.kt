@@ -34,6 +34,7 @@ import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
@@ -244,18 +245,17 @@ class AccountProviderSourceNYPLRegistry(
               result.warnings.size
             )
 
-            val countProduction = result.result.providers.count { it.isProduction }
-            val countTesting = result.result.providers.count { !it.isProduction }
-
-            this.logger.debug("{} cached production providers", countProduction)
-            this.logger.debug("{} cached testing providers", countTesting)
-            result.result.providers.associateBy(AccountProviderDescription::id).toMap()
+            this.logger.debug("{} cached providers", result.result.providers.size)
+            result.result.providers.associateBy(AccountProviderDescription::id)
           }
         }
       }
+    } catch (e: FileNotFoundException) {
+      this.logger.debug("no cache file exists, skipping")
+      emptyMap()
     } catch (e: Exception) {
       this.logger.debug("could not load cache file: ", e)
-      mapOf()
+      emptyMap()
     }
   }
 
@@ -266,29 +266,19 @@ class AccountProviderSourceNYPLRegistry(
   private fun fetchServerResults(
     includeTestingLibraries: Boolean
   ): Map<URI, AccountProviderDescription> {
-    val results = mutableMapOf<URI, AccountProviderDescription>()
-
-    this.logger.debug("fetching providers from ${this.uriProduction}")
-    this.fetchAndParse(this.uriProduction)
-      .providers
-      .associateByTo(results, { it.id }, {
-        it.copy(isProduction = true)
-      })
-
-    /* Fetch testing libraries, if required. */
-
-    if (includeTestingLibraries) {
+    val results = if (includeTestingLibraries) {
       this.logger.debug("fetching QA providers from ${this.uriQA}")
       this.fetchAndParse(this.uriQA)
         .providers
-        .filterNot { results.containsKey(it.id) }
-        .associateByTo(results, { it.id }, {
-          it.copy(isProduction = false)
-        })
+        .associateBy { it.id }
+    } else {
+      this.logger.debug("fetching providers from ${this.uriProduction}")
+      this.fetchAndParse(this.uriProduction)
+        .providers
+        .associateBy { it.id }
     }
-
     this.logger.debug("categorizing ${results.size} providers")
-    return results.toMap()
+    return results
   }
 
   private fun fetchAndParse(target: URI): AccountProviderDescriptionCollection {
