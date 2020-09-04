@@ -49,7 +49,6 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.readium.r2.shared.publication.ContentProtection
 import org.readium.r2.streamer.Streamer
 import org.readium.r2.streamer.parser.epub.EpubParser
 import org.slf4j.LoggerFactory
