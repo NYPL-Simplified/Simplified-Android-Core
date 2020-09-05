@@ -1,12 +1,9 @@
 package org.nypl.simplified.books.controller.api
 
 import com.google.common.util.concurrent.FluentFuture
-
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -32,7 +29,7 @@ interface BooksControllerType {
     bookID: BookID,
     acquisition: OPDSAcquisition,
     entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>>
+  ): FluentFuture<TaskResult<Unit>>
 
   /**
    * Attempt to borrow the given book. The controller will pick the acquisition.
@@ -47,7 +44,7 @@ interface BooksControllerType {
     accountID: AccountID,
     bookID: BookID,
     entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>>
+  ): FluentFuture<TaskResult<Unit>>
 
   /**
    * Dismiss a failed book borrowing.
@@ -131,7 +128,7 @@ interface BooksControllerType {
   fun bookRevoke(
     account: AccountType,
     bookId: BookID
-  ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>>
+  ): FluentFuture<TaskResult<Unit>>
 
   /**
    * Revoke the given book.
@@ -143,7 +140,7 @@ interface BooksControllerType {
   fun bookRevoke(
     accountID: AccountID,
     bookId: BookID
-  ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>>
+  ): FluentFuture<TaskResult<Unit>>
 
   /**
    * Delete the given book.

@@ -1,9 +1,6 @@
 package org.nypl.simplified.books.controller
 
 import io.reactivex.subjects.Subject
-import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
-import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails.AccountCannotDeleteLastAccount
-import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails.AccountUnexpectedException
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
@@ -24,23 +21,23 @@ class ProfileAccountDeleteTask(
   private val profiles: ProfilesDatabaseType,
   private val profileEvents: Subject<ProfileEvent>,
   private val strings: ProfileAccountDeletionStringResourcesType
-) : Callable<TaskResult<AccountDeleteErrorDetails, Unit>> {
+) : Callable<TaskResult<Unit>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountDeleteTask::class.java)
-  private val taskRecorder = TaskRecorder.create<AccountDeleteErrorDetails>()
+  private val taskRecorder = TaskRecorder.create()
 
-  private fun publishFailureEvent(step: TaskStep<AccountDeleteErrorDetails>) =
+  private fun publishFailureEvent() =
     this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionFailed(
-      step.resolution.message, this.taskRecorder.finishFailure<Unit>()))
+      this.taskRecorder.finishFailure<Unit>()))
 
-  private fun publishProgressEvent(step: TaskStep<AccountDeleteErrorDetails>) =
+  private fun publishProgressEvent(step: TaskStep) =
     this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionInProgress(step.description))
 
   private fun publishSuccessEvent(accountThen: AccountID) =
     this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionSucceeded(
       this.strings.deletionSucceeded, accountThen))
 
-  override fun call(): TaskResult<AccountDeleteErrorDetails, Unit> {
+  override fun call(): TaskResult<Unit> {
     return try {
       this.logger.debug("deleting account for provider {}", this.accountProviderID)
       this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.deletingAccount))
@@ -51,18 +48,10 @@ class ProfileAccountDeleteTask(
       this.publishSuccessEvent(account)
       this.taskRecorder.finishSuccess(Unit)
     } catch (e: AccountsDatabaseLastAccountException) {
-      this.publishFailureEvent(
-        this.taskRecorder.currentStepFailed(
-          this.strings.onlyOneAccountRemaining,
-          AccountCannotDeleteLastAccount(this.strings.onlyOneAccountRemaining),
-          e))
+      this.publishFailureEvent()
       this.taskRecorder.finishFailure()
     } catch (e: Throwable) {
-      this.publishFailureEvent(
-        this.taskRecorder.currentStepFailed(
-          this.strings.unexpectedException,
-          AccountUnexpectedException(this.strings.unexpectedException, e),
-          e))
+      this.publishFailureEvent()
       this.taskRecorder.finishFailure()
     }
   }

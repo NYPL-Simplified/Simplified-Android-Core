@@ -5,8 +5,6 @@ import com.google.common.util.concurrent.SettableFuture
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisition
@@ -27,7 +25,7 @@ class MockBooksController : BooksControllerType {
     bookID: BookID,
     acquisition: OPDSAcquisition,
     entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     return FluentFuture.from(SettableFuture.create())
   }
 
@@ -35,7 +33,7 @@ class MockBooksController : BooksControllerType {
     accountID: AccountID,
     id: BookID,
     entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     return FluentFuture.from(SettableFuture.create())
   }
 
@@ -54,7 +52,7 @@ class MockBooksController : BooksControllerType {
   override fun bookRevoke(
     accountID: AccountID,
     bookId: BookID
-  ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     return FluentFuture.from(SettableFuture.create())
   }
 
@@ -92,7 +90,7 @@ class MockBooksController : BooksControllerType {
   override fun bookRevoke(
     account: AccountType,
     bookId: BookID
-  ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     return FluentFuture.from(SettableFuture.create())
   }
 

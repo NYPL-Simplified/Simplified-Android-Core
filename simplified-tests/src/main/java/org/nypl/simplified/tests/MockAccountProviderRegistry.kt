@@ -4,7 +4,6 @@ import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderDescription
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
@@ -13,7 +12,6 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.net.URI
 import java.util.LinkedList
 import java.util.Queue
@@ -89,11 +87,10 @@ class MockAccountProviderRegistry(
   override fun resolve(
     onProgress: AccountProviderResolutionListenerType,
     description: AccountProviderDescription
-  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+  ): TaskResult<AccountProviderType> {
     this.logger.debug("resolve: {}", description)
 
-    val taskRecorder =
-      TaskRecorder.create<AccountProviderResolutionErrorDetails>()
+    val taskRecorder = TaskRecorder.create()
     taskRecorder.beginNewStep("Resolving account provider...")
 
     if (this.resolveNext.peek() != null) {
@@ -108,14 +105,7 @@ class MockAccountProviderRegistry(
     val provider = this.resolvedProviders[description.id]
     return if (provider == null) {
       this.logger.debug("no provider in map")
-      val error =
-        AccountProviderResolutionErrorDetails.UnexpectedException(
-          "Failed",
-          IOException(),
-          description.id.toString(),
-          description.title
-        )
-      taskRecorder.currentStepFailed("Failed", error)
+      taskRecorder.currentStepFailed("Failed", "unexpectedException")
       taskRecorder.finishFailure()
     } else {
       this.logger.debug("took provider from map")

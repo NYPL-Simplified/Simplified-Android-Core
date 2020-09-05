@@ -40,7 +40,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadCancelled
@@ -84,6 +83,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
@@ -113,7 +113,7 @@ class BookBorrowTask(
   private val downloads: ConcurrentHashMap<BookID, DownloadType>,
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry
-) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+) : Callable<TaskResult<Unit>> {
 
   private val contentTypeACSM =
     MIMEParser.parseRaisingException("application/vnd.adobe.adept+xml")
@@ -130,7 +130,7 @@ class BookBorrowTask(
     "Adobe ACS"
 
   private val logger = LoggerFactory.getLogger(BookBorrowTask::class.java)
-  private val steps = TaskRecorder.create<BookStatusDownloadErrorDetails>()
+  private val steps = TaskRecorder.create()
 
   @Volatile
   private lateinit var databaseEntry: BookDatabaseEntryType
@@ -183,53 +183,14 @@ class BookBorrowTask(
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}] $message", this.bookId.brief(), *arguments)
 
-  private fun errorDetailsFor(
-    message: String,
-    errorCode: String,
-    exception: Throwable? = null,
-    attributes: Map<String, String> = mapOf(),
-    problemReport: HTTPProblemReport? = null
-  ): BookStatusDownloadErrorDetails {
-    return BookStatusDownloadErrorDetails(
-      attributes = attributes,
-      errorCode = errorCode,
-      exception = exception,
-      message = message,
-      problemReport = problemReport
-    )
-  }
-
-  private fun errorDetailsForUnexpectedException(
-    exception: Throwable,
-    attributes: Map<String, String> = mapOf()
-  ): BookStatusDownloadErrorDetails {
-    return this.errorDetailsFor(
-      attributes = attributes,
-      errorCode = "unexpectedException",
-      exception = exception,
-      message = exception.message ?: exception.javaClass.name
-    )
-  }
-
-  private fun errorDetailsForDRM(
-    message: String,
-    drmSystem: String,
-    errorCode: String,
-    exception: Throwable,
-    attributes: Map<String, String> = mapOf()
-  ): BookStatusDownloadErrorDetails {
-    return this.errorDetailsFor(
-      attributes = attributes,
-      errorCode = "$drmSystem: $errorCode",
-      exception = exception,
-      message = message
-    )
-  }
-
   @Throws(Exception::class)
-  override fun call(): TaskResult<BookStatusDownloadErrorDetails, Unit> {
+  override fun call(): TaskResult<Unit> {
     return try {
       this.steps.beginNewStep(this.services.borrowStrings.borrowStarted)
+      this.steps.addAttribute("Book", this.entry.title)
+      this.steps.addAttribute("Author", this.entry.authorsCommaSeparated)
+      this.steps.addAttribute("Acquisition URI", this.acquisition.uri.toASCIIString())
+
       this.downloadTimeThen = this.services.clock.clockNow()
 
       this.debug(
@@ -252,11 +213,11 @@ class BookBorrowTask(
         this.logger.error("[{}]: failed to find account! ", this.bookId.brief(), e)
 
         val failure =
-          TaskResult.fail<BookStatusDownloadErrorDetails, Unit>(
+          TaskResult.fail<Unit>(
             description = this.services.borrowStrings.borrowStarted,
             resolution = this.services.borrowStrings.borrowBookUnexpectedException,
-            errorValue = this.errorDetailsForUnexpectedException(e, this.currentAttributesWith())
-          ) as TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
+            errorCode = "unexpectedException"
+          ) as TaskResult.Failure<Unit>
 
         this.services.bookRegistry.update(
           BookWithStatus(this.bookInitial, BookStatus.FailedLoan(this.bookId, failure))
@@ -320,16 +281,8 @@ class BookBorrowTask(
           this.debug("acquisition type is {}, cannot continue!", type)
           val exception = UnsupportedOperationException()
           val message = this.services.borrowStrings.borrowBookUnsupportedAcquisition(type)
-          this.steps.currentStepFailed(
-            message = message,
-            errorValue = this.errorDetailsFor(
-              message = message,
-              errorCode = "unsupportedAcquisition",
-              exception = exception,
-              attributes = this.currentAttributesWith(Pair("Acquisition type", type.toString()))
-            ),
-            exception = exception
-          )
+          this.steps.addAttribute("Acquisition type", type.toString())
+          this.steps.currentStepFailed(message, "unsupportedAcquisition", exception)
           throw exception
         }
       }
@@ -338,7 +291,7 @@ class BookBorrowTask(
 
       this.steps.currentStepFailedAppending(
         this.services.borrowStrings.borrowBookUnexpectedException,
-        this.errorDetailsForUnexpectedException(e, this.currentAttributesWith()),
+        "unexpectedException",
         e
       )
 
@@ -361,22 +314,6 @@ class BookBorrowTask(
       this.debug("finished")
     }
   }
-
-  private fun currentAttributesWith(attributes: Map<String, String>): Map<String, String> {
-    val attrs = mutableMapOf<String, String>()
-    for (entry in attributes.entries) {
-      attrs[entry.key] = entry.value
-    }
-    attrs["Book"] = this.entry.title
-    attrs["Author"] = this.entry.authorsCommaSeparated
-    return attrs.toMap()
-  }
-
-  private fun currentAttributesWith(pairs: List<Pair<String, String>>): Map<String, String> =
-    this.currentAttributesWith(pairs.toMap())
-
-  private fun currentAttributesWith(vararg pairs: Pair<String, String>): Map<String, String> =
-    this.currentAttributesWith(pairs.toList())
 
   /*
    * Create a new book database entry and publish the status of the book.
@@ -401,16 +338,7 @@ class BookBorrowTask(
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
       val message = this.services.borrowStrings.borrowBookDatabaseFailed
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "bookDatabaseFailed",
-          exception = e,
-          attributes = this.currentAttributesWith()
-        ),
-        exception = e
-      )
+      this.steps.currentStepFailed(message, "bookDatabaseFailed", e)
       throw e
     }
   }
@@ -455,26 +383,12 @@ class BookBorrowTask(
       } catch (e: Exception) {
         this.error("feed loader raised exception: ", e)
 
-        val problemReport = if (e is HTTPHasProblemReportType) {
-          e.problemReport
-        } else {
-          null
+        if (e is HTTPHasProblemReportType) {
+          this.steps.addAttributes(Presentables.problemReportAsAttributes(e.problemReport))
         }
 
-        val message =
-          this.services.borrowStrings.borrowBookFeedLoadingFailed(e.localizedMessage)
-
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = this.errorDetailsFor(
-            message = message,
-            errorCode = "feedLoaderFailed",
-            exception = e,
-            attributes = this.currentAttributesWith(),
-            problemReport = problemReport
-          ),
-          exception = e
-        )
+        val message = this.services.borrowStrings.borrowBookFeedLoadingFailed(e.localizedMessage)
+        this.steps.currentStepFailed(message, "feedLoaderFailed", e)
         throw e
       }
 
@@ -489,16 +403,7 @@ class BookBorrowTask(
             when (val feedEntry = entries[0]) {
               is FeedEntryCorrupt -> {
                 this.error("unexpectedly received corrupt feed entry")
-                this.steps.currentStepFailed(
-                  message = message,
-                  errorValue = this.errorDetailsFor(
-                    message = message,
-                    errorCode = "feedCorrupted",
-                    exception = feedEntry.error,
-                    attributes = this.currentAttributesWith()
-                  ),
-                  exception = feedEntry.error
-                )
+                this.steps.currentStepFailed(message, "feedCorrupted", feedEntry.error)
                 throw BookBorrowExceptionBadBorrowFeed(feedEntry.error)
               }
               is FeedEntryOPDS -> feedEntry
@@ -514,16 +419,7 @@ class BookBorrowTask(
             when (val feedEntry = entries[0]) {
               is FeedEntryCorrupt -> {
                 this.error("unexpectedly received corrupt feed entry")
-                this.steps.currentStepFailed(
-                  message = message,
-                  errorValue = this.errorDetailsFor(
-                    message = message,
-                    errorCode = "feedCorrupted",
-                    exception = feedEntry.error,
-                    attributes = this.currentAttributesWith()
-                  ),
-                  exception = feedEntry.error
-                )
+                this.steps.currentStepFailed(message, "feedCorrupted", feedEntry.error)
                 throw BookBorrowExceptionBadBorrowFeed(feedEntry.error)
               }
               is FeedEntryOPDS ->
@@ -535,33 +431,17 @@ class BookBorrowTask(
 
       is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral -> {
         val message = this.services.borrowStrings.borrowBookFeedLoadingFailed(feedResult.message)
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = this.errorDetailsFor(
-            message = message,
-            errorCode = "feedLoaderFailed",
-            problemReport = feedResult.problemReport,
-            exception = feedResult.exception,
-            attributes = this.currentAttributesWith(feedResult.attributes)
-          ),
-          exception = feedResult.exception
-        )
+        this.steps.addAttributes(feedResult.attributes)
+        this.steps.addAttributes(Presentables.problemReportAsAttributes(feedResult.problemReport))
+        this.steps.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
         throw feedResult.exception
       }
 
       is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication -> {
         val message = this.services.borrowStrings.borrowBookFeedLoadingFailed(feedResult.message)
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = this.errorDetailsFor(
-            message = message,
-            errorCode = "feedLoaderFailed",
-            problemReport = feedResult.problemReport,
-            exception = feedResult.exception,
-            attributes = this.currentAttributesWith(feedResult.attributes)
-          ),
-          exception = feedResult.exception
-        )
+        this.steps.addAttributes(feedResult.attributes)
+        this.steps.addAttributes(Presentables.problemReportAsAttributes(feedResult.problemReport))
+        this.steps.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
         throw feedResult.exception
       }
     }
@@ -575,24 +455,11 @@ class BookBorrowTask(
     uri: URI,
     groups: List<FeedGroup>
   ): List<FeedGroup> {
-
-    val attribute =
-      Pair("Feed URI", this.acquisition.uri.toASCIIString())
-
     if (groups.isEmpty()) {
       this.error("unexpectedly received feed with zero groups")
       val exception = BookBorrowExceptionBadBorrowFeed(IOException("No groups in feed: $uri"))
       val message = this.services.borrowStrings.borrowBookBadBorrowFeed
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "feedUnusable",
-          exception = exception,
-          attributes = this.currentAttributesWith(attribute)
-        ),
-        exception = exception
-      )
+      this.steps.currentStepFailed(message, "feedUnusable", exception)
       throw exception
     }
     return groups
@@ -606,24 +473,11 @@ class BookBorrowTask(
     uri: URI,
     entries: List<FeedEntry>
   ): List<FeedEntry> {
-
-    val attribute =
-      Pair("Feed URI", this.acquisition.uri.toASCIIString())
-
     if (entries.isEmpty()) {
       this.error("unexpectedly received feed with no entries")
       val exception = BookBorrowExceptionBadBorrowFeed(IOException("No entries in feed: $uri"))
       val message = this.services.borrowStrings.borrowBookBadBorrowFeed
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "feedUnusable",
-          exception = exception,
-          attributes = this.currentAttributesWith(attribute)
-        ),
-        exception = exception
-      )
+      this.steps.currentStepFailed(message, "feedUnusable", exception)
       throw exception
     }
     return entries
@@ -791,16 +645,7 @@ class BookBorrowTask(
 
     val exception = BookBorrowExceptionNoUsableAcquisition()
     val message = this.services.borrowStrings.borrowBookFulfillNoUsableAcquisitions
-    this.steps.currentStepFailed(
-      message = message,
-      errorValue = this.errorDetailsFor(
-        message = message,
-        errorCode = "noUsableAcquisitions",
-        attributes = this.currentAttributesWith(),
-        exception = exception
-      ),
-      exception = exception
-    )
+    this.steps.currentStepFailed(message, "noUsableAcquisitions", exception)
     throw exception
   }
 
@@ -819,11 +664,11 @@ class BookBorrowTask(
         type = Type.COVER,
         httpAuth = httpAuth
       ).call()) {
-      is TaskResult.Success -> {
+      is TaskResult.Success<*> -> {
         this.debug("fetched cover successfully")
         this.steps.addAll(result.steps)
       }
-      is TaskResult.Failure -> {
+      is TaskResult.Failure<*> -> {
         this.debug("failed to fetch cover")
         this.steps.addAll(result.steps)
       }
@@ -840,11 +685,11 @@ class BookBorrowTask(
         type = Type.THUMBNAIL,
         httpAuth = httpAuth
       ).call()) {
-      is TaskResult.Success -> {
+      is TaskResult.Success<*> -> {
         this.debug("fetched thumbnail successfully")
         this.steps.addAll(result.steps)
       }
-      is TaskResult.Failure -> {
+      is TaskResult.Failure<*> -> {
         this.debug("failed to fetch thumbnail")
         this.steps.addAll(result.steps)
       }
@@ -1018,16 +863,7 @@ class BookBorrowTask(
       downloadFuture.get(this.downloadTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (ex: TimeoutException) {
       val message = this.services.borrowStrings.borrowBookFulfillTimedOut
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "downloadTimedOut",
-          exception = ex,
-          attributes = this.currentAttributesWith()
-        ),
-        exception = ex
-      )
+      this.steps.currentStepFailed(message, "downloadTimedOut", ex)
       download.cancel()
       downloadFuture.cancel(true)
       throw IOException("Timed out", ex)
@@ -1083,24 +919,21 @@ class BookBorrowTask(
     return try {
       when (val result = strategy.execute()) {
         is TaskResult.Success -> {
-          val outputFile =
-            File.createTempFile("manifest", "data", this.cacheDirectory)
+          this.steps.addAll(result.steps)
+          this.steps.addAttributes(result.attributes)
+          this.steps.beginNewStep("Checking AudioBook strategy result…")
+
+          val outputFile = File.createTempFile("manifest", "data", this.cacheDirectory)
           outputFile.writeBytes(result.result.fulfilled.data)
           FileAndType(outputFile, result.result.fulfilled.contentType)
         }
         is TaskResult.Failure -> {
-          val message = result.errors().first()
+          this.steps.addAll(result.steps)
+          this.steps.addAttributes(result.attributes)
+          this.steps.beginNewStep("Checking AudioBook strategy result…")
+
           val exception = IOException()
-          this.steps.currentStepFailed(
-            message = message,
-            errorValue = errorDetailsFor(
-              message = message,
-              errorCode = "timedOut",
-              exception = exception,
-              attributes = this.currentAttributesWith()
-            ),
-            exception = exception
-          )
+          this.steps.currentStepFailed("Failed", "audioStrategyFailed", exception)
           throw exception
         }
       }
@@ -1123,36 +956,17 @@ class BookBorrowTask(
           this.someOrNull(result.exception) ?: IOException("I/O error")
         val message =
           this.services.borrowStrings.borrowBookFulfillDownloadFailed(exception.localizedMessage)
-        val uriAttribute =
-          Pair("Book URI", result.uri.toASCIIString())
 
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = this.errorDetailsFor(
-            message = message,
-            errorCode = "httpRequestFailed ${result.status}",
-            exception = exception,
-            problemReport = this.someOrNull(result.problemReport),
-            attributes = this.currentAttributesWith(uriAttribute)
-          ),
-          exception = exception
-        )
+        this.steps.addAttributes(Presentables.problemReportAsAttributes(someOrNull(result.problemReport)))
+        this.steps.addAttribute("Book URI", result.uri.toASCIIString())
+        this.steps.currentStepFailed(message, "httpRequestFailed ${result.status}", exception)
         throw exception
       }
 
       DownloadCancelled -> {
         val exception = CancellationException()
         val message = this.services.borrowStrings.borrowBookFulfillCancelled
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = this.errorDetailsFor(
-            message = message,
-            errorCode = "downloadCancelled",
-            exception = exception,
-            attributes = this.currentAttributesWith()
-          ),
-          exception = exception
-        )
+        this.steps.currentStepFailed(message, "downloadCancelled", exception)
         throw exception
       }
     }
@@ -1226,16 +1040,7 @@ class BookBorrowTask(
       this.error("database entry does not have a format handle for {}", handleContentType)
       val exception = BookUnsupportedTypeException(handleContentType)
       val message = this.services.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "unsupportedType",
-          attributes = this.currentAttributesWith(),
-          exception = exception
-        ),
-        exception = exception
-      )
+      this.steps.currentStepFailed(message, "unsupportedType", exception)
       throw exception
     }
   }
@@ -1338,18 +1143,9 @@ class BookBorrowTask(
         received = receivedContentType
       )
 
+    this.steps.addAttribute("Content Type", receivedContentType.fullType)
     val message = this.services.borrowStrings.borrowBookSavingCheckingContentTypeUnacceptable
-    this.steps.currentStepFailed(
-      message = message,
-      errorValue = this.errorDetailsFor(
-        message = message,
-        errorCode = "unsupportedType",
-        attributes = this.currentAttributesWith(Pair("Content Type", receivedContentType.fullType)),
-        exception = exception
-      ),
-      exception = exception
-    )
-
+    this.steps.currentStepFailed(message, "unsupportedType", exception)
     throw exception
   }
 
@@ -1388,16 +1184,7 @@ class BookBorrowTask(
       this.debug("DRM support is unavailable, cannot continue!")
       val ex = DRMUnsupportedException("DRM support is not available")
       val message = this.services.borrowStrings.borrowBookFulfillDRMNotSupported
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsForDRM(
-          message = message,
-          drmSystem = this.adobeACS,
-          errorCode = "drmUnsupported",
-          exception = ex
-        ),
-        exception = ex
-      )
+      this.steps.currentStepFailed(message, "${this.adobeACS}: drmUnsupported", ex)
       throw ex
     }
   }
@@ -1486,63 +1273,36 @@ class BookBorrowTask(
         future.get(seconds, TimeUnit.SECONDS)
       } catch (e: TimeoutException) {
         val message = this.services.borrowStrings.borrowBookFulfillTimedOut
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = this.errorDetailsFor(
-            message = message,
-            errorCode = "timedOut",
-            exception = e,
-            attributes = this.currentAttributesWith()
-          ),
-          exception = e
-        )
+        this.steps.currentStepFailed(message, "timedOut", e)
         this.downloads[this.bookId]?.cancel()
         throw IOException("Timed out", e)
       } catch (e: ExecutionException) {
         throw when (val cause = e.cause!!) {
           is CancellationException -> {
             val message = this.services.borrowStrings.borrowBookFulfillCancelled
-            this.steps.currentStepFailed(
-              message = message,
-              errorValue = this.errorDetailsFor(
-                message = message,
-                errorCode = "downloadCancelled",
-                exception = cause,
-                attributes = this.currentAttributesWith()
-              ),
-              exception = cause
-            )
+            this.steps.currentStepFailed(message, "downloadCancelled", cause)
             cause
           }
           is AdobeDRMFulfillmentException -> {
             val message =
               this.services.borrowStrings.borrowBookFulfillACSMConnectorFailed(cause.errorCode)
-            this.steps.currentStepFailed(
-              message = message,
-              errorValue = this.errorDetailsForDRM(
-                message = message,
-                drmSystem = this.adobeACS,
-                errorCode = cause.errorCode,
-                exception = cause
-              ),
-              exception = cause
-            )
+            this.steps.currentStepFailed(message, "${this.adobeACS}: ${cause.errorCode}", cause)
             cause
           }
           else -> {
             this.steps.currentStepFailed(
-              message = this.services.borrowStrings.borrowBookFulfillACSMFailed,
-              errorValue = this.errorDetailsForUnexpectedException(cause, this.currentAttributesWith()),
-              exception = cause
+              this.services.borrowStrings.borrowBookFulfillACSMFailed,
+              "unexpectedException",
+              cause
             )
             cause
           }
         }
       } catch (e: Throwable) {
         this.steps.currentStepFailed(
-          message = this.services.borrowStrings.borrowBookFulfillACSMFailed,
-          errorValue = this.errorDetailsForUnexpectedException(e, this.currentAttributesWith()),
-          exception = e
+          this.services.borrowStrings.borrowBookFulfillACSMFailed,
+          "unexpectedException",
+          e
         )
         throw e
       }
@@ -1566,16 +1326,7 @@ class BookBorrowTask(
       val exception = BookBorrowExceptionDeviceNotActivated()
       val message =
         this.services.borrowStrings.borrowBookFulfillACSMGettingDeviceCredentialsNotActivated
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsForDRM(
-          message = message,
-          drmSystem = this.adobeACS,
-          errorCode = "drmDeviceNotActive",
-          exception = exception
-        ),
-        exception = exception
-      )
+      this.steps.currentStepFailed(message, "${this.adobeACS}: drmDeviceNotActive", exception)
       throw exception
     }
 
@@ -1596,16 +1347,7 @@ class BookBorrowTask(
       return FileUtilities.fileReadBytes(file)
     } catch (e: Exception) {
       val message = this.services.borrowStrings.borrowBookFulfillACSMReadFailed
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsForDRM(
-          message = message,
-          drmSystem = this.adobeACS,
-          errorCode = "drmUnreadableACSM",
-          exception = e
-        ),
-        exception = e
-      )
+      this.steps.currentStepFailed(message, "${this.adobeACS}: drmUnreadableACSM", e)
       throw e
     }
   }
@@ -1646,14 +1388,9 @@ class BookBorrowTask(
       val exception = BookUnsupportedTypeException(contentType)
       val message = this.services.borrowStrings.borrowBookFulfillACSMUnsupportedContentType
       this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsForDRM(
-          message = message,
-          drmSystem = this.adobeACS,
-          errorCode = "drmUnsupportedContentType ${contentType.fullType}",
-          exception = exception
-        ),
-        exception = exception
+        message,
+        "${this.adobeACS}: drmUnsupportedContentType ${contentType.fullType}",
+        exception
       )
       throw exception
     }
@@ -1674,16 +1411,7 @@ class BookBorrowTask(
       AdobeAdeptFulfillmentToken.parseFromBytes(acsmBytes)
     } catch (e: Exception) {
       val message = this.services.borrowStrings.borrowBookFulfillACSMParseFailed
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsForDRM(
-          message = message,
-          drmSystem = this.adobeACS,
-          errorCode = "drmUnreadableACSM",
-          exception = e
-        ),
-        exception = e
-      )
+      this.steps.currentStepFailed(message, "${this.adobeACS}: drmUnreadableACSM", e)
       throw e
     }
   }
@@ -1714,16 +1442,7 @@ class BookBorrowTask(
     } catch (ex: Exception) {
       this.error("failed to parse bearer token: {}: ", acquisition.uri, ex)
       val message = this.services.borrowStrings.borrowBookFulfillUnparseableBearerToken
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "unparseableBearerToken",
-          exception = ex,
-          attributes = this.currentAttributesWith()
-        ),
-        exception = ex
-      )
+      this.steps.currentStepFailed(message, "unparseableBearerToken", ex)
       throw ex
     }
 
@@ -1834,18 +1553,8 @@ class BookBorrowTask(
       }
     } catch (e: Exception) {
       this.logger.error("could not copy content: ", e)
-
       val message = this.services.borrowStrings.borrowBookBundledCopyFailed
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "bundledCopyFailed",
-          exception = e,
-          attributes = this.currentAttributesWith()
-        ),
-        exception = e
-      )
+      this.steps.currentStepFailed(message, "bundledCopyFailed", e)
       FileUtilities.fileDelete(file)
       throw e
     }
@@ -1917,18 +1626,8 @@ class BookBorrowTask(
       }
     } catch (e: Exception) {
       this.logger.error("could not copy content: ", e)
-
       val message = this.services.borrowStrings.borrowBookContentCopyFailed
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "contentCopyFailed",
-          exception = e,
-          attributes = this.currentAttributesWith()
-        ),
-        exception = e
-      )
+      this.steps.currentStepFailed(message, "contentCopyFailed", e)
       FileUtilities.fileDelete(file)
       throw e
     }

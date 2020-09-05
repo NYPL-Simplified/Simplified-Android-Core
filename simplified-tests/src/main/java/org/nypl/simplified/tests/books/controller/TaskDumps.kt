@@ -6,7 +6,7 @@ import org.slf4j.Logger
 
 object TaskDumps {
 
-  fun dump(logger: Logger, results: TaskResult<*, *>) {
+  fun dump(logger: Logger, results: TaskResult<*>) {
     logger.debug("RESULTS:")
 
     for (step in results.steps) {
@@ -18,7 +18,7 @@ object TaskDumps {
         }
         is TaskStepResolution.TaskStepFailed -> {
           logger.debug("step resolution:  {} (exception: {}) (error: {})",
-            resolution.message, resolution.exception, resolution.errorValue)
+            resolution.message, resolution.exception, resolution.errorCode)
           logger.debug("--")
         }
       }

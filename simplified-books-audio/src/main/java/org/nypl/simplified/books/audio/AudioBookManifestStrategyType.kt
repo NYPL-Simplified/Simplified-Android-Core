@@ -21,5 +21,5 @@ interface AudioBookManifestStrategyType {
    * Execute the strategy.
    */
 
-  fun execute(): TaskResult<String, AudioBookManifestData>
+  fun execute(): TaskResult<AudioBookManifestData>
 }

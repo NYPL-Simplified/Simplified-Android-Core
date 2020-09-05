@@ -48,9 +48,7 @@ import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.migration.spi.MigrationType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONParser
-import org.nypl.simplified.presentableerror.api.PresentableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -108,14 +106,6 @@ class MigrationFrom3Master(
     this.noticesObservable.onNext(MigrationStepSucceeded(
       message = message,
       subject = subject
-    ))
-  }
-
-  private fun publishStepSucceeded(subject: Subject, message: String, steps: List<PresentableType>) {
-    this.noticesObservable.onNext(MigrationStepSucceeded(
-      message = message,
-      subject = subject,
-      causes = steps
     ))
   }
 
@@ -305,21 +295,10 @@ class MigrationFrom3Master(
         )
 
       when (val taskResult = this.services.loginAccount(createdAccount.account, credentials)) {
-        is TaskResult.Success -> {
+        is TaskResult.Success ->
           this.publishStepSucceeded(ACCOUNT, this.strings.successAuthenticatedAccount(accountTitle))
-        }
-        is TaskResult.Failure -> {
-          val message = taskResult.steps.last().resolution.message
-          val causes =
-            taskResult.steps.mapNotNull { step ->
-              when (val resolution = step.resolution) {
-                is TaskStepResolution.TaskStepSucceeded -> null
-                is TaskStepResolution.TaskStepFailed -> resolution.errorValue
-              }
-            }
-
-          this.publishStepError(MigrationStepError(message = message, causes = causes))
-        }
+        is TaskResult.Failure ->
+          this.publishStepError(MigrationStepError(taskResult.message))
       }
     } catch (e: Exception) {
       this.logger.error("failed to authenticate account: ", e)
@@ -724,22 +703,17 @@ class MigrationFrom3Master(
    */
 
   private fun createAccount(account: LoadedAccount): CreatedAccount? {
-    return when (val taskResult =
-      this.services.createAccount(account.enumeratedAccount.idURI)) {
+    return when (val taskResult = this.services.createAccount(account.enumeratedAccount.idURI)) {
       is TaskResult.Success -> {
         CreatedAccount(account, taskResult.result)
       }
       is TaskResult.Failure -> {
-        val message = taskResult.steps.last().resolution.message
-        val causes =
-          taskResult.steps.mapNotNull { step ->
-            when (val resolution = step.resolution) {
-              is TaskStepResolution.TaskStepSucceeded -> null
-              is TaskStepResolution.TaskStepFailed -> resolution.errorValue
-            }
-          }
-
-        this.publishStepError(MigrationStepError(message = message, causes = causes))
+        this.publishStepError(MigrationStepError(
+          message = taskResult.message,
+          exception = taskResult.exception?.let { java.lang.Exception(it) },
+          attributes = taskResult.attributes,
+          subject = ACCOUNT
+        ))
         null
       }
     }

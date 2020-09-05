@@ -1,7 +1,6 @@
 package org.nypl.simplified.books.controller
 
 import io.reactivex.subjects.Subject
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationSucceeded
@@ -11,7 +10,6 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.Callable
@@ -22,12 +20,12 @@ class ProfileAccountCreateOrReturnExistingTask(
   private val accountProviders: AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
   private val strings: ProfileAccountCreationStringResourcesType
-) : Callable<TaskResult<AccountCreateErrorDetails, AccountType>> {
+) : Callable<TaskResult<AccountType>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountCreateOrReturnExistingTask::class.java)
-  private val taskRecorder = TaskRecorder.create<AccountCreateErrorDetails>()
+  private val taskRecorder = TaskRecorder.create()
 
-  override fun call(): TaskResult<AccountCreateErrorDetails, AccountType> {
+  override fun call(): TaskResult<AccountType> {
     return try {
       this.taskRecorder.beginNewStep(this.strings.creatingAccount)
 
@@ -51,10 +49,10 @@ class ProfileAccountCreateOrReturnExistingTask(
 
       this.taskRecorder.currentStepFailedAppending(
         this.strings.unexpectedException,
-        AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
+        "unexpectedException",
         e)
 
-      this.publishFailureEvent(this.taskRecorder.currentStep()!!)
+      this.publishFailureEvent()
       this.taskRecorder.finishFailure()
     } finally {
       this.logger.debug("finished")
@@ -65,7 +63,7 @@ class ProfileAccountCreateOrReturnExistingTask(
     this.accountEvents.onNext(AccountEventCreationSucceeded(
       this.strings.creatingAccountSucceeded, account.id))
 
-  private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
+  private fun publishFailureEvent() =
     this.accountEvents.onNext(AccountEventCreationFailed(
-      step.resolution.message, this.taskRecorder.finishFailure<AccountType>()))
+      this.taskRecorder.finishFailure<AccountType>()))
 }

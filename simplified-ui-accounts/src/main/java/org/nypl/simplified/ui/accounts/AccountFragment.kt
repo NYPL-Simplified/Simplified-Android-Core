@@ -54,7 +54,6 @@ import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
@@ -992,7 +991,7 @@ class AccountFragment : Fragment() {
   }
 
   @UiThread
-  private fun <E : PresentableErrorType> openErrorPage(taskSteps: List<TaskStep<E>>) {
+  private fun openErrorPage(taskSteps: List<TaskStep>) {
     this.uiThread.checkIsUIThread()
 
     val parameters =

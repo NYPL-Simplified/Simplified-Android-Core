@@ -13,12 +13,10 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
-import org.nypl.simplified.accounts.api.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -40,7 +38,7 @@ class ProfileAccountLogoutTask(
   private val http: HTTPType,
   private val logoutStrings: AccountLogoutStringResourcesType,
   private val profile: ProfileReadableType
-) : Callable<TaskResult<AccountLogoutErrorData, Unit>> {
+) : Callable<TaskResult<Unit>> {
 
   init {
     Preconditions.checkState(
@@ -54,7 +52,7 @@ class ProfileAccountLogoutTask(
     LoggerFactory.getLogger(ProfileAccountLogoutTask::class.java)
 
   private val steps =
-    TaskRecorder.create<AccountLogoutErrorData>()
+    TaskRecorder.create()
 
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
@@ -65,50 +63,7 @@ class ProfileAccountLogoutTask(
   private fun error(message: String, vararg arguments: Any?) =
     this.logger.error("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
-  private fun errorDetailsFor(
-    message: String,
-    errorCode: String,
-    exception: Throwable? = null,
-    attributes: Map<String, String> = mapOf(),
-    problemReport: HTTPProblemReport? = null
-  ): AccountLogoutErrorData {
-    return AccountLogoutErrorData(
-      attributes = attributes,
-      errorCode = errorCode,
-      exception = exception,
-      message = message,
-      problemReport = problemReport
-    )
-  }
-
-  private fun errorDetailsForUnexpectedException(
-    exception: Throwable,
-    attributes: Map<String, String> = mapOf()
-  ): AccountLogoutErrorData {
-    return this.errorDetailsFor(
-      attributes = attributes,
-      errorCode = "unexpectedException",
-      exception = exception,
-      message = exception.message ?: exception.javaClass.name
-    )
-  }
-
-  private fun errorDetailsForDRM(
-    message: String,
-    drmSystem: String,
-    errorCode: String,
-    exception: Throwable,
-    attributes: Map<String, String> = mapOf()
-  ): AccountLogoutErrorData {
-    return this.errorDetailsFor(
-      attributes = attributes,
-      errorCode = "$drmSystem: $errorCode",
-      exception = exception,
-      message = message
-    )
-  }
-
-  override fun call(): TaskResult<AccountLogoutErrorData, Unit> {
+  override fun call(): TaskResult<Unit> {
     this.steps.beginNewStep(this.logoutStrings.logoutStarted)
 
     this.credentials =
@@ -134,10 +89,9 @@ class ProfileAccountLogoutTask(
       return this.steps.finishSuccess(Unit)
     } catch (e: Throwable) {
       this.steps.currentStepFailedAppending(
-        message = this.logoutStrings.logoutUnexpectedException,
-        errorValue = this.errorDetailsForUnexpectedException(e),
-        exception = e)
-
+        this.logoutStrings.logoutUnexpectedException,
+        "unexpectedException",
+        e)
       val failure = this.steps.finishFailure<Unit>()
       this.account.setLoginState(AccountLogoutFailed(failure, this.credentials))
       failure
@@ -243,20 +197,12 @@ class ProfileAccountLogoutTask(
     when (ex) {
       is AdobeDRMExtensions.AdobeDRMLogoutConnectorException -> {
         val message = this.logoutStrings.logoutDeactivatingDeviceAdobeFailed(ex.errorCode, ex)
-        this.steps.currentStepFailed(
-          message,
-          this.errorDetailsForDRM(
-            message = message,
-            drmSystem = "Adobe ACS",
-            errorCode = ex.errorCode,
-            exception = ex
-          ),
-          ex)
+        this.steps.currentStepFailed(message, "Adobe ACS: ${ex.errorCode}", ex)
       }
       else -> {
         this.steps.currentStepFailed(
           this.logoutStrings.logoutDeactivatingDeviceAdobeFailed("UNKNOWN", ex),
-          this.errorDetailsForUnexpectedException(ex),
+          "unexpectedException",
           ex)
       }
     }
@@ -279,7 +225,7 @@ class ProfileAccountLogoutTask(
     } catch (e: Throwable) {
       this.error("could not clear book registry: ", e)
       this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookRegistryFailed, this.errorDetailsForUnexpectedException(e))
+        this.logoutStrings.logoutClearingBookRegistryFailed, "unexpectedException")
     }
 
     this.steps.beginNewStep(this.logoutStrings.logoutClearingBookDatabase)
@@ -289,7 +235,7 @@ class ProfileAccountLogoutTask(
     } catch (e: Throwable) {
       this.error("could not clear book database: ", e)
       this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookDatabaseFailed, this.errorDetailsForUnexpectedException(e))
+        this.logoutStrings.logoutClearingBookDatabaseFailed, "unexpectedException")
     }
   }
 }

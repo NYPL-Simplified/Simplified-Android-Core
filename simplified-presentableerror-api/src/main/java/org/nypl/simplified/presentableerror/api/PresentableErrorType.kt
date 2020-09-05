@@ -24,11 +24,4 @@ interface PresentableErrorType : PresentableType, Serializable {
 
   val exception: Throwable?
     get() = null
-
-  /**
-   * A list of causes for the error.
-   */
-
-  val causes: List<PresentableErrorType>
-    get() = listOf()
 }

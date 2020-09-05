@@ -33,7 +33,6 @@ sealed class BootEvent {
   data class BootFailed(
     override val message: String,
     override val exception: Exception,
-    override val causes: List<PresentableErrorType> = listOf(),
     override val attributes: Map<String, String> = mapOf()
   ) : BootEvent(), PresentableErrorType
 }

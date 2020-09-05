@@ -6,12 +6,8 @@ import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
-import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
@@ -104,24 +100,24 @@ class MockProfilesController(
 
   override fun profileAccountLogin(
     request: ProfileAccountLoginRequest
-  ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     this.profileAccountLogins.add(request)
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profileAccountCreate(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+  override fun profileAccountCreate(provider: URI): FluentFuture<TaskResult<AccountType>> {
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profileAccountCreateCustomOPDS(opdsFeed: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+  override fun profileAccountCreateCustomOPDS(opdsFeed: URI): FluentFuture<TaskResult<AccountType>> {
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profileAccountCreateOrReturnExisting(provider: URI): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+  override fun profileAccountCreateOrReturnExisting(provider: URI): FluentFuture<TaskResult<AccountType>> {
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<TaskResult<AccountDeleteErrorDetails, Unit>> {
+  override fun profileAccountDeleteByProvider(provider: URI): FluentFuture<TaskResult<Unit>> {
     return FluentFuture.from(SettableFuture.create())
   }
 
@@ -139,7 +135,7 @@ class MockProfilesController(
 
   val profileAccountLogouts = mutableListOf<AccountID>()
 
-  override fun profileAccountLogout(account: AccountID): FluentFuture<TaskResult<AccountLogoutErrorData, Unit>> {
+  override fun profileAccountLogout(account: AccountID): FluentFuture<TaskResult<Unit>> {
     this.profileAccountLogouts.add(account)
     return FluentFuture.from(SettableFuture.create())
   }

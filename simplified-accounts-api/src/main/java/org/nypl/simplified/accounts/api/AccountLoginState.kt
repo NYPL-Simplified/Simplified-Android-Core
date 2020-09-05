@@ -1,5 +1,6 @@
 package org.nypl.simplified.accounts.api
 
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 
 /**
@@ -81,8 +82,14 @@ sealed class AccountLoginState {
    */
 
   data class AccountLoginFailed(
-    val taskResult: TaskResult.Failure<AccountLoginErrorData, *>
-  ) : AccountLoginState() {
+    val taskResult: TaskResult.Failure<*>
+  ) : AccountLoginState(), PresentableErrorType {
+    override val message: String =
+      this.taskResult.message
+    override val exception: Throwable? =
+      this.taskResult.exception
+    override val attributes: Map<String, String> =
+      this.taskResult.attributes
 
     override val credentials: AccountAuthenticationCredentials?
       get() = null
@@ -117,7 +124,14 @@ sealed class AccountLoginState {
    */
 
   data class AccountLogoutFailed(
-    val taskResult: TaskResult.Failure<AccountLogoutErrorData, *>,
+    val taskResult: TaskResult.Failure<*>,
     override val credentials: AccountAuthenticationCredentials
-  ) : AccountLoginState()
+  ) : AccountLoginState(), PresentableErrorType {
+    override val message: String =
+      this.taskResult.message
+    override val exception: Throwable? =
+      this.taskResult.exception
+    override val attributes: Map<String, String> =
+      this.taskResult.attributes
+  }
 }

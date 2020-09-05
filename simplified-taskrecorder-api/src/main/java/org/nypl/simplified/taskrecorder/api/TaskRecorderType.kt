@@ -1,26 +1,37 @@
 package org.nypl.simplified.taskrecorder.api
 
-import java.io.Serializable
-
 /**
  * A task recorder. Record the steps of complex tasks to explain how and why errors occurred.
- *
- * @param <E> The precise type of associated error values
  */
 
-interface TaskRecorderType<E : Serializable> {
+interface TaskRecorderType {
+
+  /**
+   * Add an attribute to the task.
+   */
+
+  fun addAttribute(
+    name: String,
+    value: String
+  )
+
+  /**
+   * Add a set of attributes to the task.
+   */
+
+  fun addAttributes(attributes: Map<String, String>)
 
   /**
    * Start a new controller task step.
    */
 
-  fun beginNewStep(message: String): TaskStep<E>
+  fun beginNewStep(message: String): TaskStep
 
   /**
    * Resolve the current step and mark it as having succeeded.
    */
 
-  fun currentStepSucceeded(message: String): TaskStep<E>
+  fun currentStepSucceeded(message: String): TaskStep
 
   /**
    * Resolve the current step and mark it as having failed.
@@ -28,9 +39,9 @@ interface TaskRecorderType<E : Serializable> {
 
   fun currentStepFailed(
     message: String,
-    errorValue: E,
+    errorCode: String,
     exception: Throwable? = null
-  ): TaskStep<E>
+  ): TaskStep
 
   /**
    * If the current step has not failed, fail it with the given error. If the current step
@@ -40,31 +51,31 @@ interface TaskRecorderType<E : Serializable> {
 
   fun currentStepFailedAppending(
     message: String,
-    errorValue: E,
+    errorCode: String,
     exception: Throwable
-  ): TaskStep<E>
+  ): TaskStep
 
   /**
    * Complete recording of all steps.
    */
 
-  fun <A> finishSuccess(result: A): TaskResult.Success<E, A>
+  fun <A> finishSuccess(result: A): TaskResult.Success<A>
 
   /**
    * Complete recording of all steps.
    */
 
-  fun <A> finishFailure(): TaskResult.Failure<E, A>
+  fun <A> finishFailure(): TaskResult.Failure<A>
 
   /**
    * @return The current step
    */
 
-  fun currentStep(): TaskStep<E>?
+  fun currentStep(): TaskStep?
 
   /**
    * Add a series of steps.
    */
 
-  fun addAll(steps: List<TaskStep<E>>)
+  fun addAll(steps: List<TaskStep>)
 }

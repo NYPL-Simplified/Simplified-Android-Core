@@ -6,11 +6,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails.UnexpectedException
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountLoginErrorData
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
@@ -72,20 +69,15 @@ abstract class MigrationFrom3MasterContract {
       MigrationServiceDependencies(
         applicationProfileIsAnonymous = true,
         createAccount = {
-          val taskRecorder =
-            TaskRecorder.create<AccountCreateErrorDetails>()
+          val taskRecorder = TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed("FAILED!", UnexpectedException("FAILED!", Exception()))
+          taskRecorder.currentStepFailed("FAILED!", "unexpectedException")
           taskRecorder.finishFailure()
         },
         loginAccount = { _, _ ->
-          val taskRecorder =
-            TaskRecorder.create<AccountLoginErrorData>()
+          val taskRecorder = TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed(
-            "FAILED!",
-            AccountLoginErrorData(message = "Ouch", errorCode = "unexpectedException", exception = Exception())
-          )
+          taskRecorder.currentStepFailed("FAILED!", "unexpectedException")
           taskRecorder.finishFailure()
         },
         accountEvents = this.accountEvents,
@@ -203,8 +195,8 @@ abstract class MigrationFrom3MasterContract {
         accountEvents = this.accountEvents,
         applicationProfileIsAnonymous = false,
         context = this.context,
-        createAccount = { TaskResult.Failure(listOf()) },
-        loginAccount = { _, _ -> TaskResult.Failure(listOf()) },
+        createAccount = { TaskResult.Failure(listOf(), mapOf()) },
+        loginAccount = { _, _ -> TaskResult.Failure(listOf(), mapOf()) },
         applicationVersion = "test suite 0.0.1"
       )
 
@@ -287,20 +279,15 @@ abstract class MigrationFrom3MasterContract {
       MigrationServiceDependencies(
         applicationProfileIsAnonymous = true,
         createAccount = {
-          val taskRecorder =
-            TaskRecorder.create<AccountCreateErrorDetails>()
+          val taskRecorder = TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed("FAILED!", UnexpectedException("Ouch", Exception()))
+          taskRecorder.currentStepFailed("FAILED!", "unexpectedException")
           taskRecorder.finishFailure()
         },
         loginAccount = { _, _ ->
-          val taskRecorder =
-            TaskRecorder.create<AccountLoginErrorData>()
+          val taskRecorder = TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed(
-            "FAILED!",
-            AccountLoginErrorData(message = "Ouch", errorCode = "unexpectedException", exception = Exception())
-          )
+          taskRecorder.currentStepFailed("FAILED!", "unexpectedException")
           taskRecorder.finishFailure()
         },
         accountEvents = this.accountEvents,
@@ -385,14 +372,12 @@ abstract class MigrationFrom3MasterContract {
       MigrationServiceDependencies(
         applicationProfileIsAnonymous = true,
         createAccount = {
-          val taskRecorder =
-            TaskRecorder.create<AccountCreateErrorDetails>()
+          val taskRecorder = TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
         loginAccount = { _, _ ->
-          val taskRecorder =
-            TaskRecorder.create<AccountLoginErrorData>()
+          val taskRecorder = TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(Unit)
         },
@@ -474,13 +459,13 @@ abstract class MigrationFrom3MasterContract {
         applicationProfileIsAnonymous = true,
         createAccount = {
           val taskRecorder =
-            TaskRecorder.create<AccountCreateErrorDetails>()
+            TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
         loginAccount = { _, _ ->
           val taskRecorder =
-            TaskRecorder.create<AccountLoginErrorData>()
+            TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(Unit)
         },
@@ -633,13 +618,13 @@ abstract class MigrationFrom3MasterContract {
         applicationProfileIsAnonymous = true,
         createAccount = {
           val taskRecorder =
-            TaskRecorder.create<AccountCreateErrorDetails>()
+            TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
         loginAccount = { _, _ ->
           val taskRecorder =
-            TaskRecorder.create<AccountLoginErrorData>()
+            TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(Unit)
         },
@@ -742,19 +727,14 @@ abstract class MigrationFrom3MasterContract {
       MigrationServiceDependencies(
         applicationProfileIsAnonymous = true,
         createAccount = {
-          val taskRecorder =
-            TaskRecorder.create<AccountCreateErrorDetails>()
+          val taskRecorder = TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
           taskRecorder.finishSuccess(account)
         },
         loginAccount = { _, _ ->
-          val taskRecorder =
-            TaskRecorder.create<AccountLoginErrorData>()
+          val taskRecorder = TaskRecorder.create()
           taskRecorder.beginNewStep("Starting...")
-          taskRecorder.currentStepFailed(
-            "FAILURE!",
-            AccountLoginErrorData(message = "Ouch", errorCode = "unexpectedException", exception = Exception())
-          )
+          taskRecorder.currentStepFailed("FAILURE!", "unexpectedException")
           taskRecorder.finishFailure()
         },
         accountEvents = this.accountEvents,
@@ -843,8 +823,8 @@ abstract class MigrationFrom3MasterContract {
 
   private fun resource(name: String): ByteArray {
     return MigrationFrom3MasterContract::class.java.getResource(
-        "/org/nypl/simplified/tests/migration/from3master/$name"
-      )
+      "/org/nypl/simplified/tests/migration/from3master/$name"
+    )
       .readBytes()
   }
 }

@@ -8,7 +8,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.nypl.simplified.accounts.api.AccountProviderDescription
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
@@ -395,18 +394,12 @@ abstract class AccountProviderDescriptionRegistryContract {
         isAutomatic = false,
         isProduction = true)
 
-    private fun fail(): TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType> {
-      val taskRecorder =
-        TaskRecorder.create<AccountProviderResolutionErrorDetails>()
+    private fun fail(): TaskResult.Failure<AccountProviderType> {
+      val taskRecorder = TaskRecorder.create()
       val exception = Exception()
       taskRecorder.currentStepFailed(
         message = "x",
-        errorValue = AccountProviderResolutionErrorDetails.UnexpectedException(
-          message = "Unexpected exception",
-          exception = exception,
-          accountProviderID = "accountProviderID",
-          accountProviderTitle = "accountProviderTitle"
-        ),
+        errorCode = "unexpectedException",
         exception = exception)
       return taskRecorder.finishFailure()
     }
@@ -480,7 +473,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     override fun resolve(
       onProgress: AccountProviderResolutionListenerType,
       description: AccountProviderDescription
-    ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+    ): TaskResult<AccountProviderType> {
       throw IllegalStateException()
     }
   }
@@ -503,7 +496,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     override fun resolve(
       onProgress: AccountProviderResolutionListenerType,
       description: AccountProviderDescription
-    ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+    ): TaskResult<AccountProviderType> {
       throw IllegalStateException()
     }
   }
@@ -522,7 +515,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     override fun resolve(
       onProgress: AccountProviderResolutionListenerType,
       description: AccountProviderDescription
-    ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+    ): TaskResult<AccountProviderType> {
       throw IllegalStateException()
     }
   }
@@ -541,7 +534,7 @@ abstract class AccountProviderDescriptionRegistryContract {
     override fun resolve(
       onProgress: AccountProviderResolutionListenerType,
       description: AccountProviderDescription
-    ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+    ): TaskResult<AccountProviderType> {
       throw IllegalStateException()
     }
   }

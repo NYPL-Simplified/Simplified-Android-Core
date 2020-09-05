@@ -1,79 +1,88 @@
 package org.nypl.simplified.taskrecorder.api
 
 import com.google.common.base.Preconditions
-import java.io.Serializable
+import org.nypl.simplified.presentableerror.api.PresentableErrorType
+import org.nypl.simplified.presentableerror.api.PresentableType
+import org.nypl.simplified.presentableerror.api.Presentables.mergeAttributes
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
 
 /**
  * The result of executing a task.
  */
 
-sealed class TaskResult<E : Serializable, A> {
+sealed class TaskResult<A> : PresentableType {
 
-  abstract val steps: List<TaskStep<E>>
+  abstract val steps: List<TaskStep>
 
   /**
    * A task succeeded.
    */
 
-  data class Success<E : Serializable, A>(
+  data class Success<A>(
     val result: A,
-    override val steps: List<TaskStep<E>>
-  ) : TaskResult<E, A>() {
+    override val steps: List<TaskStep>,
+    override val attributes: Map<String, String>
+  ) : TaskResult<A>() {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
         "Must have logged at least one step")
     }
+
+    override val message: String
+      get() = this.steps.last().message
   }
 
   /**
    * A task failed.
    */
 
-  data class Failure<E : Serializable, A>(
-    override val steps: List<TaskStep<E>>
-  ) : TaskResult<E, A>() {
+  data class Failure<A>(
+    override val steps: List<TaskStep>,
+    override val attributes: Map<String, String>
+  ) : TaskResult<A>(), PresentableErrorType {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
         "Must have logged at least one step")
     }
 
-    /**
-     * The errors associated with the failure.
-     */
+    override val exception: Throwable?
+      get() = this.steps.last().resolution.exception
+    override val message: String
+      get() = this.steps.last().message
 
-    fun errors(): List<E> {
-      val errorList = mutableListOf<E>()
-      for (step in this.steps) {
-        when (val resolution = step.resolution) {
-          is TaskStepResolution.TaskStepSucceeded -> Unit
-          is TaskStepResolution.TaskStepFailed -> errorList.add(resolution.errorValue)
-        }
+    val lastErrorCode: String
+      get() = run {
+        val lastStep = this.steps.last { step -> step.resolution is TaskStepFailed }
+        return (lastStep.resolution as TaskStepFailed).errorCode
       }
-      return errorList.toList()
-    }
   }
 
   /**
    * @return The resolution of step `step`
    */
 
-  fun resolutionOf(step: Int): TaskStepResolution<E> =
+  fun resolutionOf(step: Int): TaskStepResolution =
     this.steps[step].resolution
 
   /**
    * Functor map for task results.
    */
 
-  fun <B> map(f: (A) -> B): TaskResult<E, B> {
+  fun <B> map(f: (A) -> B): TaskResult<B> {
     return when (this) {
       is Success ->
         Success(
           result = f(this.result),
-          steps = this.steps)
+          steps = this.steps,
+          attributes = this.attributes
+        )
       is Failure ->
-        Failure(this.steps)
+        Failure(
+          steps = this.steps,
+          attributes = this.attributes
+        )
     }
   }
 
@@ -81,20 +90,28 @@ sealed class TaskResult<E : Serializable, A> {
    * Monadic bind for task results.
    */
 
-  fun <B> flatMap(f: (A) -> TaskResult<E, B>): TaskResult<E, B> {
+  fun <B> flatMap(f: (A) -> TaskResult<B>): TaskResult<B> {
     return when (this) {
       is Success -> {
         when (val next = f.invoke(this.result)) {
           is Success ->
             Success(
               result = next.result,
-              steps = this.steps.plus(next.steps))
+              steps = this.steps.plus(next.steps),
+              attributes = mergeAttributes(this.attributes, next.attributes)
+            )
           is Failure ->
-            Failure(steps = this.steps.plus(next.steps))
+            Failure(
+              steps = this.steps.plus(next.steps),
+              attributes = mergeAttributes(this.attributes, next.attributes)
+            )
         }
       }
       is Failure ->
-        Failure(this.steps)
+        Failure(
+          steps = this.steps,
+          attributes = this.attributes
+        )
     }
   }
 
@@ -105,18 +122,19 @@ sealed class TaskResult<E : Serializable, A> {
      * given error.
      */
 
-    fun <E : Serializable, A> fail(
+    fun <A> fail(
       description: String,
       resolution: String,
-      errorValue: E
-    ): TaskResult<E, A> {
+      errorCode: String
+    ): TaskResult<A> {
       return Failure(
+        attributes = mapOf(),
         steps = listOf(
           TaskStep(
             description = description,
-            resolution = TaskStepResolution.TaskStepFailed(
+            resolution = TaskStepFailed(
               message = resolution,
-              errorValue = errorValue,
+              errorCode = errorCode,
               exception = null
             )
           )

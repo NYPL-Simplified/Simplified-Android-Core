@@ -21,7 +21,6 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy.SORT_BY_TITLE
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountFragment
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
@@ -39,8 +38,8 @@ import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
 import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
-import org.nypl.simplified.ui.settings.SettingsFragmentMain
 import org.nypl.simplified.ui.settings.SettingsFragmentDebug
+import org.nypl.simplified.ui.settings.SettingsFragmentMain
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.viewer.api.Viewers
@@ -319,7 +318,7 @@ class TabbedNavigationController private constructor(
     )
   }
 
-  override fun <E : PresentableErrorType> openErrorPage(parameters: ErrorPageParameters<E>) {
+  override fun openErrorPage(parameters: ErrorPageParameters) {
     this.navigator.addFragment(
       fragment = ErrorPageFragment.create(parameters),
       tab = this.navigator.currentTab()

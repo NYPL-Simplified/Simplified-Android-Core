@@ -5,17 +5,16 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledURIs.BUNDLED_CONTENT_SCHEME
 import org.nypl.simplified.books.controller.BookCoverFetchTask.Type.COVER
 import org.nypl.simplified.books.controller.BookCoverFetchTask.Type.THUMBNAIL
 import org.nypl.simplified.http.core.HTTPAuthType
-import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
@@ -36,7 +35,7 @@ class BookCoverFetchTask(
   private val feedEntry: OPDSAcquisitionFeedEntry,
   private val type: Type,
   private val httpAuth: OptionType<HTTPAuthType>
-) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+) : Callable<TaskResult<Unit>> {
 
   enum class Type {
     COVER, THUMBNAIL;
@@ -49,37 +48,9 @@ class BookCoverFetchTask(
   private val logger =
     LoggerFactory.getLogger(BookCoverFetchTask::class.java)
   private val taskRecorder =
-    TaskRecorder.create<BookStatusDownloadErrorDetails>()
+    TaskRecorder.create()
 
-  private fun errorDetailsFor(
-    message: String,
-    errorCode: String,
-    exception: Throwable? = null,
-    attributes: Map<String, String> = mapOf(),
-    problemReport: HTTPProblemReport? = null
-  ): BookStatusDownloadErrorDetails {
-    return BookStatusDownloadErrorDetails(
-      attributes = attributes,
-      errorCode = errorCode,
-      exception = exception,
-      message = message,
-      problemReport = problemReport
-    )
-  }
-
-  private fun errorDetailsForUnexpectedException(
-    exception: Throwable,
-    attributes: Map<String, String> = mapOf()
-  ): BookStatusDownloadErrorDetails {
-    return this.errorDetailsFor(
-      attributes = attributes,
-      errorCode = "unexpectedException",
-      exception = exception,
-      message = exception.message ?: exception.javaClass.name
-    )
-  }
-
-  override fun call(): TaskResult<BookStatusDownloadErrorDetails, Unit> {
+  override fun call(): TaskResult<Unit> {
     this.taskRecorder.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
 
     return try {
@@ -109,7 +80,7 @@ class BookCoverFetchTask(
 
       this.taskRecorder.currentStepFailedAppending(
         this.services.borrowStrings.borrowBookCoverUnexpectedException,
-        this.errorDetailsForUnexpectedException(e),
+        "unexpectedException",
         e)
       this.taskRecorder.finishFailure()
     } finally {
@@ -127,23 +98,17 @@ class BookCoverFetchTask(
 
   private fun fetchBundledURI(
     cover: URI
-  ): TaskResult<BookStatusDownloadErrorDetails, Unit> {
+  ): TaskResult<Unit> {
     return this.services.bundledContent.resolve(cover).use(this::saveCover)
   }
 
   private fun fetchContentURI(
     cover: URI
-  ): TaskResult<BookStatusDownloadErrorDetails, Unit> {
+  ): TaskResult<Unit> {
     val inputStream = this.services.contentResolver.openInputStream(Uri.parse(cover.toString()))
     if (inputStream == null) {
       val message = this.services.borrowStrings.borrowBookContentCopyFailed
-      this.taskRecorder.currentStepFailed(
-        message = message,
-        errorValue = this.errorDetailsFor(
-          message = message,
-          errorCode = "contentCopyFailed"
-        ),
-        exception = FileNotFoundException(cover.toString()))
+      this.taskRecorder.currentStepFailed(message, "contentCopyFailed", FileNotFoundException(cover.toString()))
       return this.taskRecorder.finishFailure()
     }
     return inputStream.use(this::saveCover)
@@ -151,27 +116,20 @@ class BookCoverFetchTask(
 
   private fun fetchCoverHTTP(
     cover: URI
-  ): TaskResult<BookStatusDownloadErrorDetails, Unit> {
+  ): TaskResult<Unit> {
     val message = this.services.borrowStrings.borrowBookCoverUnexpectedException
     return when (val result = this.services.http.get(this.httpAuth, cover, 0L)) {
       is HTTPResultOK -> {
         this.saveCoverHTTP(result)
       }
       is HTTPResultError -> {
-        this.taskRecorder.currentStepFailed(
-          message,
-          errorValue = this.errorDetailsFor(
-            message = message,
-            errorCode = "httpRequestFailed ${result.status}",
-            problemReport = this.someOrNull(result.problemReport)
-          ))
+        this.taskRecorder.addAttributes(
+          Presentables.problemReportAsAttributes(this.someOrNull(result.problemReport)))
+        this.taskRecorder.currentStepFailed(message, "httpRequestFailed ${result.status}")
         this.taskRecorder.finishFailure()
       }
       is HTTPResultException -> {
-        this.taskRecorder.currentStepFailed(
-          message,
-          this.errorDetailsForUnexpectedException(result.error),
-          result.error)
+        this.taskRecorder.currentStepFailed(message, "unexpectedException", result.error)
         this.taskRecorder.finishFailure()
       }
       else -> throw UnreachableCodeException()
@@ -180,13 +138,13 @@ class BookCoverFetchTask(
 
   private fun saveCoverHTTP(
     result: HTTPResultOK<InputStream>
-  ): TaskResult<BookStatusDownloadErrorDetails, Unit> {
+  ): TaskResult<Unit> {
     return this.saveCover(result.value)
   }
 
   private fun saveCover(
     inputStream: InputStream
-  ): TaskResult.Success<BookStatusDownloadErrorDetails, Unit> {
+  ): TaskResult.Success<Unit> {
     this.taskRecorder.beginNewStep(this.services.borrowStrings.borrowBookSavingCover)
     val file = this.databaseEntry.temporaryFile()
     FileOutputStream(file).use { stream ->

@@ -169,12 +169,10 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviderRegistry,
-        authDocumentParsers = this.authDocumentParsers,
         http = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
-        resolutionStrings = this.accountProviderResolutionStrings,
         strings = this.profileAccountCreationStrings)
 
     val result = task.call()
@@ -196,12 +194,10 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviderRegistry,
-        authDocumentParsers = this.authDocumentParsers,
         http = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
-        resolutionStrings = this.accountProviderResolutionStrings,
         strings = this.profileAccountCreationStrings)
 
     val result = task.call()
@@ -233,17 +229,15 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviderRegistry,
-        authDocumentParsers = this.authDocumentParsers,
         http = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
-        resolutionStrings = this.accountProviderResolutionStrings,
         strings = this.profileAccountCreationStrings)
 
     val result = task.call()
     val failure = result as TaskResult.Failure
-    Assert.assertEquals("parsingOPDSFeedFailed", failure.steps.last().resolution.message)
+    Assert.assertEquals("parsingOPDSFeedFailed", failure.lastErrorCode)
   }
 
   @Test
@@ -294,12 +288,10 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = accountProviders,
-        authDocumentParsers = this.authDocumentParsers,
         http = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
-        resolutionStrings = this.accountProviderResolutionStrings,
         strings = this.profileAccountCreationStrings)
 
     val result = task.call()
@@ -365,12 +357,10 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviderRegistry,
-        authDocumentParsers = this.authDocumentParsers,
         http = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
-        resolutionStrings = this.accountProviderResolutionStrings,
         strings = this.profileAccountCreationStrings)
 
     val result = task.call()
@@ -421,18 +411,16 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = accountProviders,
-        authDocumentParsers = this.authDocumentParsers,
         http = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
-        resolutionStrings = this.accountProviderResolutionStrings,
         strings = this.profileAccountCreationStrings
       )
 
     val result = task.call()
     val failure = result as TaskResult.Failure
-    Assert.assertEquals("creatingAccountFailed(org.nypl.simplified.accounts.database.api.AccountsDatabaseIOException)", failure.steps.last().resolution.message)
+    Assert.assertEquals("creatingAccountFailed", failure.lastErrorCode)
   }
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {

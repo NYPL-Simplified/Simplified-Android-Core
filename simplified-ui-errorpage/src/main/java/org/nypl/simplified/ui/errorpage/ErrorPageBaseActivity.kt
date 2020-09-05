@@ -15,7 +15,7 @@ abstract class ErrorPageBaseActivity : AppCompatActivity(), ErrorPageListenerTyp
       "org.nypl.simplified.ui.errorpage.ErrorPageBaseActivity.parameters"
   }
 
-  private lateinit var parameters: ErrorPageParameters<*>
+  private lateinit var parameters: ErrorPageParameters
   private lateinit var errorFragment: ErrorPageFragment
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ abstract class ErrorPageBaseActivity : AppCompatActivity(), ErrorPageListenerTyp
         ?: throw IllegalStateException("No parameters provided for activity")
 
     this.parameters =
-      if (currentParameters is ErrorPageParameters<*>) {
+      if (currentParameters is ErrorPageParameters) {
         currentParameters
       } else {
         throw IllegalStateException("Parameters of wrong type provided for activity")
@@ -47,7 +47,7 @@ abstract class ErrorPageBaseActivity : AppCompatActivity(), ErrorPageListenerTyp
       .commit()
   }
 
-  override fun onErrorPageSendReport(parameters: ErrorPageParameters<*>) {
+  override fun onErrorPageSendReport(parameters: ErrorPageParameters) {
     Reports.sendReportsDefault(
       context = this,
       address = parameters.emailAddress,

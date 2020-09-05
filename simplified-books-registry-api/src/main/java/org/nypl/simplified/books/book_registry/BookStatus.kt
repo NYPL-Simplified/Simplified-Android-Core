@@ -8,8 +8,6 @@ import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.http.core.HTTPHasProblemReportType
-import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
@@ -19,9 +17,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
-import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
 
 sealed class BookStatus {
 
@@ -120,27 +116,18 @@ sealed class BookStatus {
      * The list of steps that lead to the failure.
      */
 
-    val result: TaskResult.Failure<BookStatusRevokeErrorDetails, Unit>
-  ) : BookStatus(), PresentableErrorType, HTTPHasProblemReportType {
+    val result: TaskResult.Failure<Unit>
+  ) : BookStatus(), PresentableErrorType {
 
     override val priority: BookStatusPriorityOrdering
       get() = BookStatusPriorityOrdering.BOOK_STATUS_REVOKE_FAILED
 
-    override val attributes: Map<String, String>
-      get() = Presentables.collectAttributes(this.result.errors())
-
-    override val message: String
-      get() = this.result.steps.lastOrNull()?.resolution?.message ?: ""
-
-    override val problemReport: HTTPProblemReport?
-      get() {
-        val resolution = this.result.steps.lastOrNull()?.resolution
-        return if (resolution is TaskStepFailed) {
-          resolution.errorValue.problemReport
-        } else {
-          null
-        }
-      }
+    override val message: String =
+      this.result.message
+    override val exception: Throwable? =
+      this.result.exception
+    override val attributes: Map<String, String> =
+      this.result.attributes
   }
 
   /**
@@ -154,14 +141,18 @@ sealed class BookStatus {
      * The list of steps that lead to the failure.
      */
 
-    val result: TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
+    val result: TaskResult.Failure<Unit>
   ) : BookStatus(), PresentableErrorType {
 
     override val priority: BookStatusPriorityOrdering
       get() = BookStatusPriorityOrdering.BOOK_STATUS_DOWNLOAD_FAILED
 
-    override val message: String
-      get() = this.result.steps.lastOrNull()?.resolution?.message ?: ""
+    override val message: String =
+      this.result.message
+    override val exception: Throwable? =
+      this.result.exception
+    override val attributes: Map<String, String> =
+      this.result.attributes
   }
 
   /**
@@ -175,24 +166,18 @@ sealed class BookStatus {
      * The list of steps that lead to the failure.
      */
 
-    val result: TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
-  ) : BookStatus(), PresentableErrorType, HTTPHasProblemReportType {
+    val result: TaskResult.Failure<Unit>
+  ) : BookStatus(), PresentableErrorType {
 
     override val priority: BookStatusPriorityOrdering
       get() = BookStatusPriorityOrdering.BOOK_STATUS_DOWNLOAD_FAILED
 
-    override val message: String
-      get() = this.result.steps.lastOrNull()?.resolution?.message ?: ""
-
-    override val problemReport: HTTPProblemReport?
-      get() {
-        val resolution = this.result.steps.lastOrNull()?.resolution
-        return if (resolution is TaskStepFailed) {
-          resolution.errorValue.problemReport
-        } else {
-          null
-        }
-      }
+    override val message: String =
+      this.result.message
+    override val exception: Throwable? =
+      this.result.exception
+    override val attributes: Map<String, String> =
+      this.result.attributes
   }
 
   /**

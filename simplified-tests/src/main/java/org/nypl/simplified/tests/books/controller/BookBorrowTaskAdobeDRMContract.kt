@@ -543,9 +543,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
-
-    val errorData = results.errors().last()
-    Assert.assertEquals("Adobe ACS: drmUnsupported", errorData.errorCode)
+    Assert.assertEquals("Adobe ACS: drmUnsupported", results.lastErrorCode)
 
     /*
      * Check that the download failed.
@@ -692,9 +690,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
-
-    val error = results.errors().last()
-    Assert.assertEquals("Adobe ACS: drmUnsupportedContentType application/pdf", error.errorCode)
+    Assert.assertEquals("Adobe ACS: drmUnsupportedContentType application/pdf", results.lastErrorCode)
 
     /*
      * Check that the download failed.
@@ -808,9 +804,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
-
-    val error = results.errors().last()
-    Assert.assertEquals("Adobe ACS: drmDeviceNotActive", error.errorCode)
+    Assert.assertEquals("Adobe ACS: drmDeviceNotActive", results.lastErrorCode)
 
     /*
      * Check that the download failed.
@@ -907,9 +901,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
-
-    val error = results.errors().last()
-    Assert.assertEquals("Adobe ACS: drmUnreadableACSM", error.errorCode)
+    Assert.assertEquals("Adobe ACS: drmUnreadableACSM", results.lastErrorCode)
 
     /*
      * Check that the download failed.
@@ -1146,9 +1138,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
     val results = task.call(); TaskDumps.dump(logger, results)
     results as TaskResult.Failure
-
-    val error = results.errors().last()
-    Assert.assertEquals("Adobe ACS: E_TYPICAL", error.errorCode)
+    Assert.assertEquals("Adobe ACS: E_TYPICAL", results.lastErrorCode)
 
     /*
      * Check that the download failed.

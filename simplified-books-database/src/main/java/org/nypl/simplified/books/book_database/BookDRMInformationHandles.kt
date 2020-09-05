@@ -30,6 +30,7 @@ object BookDRMInformationHandles {
 
     val drmInfoFile =
       File(directory, "${format.shortName}-drm.txt")
+
     val drmKind =
       try {
         BookDRMKind.valueOf(drmInfoFile.readText().trim())

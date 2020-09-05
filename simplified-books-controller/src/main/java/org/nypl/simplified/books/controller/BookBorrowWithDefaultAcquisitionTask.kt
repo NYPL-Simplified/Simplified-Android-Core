@@ -6,7 +6,6 @@ import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -29,7 +28,7 @@ class BookBorrowWithDefaultAcquisitionTask(
   private val downloadTimeoutDuration: Duration = Duration.standardMinutes(3L),
   private val entry: OPDSAcquisitionFeedEntry,
   private val services: BookTaskRequiredServices
-) : Callable<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+) : Callable<TaskResult<Unit>> {
 
   private val logger =
     LoggerFactory.getLogger(BookBorrowWithDefaultAcquisitionTask::class.java)
@@ -48,7 +47,7 @@ class BookBorrowWithDefaultAcquisitionTask(
       formats = listOf()
     )
 
-  override fun call(): TaskResult<BookStatusDownloadErrorDetails, Unit> {
+  override fun call(): TaskResult<Unit> {
     val acquisition =
       BookAcquisitionSelection.preferredAcquisition(this.entry.acquisitions)
 
@@ -57,14 +56,11 @@ class BookBorrowWithDefaultAcquisitionTask(
 
       val message = this.services.borrowStrings.borrowBookFulfillNoUsableAcquisitions
       val failure =
-        TaskResult.fail<BookStatusDownloadErrorDetails, Unit>(
+        TaskResult.fail<Unit>(
           description = this.services.borrowStrings.borrowBookSelectingAcquisition,
           resolution = message,
-          errorValue = BookStatusDownloadErrorDetails(
-            errorCode = "noUsableAcquisitions",
-            message = message
-          )
-        ) as TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
+          errorCode = "noUsableAcquisitions"
+        ) as TaskResult.Failure<Unit>
 
       this.services.bookRegistry.update(
         BookWithStatus(this.bookInitial, BookStatus.FailedLoan(this.bookId, failure)))

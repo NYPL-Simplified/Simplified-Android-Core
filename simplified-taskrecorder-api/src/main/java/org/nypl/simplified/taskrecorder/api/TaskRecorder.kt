@@ -1,15 +1,13 @@
 package org.nypl.simplified.taskrecorder.api
 
 import com.google.common.base.Preconditions
-import java.io.Serializable
+import org.nypl.simplified.presentableerror.api.Presentables
 
 /**
  * A task step recorder.
- *
- * @param <E> The precise type of associated error values
  */
 
-class TaskRecorder<E : Serializable> private constructor() : TaskRecorderType<E> {
+class TaskRecorder private constructor() : TaskRecorderType {
 
   companion object {
 
@@ -17,20 +15,34 @@ class TaskRecorder<E : Serializable> private constructor() : TaskRecorderType<E>
      * Create a new task recorder.
      */
 
-    fun <E : Serializable> create(): TaskRecorderType<E> =
+    fun create(): TaskRecorderType =
       TaskRecorder()
   }
 
-  private val steps = mutableListOf<TaskStep<E>>()
+  private val steps = mutableListOf<TaskStep>()
+  private val attributes = mutableMapOf<String, String>()
 
-  override fun beginNewStep(message: String): TaskStep<E> {
-    val step = TaskStep<E>(description = message)
+  override fun addAttribute(
+    name: String,
+    value: String
+  ) {
+    Presentables.putRetry(this.attributes, name, value)
+  }
+
+  override fun addAttributes(attributes: Map<String, String>) {
+    for ((key, value) in attributes) {
+      this.addAttribute(key, value)
+    }
+  }
+
+  override fun beginNewStep(message: String): TaskStep {
+    val step = TaskStep(description = message)
     this.steps.add(step)
     return step
   }
 
-  override fun currentStepSucceeded(message: String): TaskStep<E> {
-    Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
+  override fun currentStepSucceeded(message: String): TaskStep {
+    Preconditions.checkState(this.steps.isNotEmpty(), "A step must be active")
 
     val step = this.steps.last()
     step.resolution = TaskStepResolution.TaskStepSucceeded(message)
@@ -39,30 +51,36 @@ class TaskRecorder<E : Serializable> private constructor() : TaskRecorderType<E>
 
   override fun currentStepFailed(
     message: String,
-    errorValue: E,
+    errorCode: String,
     exception: Throwable?
-  ): TaskStep<E> {
-    Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
+  ): TaskStep {
+    Preconditions.checkState(this.steps.isNotEmpty(), "A step must be active")
 
     val step = this.steps.last()
-    step.resolution = TaskStepResolution.TaskStepFailed(
-      message = message,
-      errorValue = errorValue,
-      exception = exception)
+    step.resolution =
+      TaskStepResolution.TaskStepFailed(
+        message = message,
+        errorCode = errorCode,
+        exception = exception
+      )
     return step
   }
 
   override fun currentStepFailedAppending(
     message: String,
-    errorValue: E,
+    errorCode: String,
     exception: Throwable
-  ): TaskStep<E> {
-    Preconditions.checkState(!this.steps.isEmpty(), "A step must be active")
+  ): TaskStep {
+    Preconditions.checkState(this.steps.isNotEmpty(), "A step must be active")
 
     val step = this.steps.last()
     return when (val resolution = step.resolution) {
       is TaskStepResolution.TaskStepSucceeded -> {
-        step.resolution = TaskStepResolution.TaskStepFailed(message, errorValue, exception)
+        step.resolution = TaskStepResolution.TaskStepFailed(
+          message = message,
+          exception = exception,
+          errorCode = errorCode
+        )
         step
       }
       is TaskStepResolution.TaskStepFailed -> {
@@ -82,16 +100,16 @@ class TaskRecorder<E : Serializable> private constructor() : TaskRecorderType<E>
     }
   }
 
-  override fun addAll(steps: List<TaskStep<E>>) {
+  override fun addAll(steps: List<TaskStep>) {
     this.steps.addAll(steps)
   }
 
-  override fun currentStep(): TaskStep<E>? =
+  override fun currentStep(): TaskStep? =
     this.steps.lastOrNull()
 
-  override fun <A> finishSuccess(result: A): TaskResult.Success<E, A> =
-    TaskResult.Success(result, this.steps)
+  override fun <A> finishSuccess(result: A): TaskResult.Success<A> =
+    TaskResult.Success(result, this.steps, this.attributes.toMap())
 
-  override fun <A> finishFailure(): TaskResult.Failure<E, A> =
-    TaskResult.Failure(this.steps)
+  override fun <A> finishFailure(): TaskResult.Failure<A> =
+    TaskResult.Failure(this.steps, this.attributes.toMap())
 }

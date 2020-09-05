@@ -89,6 +89,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -555,14 +556,15 @@ abstract class BookBorrowTaskContract {
     Mockito.`when`(strategy.execute())
       .thenReturn(
         TaskResult.Success(
-          AudioBookManifestData(
+          result = AudioBookManifestData(
             playerManifest,
             ManifestFulfilled(
               this.mimeOf("application/audiobook+json"),
               manifestBytes
             )
           ),
-          listOf(
+          attributes = mapOf(),
+          steps = listOf(
             TaskStep("Did something", TaskStepResolution.TaskStepSucceeded("OK")),
             TaskStep("Did something", TaskStepResolution.TaskStepSucceeded("OK")),
             TaskStep("Did something", TaskStepResolution.TaskStepSucceeded("OK"))
@@ -2726,9 +2728,14 @@ abstract class BookBorrowTaskContract {
     val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
 
-    val errorData = results.errors().last()
-    Assert.assertTrue(errorData.errorCode.contains("404"))
-    Assert.assertEquals(report, errorData.problemReport)
+    val errorData = results.lastErrorCode
+    Assert.assertTrue(errorData.contains("404"))
+
+    val reportAttributes = Presentables.problemReportAsAttributes(report)
+    for ((key, value) in reportAttributes) {
+      this.logger.debug("attribute {} -> {}", key, value)
+      Assert.assertEquals(value, results.attributes[key])
+    }
 
     /*
      * Check that the download failed.
@@ -2798,9 +2805,7 @@ abstract class BookBorrowTaskContract {
 
     val results = task.call(); TaskDumps.dump(this.logger, results)
     results as TaskResult.Failure
-
-    val errorData = results.errors().last()
-    Assert.assertEquals("unsupportedAcquisition", errorData.errorCode)
+    Assert.assertEquals("unsupportedAcquisition", results.lastErrorCode)
 
     /*
      * Check that the download failed.

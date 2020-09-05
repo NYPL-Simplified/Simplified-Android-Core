@@ -2,7 +2,6 @@ package org.nypl.simplified.migration.api
 
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.presentableerror.api.PresentableType
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -72,10 +71,6 @@ object MigrationReportXML : MigrationReportXMLType {
           if (exception != null) {
             eventElement.appendChild(this.saveException(document, exception))
           }
-
-          for (cause in event.causes) {
-            eventElement.appendChild(this.saveCauseTree(document, cause))
-          }
         }
       }
       ++index
@@ -98,24 +93,6 @@ object MigrationReportXML : MigrationReportXMLType {
       .newTransformer()
       .transform(xmlSource, outputTarget)
     outputStream.flush()
-  }
-
-  private fun saveCauseTree(
-    document: Document,
-    cause: PresentableErrorType
-  ): Element {
-    val element = document.createElement("cause")
-    element.setAttribute("message", cause.message)
-    this.saveAttributes(document, cause.attributes)
-
-    val exception = cause.exception
-    if (exception != null) {
-      element.appendChild(this.saveException(document, exception))
-    }
-    for (subCause in cause.causes) {
-      element.appendChild(saveCauseTree(document, subCause))
-    }
-    return element
   }
 
   private fun saveCauseTree(

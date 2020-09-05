@@ -13,12 +13,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.Subject
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
-import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
@@ -31,8 +27,6 @@ import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
@@ -292,14 +286,14 @@ class Controller private constructor(
 
   override fun profileAccountLogin(
     request: ProfileAccountLoginRequest
-  ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     return this.submitTask { this.runProfileAccountLogin(request) }
       .flatMap { result -> this.runSyncIfLoginSucceeded(result, request.accountId) }
   }
 
   private fun runProfileAccountLogin(
     request: ProfileAccountLoginRequest
-  ): TaskResult<AccountLoginErrorData, Unit> {
+  ): TaskResult<Unit> {
     val profile = this.profileCurrent()
     val account = profile.account(request.accountId)
     return ProfileAccountLoginTask(
@@ -314,9 +308,9 @@ class Controller private constructor(
   }
 
   private fun runSyncIfLoginSucceeded(
-    result: TaskResult<AccountLoginErrorData, Unit>,
+    result: TaskResult<Unit>,
     accountID: AccountID
-  ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     return when (result) {
       is TaskResult.Success -> {
         this.logger.debug("logging in succeeded: syncing account")
@@ -333,7 +327,7 @@ class Controller private constructor(
 
   override fun profileAccountCreateOrReturnExisting(
     provider: URI
-  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+  ): FluentFuture<TaskResult<AccountType>> {
     return this.submitTask(ProfileAccountCreateOrReturnExistingTask(
       accountEvents = this.accountEvents,
       accountProviderID = provider,
@@ -345,23 +339,21 @@ class Controller private constructor(
 
   override fun profileAccountCreateCustomOPDS(
     opdsFeed: URI
-  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+  ): FluentFuture<TaskResult<AccountType>> {
     return this.submitTask(ProfileAccountCreateCustomOPDSTask(
       accountEvents = this.accountEvents,
       accountProviderRegistry = this.accountProviders,
-      authDocumentParsers = this.authDocumentParsers,
       http = this.http,
       opdsURI = opdsFeed,
       opdsFeedParser = this.feedParser,
       profiles = this.profiles,
-      resolutionStrings = this.accountProviderResolutionStrings,
       strings = this.profileAccountCreationStringResources
     ))
   }
 
   override fun profileAccountCreate(
     provider: URI
-  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>> {
+  ): FluentFuture<TaskResult<AccountType>> {
     return this.submitTask(ProfileAccountCreateTask(
       accountEvents = this.accountEvents,
       accountProviderID = provider,
@@ -373,7 +365,7 @@ class Controller private constructor(
 
   override fun profileAccountDeleteByProvider(
     provider: URI
-  ): FluentFuture<TaskResult<AccountDeleteErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     return this.submitTask(ProfileAccountDeleteTask(
       accountEvents = this.accountEvents,
       accountProviderID = provider,
@@ -405,7 +397,7 @@ class Controller private constructor(
 
   override fun profileAccountLogout(
     accountID: AccountID
-  ): FluentFuture<TaskResult<AccountLogoutErrorData, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     return this.submitTask {
       val profile = this.profileCurrent()
       val account = profile.account(accountID)
@@ -498,7 +490,7 @@ class Controller private constructor(
     accountID: AccountID,
     bookID: BookID,
     entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDownload(bookID)
     return this.submitTask(BookBorrowWithDefaultAcquisitionTask(
       accountId = accountID,
@@ -515,7 +507,7 @@ class Controller private constructor(
     bookID: BookID,
     acquisition: OPDSAcquisition,
     entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<BookStatusDownloadErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDownload(bookID)
     return this.submitTask(BookBorrowTask(
       accountId = accountID,
@@ -609,7 +601,7 @@ class Controller private constructor(
   override fun bookRevoke(
     account: AccountType,
     bookId: BookID
-  ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDelete(bookId)
     return this.submitTask(BookRevokeTask(
       account = account,
@@ -624,7 +616,7 @@ class Controller private constructor(
   override fun bookRevoke(
     accountID: AccountID,
     bookId: BookID
-  ): FluentFuture<TaskResult<BookStatusRevokeErrorDetails, Unit>> {
+  ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDelete(bookId)
     return this.accountFor(accountID).flatMap { account ->
       this.bookRevoke(account, bookId)

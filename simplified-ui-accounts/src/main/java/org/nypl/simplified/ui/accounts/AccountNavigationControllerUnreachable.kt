@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.accounts
 
 import com.io7m.junreachable.UnreachableCodeException
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
 /**
@@ -13,7 +12,7 @@ open class AccountNavigationControllerUnreachable : AccountNavigationControllerT
     throw UnreachableCodeException()
   }
 
-  override fun <E : PresentableErrorType> openErrorPage(parameters: ErrorPageParameters<E>) {
+  override fun openErrorPage(parameters: ErrorPageParameters) {
     throw UnreachableCodeException()
   }
 

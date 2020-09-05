@@ -1,8 +1,6 @@
 package org.nypl.simplified.books.controller
 
 import io.reactivex.subjects.Subject
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails.AccountProviderResolutionFailed
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationInProgress
@@ -12,7 +10,6 @@ import org.nypl.simplified.accounts.api.AccountUnknownProviderException
 import org.nypl.simplified.accounts.api.AccountUnresolvableProviderException
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -28,12 +25,12 @@ class ProfileAccountCreateTask(
   private val accountProviders: AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
   private val strings: ProfileAccountCreationStringResourcesType
-) : Callable<TaskResult<AccountCreateErrorDetails, AccountType>> {
+) : Callable<TaskResult<AccountType>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountCreateTask::class.java)
-  private val taskRecorder = TaskRecorder.create<AccountCreateErrorDetails>()
+  private val taskRecorder = TaskRecorder.create()
 
-  override fun call(): TaskResult<AccountCreateErrorDetails, AccountType> {
+  override fun call(): TaskResult<AccountType> {
     return try {
       this.logger.debug("creating account for provider {}", this.accountProviderID)
       val accountProvider = this.resolveAccountProvider()
@@ -45,11 +42,11 @@ class ProfileAccountCreateTask(
 
       this.taskRecorder.currentStepFailedAppending(
         this.strings.unexpectedException,
-        AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
+        "unexpectedException",
         e
       )
 
-      this.publishFailureEvent(this.taskRecorder.currentStep()!!)
+      this.publishFailureEvent()
       this.taskRecorder.finishFailure()
     } finally {
       this.logger.debug("finished")
@@ -63,13 +60,8 @@ class ProfileAccountCreateTask(
       val profile = this.profiles.currentProfileUnsafe()
       profile.createAccount(accountProvider)
     } catch (e: Exception) {
-      this.publishFailureEvent(
-        this.taskRecorder.currentStepFailedAppending(
-          this.strings.creatingAccountFailed + "(" + e.javaClass.canonicalName + ")",
-          AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
-          e
-        )
-      )
+      this.taskRecorder.currentStepFailed(e.message ?: e.javaClass.name, "creatingAccountFailed")
+      this.publishFailureEvent()
       throw e
     }
   }
@@ -81,14 +73,11 @@ class ProfileAccountCreateTask(
       )
     )
 
-  private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.onNext(
-      AccountEventCreationFailed(
-        step.resolution.message, this.taskRecorder.finishFailure<AccountType>()
-      )
-    )
+  private fun publishFailureEvent() =
+    this.accountEvents.onNext(AccountEventCreationFailed(
+      this.taskRecorder.finishFailure<AccountType>()))
 
-  private fun publishProgressEvent(step: TaskStep<AccountCreateErrorDetails>) =
+  private fun publishProgressEvent(step: TaskStep) =
     this.accountEvents.onNext(AccountEventCreationInProgress(step.description))
 
   private fun resolveAccountProvider(): AccountProviderType {
@@ -107,39 +96,14 @@ class ProfileAccountCreateTask(
       return when (resolution) {
         is TaskResult.Success -> resolution.result
         is TaskResult.Failure -> {
-          val message = StringBuilder()
-          for (error in resolution.errors()) {
-            message.append(error.message)
-            message.append("\n")
-
-            if (error is HTTPHasProblemReportType) {
-              val report = error.problemReport
-              if (report != null) {
-                message.append(report.problemTitle)
-                message.append("\n")
-                message.append(report.problemStatus)
-                message.append(": ")
-                message.append(report.problemDetail)
-                message.append("\n")
-              }
-            }
-          }
-
-          this.taskRecorder.currentStepFailed(
-            message = message.toString(),
-            errorValue = AccountProviderResolutionFailed(resolution.errors())
-          )
-          throw AccountUnresolvableProviderException(message.toString())
+          this.taskRecorder.addAll(resolution.steps)
+          this.taskRecorder.addAttributes(resolution.attributes)
+          this.taskRecorder.currentStepFailed(resolution.message, "resolutionFailed")
+          throw AccountUnresolvableProviderException(resolution.message)
         }
       }
     } catch (e: Exception) {
-      this.publishFailureEvent(
-        this.taskRecorder.currentStepFailedAppending(
-          this.strings.resolvingAccountProviderFailed,
-          AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
-          e
-        )
-      )
+      this.publishFailureEvent()
       throw e
     }
   }

@@ -15,7 +15,6 @@ import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -39,7 +38,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
   private var accountSubscription: Disposable? = null
 
   @Volatile
-  private var future: FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>>? = null
+  private var future: FluentFuture<TaskResult<AccountType>>? = null
 
   private lateinit var create: Button
   private lateinit var feedURL: EditText

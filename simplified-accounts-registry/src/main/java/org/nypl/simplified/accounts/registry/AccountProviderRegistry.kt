@@ -5,9 +5,6 @@ import com.google.common.base.Preconditions
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.accounts.api.AccountProviderDescription
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.NoApplicableSource
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails.UnexpectedException
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
@@ -153,8 +150,8 @@ class AccountProviderRegistry private constructor(
   override fun resolve(
     onProgress: AccountProviderResolutionListenerType,
     description: AccountProviderDescription
-  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
-    val taskRecorder = TaskRecorder.create<AccountProviderResolutionErrorDetails>()
+  ): TaskResult<AccountProviderType> {
+    val taskRecorder = TaskRecorder.create()
     taskRecorder.beginNewStep("Resolving description...")
 
     try {
@@ -176,21 +173,13 @@ class AccountProviderRegistry private constructor(
 
       taskRecorder.currentStepFailed(
         "No sources can resolve the given description.",
-        NoApplicableSource(
-          "No sources can resolve the given description.",
-          description.id.toString(),
-          description.title
-        )
+        "noApplicableSource ${description.id} ${description.title}"
       )
       return taskRecorder.finishFailure()
     } catch (e: Exception) {
       this.logger.error("resolution exception: ", e)
       val message = e.message ?: e.javaClass.canonicalName
-      taskRecorder.currentStepFailedAppending(
-        message,
-        UnexpectedException(message, e, description.id.toString(), description.title),
-        e
-      )
+      taskRecorder.currentStepFailedAppending(message, "unexpectedException", e)
       return taskRecorder.finishFailure()
     }
   }

@@ -16,12 +16,27 @@ object Presentables {
     map: Map<String, String>,
     problemReport: HTTPProblemReport
   ): Map<String, String> {
-    val attributes = map.toMutableMap()
-    putRetry(attributes, "HTTP problem detail", problemReport.problemDetail)
-    putRetry(attributes, "HTTP problem status", problemReport.problemStatus.toString())
-    putRetry(attributes, "HTTP problem title", problemReport.problemTitle)
-    putRetry(attributes, "HTTP problem type", problemReport.problemType.toString())
-    return attributes.toMap()
+    return mergeAttributes(map, problemReportAsAttributes(problemReport))
+  }
+
+  /**
+   * Merge the given problem report as a set of attributes into the existing attributes.
+   */
+
+  fun problemReportAsAttributes(
+    problemReport: HTTPProblemReport?
+  ): Map<String, String> {
+    return when (problemReport) {
+      null -> mapOf()
+      else -> {
+        val attributes = mutableMapOf<String, String>()
+        attributes["HTTP problem detail"] = problemReport.problemDetail ?: ""
+        attributes["HTTP problem status"] = problemReport.problemStatus.toString()
+        attributes["HTTP problem title"] = problemReport.problemTitle ?: ""
+        attributes["HTTP problem type"] = problemReport.problemType.toString()
+        attributes.toMap()
+      }
+    }
   }
 
   /**
@@ -36,19 +51,18 @@ object Presentables {
   }
 
   /**
-   * Collect all of the attributes of all of the given presentable values, making keys unique
-   * as necessary.
+   * Merge all of the attributes of `map0` into `map`, making names unique as necessary.
    */
 
-  fun collectAttributes(presentables: List<PresentableType>): Map<String, String> {
+  fun mergeAttributes(
+    map0: Map<String, String>,
+    map1: Map<String, String>
+  ): Map<String, String> {
     val attributes = mutableMapOf<String, String>()
-
-    for (presentable in presentables) {
-      for ((key, value) in presentable.attributes) {
-        putRetry(attributes, key, value)
-      }
+    attributes.putAll(map0)
+    for ((key, value) in map1) {
+      putRetry(attributes, key, value)
     }
-
     return attributes.toMap()
   }
 
@@ -57,7 +71,11 @@ object Presentables {
    * in the presence of duplicates.
    */
 
-  private fun putRetry(attributes: MutableMap<String, String>, key: String, value: String) {
+  fun putRetry(
+    attributes: MutableMap<String, String>,
+    key: String,
+    value: String
+  ) {
     if (!attributes.containsKey(key)) {
       attributes[key] = value
       return

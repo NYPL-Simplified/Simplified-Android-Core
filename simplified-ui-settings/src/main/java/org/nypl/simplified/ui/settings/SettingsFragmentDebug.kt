@@ -345,7 +345,7 @@ class SettingsFragmentDebug : Fragment() {
     )
 
     val taskSteps =
-      mutableListOf<TaskStep<ExampleError>>()
+      mutableListOf<TaskStep>()
 
     taskSteps.add(
       TaskStep(
