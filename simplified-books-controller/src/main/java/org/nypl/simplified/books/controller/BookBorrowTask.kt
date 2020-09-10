@@ -1017,7 +1017,8 @@ class BookBorrowTask(
           contentType = targetContentType,
           userAgent = PlayerUserAgent(HTTP.userAgent()),
           credentials = audioBookCredentials,
-          services = this.services.services
+          services = this.services.services,
+          cacheDirectory = this.cacheDirectory
         )
       )
 

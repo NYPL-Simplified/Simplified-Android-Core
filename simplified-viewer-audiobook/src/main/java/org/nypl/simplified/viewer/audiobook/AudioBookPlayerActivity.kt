@@ -425,7 +425,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       this.parameters.toManifestStrategy(
         strategies = this.strategies,
         isNetworkAvailable = { this.networkConnectivity.isNetworkAvailable },
-        credentials = credentials
+        credentials = credentials,
+        cacheDirectory = this.cacheDir
       )
     return when (val strategyResult = strategy.execute()) {
       is TaskResult.Success -> {
