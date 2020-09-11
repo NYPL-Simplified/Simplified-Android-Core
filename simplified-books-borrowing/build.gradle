@@ -1,0 +1,13 @@
+dependencies {
+  api project(":simplified-accounts-api")
+  api project(":simplified-books-api")
+  api project(":simplified-books-formats-api")
+  api project(":simplified-opds-core")
+  api project(":simplified-profiles-api")
+
+  implementation project(":simplified-taskrecorder-api")
+
+  implementation libraries.kotlinStdlib
+  implementation libraries.nyplHttpAPI
+  implementation libraries.slf4j
+}

@@ -80,6 +80,7 @@ ext {
   nyplAudioBookAPIVersion = "5.0.2"
   nyplR2Version = "0.0.5"
   nyplHTTPVersion = "0.0.4"
+  irradiaMimeVersion = "1.1.0"
 }
 
 subprojects {
@@ -123,8 +124,8 @@ ext.libraries = [
   io7mJFunctional                  : "com.io7m.jfunctional:io7m-jfunctional-core:1.3.0",
   io7mJNull                        : "com.io7m.jnull:io7m-jnull-core:1.0.2",
   io7mJUnreachable                 : "com.io7m.junreachable:io7m-junreachable-core:1.0.2",
-  irradiaMimeAPI                   : "one.irradia.mime:one.irradia.mime.api:1.0.0",
-  irradiaMimeVanilla               : "one.irradia.mime:one.irradia.mime.vanilla:1.0.0",
+  irradiaMimeAPI                   : "one.irradia.mime:one.irradia.mime.api:${irradiaMimeVersion}",
+  irradiaMimeVanilla               : "one.irradia.mime:one.irradia.mime.vanilla:${irradiaMimeVersion}",
   jacksonCore                      : "com.fasterxml.jackson.core:jackson-core:2.10.0",
   jacksonDatabind                  : "com.fasterxml.jackson.core:jackson-databind:2.10.0",
   jacksonKotlin                    : "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.9",
@@ -140,6 +141,7 @@ ext.libraries = [
   mockito                          : "org.mockito:mockito-core:3.4.4",
   mockitoAndroid                   : "org.mockito:mockito-android:2.22.0",
   mockitoKotlin                    : "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0",
+  mockWebServer                    : "com.squareup.okhttp3:mockwebserver:4.8.1",
   nyplAudiobookAPI                 : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.api:${nyplAudioBookAPIVersion}",
   nyplAudiobookDownloads           : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.downloads:${nyplAudioBookAPIVersion}",
   nyplAudiobookFeedbooks           : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.feedbooks:${nyplAudioBookAPIVersion}",

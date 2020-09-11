@@ -321,7 +321,7 @@ abstract class BooksControllerContract {
         Option.none<HTTPProblemReport>()))
 
     this.expected.expect(ExecutionException::class.java)
-    this.expected.expectCause(IsInstanceOf.instanceOf(IOException::class.java))
+    this.expected.expectCause(IsInstanceOf.instanceOf<IOException>(IOException::class.java))
     controller.booksSync(account).get()
   }
 
@@ -480,7 +480,7 @@ abstract class BooksControllerContract {
         0L))
 
     this.expected.expect(ExecutionException::class.java)
-    this.expected.expectCause(IsInstanceOf.instanceOf(OPDSParseException::class.java))
+    this.expected.expectCause(IsInstanceOf.instanceOf<OPDSParseException>(OPDSParseException::class.java))
     controller.booksSync(account).get()
   }
 
