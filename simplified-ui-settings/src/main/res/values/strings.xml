@@ -89,14 +89,14 @@
   <string name="pref_title_cache_location">Location</string>
   <string name="pref_title_cache_size">Size</string>
 
-  <string name="pref_title_location_nyc">Force location to New York</string>
-  <string name="pref_summary_location_nyc">Card Creator</string>
-
   <string name="pref_title_testing_libraries">Show non-production libraries</string>
   <string name="pref_summary_testing_libraries" />
 
   <string name="pref_title_library_selection">Show library selection</string>
   <string name="pref_summary_library_selection" />
+
+  <string name="pref_title_location_nyc">Force location to New York</string>
+  <string name="pref_summary_location_nyc">Applies to Card Creator</string>
 
   <string name="pref_title_readium2">Enable Readium2</string>
   <string name="pref_summary_readium2" />

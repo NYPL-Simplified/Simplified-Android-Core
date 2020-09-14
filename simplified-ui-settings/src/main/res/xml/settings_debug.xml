@@ -41,17 +41,17 @@
 
   <PreferenceCategory android:title="@string/pref_category_features">
     <SwitchPreference
-      android:key="pref_key_location_nyc"
-      android:summary="@string/pref_summary_location_nyc"
-      android:title="@string/pref_title_location_nyc" />
+      android:key="pref_key_testing_libraries"
+      android:summary="@string/pref_summary_testing_libraries"
+      android:title="@string/pref_title_testing_libraries" />
     <SwitchPreference
       android:key="pref_key_library_selection"
       android:summary="@string/pref_summary_library_selection"
       android:title="@string/pref_title_library_selection" />
     <SwitchPreference
-      android:key="pref_key_testing_libraries"
-      android:summary="@string/pref_summary_testing_libraries"
-      android:title="@string/pref_title_testing_libraries" />
+      android:key="pref_key_location_nyc"
+      android:summary="@string/pref_summary_location_nyc"
+      android:title="@string/pref_title_location_nyc" />
     <SwitchPreference
       android:key="pref_key_readium2"
       android:summary="@string/pref_summary_readium2"
