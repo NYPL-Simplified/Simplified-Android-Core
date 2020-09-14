@@ -148,7 +148,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
 
     this.setTheme(
-      Services.serviceDirectory()
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
         .requireService(ThemeServiceType::class.java)
         .findCurrentTheme()
         .themeWithActionBar
