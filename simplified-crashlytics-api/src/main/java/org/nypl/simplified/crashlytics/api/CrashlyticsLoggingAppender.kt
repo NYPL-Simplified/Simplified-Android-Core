@@ -51,7 +51,7 @@ class CrashlyticsLoggingAppender(
     // of a `Throwable`.
 
     if (throwable != null) {
-      this.service?.log(event.message)
+      this.service?.log(event.formattedMessage)
       this.service?.recordException(throwable)
     }
   }
