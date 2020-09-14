@@ -412,7 +412,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
         this.supportFragmentManager
           .beginTransaction()
           .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
-          .commit()
+          .commitAllowingStateLoss()
       }
     }
   }
