@@ -46,6 +46,7 @@ import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.reader.ReaderColorSchemes;
 import org.nypl.simplified.books.api.BookDRMInformation;
 import org.nypl.simplified.profiles.api.ProfilePreferences;
+import org.nypl.simplified.profiles.api.ProfileReadableType;
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
 import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOC;
@@ -490,6 +491,40 @@ public final class ReaderActivity extends AppCompatActivity implements
       ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
         .setAdobeRightsFile(getAdobeRightsFrom(format))
         .build();
+
+    /*
+     * Publish an analytics event.
+     */
+
+    try {
+      OptionType<URI> analytics = this.feed_entry.getAnalytics();
+
+      final URI targetURI;
+      if (analytics.isSome()) {
+        targetURI = ((Some<URI>) analytics).get();
+      } else {
+        targetURI = null;
+      }
+
+      ProfileReadableType profile = Services.INSTANCE.serviceDirectory()
+        .requireService(ProfilesControllerType.class)
+        .profileCurrent();
+
+      Services.INSTANCE.serviceDirectory()
+        .requireService(AnalyticsType.class)
+        .publishEvent(new AnalyticsEvent.BookOpened(
+          LocalDateTime.now(),
+          this.current_account.getLoginState().getCredentials(),
+          profile.getId().getUuid(),
+          profile.getDisplayName(),
+          this.current_account.getProvider().getId(),
+          this.current_account.getId().getUuid(),
+          this.feed_entry,
+          targetURI
+        ));
+    } catch (ProfileNoneCurrentException ex) {
+      LOG.error("profile is not current: ", ex);
+    }
 
     LOG.debug("onCreate: loading EPUB");
     loader.loadEPUB(request, this);
