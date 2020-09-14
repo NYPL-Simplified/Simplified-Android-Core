@@ -449,10 +449,8 @@ public final class ReaderActivity extends AppCompatActivity implements
     });
 
     // Allow the webview to be debuggable only if this is a dev build
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-        WebView.setWebContentsDebuggingEnabled(true);
-      }
+    if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+      WebView.setWebContentsDebuggingEnabled(true);
     }
 
     final WebSettings s = Objects.requireNonNull(in_webview.getSettings());
