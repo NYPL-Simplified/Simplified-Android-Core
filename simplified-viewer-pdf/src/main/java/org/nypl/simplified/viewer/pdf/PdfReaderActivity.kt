@@ -9,19 +9,24 @@ import edu.umn.minitex.pdf.android.api.TableOfContentsFragmentListenerType
 import edu.umn.minitex.pdf.android.api.TableOfContentsItem
 import edu.umn.minitex.pdf.android.pdfviewer.PdfViewerFragment
 import edu.umn.minitex.pdf.android.pdfviewer.TableOfContentsFragment
+import org.joda.time.LocalDateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
+import org.nypl.simplified.opds.core.getOrNull
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfContentsFragmentListenerType {
 
@@ -49,11 +54,12 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
   private val log: Logger = LoggerFactory.getLogger(PdfReaderActivity::class.java)
 
   // vars assigned in onCreate and passed with the intent
+  private lateinit var analyticsService: AnalyticsType
   private lateinit var documentTitle: String
   private lateinit var pdfFile: File
   private lateinit var accountId: AccountID
   private lateinit var id: BookID
-  private lateinit var profile: ProfileReadableType
+  private lateinit var currentProfile: ProfileReadableType
   private lateinit var account: AccountType
   private lateinit var books: BookDatabaseType
   private lateinit var entry: BookDatabaseEntryType
@@ -74,12 +80,14 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
     this.accountId = intentParams.accountId
     this.id = intentParams.id
 
-    this.profile =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-        .profileCurrent()
+    val services =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
 
-    this.account = profile.account(accountId)
+    this.analyticsService =
+      services.requireService(AnalyticsType::class.java)
+    this.currentProfile =
+      services.requireService(ProfilesControllerType::class.java).profileCurrent()
+    this.account = currentProfile.account(accountId)
     this.books = account.bookDatabase
 
     try {
@@ -90,11 +98,7 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
       log.error("Could not get lastReadLocation, defaulting to the 1st page", e)
     }
 
-    if (savedInstanceState != null) {
-      this.tableOfContentsList = savedInstanceState.getParcelableArrayList(TABLE_OF_CONTENTS)
-        ?: arrayListOf()
-    } else {
-
+    if (savedInstanceState == null) {
       // Get the new instance of the reader you want to load here.
       val readerFragment = PdfViewerFragment.newInstance()
 
@@ -102,6 +106,24 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
         .beginTransaction()
         .replace(R.id.pdf_reader_fragment_holder, readerFragment, "READER")
         .commit()
+
+      /* Publish 'BookOpened' event. */
+
+      this.analyticsService.publishEvent(
+        AnalyticsEvent.BookOpened(
+          timestamp = LocalDateTime.now(),
+          credentials = this.account.loginState.credentials,
+          profileUUID = this.currentProfile.id.uuid,
+          profileDisplayName = this.currentProfile.displayName,
+          accountProvider = this.account.provider.id,
+          accountUUID = this.account.id.uuid,
+          opdsEntry = this.entry.book.entry,
+          targetURI = this.entry.book.entry.analytics.getOrNull()
+        )
+      )
+    } else {
+      this.tableOfContentsList =
+        savedInstanceState.getParcelableArrayList(TABLE_OF_CONTENTS) ?: arrayListOf()
     }
   }
 
