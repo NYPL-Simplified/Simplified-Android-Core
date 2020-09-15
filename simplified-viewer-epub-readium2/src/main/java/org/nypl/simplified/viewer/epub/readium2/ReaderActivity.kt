@@ -163,6 +163,8 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         .replace(R.id.reader_container, readerFragment)
         .commit()
 
+      /* Publish 'BookOpened' event. */
+
       this.analyticsService.publishEvent(
         AnalyticsEvent.BookOpened(
           timestamp = LocalDateTime.now(),

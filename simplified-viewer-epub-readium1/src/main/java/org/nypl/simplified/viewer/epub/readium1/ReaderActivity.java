@@ -490,9 +490,7 @@ public final class ReaderActivity extends AppCompatActivity implements
         .setAdobeRightsFile(getAdobeRightsFrom(format))
         .build();
 
-    /*
-     * Publish an analytics event.
-     */
+    /* Publish 'BookOpened' event. */
 
     try {
       OptionType<URI> analytics = this.feed_entry.getAnalytics();
