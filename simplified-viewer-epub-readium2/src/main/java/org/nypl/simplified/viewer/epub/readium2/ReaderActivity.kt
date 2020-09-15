@@ -12,8 +12,6 @@ import android.view.accessibility.AccessibilityManager
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.Some
 import io.reactivex.disposables.Disposable
 import org.joda.time.LocalDateTime
 import org.librarysimplified.r2.api.SR2Bookmark
