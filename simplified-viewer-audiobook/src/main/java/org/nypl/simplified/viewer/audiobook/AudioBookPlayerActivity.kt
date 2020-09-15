@@ -148,7 +148,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
 
     this.setTheme(
-      Services.serviceDirectory()
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
         .requireService(ThemeServiceType::class.java)
         .findCurrentTheme()
         .themeWithActionBar
@@ -412,7 +412,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
         this.supportFragmentManager
           .beginTransaction()
           .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
-          .commit()
+          .commitAllowingStateLoss()
       }
     }
   }
