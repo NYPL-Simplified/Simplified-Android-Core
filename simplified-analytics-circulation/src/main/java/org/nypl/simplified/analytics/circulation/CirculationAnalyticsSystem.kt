@@ -27,11 +27,13 @@ class CirculationAnalyticsSystem(
     this.executor.execute { this.consumeEvent(event) }
 
   private fun consumeEvent(event: AnalyticsEvent) {
+    this.logger.debug("received event {}", event::class.simpleName)
     when (event) {
       is AnalyticsEvent.BookOpened -> {
         event.targetURI?.let { target ->
           postURI(target, event.credentials)
         }
+        this.logger.debug("consuming 'BookOpened' event for {}", event.targetURI)
       }
       else -> {
         // All other events are silently dropped
