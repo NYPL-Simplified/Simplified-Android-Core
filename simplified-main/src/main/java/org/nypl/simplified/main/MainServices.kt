@@ -552,11 +552,11 @@ internal object MainServices {
         CardCreatorService.create(stream)
       }
     } catch (e: FileNotFoundException) {
-      this.logger.debug("card creator configuration not present: ", e)
+      this.logger.debug("could not initialize card creator; cardcreator.conf not found")
       null
     } catch (e: IOException) {
       this.logger.debug("could not initialize card creator: ", e)
-      throw IllegalStateException("could not initialize card creator", e)
+      null
     }
   }
 
