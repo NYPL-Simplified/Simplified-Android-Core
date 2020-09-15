@@ -330,12 +330,7 @@ public final class ReaderActivity extends AppCompatActivity implements
     final ReaderPreferences readerPreferences;
 
     try {
-      readerPreferences =
-        Services.INSTANCE.serviceDirectory()
-          .requireService(ProfilesControllerType.class)
-          .profileCurrent()
-          .preferences()
-          .getReaderPreferences();
+      readerPreferences = getProfileCurrentReaderPreferences();
     } catch (final ProfileNoneCurrentException e) {
       this.onEPUBLoadFailed(e);
       this.finish();
@@ -532,7 +527,8 @@ public final class ReaderActivity extends AppCompatActivity implements
       // page style settings.
       this.simplified_js_api.getReadiumCFI();
 
-      this.readium_js_api.setPageStyleSettings(preferences);
+      this.readium_js_api.setBookStyles(preferences);
+      this.readium_js_api.updateSettings(preferences);
 
       // Once they are applied, go to the CFI that is stored in the
       // JS ReadiumSDK instance.
@@ -543,6 +539,15 @@ public final class ReaderActivity extends AppCompatActivity implements
       this.readium_js_api.getCurrentPage(this);
       this.readium_js_api.mediaOverlayIsAvailable(this);
     });
+  }
+
+  private ReaderPreferences getProfileCurrentReaderPreferences() throws ProfileNoneCurrentException {
+    return
+      Services.INSTANCE.serviceDirectory()
+        .requireService(ProfilesControllerType.class)
+        .profileCurrent()
+        .preferences()
+        .getReaderPreferences();
   }
 
   @Override
@@ -817,7 +822,19 @@ public final class ReaderActivity extends AppCompatActivity implements
     in_progress_bar.setVisibility(View.VISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
 
+    ReaderPreferences preferences;
+
+    try {
+      preferences = getProfileCurrentReaderPreferences();
+    } catch (ProfileNoneCurrentException e) {
+      throw new IllegalStateException("No current profile");
+    }
+
+    this.applyViewerColorScheme(preferences.colorScheme());
+
     uiThread.runOnUIThread(() -> {
+      this.readium_js_api.setBookStyles(preferences);
+
       in_media_play.setOnClickListener(view -> {
         LOG.debug("toggling media overlay");
         this.readium_js_api.mediaOverlayToggle();
@@ -851,17 +868,6 @@ public final class ReaderActivity extends AppCompatActivity implements
   @Override
   public void onReadiumContentDocumentLoaded() {
     LOG.debug("onReadiumContentDocumentLoaded");
-
-    try {
-      this.applyReaderPreferences(
-        Services.INSTANCE.serviceDirectory()
-          .requireService(ProfilesControllerType.class)
-          .profileCurrent()
-          .preferences()
-          .getReaderPreferences());
-    } catch (final ProfileNoneCurrentException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   @Override

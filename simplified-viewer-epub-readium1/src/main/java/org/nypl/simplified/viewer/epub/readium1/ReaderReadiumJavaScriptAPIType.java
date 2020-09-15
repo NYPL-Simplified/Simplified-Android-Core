@@ -83,11 +83,20 @@ public interface ReaderReadiumJavaScriptAPIType
   void pagePrevious();
 
   /**
-   * Configure the page style based on the given preferences.
+   * Configure book styles based on the given preferences.
    *
    * @param r The preferences
    */
 
-  void setPageStyleSettings(
+  void setBookStyles(
+    ReaderPreferences r);
+
+  /**
+   * Configure Readium settings based on the given preferences.
+   *
+   * @param r The preferences
+   */
+
+  void updateSettings(
     ReaderPreferences r);
 }

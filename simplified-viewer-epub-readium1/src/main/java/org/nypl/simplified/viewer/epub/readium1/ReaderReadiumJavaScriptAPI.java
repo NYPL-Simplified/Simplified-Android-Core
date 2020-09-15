@@ -172,7 +172,7 @@ public final class ReaderReadiumJavaScriptAPI implements ReaderReadiumJavaScript
   }
 
   @Override
-  public void setPageStyleSettings(
+  public void setBookStyles(
     final ReaderPreferences preferences) {
     try {
       final ReaderColorScheme cs = preferences.colorScheme();
@@ -204,7 +204,15 @@ public final class ReaderReadiumJavaScriptAPI implements ReaderReadiumJavaScript
       script.append(foreground);
       script.append("\";");
       this.evaluate(script.toString());
+    } catch (final JSONException e) {
+      LOG.error("error constructing json: {}", e.getMessage(), e);
+    }
+  }
 
+  @Override
+  public void updateSettings(
+    final ReaderPreferences preferences) {
+    try {
       final ReaderReadiumViewerSettings vs =
         new ReaderReadiumViewerSettings(
           ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE,
