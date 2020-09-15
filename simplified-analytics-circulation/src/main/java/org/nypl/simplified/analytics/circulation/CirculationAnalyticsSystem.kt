@@ -51,7 +51,7 @@ class CirculationAnalyticsSystem(
       }
 
     val result =
-      this.configuration.http.get(httpAuth, target, 0L)
+      this.configuration.http.get(httpAuth, target, 0L, true)
 
     return result.match<Unit, Exception>({ error ->
       HTTPProblemReportLogging.logError(
