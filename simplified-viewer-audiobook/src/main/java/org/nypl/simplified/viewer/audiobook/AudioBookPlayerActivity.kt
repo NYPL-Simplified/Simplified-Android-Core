@@ -133,7 +133,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   @Volatile
   private var destroying: Boolean = false
 
-  override fun onCreate(state: Bundle?) {
+  override fun onCreate(savedInstanceState: Bundle?) {
     this.log.debug("onCreate")
     super.onCreate(null)
 

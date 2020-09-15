@@ -34,6 +34,15 @@ open class CrashingHTTP : HTTPType {
     return HTTPResultException(uri, IOException())
   }
 
+  override fun get(
+    auth: OptionType<HTTPAuthType>?,
+    uri: URI?,
+    offset: Long,
+    noCache: Boolean?
+  ): HTTPResultType<InputStream> {
+    return HTTPResultException(uri, IOException())
+  }
+
   override fun put(
     auth: OptionType<HTTPAuthType>,
     uri: URI

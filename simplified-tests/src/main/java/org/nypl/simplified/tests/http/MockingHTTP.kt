@@ -76,6 +76,17 @@ class MockingHTTP : HTTPType {
     return response(uri)
   }
 
+  override fun get(
+    auth: OptionType<HTTPAuthType>?,
+    uri: URI,
+    offset: Long,
+    noCache: Boolean?
+  ): HTTPResultType<InputStream> {
+
+    LOG.debug("get: {} {} {}", auth, uri, offset)
+    return response(uri)
+  }
+
   private fun response(uri: URI): HTTPResultType<InputStream> {
     synchronized(this.responses) {
       val xs = this.responses[uri]
