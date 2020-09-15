@@ -1,6 +1,5 @@
 dependencies {
   implementation project(":simplified-accounts-api")
-  implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-api")
   implementation project(":simplified-books-database-api")
   implementation project(":simplified-profiles-controller-api")

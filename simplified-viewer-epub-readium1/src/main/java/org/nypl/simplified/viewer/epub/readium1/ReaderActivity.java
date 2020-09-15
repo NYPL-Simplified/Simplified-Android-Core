@@ -8,7 +8,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.ColorMatrixColorFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,16 +44,6 @@ import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.reader.ReaderColorSchemes;
 import org.nypl.simplified.books.api.BookDRMInformation;
-import org.nypl.simplified.profiles.api.ProfilePreferences;
-import org.nypl.simplified.profiles.api.ProfileReadableType;
-import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOC;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCElement;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCParameters;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelection;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelectionListenerType;
 import org.nypl.simplified.books.api.BookFormat;
 import org.nypl.simplified.books.api.BookID;
 import org.nypl.simplified.books.api.BookLocation;
@@ -66,14 +55,23 @@ import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
+import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileUpdated;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.reader.api.ReaderColorScheme;
 import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks;
+import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
 import org.nypl.simplified.ui.theme.ThemeControl;
 import org.nypl.simplified.ui.theme.ThemeServiceType;
+import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOC;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCElement;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCParameters;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelection;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelectionListenerType;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -489,38 +487,6 @@ public final class ReaderActivity extends AppCompatActivity implements
       ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
         .setAdobeRightsFile(getAdobeRightsFrom(format))
         .build();
-
-    /* Publish 'BookOpened' event. */
-
-    try {
-      OptionType<URI> analytics = this.feed_entry.getAnalytics();
-
-      final URI targetURI;
-      if (analytics.isSome()) {
-        targetURI = ((Some<URI>) analytics).get();
-      } else {
-        targetURI = null;
-      }
-
-      ProfileReadableType profile = Services.INSTANCE.serviceDirectory()
-        .requireService(ProfilesControllerType.class)
-        .profileCurrent();
-
-      Services.INSTANCE.serviceDirectory()
-        .requireService(AnalyticsType.class)
-        .publishEvent(new AnalyticsEvent.BookOpened(
-          LocalDateTime.now(),
-          this.current_account.getLoginState().getCredentials(),
-          profile.getId().getUuid(),
-          profile.getDisplayName(),
-          this.current_account.getProvider().getId(),
-          this.current_account.getId().getUuid(),
-          this.feed_entry,
-          targetURI
-        ));
-    } catch (ProfileNoneCurrentException ex) {
-      LOG.error("profile is not current: ", ex);
-    }
 
     LOG.debug("onCreate: loading EPUB");
     loader.loadEPUB(request, this);

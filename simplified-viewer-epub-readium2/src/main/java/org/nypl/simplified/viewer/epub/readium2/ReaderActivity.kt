@@ -47,7 +47,6 @@ import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkExplicit
 import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkLastReadLocation
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.opds.core.getOrNull
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
@@ -162,21 +161,6 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         .beginTransaction()
         .replace(R.id.reader_container, readerFragment)
         .commit()
-
-      /* Publish 'BookOpened' event. */
-
-      this.analyticsService.publishEvent(
-        AnalyticsEvent.BookOpened(
-          timestamp = LocalDateTime.now(),
-          credentials = this.account.loginState.credentials,
-          profileUUID = this.currentProfile.id.uuid,
-          profileDisplayName = this.currentProfile.displayName,
-          accountProvider = this.account.provider.id,
-          accountUUID = this.account.id.uuid,
-          opdsEntry = this.bookEntry.feedEntry,
-          targetURI = this.bookEntry.feedEntry.analytics.getOrNull()
-        )
-      )
     } else {
       this.readerFragment =
         this.supportFragmentManager.findFragmentById(R.id.reader_container) as SR2ReaderFragment
