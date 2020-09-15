@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
+import org.joda.time.LocalDateTime
 import org.librarysimplified.audiobook.api.PlayerAudioBookType
 import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
 import org.librarysimplified.audiobook.api.PlayerAudioEngines
@@ -45,6 +46,8 @@ import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -54,6 +57,7 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.getOrNull
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
@@ -105,6 +109,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
   @Volatile
   private var playerLastPosition: PlayerPosition? = null
+  private lateinit var analyticsService: AnalyticsType
   private lateinit var book: PlayerAudioBookType
   private lateinit var bookAuthor: String
   private lateinit var books: BooksControllerType
@@ -133,7 +138,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   @Volatile
   private var destroying: Boolean = false
 
-  override fun onCreate(state: Bundle?) {
+  override fun onCreate(savedInstanceState: Bundle?) {
     this.log.debug("onCreate")
     super.onCreate(null)
 
@@ -163,6 +168,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
     val services = Services.serviceDirectory()
 
+    this.analyticsService =
+      services.requireService(AnalyticsType::class.java)
     this.profiles =
       services.requireService(ProfilesControllerType::class.java)
     this.http =
@@ -240,6 +247,27 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       if (this.supportFragmentManager.backStackEntryCount == 0) {
         this.restoreActionBarTitle()
       }
+    }
+
+    /* Publish 'BookOpened' event. */
+
+    if (savedInstanceState == null) {
+      val currentProfile = this.profiles.profileCurrent()
+      val account = currentProfile.account(this.parameters.accountID)
+      val feedEntry = this.parameters.opdsEntry
+
+      this.analyticsService.publishEvent(
+        AnalyticsEvent.BookOpened(
+          timestamp = LocalDateTime.now(),
+          credentials = account.loginState.credentials,
+          profileUUID = currentProfile.id.uuid,
+          profileDisplayName = currentProfile.displayName,
+          accountProvider = account.provider.id,
+          accountUUID = account.id.uuid,
+          opdsEntry = feedEntry,
+          targetURI = feedEntry.analytics.getOrNull()
+        )
+      )
     }
   }
 
