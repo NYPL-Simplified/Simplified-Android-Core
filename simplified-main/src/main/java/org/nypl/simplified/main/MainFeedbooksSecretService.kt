@@ -25,7 +25,7 @@ class MainFeedbooksSecretService private constructor(
       return try {
         context.assets.open("feedbooks.conf").use(::create)
       } catch (e: FileNotFoundException) {
-        this.logger.debug("Feedbooks configuration not present: ", e)
+        this.logger.debug("could not initialize Feedbooks; feedbooks.conf not found")
         null
       } catch (e: IOException) {
         this.logger.debug("could not initialize Feedbooks secret service: ", e)

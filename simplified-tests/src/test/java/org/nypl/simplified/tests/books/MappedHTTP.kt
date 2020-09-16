@@ -38,6 +38,16 @@ class MappedHTTP(
     return this.content[uri.toASCIIString()] ?: this.notFound(uri)
   }
 
+  override fun get(
+    auth: OptionType<HTTPAuthType>?,
+    uri: URI,
+    offset: Long,
+    noCache: Boolean?
+  ): HTTPResultType<InputStream> {
+    this.logger.debug("get: {} {} {}", auth, uri, offset)
+    return this.content[uri.toASCIIString()] ?: this.notFound(uri)
+  }
+
   private fun notFound(uri: URI): HTTPResultError<InputStream> {
     this.logger.debug("NOT FOUND: {}", uri)
     return HTTPResultError(

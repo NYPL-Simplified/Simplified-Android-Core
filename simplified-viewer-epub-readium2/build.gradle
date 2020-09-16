@@ -4,6 +4,7 @@ dependencies {
   implementation project(":simplified-services-api")
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-spi")
+  implementation project(":simplified-analytics-api")
 
   implementation libraries.androidXActivity
   implementation libraries.androidXAppCompat
