@@ -45,6 +45,8 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
 
   private val viewModel: AddressViewModel by viewModels()
 
+  private var dialog: AlertDialog? = null
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -170,8 +172,10 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
         .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
           dialog.cancel()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
+      if (dialog == null) {
+        dialog = dialogBuilder.create()
+      }
+      dialog?.show()
     })
     viewModel.validateAddress(
       Address(
@@ -248,5 +252,10 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
       binding.etStreet1.setText(alternateAddress.line_1, TextView.BufferType.EDITABLE)
       binding.etCity.setText(alternateAddress.city, TextView.BufferType.EDITABLE)
     }
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }

@@ -43,6 +43,8 @@ class JuvenilePolicyFragment : Fragment() {
   private val viewModel: TokenViewModel by viewModels()
   private val platformViewModel: PlatformViewModel by viewModels()
 
+  private var dialog: AlertDialog? = null
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -118,8 +120,10 @@ class JuvenilePolicyFragment : Fragment() {
             requireActivity().setResult(Activity.RESULT_CANCELED)
             requireActivity().finish()
           }
-        val alert = dialogBuilder.create()
-        alert.show()
+        if (dialog == null) {
+          dialog = dialogBuilder.create()
+        }
+        dialog?.show()
       }
     })
 
@@ -134,8 +138,10 @@ class JuvenilePolicyFragment : Fragment() {
         .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
           dialog.cancel()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
+      if (dialog == null) {
+        dialog = dialogBuilder.create()
+      }
+      dialog?.show()
     })
 
     platformViewModel.apiError.observe(viewLifecycleOwner, Observer {
@@ -149,8 +155,10 @@ class JuvenilePolicyFragment : Fragment() {
         .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
           dialog.cancel()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
+      if (dialog == null) {
+        dialog = dialogBuilder.create()
+      }
+      dialog?.show()
     })
 
     viewModel.apiError.observe(viewLifecycleOwner, Observer {
@@ -164,8 +172,10 @@ class JuvenilePolicyFragment : Fragment() {
         .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
           dialog.cancel()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
+      if (dialog == null) {
+        dialog = dialogBuilder.create()
+      }
+      dialog?.show()
     })
 
     val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -209,5 +219,10 @@ class JuvenilePolicyFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }
