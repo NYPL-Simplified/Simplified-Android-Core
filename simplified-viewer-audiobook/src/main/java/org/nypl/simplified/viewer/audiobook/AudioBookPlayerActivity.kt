@@ -133,7 +133,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   @Volatile
   private var destroying: Boolean = false
 
-  override fun onCreate(state: Bundle?) {
+  override fun onCreate(savedInstanceState: Bundle?) {
     this.log.debug("onCreate")
     super.onCreate(null)
 
@@ -148,7 +148,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
 
     this.setTheme(
-      Services.serviceDirectory()
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
         .requireService(ThemeServiceType::class.java)
         .findCurrentTheme()
         .themeWithActionBar
@@ -412,7 +412,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
         this.supportFragmentManager
           .beginTransaction()
           .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
-          .commit()
+          .commitAllowingStateLoss()
       }
     }
   }
@@ -425,7 +425,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       this.parameters.toManifestStrategy(
         strategies = this.strategies,
         isNetworkAvailable = { this.networkConnectivity.isNetworkAvailable },
-        credentials = credentials
+        credentials = credentials,
+        cacheDirectory = this.cacheDir
       )
     return when (val strategyResult = strategy.execute()) {
       is TaskResult.Success -> {

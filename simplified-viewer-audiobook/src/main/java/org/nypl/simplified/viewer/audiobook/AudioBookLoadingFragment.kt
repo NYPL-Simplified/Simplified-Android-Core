@@ -134,7 +134,8 @@ class AudioBookLoadingFragment : Fragment() {
       this.playerParameters.toManifestStrategy(
         this.strategies,
         this.listener::onLoadingFragmentIsNetworkConnectivityAvailable,
-        credentials
+        credentials,
+        this.requireContext().cacheDir
       )
     return when (val strategyResult = strategy.execute()) {
       is TaskResult.Success -> {

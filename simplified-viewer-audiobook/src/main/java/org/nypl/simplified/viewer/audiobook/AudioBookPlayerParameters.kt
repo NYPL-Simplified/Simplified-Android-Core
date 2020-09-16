@@ -72,7 +72,8 @@ data class AudioBookPlayerParameters(
   fun toManifestStrategy(
     strategies: AudioBookManifestStrategiesType,
     isNetworkAvailable: () -> Boolean,
-    credentials: AccountAuthenticationCredentials?
+    credentials: AccountAuthenticationCredentials?,
+    cacheDirectory: File
   ): AudioBookManifestStrategyType {
 
     val manifestContentType =
@@ -103,7 +104,8 @@ data class AudioBookPlayerParameters(
         isNetworkAvailable = isNetworkAvailable,
         loadFallbackData = {
           ManifestFulfilled(manifestContentType, this.manifestFile.readBytes())
-        }
+        },
+        cacheDirectory = cacheDirectory
       )
 
     return strategies.createStrategy(request)

@@ -108,6 +108,15 @@ abstract class ReaderBookmarkHTTPCallsContract {
       return (this.responses[uri] as HTTPResultType<InputStream>)
     }
 
+    override fun get(
+      auth: OptionType<HTTPAuthType>?,
+      uri: URI?,
+      offset: Long,
+      noCache: Boolean?
+    ): HTTPResultType<InputStream> {
+      return (this.responses[uri] as HTTPResultType<InputStream>)
+    }
+
     override fun put(
       auth: OptionType<HTTPAuthType>,
       uri: URI

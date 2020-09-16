@@ -8,7 +8,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.ColorMatrixColorFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,15 +44,6 @@ import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.reader.ReaderColorSchemes;
 import org.nypl.simplified.books.api.BookDRMInformation;
-import org.nypl.simplified.profiles.api.ProfilePreferences;
-import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOC;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCElement;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCParameters;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelection;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelectionListenerType;
 import org.nypl.simplified.books.api.BookFormat;
 import org.nypl.simplified.books.api.BookID;
 import org.nypl.simplified.books.api.BookLocation;
@@ -65,14 +55,23 @@ import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
+import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileUpdated;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.reader.api.ReaderColorScheme;
 import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks;
+import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
 import org.nypl.simplified.ui.theme.ThemeControl;
 import org.nypl.simplified.ui.theme.ThemeServiceType;
+import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOC;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCElement;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCParameters;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelection;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelectionListenerType;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -330,12 +329,7 @@ public final class ReaderActivity extends AppCompatActivity implements
     final ReaderPreferences readerPreferences;
 
     try {
-      readerPreferences =
-        Services.INSTANCE.serviceDirectory()
-          .requireService(ProfilesControllerType.class)
-          .profileCurrent()
-          .preferences()
-          .getReaderPreferences();
+      readerPreferences = getProfileCurrentReaderPreferences();
     } catch (final ProfileNoneCurrentException e) {
       this.onEPUBLoadFailed(e);
       this.finish();
@@ -448,10 +442,8 @@ public final class ReaderActivity extends AppCompatActivity implements
     });
 
     // Allow the webview to be debuggable only if this is a dev build
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-        WebView.setWebContentsDebuggingEnabled(true);
-      }
+    if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+      WebView.setWebContentsDebuggingEnabled(true);
     }
 
     final WebSettings s = Objects.requireNonNull(in_webview.getSettings());
@@ -532,7 +524,8 @@ public final class ReaderActivity extends AppCompatActivity implements
       // page style settings.
       this.simplified_js_api.getReadiumCFI();
 
-      this.readium_js_api.setPageStyleSettings(preferences);
+      this.readium_js_api.setBookStyles(preferences);
+      this.readium_js_api.updateSettings(preferences);
 
       // Once they are applied, go to the CFI that is stored in the
       // JS ReadiumSDK instance.
@@ -543,6 +536,15 @@ public final class ReaderActivity extends AppCompatActivity implements
       this.readium_js_api.getCurrentPage(this);
       this.readium_js_api.mediaOverlayIsAvailable(this);
     });
+  }
+
+  private ReaderPreferences getProfileCurrentReaderPreferences() throws ProfileNoneCurrentException {
+    return
+      Services.INSTANCE.serviceDirectory()
+        .requireService(ProfilesControllerType.class)
+        .profileCurrent()
+        .preferences()
+        .getReaderPreferences();
   }
 
   @Override
@@ -817,7 +819,19 @@ public final class ReaderActivity extends AppCompatActivity implements
     in_progress_bar.setVisibility(View.VISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
 
+    ReaderPreferences preferences;
+
+    try {
+      preferences = getProfileCurrentReaderPreferences();
+    } catch (ProfileNoneCurrentException e) {
+      throw new IllegalStateException("No current profile");
+    }
+
+    this.applyViewerColorScheme(preferences.colorScheme());
+
     uiThread.runOnUIThread(() -> {
+      this.readium_js_api.setBookStyles(preferences);
+
       in_media_play.setOnClickListener(view -> {
         LOG.debug("toggling media overlay");
         this.readium_js_api.mediaOverlayToggle();
@@ -851,17 +865,6 @@ public final class ReaderActivity extends AppCompatActivity implements
   @Override
   public void onReadiumContentDocumentLoaded() {
     LOG.debug("onReadiumContentDocumentLoaded");
-
-    try {
-      this.applyReaderPreferences(
-        Services.INSTANCE.serviceDirectory()
-          .requireService(ProfilesControllerType.class)
-          .profileCurrent()
-          .preferences()
-          .getReaderPreferences());
-    } catch (final ProfileNoneCurrentException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   @Override

@@ -10,6 +10,7 @@ import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsers
 import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsersType
 import org.librarysimplified.audiobook.manifest_parser.extension_spi.ManifestParserExtensionType
 import org.librarysimplified.services.api.ServiceDirectoryType
+import java.io.File
 import java.net.URI
 import java.util.ServiceLoader
 
@@ -96,5 +97,11 @@ data class AudioBookManifestRequest(
    */
 
   val manifestParsers: ManifestParsersType =
-    ManifestParsers
+    ManifestParsers,
+
+  /**
+   * The directory in which to store cache files.
+   */
+
+  val cacheDirectory: File
 )

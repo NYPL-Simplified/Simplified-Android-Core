@@ -349,7 +349,8 @@ class AudioBookManifestStrategy(
         LicenseCheckParameters(
           manifest = manifest,
           userAgent = this.request.userAgent,
-          checks = this.request.licenseChecks
+          checks = this.request.licenseChecks,
+          cacheDirectory = this.request.cacheDirectory
         )
       )
 

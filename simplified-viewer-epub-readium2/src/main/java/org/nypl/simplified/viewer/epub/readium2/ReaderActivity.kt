@@ -13,6 +13,7 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.disposables.Disposable
+import org.joda.time.LocalDateTime
 import org.librarysimplified.r2.api.SR2Bookmark
 import org.librarysimplified.r2.api.SR2Bookmark.Type.EXPLICIT
 import org.librarysimplified.r2.api.SR2Bookmark.Type.LAST_READ
@@ -36,6 +37,9 @@ import org.librarysimplified.r2.views.SR2ReaderFragmentParameters
 import org.librarysimplified.r2.views.SR2TOCFragment
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.analytics.api.AnalyticsEvent
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookLocation
@@ -43,6 +47,7 @@ import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkExplicit
 import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkLastReadLocation
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
@@ -92,12 +97,14 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
     }
   }
 
-  private lateinit var accountId: AccountID
+  private lateinit var account: AccountType
+  private lateinit var analyticsService: AnalyticsType
   private lateinit var bookEntry: FeedEntry.FeedEntryOPDS
   private lateinit var bookFile: File
   private lateinit var bookId: BookID
   private lateinit var bookmarkService: ReaderBookmarkServiceType
-  private lateinit var profiles: ProfilesControllerType
+  private lateinit var currentProfile: ProfileReadableType
+  private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var readerFragment: SR2ReaderFragment
 
@@ -113,15 +120,20 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
     val services = Services.serviceDirectory()
 
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
+    this.analyticsService =
+      services.requireService(AnalyticsType::class.java)
     this.bookmarkService =
       services.requireService(ReaderBookmarkServiceType::class.java)
-    this.profiles =
+    this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
+    this.uiThread =
+      services.requireService(UIThreadServiceType::class.java)
 
-    this.accountId =
+    val accountId =
       this.intent?.extras?.getSerializable(ARG_ACCOUNT_ID) as AccountID
+    this.currentProfile = this.profilesController.profileCurrent()
+    this.account = this.currentProfile.account(accountId)
+
     this.bookId =
       this.intent?.extras?.getSerializable(ARG_BOOK_ID) as BookID
     this.bookFile =
@@ -170,6 +182,23 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
   override fun onStop() {
     super.onStop()
     this.controllerSubscription?.dispose()
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+
+    if (isFinishing) {
+      this.analyticsService.publishEvent(
+        AnalyticsEvent.BookClosed(
+          timestamp = LocalDateTime.now(),
+          credentials = this.account.loginState.credentials,
+          profileUUID = this.currentProfile.id.uuid,
+          accountProvider = this.account.provider.id,
+          accountUUID = this.account.id.uuid,
+          opdsEntry = this.bookEntry.feedEntry
+        )
+      )
+    }
   }
 
   override fun onControllerBecameAvailable(
@@ -231,7 +260,8 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
     return when (event) {
       is SR2ChapterNonexistent -> {
         this.uiThread.runOnUIThread {
-          Toast.makeText(this, "Chapter nonexistent: ${event.chapterIndex}", Toast.LENGTH_SHORT).show()
+          Toast.makeText(this, "Chapter nonexistent: ${event.chapterIndex}", Toast.LENGTH_SHORT)
+            .show()
         }
       }
 
@@ -253,7 +283,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
 
       is SR2BookmarkCreated -> {
         this.bookmarkService.bookmarkCreate(
-          accountID = this.accountId,
+          accountID = this.account.id,
           bookmark = fromSR2Bookmark(event.bookmark)
         )
         Unit
@@ -322,7 +352,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
   }
 
   private fun getDeviceIDString(): String? {
-    val account = this.profiles.profileAccountForBook(this.bookId)
+    val account = this.profilesController.profileAccountForBook(this.bookId)
     val state = account.loginState
     val credentials = state.credentials
     if (credentials != null) {
@@ -368,7 +398,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
   private fun loadRawBookmarks(): ReaderBookmarks {
     return try {
       this.bookmarkService
-        .bookmarkLoad(this.accountId, this.bookId)
+        .bookmarkLoad(this.account.id, this.bookId)
         .get(10L, TimeUnit.SECONDS)
     } catch (e: Exception) {
       this.logger.error("could not load bookmarks: ", e)

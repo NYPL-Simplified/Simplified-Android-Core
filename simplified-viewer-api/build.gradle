@@ -1,7 +1,8 @@
 dependencies {
   api project(":simplified-books-api")
-
+  implementation project(":simplified-analytics-api")
+  implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-services-api")
   implementation project(":simplified-viewer-spi")
-
   implementation libraries.kotlinStdlib
 }
