@@ -713,6 +713,9 @@ class AccountFragment : Fragment() {
           if (auth.passwordKeyboard == NO_INPUT) View.GONE else View.VISIBLE
         this.authenticationBasicShowPass.visibility =
           if (auth.passwordKeyboard == NO_INPUT) View.GONE else View.VISIBLE
+
+        // Reset password visibility
+        setPasswordVisible(this.authenticationBasicShowPass.isChecked)
       }
 
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
