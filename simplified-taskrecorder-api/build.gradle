@@ -3,4 +3,5 @@ dependencies {
 
   implementation libraries.googleGuava
   implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

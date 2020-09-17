@@ -79,7 +79,7 @@ ext {
 
   nyplAudioBookAPIVersion = "6.0.0"
   nyplR2Version = "0.0.5"
-  nyplHTTPVersion = "0.0.4"
+  nyplHTTPVersion = "0.0.7"
   irradiaMimeVersion = "1.1.0"
 }
 
@@ -163,6 +163,7 @@ ext.libraries = [
   nyplHttpAPI                      : "org.librarysimplified.http:org.librarysimplified.http.api:${nyplHTTPVersion}",
   nyplHttpVanilla                  : "org.librarysimplified.http:org.librarysimplified.http.vanilla:${nyplHTTPVersion}",
   nyplHttpChucker                  : "org.librarysimplified.http:org.librarysimplified.http.chucker:${nyplHTTPVersion}",
+  nyplHttpBearerToken              : "org.librarysimplified.http:org.librarysimplified.http.bearer_token:${nyplHTTPVersion}",
   picasso                          : "com.squareup.picasso:picasso:2.71828",
   readium                          : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
   readiumSharedJS                  : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",

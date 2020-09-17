@@ -76,6 +76,7 @@ dependencies {
   implementation libraries.nyplDRMCore
   implementation libraries.nyplHttpAPI
   implementation libraries.nyplHttpVanilla
+  implementation libraries.nyplHttpBearerToken
   implementation libraries.slf4j
 
   testImplementation libraries.logbackClassic

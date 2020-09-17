@@ -10,7 +10,7 @@ import org.nypl.simplified.books.borrowing.BorrowContextType
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpConnectionFailed
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpContentTypeIncompatible
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpEmptyBody
-import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.requiredURIMissing
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
 import java.io.File
@@ -18,8 +18,8 @@ import java.io.InputStream
 
 /**
  * A task that downloads a file directly and saves it to the book database. It _does not_
- * do any special logic such as bearer token retrieval, audio book manifest fulfillment,
- * Adobe ACS operations, or anything else.
+ * do any special logic such as audio book manifest fulfillment, Adobe ACS operations, or
+ * anything else.
  */
 
 class BorrowDirectDownload private constructor() : BorrowSubtaskType {
@@ -34,17 +34,14 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
   }
 
   override fun execute(context: BorrowContextType) {
-    val currentURI = context.currentURI
+    context.taskRecorder.beginNewStep("Downloading directly...")
+
+    val currentURI = context.currentURICheck()
     context.logDebug("downloading {}", currentURI)
     context.taskRecorder.beginNewStep("Downloading $currentURI...")
-
-    if (currentURI == null) {
-      context.logError("no current URI")
-      context.taskRecorder.currentStepFailed("A required URI is missing.", requiredURIMissing)
-      throw BorrowSubtaskFailed()
-    }
-
     context.taskRecorder.addAttribute("URI", currentURI.toString())
+
+    context.checkCancelled()
 
     val request =
       context.httpClient.newRequest(currentURI)
@@ -126,6 +123,8 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
       )
 
       while (true) {
+        context.checkCancelled()
+
         val read = inputStream.read(buffer)
         if (read == -1) {
           break

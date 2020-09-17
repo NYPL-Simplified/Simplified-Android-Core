@@ -12,6 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.bearer_token.LSHTTPBearerTokenInterceptors
 import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountID
@@ -29,6 +30,8 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.borrowing.BorrowContextType
 import org.nypl.simplified.books.borrowing.internal.BorrowDirectDownload
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.requiredURIMissing
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericPDFFiles
@@ -40,7 +43,6 @@ import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.net.URI
 import java.util.UUID
 
 class BorrowDirectDownloadTest {
@@ -145,6 +147,12 @@ class BorrowDirectDownloadTest {
   fun testNoURI() {
     val task = BorrowDirectDownload.createSubtask()
 
+    Mockito.`when`(this.context.currentURICheck())
+      .then {
+        this.taskRecorder.currentStepFailed("Missing URI", requiredURIMissing)
+        throw BorrowSubtaskException.BorrowSubtaskFailed()
+      }
+
     try {
       task.execute(this.context)
       Assert.fail()
@@ -153,7 +161,7 @@ class BorrowDirectDownloadTest {
     }
 
     assertEquals(
-      BorrowErrorCodes.requiredURIMissing,
+      requiredURIMissing,
       this.taskRecorder.finishFailure<Unit>().lastErrorCode
     )
   }
@@ -166,8 +174,10 @@ class BorrowDirectDownloadTest {
   fun testHTTPConnectionFails() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.context.currentURI)
-      .thenReturn(URI.create("http://localhost:20001/book.epub"))
+    Mockito.`when`(this.context.currentURI())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
+    Mockito.`when`(this.context.currentURICheck())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
 
     try {
       task.execute(this.context)
@@ -190,8 +200,10 @@ class BorrowDirectDownloadTest {
   fun testHTTP404Fails() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.context.currentURI)
-      .thenReturn(URI.create("http://localhost:20000/book.epub"))
+    Mockito.`when`(this.context.currentURI())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
+    Mockito.`when`(this.context.currentURICheck())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
 
     this.webServer.enqueue(MockResponse().setResponseCode(404))
 
@@ -216,8 +228,11 @@ class BorrowDirectDownloadTest {
   fun testMIMEIncompatibleFails() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.context.currentURI)
-      .thenReturn(URI.create("http://localhost:20000/book.epub"))
+    Mockito.`when`(this.context.currentURI())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
+    Mockito.`when`(this.context.currentURICheck())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
+
     Mockito.`when`(this.context.currentAcquisitionPathElement)
       .thenReturn(OPDSAcquisitionPathElement(
         MIMEType("application", "pdf", mapOf()),
@@ -254,8 +269,10 @@ class BorrowDirectDownloadTest {
 
     Mockito.`when`(this.bookDatabaseEntry.findFormatHandleForContentType(genericPDFFiles))
       .thenReturn(this.pdfHandle)
-    Mockito.`when`(this.context.currentURI)
-      .thenReturn(URI.create("http://localhost:20000/book.epub"))
+    Mockito.`when`(this.context.currentURI())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
+    Mockito.`when`(this.context.currentURICheck())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
     Mockito.`when`(this.context.currentAcquisitionPathElement)
       .thenReturn(OPDSAcquisitionPathElement(
         genericPDFFiles,
@@ -263,7 +280,7 @@ class BorrowDirectDownloadTest {
       ))
 
     var savedData = ""
-    Mockito.`when`(this.pdfHandle.copyInBook(anyNonNull()))
+    Mockito.`when`(this.pdfHandle.copyInBook(this.anyNonNull()))
       .then {
         savedData = (it.getArgument(0) as File).readText()
         Unit
@@ -292,8 +309,10 @@ class BorrowDirectDownloadTest {
 
     Mockito.`when`(this.bookDatabaseEntry.findFormatHandleForContentType(genericEPUBFiles))
       .thenReturn(this.epubHandle)
-    Mockito.`when`(this.context.currentURI)
-      .thenReturn(URI.create("http://localhost:20000/book.epub"))
+    Mockito.`when`(this.context.currentURI())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
+    Mockito.`when`(this.context.currentURICheck())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
     Mockito.`when`(this.context.currentAcquisitionPathElement)
       .thenReturn(OPDSAcquisitionPathElement(
         genericEPUBFiles,
@@ -301,7 +320,7 @@ class BorrowDirectDownloadTest {
       ))
 
     var savedData = ""
-    Mockito.`when`(this.epubHandle.copyInBook(anyNonNull()))
+    Mockito.`when`(this.epubHandle.copyInBook(this.anyNonNull()))
       .then {
         savedData = (it.getArgument(0) as File).readText()
         Unit
@@ -317,6 +336,61 @@ class BorrowDirectDownloadTest {
 
     task.execute(this.context)
 
+    assertEquals("EPUB!", savedData)
+  }
+
+  /**
+   * A file is downloaded even if it has to go through a bearer token.
+   */
+
+  @Test
+  fun testDownloadOkEPUBBearerToken() {
+    val task = BorrowDirectDownload.createSubtask()
+
+    Mockito.`when`(this.bookDatabaseEntry.findFormatHandleForContentType(genericEPUBFiles))
+      .thenReturn(this.epubHandle)
+    Mockito.`when`(this.context.currentURI())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
+    Mockito.`when`(this.context.currentURICheck())
+      .thenReturn(this.webServer.url("/book.epub").toUri())
+    Mockito.`when`(this.context.currentAcquisitionPathElement)
+      .thenReturn(OPDSAcquisitionPathElement(
+        genericEPUBFiles,
+        null
+      ))
+
+    var savedData = ""
+    Mockito.`when`(this.epubHandle.copyInBook(this.anyNonNull()))
+      .then {
+        savedData = (it.getArgument(0) as File).readText()
+        Unit
+      }
+
+    val response0 =
+      MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", LSHTTPBearerTokenInterceptors.bearerTokenContentType)
+        .setBody("""{
+          "access_token": "abcd",
+          "expires_in": 1000,
+          "location": "http://localhost:20000/book.epub"
+        }""".trimIndent())
+
+    val response1 =
+      MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", "application/epub+zip")
+        .setBody("EPUB!")
+
+    this.webServer.enqueue(response0)
+    this.webServer.enqueue(response1)
+
+    task.execute(this.context)
+
+    val sent0 = this.webServer.takeRequest()
+    assertEquals(null, sent0.getHeader("Authorization"))
+    val sent1 = this.webServer.takeRequest()
+    assertEquals("Bearer abcd", sent1.getHeader("Authorization"))
     assertEquals("EPUB!", savedData)
   }
 }

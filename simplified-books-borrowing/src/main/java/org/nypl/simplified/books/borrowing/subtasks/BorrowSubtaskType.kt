@@ -12,5 +12,6 @@ interface BorrowSubtaskType {
    * Execute the subtask.
    */
 
+  @Throws(BorrowSubtaskException::class)
   fun execute(context: BorrowContextType)
 }

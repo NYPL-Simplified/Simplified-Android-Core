@@ -15,6 +15,8 @@ import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.noSubtaskAv
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.noSupportedAcquisitions
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.subtaskFailed
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.unexpectedException
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskCancelled
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskHaltedEarly
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
@@ -133,20 +135,33 @@ class BorrowTask private constructor(
     val context =
       BorrowContext(
         account = this.account,
-        bookInitial = book,
         bookDatabaseEntry = this.databaseEntry!!,
+        bookInitial = book,
         clock = this.requirements.clock,
         currentOPDSAcquisitionPathElement = path.elements.first(),
         httpClient = this.requirements.httpClient,
         logger = this.logger,
+        opdsAcquisitionPath = path,
         taskRecorder = this.taskRecorder,
         temporaryDirectory = this.requirements.temporaryDirectory
       )
 
-    for (pathElement in path.elements) {
-      context.currentOPDSAcquisitionPathElement = pathElement
-      val subtaskFactory = this.subtaskFindForPathElement(pathElement, book)
-      this.subtaskExecute(subtaskFactory, context, book)
+    val elementQueue = path.elements.toMutableList()
+    while (elementQueue.isNotEmpty()) {
+      try {
+        val pathElement = elementQueue[0]
+        elementQueue.removeAt(0)
+        context.currentOPDSAcquisitionPathElement = pathElement
+        context.currentRemainingOPDSPathElements = elementQueue.toList()
+        val subtaskFactory = this.subtaskFindForPathElement(pathElement, book)
+        this.subtaskExecute(subtaskFactory, context, book)
+      } catch (e: BorrowSubtaskHaltedEarly) {
+        this.logger.debug("subtask halted early: ", e)
+        return
+      } catch (e: BorrowSubtaskCancelled) {
+        this.logger.debug("subtask cancelled: ", e)
+        return
+      }
     }
   }
 
@@ -164,6 +179,10 @@ class BorrowTask private constructor(
     try {
       subtaskFactory.createSubtask().execute(context)
       step.resolution = TaskStepSucceeded("Executed subtask '$name' successfully.")
+    } catch (e: BorrowSubtaskHaltedEarly) {
+      throw e
+    } catch (e: BorrowSubtaskCancelled) {
+      throw e
     } catch (e: Exception) {
       step.resolution = TaskStepFailed(
         message = "Subtask '$name' raised an unexpected exception",
@@ -204,6 +223,7 @@ class BorrowTask private constructor(
     override val bookDatabaseEntry: BookDatabaseEntryType,
     override val httpClient: LSHTTPClientType,
     override val taskRecorder: TaskRecorderType,
+    override val opdsAcquisitionPath: OPDSAcquisitionPath,
     bookInitial: Book,
     private val logger: Logger,
     private val temporaryDirectory: File,
@@ -213,6 +233,9 @@ class BorrowTask private constructor(
     @Volatile
     override var isCancelled =
       false
+
+    var currentRemainingOPDSPathElements =
+      this.opdsAcquisitionPath.elements
 
     private var currentBookField =
       bookInitial
@@ -231,10 +254,9 @@ class BorrowTask private constructor(
     var currentURIField: URI? =
       null
 
-    override val currentURI: URI?
-      get() = if (this.currentURIField == null) {
-        this.currentOPDSAcquisitionPathElement.target
-      } else null
+    override fun currentURI(): URI? {
+      return this.currentURIField ?: return this.currentAcquisitionPathElement.target
+    }
 
     override fun receivedNewURI(uri: URI) {
       this.logDebug("received new URI: {}", uri)
@@ -265,6 +287,10 @@ class BorrowTask private constructor(
         }
       }
       throw IOException("Could not create a temporary file within 100 attempts!")
+    }
+
+    override fun opdsAcquisitionPathRemaining(): List<OPDSAcquisitionPathElement> {
+      return this.currentRemainingOPDSPathElements
     }
   }
 
