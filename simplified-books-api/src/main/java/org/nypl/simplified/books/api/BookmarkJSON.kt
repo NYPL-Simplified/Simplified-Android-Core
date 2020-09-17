@@ -69,12 +69,13 @@ object BookmarkJSON {
       objectMapper, JSONParserUtilities.getObject(node, "location"))
 
     val location =
-      if (deserializedLocation.progress == null && chapterProgress != null)
+      if (deserializedLocation.progress == null && chapterProgress != null) {
         // If this is an older bookmark, move the chapter progress into location.progress. In this
         // case the chapter index is unknown.
         deserializedLocation.copy(progress = BookChapterProgress(0, chapterProgress))
-      else
+      } else {
         deserializedLocation
+      }
 
     return Bookmark(
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
