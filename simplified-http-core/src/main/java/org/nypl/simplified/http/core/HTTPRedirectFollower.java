@@ -168,6 +168,7 @@ public final class HTTPRedirectFollower
     switch (code) {
       case HttpURLConnection.HTTP_MOVED_PERM:
       case HttpURLConnection.HTTP_MOVED_TEMP:
+      case HttpURLConnection.HTTP_SEE_OTHER:
       case 307:
       case 308: {
 
