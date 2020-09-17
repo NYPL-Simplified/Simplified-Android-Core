@@ -40,6 +40,8 @@ class AccountInformationFragment : Fragment() {
 
   private val viewModel: UsernameViewModel by viewModels()
 
+  private var dialog: AlertDialog? = null
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -123,8 +125,10 @@ class AccountInformationFragment : Fragment() {
         .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
           dialog.cancel()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
+      if (dialog == null) {
+        dialog = dialogBuilder.create()
+      }
+      dialog?.show()
     })
     viewModel.validateUsername(
       binding.usernameEt.text.toString(),
@@ -162,5 +166,10 @@ class AccountInformationFragment : Fragment() {
     val accountInformation = Cache(requireContext()).getAccountInformation()
     binding.pinEt.setText(accountInformation.pin, TextView.BufferType.EDITABLE)
     binding.usernameEt.setText(accountInformation.username, TextView.BufferType.EDITABLE)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }

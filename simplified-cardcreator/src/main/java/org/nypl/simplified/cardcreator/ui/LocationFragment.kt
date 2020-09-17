@@ -52,6 +52,8 @@ class LocationFragment : Fragment(), LocationListener {
 
   private val locationRequestCode = 102
 
+  private var dialog: AlertDialog? = null
+
   override fun onAttach(context: Context) {
     super.onAttach(context)
     locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -76,6 +78,7 @@ class LocationFragment : Fragment(), LocationListener {
   override fun onPause() {
     super.onPause()
     locationManager.removeUpdates(this)
+    dialog?.dismiss()
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -139,8 +142,10 @@ class LocationFragment : Fragment(), LocationListener {
         initialLocationCheckCompleted = true
         dialog.cancel()
       }
-    val alert = dialogBuilder.create()
-    alert.show()
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
   }
 
   /**
@@ -157,8 +162,10 @@ class LocationFragment : Fragment(), LocationListener {
       .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
         dialog.cancel()
       }
-    val alert = dialogBuilder.create()
-    alert.show()
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
   }
 
   /**

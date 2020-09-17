@@ -38,6 +38,7 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
   private val addressCharsMin = 5
   private val validAddress = "valid-address"
   private val alternateAddress = "alternate-addresses"
+  private var dialog: AlertDialog? = null
 
   private val viewModel: AddressViewModel by viewModels()
 
@@ -120,6 +121,7 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
           response.address.zip)
         )
         nextAction = HomeAddressFragmentDirections.actionNext()
+
         navController.navigate(nextAction)
       } else {
         Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
@@ -141,8 +143,10 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
         .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
           dialog.cancel()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
+      if (dialog == null) {
+          dialog = dialogBuilder.create()
+      }
+      dialog?.show()
     })
     viewModel.validateAddress(Address(AddressDetails(binding.etCity.text.toString(),
       binding.etStreet1.text.toString(),
@@ -210,5 +214,10 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
     binding.etZip.setText(homeAddress.zip, TextView.BufferType.EDITABLE)
     binding.etStreet1.setText(homeAddress.line_1, TextView.BufferType.EDITABLE)
     binding.etCity.setText(homeAddress.city, TextView.BufferType.EDITABLE)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }

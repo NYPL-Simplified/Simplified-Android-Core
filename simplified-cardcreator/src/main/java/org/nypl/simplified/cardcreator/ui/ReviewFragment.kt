@@ -45,6 +45,8 @@ class ReviewFragment : Fragment() {
   private val viewModel: PatronViewModel by viewModels()
   private val platformViewModel: PlatformViewModel by viewModels()
 
+  private var dialog: AlertDialog? = null
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -133,8 +135,10 @@ class ReviewFragment : Fragment() {
           requireActivity().setResult(Activity.RESULT_CANCELED)
           requireActivity().finish()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
+      if (dialog == null) {
+        dialog = dialogBuilder.create()
+      }
+      dialog?.show()
     })
 
     platformViewModel.apiError.observe(viewLifecycleOwner, Observer {
@@ -154,8 +158,10 @@ class ReviewFragment : Fragment() {
           requireActivity().setResult(Activity.RESULT_CANCELED)
           requireActivity().finish()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
+      if (dialog == null) {
+        dialog = dialogBuilder.create()
+      }
+      dialog?.show()
     })
 
     val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -300,5 +306,10 @@ class ReviewFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }
