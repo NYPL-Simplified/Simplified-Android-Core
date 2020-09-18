@@ -7,6 +7,7 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.accountsDatabaseException
@@ -136,6 +137,7 @@ class BorrowTask private constructor(
       BorrowContext(
         account = this.account,
         bookDatabaseEntry = this.databaseEntry!!,
+        bookRegistry = this.requirements.bookRegistry,
         bookInitial = book,
         clock = this.requirements.clock,
         currentOPDSAcquisitionPathElement = path.elements.first(),
@@ -217,83 +219,6 @@ class BorrowTask private constructor(
     return subtaskFactory
   }
 
-  private class BorrowContext(
-    override val account: AccountReadableType,
-    override val clock: () -> Instant,
-    override val bookDatabaseEntry: BookDatabaseEntryType,
-    override val httpClient: LSHTTPClientType,
-    override val taskRecorder: TaskRecorderType,
-    override val opdsAcquisitionPath: OPDSAcquisitionPath,
-    bookInitial: Book,
-    private val logger: Logger,
-    private val temporaryDirectory: File,
-    var currentOPDSAcquisitionPathElement: OPDSAcquisitionPathElement
-  ) : BorrowContextType {
-
-    @Volatile
-    override var isCancelled =
-      false
-
-    var currentRemainingOPDSPathElements =
-      this.opdsAcquisitionPath.elements
-
-    private var currentBookField =
-      bookInitial
-
-    override val bookCurrent: Book
-      get() = this.currentBookField
-
-    override fun bookIsDownloading(
-      expectedSize: Long?,
-      receivedSize: Long,
-      bytesPerSecond: Long
-    ) {
-      this.logDebug("downloading: {} {} {}", expectedSize, receivedSize, bytesPerSecond)
-    }
-
-    var currentURIField: URI? =
-      null
-
-    override fun currentURI(): URI? {
-      return this.currentURIField ?: return this.currentAcquisitionPathElement.target
-    }
-
-    override fun receivedNewURI(uri: URI) {
-      this.logDebug("received new URI: {}", uri)
-      this.currentURIField = uri
-    }
-
-    override val currentAcquisitionPathElement: OPDSAcquisitionPathElement
-      get() = this.currentOPDSAcquisitionPathElement
-
-    private val bookIdBrief =
-      this.currentBookField.id.brief()
-
-    override fun logDebug(message: String, vararg arguments: Any?) =
-      this.logger.debug("[{}] $message", this.bookIdBrief, *arguments)
-
-    override fun logError(message: String, vararg arguments: Any?) =
-      this.logger.error("[{}] $message", this.bookIdBrief, *arguments)
-
-    override fun logWarn(message: String, vararg arguments: Any?) =
-      this.logger.warn("[{}] $message", this.bookIdBrief, *arguments)
-
-    override fun temporaryFile(): File {
-      this.temporaryDirectory.mkdirs()
-      for (i in 0..100) {
-        val file = File(this.temporaryDirectory, "${UUID.randomUUID()}.tmp")
-        if (!file.exists()) {
-          return file
-        }
-      }
-      throw IOException("Could not create a temporary file within 100 attempts!")
-    }
-
-    override fun opdsAcquisitionPathRemaining(): List<OPDSAcquisitionPathElement> {
-      return this.currentRemainingOPDSPathElements
-    }
-  }
-
   /**
    * Create a new book database entry and publish the status of the book.
    */
@@ -372,5 +297,125 @@ class BorrowTask private constructor(
   private fun publishBookFailure(book: Book) {
     val failure = this.taskRecorder.finishFailure<Unit>()
     this.requirements.bookRegistry.update(BookWithStatus(book, BookStatus.FailedLoan(book.id, failure)))
+  }
+
+  private class BorrowContext(
+    override val account: AccountReadableType,
+    override val clock: () -> Instant,
+    override val bookDatabaseEntry: BookDatabaseEntryType,
+    override val httpClient: LSHTTPClientType,
+    override val taskRecorder: TaskRecorderType,
+    override val opdsAcquisitionPath: OPDSAcquisitionPath,
+    bookInitial: Book,
+    private val bookRegistry: BookRegistryType,
+    private val logger: Logger,
+    private val temporaryDirectory: File,
+    var currentOPDSAcquisitionPathElement: OPDSAcquisitionPathElement
+  ) : BorrowContextType {
+
+    @Volatile
+    override var isCancelled =
+      false
+
+    var currentRemainingOPDSPathElements =
+      this.opdsAcquisitionPath.elements
+
+    override val bookCurrent: Book
+      get() = this.bookDatabaseEntry.book
+
+    override fun bookDownloadIsRunning(
+      expectedSize: Long?,
+      receivedSize: Long,
+      bytesPerSecond: Long,
+      message: String
+    ) {
+      this.logDebug("downloading: {} {} {}", expectedSize, receivedSize, bytesPerSecond)
+
+      this.bookPublishStatus(
+        BookStatus.Downloading(
+          id = this.bookCurrent.id,
+          currentTotalBytes = receivedSize,
+          expectedTotalBytes = expectedSize ?: 100L,
+          detailMessage = message
+        )
+      )
+    }
+
+    override fun bookPublishStatus(status: BookStatus) {
+      this.bookRegistry.update(BookWithStatus(this.bookDatabaseEntry.book, status))
+    }
+
+    override fun bookDownloadSucceeded() {
+      this.bookPublishStatus(BookStatus.fromBook(this.bookDatabaseEntry.book))
+    }
+
+    override fun bookLoanIsRequesting(message: String) {
+      this.bookPublishStatus(
+        BookStatus.RequestingLoan(
+          id = this.bookCurrent.id,
+          detailMessage = message
+        )
+      )
+    }
+
+    override fun bookLoanFailed() {
+      this.bookPublishStatus(
+        BookStatus.FailedLoan(
+          id = this.bookCurrent.id,
+          result = this.taskRecorder.finishFailure()
+        )
+      )
+    }
+
+    override fun bookDownloadFailed() {
+      this.bookPublishStatus(
+        BookStatus.FailedDownload(
+          id = this.bookCurrent.id,
+          result = this.taskRecorder.finishFailure()
+        )
+      )
+    }
+
+    var currentURIField: URI? =
+      null
+
+    override fun currentURI(): URI? {
+      return this.currentURIField ?: return this.currentAcquisitionPathElement.target
+    }
+
+    override fun receivedNewURI(uri: URI) {
+      this.logDebug("received new URI: {}", uri)
+      this.currentURIField = uri
+    }
+
+    override val currentAcquisitionPathElement: OPDSAcquisitionPathElement
+      get() = this.currentOPDSAcquisitionPathElement
+
+    private val bookIdBrief =
+      bookInitial.id.brief()
+
+    override fun logDebug(message: String, vararg arguments: Any?) =
+      this.logger.debug("[{}] $message", this.bookIdBrief, *arguments)
+
+    override fun logError(message: String, vararg arguments: Any?) =
+      this.logger.error("[{}] $message", this.bookIdBrief, *arguments)
+
+    override fun logWarn(message: String, vararg arguments: Any?) =
+      this.logger.warn("[{}] $message", this.bookIdBrief, *arguments)
+
+    override fun temporaryFile(): File {
+      this.temporaryDirectory.mkdirs()
+      for (i in 0..100) {
+        val file = File(this.temporaryDirectory, "${UUID.randomUUID()}.tmp")
+        if (!file.exists()) {
+          return file
+        }
+      }
+      throw IOException("Could not create a temporary file within 100 attempts!")
+    }
+
+    override fun opdsAcquisitionPathRemaining(): List<OPDSAcquisitionPathElement> {
+      return this.currentRemainingOPDSPathElements
+    }
   }
 }

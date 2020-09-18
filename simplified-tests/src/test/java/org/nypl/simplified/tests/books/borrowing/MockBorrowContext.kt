@@ -5,6 +5,9 @@ import org.librarysimplified.http.api.LSHTTPClientType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.borrowing.BorrowContextType
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
@@ -18,6 +21,7 @@ import java.util.UUID
 class MockBorrowContext(
   val logger: Logger,
   val temporaryDirectory: File,
+  val bookRegistry: BookRegistryType,
   override var account: AccountReadableType,
   override var clock: () -> Instant,
   override var httpClient: LSHTTPClientType,
@@ -31,12 +35,62 @@ class MockBorrowContext(
   override lateinit var opdsAcquisitionPath: OPDSAcquisitionPath
   override var bookCurrent: Book = bookInitial
 
-  override fun bookIsDownloading(
+  override fun bookPublishStatus(status: BookStatus) {
+    val bookNext = this.bookDatabaseEntry.book
+    this.bookCurrent = bookNext
+    this.bookRegistry.update(BookWithStatus(bookNext, status))
+  }
+
+  override fun bookDownloadSucceeded() {
+    val book = this.bookDatabaseEntry.book
+    check(book.isDownloaded)
+    val status = BookStatus.fromBook(book)
+    this.bookPublishStatus(status)
+  }
+
+  override fun bookDownloadIsRunning(
     expectedSize: Long?,
     receivedSize: Long,
-    bytesPerSecond: Long
+    bytesPerSecond: Long,
+    message: String
   ) {
     this.logDebug("downloading: {} {} {}", expectedSize, receivedSize, bytesPerSecond)
+
+    this.bookPublishStatus(
+      BookStatus.Downloading(
+        id = this.bookCurrent.id,
+        currentTotalBytes = receivedSize,
+        expectedTotalBytes = expectedSize ?: 100L,
+        detailMessage = message
+      )
+    )
+  }
+
+  override fun bookDownloadFailed() {
+    this.bookPublishStatus(
+      BookStatus.FailedDownload(
+        id = this.bookCurrent.id,
+        result = this.taskRecorder.finishFailure()
+      )
+    )
+  }
+
+  override fun bookLoanIsRequesting(message: String) {
+    this.bookPublishStatus(
+      BookStatus.RequestingLoan(
+        id = this.bookCurrent.id,
+        detailMessage = message
+      )
+    )
+  }
+
+  override fun bookLoanFailed() {
+    this.bookPublishStatus(
+      BookStatus.FailedLoan(
+        id = this.bookCurrent.id,
+        result = this.taskRecorder.finishFailure()
+      )
+    )
   }
 
   var currentRemainingOPDSPathElements: List<OPDSAcquisitionPathElement> =

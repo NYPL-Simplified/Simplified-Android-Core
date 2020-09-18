@@ -22,14 +22,18 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
-import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatus.FailedLoan
+import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldInQueue
+import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldReady
+import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedNotDownloaded
+import org.nypl.simplified.books.book_registry.BookStatus.RequestingLoan
 import org.nypl.simplified.books.book_registry.BookStatusEvent
-import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpConnectionFailed
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpContentTypeIncompatible
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpRequestFailed
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryHoldable
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryParseError
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.requiredURIMissing
@@ -45,6 +49,8 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.MockBookDatabase
+import org.nypl.simplified.tests.MockBookDatabaseEntry
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 
@@ -53,22 +59,29 @@ class BorrowLoanCreateTest {
   private lateinit var account: AccountType
   private lateinit var accountId: AccountID
   private lateinit var accountProvider: AccountProvider
-  private lateinit var bookDatabase: BookDatabaseType
-  private lateinit var bookDatabaseEntry: BookDatabaseEntryType
+  private lateinit var bookStates: MutableList<BookStatus>
+  private lateinit var bookDatabase: MockBookDatabase
+  private lateinit var bookDatabaseEntry: MockBookDatabaseEntry
   private lateinit var bookEvents: MutableList<BookStatusEvent>
   private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookID: BookID
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var context: MockBorrowContext
-  private lateinit var epubHandle: BookDatabaseEntryFormatHandleEPUB
   private lateinit var httpClient: LSHTTPClientType
-  private lateinit var pdfHandle: BookDatabaseEntryFormatHandlePDF
   private lateinit var profile: ProfileReadableType
   private lateinit var taskRecorder: TaskRecorderType
   private lateinit var webServer: MockWebServer
   private var bookRegistrySub: Disposable? = null
 
   private val logger = LoggerFactory.getLogger(BorrowLoanCreateTest::class.java)
+
+  private fun verifyBookRegistryHasStatus(clazz: Class<*>) {
+    val registryStatus = this.bookRegistry.bookStatusOrNull(this.bookID)!!
+    assertEquals(clazz, registryStatus.javaClass)
+  }
+
+  private fun <T> anyNonNull(): T =
+    Mockito.argThat { x -> x != null }
 
   @Before
   fun testSetup() {
@@ -81,22 +94,14 @@ class BorrowLoanCreateTest {
       BookRegistry.create()
     this.bookEvents =
       mutableListOf()
+    this.bookStates =
+      mutableListOf()
     this.bookRegistrySub =
       this.bookRegistry.bookEvents()
         .subscribe(this::recordBookEvent)
 
-    this.bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    this.bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    this.pdfHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandlePDF::class.java)
-    this.epubHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
     this.profile =
       Mockito.mock(ProfileReadableType::class.java)
-    this.accountId =
-      AccountID.generate()
     this.bookID =
       BookIDs.newFromText("x")
     this.account =
@@ -117,9 +122,28 @@ class BorrowLoanCreateTest {
           )
         )
 
+    this.accountId =
+      AccountID.generate()
+
+    val bookInitial =
+      Book(
+        id = this.bookID,
+        account = this.accountId,
+        cover = null,
+        thumbnail = null,
+        entry = OPDSAcquisitionFeedEntry.newBuilder("x", "Title", DateTime.now(), OPDSAvailabilityLoanable.get()).build(),
+        formats = listOf()
+      )
+
+    this.bookDatabase =
+      MockBookDatabase(this.accountId)
+    this.bookDatabaseEntry =
+      MockBookDatabaseEntry(bookInitial)
+
     this.context =
       MockBorrowContext(
         logger = this.logger,
+        bookRegistry = this.bookRegistry,
         temporaryDirectory = TestDirectories.temporaryDirectory(),
         account = this.account,
         clock = { Instant.now() },
@@ -127,14 +151,7 @@ class BorrowLoanCreateTest {
         taskRecorder = this.taskRecorder,
         isCancelled = false,
         bookDatabaseEntry = this.bookDatabaseEntry,
-        bookInitial = Book(
-          id = this.bookID,
-          account = this.accountId,
-          cover = null,
-          thumbnail = null,
-          entry = OPDSAcquisitionFeedEntry.newBuilder("x", "Title", DateTime.now(), OPDSAvailabilityLoanable.get()).build(),
-          formats = listOf()
-        )
+        bookInitial = bookInitial
       )
 
     this.context.currentAcquisitionPathElement =
@@ -146,6 +163,9 @@ class BorrowLoanCreateTest {
 
   private fun recordBookEvent(event: BookStatusEvent) {
     this.logger.debug("event: {}", event)
+    val status = this.bookRegistry.bookStatusOrNull(event.book())!!
+    this.logger.debug("status: {}", status)
+    this.bookStates.add(status)
     this.bookEvents.add(event)
   }
 
@@ -170,10 +190,13 @@ class BorrowLoanCreateTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      requiredURIMissing,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
+    assertEquals(requiredURIMissing, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -194,10 +217,13 @@ class BorrowLoanCreateTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      BorrowErrorCodes.httpConnectionFailed,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
+    assertEquals(httpConnectionFailed, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -220,10 +246,13 @@ class BorrowLoanCreateTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      BorrowErrorCodes.httpRequestFailed,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
+    assertEquals(httpRequestFailed, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -251,10 +280,13 @@ class BorrowLoanCreateTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      BorrowErrorCodes.httpContentTypeIncompatible,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
+    assertEquals(httpContentTypeIncompatible, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -285,10 +317,13 @@ class BorrowLoanCreateTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      opdsFeedEntryParseError,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
+    assertEquals(opdsFeedEntryParseError, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -331,6 +366,13 @@ class BorrowLoanCreateTest {
 
     assertEquals(this.webServer.url("/next").toUri(), this.context.receivedURIs[0])
     assertEquals(1, this.context.receivedURIs.size)
+
+    this.verifyBookRegistryHasStatus(LoanedNotDownloaded::class.java)
+    assertEquals(1, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedNotDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -386,6 +428,13 @@ class BorrowLoanCreateTest {
     assertEquals(null, sent0.getHeader("Authorization"))
     val sent1 = this.webServer.takeRequest()
     assertEquals("Bearer abcd", sent1.getHeader("Authorization"))
+
+    this.verifyBookRegistryHasStatus(LoanedNotDownloaded::class.java)
+    assertEquals(1, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedNotDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -433,6 +482,13 @@ class BorrowLoanCreateTest {
       this.logger.debug("error: ", e)
       throw IllegalStateException(e)
     }
+
+    this.verifyBookRegistryHasStatus(HeldInQueue::class.java)
+    assertEquals(1, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(HeldInQueue::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -480,6 +536,12 @@ class BorrowLoanCreateTest {
       this.logger.debug("error: ", e)
       throw IllegalStateException(e)
     }
+
+    this.verifyBookRegistryHasStatus(HeldReady::class.java)
+    assertEquals(1, this.bookDatabaseEntry.entryWrites)
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(HeldReady::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -528,6 +590,11 @@ class BorrowLoanCreateTest {
       opdsFeedEntryHoldable,
       this.taskRecorder.finishFailure<Unit>().lastErrorCode
     )
+
+    assertEquals(1, this.bookDatabaseEntry.entryWrites)
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -556,5 +623,11 @@ class BorrowLoanCreateTest {
     this.webServer.enqueue(response)
 
     task.execute(this.context)
+
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedNotDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 }

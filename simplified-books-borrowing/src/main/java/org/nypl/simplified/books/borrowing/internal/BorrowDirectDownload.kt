@@ -35,27 +35,32 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Downloading directly...")
+    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
 
-    val currentURI = context.currentURICheck()
-    context.logDebug("downloading {}", currentURI)
-    context.taskRecorder.beginNewStep("Downloading $currentURI...")
-    context.taskRecorder.addAttribute("URI", currentURI.toString())
+    try {
+      val currentURI = context.currentURICheck()
+      context.logDebug("downloading {}", currentURI)
+      context.taskRecorder.beginNewStep("Downloading $currentURI...")
+      context.taskRecorder.addAttribute("URI", currentURI.toString())
+      context.checkCancelled()
 
-    context.checkCancelled()
+      val request =
+        context.httpClient.newRequest(currentURI)
+          .build()
 
-    val request =
-      context.httpClient.newRequest(currentURI)
-        .build()
-
-    return request.execute().use { response ->
-      when (val status = response.status) {
-        is LSHTTPResponseStatus.Responded.OK ->
-          this.handleOKRequest(context, status)
-        is LSHTTPResponseStatus.Responded.Error ->
-          this.handleHTTPError(context, status)
-        is LSHTTPResponseStatus.Failed ->
-          this.handleHTTPFailure(context, status)
+      return request.execute().use { response ->
+        when (val status = response.status) {
+          is LSHTTPResponseStatus.Responded.OK ->
+            this.handleOKRequest(context, status)
+          is LSHTTPResponseStatus.Responded.Error ->
+            this.handleHTTPError(context, status)
+          is LSHTTPResponseStatus.Failed ->
+            this.handleHTTPFailure(context, status)
+        }
       }
+    } catch (e: BorrowSubtaskFailed) {
+      context.bookDownloadFailed()
+      throw e
     }
   }
 
@@ -92,10 +97,14 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
       )
 
       when (val formatHandle = context.bookDatabaseEntry.findFormatHandleForContentType(expectedType)) {
-        is BookDatabaseEntryFormatHandleEPUB ->
+        is BookDatabaseEntryFormatHandleEPUB -> {
           formatHandle.copyInBook(file)
-        is BookDatabaseEntryFormatHandlePDF ->
+          context.bookDownloadSucceeded()
+        }
+        is BookDatabaseEntryFormatHandlePDF -> {
           formatHandle.copyInBook(file)
+          context.bookDownloadSucceeded()
+        }
         is BookDatabaseEntryFormatHandleAudioBook,
         null ->
           throw UnreachableCodeException()
@@ -116,10 +125,11 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
       val buffer = ByteArray(65536)
       var total = 0L
 
-      context.bookIsDownloading(
+      context.bookDownloadIsRunning(
         expectedSize = expectedSize,
         receivedSize = total,
-        bytesPerSecond = 0L
+        bytesPerSecond = 0L,
+        message = "Downloading..."
       )
 
       while (true) {
@@ -132,13 +142,26 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
         outputStream.write(buffer, 0, read)
         total += read
         if (unitsPerSecond.update(read.toLong())) {
-          context.bookIsDownloading(
+          context.bookDownloadIsRunning(
             expectedSize = expectedSize,
             receivedSize = total,
-            bytesPerSecond = unitsPerSecond.now
+            bytesPerSecond = unitsPerSecond.now,
+            message = downloadingMessage(expectedSize, total, unitsPerSecond.now)
           )
         }
       }
+    }
+  }
+
+  private fun downloadingMessage(
+    expectedSize: Long?,
+    currentSize: Long,
+    perSecond: Long
+  ): String {
+    return if (expectedSize == null) {
+      "Downloading..."
+    } else {
+      "Downloading $currentSize / $expectedSize ($perSecond)..."
     }
   }
 

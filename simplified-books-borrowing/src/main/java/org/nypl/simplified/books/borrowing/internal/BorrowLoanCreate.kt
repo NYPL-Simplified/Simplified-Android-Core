@@ -2,17 +2,27 @@ package org.nypl.simplified.books.borrowing.internal
 
 import com.io7m.junreachable.UnreachableCodeException
 import one.irradia.mime.api.MIMECompatibility
+import one.irradia.mime.api.MIMECompatibility.applicationOctetStream
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Put
 import org.librarysimplified.http.api.LSHTTPResponseStatus
+import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldInQueue
+import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldReady
+import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedNotDownloaded
 import org.nypl.simplified.books.borrowing.BorrowContextType
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpConnectionFailed
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpContentTypeIncompatible
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpEmptyBody
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpRequestFailed
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryHoldable
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryLoanable
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryNoNext
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryParseError
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskHaltedEarly
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
-import org.nypl.simplified.books.formats.api.StandardFormatNames
+import org.nypl.simplified.books.formats.api.StandardFormatNames.opdsAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
@@ -47,25 +57,32 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Creating an OPDS loan...")
 
-    val currentURI = context.currentURICheck()
-    context.taskRecorder.beginNewStep("Using $currentURI to create a loan...")
-    context.taskRecorder.addAttribute("Loan URI", currentURI.toString())
-    context.checkCancelled()
+    try {
+      context.bookLoanIsRequesting("Requesting a loan...")
 
-    val request =
-      context.httpClient.newRequest(currentURI)
-        .setMethod(Put(ByteArray(0), MIMECompatibility.applicationOctetStream))
-        .build()
+      val currentURI = context.currentURICheck()
+      context.taskRecorder.beginNewStep("Using $currentURI to create a loan...")
+      context.taskRecorder.addAttribute("Loan URI", currentURI.toString())
+      context.checkCancelled()
 
-    return request.execute().use { response ->
-      when (val status = response.status) {
-        is LSHTTPResponseStatus.Responded.OK ->
-          this.handleOKRequest(context, currentURI, status)
-        is LSHTTPResponseStatus.Responded.Error ->
-          this.handleHTTPError(context, status)
-        is LSHTTPResponseStatus.Failed ->
-          this.handleHTTPFailure(context, status)
+      val request =
+        context.httpClient.newRequest(currentURI)
+          .setMethod(Put(ByteArray(0), applicationOctetStream))
+          .build()
+
+      return request.execute().use { response ->
+        when (val status = response.status) {
+          is LSHTTPResponseStatus.Responded.OK ->
+            this.handleOKRequest(context, currentURI, status)
+          is LSHTTPResponseStatus.Responded.Error ->
+            this.handleHTTPError(context, status)
+          is LSHTTPResponseStatus.Failed ->
+            this.handleHTTPFailure(context, status)
+        }
       }
+    } catch (e: BorrowSubtaskFailed) {
+      context.bookLoanFailed()
+      throw e
     }
   }
 
@@ -75,7 +92,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
   ) {
     context.taskRecorder.currentStepFailed(
       message = status.exception.message ?: "Exception raised during connection attempt.",
-      errorCode = BorrowErrorCodes.httpConnectionFailed,
+      errorCode = httpConnectionFailed,
       exception = status.exception
     )
     throw BorrowSubtaskFailed()
@@ -91,13 +108,18 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     if (report != null) {
       if (report.type == "http://librarysimplified.org/terms/problem/loan-already-exists") {
         context.taskRecorder.currentStepSucceeded("It turns out we already had a loan for this book.")
+        context.bookPublishStatus(LoanedNotDownloaded(
+          id = context.bookCurrent.id,
+          loanExpiryDate = null,
+          returnable = false
+        ))
         return
       }
     }
 
     context.taskRecorder.currentStepFailed(
       message = "HTTP request failed: ${status.originalStatus} ${status.message}",
-      errorCode = BorrowErrorCodes.httpRequestFailed,
+      errorCode = httpRequestFailed,
       exception = null
     )
     throw BorrowSubtaskFailed()
@@ -108,12 +130,12 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     uri: URI,
     status: LSHTTPResponseStatus.Responded.OK
   ) {
-    val expectedType = StandardFormatNames.opdsAcquisitionFeedEntry
+    val expectedType = opdsAcquisitionFeedEntry
     val receivedType = status.contentType
     if (!MIMECompatibility.isCompatibleLax(receivedType, expectedType)) {
       context.taskRecorder.currentStepFailed(
         message = "The server returned an incompatible context type: We wanted something compatible with ${expectedType.fullType} but received ${receivedType.fullType}.",
-        errorCode = BorrowErrorCodes.httpContentTypeIncompatible
+        errorCode = httpContentTypeIncompatible
       )
       throw BorrowSubtaskFailed()
     }
@@ -122,12 +144,14 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     if (inputStream == null) {
       context.taskRecorder.currentStepFailed(
         message = "The server returned an empty HTTP body.",
-        errorCode = BorrowErrorCodes.httpEmptyBody
+        errorCode = httpEmptyBody
       )
       throw BorrowSubtaskFailed()
     }
 
     val entry = this.parseOPDSFeedEntry(context, inputStream, uri)
+    context.bookDatabaseEntry.writeOPDSEntry(entry)
+
     this.checkAvailability(context, entry)
     val nextURI = this.findNextURI(context, entry)
     context.receivedNewURI(nextURI)
@@ -138,15 +162,28 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     entry: OPDSAcquisitionFeedEntry
   ) {
     context.taskRecorder.beginNewStep("Checking OPDS availability...")
+
     return entry.availability.matchAvailability(
       object : OPDSAvailabilityMatcherType<Unit, BorrowSubtaskException> {
         override fun onHeldReady(a: OPDSAvailabilityHeldReady) {
           context.taskRecorder.currentStepSucceeded("Book is held and ready.")
+          context.bookPublishStatus(HeldReady(
+            id = context.bookCurrent.id,
+            endDate = a.endDateOrNull,
+            isRevocable = a.revoke.isSome
+          ))
           throw BorrowSubtaskHaltedEarly()
         }
 
         override fun onHeld(a: OPDSAvailabilityHeld) {
           context.taskRecorder.currentStepSucceeded("Book is held.")
+          context.bookPublishStatus(HeldInQueue(
+            id = context.bookCurrent.id,
+            queuePosition = a.positionOrNull,
+            startDate = a.startDateOrNull,
+            isRevocable = a.revoke.isSome,
+            endDate = a.endDateOrNull
+          ))
           throw BorrowSubtaskHaltedEarly()
         }
 
@@ -165,6 +202,11 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
 
         override fun onLoaned(a: OPDSAvailabilityLoaned) {
           context.taskRecorder.currentStepSucceeded("Book is loaned.")
+          context.bookPublishStatus(LoanedNotDownloaded(
+            id = context.bookCurrent.id,
+            loanExpiryDate = a.endDateOrNull,
+            returnable = a.revoke.isSome
+          ))
         }
 
         /**
@@ -182,6 +224,11 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
 
         override fun onOpenAccess(a: OPDSAvailabilityOpenAccess) {
           context.taskRecorder.currentStepSucceeded("Book is open access.")
+          context.bookPublishStatus(LoanedNotDownloaded(
+            id = context.bookCurrent.id,
+            loanExpiryDate = a.endDateOrNull,
+            returnable = a.revoke.isSome
+          ))
         }
 
         /**
@@ -211,7 +258,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
       context.logError("OPDS feed parse error: ", e)
       context.taskRecorder.currentStepFailed(
         message = "Failed to parse the OPDS feed entry (${e.message}).",
-        errorCode = BorrowErrorCodes.opdsFeedEntryParseError,
+        errorCode = opdsFeedEntryParseError,
         exception = e
       )
       throw BorrowSubtaskFailed()
@@ -241,7 +288,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
 
     context.taskRecorder.currentStepFailed(
       message = "The OPDS feed entry did not provide a 'next' URI.",
-      errorCode = BorrowErrorCodes.opdsFeedEntryNoNext
+      errorCode = opdsFeedEntryNoNext
     )
     throw BorrowSubtaskFailed()
   }

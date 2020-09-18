@@ -5,6 +5,7 @@ import org.librarysimplified.http.api.LSHTTPClientType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskCancelled
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
@@ -143,9 +144,44 @@ interface BorrowContextType {
    * Called by subtasks to indicate that a book is currently in the process of being downloaded.
    */
 
-  fun bookIsDownloading(
+  fun bookDownloadIsRunning(
     expectedSize: Long?,
     receivedSize: Long,
-    bytesPerSecond: Long
+    bytesPerSecond: Long,
+    message: String
   )
+
+  /**
+   * Indicate that downloading the current book failed. Implementations should base the
+   * actual resulting book status on the current status of the loan in the book database.
+   */
+
+  fun bookDownloadFailed()
+
+  /**
+   * Publish the latest status of the current book.
+   */
+
+  fun bookPublishStatus(status: BookStatus)
+
+  /**
+   * Indicate that downloading the current book succeeded. Implementations should base the
+   * actual resulting book status on the current status of the loan in the book database.
+   */
+
+  fun bookDownloadSucceeded()
+
+  /**
+   * Indicate a request is being made to loan the current book. Implementations should base the
+   * actual resulting book status on the current status of the loan in the book database.
+   */
+
+  fun bookLoanIsRequesting(message: String)
+
+  /**
+   * Indicate that borrowing the current book failed. Implementations should base the
+   * actual resulting book status on the current status of the loan in the book database.
+   */
+
+  fun bookLoanFailed()
 }

@@ -1,9 +1,9 @@
 package org.nypl.simplified.tests.books.borrowing
 
 import android.content.Context
+import io.reactivex.disposables.Disposable
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import one.irradia.mime.api.MIMEType
 import org.joda.time.Instant
 import org.junit.After
 import org.junit.Assert
@@ -18,56 +18,68 @@ import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.borrowing.BorrowContextType
+import org.nypl.simplified.books.book_registry.BookStatus.Downloading
+import org.nypl.simplified.books.book_registry.BookStatus.FailedDownload
+import org.nypl.simplified.books.book_registry.BookStatus.Loaned
+import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedDownloaded
+import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.borrowing.internal.BorrowDirectDownload
-import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpConnectionFailed
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpContentTypeIncompatible
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpRequestFailed
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.requiredURIMissing
-import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericPDFFiles
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.MockBookDatabase
+import org.nypl.simplified.tests.MockBookDatabaseEntry
+import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.util.UUID
+import java.net.URI
 
 class BorrowDirectDownloadTest {
 
-  private lateinit var epubHandle: BookDatabaseEntryFormatHandleEPUB
-  private lateinit var pdfHandle: BookDatabaseEntryFormatHandlePDF
-  private lateinit var webServer: MockWebServer
-  private lateinit var taskRecorder: TaskRecorderType
-  private lateinit var context: BorrowContextType
   private lateinit var account: AccountType
   private lateinit var accountId: AccountID
   private lateinit var accountProvider: AccountProvider
   private lateinit var bookDatabase: BookDatabaseType
-  private lateinit var bookDatabaseEntry: BookDatabaseEntryType
+  private lateinit var bookDatabaseEntry: MockBookDatabaseEntry
+  private lateinit var bookEvents: MutableList<BookStatusEvent>
   private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookID: BookID
   private lateinit var bookRegistry: BookRegistryType
+  private lateinit var bookStates: MutableList<BookStatus>
+  private lateinit var context: MockBorrowContext
+  private lateinit var epubHandle: MockBookDatabaseEntryFormatHandleEPUB
   private lateinit var httpClient: LSHTTPClientType
+  private lateinit var pdfHandle: MockBookDatabaseEntryFormatHandlePDF
   private lateinit var profile: ProfileReadableType
+  private lateinit var taskRecorder: TaskRecorderType
+  private lateinit var webServer: MockWebServer
+  private var bookRegistrySub: Disposable? = null
 
   private val logger = LoggerFactory.getLogger(BorrowDirectDownloadTest::class.java)
 
-  private fun verifyBookRegistryHasFailureStatus() {
+  private fun verifyBookRegistryHasStatus(clazz: Class<*>) {
     val registryStatus = this.bookRegistry.bookStatusOrNull(this.bookID)!!
-    assertEquals(BookStatus.FailedLoan::class.java, registryStatus.javaClass)
+    assertEquals(clazz, registryStatus.javaClass)
   }
 
   private fun <T> anyNonNull(): T =
@@ -75,8 +87,9 @@ class BorrowDirectDownloadTest {
 
   @Before
   fun testSetup() {
-    this.context =
-      Mockito.mock(BorrowContextType::class.java)
+    this.webServer = MockWebServer()
+    this.webServer.start(20000)
+
     this.taskRecorder =
       TaskRecorder.create()
 
@@ -84,20 +97,14 @@ class BorrowDirectDownloadTest {
       Mockito.mock(BookFormatSupportType::class.java)
     this.bookRegistry =
       BookRegistry.create()
-    this.bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    this.bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
-    this.pdfHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandlePDF::class.java)
-    this.epubHandle =
-      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
-    this.profile =
-      Mockito.mock(ProfileReadableType::class.java)
-    this.accountId =
-      AccountID.generate()
-    this.bookID =
-      BookIDs.newFromText("x")
+    this.bookStates =
+      mutableListOf<BookStatus>()
+    this.bookEvents =
+      mutableListOf()
+    this.bookRegistrySub =
+      this.bookRegistry.bookEvents()
+        .subscribe(this::recordBookEvent)
+
     this.account =
       Mockito.mock(AccountType::class.java)
     this.accountProvider =
@@ -116,22 +123,55 @@ class BorrowDirectDownloadTest {
           )
         )
 
-    Mockito.`when`(this.context.clock)
-      .thenReturn({ Instant.now() })
-    Mockito.`when`(this.context.bookDatabaseEntry)
-      .thenReturn(this.bookDatabaseEntry)
-    Mockito.`when`(this.context.taskRecorder)
-      .thenReturn(this.taskRecorder)
-    Mockito.`when`(this.context.httpClient)
-      .thenReturn(this.httpClient)
-    Mockito.`when`(this.context.temporaryFile())
-      .then {
-        this.logger.debug("creating temporary directory")
-        return@then File(TestDirectories.temporaryDirectory(), "${UUID.randomUUID()}.tmp")
-      }
+    this.accountId =
+      AccountID.generate()
 
-    this.webServer = MockWebServer()
-    this.webServer.start(20000)
+    val initialFeedEntry =
+      this.opdsFeedEntryOfType(genericEPUBFiles.fullType)
+
+    this.bookID =
+      BookIDs.newFromOPDSEntry(initialFeedEntry)
+
+    val bookInitial =
+      Book(
+        id = this.bookID,
+        account = this.accountId,
+        cover = null,
+        thumbnail = null,
+        entry = initialFeedEntry,
+        formats = listOf()
+      )
+
+    this.bookDatabase =
+      MockBookDatabase(this.accountId)
+    this.bookDatabaseEntry =
+      MockBookDatabaseEntry(bookInitial)
+    this.pdfHandle =
+      MockBookDatabaseEntryFormatHandlePDF(this.bookID)
+    this.epubHandle =
+      MockBookDatabaseEntryFormatHandleEPUB(this.bookID)
+
+    this.context =
+      MockBorrowContext(
+        logger = this.logger,
+        bookRegistry = this.bookRegistry,
+        temporaryDirectory = TestDirectories.temporaryDirectory(),
+        account = this.account,
+        clock = { Instant.now() },
+        httpClient = this.httpClient,
+        taskRecorder = this.taskRecorder,
+        isCancelled = false,
+        bookDatabaseEntry = this.bookDatabaseEntry,
+        bookInitial = bookInitial
+      )
+  }
+
+  private fun recordBookEvent(event: BookStatusEvent) {
+    this.logger.debug("event: {}", event)
+    val status = this.bookRegistry.bookStatusOrNull(event.book())!!
+    this.logger.debug("status: {}", status)
+    this.bookStates.add(status)
+    this.bookEvents.add(event)
   }
 
   @After
@@ -147,11 +187,8 @@ class BorrowDirectDownloadTest {
   fun testNoURI() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.context.currentURICheck())
-      .then {
-        this.taskRecorder.currentStepFailed("Missing URI", requiredURIMissing)
-        throw BorrowSubtaskException.BorrowSubtaskFailed()
-      }
+    this.context.currentAcquisitionPathElement =
+      OPDSAcquisitionPathElement(genericPDFFiles, null)
 
     try {
       task.execute(this.context)
@@ -160,10 +197,12 @@ class BorrowDirectDownloadTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      requiredURIMissing,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    assertEquals(requiredURIMissing, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedDownload::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -174,10 +213,8 @@ class BorrowDirectDownloadTest {
   fun testHTTPConnectionFails() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.context.currentURI())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentURICheck())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
+    this.context.currentURIField =
+      this.webServer.url("/book.epub").toUri()
 
     try {
       task.execute(this.context)
@@ -186,10 +223,12 @@ class BorrowDirectDownloadTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      BorrowErrorCodes.httpConnectionFailed,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    assertEquals(httpConnectionFailed, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedDownload::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -200,10 +239,8 @@ class BorrowDirectDownloadTest {
   fun testHTTP404Fails() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.context.currentURI())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentURICheck())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
+    this.context.currentURIField =
+      this.webServer.url("/book.epub").toUri()
 
     this.webServer.enqueue(MockResponse().setResponseCode(404))
 
@@ -214,10 +251,12 @@ class BorrowDirectDownloadTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      BorrowErrorCodes.httpRequestFailed,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    assertEquals(httpRequestFailed, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedDownload::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -228,16 +267,10 @@ class BorrowDirectDownloadTest {
   fun testMIMEIncompatibleFails() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.context.currentURI())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentURICheck())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-
-    Mockito.`when`(this.context.currentAcquisitionPathElement)
-      .thenReturn(OPDSAcquisitionPathElement(
-        MIMEType("application", "pdf", mapOf()),
-        null
-      ))
+    this.context.currentURIField =
+      this.webServer.url("/book.epub").toUri()
+    this.context.currentAcquisitionPathElement =
+      OPDSAcquisitionPathElement(genericPDFFiles, null)
 
     val response =
       MockResponse()
@@ -253,10 +286,12 @@ class BorrowDirectDownloadTest {
       this.logger.error("exception: ", e)
     }
 
-    assertEquals(
-      BorrowErrorCodes.httpContentTypeIncompatible,
-      this.taskRecorder.finishFailure<Unit>().lastErrorCode
-    )
+    assertEquals(httpContentTypeIncompatible, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedDownload::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -267,24 +302,17 @@ class BorrowDirectDownloadTest {
   fun testDownloadOkPDF() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.bookDatabaseEntry.findFormatHandleForContentType(genericPDFFiles))
-      .thenReturn(this.pdfHandle)
-    Mockito.`when`(this.context.currentURI())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentURICheck())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentAcquisitionPathElement)
-      .thenReturn(OPDSAcquisitionPathElement(
-        genericPDFFiles,
-        null
-      ))
+    this.context.currentURIField =
+      this.webServer.url("/book.epub").toUri()
+    this.context.currentAcquisitionPathElement =
+      OPDSAcquisitionPathElement(genericPDFFiles, null)
 
-    var savedData = ""
-    Mockito.`when`(this.pdfHandle.copyInBook(this.anyNonNull()))
-      .then {
-        savedData = (it.getArgument(0) as File).readText()
-        Unit
-      }
+    this.bookDatabaseEntry.writeOPDSEntry(this.opdsFeedEntryOfType(genericPDFFiles.fullType))
+    this.bookDatabaseEntry.entryWrites = 0
+    this.bookDatabaseEntry.formatHandlesField.clear()
+    this.bookDatabaseEntry.formatHandlesField.add(this.pdfHandle)
+    check(this.bookDatabaseEntry.formatHandlesField.size == 1)
+    check(BookStatus.fromBook(this.bookDatabaseEntry.book) is Loaned)
 
     val response =
       MockResponse()
@@ -296,7 +324,15 @@ class BorrowDirectDownloadTest {
 
     task.execute(this.context)
 
-    assertEquals("PDF!", savedData)
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+    assertEquals("PDF!", this.pdfHandle.bookData)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -307,24 +343,15 @@ class BorrowDirectDownloadTest {
   fun testDownloadOkEPUB() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.bookDatabaseEntry.findFormatHandleForContentType(genericEPUBFiles))
-      .thenReturn(this.epubHandle)
-    Mockito.`when`(this.context.currentURI())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentURICheck())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentAcquisitionPathElement)
-      .thenReturn(OPDSAcquisitionPathElement(
-        genericEPUBFiles,
-        null
-      ))
+    this.context.currentURIField =
+      this.webServer.url("/book.epub").toUri()
+    this.context.currentAcquisitionPathElement =
+      OPDSAcquisitionPathElement(genericEPUBFiles, null)
 
-    var savedData = ""
-    Mockito.`when`(this.epubHandle.copyInBook(this.anyNonNull()))
-      .then {
-        savedData = (it.getArgument(0) as File).readText()
-        Unit
-      }
+    this.bookDatabaseEntry.formatHandlesField.clear()
+    this.bookDatabaseEntry.formatHandlesField.add(this.epubHandle)
+    check(this.bookDatabaseEntry.formatHandlesField.size == 1)
+    check(BookStatus.fromBook(this.bookDatabaseEntry.book) is Loaned)
 
     val response =
       MockResponse()
@@ -336,7 +363,15 @@ class BorrowDirectDownloadTest {
 
     task.execute(this.context)
 
-    assertEquals("EPUB!", savedData)
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+    assertEquals("EPUB!", this.epubHandle.bookData)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
   }
 
   /**
@@ -347,24 +382,15 @@ class BorrowDirectDownloadTest {
   fun testDownloadOkEPUBBearerToken() {
     val task = BorrowDirectDownload.createSubtask()
 
-    Mockito.`when`(this.bookDatabaseEntry.findFormatHandleForContentType(genericEPUBFiles))
-      .thenReturn(this.epubHandle)
-    Mockito.`when`(this.context.currentURI())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentURICheck())
-      .thenReturn(this.webServer.url("/book.epub").toUri())
-    Mockito.`when`(this.context.currentAcquisitionPathElement)
-      .thenReturn(OPDSAcquisitionPathElement(
-        genericEPUBFiles,
-        null
-      ))
+    this.context.currentURIField =
+      this.webServer.url("/book.epub").toUri()
+    this.context.currentAcquisitionPathElement =
+      OPDSAcquisitionPathElement(genericEPUBFiles, null)
 
-    var savedData = ""
-    Mockito.`when`(this.epubHandle.copyInBook(this.anyNonNull()))
-      .then {
-        savedData = (it.getArgument(0) as File).readText()
-        Unit
-      }
+    this.bookDatabaseEntry.formatHandlesField.clear()
+    this.bookDatabaseEntry.formatHandlesField.add(this.epubHandle)
+    check(this.bookDatabaseEntry.formatHandlesField.size == 1)
+    check(BookStatus.fromBook(this.bookDatabaseEntry.book) is Loaned)
 
     val response0 =
       MockResponse()
@@ -391,6 +417,39 @@ class BorrowDirectDownloadTest {
     assertEquals(null, sent0.getHeader("Authorization"))
     val sent1 = this.webServer.takeRequest()
     assertEquals("Bearer abcd", sent1.getHeader("Authorization"))
-    assertEquals("EPUB!", savedData)
+
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+    assertEquals("EPUB!", this.epubHandle.bookData)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
+  }
+
+  private fun opdsFeedEntryOfType(
+    mime: String
+  ): OPDSAcquisitionFeedEntry {
+    val parsedEntry = this.opdsFeedEntryOf("""
+    <entry xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+      <title>Example</title>
+      <updated>2020-09-17T16:48:51+0000</updated>
+      <id>7264f7f8-7bea-4ce6-906e-615406ca38cb</id>
+      <link href="${this.webServer.url("/next")}" rel="http://opds-spec.org/acquisition" type="$mime">
+        <opds:availability since="2020-09-17T16:48:51+0000" status="available" until="2020-09-17T16:48:51+0000" />
+        <opds:holds total="0" />
+        <opds:copies available="5" total="5" />
+      </link>
+    </entry>
+    """)
+    check(parsedEntry.availability is OPDSAvailabilityLoaned) { "Feed entry must be Loanable" }
+    return parsedEntry
+  }
+
+  private fun opdsFeedEntryOf(text: String): OPDSAcquisitionFeedEntry {
+    return OPDSAcquisitionFeedEntryParser.newParser()
+      .parseEntryStream(URI.create("urn:stdin"), text.byteInputStream())
   }
 }
