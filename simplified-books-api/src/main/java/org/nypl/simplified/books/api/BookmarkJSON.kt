@@ -60,10 +60,27 @@ object BookmarkJSON {
     node: ObjectNode
   ): Bookmark {
 
+    // Older bookmarks store chapter progress in a top-level property, instead of inside
+    // location.progress.
+
+    val chapterProgress = JSONParserUtilities.getDouble(node, "chapterProgress")
+
+    val deserializedLocation = BookLocationJSON.deserializeFromJSON(
+      objectMapper, JSONParserUtilities.getObject(node, "location"))
+
+    val location =
+      if (deserializedLocation.progress == null && chapterProgress != null) {
+        // If this is an older bookmark, move the chapter progress into location.progress. In this
+        // case the chapter index is unknown.
+        deserializedLocation.copy(progress = BookChapterProgress(0, chapterProgress))
+      } else {
+        deserializedLocation
+      }
+
     return Bookmark(
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
-      location = BookLocationJSON.deserializeFromJSON(objectMapper, JSONParserUtilities.getObject(node, "location")),
+      location = location,
       time = LocalDateTime.parse(JSONParserUtilities.getString(node, "time")),
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),

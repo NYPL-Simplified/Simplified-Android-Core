@@ -43,6 +43,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentExce
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.reader.ReaderColorSchemes;
+import org.nypl.simplified.books.api.BookChapterProgress;
 import org.nypl.simplified.books.api.BookDRMInformation;
 import org.nypl.simplified.books.api.BookFormat;
 import org.nypl.simplified.books.api.BookID;
@@ -557,10 +558,17 @@ public final class ReaderActivity extends AppCompatActivity implements
     Objects.requireNonNull(location);
     LOG.debug("onCurrentPageReceived: {}", location);
 
+    // Add the current chapter progress to the location.
+
+    BookLocation currentLocation = new BookLocation(
+      new BookChapterProgress(current_page_index, currentChapterProgress()),
+      location.getContentCFI(),
+      location.getIdRef());
+
     final Bookmark bookmark =
       new Bookmark(
         this.feed_entry.getID(),
-        location,
+        currentLocation,
         BookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
         LocalDateTime.now(),
         this.current_chapter_title,
