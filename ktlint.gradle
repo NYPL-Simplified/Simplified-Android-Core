@@ -5,7 +5,7 @@ configurations {
     ktlint
 }
 dependencies {
-    ktlint "com.pinterest:ktlint:0.36.0"
+    ktlint "com.pinterest:ktlint:0.39.0"
 }
 task ktlint(type: JavaExec, group: "quality") {
     description = "Check Kotlin code style."
