@@ -196,7 +196,6 @@ class AccountsFragment : Fragment() {
       is AccountEventCreation.AccountEventCreationSucceeded,
       is AccountEventDeletionSucceeded,
       is AccountEventUpdated -> {
-
         this.uiThread.runOnUIThread(
           Runnable {
             this.reconfigureAccountListUI()

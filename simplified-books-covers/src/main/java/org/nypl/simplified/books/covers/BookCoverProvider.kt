@@ -53,7 +53,6 @@ class BookCoverProvider private constructor(
     tag: String,
     uriSpecified: URI?
   ): FluentFuture<Unit> {
-
     val future = SettableFuture.create<Unit>()
     val uriGenerated = this.generateCoverURI(entry)
 
@@ -216,7 +215,6 @@ class BookCoverProvider private constructor(
       debugCacheIndicators: Boolean,
       debugLogging: Boolean
     ): BookCoverProviderType {
-
       val picassoBuilder = Picasso.Builder(context)
       picassoBuilder.defaultBitmapConfig(Bitmap.Config.RGB_565)
       picassoBuilder.indicatorsEnabled(debugCacheIndicators)

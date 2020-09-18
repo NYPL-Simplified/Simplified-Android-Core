@@ -28,7 +28,6 @@ object HTTPProblemReportLogging {
     statusCode: Int,
     reportOption: OptionType<HTTPProblemReport>
   ): String {
-
     val text =
       StringBuilder(128)
         .append("Error retrieving URI\n")

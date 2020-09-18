@@ -163,7 +163,6 @@ object AccountProvidersJSON {
 
   @Throws(JSONParseException::class)
   fun deserializeFromJSON(node: JsonNode): AccountProvider {
-
     val obj =
       JSONParserUtilities.checkObject(null, node)
     val idUUID =
@@ -388,7 +387,6 @@ object AccountProvidersJSON {
 
   @Throws(JSONParseException::class)
   fun deserializeCollectionFromJSONArray(node: ArrayNode): Map<URI, AccountProvider> {
-
     val providers = TreeMap<URI, AccountProvider>()
     var default_provider: AccountProvider? = null
 

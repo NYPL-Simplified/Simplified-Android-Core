@@ -115,7 +115,6 @@ abstract class BookDatabaseContract {
 
   @Test
   fun testOpenCreateDelete() {
-
     val parser = OPDSJSONParser.newParser()
     val serializer = OPDSJSONSerializer.newSerializer()
 
@@ -678,7 +677,6 @@ abstract class BookDatabaseContract {
     entry: org.nypl.simplified.books.book_database.api.BookDatabaseEntryType,
     clazz: Class<T>
   ) {
-
     val others =
       entry.formatHandles
         .filter { handle -> !clazz.isAssignableFrom(handle.javaClass) }

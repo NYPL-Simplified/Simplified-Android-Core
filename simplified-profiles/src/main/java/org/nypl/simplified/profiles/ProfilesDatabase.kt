@@ -106,7 +106,6 @@ internal class ProfilesDatabase internal constructor(
     accountProvider: AccountProviderType,
     displayName: String
   ): ProfileType {
-
     if (displayName.isEmpty()) {
       throw ProfileCreateInvalidException("Display name cannot be empty")
     }

@@ -132,7 +132,6 @@ object AccountDescriptionJSON {
     objectMapper: ObjectMapper,
     description: AccountDescription
   ): ObjectNode {
-
     val objectNode = objectMapper.createObjectNode()
     objectNode.put("@version", 20191204)
     objectNode.set<JsonNode>(

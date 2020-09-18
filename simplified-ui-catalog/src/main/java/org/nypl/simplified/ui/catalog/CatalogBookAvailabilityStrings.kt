@@ -80,7 +80,6 @@ object CatalogBookAvailabilityStrings {
     resources: Resources,
     expiryOpt: OptionType<DateTime>
   ): String {
-
     /*
      * If there is an expiry time, display it.
      */
@@ -104,7 +103,6 @@ object CatalogBookAvailabilityStrings {
     resources: Resources,
     expiryOpt: OptionType<DateTime>
   ): String {
-
     /*
      * If there is an expiry time, display it.
      */
@@ -130,7 +128,6 @@ object CatalogBookAvailabilityStrings {
     endDateOpt: OptionType<DateTime>,
     queuePositionOpt: OptionType<Int>
   ): String {
-
     /*
      * If there is an availability date, show this in preference to
      * anything else.
@@ -181,7 +178,6 @@ object CatalogBookAvailabilityStrings {
     lower: DateTime,
     upper: DateTime
   ): String {
-
     val hours = this.calendarHoursBetween(lower, upper)
 
     if (hours < 1) {
@@ -211,7 +207,6 @@ object CatalogBookAvailabilityStrings {
     lower: DateTime,
     upper: DateTime
   ): String {
-
     val hours = this.calendarHoursBetween(lower, upper)
     val days = TimeUnit.HOURS.toDays(hours)
     val weeks = days / 7

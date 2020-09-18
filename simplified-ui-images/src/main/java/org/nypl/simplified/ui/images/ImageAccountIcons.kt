@@ -31,7 +31,6 @@ object ImageAccountIcons {
     @DrawableRes defaultIcon: Int,
     iconView: ImageView
   ) {
-
     val request: RequestCreator
     val logoURI: URI? = account.logoURI?.hrefURI
     if (logoURI != null) {

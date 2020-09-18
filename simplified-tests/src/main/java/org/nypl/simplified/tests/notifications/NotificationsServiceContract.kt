@@ -223,7 +223,6 @@ abstract class NotificationsServiceContract {
 
   @Test(timeout = 3_000L)
   fun testProfileEventSubscriptionAndUnsubscription() {
-
     /**
      * Create a countdown latch that only accepts one count down.
      */

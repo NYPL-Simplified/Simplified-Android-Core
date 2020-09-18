@@ -99,7 +99,6 @@ class ReaderTOCActivity : AppCompatActivity(), ReaderTOCSelectionListenerType {
       from: Activity,
       parameters: ReaderTOCParameters
     ) {
-
       val i = Intent(Intent.ACTION_PICK)
       i.setClass(from, ReaderTOCActivity::class.java)
       i.putExtra(PARAMETERS_ID, parameters)

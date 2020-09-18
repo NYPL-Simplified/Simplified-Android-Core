@@ -444,7 +444,6 @@ class MigrationFrom3Master(
     handle: BookDatabaseEntryFormatHandleEPUB,
     book: LoadedBook
   ): CopiedBook? {
-
     var result: CopiedBook? = CopiedBook(book)
 
     try {
@@ -684,7 +683,6 @@ class MigrationFrom3Master(
     title: String,
     annotation: BookmarkAnnotation
   ): Bookmark? {
-
     val formatter = ISODateTimeFormat.dateTimeParser()
 
     return try {
@@ -951,7 +949,6 @@ class MigrationFrom3Master(
    */
 
   private fun determineDiskDataDirectory(context: Context): File {
-
     /*
      * If external storage is mounted and is on a device that doesn't allow
      * the storage to be removed, use the external storage for data.

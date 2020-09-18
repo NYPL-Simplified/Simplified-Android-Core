@@ -51,7 +51,6 @@ data class ReaderBookmarkPolicyState(
       initialAccounts: Set<ReaderBookmarkPolicyAccountState>,
       locallySaved: Map<AccountID, Set<Bookmark>>
     ): ReaderBookmarkPolicyState {
-
       val states: Map<AccountID, Map<BookmarkID, ReaderBookmarkState>> =
         locallySaved.mapValues { savedEntry ->
           savedEntry.value.map { bookmark ->

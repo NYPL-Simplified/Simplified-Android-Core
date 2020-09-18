@@ -74,7 +74,6 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-
     this.readerTOCLayout =
       inflater.inflate(R.layout.reader_toc, null)
     this.readerTOCListView =
@@ -159,7 +158,6 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
   }
 
   override fun getView(position: Int, reuse: View?, parent: ViewGroup?): View {
-
     val itemView = if (reuse != null) {
       reuse as ViewGroup
     } else {

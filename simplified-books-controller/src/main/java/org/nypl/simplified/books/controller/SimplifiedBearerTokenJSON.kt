@@ -22,7 +22,6 @@ object SimplifiedBearerTokenJSON {
     now: LocalDateTime,
     token: SimplifiedBearerToken
   ): ObjectNode {
-
     val expires = Seconds.secondsBetween(now, token.expiration).seconds
     val node = objectMapper.createObjectNode()
     node.put("access_token", token.accessToken)
@@ -36,7 +35,6 @@ object SimplifiedBearerTokenJSON {
     now: LocalDateTime,
     token: SimplifiedBearerToken
   ): String {
-
     return ByteArrayOutputStream().use { stream ->
       val writer = objectMapper.writerWithDefaultPrettyPrinter()
       writer.writeValue(stream, serializeToJSON(objectMapper, now, token))
@@ -50,7 +48,6 @@ object SimplifiedBearerTokenJSON {
     token: SimplifiedBearerToken,
     file: File
   ) {
-
     FileOutputStream(file).use { stream ->
       val writer = objectMapper.writerWithDefaultPrettyPrinter()
       writer.writeValue(stream, serializeToJSON(objectMapper, now, token))
@@ -61,7 +58,6 @@ object SimplifiedBearerTokenJSON {
     now: LocalDateTime,
     node: ObjectNode
   ): SimplifiedBearerToken {
-
     return SimplifiedBearerToken(
       accessToken = JSONParserUtilities.getString(node, "access_token"),
       expiration = now.plusSeconds(JSONParserUtilities.getInteger(node, "expires_in")),

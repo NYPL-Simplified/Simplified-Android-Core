@@ -494,7 +494,6 @@ class BookRevokeTask(
     adobeDRM: AdobeAdeptExecutorType,
     adobeRights: AdobeAdeptLoan
   ) {
-
     val credentials =
       this.revokeFormatHandleEPUBAdobeWithConnectorGetCredentials()
 

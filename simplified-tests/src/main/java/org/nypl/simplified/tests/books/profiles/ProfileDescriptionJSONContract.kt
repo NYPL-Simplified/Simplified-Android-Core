@@ -82,7 +82,6 @@ abstract class ProfileDescriptionJSONContract {
 
   @Test
   fun testLFA_1() {
-
     val mapper = ObjectMapper()
 
     val description =
@@ -98,7 +97,6 @@ abstract class ProfileDescriptionJSONContract {
 
   @Test
   fun testNYPL_0() {
-
     val mapper = ObjectMapper()
 
     val description =

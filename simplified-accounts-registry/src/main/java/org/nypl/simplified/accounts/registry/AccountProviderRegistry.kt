@@ -133,7 +133,6 @@ class AccountProviderRegistry private constructor(
   override fun updateDescription(
     description: AccountProviderDescription
   ): AccountProviderDescription {
-
     val id = description.id
     val existing = this.descriptions[id]
     if (existing != null) {

@@ -44,7 +44,6 @@ object AccountAuthenticationCredentialsJSON {
   fun serializeToJSON(
     credentials: AccountAuthenticationCredentials
   ): ObjectNode {
-
     val objectMapper = ObjectMapper()
     val authObject = objectMapper.createObjectNode()
     authObject.put("@version", this.currentSupportedVersion)

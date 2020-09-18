@@ -103,7 +103,6 @@ class BookDatabase private constructor(
     id: BookID,
     entry: OPDSAcquisitionFeedEntry
   ): BookDatabaseEntryType {
-
     synchronized(this.maps.mapsLock) {
       if (this.maps.contains(id)) {
         LOG.debug("Updating entry for {}", id)
@@ -174,7 +173,6 @@ class BookDatabase private constructor(
       owner: AccountID,
       directory: File
     ): BookDatabaseType {
-
       LOG.debug("opening book database: {}", directory)
       val maps = BookMaps()
       val errors = ArrayList<Exception>()
@@ -199,7 +197,6 @@ class BookDatabase private constructor(
       maps: BookMaps,
       errors: MutableList<Exception>
     ) {
-
       if (!directory.exists()) {
         directory.mkdirs()
       }
@@ -240,7 +237,6 @@ class BookDatabase private constructor(
       errors: MutableList<Exception>,
       name: String
     ): BookDatabaseEntry? {
-
       try {
         LOG.debug("open: {}", directory)
 

@@ -61,7 +61,6 @@ class FeedLoader private constructor(
     auth: OptionType<HTTPAuthType>,
     updateFromRegistry: Boolean
   ): FluentFuture<FeedLoaderResult> {
-
     if (this.cache.containsKey(uri)) {
       return FluentFuture.from(
         Futures.immediateFuture(
@@ -141,9 +140,7 @@ class FeedLoader private constructor(
     method: String,
     updateFromRegistry: Boolean
   ): FeedLoaderResult {
-
     try {
-
       /*
        * If the URI has a scheme that refers to bundled content, fetch the data from
        * the resolver instead.
@@ -340,7 +337,6 @@ class FeedLoader private constructor(
       bookRegistry: BookRegistryReadableType,
       bundledContent: BundledContentResolverType
     ): FeedLoaderType {
-
       val cache =
         ExpiringMap.builder()
           .expirationPolicy(ExpiringMap.ExpirationPolicy.CREATED)

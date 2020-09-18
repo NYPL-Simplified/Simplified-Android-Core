@@ -214,7 +214,6 @@ class ReaderBookmarkService private constructor(
       profile: ProfileReadableType,
       account: SyncableAccount
     ): SyncableAccount? {
-
       return try {
         this.logger.debug(
           "[{}]: checking account {} has syncing enabled",
@@ -556,7 +555,6 @@ class ReaderBookmarkService private constructor(
     profile: ProfileReadableType,
     event: AccountEventLoginStateChanged
   ) {
-
     return when (event.state) {
       AccountLoginState.AccountNotLoggedIn,
       is AccountLoginState.AccountLoggingIn,
@@ -726,7 +724,6 @@ class ReaderBookmarkService private constructor(
     accountID: AccountID,
     bookmark: Bookmark
   ): FluentFuture<Unit> {
-
     return try {
       val profile = this.profilesController.profileCurrent()
       FluentFuture.from(
@@ -749,7 +746,6 @@ class ReaderBookmarkService private constructor(
     accountID: AccountID,
     bookmark: Bookmark
   ): FluentFuture<Unit> {
-
     return try {
       val profile = this.profilesController.profileCurrent()
       FluentFuture.from(
@@ -772,7 +768,6 @@ class ReaderBookmarkService private constructor(
     accountID: AccountID,
     book: BookID
   ): FluentFuture<ReaderBookmarks> {
-
     return try {
       val profile = this.profilesController.profileCurrent()
       FluentFuture.from(

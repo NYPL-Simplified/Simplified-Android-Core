@@ -41,7 +41,6 @@ object AdobeDRMExtensions {
     vendorID: AdobeVendorID,
     clientToken: AccountAuthenticationAdobeClientToken
   ): ListenableFuture<List<AccountAuthenticationAdobePostActivationCredentials>> {
-
     val future =
       SettableFuture.create<List<AccountAuthenticationAdobePostActivationCredentials>>()
 
@@ -138,7 +137,6 @@ object AdobeDRMExtensions {
     userID: AdobeUserID,
     clientToken: AccountAuthenticationAdobeClientToken
   ): ListenableFuture<Unit> {
-
     val adeptFuture = SettableFuture.create<Unit>()
     executor.execute { connector ->
       try {
@@ -197,7 +195,6 @@ object AdobeDRMExtensions {
     error: (String) -> Unit,
     debug: (String) -> Unit
   ): ListenableFuture<List<Activation>> {
-
     val adeptFuture = SettableFuture.create<List<Activation>>()
     executor.execute { connector ->
       try {
@@ -283,7 +280,6 @@ object AdobeDRMExtensions {
     data: ByteArray,
     userId: AdobeUserID
   ): ListenableFuture<Fulfillment> {
-
     val adeptFuture = SettableFuture.create<Fulfillment>()
     executor.execute { connector ->
       try {
@@ -367,7 +363,6 @@ object AdobeDRMExtensions {
     loan: AdobeAdeptLoan,
     userId: AdobeUserID
   ): ListenableFuture<Unit> {
-
     val adeptFuture = SettableFuture.create<Unit>()
     executor.execute { connector ->
       try {

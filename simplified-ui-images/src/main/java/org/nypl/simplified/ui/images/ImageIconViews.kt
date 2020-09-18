@@ -39,7 +39,6 @@ object ImageIconViews {
     iconView: ImageView,
     image: URI
   ) {
-
     return if ("simplified-asset" == image.scheme) {
       configureFromAsset(image, assets, iconView)
     } else {

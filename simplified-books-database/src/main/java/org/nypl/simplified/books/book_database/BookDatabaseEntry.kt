@@ -130,7 +130,6 @@ internal class BookDatabaseEntry internal constructor(
 
   @Throws(BookDatabaseException::class)
   override fun writeOPDSEntry(opdsEntry: OPDSAcquisitionFeedEntry) {
-
     synchronized(this.bookLock) {
       Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
@@ -265,7 +264,6 @@ internal class BookDatabaseEntry internal constructor(
       for (contentType in contentTypes) {
         for ((format, constructor) in constructors) {
           if (format.supports(contentType)) {
-
             // Skip if handler already exists for type
             if (existingFormats.containsKey(constructor.classType)) {
               logger.debug(

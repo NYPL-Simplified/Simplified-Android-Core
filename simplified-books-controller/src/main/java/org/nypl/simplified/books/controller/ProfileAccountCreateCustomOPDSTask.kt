@@ -108,7 +108,6 @@ class ProfileAccountCreateCustomOPDSTask(
   private fun createAccount(
     accountProviderDescription: AccountProviderDescription
   ): TaskResult<AccountCreateErrorDetails, AccountType> {
-
     val createResult =
       ProfileAccountCreateTask(
         accountEvents = this.accountEvents,

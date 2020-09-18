@@ -60,7 +60,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-
     this.inflater = inflater
     this.bookmarksTOCLayout =
       inflater.inflate(R.layout.reader_toc_bookmarks, null)
@@ -117,7 +116,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
   }
 
   override fun getView(position: Int, reuse: View?, parent: ViewGroup?): View {
-
     val itemView = if (reuse != null) {
       reuse as ViewGroup
     } else {
@@ -177,7 +175,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
   }
 
   private fun detailTextFrom(bookmark: Bookmark): String {
-
     val shortDateText =
       run {
         val formatter = DateTimeFormat.forPattern("dd/MM/yy")

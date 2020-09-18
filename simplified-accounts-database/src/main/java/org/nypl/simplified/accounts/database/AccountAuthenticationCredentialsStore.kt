@@ -28,7 +28,6 @@ class AccountAuthenticationCredentialsStore(
       file: File,
       fileTemp: File
     ): AccountAuthenticationCredentialsStoreType {
-
       val initialCredentials =
         if (file.isFile) {
           val text = FileUtilities.fileReadUTF8(file)
@@ -75,7 +74,6 @@ class AccountAuthenticationCredentialsStore(
     account: AccountID,
     credentials: AccountAuthenticationCredentials
   ) {
-
     synchronized(this.storeLock) {
       this.store = this.store.plus(Pair(account, credentials))
       this.writeLocked()

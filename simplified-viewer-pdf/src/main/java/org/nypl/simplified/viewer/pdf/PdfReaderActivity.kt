@@ -41,7 +41,6 @@ class PdfReaderActivity :
       from: Activity,
       parameters: PdfReaderParameters
     ) {
-
       val b = Bundle()
       b.putSerializable(PARAMS_ID, parameters)
       val i = Intent(from, PdfReaderActivity::class.java)

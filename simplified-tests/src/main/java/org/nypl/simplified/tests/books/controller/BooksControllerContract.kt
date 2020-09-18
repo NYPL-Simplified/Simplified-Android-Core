@@ -166,7 +166,6 @@ abstract class BooksControllerContract {
     timerExec: ExecutorService,
     patronUserProfileParsers: PatronUserProfileParsersType
   ): BooksControllerType {
-
     val parser = OPDSFeedParser.newParser(
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
     )
@@ -356,7 +355,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncRemote401() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -404,7 +402,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncWithoutAuthSupport() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -440,7 +437,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncMissingCredentials() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -475,7 +471,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncBadFeed() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -523,7 +518,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncNewEntries() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -599,7 +593,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncRemoveEntries() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -712,7 +705,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksDelete() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -799,7 +791,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksRevokeDismissHasNotFailed() {
-
     val controller =
       createController(
         exec = this.executorBooks,

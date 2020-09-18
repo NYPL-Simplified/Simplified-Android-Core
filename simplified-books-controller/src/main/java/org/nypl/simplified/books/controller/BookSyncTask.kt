@@ -151,7 +151,6 @@ class BookSyncTask(
     result: HTTPResultOKType<InputStream>,
     provider: AccountProviderType
   ) {
-
     val feed = this.feedParser.parse(provider.loansURI, result.value)
     this.updateAnnotations(feed)
 
@@ -266,7 +265,6 @@ class BookSyncTask(
     result: HTTPResultError<InputStream>,
     provider: AccountProviderType
   ) {
-
     if (result.status == HttpURLConnection.HTTP_UNAUTHORIZED) {
       this.logger.debug("removing credentials due to 401 server response")
       this.account.setLoginState(AccountLoginState.AccountNotLoggedIn)

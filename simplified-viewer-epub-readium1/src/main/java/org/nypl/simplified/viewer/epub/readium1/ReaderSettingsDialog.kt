@@ -175,7 +175,6 @@ class ReaderSettingsDialog : DialogFragment() {
           progress: Int,
           from_user: Boolean
         ) {
-
           this.bright = progress / 100.0
         }
 

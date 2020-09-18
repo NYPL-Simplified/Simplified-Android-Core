@@ -91,7 +91,6 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
      */
 
     fun fromPackage(p: org.readium.sdk.android.Package): ReaderTOC {
-
       logger.debug("requesting toc")
 
       val readLock = ReaderNativeCodeReadLock.get()

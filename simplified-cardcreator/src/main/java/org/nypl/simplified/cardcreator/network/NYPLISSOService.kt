@@ -29,7 +29,6 @@ internal interface NYPLISSOService {
 
   companion object {
     operator fun invoke(): NYPLISSOService {
-
       val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.HEADERS
       }

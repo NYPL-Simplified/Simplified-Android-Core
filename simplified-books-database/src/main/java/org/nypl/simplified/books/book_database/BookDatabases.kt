@@ -36,7 +36,6 @@ object BookDatabases : BookDatabaseFactoryType {
     owner: AccountID,
     directory: File
   ): BookDatabaseType {
-
     return BookDatabase.open(
       context = context,
       parser = OPDSJSONParser.newParser(),

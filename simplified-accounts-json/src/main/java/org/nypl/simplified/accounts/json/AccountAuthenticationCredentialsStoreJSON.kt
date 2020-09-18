@@ -118,7 +118,6 @@ object AccountAuthenticationCredentialsStoreJSON {
   private fun deserializeFromJSONV20190424(
     obj: ObjectNode
   ): Map<AccountID, AccountAuthenticationCredentials> {
-
     val credentials =
       JSONParserUtilities.getObject(obj, "credentials")
     val result =

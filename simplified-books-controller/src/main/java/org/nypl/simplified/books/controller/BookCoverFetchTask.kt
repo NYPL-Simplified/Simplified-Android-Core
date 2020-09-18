@@ -85,7 +85,6 @@ class BookCoverFetchTask(
       )
       this.taskRecorder.finishFailure()
     } finally {
-
       /*
        * Refresh the entry in the book registry so that anything that's observing the book
        * will see the new cover.

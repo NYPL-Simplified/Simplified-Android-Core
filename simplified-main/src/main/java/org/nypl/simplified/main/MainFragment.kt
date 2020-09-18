@@ -204,7 +204,6 @@ class MainFragment : Fragment() {
 
   private fun onAccountEvent(event: AccountEvent) {
     return when (event) {
-
       /*
        * We don't know which fragments on the backstack might refer to accounts that
        * have been deleted so we need to clear the history when an account is deleted.

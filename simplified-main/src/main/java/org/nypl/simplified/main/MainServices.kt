@@ -315,7 +315,6 @@ internal object MainServices {
     exec: ExecutorService,
     directory: File
   ): DocumentStoreType {
-
     val documentsBuilder =
       DocumentStore.newBuilder(clock, http, exec, directory)
 
@@ -410,7 +409,6 @@ internal object MainServices {
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     directory: File
   ): ProfilesDatabaseType {
-
     /*
      * If profiles are enabled, then disable the anonymous profile.
      */
@@ -626,7 +624,6 @@ internal object MainServices {
     context: Context,
     onProgress: (BootEvent) -> Unit
   ): ServiceDirectoryType {
-
     fun publishEvent(message: String) {
       this.logger.debug("boot: {}", message)
       onProgress.invoke(BootEvent.BootInProgress(message))

@@ -277,7 +277,6 @@ internal class ProfileFeedTask(
     termsUpper: List<String>,
     book: BookWithStatus
   ): Boolean {
-
     if (termsUpper.isEmpty()) {
       return true
     }

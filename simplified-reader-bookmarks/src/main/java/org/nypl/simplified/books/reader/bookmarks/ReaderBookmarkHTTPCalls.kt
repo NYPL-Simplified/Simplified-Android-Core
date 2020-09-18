@@ -31,7 +31,6 @@ class ReaderBookmarkHTTPCalls(
     annotationsURI: URI,
     credentials: AccountAuthenticationCredentials
   ): List<BookmarkAnnotation> {
-
     val auth =
       createAuthenticatedHTTP(credentials)
     val result =
@@ -48,7 +47,6 @@ class ReaderBookmarkHTTPCalls(
     bookmarkURI: URI,
     credentials: AccountAuthenticationCredentials
   ) {
-
     val auth =
       createAuthenticatedHTTP(credentials)
     val result =
@@ -66,7 +64,6 @@ class ReaderBookmarkHTTPCalls(
     credentials: AccountAuthenticationCredentials,
     bookmark: BookmarkAnnotation
   ) {
-
     val data =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationToBytes(this.objectMapper, bookmark)
     val auth =
@@ -86,7 +83,6 @@ class ReaderBookmarkHTTPCalls(
     credentials: AccountAuthenticationCredentials,
     enabled: Boolean
   ) {
-
     val data =
       serializeSynchronizeEnableData(enabled)
     val auth =
@@ -105,7 +101,6 @@ class ReaderBookmarkHTTPCalls(
     settingsURI: URI,
     credentials: AccountAuthenticationCredentials
   ): Boolean {
-
     val auth =
       createAuthenticatedHTTP(credentials)
     val result =

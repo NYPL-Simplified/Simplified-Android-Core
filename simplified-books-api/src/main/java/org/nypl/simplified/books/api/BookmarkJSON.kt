@@ -60,7 +60,6 @@ object BookmarkJSON {
     kind: BookmarkKind,
     node: ObjectNode
   ): Bookmark {
-
     // Older bookmarks store chapter progress in a top-level property, instead of inside
     // location.progress.
 
@@ -111,7 +110,6 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     description: Bookmark
   ): ObjectNode {
-
     val node = objectMapper.createObjectNode()
     node.put("opdsId", description.opdsId)
     val location = BookLocationJSON.serializeToJSON(objectMapper, description.location)
@@ -136,7 +134,6 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     bookmarks: List<Bookmark>
   ): ArrayNode {
-
     val node = objectMapper.createArrayNode()
     bookmarks.forEach { bookmark -> node.add(serializeToJSON(objectMapper, bookmark)) }
     return node
@@ -156,7 +153,6 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     description: Bookmark
   ): String {
-
     val json = serializeToJSON(objectMapper, description)
     val output = ByteArrayOutputStream(1024)
     JSONSerializerUtilities.serialize(json, output)
@@ -177,7 +173,6 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     bookmarks: List<Bookmark>
   ): String {
-
     val json = serializeToJSON(objectMapper, bookmarks)
     val output = ByteArrayOutputStream(1024)
     val writer = objectMapper.writerWithDefaultPrettyPrinter()

@@ -343,7 +343,6 @@ class AccountFragment : Fragment() {
      */
 
     return if (cardCreatorURI != null) {
-
       /*
        * Unless the URI refers to the NYPL Card Creator and we don't have that enabled
        * in this build.
@@ -1229,7 +1228,6 @@ class AccountFragment : Fragment() {
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     if (requestCode == this.cardCreatorResultCode) {
-
       when (resultCode) {
         Activity.RESULT_OK -> {
           if (data != null) {

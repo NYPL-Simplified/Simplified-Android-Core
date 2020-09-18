@@ -81,7 +81,6 @@ abstract class ReaderBookmarkHTTPCallsContract {
     objectMapper: ObjectMapper,
     jsonText: String
   ): HTTPResultType<InputStream> {
-
     val node = objectMapper.readTree(jsonText)
     val data = objectMapper.writeValueAsBytes(node)
     val stream = ByteArrayInputStream(data)

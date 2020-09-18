@@ -117,7 +117,6 @@ class SplashFragment : Fragment() {
     container: ViewGroup?,
     state: Bundle?
   ): View? {
-
     val stackView =
       inflater.inflate(R.layout.splash_stack, container, false) as ViewGroup
     val imageView =
@@ -180,7 +179,6 @@ class SplashFragment : Fragment() {
   }
 
   private fun configureViewsForImage() {
-
     /*
      * Initially, only the image is shown.
      */

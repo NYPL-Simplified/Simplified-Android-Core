@@ -541,7 +541,6 @@ class BookBorrowTask(
     uri: URI,
     groups: List<FeedGroup>
   ): List<FeedGroup> {
-
     val attribute =
       Pair("Feed URI", this.acquisition.uri.toASCIIString())
 
@@ -569,7 +568,6 @@ class BookBorrowTask(
     uri: URI,
     entries: List<FeedEntry>
   ): List<FeedEntry> {
-
     val attribute =
       Pair("Feed URI", this.acquisition.uri.toASCIIString())
 
@@ -946,7 +944,6 @@ class BookBorrowTask(
     acquisition: OPDSAcquisition,
     httpAuth: OptionType<HTTPAuthType>
   ): FileAndType {
-
     /*
      * Point the downloader at the acquisition link. The result will be an
      * EPUB, ACSM file, or Simplified bearer token. ACSM files have to be
@@ -1192,7 +1189,6 @@ class BookBorrowTask(
     expectedContentTypes: Set<MIMEType>,
     receivedContentType: MIMEType
   ): MIMEType {
-
     this.steps.beginNewStep(
       this.services.borrowStrings.borrowBookSavingCheckingContentType(
         receivedContentType, expectedContentTypes
@@ -1858,7 +1854,6 @@ class BookBorrowTask(
     expectedTotal: Long,
     unconditional: Boolean
   ) {
-
     /*
      * Because "data received" updates happen at such a huge rate, we want
      * to ensure that updates to the book status are rate limited to avoid

@@ -29,7 +29,6 @@ object BookmarkAnnotationsJSON {
     mapper: ObjectMapper,
     selector: BookmarkAnnotationSelectorNode
   ): ObjectNode {
-
     val node = mapper.createObjectNode()
     node.put("type", selector.type)
     node.put("value", selector.value)
@@ -40,7 +39,6 @@ object BookmarkAnnotationsJSON {
     mapper: ObjectMapper,
     target: BookmarkAnnotationTargetNode
   ): ObjectNode {
-
     val node = mapper.createObjectNode()
     node.put("source", target.source)
     node.set<ObjectNode>("selector", serializeSelectorNodeToJSON(mapper, target.selector))
@@ -59,7 +57,6 @@ object BookmarkAnnotationsJSON {
     mapper: ObjectMapper,
     target: BookmarkAnnotationBodyNode
   ): ObjectNode {
-
     val node = mapper.createObjectNode()
     node.put("http://librarysimplified.org/terms/time", target.timestamp)
     node.put("http://librarysimplified.org/terms/device", target.device)
@@ -112,7 +109,6 @@ object BookmarkAnnotationsJSON {
     mapper: ObjectMapper,
     annotation: BookmarkAnnotation
   ): ObjectNode {
-
     val node = mapper.createObjectNode()
     if (annotation.context != null) { node.put("@context", annotation.context) }
     if (annotation.id != null) { node.put("id", annotation.id) }
@@ -152,7 +148,6 @@ object BookmarkAnnotationsJSON {
     mapper: ObjectMapper,
     annotation: BookmarkAnnotationFirstNode
   ): ObjectNode {
-
     val nodes = mapper.createArrayNode()
     annotation.items.forEach { mark -> nodes.add(serializeBookmarkAnnotationToJSON(mapper, mark)) }
 
@@ -178,7 +173,6 @@ object BookmarkAnnotationsJSON {
     mapper: ObjectMapper,
     annotation: BookmarkAnnotationResponse
   ): ObjectNode {
-
     val node = mapper.createObjectNode()
     node.put("total", annotation.total)
     node.put("id", annotation.id)

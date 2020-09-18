@@ -27,7 +27,6 @@ object BookDRMInformationHandles {
     format: BookFormats.BookFormatDefinition,
     onUpdate: () -> Unit
   ): BookDRMInformationHandle {
-
     val drmInfoFile =
       File(directory, "${format.shortName}-drm.txt")
     val drmKind =

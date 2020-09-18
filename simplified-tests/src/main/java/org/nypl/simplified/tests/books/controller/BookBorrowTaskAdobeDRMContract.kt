@@ -271,7 +271,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test // (timeout = 5_000L)
   fun testBorrowFeedACSMForEPUB() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -425,7 +424,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMForEPUBUnavailableDRM() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -540,7 +538,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMForNonEPUB() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -692,7 +689,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMDeviceNotActive() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -810,7 +806,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMUnparseable() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -911,7 +906,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5000L)
   fun testBorrowFeedACSMCancellation() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -1029,7 +1023,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMFailsErrorCode() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =

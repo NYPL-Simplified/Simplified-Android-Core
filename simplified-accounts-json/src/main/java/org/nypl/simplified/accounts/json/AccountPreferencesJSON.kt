@@ -20,7 +20,6 @@ object AccountPreferencesJSON {
     objectMapper: ObjectMapper,
     preferences: org.nypl.simplified.accounts.api.AccountPreferences
   ): ObjectNode {
-
     val node = objectMapper.createObjectNode()
     node.put("bookmarkSyncingPermitted", preferences.bookmarkSyncingPermitted)
     return node

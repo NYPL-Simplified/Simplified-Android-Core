@@ -258,7 +258,6 @@ class CatalogFeedViewModel(
     state: CatalogFeedState,
     result: FeedLoaderResult.FeedLoaderFailure
   ): CatalogFeedState.CatalogFeedLoadFailed {
-
     /*
      * If the failure is due to bad credentials, then subscribe to events for the account
      * and try refreshing the feed when an account login has occurred.
@@ -343,7 +342,6 @@ class CatalogFeedViewModel(
     state: CatalogFeedState,
     feed: Feed.FeedWithoutGroups
   ): CatalogFeedLoaded {
-
     if (feed.entriesInOrder.isEmpty()) {
       return CatalogFeedEmpty(
         arguments = state.arguments,

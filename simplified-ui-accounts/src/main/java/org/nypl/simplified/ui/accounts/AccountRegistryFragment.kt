@@ -163,7 +163,6 @@ class AccountRegistryFragment : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-
     val layout =
       inflater.inflate(R.layout.account_registry, container, false)
 

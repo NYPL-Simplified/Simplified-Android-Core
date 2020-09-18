@@ -259,7 +259,6 @@ data class ReaderBookmarkPolicy<T>(
       account: AccountID,
       bookmark: ReaderBookmarkState
     ): Boolean {
-
       return if (bookmark.account == account) {
         when (bookmark.remoteState) {
           is ReaderBookmarkRemoteState.Sending -> false
@@ -302,7 +301,6 @@ data class ReaderBookmarkPolicy<T>(
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
-
             /*
              * If the bookmark was previously deleted, then recreate it and send it to the
              * server (if possible).
@@ -329,7 +327,6 @@ data class ReaderBookmarkPolicy<T>(
               emitOutput(LocalBookmarkAlreadyExists(event.accountID, event.bookmark))
           }
         } else {
-
           /*
            * If nothing is known about the bookmark, then save it locally and then sync
            * with the server (if possible).
@@ -356,7 +353,6 @@ data class ReaderBookmarkPolicy<T>(
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
-
             /*
              * If the bookmark is already deleted, then ignore it.
              */
@@ -382,7 +378,6 @@ data class ReaderBookmarkPolicy<T>(
             }
           }
         } else {
-
           /*
            * If the bookmark isn't known, then ignore it.
            */
@@ -398,7 +393,6 @@ data class ReaderBookmarkPolicy<T>(
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
-
             /*
              * If the bookmark has been deleted locally, but the server has sent it to us, then
              * tell the server we want it deleted.
@@ -435,7 +429,6 @@ data class ReaderBookmarkPolicy<T>(
             }
           }
         } else {
-
           /*
            * If nothing is known about the bookmark locally, then save it to disk.
            */
@@ -459,14 +452,12 @@ data class ReaderBookmarkPolicy<T>(
     ): ReaderBookmarkPolicy<Unit> {
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
-
           /*
            * If the bookmark is known, then mark it as having been saved remotely.
            */
 
           updateBookmark(bookmarkState.copy(remoteState = ReaderBookmarkRemoteState.Saved))
         } else {
-
           /*
            * If nothing is known about the bookmark locally, then ignore it.
            */

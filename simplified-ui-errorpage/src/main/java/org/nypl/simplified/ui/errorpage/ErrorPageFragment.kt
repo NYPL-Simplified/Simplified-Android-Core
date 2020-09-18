@@ -77,7 +77,6 @@ class ErrorPageFragment : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-
     val viewRoot =
       inflater.inflate(R.layout.error_page, container, false)
 

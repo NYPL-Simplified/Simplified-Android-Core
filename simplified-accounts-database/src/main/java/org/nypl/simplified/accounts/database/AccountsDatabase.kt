@@ -426,7 +426,6 @@ class AccountsDatabase private constructor(
       accountProviders: AccountProviderRegistryType,
       directory: File
     ): AccountsDatabaseType {
-
       this.logger.debug("opening account database: {}", directory)
 
       val accounts = ConcurrentSkipListMap<AccountID, Account>()
@@ -512,7 +511,6 @@ class AccountsDatabase private constructor(
       errors: MutableList<Exception>,
       objectMapper: ObjectMapper
     ) {
-
       val accountDirs = directory.list()
       if (accountDirs != null) {
         for (index in accountDirs.indices) {
@@ -571,7 +569,6 @@ class AccountsDatabase private constructor(
       directory: File,
       accountIdName: String
     ): AccountID? {
-
       /*
        * If the account directory is not a directory, then give up.
        */
@@ -607,7 +604,6 @@ class AccountsDatabase private constructor(
       ownerDirectory: File,
       existingDirectory: File
     ): AccountID? {
-
       this.logger.debug("attempting to migrate {} directory", existingDirectory)
 
       for (index in 0..99) {
@@ -653,7 +649,6 @@ class AccountsDatabase private constructor(
       errors: MutableList<Exception>,
       objectMapper: ObjectMapper
     ): Account? {
-
       val accountId =
         this.openOneAccountDirectory(errors, directory, accountIdName) ?: return null
       val accountDir =
@@ -729,7 +724,6 @@ class AccountsDatabase private constructor(
       accountFileTemp: File,
       description: AccountDescription
     ) {
-
       FileLocking.withFileThreadLocked<Unit, IOException>(
         accountLock, 1000L
       ) {

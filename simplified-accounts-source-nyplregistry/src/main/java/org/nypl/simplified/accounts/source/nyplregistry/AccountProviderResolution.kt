@@ -199,7 +199,6 @@ class AccountProviderResolution(
     taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>,
     authDocument: AuthenticationDocument
   ): Pair<AccountProviderAuthenticationDescription, List<AccountProviderAuthenticationDescription>> {
-
     if (authDocument.authentication.isEmpty()) {
       return Pair(AccountProviderAuthenticationDescription.Anonymous, listOf())
     }
@@ -256,7 +255,6 @@ class AccountProviderResolution(
     taskRecorder: TaskRecorderType<AccountProviderResolutionErrorDetails>,
     authObject: AuthenticationObject
   ): AccountProviderAuthenticationDescription {
-
     val authenticate =
       authObject.links.find { link -> link.relation == "authenticate" }
     val logo =
@@ -286,7 +284,6 @@ class AccountProviderResolution(
   private fun extractAuthenticationDescriptionBasic(
     authObject: AuthenticationObject
   ): AccountProviderAuthenticationDescription.Basic {
-
     val loginRestrictions =
       authObject.inputs[LABEL_LOGIN]
     val passwordRestrictions =

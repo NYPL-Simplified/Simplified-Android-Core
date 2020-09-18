@@ -192,7 +192,6 @@ class CatalogFragmentFeed : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-
     this.buttonCreator =
       CatalogButtons(this.requireContext(), this.screenInformation)
 
@@ -678,7 +677,6 @@ class CatalogFragmentFeed : Fragment() {
       is FeedLoaderFailedAuthentication -> {
         when (val ownership = this.parameters.ownership) {
           is CatalogFeedOwnership.OwnedByAccount -> {
-
             /*
              * Explicitly deferring the opening of the fragment is required due to the
              * tabbed navigation controller eagerly instantiating fragments and causing
@@ -934,7 +932,6 @@ class CatalogFragmentFeed : Fragment() {
     facetLayout: LinearLayout,
     facetsByGroup: Map<String, List<FeedFacet>>
   ) {
-
     /*
      * If the facet groups are empty, hide the header entirely.
      */
