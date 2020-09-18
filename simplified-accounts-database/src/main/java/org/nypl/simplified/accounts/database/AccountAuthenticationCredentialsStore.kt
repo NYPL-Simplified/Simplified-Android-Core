@@ -45,7 +45,8 @@ class AccountAuthenticationCredentialsStore(
         AccountAuthenticationCredentialsStore(
           file = file,
           fileTemp = fileTemp,
-          initialCredentials = initialCredentials)
+          initialCredentials = initialCredentials
+        )
 
       synchronized(store.storeLock) {
         store.writeLocked()
@@ -92,6 +93,7 @@ class AccountAuthenticationCredentialsStore(
     FileUtilities.fileWriteUTF8Atomically(
       this.file,
       this.fileTemp,
-      AccountAuthenticationCredentialsStoreJSON.serializeToText(this.store))
+      AccountAuthenticationCredentialsStoreJSON.serializeToText(this.store)
+    )
   }
 }

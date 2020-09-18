@@ -73,7 +73,8 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
         0,
         this.parameters.bookmarks.bookmarks.sortedBy { bookmark ->
           bookmark.bookProgress
-        }.reversed())
+        }.reversed()
+      )
 
     this.bookmarksTOCListView.adapter = this
     return this.bookmarksTOCLayout
@@ -84,8 +85,10 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     if (context is ReaderTOCSelectionListenerType) {
       this.listener = context
     } else {
-      throw IllegalStateException(context.toString() +
-        " must implement ReaderTOCSelectionListenerType ")
+      throw IllegalStateException(
+        context.toString() +
+          " must implement ReaderTOCSelectionListenerType "
+      )
     }
   }
 
@@ -139,7 +142,9 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
           .profileCurrent()
           .preferences()
           .readerPreferences
-          .colorScheme()))
+          .colorScheme()
+      )
+    )
 
     layoutView.setOnClickListener {
       this.listener.onTOCItemSelected(ReaderSelectedBookmark(bookmark))

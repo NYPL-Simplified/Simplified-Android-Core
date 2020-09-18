@@ -48,7 +48,8 @@ class TaskRecorder<E : Serializable> private constructor() : TaskRecorderType<E>
     step.resolution = TaskStepResolution.TaskStepFailed(
       message = message,
       errorValue = errorValue,
-      exception = exception)
+      exception = exception
+    )
     return step
   }
 

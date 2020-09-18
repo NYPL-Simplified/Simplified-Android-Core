@@ -126,9 +126,11 @@ class CatalogFeedViewModel(
       }
 
     val syncFuture =
-      fluentFutureOfAll(accountsToSync.values.map { account ->
-        this.booksController.booksSync(account)
-      })
+      fluentFutureOfAll(
+        accountsToSync.values.map { account ->
+          this.booksController.booksSync(account)
+        }
+      )
 
     val future = this.profilesController.profileFeed(request)
       .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }

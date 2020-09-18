@@ -68,7 +68,8 @@ abstract class BookDatabaseContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
+        OPDSAvailabilityOpenAccess.get(Option.none<URI>())
+      )
         .build()
 
     val entry1 =
@@ -76,7 +77,8 @@ abstract class BookDatabaseContract {
         "b",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
+        OPDSAvailabilityOpenAccess.get(Option.none<URI>())
+      )
         .build()
 
     val entry2 =
@@ -84,7 +86,8 @@ abstract class BookDatabaseContract {
         "c",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
+        OPDSAvailabilityOpenAccess.get(Option.none<URI>())
+      )
         .build()
 
     val id0 = org.nypl.simplified.books.api.BookID.create("a")
@@ -125,7 +128,8 @@ abstract class BookDatabaseContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none<URI>()))
+        OPDSAvailabilityOpenAccess.get(Option.none<URI>())
+      )
         .build()
 
     val id0 = org.nypl.simplified.books.api.BookID.create("a")
@@ -184,10 +188,12 @@ abstract class BookDatabaseContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle0 != null)
+        "Format is present", formatHandle0 != null
+      )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry0, BookDatabaseEntryFormatHandleEPUB::class.java)
+        databaseEntry0, BookDatabaseEntryFormatHandleEPUB::class.java
+      )
 
       val epubFormat = databaseEntry0.book.findFormat(BookFormatEPUB::class.java)
       Assert.assertTrue("Format is present", epubFormat != null)
@@ -198,10 +204,12 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/epub+zip"))
+      )
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format"))
+      )
 
       databaseEntry0.book
     }
@@ -215,10 +223,12 @@ abstract class BookDatabaseContract {
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle1 != null)
+        "Format is present", formatHandle1 != null
+      )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry1, BookDatabaseEntryFormatHandleEPUB::class.java)
+        databaseEntry1, BookDatabaseEntryFormatHandleEPUB::class.java
+      )
 
       val epubFormat = databaseEntry1.book.findFormat(BookFormatEPUB::class.java)
       Assert.assertTrue("Format is present", epubFormat != null)
@@ -229,10 +239,12 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType(mimeOf("application/epub+zip")))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/epub+zip"))
+      )
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format"))
+      )
 
       databaseEntry1.book
     }
@@ -264,10 +276,12 @@ abstract class BookDatabaseContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle0 != null)
+        "Format is present", formatHandle0 != null
+      )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry0, BookDatabaseEntryFormatHandlePDF::class.java)
+        databaseEntry0, BookDatabaseEntryFormatHandlePDF::class.java
+      )
 
       val pdfFormat = databaseEntry0.book.findFormat(BookFormatPDF::class.java)
       Assert.assertTrue("Format is present", pdfFormat != null)
@@ -278,10 +292,12 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType(mimeOf("application/pdf")))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/pdf"))
+      )
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format"))
+      )
 
       databaseEntry0.book
     }
@@ -295,10 +311,12 @@ abstract class BookDatabaseContract {
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle1 != null)
+        "Format is present", formatHandle1 != null
+      )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry1, BookDatabaseEntryFormatHandlePDF::class.java)
+        databaseEntry1, BookDatabaseEntryFormatHandlePDF::class.java
+      )
 
       val pdfFormat = databaseEntry1.book.findFormat(BookFormatPDF::class.java)
       Assert.assertTrue("Format is present", pdfFormat != null)
@@ -309,10 +327,12 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType(mimeOf("application/pdf")))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/pdf"))
+      )
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format"))
+      )
 
       databaseEntry1.book
     }
@@ -344,10 +364,12 @@ abstract class BookDatabaseContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle0 != null)
+        "Format is present", formatHandle0 != null
+      )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry0, BookDatabaseEntryFormatHandleAudioBook::class.java)
+        databaseEntry0, BookDatabaseEntryFormatHandleAudioBook::class.java
+      )
 
       val audioFormat = databaseEntry0.book.findFormat(BookFormatAudioBook::class.java)
       Assert.assertTrue("Format is present", audioFormat != null)
@@ -358,10 +380,12 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle0,
-        databaseEntry0.findFormatHandleForContentType(mimeOf("application/audiobook+json")))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/audiobook+json"))
+      )
       Assert.assertEquals(
         null,
-        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
+        databaseEntry0.findFormatHandleForContentType(mimeOf("application/not-a-supported-format"))
+      )
 
       databaseEntry0.book
     }
@@ -375,10 +399,12 @@ abstract class BookDatabaseContract {
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle1 != null)
+        "Format is present", formatHandle1 != null
+      )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry1, BookDatabaseEntryFormatHandleAudioBook::class.java)
+        databaseEntry1, BookDatabaseEntryFormatHandleAudioBook::class.java
+      )
 
       val audioFormat = databaseEntry1.book.findFormat(BookFormatAudioBook::class.java)
       Assert.assertTrue("Format is present", audioFormat != null)
@@ -389,10 +415,12 @@ abstract class BookDatabaseContract {
 
       Assert.assertEquals(
         formatHandle1,
-        databaseEntry1.findFormatHandleForContentType(mimeOf("application/audiobook+json")))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/audiobook+json"))
+      )
       Assert.assertEquals(
         null,
-        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format")))
+        databaseEntry1.findFormatHandleForContentType(mimeOf("application/not-a-supported-format"))
+      )
 
       databaseEntry1.book
     }
@@ -602,7 +630,8 @@ abstract class BookDatabaseContract {
     val format = databaseEntry.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
     format!!
     format.savePlayerPosition(
-      PlayerPosition(title = "Title", part = 0, chapter = 1, offsetMilliseconds = 23L))
+      PlayerPosition(title = "Title", part = 0, chapter = 1, offsetMilliseconds = 23L)
+    )
 
     run {
       val book = databaseEntry.book
@@ -615,7 +644,8 @@ abstract class BookDatabaseContract {
     }
 
     format.savePlayerPosition(
-      PlayerPosition(title = "Title 2", part = 2, chapter = 3, offsetMilliseconds = 46L))
+      PlayerPosition(title = "Title 2", part = 2, chapter = 3, offsetMilliseconds = 46L)
+    )
 
     run {
       val book = databaseEntry.book
@@ -663,13 +693,16 @@ abstract class BookDatabaseContract {
       "abcd",
       "Title",
       DateTime.now(),
-      OPDSAvailabilityOpenAccess.get(revoke))
+      OPDSAvailabilityOpenAccess.get(revoke)
+    )
     eb.addAcquisition(
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
         Option.some(mimeOf("application/pdf")),
-        emptyList()))
+        emptyList()
+      )
+    )
     return eb.build()
   }
 
@@ -679,13 +712,16 @@ abstract class BookDatabaseContract {
       "abcd",
       "Title",
       DateTime.now(),
-      OPDSAvailabilityOpenAccess.get(revoke))
+      OPDSAvailabilityOpenAccess.get(revoke)
+    )
     eb.addAcquisition(
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
         Option.some(mimeOf("application/audiobook+json")),
-        emptyList()))
+        emptyList()
+      )
+    )
     return eb.build()
   }
 
@@ -695,14 +731,17 @@ abstract class BookDatabaseContract {
       "abcd",
       "Title",
       DateTime.now(),
-      OPDSAvailabilityOpenAccess.get(revoke))
+      OPDSAvailabilityOpenAccess.get(revoke)
+    )
 
     eb.addAcquisition(
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
         Option.some(mimeOf("application/epub+zip")),
-        emptyList()))
+        emptyList()
+      )
+    )
     return eb.build()
   }
 

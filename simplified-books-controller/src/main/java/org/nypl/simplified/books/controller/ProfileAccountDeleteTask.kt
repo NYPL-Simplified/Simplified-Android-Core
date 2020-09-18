@@ -30,15 +30,21 @@ class ProfileAccountDeleteTask(
   private val taskRecorder = TaskRecorder.create<AccountDeleteErrorDetails>()
 
   private fun publishFailureEvent(step: TaskStep<AccountDeleteErrorDetails>) =
-    this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionFailed(
-      step.resolution.message, this.taskRecorder.finishFailure<Unit>()))
+    this.accountEvents.onNext(
+      AccountEventDeletion.AccountEventDeletionFailed(
+        step.resolution.message, this.taskRecorder.finishFailure<Unit>()
+      )
+    )
 
   private fun publishProgressEvent(step: TaskStep<AccountDeleteErrorDetails>) =
     this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionInProgress(step.description))
 
   private fun publishSuccessEvent(accountThen: AccountID) =
-    this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionSucceeded(
-      this.strings.deletionSucceeded, accountThen))
+    this.accountEvents.onNext(
+      AccountEventDeletion.AccountEventDeletionSucceeded(
+        this.strings.deletionSucceeded, accountThen
+      )
+    )
 
   override fun call(): TaskResult<AccountDeleteErrorDetails, Unit> {
     return try {
@@ -55,14 +61,18 @@ class ProfileAccountDeleteTask(
         this.taskRecorder.currentStepFailed(
           this.strings.onlyOneAccountRemaining,
           AccountCannotDeleteLastAccount(this.strings.onlyOneAccountRemaining),
-          e))
+          e
+        )
+      )
       this.taskRecorder.finishFailure()
     } catch (e: Throwable) {
       this.publishFailureEvent(
         this.taskRecorder.currentStepFailed(
           this.strings.unexpectedException,
           AccountUnexpectedException(this.strings.unexpectedException, e),
-          e))
+          e
+        )
+      )
       this.taskRecorder.finishFailure()
     }
   }

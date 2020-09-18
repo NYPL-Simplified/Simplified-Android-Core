@@ -89,7 +89,8 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
         .profileCurrent()
         .preferences()
         .readerPreferences
-        .colorScheme())
+        .colorScheme()
+    )
 
     return this.readerTOCLayout
   }
@@ -105,8 +106,10 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
           .profileEvents()
           .subscribe { event -> this.onProfileEvent(event) }
     } else {
-      throw RuntimeException(context.toString() +
-        " must implement ReaderTOCSelectionListenerType ")
+      throw RuntimeException(
+        context.toString() +
+          " must implement ReaderTOCSelectionListenerType "
+      )
     }
   }
 
@@ -163,7 +166,8 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
       this.layoutInflater.inflate(
         R.layout.reader_toc_element,
         parent,
-        false) as ViewGroup
+        false
+      ) as ViewGroup
     }
 
     val textView =
@@ -178,12 +182,13 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
     val layoutParams =
       RelativeLayout.LayoutParams(
         ViewGroup.LayoutParams.WRAP_CONTENT,
-        ViewGroup.LayoutParams.WRAP_CONTENT)
+        ViewGroup.LayoutParams.WRAP_CONTENT
+      )
 
     // Set the left margin based on the desired indentation level.
     val leftIndent = Services.serviceDirectory()
-        .requireService(ScreenSizeInformationType::class.java)
-        .dpToPixels(element.indent * 16)
+      .requireService(ScreenSizeInformationType::class.java)
+      .dpToPixels(element.indent * 16)
 
     layoutParams.setMargins(leftIndent.toInt(), 0, 0, 0)
     textView.layoutParams = layoutParams
@@ -194,7 +199,9 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
           .profileCurrent()
           .preferences()
           .readerPreferences
-          .colorScheme()))
+          .colorScheme()
+      )
+    )
 
     itemView.setOnClickListener {
       this.listener.onTOCItemSelected(ReaderSelectedTOCElement(element))

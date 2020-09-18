@@ -165,7 +165,8 @@ class ProfileSelectionFragment : Fragment() {
     this.profiles.addAll(
       this.profilesController.profiles()
         .values
-        .sortedBy(ProfileReadableType::displayName))
+        .sortedBy(ProfileReadableType::displayName)
+    )
     this.listAdapter.notifyDataSetChanged()
   }
 

@@ -766,14 +766,16 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
     this.debug("fetching cover")
 
-    when (val result =
-      BookCoverFetchTask(
-        services = this.services,
-        databaseEntry = this.databaseEntry,
-        feedEntry = opdsEntry,
-        type = Type.COVER,
-        httpAuth = httpAuth
-      ).call()) {
+    when (
+      val result =
+        BookCoverFetchTask(
+          services = this.services,
+          databaseEntry = this.databaseEntry,
+          feedEntry = opdsEntry,
+          type = Type.COVER,
+          httpAuth = httpAuth
+        ).call()
+    ) {
       is TaskResult.Success -> {
         this.debug("fetched cover successfully")
         this.steps.addAll(result.steps)
@@ -787,14 +789,16 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
     this.debug("fetching thumbnail")
 
-    when (val result =
-      BookCoverFetchTask(
-        services = this.services,
-        databaseEntry = this.databaseEntry,
-        feedEntry = opdsEntry,
-        type = Type.THUMBNAIL,
-        httpAuth = httpAuth
-      ).call()) {
+    when (
+      val result =
+        BookCoverFetchTask(
+          services = this.services,
+          databaseEntry = this.databaseEntry,
+          feedEntry = opdsEntry,
+          type = Type.THUMBNAIL,
+          httpAuth = httpAuth
+        ).call()
+    ) {
       is TaskResult.Success -> {
         this.debug("fetched thumbnail successfully")
         this.steps.addAll(result.steps)
@@ -1264,14 +1268,14 @@ class BookBorrowTask(
     val exception =
       BookUnexpectedTypeException(
         message =
-        StringBuilder("Unexpected content type\n")
-          .append("  Expected: One of ")
-          .append(expectedContentTypes)
-          .append('\n')
-          .append("  Received: ")
-          .append(receivedContentType)
-          .append('\n')
-          .toString(),
+          StringBuilder("Unexpected content type\n")
+            .append("  Expected: One of ")
+            .append(expectedContentTypes)
+            .append('\n')
+            .append("  Received: ")
+            .append(receivedContentType)
+            .append('\n')
+            .toString(),
         expected = expectedContentTypes,
         received = receivedContentType
       )

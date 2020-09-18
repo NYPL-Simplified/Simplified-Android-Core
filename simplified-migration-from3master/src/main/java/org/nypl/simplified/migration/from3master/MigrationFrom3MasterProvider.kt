@@ -38,6 +38,7 @@ class MigrationFrom3MasterProvider(
     return MigrationFrom3Master(
       environment = this.environment,
       strings = this.strings!!,
-      services = services)
+      services = services
+    )
   }
 }

@@ -89,7 +89,8 @@ object CatalogBookAvailabilityStrings {
       val expiry = expiryOpt.get()
       val now = DateTime.now()
       return resources.getString(
-        R.string.catalogBookAvailabilityLoanedTimed, this.intervalString(resources, now, expiry))
+        R.string.catalogBookAvailabilityLoanedTimed, this.intervalString(resources, now, expiry)
+      )
     }
 
     /*
@@ -113,7 +114,8 @@ object CatalogBookAvailabilityStrings {
       val now = DateTime.now()
       return resources.getString(
         R.string.catalogBookAvailabilityReservedTimed,
-        this.intervalString(resources, now, expiry))
+        this.intervalString(resources, now, expiry)
+      )
     }
 
     /*
@@ -139,7 +141,8 @@ object CatalogBookAvailabilityStrings {
       val now = DateTime.now()
       return resources.getString(
         R.string.catalogBookAvailabilityHeldTimed,
-        this.intervalString(resources, now, endDate))
+        this.intervalString(resources, now, endDate)
+      )
     }
 
     /*

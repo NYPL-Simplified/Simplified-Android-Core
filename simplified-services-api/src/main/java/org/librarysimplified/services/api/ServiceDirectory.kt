@@ -7,7 +7,8 @@ class ServiceDirectory internal constructor(
   override fun toBuilder(): ServiceDirectoryBuilderType {
     return ServiceDirectoryBuilder(
       this.services.mapValues { v -> v.value.toMutableList() }
-        .toMutableMap())
+        .toMutableMap()
+    )
   }
 
   override fun <T : Any> optionalServices(serviceClass: Class<T>): List<T> {

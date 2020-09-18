@@ -576,9 +576,12 @@ object ProfilesDatabases {
         )
 
         val resolutionResult =
-          accountProviders.resolve({ _, message ->
-            accountEvents.onNext(AccountEventCreationInProgress(message))
-          }, description)
+          accountProviders.resolve(
+            { _, message ->
+              accountEvents.onNext(AccountEventCreationInProgress(message))
+            },
+            description
+          )
 
         when (resolutionResult) {
           is TaskResult.Success -> {

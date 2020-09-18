@@ -448,14 +448,14 @@ abstract class ProfilesControllerContract {
     controller.profileUpdate { description ->
       description.copy(
         preferences =
-        description.preferences.copy(
-          readerPreferences = ReaderPreferences.builder()
-            .setBrightness(0.2)
-            .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
-            .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
-            .setFontScale(2.0)
-            .build()
-        )
+          description.preferences.copy(
+            readerPreferences = ReaderPreferences.builder()
+              .setBrightness(0.2)
+              .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
+              .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
+              .setFontScale(2.0)
+              .build()
+          )
       )
     }.get()
 
@@ -513,7 +513,8 @@ abstract class ProfilesControllerContract {
               get() = "Author"
             override val sortByTitle: String
               get() = "Title"
-          })
+          }
+        )
       ).get()
 
     Assert.assertEquals(0L, feed.size.toLong())

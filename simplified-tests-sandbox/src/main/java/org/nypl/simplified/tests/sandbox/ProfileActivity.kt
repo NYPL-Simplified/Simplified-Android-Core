@@ -68,7 +68,8 @@ class ProfileActivity : FragmentActivity(), ToolbarHostType {
             override fun backStackSize(): Int {
               return 1
             }
-          })
+          }
+        )
 
       this.supportFragmentManager.beginTransaction()
         .replace(R.id.fragmentHolder, ProfileSelectionFragment())

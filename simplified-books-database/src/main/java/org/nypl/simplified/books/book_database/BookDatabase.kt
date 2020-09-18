@@ -123,7 +123,8 @@ class BookDatabase private constructor(
         FileUtilities.fileWriteUTF8Atomically(
           fileMeta,
           fileMetaTmp,
-          JSONSerializerUtilities.serializeToString(this.serializer.serializeFeedEntry(entry)))
+          JSONSerializerUtilities.serializeToString(this.serializer.serializeFeedEntry(entry))
+        )
 
         val book =
           Book(
@@ -132,7 +133,8 @@ class BookDatabase private constructor(
             cover = cover,
             thumbnail = thumb,
             entry = entry,
-            formats = listOf())
+            formats = listOf()
+          )
 
         val dbEntry =
           BookDatabaseEntry(
@@ -140,7 +142,8 @@ class BookDatabase private constructor(
             bookDir = bookDir,
             serializer = this.serializer,
             bookRef = book,
-            onDelete = Runnable { this.maps.delete(id) })
+            onDelete = Runnable { this.maps.delete(id) }
+          )
 
         this.maps.addEntry(dbEntry)
         return dbEntry
@@ -154,7 +157,8 @@ class BookDatabase private constructor(
   override fun entry(id: BookID): BookDatabaseEntryType {
     synchronized(this.maps.mapsLock) {
       return this.maps.entries[id] ?: throw BookDatabaseException(
-        "Nonexistent book entry: " + id.value(), emptyList())
+        "Nonexistent book entry: " + id.value(), emptyList()
+      )
     }
   }
 
@@ -179,7 +183,8 @@ class BookDatabase private constructor(
       if (errors.isNotEmpty()) {
         errors.forEach { exception -> LOG.error("error opening book database: ", exception) }
         throw BookDatabaseException(
-          "One or more errors occurred whilst trying to open a book database.", errors)
+          "One or more errors occurred whilst trying to open a book database.", errors
+        )
       }
 
       return BookDatabase(context, owner, directory, maps, serializer)
@@ -216,7 +221,8 @@ class BookDatabase private constructor(
             directory = bookDirectory,
             maps = maps,
             errors = errors,
-            name = bookID)
+            name = bookID
+          )
             ?: continue
           maps.addEntry(entry)
         }
@@ -259,14 +265,16 @@ class BookDatabase private constructor(
             cover = cover,
             thumbnail = thumb,
             entry = entry,
-            formats = listOf())
+            formats = listOf()
+          )
 
         return BookDatabaseEntry(
           context = context,
           bookDir = directory,
           serializer = serializer,
           bookRef = book,
-          onDelete = Runnable { maps.delete(bookId) })
+          onDelete = Runnable { maps.delete(bookId) }
+        )
       } catch (e: IOException) {
         errors.add(e)
         return null

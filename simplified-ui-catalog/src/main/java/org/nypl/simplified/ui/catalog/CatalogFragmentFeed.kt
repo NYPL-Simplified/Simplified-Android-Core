@@ -614,10 +614,13 @@ class CatalogFragmentFeed : Fragment() {
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
-    feedState.entries.observe(this, Observer { newPagedList ->
-      this.logger.debug("received paged list ({} elements)", newPagedList.size)
-      this.feedWithoutGroupsAdapter.submitList(newPagedList)
-    })
+    feedState.entries.observe(
+      this,
+      Observer { newPagedList ->
+        this.logger.debug("received paged list ({} elements)", newPagedList.size)
+        this.feedWithoutGroupsAdapter.submitList(newPagedList)
+      }
+    )
   }
 
   @Suppress("UNUSED_PARAMETER")
@@ -685,11 +688,13 @@ class CatalogFragmentFeed : Fragment() {
 
             this.uiThread.runOnUIThread {
               this.navigationController
-                .openSettingsAccount(AccountFragmentParameters(
-                  accountId = ownership.accountId,
-                  closeOnLoginSuccess = true,
-                  showPleaseLogInTitle = true
-                ))
+                .openSettingsAccount(
+                  AccountFragmentParameters(
+                    accountId = ownership.accountId,
+                    closeOnLoginSuccess = true,
+                    showPleaseLogInTitle = true
+                  )
+                )
             }
           }
           CatalogFeedOwnership.CollectedFromAccounts -> {
@@ -1160,11 +1165,11 @@ class CatalogFragmentFeed : Fragment() {
       TaskStep(
         description = this.resources.getString(R.string.catalogFeedLoading),
         resolution =
-        TaskStepResolution.TaskStepFailed(
-          message = failure.message,
-          errorValue = failure,
-          exception = failure.exception
-        )
+          TaskStepResolution.TaskStepFailed(
+            message = failure.message,
+            errorValue = failure,
+            exception = failure.exception
+          )
       )
 
     return ErrorPageParameters(

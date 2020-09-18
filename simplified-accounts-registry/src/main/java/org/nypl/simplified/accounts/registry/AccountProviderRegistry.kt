@@ -115,7 +115,8 @@ class AccountProviderRegistry private constructor(
     if (existing != null) {
       Preconditions.checkState(
         id == existing.id,
-        "ID $id must match existing id ${existing.id}")
+        "ID $id must match existing id ${existing.id}"
+      )
       if (existing.updated.isAfter(accountProvider.updated)) {
         return existing
       }
@@ -138,7 +139,8 @@ class AccountProviderRegistry private constructor(
     if (existing != null) {
       Preconditions.checkState(
         id == existing.id,
-        "ID $id must match existing id ${existing.id}")
+        "ID $id must match existing id ${existing.id}"
+      )
       if (existing.updated.isAfter(description.updated)) {
         return existing
       }

@@ -340,7 +340,8 @@ abstract class ProfileAccountLoginTaskContract {
         404,
         "NOT FOUND",
         null
-      ), state.taskResult.errors().last()
+      ),
+      state.taskResult.errors().last()
     )
   }
 

@@ -38,12 +38,15 @@ data class AuthenticationObjectNYPLInput(
   init {
     Preconditions.checkArgument(
       this.fieldName.all { c -> c.isUpperCase() || c.isWhitespace() },
-      "Field name ${this.fieldName} must be uppercase")
+      "Field name ${this.fieldName} must be uppercase"
+    )
     Preconditions.checkArgument(
       this.barcodeFormat?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
-      "Barcode format ${this.barcodeFormat} must be uppercase")
+      "Barcode format ${this.barcodeFormat} must be uppercase"
+    )
     Preconditions.checkArgument(
       this.keyboardType?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
-      "Keyboard ${this.keyboardType} must be uppercase")
+      "Keyboard ${this.keyboardType} must be uppercase"
+    )
   }
 }

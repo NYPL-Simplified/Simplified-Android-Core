@@ -40,7 +40,8 @@ class ReaderBookmarkHTTPCalls(
     return result.match<List<BookmarkAnnotation>, IOException>(
       { error -> logAndFail(annotationsURI, error) },
       { exception -> throw exception.error },
-      { success -> deserializeBookmarksFromStream(success.value) })
+      { success -> deserializeBookmarksFromStream(success.value) }
+    )
   }
 
   override fun bookmarkDelete(
@@ -56,7 +57,8 @@ class ReaderBookmarkHTTPCalls(
     return result.match<Unit, IOException>(
       { error -> logAndFail(bookmarkURI, error) },
       { exception -> throw exception.error },
-      { success -> deserializeBookmarksFromStream(success.value) })
+      { success -> deserializeBookmarksFromStream(success.value) }
+    )
   }
 
   override fun bookmarkAdd(
@@ -75,7 +77,8 @@ class ReaderBookmarkHTTPCalls(
     return result.match<Unit, IOException>(
       { error -> logAndFail(annotationsURI, error) },
       { exception -> throw exception.error },
-      { })
+      { }
+    )
   }
 
   override fun syncingEnable(
@@ -94,7 +97,8 @@ class ReaderBookmarkHTTPCalls(
     return result.match<Unit, IOException>(
       { error -> logAndFail(settingsURI, error) },
       { exception -> throw exception.error },
-      { })
+      { }
+    )
   }
 
   override fun syncingIsEnabled(
@@ -110,12 +114,14 @@ class ReaderBookmarkHTTPCalls(
     return result.match<Boolean, IOException>(
       { error -> logAndFail(settingsURI, error) },
       { exception -> throw exception.error },
-      { success -> deserializeSyncingEnabledFromStream(success.value) })
+      { success -> deserializeSyncingEnabledFromStream(success.value) }
+    )
   }
 
   private fun <T> logAndFail(uri: URI, error: HTTPResultError<InputStream>): T {
     HTTPProblemReportLogging.logError(
-      this.logger, uri, error.message, error.status, error.problemReport)
+      this.logger, uri, error.message, error.status, error.problemReport
+    )
     throw IOException("$uri received ${error.status} ${error.message}")
   }
 

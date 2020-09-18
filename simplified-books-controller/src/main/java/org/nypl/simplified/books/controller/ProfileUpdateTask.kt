@@ -51,7 +51,8 @@ class ProfileUpdateTask(
       val event =
         ProfileUpdated.Failed(
           profileID = this.requestedProfileId ?: ProfileID(UUID(0L, 0L)),
-          exception = e)
+          exception = e
+        )
       this.events.onNext(event)
       return event
     }

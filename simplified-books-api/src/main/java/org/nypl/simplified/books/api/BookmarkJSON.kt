@@ -39,7 +39,8 @@ object BookmarkJSON {
     return deserializeFromJSON(
       objectMapper = objectMapper,
       kind = kind,
-      node = JSONParserUtilities.checkObject(null, node))
+      node = JSONParserUtilities.checkObject(null, node)
+    )
   }
 
   /**
@@ -66,7 +67,8 @@ object BookmarkJSON {
     val chapterProgress = JSONParserUtilities.getDouble(node, "chapterProgress")
 
     val deserializedLocation = BookLocationJSON.deserializeFromJSON(
-      objectMapper, JSONParserUtilities.getObject(node, "location"))
+      objectMapper, JSONParserUtilities.getObject(node, "location")
+    )
 
     val location =
       if (deserializedLocation.progress == null && chapterProgress != null) {
@@ -85,7 +87,8 @@ object BookmarkJSON {
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
       uri = toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
-      deviceID = JSONParserUtilities.getStringDefault(node, "deviceID", null))
+      deviceID = JSONParserUtilities.getStringDefault(node, "deviceID", null)
+    )
   }
 
   private fun <T> toNullable(option: OptionType<T>): T? {

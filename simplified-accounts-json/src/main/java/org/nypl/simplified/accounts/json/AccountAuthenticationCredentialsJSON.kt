@@ -111,8 +111,10 @@ object AccountAuthenticationCredentialsJSON {
     node: JsonNode
   ): AccountAuthenticationCredentials {
     val obj = JSONParserUtilities.checkObject(null, node)
-    return when (val version =
-      JSONParserUtilities.getIntegerDefault(obj, "@version", this.inferredVersion)) {
+    return when (
+      val version =
+        JSONParserUtilities.getIntegerDefault(obj, "@version", this.inferredVersion)
+    ) {
       this.inferredVersion ->
         this.deserialize20190424(obj)
       20200604 ->

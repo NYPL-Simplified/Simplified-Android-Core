@@ -74,8 +74,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  * The main activity for playing audio books.
  */
 
-class AudioBookPlayerActivity : AppCompatActivity(),
-  AudioBookLoadingFragmentListenerType, PlayerFragmentListenerType {
+class AudioBookPlayerActivity :
+  AppCompatActivity(),
+  AudioBookLoadingFragmentListenerType,
+  PlayerFragmentListenerType {
 
   private val log: Logger = LoggerFactory.getLogger(AudioBookPlayerActivity::class.java)
 
@@ -569,11 +571,14 @@ class AudioBookPlayerActivity : AppCompatActivity(),
        * to return the book.
        */
 
-      this.playerScheduledExecutor.schedule({
-        if (!this.destroying) {
-          this.uiThread.runOnUIThread { this.loanReturnShowDialog() }
-        }
-      }, 5L, TimeUnit.SECONDS)
+      this.playerScheduledExecutor.schedule(
+        {
+          if (!this.destroying) {
+            this.uiThread.runOnUIThread { this.loanReturnShowDialog() }
+          }
+        },
+        5L, TimeUnit.SECONDS
+      )
     }
   }
 

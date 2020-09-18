@@ -61,10 +61,13 @@ internal interface CardCreatorService {
 
       val auth = Interceptor {
         val request = it.request().newBuilder()
-          .addHeader("Authorization",
+          .addHeader(
+            "Authorization",
             Credentials.basic(
               authUsername,
-              authPassword))
+              authPassword
+            )
+          )
           .build()
         it.proceed(request)
       }

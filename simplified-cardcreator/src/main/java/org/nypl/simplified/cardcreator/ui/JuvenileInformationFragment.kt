@@ -67,13 +67,15 @@ class JuvenileInformationFragment : Fragment() {
       if (lastName.isEmpty()) {
         lastName = Cache(requireContext()).getPersonalInformation().lastName
       }
-      Cache(requireContext()).setPersonalInformation(PersonalInformation(
-        binding.firstNameEt.text.toString(),
-        "",
-        lastName,
-        Cache(requireContext()).getPersonalInformation().birthDate,
-        Cache(requireContext()).getPersonalInformation().email
-      ))
+      Cache(requireContext()).setPersonalInformation(
+        PersonalInformation(
+          binding.firstNameEt.text.toString(),
+          "",
+          lastName,
+          Cache(requireContext()).getPersonalInformation().birthDate,
+          Cache(requireContext()).getPersonalInformation().email
+        )
+      )
       hideKeyboard()
       navController.navigate(nextAction)
     }

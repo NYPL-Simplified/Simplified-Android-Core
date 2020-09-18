@@ -35,7 +35,8 @@ class ReaderTOCActivity : AppCompatActivity(), ReaderTOCSelectionListenerType {
       Services.serviceDirectory()
         .requireService(ThemeServiceType::class.java)
         .findCurrentTheme()
-        .themeWithActionBar)
+        .themeWithActionBar
+    )
 
     this.setTitle(R.string.reader_toc)
 

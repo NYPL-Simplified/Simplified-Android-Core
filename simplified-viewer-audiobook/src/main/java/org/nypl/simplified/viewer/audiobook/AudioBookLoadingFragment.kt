@@ -74,7 +74,7 @@ class AudioBookLoadingFragment : Fragment() {
 
     this.loadingParameters =
       this.arguments!!.getSerializable(parametersKey)
-        as AudioBookLoadingFragmentParameters
+      as AudioBookLoadingFragmentParameters
 
     val services = Services.serviceDirectory()
 

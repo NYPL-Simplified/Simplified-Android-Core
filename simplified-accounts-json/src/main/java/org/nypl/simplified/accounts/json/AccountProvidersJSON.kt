@@ -72,7 +72,8 @@ object AccountProvidersJSON {
     this.putConditionally(node, "subtitle", provider.subtitle)
     this.putConditionally(node, "supportEmail", provider.supportEmail)
 
-    node.set<ObjectNode>("authentication",
+    node.set<ObjectNode>(
+      "authentication",
       this.serializeAuthentication(mapper, provider.authentication)
     )
 
@@ -325,9 +326,9 @@ object AccountProvidersJSON {
       COPPA_TYPE -> {
         COPPAAgeGate(
           greaterEqual13 =
-          JSONParserUtilities.getURIOrNull(container, "greaterEqual13"),
+            JSONParserUtilities.getURIOrNull(container, "greaterEqual13"),
           under13 =
-          JSONParserUtilities.getURIOrNull(container, "under13")
+            JSONParserUtilities.getURIOrNull(container, "under13")
         )
       }
       else -> {

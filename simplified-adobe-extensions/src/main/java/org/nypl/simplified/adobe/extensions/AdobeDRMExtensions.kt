@@ -57,7 +57,8 @@ object AdobeDRMExtensions {
           receiver,
           vendorID,
           clientToken.userName,
-          clientToken.password)
+          clientToken.password
+        )
         debug("activation finished")
 
         if (!receiver.failed) {
@@ -159,7 +160,8 @@ object AdobeDRMExtensions {
           vendorID,
           userID,
           clientToken.userName,
-          clientToken.password)
+          clientToken.password
+        )
         debug("deactivation finished")
 
         if (errors.isNotEmpty()) {
@@ -292,8 +294,11 @@ object AdobeDRMExtensions {
         debug("fulfillment ended")
 
         if (!adeptFuture.isDone) {
-          adeptFuture.setException(IllegalStateException(
-            "Fulfillment receiver failed to report success or failure"))
+          adeptFuture.setException(
+            IllegalStateException(
+              "Fulfillment receiver failed to report success or failure"
+            )
+          )
         }
       } catch (e: Throwable) {
         adeptFuture.setException(e)
@@ -369,8 +374,11 @@ object AdobeDRMExtensions {
         connector.loanReturn(RevokeReceiver(adeptFuture), loan.id, userId)
 
         if (!adeptFuture.isDone) {
-          adeptFuture.setException(IllegalStateException(
-            "Revoke receiver failed to report success or failure"))
+          adeptFuture.setException(
+            IllegalStateException(
+              "Revoke receiver failed to report success or failure"
+            )
+          )
         }
       } catch (e: Throwable) {
         adeptFuture.setException(e)

@@ -131,11 +131,13 @@ class AccountRegistryFragment : Fragment() {
   private fun onAccountEvent(event: AccountEvent) {
     return when (event) {
       is AccountEventCreation.AccountEventCreationInProgress ->
-        this.uiThread.runOnUIThread(Runnable {
-          this.accountList.visibility = View.INVISIBLE
-          this.progress.visibility = View.VISIBLE
-          this.progressText.text = event.message
-        })
+        this.uiThread.runOnUIThread(
+          Runnable {
+            this.accountList.visibility = View.INVISIBLE
+            this.progress.visibility = View.VISIBLE
+            this.progressText.text = event.message
+          }
+        )
 
       is AccountEventCreation.AccountEventCreationSucceeded -> {
         this.uiThread.runOnUIThread {
@@ -144,10 +146,12 @@ class AccountRegistryFragment : Fragment() {
       }
 
       is AccountEventCreation.AccountEventCreationFailed ->
-        this.uiThread.runOnUIThread(Runnable {
-          this.showAccountCreationFailedDialog(event)
-          this.reconfigureViewForRegistryStatus(this.accountRegistry.status)
-        })
+        this.uiThread.runOnUIThread(
+          Runnable {
+            this.showAccountCreationFailedDialog(event)
+            this.reconfigureViewForRegistryStatus(this.accountRegistry.status)
+          }
+        )
 
       else -> {
       }
@@ -248,7 +252,8 @@ class AccountRegistryFragment : Fragment() {
         },
         onArrowClicked = {
           this.navigationController.popBackStack()
-        })
+        }
+      )
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
     }
@@ -257,9 +262,11 @@ class AccountRegistryFragment : Fragment() {
   private fun onAccountRegistryEvent(event: AccountProviderRegistryEvent) {
     return when (event) {
       AccountProviderRegistryEvent.StatusChanged -> {
-        this.uiThread.runOnUIThread(Runnable {
-          this.reconfigureViewForRegistryStatus(this.accountRegistry.status)
-        })
+        this.uiThread.runOnUIThread(
+          Runnable {
+            this.reconfigureViewForRegistryStatus(this.accountRegistry.status)
+          }
+        )
       }
       is AccountProviderRegistryEvent.Updated -> {
       }

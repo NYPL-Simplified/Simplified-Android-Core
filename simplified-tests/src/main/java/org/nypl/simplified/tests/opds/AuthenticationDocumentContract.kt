@@ -104,13 +104,16 @@ abstract class AuthenticationDocumentContract {
 
     Assert.assertEquals(
       "The New York Public Library",
-      document.title)
+      document.title
+    )
     Assert.assertEquals(
       null,
-      document.description)
+      document.description
+    )
     Assert.assertEquals(
       URI.create("https://circulation.librarysimplified.org/NYNYPL/authentication_document"),
-      document.id)
+      document.id
+    )
 
     Assert.assertEquals(13, document.links.size)
 
@@ -280,10 +283,12 @@ abstract class AuthenticationDocumentContract {
 
     Assert.assertEquals(
       "Public Library",
-      document.title)
+      document.title
+    )
     Assert.assertEquals(
       URI.create("http://example.com/auth.json"),
-      document.id)
+      document.id
+    )
   }
 
   @Test
@@ -302,13 +307,16 @@ abstract class AuthenticationDocumentContract {
 
     Assert.assertEquals(
       "Public Library",
-      document.title)
+      document.title
+    )
     Assert.assertEquals(
       URI.create("http://example.com/auth.json"),
-      document.id)
+      document.id
+    )
     Assert.assertEquals(
       "Enter a valid library card number and PIN code to authenticate on our service.",
-      document.description)
+      document.description
+    )
 
     Assert.assertEquals(5, document.links.size)
 

@@ -143,7 +143,8 @@ class SettingsFragmentAccountTest :
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("pass"),
           AccountBarcode.create("user")
-        ).build())
+        ).build()
+      )
 
     Assert.assertEquals(1, profilesController.profileAccountLogins.size)
     Assert.assertEquals(expectedCall, profilesController.profileAccountLogins[0])
@@ -270,7 +271,8 @@ class SettingsFragmentAccountTest :
         AccountAuthenticationCredentials.builder(
           AccountPIN.create("pass"),
           AccountBarcode.create("user")
-        ).build())
+        ).build()
+      )
 
     Assert.assertEquals(1, profilesController.profileAccountLogins.size)
     Assert.assertEquals(expectedCall, profilesController.profileAccountLogins[0])
@@ -374,11 +376,13 @@ class SettingsFragmentAccountTest :
     Assert.assertEquals(accountCurrent.id, profilesController.profileAccountLogouts[0])
 
     accountCurrent.setLoginState(AccountLoginState.AccountNotLoggedIn)
-    profilesController.accountEventSource.onNext(AccountEventLoginStateChanged(
-      message = "Logged out!",
-      accountID = accountCurrent.id,
-      state = AccountLoginState.AccountNotLoggedIn
-    ))
+    profilesController.accountEventSource.onNext(
+      AccountEventLoginStateChanged(
+        message = "Logged out!",
+        accountID = accountCurrent.id,
+        state = AccountLoginState.AccountNotLoggedIn
+      )
+    )
 
     /*
      * If we've logged out successfully, the user and password fields should now be empty.
@@ -430,10 +434,13 @@ class SettingsFragmentAccountTest :
     accountCurrent.loginState as AccountLoginState.AccountNotLoggedIn
     accountCurrent.setAccountProvider(
       AccountProviderImmutable.copy(accountCurrent.provider)
-        .copy(authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
-          greaterEqual13 = URI.create("urn:over13"),
-          under13 = URI.create("urn:under13")
-        )))
+        .copy(
+          authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
+            greaterEqual13 = URI.create("urn:over13"),
+            under13 = URI.create("urn:under13")
+          )
+        )
+    )
     SettingsFragmentAccountActivity.initialAccountId = accountCurrent.id
 
     this.launchActivity()
@@ -490,10 +497,13 @@ class SettingsFragmentAccountTest :
     accountCurrent.loginState as AccountLoginState.AccountNotLoggedIn
     accountCurrent.setAccountProvider(
       AccountProviderImmutable.copy(accountCurrent.provider)
-        .copy(authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
-          greaterEqual13 = URI.create("urn:over13"),
-          under13 = URI.create("urn:under13")
-        )))
+        .copy(
+          authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
+            greaterEqual13 = URI.create("urn:over13"),
+            under13 = URI.create("urn:under13")
+          )
+        )
+    )
     SettingsFragmentAccountActivity.initialAccountId = accountCurrent.id
 
     this.launchActivity()

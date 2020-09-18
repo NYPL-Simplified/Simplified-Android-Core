@@ -104,8 +104,10 @@ object AccountAuthenticationCredentialsStoreJSON {
   fun deserializeFromJSON(node: JsonNode): Map<AccountID, AccountAuthenticationCredentials> {
     val obj = JSONParserUtilities.checkObject(null, node)
 
-    return when (val version =
-      JSONParserUtilities.getIntegerDefault(obj, "@version", inferredVersion)) {
+    return when (
+      val version =
+        JSONParserUtilities.getIntegerDefault(obj, "@version", inferredVersion)
+    ) {
       20190424 ->
         deserializeFromJSONV20190424(obj)
       else ->

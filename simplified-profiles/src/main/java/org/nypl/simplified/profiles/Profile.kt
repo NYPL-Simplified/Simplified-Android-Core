@@ -91,7 +91,8 @@ internal class Profile internal constructor(
       if (existing.isSome) {
         if (existing != Option.of(this)) {
           throw ProfileCreateDuplicateException(
-            "A profile already exists with the name '$newNameNormal'")
+            "A profile already exists with the name '$newNameNormal'"
+          )
         }
       }
 
@@ -161,24 +162,28 @@ internal class Profile internal constructor(
   }
 
   private fun logProfileDeleted() {
-    this.analytics.publishEvent(AnalyticsEvent.ProfileDeleted(
-      timestamp = LocalDateTime.now(),
-      credentials = null,
-      profileUUID = this.id.uuid,
-      displayName = this.displayName,
-      birthDate = this.preferences().dateOfBirth?.date?.toString(),
-      attributes = this.description().attributes.attributes
-    ))
+    this.analytics.publishEvent(
+      AnalyticsEvent.ProfileDeleted(
+        timestamp = LocalDateTime.now(),
+        credentials = null,
+        profileUUID = this.id.uuid,
+        displayName = this.displayName,
+        birthDate = this.preferences().dateOfBirth?.date?.toString(),
+        attributes = this.description().attributes.attributes
+      )
+    )
   }
 
   private fun logProfileModified() {
-    this.analytics.publishEvent(AnalyticsEvent.ProfileUpdated(
-      timestamp = LocalDateTime.now(),
-      credentials = null,
-      profileUUID = this.id.uuid,
-      displayName = this.displayName,
-      birthDate = this.preferences().dateOfBirth?.date?.toString(),
-      attributes = this.description().attributes.attributes
-    ))
+    this.analytics.publishEvent(
+      AnalyticsEvent.ProfileUpdated(
+        timestamp = LocalDateTime.now(),
+        credentials = null,
+        profileUUID = this.id.uuid,
+        displayName = this.displayName,
+        birthDate = this.preferences().dateOfBirth?.date?.toString(),
+        attributes = this.description().attributes.attributes
+      )
+    )
   }
 }

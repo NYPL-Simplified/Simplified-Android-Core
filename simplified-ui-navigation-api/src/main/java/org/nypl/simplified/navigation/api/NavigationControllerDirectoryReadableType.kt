@@ -24,6 +24,7 @@ interface NavigationControllerDirectoryReadableType {
   ): T {
     return this.navigationControllerIfAvailable(navigationClass)
       ?: throw IllegalArgumentException(
-        "No navigation controllers of type $navigationClass are available")
+        "No navigation controllers of type $navigationClass are available"
+      )
   }
 }

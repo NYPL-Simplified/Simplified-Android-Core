@@ -65,7 +65,8 @@ object SimplifiedBearerTokenJSON {
     return SimplifiedBearerToken(
       accessToken = JSONParserUtilities.getString(node, "access_token"),
       expiration = now.plusSeconds(JSONParserUtilities.getInteger(node, "expires_in")),
-      location = JSONParserUtilities.getURI(node, "location"))
+      location = JSONParserUtilities.getURI(node, "location")
+    )
   }
 
   fun deserializeFromJSON(

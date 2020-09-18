@@ -70,7 +70,8 @@ object Reports {
       address = address,
       subject = subject,
       body = body,
-      includeFile = this::isLogFileOrMigrationReport)
+      includeFile = this::isLogFileOrMigrationReport
+    )
   }
 
   @JvmStatic

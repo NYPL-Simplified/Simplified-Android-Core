@@ -26,7 +26,8 @@ object BookDatabases : BookDatabaseFactoryType {
       parser = parser,
       serializer = serializer,
       owner = owner,
-      directory = directory)
+      directory = directory
+    )
   }
 
   @Throws(BookDatabaseException::class)
@@ -41,6 +42,7 @@ object BookDatabases : BookDatabaseFactoryType {
       parser = OPDSJSONParser.newParser(),
       serializer = OPDSJSONSerializer.newSerializer(),
       owner = owner,
-      directory = directory)
+      directory = directory
+    )
   }
 }
