@@ -76,7 +76,6 @@ object ProfilesDatabases {
     accountsDatabases: AccountsDatabaseFactoryType,
     directory: File
   ): ProfilesDatabaseType {
-
     this.logger.debug("opening profile database: {}", directory)
 
     val profiles = ConcurrentSkipListMap<ProfileID, Profile>()
@@ -136,7 +135,6 @@ object ProfilesDatabases {
     jom: ObjectMapper,
     errors: MutableList<Exception>
   ) {
-
     if (!directory.exists()) {
       directory.mkdirs()
     }
@@ -186,7 +184,6 @@ object ProfilesDatabases {
     accountsDatabases: AccountsDatabaseFactoryType,
     directory: File
   ): ProfilesDatabaseType {
-
     this.logger.debug("opening profile database: {}", directory)
 
     val profiles = ConcurrentSkipListMap<ProfileID, Profile>()
@@ -254,7 +251,6 @@ object ProfilesDatabases {
     directory: File,
     profileIdName: String
   ): ProfileID? {
-
     /*
      * If the profile directory is not a directory, then give up.
      */
@@ -291,7 +287,6 @@ object ProfilesDatabases {
     existingDirectory: File,
     profileIdName: String
   ): ProfileID? {
-
     this.logger.debug("attempting to migrate {} directory", existingDirectory)
 
     if (profileIdName == "0") {
@@ -344,7 +339,6 @@ object ProfilesDatabases {
     errors: MutableList<Exception>,
     profileIdName: String
   ): Profile? {
-
     val profileId =
       this.openOneProfileDirectory(errors, directory, profileIdName) ?: return null
 
@@ -435,7 +429,6 @@ object ProfilesDatabases {
     displayName: String,
     id: ProfileID
   ): Profile {
-
     try {
       val profileDir =
         File(directory, id.uuid.toString())
@@ -515,7 +508,6 @@ object ProfilesDatabases {
     accountProviders: AccountProviderRegistryType,
     profile: ProfileID
   ) {
-
     val pId = profile.uuid
     this.logger.debug("[{}]: creating automatic accounts", pId)
 
@@ -576,9 +568,12 @@ object ProfilesDatabases {
         )
 
         val resolutionResult =
-          accountProviders.resolve({ _, message ->
-            accountEvents.onNext(AccountEventCreationInProgress(message))
-          }, description)
+          accountProviders.resolve(
+            { _, message ->
+              accountEvents.onNext(AccountEventCreationInProgress(message))
+            },
+            description
+          )
 
         when (resolutionResult) {
           is TaskResult.Success -> {
@@ -641,7 +636,6 @@ object ProfilesDatabases {
     directory: File,
     newDescription: ProfileDescription
   ) {
-
     val profileLock =
       File(directory, "lock")
     val profileFile =
@@ -653,7 +647,6 @@ object ProfilesDatabases {
       profileLock,
       1000L
     ) {
-
       /*
        * Ignore the return value here; the write call will immediately fail if this
        * call fails anyway.

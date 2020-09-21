@@ -168,13 +168,17 @@ class MainFragment : Fragment() {
 
     this.uiThread.runOnUIThread {
       this.navigationControllerDirectory.updateNavigationController(
-        CatalogNavigationControllerType::class.java, this.bottomNavigator)
+        CatalogNavigationControllerType::class.java, this.bottomNavigator
+      )
       this.navigationControllerDirectory.updateNavigationController(
-        AccountNavigationControllerType::class.java, this.bottomNavigator)
+        AccountNavigationControllerType::class.java, this.bottomNavigator
+      )
       this.navigationControllerDirectory.updateNavigationController(
-        SettingsNavigationControllerType::class.java, this.bottomNavigator)
+        SettingsNavigationControllerType::class.java, this.bottomNavigator
+      )
       this.navigationControllerDirectory.updateNavigationController(
-        NavigationControllerType::class.java, this.bottomNavigator)
+        NavigationControllerType::class.java, this.bottomNavigator
+      )
     }
 
     this.accountSubscription =
@@ -200,7 +204,6 @@ class MainFragment : Fragment() {
 
   private fun onAccountEvent(event: AccountEvent) {
     return when (event) {
-
       /*
        * We don't know which fragments on the backstack might refer to accounts that
        * have been deleted so we need to clear the history when an account is deleted.
@@ -256,12 +259,14 @@ class MainFragment : Fragment() {
         val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
         this.bottomNavigator.clearHistory()
         this.bottomNavigator.popBackStack()
-        this.bottomNavigator.openFeed(CatalogFeedArguments.CatalogFeedArgumentsRemote(
-          title = account.provider.displayName,
-          ownership = CatalogFeedOwnership.OwnedByAccount(id),
-          feedURI = account.provider.catalogURIForAge(age),
-          isSearchResults = false
-        ))
+        this.bottomNavigator.openFeed(
+          CatalogFeedArguments.CatalogFeedArgumentsRemote(
+            title = account.provider.displayName,
+            ownership = CatalogFeedOwnership.OwnedByAccount(id),
+            feedURI = account.provider.catalogURIForAge(age),
+            isSearchResults = false
+          )
+        )
       }
     }
   }
@@ -303,12 +308,16 @@ class MainFragment : Fragment() {
     this.accountSubscription?.dispose()
 
     this.navigationControllerDirectory.removeNavigationController(
-      CatalogNavigationControllerType::class.java)
+      CatalogNavigationControllerType::class.java
+    )
     this.navigationControllerDirectory.removeNavigationController(
-      AccountNavigationControllerType::class.java)
+      AccountNavigationControllerType::class.java
+    )
     this.navigationControllerDirectory.removeNavigationController(
-      SettingsNavigationControllerType::class.java)
+      SettingsNavigationControllerType::class.java
+    )
     this.navigationControllerDirectory.removeNavigationController(
-      NavigationControllerType::class.java)
+      NavigationControllerType::class.java
+    )
   }
 }

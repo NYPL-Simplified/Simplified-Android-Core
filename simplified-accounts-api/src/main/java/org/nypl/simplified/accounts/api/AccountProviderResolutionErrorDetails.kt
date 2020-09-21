@@ -30,7 +30,8 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
   override val attributes: Map<String, String>
     get() = mapOf(
       Pair("Account ID", accountProviderID),
-      Pair("Account", accountProviderTitle))
+      Pair("Account", accountProviderTitle)
+    )
 
   /**
    * The authentication document link was unusable.
@@ -55,10 +56,13 @@ sealed class AccountProviderResolutionErrorDetails : PresentableErrorType {
   ) : AccountProviderResolutionErrorDetails(), HTTPHasProblemReportType {
 
     override val attributes: Map<String, String>
-      get() = Presentables.mergeProblemReportOptional(super.attributes.toMutableMap().apply {
-        this["HTTP status code"] = errorCode.toString()
-        this.toMap()
-      }, this.problemReport)
+      get() = Presentables.mergeProblemReportOptional(
+        super.attributes.toMutableMap().apply {
+          this["HTTP status code"] = errorCode.toString()
+          this.toMap()
+        },
+        this.problemReport
+      )
   }
 
   /**

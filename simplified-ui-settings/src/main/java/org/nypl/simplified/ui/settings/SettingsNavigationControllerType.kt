@@ -7,7 +7,8 @@ import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
  * Navigation functions for the settings screens.
  */
 
-interface SettingsNavigationControllerType : NavigationControllerType,
+interface SettingsNavigationControllerType :
+  NavigationControllerType,
   AccountNavigationControllerType {
 
   /**

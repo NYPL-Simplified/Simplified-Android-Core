@@ -111,7 +111,8 @@ class BookRevokeTask(
             this.bookID.value(),
             "",
             DateTime.now(),
-            OPDSAvailabilityLoanable.get())
+            OPDSAvailabilityLoanable.get()
+          )
             .build()
 
         Book(
@@ -120,7 +121,8 @@ class BookRevokeTask(
           null,
           null,
           entry,
-          listOf())
+          listOf()
+        )
       }
 
     this.bookRegistry.update(BookWithStatus(book, status))
@@ -151,7 +153,8 @@ class BookRevokeTask(
       this.error("revoke failed: ", e)
 
       this.steps.currentStepFailedAppending(
-        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e)
+        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e
+      )
 
       val failure = this.steps.finishFailure<Unit>()
       this.publishBookStatus(BookStatus.FailedRevoke(this.bookID, failure))
@@ -199,7 +202,8 @@ class BookRevokeTask(
         this.steps.currentStepFailed(
           message,
           NotRevocable(message),
-          exception)
+          exception
+        )
         throw exception
       }
 
@@ -221,7 +225,8 @@ class BookRevokeTask(
         this.steps.currentStepFailed(
           message,
           NotRevocable(message),
-          exception)
+          exception
+        )
         throw exception
       }
 
@@ -269,7 +274,8 @@ class BookRevokeTask(
       this.databaseEntry.writeOPDSEntry(entry.feedEntry)
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeServerNotifySavingEntryFailed, UnexpectedException(e), e)
+        this.revokeStrings.revokeServerNotifySavingEntryFailed, UnexpectedException(e), e
+      )
       throw e
     }
   }
@@ -283,7 +289,8 @@ class BookRevokeTask(
       this.databaseEntry.delete()
     } catch (e: Throwable) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e)
+        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e
+      )
       throw e
     }
   }
@@ -340,7 +347,8 @@ class BookRevokeTask(
             message = message,
             problemReport = feedResult.problemReport,
             exception = feedResult.exception
-          ))
+          )
+        )
         throw feedResult.exception
       }
 
@@ -352,7 +360,8 @@ class BookRevokeTask(
             message = message,
             problemReport = feedResult.problemReport,
             exception = feedResult.exception
-          ))
+          )
+        )
         throw feedResult.exception
       }
     }
@@ -378,7 +387,8 @@ class BookRevokeTask(
             this.steps.currentStepFailed(
               message = this.revokeStrings.revokeServerNotifyFeedCorrupt,
               errorValue = FeedCorrupted(feedEntry.error),
-              exception = exception)
+              exception = exception
+            )
             throw exception
           }
           is FeedEntryOPDS ->
@@ -391,7 +401,8 @@ class BookRevokeTask(
         this.steps.currentStepFailed(
           message = message,
           errorValue = FeedUnusable(message),
-          exception = exception)
+          exception = exception
+        )
         throw exception
       }
     }
@@ -483,7 +494,6 @@ class BookRevokeTask(
     adobeDRM: AdobeAdeptExecutorType,
     adobeRights: AdobeAdeptLoan
   ) {
-
     val credentials =
       this.revokeFormatHandleEPUBAdobeWithConnectorGetCredentials()
 
@@ -500,7 +510,8 @@ class BookRevokeTask(
       this.steps.currentStepFailed(
         message = message,
         errorValue = TimedOut(message),
-        exception = e)
+        exception = e
+      )
       throw e
     } catch (e: ExecutionException) {
       throw when (val cause = e.cause!!) {
@@ -509,7 +520,8 @@ class BookRevokeTask(
           this.steps.currentStepFailed(
             message = message,
             errorValue = Cancelled(message),
-            exception = cause)
+            exception = cause
+          )
           cause
         }
         is AdobeDRMExtensions.AdobeDRMRevokeException -> {
@@ -521,14 +533,16 @@ class BookRevokeTask(
               errorCode = cause.errorCode,
               message = message
             ),
-            exception = cause)
+            exception = cause
+          )
           cause
         }
         else -> {
           this.steps.currentStepFailed(
             message = this.revokeStrings.revokeBookACSFailed,
             errorValue = UnexpectedException(cause),
-            exception = cause)
+            exception = cause
+          )
           cause
         }
       }
@@ -536,7 +550,8 @@ class BookRevokeTask(
       this.steps.currentStepFailed(
         message = this.revokeStrings.revokeBookACSFailed,
         errorValue = UnexpectedException(e),
-        exception = e)
+        exception = e
+      )
       throw e
     }
 
@@ -565,7 +580,8 @@ class BookRevokeTask(
           system = this.adobeACS,
           message = message
         ),
-        exception = exception)
+        exception = exception
+      )
       throw exception
     }
 
@@ -597,7 +613,8 @@ class BookRevokeTask(
       }
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeACSDeleteRightsFailed, UnexpectedException(e), e)
+        this.revokeStrings.revokeACSDeleteRightsFailed, UnexpectedException(e), e
+      )
       throw e
     }
   }
@@ -633,7 +650,8 @@ class BookRevokeTask(
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeBookDatabaseLookupFailed, UnexpectedException(e), e)
+        this.revokeStrings.revokeBookDatabaseLookupFailed, UnexpectedException(e), e
+      )
       throw e
     }
   }
@@ -668,7 +686,8 @@ class BookRevokeTask(
       this.steps.currentStepFailed(
         message = message,
         errorValue = NoCredentialsAvailable(message),
-        exception = exception)
+        exception = exception
+      )
       throw exception
     }
   }

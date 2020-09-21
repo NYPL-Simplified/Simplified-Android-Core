@@ -68,10 +68,11 @@ sealed class FeedLoaderResult {
       return FeedLoaderFailure.FeedLoaderFailedGeneral(
         problemReport = null,
         exception =
-        if (exception is java.lang.Exception) exception
-        else java.lang.Exception(exception),
+          if (exception is java.lang.Exception) exception
+          else java.lang.Exception(exception),
         message = exception.localizedMessage ?: "",
-        attributesInitial = sortedMapOf(Pair("Feed URI", uri.toASCIIString())))
+        attributesInitial = sortedMapOf(Pair("Feed URI", uri.toASCIIString()))
+      )
     }
   }
 }

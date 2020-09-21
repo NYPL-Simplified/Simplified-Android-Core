@@ -35,7 +35,8 @@ class ReaderTOCActivity : AppCompatActivity(), ReaderTOCSelectionListenerType {
       Services.serviceDirectory()
         .requireService(ThemeServiceType::class.java)
         .findCurrentTheme()
-        .themeWithActionBar)
+        .themeWithActionBar
+    )
 
     this.setTitle(R.string.reader_toc)
 
@@ -98,7 +99,6 @@ class ReaderTOCActivity : AppCompatActivity(), ReaderTOCSelectionListenerType {
       from: Activity,
       parameters: ReaderTOCParameters
     ) {
-
       val i = Intent(Intent.ACTION_PICK)
       i.setClass(from, ReaderTOCActivity::class.java)
       i.putExtra(PARAMETERS_ID, parameters)

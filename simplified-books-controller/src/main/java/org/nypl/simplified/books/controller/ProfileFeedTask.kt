@@ -219,11 +219,13 @@ internal class ProfileFeedTask(
   private fun collectAllBooks(bookRegistry: BookRegistryReadableType): ArrayList<BookWithStatus> {
     val accountID = this.request.filterByAccountID
     val values = bookRegistry.books().values
-    return ArrayList(if (accountID != null) {
-      values.filter { book -> book.book.account == accountID }
-    } else {
-      values
-    })
+    return ArrayList(
+      if (accountID != null) {
+        values.filter { book -> book.book.account == accountID }
+      } else {
+        values
+      }
+    )
   }
 
   private fun usableForBooksFeed(status: BookStatus): Boolean {
@@ -275,7 +277,6 @@ internal class ProfileFeedTask(
     termsUpper: List<String>,
     book: BookWithStatus
   ): Boolean {
-
     if (termsUpper.isEmpty()) {
       return true
     }

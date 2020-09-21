@@ -329,7 +329,8 @@ class SettingsFragmentDebug : Fragment() {
         },
         onArrowClicked = {
           this.navigationController.popBackStack()
-        })
+        }
+      )
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
     }
@@ -379,12 +380,14 @@ class SettingsFragmentDebug : Fragment() {
 
   private fun onProfileEvent(event: ProfileEvent) {
     if (event is ProfileUpdated) {
-      this.uiThread.runOnUIThread(Runnable {
-        this.showTesting.isChecked = this.profilesController
-          .profileCurrent()
-          .preferences()
-          .showTestingLibraries
-      })
+      this.uiThread.runOnUIThread(
+        Runnable {
+          this.showTesting.isChecked = this.profilesController
+            .profileCurrent()
+            .preferences()
+            .showTestingLibraries
+        }
+      )
 
       if (event is Succeeded) {
         val old = event.oldDescription.preferences
@@ -426,17 +429,20 @@ class SettingsFragmentDebug : Fragment() {
       AdobeDRMExtensions.getDeviceActivations(
         executor,
         { message -> this.logger.error("DRM: {}", message) },
-        { message -> this.logger.debug("DRM: {}", message) })
+        { message -> this.logger.debug("DRM: {}", message) }
+      )
 
     adeptFuture.addListener(
       Runnable {
-        this.uiThread.runOnUIThread(Runnable {
-          try {
-            this.onAdobeDRMReceivedActivations(adeptFuture.get())
-          } catch (e: Exception) {
-            this.onAdobeDRMReceivedActivationsError(e)
+        this.uiThread.runOnUIThread(
+          Runnable {
+            try {
+              this.onAdobeDRMReceivedActivations(adeptFuture.get())
+            } catch (e: Exception) {
+              this.onAdobeDRMReceivedActivationsError(e)
+            }
           }
-        })
+        )
       },
       MoreExecutors.directExecutor()
     )

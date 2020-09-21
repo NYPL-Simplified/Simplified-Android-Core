@@ -175,7 +175,6 @@ class ReaderSettingsDialog : DialogFragment() {
           progress: Int,
           from_user: Boolean
         ) {
-
           this.bright = progress / 100.0
         }
 
@@ -202,7 +201,8 @@ class ReaderSettingsDialog : DialogFragment() {
     this.dialog!!.window!!.let { window ->
       window.setLayout(
         this.screen.dpToPixels(300).toInt(),
-        ViewGroup.LayoutParams.WRAP_CONTENT)
+        ViewGroup.LayoutParams.WRAP_CONTENT
+      )
       window.setGravity(Gravity.CENTER)
     }
     this.dialog!!.setCanceledOnTouchOutside(true)

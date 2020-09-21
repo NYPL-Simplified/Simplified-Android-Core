@@ -81,10 +81,10 @@ class BookCoverFetchTask(
       this.taskRecorder.currentStepFailedAppending(
         this.services.borrowStrings.borrowBookCoverUnexpectedException,
         BookStatusDownloadErrorDetails.UnexpectedException(e),
-        e)
+        e
+      )
       this.taskRecorder.finishFailure()
     } finally {
-
       /*
        * Refresh the entry in the book registry so that anything that's observing the book
        * will see the new cover.
@@ -111,7 +111,8 @@ class BookCoverFetchTask(
       this.taskRecorder.currentStepFailed(
         message = message,
         errorValue = BookStatusDownloadErrorDetails.ContentCopyFailed(message, mapOf()),
-        exception = FileNotFoundException(cover.toString()))
+        exception = FileNotFoundException(cover.toString())
+      )
       return this.taskRecorder.finishFailure()
     }
     return inputStream.use(this::saveCover)
@@ -132,14 +133,16 @@ class BookCoverFetchTask(
             problemReport = this.someOrNull(result.problemReport),
             message = result.message,
             attributesInitial = mapOf()
-          ))
+          )
+        )
         this.taskRecorder.finishFailure()
       }
       is HTTPResultException -> {
         this.taskRecorder.currentStepFailed(
           this.services.borrowStrings.borrowBookCoverUnexpectedException,
           BookStatusDownloadErrorDetails.UnexpectedException(result.error),
-          result.error)
+          result.error
+        )
         this.taskRecorder.finishFailure()
       }
       else -> throw UnreachableCodeException()

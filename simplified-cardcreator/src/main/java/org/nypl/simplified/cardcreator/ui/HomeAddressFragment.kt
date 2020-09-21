@@ -110,51 +110,65 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
    */
   private fun validateAddress() {
     showLoading(true)
-    viewModel.validateAddressResponse.observe(viewLifecycleOwner, Observer { response ->
-      showLoading(false)
-      if (response.type == validAddress || response.type == alternateAddress) {
-        logger.debug("Address is valid")
-        Cache(requireContext()).setHomeAddress(AddressDetails(
-          response.address.line_1,
-          response.address.city,
-          response.address.state,
-          response.address.zip)
-        )
-        nextAction = HomeAddressFragmentDirections.actionNext()
+    viewModel.validateAddressResponse.observe(
+      viewLifecycleOwner,
+      Observer { response ->
+        showLoading(false)
+        if (response.type == validAddress || response.type == alternateAddress) {
+          logger.debug("Address is valid")
+          Cache(requireContext()).setHomeAddress(
+            AddressDetails(
+              response.address.line_1,
+              response.address.city,
+              response.address.state,
+              response.address.zip
+            )
+          )
+          nextAction = HomeAddressFragmentDirections.actionNext()
 
-        navController.navigate(nextAction)
-      } else {
-        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+          navController.navigate(nextAction)
+        } else {
+          Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+        }
       }
-    })
+    )
 
-    viewModel.apiError.observe(viewLifecycleOwner, Observer {
-      showLoading(false)
-      var error = getString(R.string.validate_address_general_error)
-      if (it != null) {
-        error = getString(R.string.validate_address_error, it)
-      }
-      val dialogBuilder = AlertDialog.Builder(requireContext())
-      dialogBuilder.setMessage(error)
-        .setCancelable(false)
-        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-          validateAddress()
+    viewModel.apiError.observe(
+      viewLifecycleOwner,
+      Observer {
+        showLoading(false)
+        var error = getString(R.string.validate_address_general_error)
+        if (it != null) {
+          error = getString(R.string.validate_address_error, it)
         }
-        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-          dialog.cancel()
-        }
-      if (dialog == null) {
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setMessage(error)
+          .setCancelable(false)
+          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+            validateAddress()
+          }
+          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+            dialog.cancel()
+          }
+        if (dialog == null) {
           dialog = dialogBuilder.create()
+        }
+        dialog?.show()
       }
-      dialog?.show()
-    })
-    viewModel.validateAddress(Address(AddressDetails(binding.etCity.text.toString(),
-      binding.etStreet1.text.toString(),
-      getStateAbbreviation(binding.spState.selectedItem.toString()),
-      binding.etZip.text.toString()),
-      false),
+    )
+    viewModel.validateAddress(
+      Address(
+        AddressDetails(
+          binding.etCity.text.toString(),
+          binding.etStreet1.text.toString(),
+          getStateAbbreviation(binding.spState.selectedItem.toString()),
+          binding.etZip.text.toString()
+        ),
+        false
+      ),
       requireActivity().intent.extras.getString("username"),
-      requireActivity().intent.extras.getString("password"))
+      requireActivity().intent.extras.getString("password")
+    )
   }
 
   /**
@@ -189,7 +203,8 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
       binding.spState.selectedItem.toString() != getString(R.string.required) &&
         binding.etZip.text.length == addressCharsMin &&
         binding.etStreet1.text.length >= addressCharsMin &&
-        binding.etCity.text.length >= addressCharsMin)
+        binding.etCity.text.length >= addressCharsMin
+      )
   }
 
   override fun onNothingSelected(parent: AdapterView<*>?) {

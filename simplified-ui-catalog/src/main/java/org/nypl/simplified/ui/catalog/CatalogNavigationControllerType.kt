@@ -11,7 +11,8 @@ import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
  * Navigation functions for the catalog screens.
  */
 
-interface CatalogNavigationControllerType : NavigationControllerType,
+interface CatalogNavigationControllerType :
+  NavigationControllerType,
   AccountNavigationControllerType {
 
   /**

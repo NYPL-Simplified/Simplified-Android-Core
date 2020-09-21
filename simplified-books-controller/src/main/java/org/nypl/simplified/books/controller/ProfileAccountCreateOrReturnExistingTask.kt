@@ -52,7 +52,8 @@ class ProfileAccountCreateOrReturnExistingTask(
       this.taskRecorder.currentStepFailedAppending(
         this.strings.unexpectedException,
         AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
-        e)
+        e
+      )
 
       this.publishFailureEvent(this.taskRecorder.currentStep()!!)
       this.taskRecorder.finishFailure()
@@ -62,10 +63,16 @@ class ProfileAccountCreateOrReturnExistingTask(
   }
 
   private fun publishSuccessEvent(account: AccountType) =
-    this.accountEvents.onNext(AccountEventCreationSucceeded(
-      this.strings.creatingAccountSucceeded, account.id))
+    this.accountEvents.onNext(
+      AccountEventCreationSucceeded(
+        this.strings.creatingAccountSucceeded, account.id
+      )
+    )
 
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.onNext(AccountEventCreationFailed(
-      step.resolution.message, this.taskRecorder.finishFailure<AccountType>()))
+    this.accountEvents.onNext(
+      AccountEventCreationFailed(
+        step.resolution.message, this.taskRecorder.finishFailure<AccountType>()
+      )
+    )
 }

@@ -160,7 +160,9 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         mutableMapOf(),
         0L,
         ByteArrayInputStream(ByteArray(0)),
-        Option.none()))
+        Option.none()
+      )
+    )
 
     val task =
       ProfileAccountCreateCustomOPDSTask(
@@ -172,7 +174,8 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
         resolutionStrings = this.accountProviderResolutionStrings,
-        strings = this.profileAccountCreationStrings)
+        strings = this.profileAccountCreationStrings
+      )
 
     val result = task.call()
     val failure = result as TaskResult.Failure
@@ -187,7 +190,9 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       "urn:test:0",
       HTTPResultException(
         opdsURI,
-        java.lang.Exception()))
+        java.lang.Exception()
+      )
+    )
 
     val task =
       ProfileAccountCreateCustomOPDSTask(
@@ -199,7 +204,8 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
         resolutionStrings = this.accountProviderResolutionStrings,
-        strings = this.profileAccountCreationStrings)
+        strings = this.profileAccountCreationStrings
+      )
 
     val result = task.call()
     val failure = result as TaskResult.Failure
@@ -221,7 +227,9 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         stream,
         0L,
         mutableMapOf(),
-        0L))
+        0L
+      )
+    )
 
     Mockito.`when`(this.opdsFeedParser.parse(opdsURI, stream))
       .thenThrow(OPDSParseException())
@@ -236,7 +244,8 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
         resolutionStrings = this.accountProviderResolutionStrings,
-        strings = this.profileAccountCreationStrings)
+        strings = this.profileAccountCreationStrings
+      )
 
     val result = task.call()
     val failure = result as TaskResult.Failure
@@ -259,7 +268,9 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         stream,
         0L,
         mutableMapOf(),
-        0L))
+        0L
+      )
+    )
 
     val feed =
       OPDSAcquisitionFeed.newBuilder(opdsURI, "id", DateTime.now(), "Title")
@@ -297,7 +308,8 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
         resolutionStrings = this.accountProviderResolutionStrings,
-        strings = this.profileAccountCreationStrings)
+        strings = this.profileAccountCreationStrings
+      )
 
     val result = task.call()
     val success = result as TaskResult.Success
@@ -325,7 +337,9 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         stream,
         0L,
         mutableMapOf(),
-        0L))
+        0L
+      )
+    )
 
     this.http.addResponse(
       authURI,
@@ -336,7 +350,9 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         mutableMapOf(),
         0L,
         ByteArrayInputStream(ByteArray(0)),
-        Option.none()))
+        Option.none()
+      )
+    )
 
     val feed =
       OPDSAcquisitionFeed.newBuilder(opdsURI, "id", DateTime.now(), "Title")
@@ -368,7 +384,8 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
         resolutionStrings = this.accountProviderResolutionStrings,
-        strings = this.profileAccountCreationStrings)
+        strings = this.profileAccountCreationStrings
+      )
 
     val result = task.call()
     val failure = result as TaskResult.Failure
@@ -390,7 +407,9 @@ abstract class ProfileAccountCreateCustomOPDSContract {
         stream,
         0L,
         mutableMapOf(),
-        0L))
+        0L
+      )
+    )
 
     val feed =
       OPDSAcquisitionFeed.newBuilder(opdsURI, "id", DateTime.now(), "Title")

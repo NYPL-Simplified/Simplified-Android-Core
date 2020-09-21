@@ -21,7 +21,8 @@ abstract class BookmarkAnnotationsJSONContract {
       device = "cca80416-3168-4e58-b621-7964b9265ac9",
       chapterProgress = 25.0f,
       chapterTitle = "A Title",
-      bookProgress = 50.0f)
+      bookProgress = 50.0f
+    )
 
   private val bookmarkBody1 =
     BookmarkAnnotationBodyNode(
@@ -29,7 +30,8 @@ abstract class BookmarkAnnotationsJSONContract {
       device = "cca80416-3168-4e58-b621-7964b9265ac9",
       chapterProgress = 10.0f,
       chapterTitle = "A Title",
-      bookProgress = 50.0f)
+      bookProgress = 50.0f
+    )
 
   private val bookmarkBody2 =
     BookmarkAnnotationBodyNode(
@@ -37,7 +39,8 @@ abstract class BookmarkAnnotationsJSONContract {
       device = "cca80416-3168-4e58-b621-7964b9265ac9",
       chapterProgress = 50.0f,
       chapterTitle = "A Title",
-      bookProgress = 50.0f)
+      bookProgress = 50.0f
+    )
 
   private val bookmarkBodyBadDate =
     BookmarkAnnotationBodyNode(
@@ -45,7 +48,8 @@ abstract class BookmarkAnnotationsJSONContract {
       device = "cca80416-3168-4e58-b621-7964b9265ac9",
       chapterProgress = 25.0f,
       chapterTitle = "A Title",
-      bookProgress = 50.0f)
+      bookProgress = 50.0f
+    )
 
   private val bookmark0 =
     BookmarkAnnotation(
@@ -54,8 +58,11 @@ abstract class BookmarkAnnotationsJSONContract {
       id = "x",
       type = "Annotation",
       motivation = "http://www.w3.org/ns/oa#bookmarking",
-      target = BookmarkAnnotationTargetNode("z0",
-        BookmarkAnnotationSelectorNode("x0", "y0")))
+      target = BookmarkAnnotationTargetNode(
+        "z0",
+        BookmarkAnnotationSelectorNode("x0", "y0")
+      )
+    )
 
   private val bookmark1 =
     BookmarkAnnotation(
@@ -64,8 +71,11 @@ abstract class BookmarkAnnotationsJSONContract {
       id = "x",
       type = "Annotation",
       motivation = "http://www.w3.org/ns/oa#bookmarking",
-      target = BookmarkAnnotationTargetNode("z1",
-        BookmarkAnnotationSelectorNode("x1", "y1")))
+      target = BookmarkAnnotationTargetNode(
+        "z1",
+        BookmarkAnnotationSelectorNode("x1", "y1")
+      )
+    )
 
   private val bookmark2 =
     BookmarkAnnotation(
@@ -74,8 +84,11 @@ abstract class BookmarkAnnotationsJSONContract {
       id = "x",
       type = "Annotation",
       motivation = "http://www.w3.org/ns/oa#bookmarking",
-      target = BookmarkAnnotationTargetNode("z2",
-        BookmarkAnnotationSelectorNode("x2", "y2")))
+      target = BookmarkAnnotationTargetNode(
+        "z2",
+        BookmarkAnnotationSelectorNode("x2", "y2")
+      )
+    )
 
   private val bookmarkAnnotationResponse =
     BookmarkAnnotationResponse(
@@ -86,7 +99,9 @@ abstract class BookmarkAnnotationsJSONContract {
       first = BookmarkAnnotationFirstNode(
         items = listOf(bookmark0, bookmark1, bookmark2),
         type = "Annotation",
-        id = "id"))
+        id = "id"
+      )
+    )
 
   @Test
   fun testSelector() {
@@ -122,21 +137,26 @@ abstract class BookmarkAnnotationsJSONContract {
 
     Assert.assertEquals(
       "2019-01-25T20:00:37+0000",
-      node["http://librarysimplified.org/terms/time"].textValue())
+      node["http://librarysimplified.org/terms/time"].textValue()
+    )
     Assert.assertEquals(
       "cca80416-3168-4e58-b621-7964b9265ac9",
-      node["http://librarysimplified.org/terms/device"].textValue())
+      node["http://librarysimplified.org/terms/device"].textValue()
+    )
     Assert.assertEquals(
       25.0,
       node["http://librarysimplified.org/terms/progressWithinChapter"].doubleValue(),
-      0.0)
+      0.0
+    )
     Assert.assertEquals(
       50.0,
       node["http://librarysimplified.org/terms/progressWithinBook"].doubleValue(),
-      0.0)
+      0.0
+    )
     Assert.assertEquals(
       "A Title",
-      node["http://librarysimplified.org/terms/chapter"].textValue())
+      node["http://librarysimplified.org/terms/chapter"].textValue()
+    )
 
     Assert.assertEquals(bookmarkBody0, BookmarkAnnotationsJSON.deserializeBodyNodeFromJSON(node))
   }
@@ -153,7 +173,8 @@ abstract class BookmarkAnnotationsJSONContract {
         id = "x",
         type = "Annotation",
         motivation = "http://www.w3.org/ns/oa#bookmarking",
-        target = target)
+        target = target
+      )
 
     val node =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationToJSON(mapper, input)
@@ -167,25 +188,29 @@ abstract class BookmarkAnnotationsJSONContract {
       BookmarkAnnotationFirstNode(
         type = "x",
         id = "z",
-        items = listOf(bookmark0, bookmark1, bookmark2))
+        items = listOf(bookmark0, bookmark1, bookmark2)
+      )
 
     val node =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationFirstNodeToJSON(mapper, input)
 
     Assert.assertEquals(
       input,
-      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFirstNodeFromJSON(node))
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFirstNodeFromJSON(node)
+    )
   }
 
   @Test
   fun testBookmarkAnnotationResponse() {
     val node =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationResponseToJSON(
-        mapper, bookmarkAnnotationResponse)
+        mapper, bookmarkAnnotationResponse
+      )
 
     Assert.assertEquals(
       bookmarkAnnotationResponse,
-      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationResponseFromJSON(node))
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationResponseFromJSON(node)
+    )
   }
 
   @Test
@@ -200,7 +225,8 @@ abstract class BookmarkAnnotationsJSONContract {
         id = "x",
         type = "Annotation",
         motivation = "http://www.w3.org/ns/oa#bookmarking",
-        target = target)
+        target = target
+      )
 
     val node =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationToJSON(mapper, input)

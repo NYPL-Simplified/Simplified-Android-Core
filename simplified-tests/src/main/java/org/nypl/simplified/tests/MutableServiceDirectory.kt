@@ -34,7 +34,8 @@ class MutableServiceDirectory : ServiceDirectoryType {
   ) {
     Preconditions.checkArgument(
       interfaces.isNotEmpty(),
-      "Must supply at least one interface type")
+      "Must supply at least one interface type"
+    )
 
     this.logger.debug("registering (replacing) service {}", service.javaClass)
     synchronized(this.servicesLock) {
@@ -55,7 +56,8 @@ class MutableServiceDirectory : ServiceDirectoryType {
   ) {
     Preconditions.checkArgument(
       interfaces.isNotEmpty(),
-      "Must supply at least one interface type")
+      "Must supply at least one interface type"
+    )
 
     this.logger.debug("registering service {}", service.javaClass)
     synchronized(this.servicesLock) {

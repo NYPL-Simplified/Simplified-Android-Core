@@ -541,7 +541,6 @@ class BookBorrowTask(
     uri: URI,
     groups: List<FeedGroup>
   ): List<FeedGroup> {
-
     val attribute =
       Pair("Feed URI", this.acquisition.uri.toASCIIString())
 
@@ -569,7 +568,6 @@ class BookBorrowTask(
     uri: URI,
     entries: List<FeedEntry>
   ): List<FeedEntry> {
-
     val attribute =
       Pair("Feed URI", this.acquisition.uri.toASCIIString())
 
@@ -766,14 +764,16 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
     this.debug("fetching cover")
 
-    when (val result =
-      BookCoverFetchTask(
-        services = this.services,
-        databaseEntry = this.databaseEntry,
-        feedEntry = opdsEntry,
-        type = Type.COVER,
-        httpAuth = httpAuth
-      ).call()) {
+    when (
+      val result =
+        BookCoverFetchTask(
+          services = this.services,
+          databaseEntry = this.databaseEntry,
+          feedEntry = opdsEntry,
+          type = Type.COVER,
+          httpAuth = httpAuth
+        ).call()
+    ) {
       is TaskResult.Success -> {
         this.debug("fetched cover successfully")
         this.steps.addAll(result.steps)
@@ -787,14 +787,16 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
     this.debug("fetching thumbnail")
 
-    when (val result =
-      BookCoverFetchTask(
-        services = this.services,
-        databaseEntry = this.databaseEntry,
-        feedEntry = opdsEntry,
-        type = Type.THUMBNAIL,
-        httpAuth = httpAuth
-      ).call()) {
+    when (
+      val result =
+        BookCoverFetchTask(
+          services = this.services,
+          databaseEntry = this.databaseEntry,
+          feedEntry = opdsEntry,
+          type = Type.THUMBNAIL,
+          httpAuth = httpAuth
+        ).call()
+    ) {
       is TaskResult.Success -> {
         this.debug("fetched thumbnail successfully")
         this.steps.addAll(result.steps)
@@ -942,7 +944,6 @@ class BookBorrowTask(
     acquisition: OPDSAcquisition,
     httpAuth: OptionType<HTTPAuthType>
   ): FileAndType {
-
     /*
      * Point the downloader at the acquisition link. The result will be an
      * EPUB, ACSM file, or Simplified bearer token. ACSM files have to be
@@ -1188,7 +1189,6 @@ class BookBorrowTask(
     expectedContentTypes: Set<MIMEType>,
     receivedContentType: MIMEType
   ): MIMEType {
-
     this.steps.beginNewStep(
       this.services.borrowStrings.borrowBookSavingCheckingContentType(
         receivedContentType, expectedContentTypes
@@ -1264,14 +1264,14 @@ class BookBorrowTask(
     val exception =
       BookUnexpectedTypeException(
         message =
-        StringBuilder("Unexpected content type\n")
-          .append("  Expected: One of ")
-          .append(expectedContentTypes)
-          .append('\n')
-          .append("  Received: ")
-          .append(receivedContentType)
-          .append('\n')
-          .toString(),
+          StringBuilder("Unexpected content type\n")
+            .append("  Expected: One of ")
+            .append(expectedContentTypes)
+            .append('\n')
+            .append("  Received: ")
+            .append(receivedContentType)
+            .append('\n')
+            .toString(),
         expected = expectedContentTypes,
         received = receivedContentType
       )
@@ -1854,7 +1854,6 @@ class BookBorrowTask(
     expectedTotal: Long,
     unconditional: Boolean
   ) {
-
     /*
      * Because "data received" updates happen at such a huge rate, we want
      * to ensure that updates to the book status are rate limited to avoid

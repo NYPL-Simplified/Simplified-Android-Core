@@ -146,7 +146,6 @@ class AccountProviderSourceNYPLRegistry(
   }
 
   override fun canResolve(description: AccountProviderDescription): Boolean {
-
     /*
      * We assume that the NYPL registry can always resolve any account description.
      */

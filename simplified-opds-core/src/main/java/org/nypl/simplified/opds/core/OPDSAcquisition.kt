@@ -43,7 +43,8 @@ data class OPDSAcquisition(
     if (this.type.isNone) {
       Preconditions.checkArgument(
         !this.indirectAcquisitions.isEmpty(),
-        "If no acquisition type is provided, a set of indirect acquisitions must be provided")
+        "If no acquisition type is provided, a set of indirect acquisitions must be provided"
+      )
     }
   }
 

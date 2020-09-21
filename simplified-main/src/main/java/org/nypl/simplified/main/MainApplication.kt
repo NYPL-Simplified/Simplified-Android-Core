@@ -47,7 +47,8 @@ class MainApplication : Application() {
           return MainServices.setup(this@MainApplication, onProgress)
         }
       },
-      bootStringResources = ::MainServicesStrings)
+      bootStringResources = ::MainServicesStrings
+    )
 
   override fun onCreate() {
     super.onCreate()
@@ -185,17 +186,21 @@ class MainApplication : Application() {
 
   private fun configureStrictMode() {
     if (BuildConfig.DEBUG) {
-      StrictMode.setThreadPolicy(ThreadPolicy.Builder()
-        .detectDiskReads()
-        .detectDiskWrites()
-        .detectNetwork()
-        .penaltyLog()
-        .build())
-      StrictMode.setVmPolicy(VmPolicy.Builder()
-        .detectLeakedSqlLiteObjects()
-        .detectLeakedClosableObjects()
-        .penaltyLog()
-        .build())
+      StrictMode.setThreadPolicy(
+        ThreadPolicy.Builder()
+          .detectDiskReads()
+          .detectDiskWrites()
+          .detectNetwork()
+          .penaltyLog()
+          .build()
+      )
+      StrictMode.setVmPolicy(
+        VmPolicy.Builder()
+          .detectLeakedSqlLiteObjects()
+          .detectLeakedClosableObjects()
+          .penaltyLog()
+          .build()
+      )
     }
   }
 

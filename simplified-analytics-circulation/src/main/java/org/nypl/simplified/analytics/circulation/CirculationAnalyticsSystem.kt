@@ -55,15 +55,16 @@ class CirculationAnalyticsSystem(
     val result =
       this.configuration.http.get(httpAuth, target, 0L, true)
 
-    return result.match<Unit, Exception>({ error ->
-      HTTPProblemReportLogging.logError(
-        this.logger,
-        target,
-        error.message,
-        error.status,
-        error.problemReport
-      )
-    },
+    return result.match<Unit, Exception>(
+      { error ->
+        HTTPProblemReportLogging.logError(
+          this.logger,
+          target,
+          error.message,
+          error.status,
+          error.problemReport
+        )
+      },
       { exception ->
         this.logger.error(
           "error sending event to {}: ",
@@ -72,6 +73,7 @@ class CirculationAnalyticsSystem(
         )
       },
       {
-      })
+      }
+    )
   }
 }

@@ -27,7 +27,8 @@ class EventLogging<T>(
         logger = logger,
         events = PublishSubject.create(),
         latch = CountDownLatch(requiredEventCount),
-        eventLog = mutableListOf())
+        eventLog = mutableListOf()
+      )
     }
   }
 }

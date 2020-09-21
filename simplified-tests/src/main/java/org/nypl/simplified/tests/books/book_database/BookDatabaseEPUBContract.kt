@@ -62,7 +62,8 @@ abstract class BookDatabaseEPUBContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle != null)
+        "Format is present", formatHandle != null
+      )
 
       formatHandle!!
       Assert.assertEquals(null, formatHandle.format.lastReadLocation)
@@ -80,7 +81,8 @@ abstract class BookDatabaseEPUBContract {
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
           bookProgress = 0.25,
           uri = null,
-          deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
+          deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a"
+        )
 
       formatHandle.setLastReadLocation(bookmark)
       Assert.assertEquals(bookmark, formatHandle.format.lastReadLocation)
@@ -120,7 +122,8 @@ abstract class BookDatabaseEPUBContract {
         chapterTitle = "A title",
         bookProgress = 0.25,
         uri = null,
-        deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
+        deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a"
+      )
 
     val bookmark1 =
       Bookmark(
@@ -135,7 +138,8 @@ abstract class BookDatabaseEPUBContract {
         chapterTitle = "A title",
         bookProgress = 0.25,
         uri = null,
-        deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
+        deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a"
+      )
 
     val bookmark2 =
       Bookmark(
@@ -150,7 +154,8 @@ abstract class BookDatabaseEPUBContract {
         chapterTitle = "A title",
         bookProgress = 0.25,
         uri = null,
-        deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
+        deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a"
+      )
 
     val bookmarks0 = listOf(bookmark0)
     val bookmarks1 = listOf(bookmark0, bookmark1, bookmark2)
@@ -160,7 +165,8 @@ abstract class BookDatabaseEPUBContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle != null)
+        "Format is present", formatHandle != null
+      )
 
       formatHandle!!
       Assert.assertEquals(listOf<Bookmark>(), formatHandle.format.bookmarks)
@@ -182,7 +188,8 @@ abstract class BookDatabaseEPUBContract {
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present", formatHandle != null)
+        "Format is present", formatHandle != null
+      )
 
       formatHandle!!
       Assert.assertEquals(bookmarks1, formatHandle.format.bookmarks)
@@ -231,14 +238,17 @@ abstract class BookDatabaseEPUBContract {
       "abcd",
       "Title",
       DateTime.now(),
-      OPDSAvailabilityOpenAccess.get(revoke))
+      OPDSAvailabilityOpenAccess.get(revoke)
+    )
 
     eb.addAcquisition(
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://example.com"),
         Option.some(MIMEParser.parseRaisingException("application/epub+zip")),
-        emptyList()))
+        emptyList()
+      )
+    )
     return eb.build()
   }
 }

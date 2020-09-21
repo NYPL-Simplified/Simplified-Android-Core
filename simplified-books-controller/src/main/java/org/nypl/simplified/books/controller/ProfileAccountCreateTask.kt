@@ -100,9 +100,12 @@ class ProfileAccountCreateTask(
           ?: throw AccountUnknownProviderException()
 
       val resolution =
-        this.accountProviders.resolve({ _, status ->
-          this.publishProgressEvent(this.taskRecorder.beginNewStep(status))
-        }, description)
+        this.accountProviders.resolve(
+          { _, status ->
+            this.publishProgressEvent(this.taskRecorder.beginNewStep(status))
+          },
+          description
+        )
 
       return when (resolution) {
         is TaskResult.Success -> resolution.result

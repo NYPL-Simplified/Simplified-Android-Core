@@ -66,7 +66,8 @@ class BookBorrowWithDefaultAcquisitionTask(
         ) as TaskResult.Failure<BookStatusDownloadErrorDetails, Unit>
 
       this.services.bookRegistry.update(
-        BookWithStatus(this.bookInitial, BookStatus.FailedLoan(this.bookId, failure)))
+        BookWithStatus(this.bookInitial, BookStatus.FailedLoan(this.bookId, failure))
+      )
 
       return failure
     }

@@ -59,7 +59,6 @@ object Reports {
     subject: String,
     body: String
   ): Result {
-
     val directories: List<File> = context.cacheDir?.let { cacheDir ->
       arrayListOf(cacheDir, File(cacheDir, "migrations"))
     } ?: emptyList()
@@ -70,7 +69,8 @@ object Reports {
       address = address,
       subject = subject,
       body = body,
-      includeFile = this::isLogFileOrMigrationReport)
+      includeFile = this::isLogFileOrMigrationReport
+    )
   }
 
   @JvmStatic
@@ -94,7 +94,6 @@ object Reports {
     body: String,
     includeFile: (String) -> Boolean
   ): Result {
-
     this.logger.debug("preparing report")
 
     try {

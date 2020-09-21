@@ -309,7 +309,8 @@ class AudioBookManifestStrategy(
                 )
               is AudioBookCredentials.BearerToken ->
                 throw UnsupportedOperationException(
-                  "Can't use bearer tokens for audio book fulfillment")
+                  "Can't use bearer tokens for audio book fulfillment"
+                )
             }
           },
           userAgent = this.request.userAgent

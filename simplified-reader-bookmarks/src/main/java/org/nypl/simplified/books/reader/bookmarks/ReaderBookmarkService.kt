@@ -79,7 +79,8 @@ class ReaderBookmarkService private constructor(
     MoreExecutors.listeningDecorator(
       Executors.newScheduledThreadPool(1) { runnable ->
         ReaderBookmarkServiceThread(this.threads.invoke(runnable))
-      })
+      }
+    )
 
   override fun close() {
     this.executor.shutdown()
@@ -106,7 +107,8 @@ class ReaderBookmarkService private constructor(
           logger = this.logger,
           httpCalls = this.httpCalls,
           profile = profile,
-          evaluatePolicyInput = { input -> this.evaluatePolicyInput(profile, input) })
+          evaluatePolicyInput = { input -> this.evaluatePolicyInput(profile, input) }
+        )
       )
     } catch (e: ProfileNoneCurrentException) {
       this.logger.debug("no profile is current, using an empty engine state")
@@ -212,7 +214,6 @@ class ReaderBookmarkService private constructor(
       profile: ProfileReadableType,
       account: SyncableAccount
     ): SyncableAccount? {
-
       return try {
         this.logger.debug(
           "[{}]: checking account {} has syncing enabled",
@@ -517,7 +518,8 @@ class ReaderBookmarkService private constructor(
         logger = this.logger,
         httpCalls = this.httpCalls,
         profile = profile,
-        evaluatePolicyInput = { input -> this.evaluatePolicyInput(profile, input) })
+        evaluatePolicyInput = { input -> this.evaluatePolicyInput(profile, input) }
+      )
     )
   }
 
@@ -553,7 +555,6 @@ class ReaderBookmarkService private constructor(
     profile: ProfileReadableType,
     event: AccountEventLoginStateChanged
   ) {
-
     return when (event.state) {
       AccountLoginState.AccountNotLoggedIn,
       is AccountLoginState.AccountLoggingIn,
@@ -700,7 +701,8 @@ class ReaderBookmarkService private constructor(
           accountID = output.accountID,
           objectMapper = this.objectMapper,
           bookmarkEventsOut = this.bookmarkEventsOut,
-          evaluatePolicyInput = { input -> this.evaluatePolicyInput(profile, input) })
+          evaluatePolicyInput = { input -> this.evaluatePolicyInput(profile, input) }
+        )
           .call()
 
       is Command.RemotelyDeleteBookmark ->
@@ -722,7 +724,6 @@ class ReaderBookmarkService private constructor(
     accountID: AccountID,
     bookmark: Bookmark
   ): FluentFuture<Unit> {
-
     return try {
       val profile = this.profilesController.profileCurrent()
       FluentFuture.from(
@@ -745,7 +746,6 @@ class ReaderBookmarkService private constructor(
     accountID: AccountID,
     bookmark: Bookmark
   ): FluentFuture<Unit> {
-
     return try {
       val profile = this.profilesController.profileCurrent()
       FluentFuture.from(
@@ -768,7 +768,6 @@ class ReaderBookmarkService private constructor(
     accountID: AccountID,
     book: BookID
   ): FluentFuture<ReaderBookmarks> {
-
     return try {
       val profile = this.profilesController.profileCurrent()
       FluentFuture.from(

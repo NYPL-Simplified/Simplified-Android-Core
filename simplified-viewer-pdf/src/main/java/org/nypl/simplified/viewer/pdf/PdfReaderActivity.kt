@@ -24,7 +24,9 @@ import java.io.File
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
 
-class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType,
+class PdfReaderActivity :
+  AppCompatActivity(),
+  PdfFragmentListenerType,
   TableOfContentsFragmentListenerType {
 
   companion object {
@@ -39,7 +41,6 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType,
       from: Activity,
       parameters: PdfReaderParameters
     ) {
-
       val b = Bundle()
       b.putSerializable(PARAMS_ID, parameters)
       val i = Intent(from, PdfReaderActivity::class.java)

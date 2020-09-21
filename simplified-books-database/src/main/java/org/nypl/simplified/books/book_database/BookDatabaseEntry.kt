@@ -65,7 +65,7 @@ internal class BookDatabaseEntry internal constructor(
 
   private val formatHandleConstructors:
     EnumMap<BookFormats.BookFormatDefinition, DatabaseBookFormatHandleConstructor> =
-    EnumMap(BookFormats.BookFormatDefinition::class.java)
+      EnumMap(BookFormats.BookFormatDefinition::class.java)
 
   init {
     for (format in BookFormats.BookFormatDefinition.values()) {
@@ -75,19 +75,22 @@ internal class BookDatabaseEntry internal constructor(
             DatabaseBookFormatHandleConstructor(
               classType = DatabaseFormatHandleEPUB::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { params -> DatabaseFormatHandleEPUB(params) })
+              constructor = { params -> DatabaseFormatHandleEPUB(params) }
+            )
           }
           BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO -> {
             DatabaseBookFormatHandleConstructor(
               classType = DatabaseFormatHandleAudioBook::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { params -> DatabaseFormatHandleAudioBook(params) })
+              constructor = { params -> DatabaseFormatHandleAudioBook(params) }
+            )
           }
           BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF -> {
             DatabaseBookFormatHandleConstructor(
               classType = DatabaseFormatHandlePDF::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { params -> DatabaseFormatHandlePDF(params) })
+              constructor = { params -> DatabaseFormatHandlePDF(params) }
+            )
           }
         }
     }
@@ -117,7 +120,8 @@ internal class BookDatabaseEntry internal constructor(
     synchronized(this.bookLock) {
       LOG.debug("onFormatUpdated: {}", format.javaClass.canonicalName)
       this.bookRef = this.bookRef.copy(
-        formats = this.formatHandles.map { handle -> handle.format })
+        formats = this.formatHandles.map { handle -> handle.format }
+      )
     }
   }
 
@@ -126,7 +130,6 @@ internal class BookDatabaseEntry internal constructor(
 
   @Throws(BookDatabaseException::class)
   override fun writeOPDSEntry(opdsEntry: OPDSAcquisitionFeedEntry) {
-
     synchronized(this.bookLock) {
       Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
@@ -140,7 +143,9 @@ internal class BookDatabaseEntry internal constructor(
           fileMeta,
           fileMetaTmp,
           JSONSerializerUtilities.serializeToString(
-            this.serializer.serializeFeedEntry(opdsEntry)))
+            this.serializer.serializeFeedEntry(opdsEntry)
+          )
+        )
 
         this.bookRef = this.bookRef.copy(entry = opdsEntry)
       } catch (e: IOException) {
@@ -259,7 +264,6 @@ internal class BookDatabaseEntry internal constructor(
       for (contentType in contentTypes) {
         for ((format, constructor) in constructors) {
           if (format.supports(contentType)) {
-
             // Skip if handler already exists for type
             if (existingFormats.containsKey(constructor.classType)) {
               logger.debug(

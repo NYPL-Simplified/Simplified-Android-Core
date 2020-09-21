@@ -60,13 +60,15 @@ class SettingsFragmentMainTest :
 
     val fragment = activity.currentFragment
 
-    for (name in listOf(
-      "settingsAcknowledgements",
-      "settingsAbout",
-      "settingsEULA",
-      "settingsFaq",
-      "settingsLicense"
-    )) {
+    for (
+      name in listOf(
+        "settingsAcknowledgements",
+        "settingsAbout",
+        "settingsEULA",
+        "settingsFaq",
+        "settingsLicense"
+      )
+    ) {
       val pref = fragment.findPreference<Preference>(name)!!
       Assert.assertEquals(false, pref.isEnabled)
     }
@@ -111,12 +113,14 @@ class SettingsFragmentMainTest :
 
     val fragment = activity.currentFragment
 
-    for (name in listOf(
-      "settingsAcknowledgements",
-      "settingsAbout",
-      "settingsEULA",
-      "settingsLicense"
-    )) {
+    for (
+      name in listOf(
+        "settingsAcknowledgements",
+        "settingsAbout",
+        "settingsEULA",
+        "settingsLicense"
+      )
+    ) {
       val pref = fragment.findPreference<Preference>(name)!!
       Assert.assertEquals(true, pref.isEnabled)
     }

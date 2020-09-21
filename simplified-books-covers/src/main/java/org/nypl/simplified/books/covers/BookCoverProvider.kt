@@ -53,7 +53,6 @@ class BookCoverProvider private constructor(
     tag: String,
     uriSpecified: URI?
   ): FluentFuture<Unit> {
-
     val future = SettableFuture.create<Unit>()
     val uriGenerated = this.generateCoverURI(entry)
 
@@ -64,16 +63,18 @@ class BookCoverProvider private constructor(
 
       override fun onError(e: Exception) {
         val ioException =
-          IOException(StringBuilder(128)
-            .append("Failed to load image.\n")
-            .append("  URI (specified): ")
-            .append(uriSpecified)
-            .append('\n')
-            .append("  URI (generated): ")
-            .append(uriGenerated)
-            .append('\n')
-            .toString(),
-            e)
+          IOException(
+            StringBuilder(128)
+              .append("Failed to load image.\n")
+              .append("  URI (specified): ")
+              .append(uriSpecified)
+              .append('\n')
+              .append("  URI (generated): ")
+              .append(uriGenerated)
+              .append('\n')
+              .toString(),
+            e
+          )
 
         future.setException(ioException)
       }
@@ -94,7 +95,8 @@ class BookCoverProvider private constructor(
             tag,
             entry.bookID,
             uriSpecified,
-            e)
+            e
+          )
 
           this@BookCoverProvider.picasso.load(uriGenerated.toString())
             .tag(tag)
@@ -152,7 +154,8 @@ class BookCoverProvider private constructor(
       width = width,
       height = height,
       tag = thumbnailTag,
-      uriSpecified = thumbnailURIOf(entry))
+      uriSpecified = thumbnailURIOf(entry)
+    )
   }
 
   override fun loadCoverInto(
@@ -167,7 +170,8 @@ class BookCoverProvider private constructor(
       width = width,
       height = height,
       tag = coverTag,
-      uriSpecified = coverURIOf(entry))
+      uriSpecified = coverURIOf(entry)
+    )
   }
 
   private fun <T> mapOptionToNull(option: OptionType<T>): T? {
@@ -211,7 +215,6 @@ class BookCoverProvider private constructor(
       debugCacheIndicators: Boolean,
       debugLogging: Boolean
     ): BookCoverProviderType {
-
       val picassoBuilder = Picasso.Builder(context)
       picassoBuilder.defaultBitmapConfig(Bitmap.Config.RGB_565)
       picassoBuilder.indicatorsEnabled(debugCacheIndicators)

@@ -31,7 +31,6 @@ object ImageAccountIcons {
     @DrawableRes defaultIcon: Int,
     iconView: ImageView
   ) {
-
     val request: RequestCreator
     val logoURI: URI? = account.logoURI?.hrefURI
     if (logoURI != null) {
@@ -41,16 +40,19 @@ object ImageAccountIcons {
       request = loader.load(defaultIcon)
     }
 
-    request.into(iconView, object : Callback {
-      override fun onSuccess() {
-        iconView.visibility = View.VISIBLE
-      }
+    request.into(
+      iconView,
+      object : Callback {
+        override fun onSuccess() {
+          iconView.visibility = View.VISIBLE
+        }
 
-      override fun onError(e: Exception) {
-        LOG.error("failed to load account icon: ", e)
-        iconView.setImageResource(defaultIcon)
-        iconView.visibility = View.VISIBLE
+        override fun onError(e: Exception) {
+          LOG.error("failed to load account icon: ", e)
+          iconView.setImageResource(defaultIcon)
+          iconView.visibility = View.VISIBLE
+        }
       }
-    })
+    )
   }
 }

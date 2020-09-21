@@ -60,7 +60,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-
     this.inflater = inflater
     this.bookmarksTOCLayout =
       inflater.inflate(R.layout.reader_toc_bookmarks, null)
@@ -73,7 +72,8 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
         0,
         this.parameters.bookmarks.bookmarks.sortedBy { bookmark ->
           bookmark.bookProgress
-        }.reversed())
+        }.reversed()
+      )
 
     this.bookmarksTOCListView.adapter = this
     return this.bookmarksTOCLayout
@@ -84,8 +84,10 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     if (context is ReaderTOCSelectionListenerType) {
       this.listener = context
     } else {
-      throw IllegalStateException(context.toString() +
-        " must implement ReaderTOCSelectionListenerType ")
+      throw IllegalStateException(
+        context.toString() +
+          " must implement ReaderTOCSelectionListenerType "
+      )
     }
   }
 
@@ -114,7 +116,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
   }
 
   override fun getView(position: Int, reuse: View?, parent: ViewGroup?): View {
-
     val itemView = if (reuse != null) {
       reuse as ViewGroup
     } else {
@@ -139,7 +140,9 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
           .profileCurrent()
           .preferences()
           .readerPreferences
-          .colorScheme()))
+          .colorScheme()
+      )
+    )
 
     layoutView.setOnClickListener {
       this.listener.onTOCItemSelected(ReaderSelectedBookmark(bookmark))
@@ -172,7 +175,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
   }
 
   private fun detailTextFrom(bookmark: Bookmark): String {
-
     val shortDateText =
       run {
         val formatter = DateTimeFormat.forPattern("dd/MM/yy")

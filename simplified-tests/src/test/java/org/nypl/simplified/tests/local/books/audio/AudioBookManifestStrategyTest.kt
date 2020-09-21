@@ -85,7 +85,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoBasicStrategyFails() {
-
     Mockito.`when`(
       this.strategies.findStrategy(
         this.any((ManifestFulfillmentBasicType::class.java)::class.java)
@@ -131,7 +130,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoBasicStrategyParseFails() {
-
     Mockito.`when`(
       this.strategies.findStrategy(
         this.any((ManifestFulfillmentBasicType::class.java)::class.java)
@@ -182,7 +180,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoBasicStrategyLicenseCheckFails() {
-
     Mockito.`when`(
       this.strategies.findStrategy(
         this.any((ManifestFulfillmentBasicType::class.java)::class.java)
@@ -234,7 +231,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoBasicStrategySucceeds() {
-
     Mockito.`when`(
       this.strategies.findStrategy(
         this.any((ManifestFulfillmentBasicType::class.java)::class.java)
@@ -284,7 +280,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoNetworkLoadFails() {
-
     val strategy =
       AudioBookManifestStrategy(
         AudioBookManifestRequest(
@@ -308,7 +303,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoNetworkLoadSucceeds() {
-
     val strategy =
       AudioBookManifestStrategy(
         AudioBookManifestRequest(

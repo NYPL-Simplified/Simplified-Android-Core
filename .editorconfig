@@ -1,7 +1,7 @@
 [*.kt]
 indent_size=2
 insert_final_newline=true
-disabled_rules=import-ordering
+disabled_rules=import-ordering,experimental:package-name,experimental:argument-list-wrapping
 
 [*.gradle]
 indent_size=2

@@ -39,7 +39,6 @@ object ImageIconViews {
     iconView: ImageView,
     image: URI
   ) {
-
     return if ("simplified-asset" == image.scheme) {
       configureFromAsset(image, assets, iconView)
     } else {
@@ -56,7 +55,8 @@ object ImageIconViews {
   fun imageFromBase64URI(text: String): Bitmap? {
     Preconditions.checkArgument(
       text.startsWith("data:"),
-      "Base64 URI must begin with 'data:'")
+      "Base64 URI must begin with 'data:'"
+    )
 
     val comma = text.indexOf(',')
     if (comma != -1) {

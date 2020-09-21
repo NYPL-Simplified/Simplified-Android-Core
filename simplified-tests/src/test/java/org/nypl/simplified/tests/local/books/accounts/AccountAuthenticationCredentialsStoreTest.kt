@@ -7,5 +7,5 @@ import org.slf4j.LoggerFactory
 class AccountAuthenticationCredentialsStoreTest : AccountAuthenticationCredentialsStoreContract() {
 
   override val logger: Logger =
-              LoggerFactory.getLogger(AccountAuthenticationCredentialsStoreTest::class.java)
+    LoggerFactory.getLogger(AccountAuthenticationCredentialsStoreTest::class.java)
 }

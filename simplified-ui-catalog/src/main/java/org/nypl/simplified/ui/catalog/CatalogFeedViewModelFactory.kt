@@ -28,7 +28,8 @@ class CatalogFeedViewModelFactory(
         CatalogFeedViewModel(this.context, this.services, this.feedArguments) as T
       else ->
         throw IllegalArgumentException(
-          "This view model factory (${this.javaClass}) cannot produce view models of type $modelClass")
+          "This view model factory (${this.javaClass}) cannot produce view models of type $modelClass"
+        )
     }
   }
 }

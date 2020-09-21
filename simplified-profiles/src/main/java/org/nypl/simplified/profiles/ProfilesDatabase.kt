@@ -106,7 +106,6 @@ internal class ProfilesDatabase internal constructor(
     accountProvider: AccountProviderType,
     displayName: String
   ): ProfileType {
-
     if (displayName.isEmpty()) {
       throw ProfileCreateInvalidException("Display name cannot be empty")
     }
@@ -120,7 +119,8 @@ internal class ProfilesDatabase internal constructor(
 
     Preconditions.checkArgument(
       !this.profiles.containsKey(next),
-      "Profile ID %s cannot have been used", next)
+      "Profile ID %s cannot have been used", next
+    )
 
     val profile =
       ProfilesDatabases.createProfileActual(
@@ -134,7 +134,8 @@ internal class ProfilesDatabase internal constructor(
         accountProvider = accountProvider,
         directory = this.directory,
         displayName = displayName,
-        id = next)
+        id = next
+      )
 
     this.profiles[profile.id] = profile
     profile.setOwner(this)
@@ -157,7 +158,8 @@ internal class ProfilesDatabase internal constructor(
     return when (this.anonymousProfileEnabled) {
       ANONYMOUS_PROFILE_ENABLED -> {
         throw ProfileAnonymousEnabledException(
-          "The anonymous profile is enabled; cannot set the current profile")
+          "The anonymous profile is enabled; cannot set the current profile"
+        )
       }
       ANONYMOUS_PROFILE_DISABLED -> {
         if (!this.profiles.containsKey(profile)) {
@@ -221,13 +223,15 @@ internal class ProfilesDatabase internal constructor(
   }
 
   private fun logProfileCreated(profile: Profile) {
-    this.analytics.publishEvent(AnalyticsEvent.ProfileCreated(
-      timestamp = LocalDateTime.now(),
-      credentials = null,
-      profileUUID = profile.id.uuid,
-      displayName = profile.displayName,
-      birthDate = profile.preferences().dateOfBirth?.show(),
-      attributes = profile.description().attributes.attributes
-    ))
+    this.analytics.publishEvent(
+      AnalyticsEvent.ProfileCreated(
+        timestamp = LocalDateTime.now(),
+        credentials = null,
+        profileUUID = profile.id.uuid,
+        displayName = profile.displayName,
+        birthDate = profile.preferences().dateOfBirth?.show(),
+        attributes = profile.description().attributes.attributes
+      )
+    )
   }
 }

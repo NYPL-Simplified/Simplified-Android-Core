@@ -20,7 +20,6 @@ class ImageLoader private constructor(
     fun create(
       context: Context
     ): ImageLoaderType {
-
       val localImageLoader =
         Picasso.Builder(context)
           .indicatorsEnabled(false)

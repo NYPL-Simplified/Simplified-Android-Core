@@ -41,7 +41,6 @@ object AdobeDRMExtensions {
     vendorID: AdobeVendorID,
     clientToken: AccountAuthenticationAdobeClientToken
   ): ListenableFuture<List<AccountAuthenticationAdobePostActivationCredentials>> {
-
     val future =
       SettableFuture.create<List<AccountAuthenticationAdobePostActivationCredentials>>()
 
@@ -57,7 +56,8 @@ object AdobeDRMExtensions {
           receiver,
           vendorID,
           clientToken.userName,
-          clientToken.password)
+          clientToken.password
+        )
         debug("activation finished")
 
         if (!receiver.failed) {
@@ -137,7 +137,6 @@ object AdobeDRMExtensions {
     userID: AdobeUserID,
     clientToken: AccountAuthenticationAdobeClientToken
   ): ListenableFuture<Unit> {
-
     val adeptFuture = SettableFuture.create<Unit>()
     executor.execute { connector ->
       try {
@@ -159,7 +158,8 @@ object AdobeDRMExtensions {
           vendorID,
           userID,
           clientToken.userName,
-          clientToken.password)
+          clientToken.password
+        )
         debug("deactivation finished")
 
         if (errors.isNotEmpty()) {
@@ -195,7 +195,6 @@ object AdobeDRMExtensions {
     error: (String) -> Unit,
     debug: (String) -> Unit
   ): ListenableFuture<List<Activation>> {
-
     val adeptFuture = SettableFuture.create<List<Activation>>()
     executor.execute { connector ->
       try {
@@ -281,7 +280,6 @@ object AdobeDRMExtensions {
     data: ByteArray,
     userId: AdobeUserID
   ): ListenableFuture<Fulfillment> {
-
     val adeptFuture = SettableFuture.create<Fulfillment>()
     executor.execute { connector ->
       try {
@@ -292,8 +290,11 @@ object AdobeDRMExtensions {
         debug("fulfillment ended")
 
         if (!adeptFuture.isDone) {
-          adeptFuture.setException(IllegalStateException(
-            "Fulfillment receiver failed to report success or failure"))
+          adeptFuture.setException(
+            IllegalStateException(
+              "Fulfillment receiver failed to report success or failure"
+            )
+          )
         }
       } catch (e: Throwable) {
         adeptFuture.setException(e)
@@ -362,15 +363,17 @@ object AdobeDRMExtensions {
     loan: AdobeAdeptLoan,
     userId: AdobeUserID
   ): ListenableFuture<Unit> {
-
     val adeptFuture = SettableFuture.create<Unit>()
     executor.execute { connector ->
       try {
         connector.loanReturn(RevokeReceiver(adeptFuture), loan.id, userId)
 
         if (!adeptFuture.isDone) {
-          adeptFuture.setException(IllegalStateException(
-            "Revoke receiver failed to report success or failure"))
+          adeptFuture.setException(
+            IllegalStateException(
+              "Revoke receiver failed to report success or failure"
+            )
+          )
         }
       } catch (e: Throwable) {
         adeptFuture.setException(e)
