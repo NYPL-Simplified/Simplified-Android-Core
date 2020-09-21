@@ -204,7 +204,8 @@ abstract class BookmarkAnnotationsJSONContract {
   fun testBookmarkAnnotationResponse() {
     val node =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationResponseToJSON(
-        mapper, bookmarkAnnotationResponse
+        mapper,
+        bookmarkAnnotationResponse
       )
 
     Assert.assertEquals(

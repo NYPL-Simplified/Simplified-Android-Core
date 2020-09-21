@@ -32,7 +32,8 @@ class ProfileAccountDeleteTask(
   private fun publishFailureEvent(step: TaskStep<AccountDeleteErrorDetails>) =
     this.accountEvents.onNext(
       AccountEventDeletion.AccountEventDeletionFailed(
-        step.resolution.message, this.taskRecorder.finishFailure<Unit>()
+        step.resolution.message,
+        this.taskRecorder.finishFailure<Unit>()
       )
     )
 
@@ -42,7 +43,8 @@ class ProfileAccountDeleteTask(
   private fun publishSuccessEvent(accountThen: AccountID) =
     this.accountEvents.onNext(
       AccountEventDeletion.AccountEventDeletionSucceeded(
-        this.strings.deletionSucceeded, accountThen
+        this.strings.deletionSucceeded,
+        accountThen
       )
     )
 

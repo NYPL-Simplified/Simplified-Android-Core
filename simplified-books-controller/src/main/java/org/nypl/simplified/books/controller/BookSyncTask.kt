@@ -94,7 +94,8 @@ class BookSyncTask(
         override fun onHTTPOK(e: HTTPResultOKType<InputStream>) {
           return this@BookSyncTask.onHTTPOK(e, provider)
         }
-      })
+      }
+    )
   }
 
   private fun updateAccountProvider(): AccountProviderType {

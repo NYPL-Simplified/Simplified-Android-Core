@@ -315,15 +315,17 @@ object ProfileDescriptionJSON {
       .mapPartial<ReaderPreferences, JSONParseException> { prefsNode ->
         ReaderPreferencesJSON.deserializeFromJSON(objectMapper, prefsNode)
       }
-      .accept(object : OptionVisitorType<ReaderPreferences, ReaderPreferences> {
-        override fun none(none: None<ReaderPreferences>): ReaderPreferences {
-          return ReaderPreferences.builder().build()
-        }
+      .accept(
+        object : OptionVisitorType<ReaderPreferences, ReaderPreferences> {
+          override fun none(none: None<ReaderPreferences>): ReaderPreferences {
+            return ReaderPreferences.builder().build()
+          }
 
-        override fun some(some: Some<ReaderPreferences>): ReaderPreferences {
-          return some.get()
+          override fun some(some: Some<ReaderPreferences>): ReaderPreferences {
+            return some.get()
+          }
         }
-      })
+      )
   }
 
   private fun <T> someOrNull(opt: OptionType<T>?): T? {

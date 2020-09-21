@@ -188,67 +188,88 @@ abstract class BooksControllerContract {
 
     val services = MutableServiceDirectory()
     services.putService(
-      AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies
+      AudioBookManifestStrategiesType::class.java,
+      this.audioBookManifestStrategies
     )
     services.putService(
-      AnalyticsType::class.java, this.analytics
+      AnalyticsType::class.java,
+      this.analytics
     )
     services.putService(
-      AccountLoginStringResourcesType::class.java, this.accountLoginStringResources
+      AccountLoginStringResourcesType::class.java,
+      this.accountLoginStringResources
     )
     services.putService(
-      AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources
+      AccountLogoutStringResourcesType::class.java,
+      this.accountLogoutStringResources
     )
     services.putService(
-      AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings
+      AccountProviderResolutionStringsType::class.java,
+      this.accountProviderResolutionStrings
     )
     services.putService(
-      AccountProviderRegistryType::class.java, accountProviders
+      AccountProviderRegistryType::class.java,
+      accountProviders
     )
     services.putService(
-      AuthenticationDocumentParsersType::class.java, this.authDocumentParsers
+      AuthenticationDocumentParsersType::class.java,
+      this.authDocumentParsers
     )
     services.putService(
-      BookRegistryType::class.java, this.bookRegistry
+      BookRegistryType::class.java,
+      this.bookRegistry
     )
     services.putService(
-      BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources
+      BookBorrowStringResourcesType::class.java,
+      this.bookBorrowStringResources
     )
     services.putService(
-      BundledContentResolverType::class.java, bundledContent
+      BundledContentResolverType::class.java,
+      bundledContent
     )
     services.putService(
-      DownloaderType::class.java, downloader
+      DownloaderType::class.java,
+      downloader
     )
     services.putService(
-      FeedLoaderType::class.java, feedLoader
+      FeedLoaderType::class.java,
+      feedLoader
     )
     services.putService(
-      OPDSFeedParserType::class.java, parser
+      OPDSFeedParserType::class.java,
+      parser
     )
     services.putService(
-      HTTPType::class.java, http
+      HTTPType::class.java,
+      http
     )
     services.putService(
-      PatronUserProfileParsersType::class.java, patronUserProfileParsers
+      PatronUserProfileParsersType::class.java,
+      patronUserProfileParsers
     )
     services.putService(
-      ProfileAccountCreationStringResourcesType::class.java, profileAccountCreationStringResources
+      ProfileAccountCreationStringResourcesType::class.java,
+      profileAccountCreationStringResources
     )
     services.putService(
-      ProfileAccountDeletionStringResourcesType::class.java, profileAccountDeletionStringResources
+      ProfileAccountDeletionStringResourcesType::class.java,
+      profileAccountDeletionStringResources
     )
     services.putService(
-      ProfilesDatabaseType::class.java, profiles
+      ProfilesDatabaseType::class.java,
+      profiles
     )
     services.putService(
-      BookRevokeStringResourcesType::class.java, revokeStringResources
+      BookRevokeStringResourcesType::class.java,
+      revokeStringResources
     )
     services.putService(
-      ProfileIdleTimerType::class.java, InoperableIdleTimer()
+      ProfileIdleTimerType::class.java,
+      InoperableIdleTimer()
     )
     services.putService(
-      ClockType::class.java, Clock
+      ClockType::class.java,
+      Clock
     )
 
     return Controller.createFromServiceDirectory(

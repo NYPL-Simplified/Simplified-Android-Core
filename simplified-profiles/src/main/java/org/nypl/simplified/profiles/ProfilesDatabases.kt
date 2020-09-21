@@ -224,7 +224,8 @@ object ProfilesDatabases {
 
     if (!errors.isEmpty()) {
       throw ProfileDatabaseOpenException(
-        "One or more errors occurred whilst trying to open the profile database.", errors
+        "One or more errors occurred whilst trying to open the profile database.",
+        errors
       )
     }
 
@@ -564,7 +565,8 @@ object ProfilesDatabases {
       if (description.isAutomatic) {
         this.logger.debug(
           "[{}]: resolving automatic account provider {}",
-          profile.uuid, description.id
+          profile.uuid,
+          description.id
         )
 
         val resolutionResult =
@@ -579,14 +581,16 @@ object ProfilesDatabases {
           is TaskResult.Success -> {
             this.logger.debug(
               "[{}]: resolved automatic account provider {}",
-              profile.uuid, description.id
+              profile.uuid,
+              description.id
             )
             resolvedProviders.add(resolutionResult.result)
           }
           is TaskResult.Failure -> {
             this.logger.error(
               "[{}]: failed to resolve automatic account provider {}",
-              profile.uuid, description.id
+              profile.uuid,
+              description.id
             )
             publishResolutionError(accountEvents, resolutionResult)
           }
@@ -594,7 +598,8 @@ object ProfilesDatabases {
       } else {
         this.logger.debug(
           "[{}]: account provider {} is not automatic",
-          profile.uuid, description.id
+          profile.uuid,
+          description.id
         )
       }
     }
@@ -616,7 +621,9 @@ object ProfilesDatabases {
           TaskStep<AccountCreateErrorDetails>(
             description = "",
             resolution = TaskStepResolution.TaskStepFailed(
-              error.message, error, error.exception
+              error.message,
+              error,
+              error.exception
             )
           )
         )

@@ -48,7 +48,8 @@ class Analytics private constructor(
       } catch (e: Exception) {
         LOG.error(
           "{}: failed to start analytics system: {}",
-          provider::class.java.canonicalName, e
+          provider::class.java.canonicalName,
+          e
         )
         null
       }

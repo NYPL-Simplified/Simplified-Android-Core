@@ -219,7 +219,10 @@ class CatalogPagedViewHolder(
     val targetWidth = 0
     this.thumbnailLoading =
       this.bookCovers.loadThumbnailInto(
-        item, this.idleCover, targetWidth, targetHeight
+        item,
+        this.idleCover,
+        targetWidth,
+        targetHeight
       ).map {
         this.uiThread.runOnUIThread {
           this.setVisibilityIfNecessary(this.idleProgress, View.INVISIBLE)

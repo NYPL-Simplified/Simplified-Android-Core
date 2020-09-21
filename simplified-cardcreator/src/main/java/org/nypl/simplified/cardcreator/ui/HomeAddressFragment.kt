@@ -66,32 +66,38 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
       binding.spState.adapter = adapter
     }
 
-    binding.etCity.addTextChangedListener(object : TextWatcher {
-      override fun afterTextChanged(s: Editable?) {
-        validateForm()
+    binding.etCity.addTextChangedListener(
+      object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+          validateForm()
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
       }
+    )
 
-      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
+    binding.etStreet1.addTextChangedListener(
+      object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+          validateForm()
+        }
 
-    binding.etStreet1.addTextChangedListener(object : TextWatcher {
-      override fun afterTextChanged(s: Editable?) {
-        validateForm()
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
       }
+    )
 
-      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
+    binding.etZip.addTextChangedListener(
+      object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+          validateForm()
+        }
 
-    binding.etZip.addTextChangedListener(object : TextWatcher {
-      override fun afterTextChanged(s: Editable?) {
-        validateForm()
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
       }
-
-      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
+    )
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {

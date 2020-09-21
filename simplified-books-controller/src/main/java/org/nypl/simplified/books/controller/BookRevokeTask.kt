@@ -153,7 +153,9 @@ class BookRevokeTask(
       this.error("revoke failed: ", e)
 
       this.steps.currentStepFailedAppending(
-        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e
+        this.revokeStrings.revokeUnexpectedException,
+        UnexpectedException(e),
+        e
       )
 
       val failure = this.steps.finishFailure<Unit>()
@@ -274,7 +276,9 @@ class BookRevokeTask(
       this.databaseEntry.writeOPDSEntry(entry.feedEntry)
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeServerNotifySavingEntryFailed, UnexpectedException(e), e
+        this.revokeStrings.revokeServerNotifySavingEntryFailed,
+        UnexpectedException(e),
+        e
       )
       throw e
     }
@@ -289,7 +293,9 @@ class BookRevokeTask(
       this.databaseEntry.delete()
     } catch (e: Throwable) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeUnexpectedException, UnexpectedException(e), e
+        this.revokeStrings.revokeUnexpectedException,
+        UnexpectedException(e),
+        e
       )
       throw e
     }
@@ -613,7 +619,9 @@ class BookRevokeTask(
       }
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeACSDeleteRightsFailed, UnexpectedException(e), e
+        this.revokeStrings.revokeACSDeleteRightsFailed,
+        UnexpectedException(e),
+        e
       )
       throw e
     }
@@ -650,7 +658,9 @@ class BookRevokeTask(
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeBookDatabaseLookupFailed, UnexpectedException(e), e
+        this.revokeStrings.revokeBookDatabaseLookupFailed,
+        UnexpectedException(e),
+        e
       )
       throw e
     }

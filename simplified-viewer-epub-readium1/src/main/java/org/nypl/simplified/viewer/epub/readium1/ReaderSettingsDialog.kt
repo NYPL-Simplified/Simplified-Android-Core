@@ -184,7 +184,8 @@ class ReaderSettingsDialog : DialogFragment() {
         override fun onStopTrackingTouch(@Nullable bar: SeekBar) {
           this@ReaderSettingsDialog.updateBrightness(this.bright.toFloat())
         }
-      })
+      }
+    )
 
     this.onReaderPreferencesChanged(this.readerPreferencesBuilder.build())
     return layout

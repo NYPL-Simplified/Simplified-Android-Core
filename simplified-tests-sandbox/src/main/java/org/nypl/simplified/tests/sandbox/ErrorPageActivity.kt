@@ -51,7 +51,8 @@ class ErrorPageActivity : AppCompatActivity(), ErrorPageListenerType {
         "Ironing clothes.",
         TaskStepFailed(
           "Ironing failed: The ironing board did not survive the attempt.",
-          ExampleError("Ouch"), Exception()
+          ExampleError("Ouch"),
+          Exception()
         )
       )
     )

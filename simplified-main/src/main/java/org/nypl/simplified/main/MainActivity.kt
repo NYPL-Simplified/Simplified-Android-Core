@@ -370,7 +370,8 @@ class MainActivity :
     this.profilesNavigationController =
       ProfilesNavigationController(this.supportFragmentManager, this.mainViewModel)
     this.navigationControllerDirectory.updateNavigationController(
-      ProfilesNavigationControllerType::class.java, this.profilesNavigationController
+      ProfilesNavigationControllerType::class.java,
+      this.profilesNavigationController
     )
 
     if (savedInstanceState == null) {

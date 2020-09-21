@@ -66,7 +66,8 @@ object BookmarkJSON {
     val chapterProgress = JSONParserUtilities.getDouble(node, "chapterProgress")
 
     val deserializedLocation = BookLocationJSON.deserializeFromJSON(
-      objectMapper, JSONParserUtilities.getObject(node, "location")
+      objectMapper,
+      JSONParserUtilities.getObject(node, "location")
     )
 
     val location =

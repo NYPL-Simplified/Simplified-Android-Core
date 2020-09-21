@@ -2455,7 +2455,8 @@ abstract class BookBorrowTaskContract {
     this.downloader =
       Mockito.mock(DownloaderType::class.java)
     this.services.putService(
-      DownloaderType::class.java, this.downloader
+      DownloaderType::class.java,
+      this.downloader
     )
     this.bookTaskRequiredServices =
       BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
@@ -2574,7 +2575,8 @@ abstract class BookBorrowTaskContract {
     this.downloader =
       Mockito.mock(DownloaderType::class.java)
     this.services.putService(
-      DownloaderType::class.java, this.downloader
+      DownloaderType::class.java,
+      this.downloader
     )
     this.bookTaskRequiredServices =
       BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)

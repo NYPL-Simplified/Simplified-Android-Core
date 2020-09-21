@@ -304,7 +304,8 @@ class ProfileAccountCreateCustomOPDSTask(
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
     this.accountEvents.onNext(
       AccountEventCreationFailed(
-        step.resolution.message, this.taskRecorder.finishFailure<AccountType>()
+        step.resolution.message,
+        this.taskRecorder.finishFailure<AccountType>()
       )
     )
 

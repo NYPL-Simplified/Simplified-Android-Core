@@ -51,32 +51,38 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
     nextAction = PersonalInformationFragmentDirections.actionNext()
 
-    binding.firstNameEt.addTextChangedListener(object : TextWatcher {
-      override fun afterTextChanged(s: Editable?) {
-        validateForm()
+    binding.firstNameEt.addTextChangedListener(
+      object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+          validateForm()
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
       }
+    )
 
-      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
+    binding.lastNameEt.addTextChangedListener(
+      object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+          validateForm()
+        }
 
-    binding.lastNameEt.addTextChangedListener(object : TextWatcher {
-      override fun afterTextChanged(s: Editable?) {
-        validateForm()
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
       }
+    )
 
-      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
+    binding.emailEt.addTextChangedListener(
+      object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+          validateForm()
+        }
 
-    binding.emailEt.addTextChangedListener(object : TextWatcher {
-      override fun afterTextChanged(s: Editable?) {
-        validateForm()
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
       }
-
-      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
+    )
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {

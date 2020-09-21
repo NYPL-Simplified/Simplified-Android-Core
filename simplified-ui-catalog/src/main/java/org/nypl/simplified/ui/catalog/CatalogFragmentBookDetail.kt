@@ -241,7 +241,10 @@ class CatalogFragmentBookDetail : Fragment() {
     val targetHeight =
       this.resources.getDimensionPixelSize(R.dimen.cover_detail_height)
     this.covers.loadCoverInto(
-      this.parameters.feedEntry, this.cover, 0, targetHeight
+      this.parameters.feedEntry,
+      this.cover,
+      0,
+      targetHeight
     )
 
     /*
@@ -791,7 +794,8 @@ class CatalogFragmentBookDetail : Fragment() {
 
             override fun onRevoked(availability: OPDSAvailabilityRevoked): Boolean =
               false
-          })
+          }
+        )
       } else {
         false
       }
