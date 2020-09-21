@@ -79,7 +79,6 @@ class TabbedNavigationController private constructor(
       @IdRes fragmentContainerId: Int,
       navigationView: BottomNavigationView
     ): TabbedNavigationController {
-
       this.logger.debug("creating bottom navigator")
       val navigator =
         BottomNavigator.onCreate(
@@ -376,7 +375,6 @@ class TabbedNavigationController private constructor(
     book: Book,
     format: BookFormat
   ) {
-
     /*
      * XXX: Enable or disable support for R2 based on the current profile's preferences. When R2
      * moves from being experimental, this code can be removed.

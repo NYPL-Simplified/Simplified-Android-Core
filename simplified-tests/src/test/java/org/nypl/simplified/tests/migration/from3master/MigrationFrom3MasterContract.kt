@@ -320,11 +320,13 @@ abstract class MigrationFrom3MasterContract {
      * Because account creation failed, the original files are not removed.
      */
 
-    for (file in listOf(
-      accountsDir,
-      accountFile,
-      deviceFile
-    )) {
+    for (
+      file in listOf(
+        accountsDir,
+        accountFile,
+        deviceFile
+      )
+    ) {
       Assert.assertTrue("$file exists", file.exists())
     }
 
@@ -498,16 +500,18 @@ abstract class MigrationFrom3MasterContract {
     val deviceFile = File(this.tempDir, "device.xml")
     deviceFile.writeBytes(ByteArray(16))
 
-    for (file in listOf(
-      booksDir,
-      booksDataDir,
-      bookDir,
-      bookEPUBFile,
-      bookMetaFile,
-      bookAnnotationsFile,
-      accountFile,
-      deviceFile
-    )) {
+    for (
+      file in listOf(
+        booksDir,
+        booksDataDir,
+        bookDir,
+        bookEPUBFile,
+        bookMetaFile,
+        bookAnnotationsFile,
+        accountFile,
+        deviceFile
+      )
+    ) {
       Assert.assertTrue("$file no exists", file.exists())
     }
 
@@ -533,17 +537,19 @@ abstract class MigrationFrom3MasterContract {
      * All files should be gone.
      */
 
-    for (file in listOf(
-      booksDir,
-      booksDataDir,
-      bookDir,
-      bookEPUBFile,
-      bookMetaFile,
-      bookAnnotationsFile,
-      accountsSubDir,
-      accountFile,
-      deviceFile
-    )) {
+    for (
+      file in listOf(
+        booksDir,
+        booksDataDir,
+        bookDir,
+        bookEPUBFile,
+        bookMetaFile,
+        bookAnnotationsFile,
+        accountsSubDir,
+        accountFile,
+        deviceFile
+      )
+    ) {
       Assert.assertTrue("$file no longer exists", !file.exists())
     }
 
@@ -788,17 +794,19 @@ abstract class MigrationFrom3MasterContract {
      * Because everything except authentication succeeded, the original files can be deleted.
      */
 
-    for (file in listOf(
-      booksDir,
-      booksDataDir,
-      bookDir,
-      bookEPUBFile,
-      bookMetaFile,
-      bookAnnotationsFile,
-      accountsSubDir,
-      accountFile,
-      deviceFile
-    )) {
+    for (
+      file in listOf(
+        booksDir,
+        booksDataDir,
+        bookDir,
+        bookEPUBFile,
+        bookMetaFile,
+        bookAnnotationsFile,
+        accountsSubDir,
+        accountFile,
+        deviceFile
+      )
+    ) {
       Assert.assertTrue("$file no longer exists", !file.exists())
     }
 

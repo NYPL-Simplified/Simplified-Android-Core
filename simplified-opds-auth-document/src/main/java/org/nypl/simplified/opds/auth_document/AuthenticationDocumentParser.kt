@@ -36,32 +36,38 @@ internal class AuthenticationDocumentParser(
 
   private fun publishWarning(warning: ParseWarning) {
     if (this.warningsAsErrors) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = warning.message,
-        line = 0,
-        column = 0,
-        exception = warning.exception
-      ))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = warning.message,
+          line = 0,
+          column = 0,
+          exception = warning.exception
+        )
+      )
     } else {
       this.warnings.add(warning)
     }
   }
 
   private fun publishErrorForException(e: Exception) {
-    this.errors.add(ParseError(
-      source = this.uri,
-      message = e.message ?: "",
-      exception = e
-    ))
+    this.errors.add(
+      ParseError(
+        source = this.uri,
+        message = e.message ?: "",
+        exception = e
+      )
+    )
   }
 
   private fun publishErrorForString(message: String) {
-    this.errors.add(ParseError(
-      source = this.uri,
-      message = message,
-      exception = null
-    ))
+    this.errors.add(
+      ParseError(
+        source = this.uri,
+        message = message,
+        exception = null
+      )
+    )
   }
 
   override fun parse(): ParseResult<AuthenticationDocument> {
@@ -103,7 +109,8 @@ internal class AuthenticationDocumentParser(
             links = links,
             mainColor = mainColor,
             title = title
-          ))
+          )
+        )
       } else {
         ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
       }
@@ -127,7 +134,8 @@ internal class AuthenticationDocumentParser(
 
       AuthenticationObjectNYPLFeatures(
         enabled = enabled.toSet(),
-        disabled = disabled.toSet())
+        disabled = disabled.toSet()
+      )
     } catch (e: Exception) {
       this.publishErrorForException(e)
       AuthenticationObjectNYPLFeatures(setOf(), setOf())
@@ -240,11 +248,11 @@ internal class AuthenticationDocumentParser(
       AuthenticationObjectNYPLInput(
         fieldName = fieldName,
         keyboardType =
-        JSONParserUtilities.getStringOrNull(root, "keyboard")?.toUpperCase(),
+          JSONParserUtilities.getStringOrNull(root, "keyboard")?.toUpperCase(),
         maximumLength =
-        JSONParserUtilities.getIntegerDefault(root, "maximum_length", 0),
+          JSONParserUtilities.getIntegerDefault(root, "maximum_length", 0),
         barcodeFormat =
-        JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase()
+          JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase()
       )
     } catch (e: Exception) {
       this.publishErrorForException(e)

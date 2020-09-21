@@ -17,8 +17,10 @@ object TaskDumps {
           logger.debug("--")
         }
         is TaskStepResolution.TaskStepFailed -> {
-          logger.debug("step resolution:  {} (exception: {}) (error: {})",
-            resolution.message, resolution.exception, resolution.errorCode)
+          logger.debug(
+            "step resolution:  {} (exception: {}) (error: {})",
+            resolution.message, resolution.exception, resolution.errorCode
+          )
           logger.debug("--")
         }
       }

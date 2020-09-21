@@ -41,7 +41,8 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
             indent = indent,
             title = title,
             contentRef = contentRef,
-            sourceHref = sourceHref)
+            sourceHref = sourceHref
+          )
 
         elements.add(tocElement)
 
@@ -50,7 +51,8 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
             elements,
             indent + 1,
             parent,
-            Objects.requireNonNull(child, "Child element"))
+            Objects.requireNonNull(child, "Child element")
+          )
         }
 
         return
@@ -61,7 +63,8 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
           "nav table: {} {} → {}",
           currentElement.sourceHref,
           currentElement.type,
-          currentElement.title)
+          currentElement.title
+        )
 
         // XXX: What's the correct thing to do here? There's no
         // content ref accessible from here...
@@ -73,7 +76,8 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
             elements,
             indent + 1,
             currentElement,
-            Objects.requireNonNull(child, "Child"))
+            Objects.requireNonNull(child, "Child")
+          )
         }
       }
     }
@@ -87,7 +91,6 @@ class ReaderTOC(val elements: List<ReaderTOCElement>) : Serializable {
      */
 
     fun fromPackage(p: org.readium.sdk.android.Package): ReaderTOC {
-
       logger.debug("requesting toc")
 
       val readLock = ReaderNativeCodeReadLock.get()

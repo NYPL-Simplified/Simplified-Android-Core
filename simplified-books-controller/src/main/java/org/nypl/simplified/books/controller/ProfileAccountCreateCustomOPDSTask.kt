@@ -62,9 +62,12 @@ class ProfileAccountCreateCustomOPDSTask(
         this.createAccountProviderDescription()
 
       val resolutionResult =
-        this.accountProviderRegistry.resolve({ _, message ->
-          this.publishProgressEvent(this.taskRecorder.beginNewStep(message))
-        }, accountProviderDescription)
+        this.accountProviderRegistry.resolve(
+          { _, message ->
+            this.publishProgressEvent(this.taskRecorder.beginNewStep(message))
+          },
+          accountProviderDescription
+        )
 
       when (resolutionResult) {
         is TaskResult.Success ->
@@ -87,14 +90,14 @@ class ProfileAccountCreateCustomOPDSTask(
     this.taskRecorder.addAll(resolutionResult.steps)
     this.taskRecorder.addAttributes(resolutionResult.attributes)
     this.taskRecorder.currentStepFailed(
-      this.strings.resolvingAccountProviderFailed, "resolvingAccountProviderFailed")
+      this.strings.resolvingAccountProviderFailed, "resolvingAccountProviderFailed"
+    )
     return this.taskRecorder.finishFailure()
   }
 
   private fun createAccount(
     accountProviderDescription: AccountProviderDescription
   ): TaskResult<AccountType> {
-
     val createResult =
       ProfileAccountCreateTask(
         accountEvents = this.accountEvents,
@@ -229,7 +232,8 @@ class ProfileAccountCreateCustomOPDSTask(
          */
 
         this.taskRecorder.addAttributes(
-          Presentables.problemReportAsAttributes(someOrNull(result.problemReport)))
+          Presentables.problemReportAsAttributes(someOrNull(result.problemReport))
+        )
 
         this.taskRecorder.currentStepFailed(this.strings.fetchingOPDSFeedFailed, "fetchingOPDSFeedFailed")
         this.publishFailureEvent()

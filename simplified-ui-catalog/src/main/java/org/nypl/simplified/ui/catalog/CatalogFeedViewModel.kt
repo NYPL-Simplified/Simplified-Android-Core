@@ -126,9 +126,11 @@ class CatalogFeedViewModel(
       }
 
     val syncFuture =
-      fluentFutureOfAll(accountsToSync.values.map { account ->
-        this.booksController.booksSync(account)
-      })
+      fluentFutureOfAll(
+        accountsToSync.values.map { account ->
+          this.booksController.booksSync(account)
+        }
+      )
 
     val future = this.profilesController.profileFeed(request)
       .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
@@ -256,7 +258,6 @@ class CatalogFeedViewModel(
     state: CatalogFeedState,
     result: FeedLoaderResult.FeedLoaderFailure
   ): CatalogFeedState.CatalogFeedLoadFailed {
-
     /*
      * If the failure is due to bad credentials, then subscribe to events for the account
      * and try refreshing the feed when an account login has occurred.
@@ -341,7 +342,6 @@ class CatalogFeedViewModel(
     state: CatalogFeedState,
     feed: Feed.FeedWithoutGroups
   ): CatalogFeedLoaded {
-
     if (feed.entriesInOrder.isEmpty()) {
       return CatalogFeedEmpty(
         arguments = state.arguments,

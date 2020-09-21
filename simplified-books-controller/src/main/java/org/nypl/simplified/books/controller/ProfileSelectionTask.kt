@@ -61,7 +61,8 @@ class ProfileSelectionTask(
   private fun loadData() {
     return ProfileDataLoadTask(
       profile = this.profiles.currentProfileUnsafe(),
-      bookRegistry = this.bookRegistry)
+      bookRegistry = this.bookRegistry
+    )
       .run()
   }
 }

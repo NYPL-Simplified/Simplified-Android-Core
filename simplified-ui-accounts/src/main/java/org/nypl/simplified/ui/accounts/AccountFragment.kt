@@ -342,7 +342,6 @@ class AccountFragment : Fragment() {
      */
 
     return if (cardCreatorURI != null) {
-
       /*
        * Unless the URI refers to the NYPL Card Creator and we don't have that enabled
        * in this build.
@@ -641,9 +640,11 @@ class AccountFragment : Fragment() {
   private fun onProfileEvent(event: ProfileEvent) {
     return when (event) {
       is ProfileUpdated -> {
-        this.uiThread.runOnUIThread(Runnable {
-          this.reconfigureAccountUI()
-        })
+        this.uiThread.runOnUIThread(
+          Runnable {
+            this.reconfigureAccountUI()
+          }
+        )
       }
       else -> {
       }
@@ -712,6 +713,9 @@ class AccountFragment : Fragment() {
           if (auth.passwordKeyboard == NO_INPUT) View.GONE else View.VISIBLE
         this.authenticationBasicShowPass.visibility =
           if (auth.passwordKeyboard == NO_INPUT) View.GONE else View.VISIBLE
+
+        // Reset password visibility
+        setPasswordVisible(this.authenticationBasicShowPass.isChecked)
       }
 
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
@@ -732,10 +736,12 @@ class AccountFragment : Fragment() {
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = ""
-        this.setLoginButtonStatus(AsLoginButtonEnabled {
-          this.loginFormLock()
-          this.tryLogin()
-        })
+        this.setLoginButtonStatus(
+          AsLoginButtonEnabled {
+            this.loginFormLock()
+            this.tryLogin()
+          }
+        )
         this.loginFormUnlock()
       }
 
@@ -746,10 +752,12 @@ class AccountFragment : Fragment() {
         this.loginFormLock()
 
         if (loginState.cancellable) {
-          this.setLoginButtonStatus(AsCancelButtonEnabled {
-            // We don't really support this yet.
-            throw UnimplementedCodeException()
-          })
+          this.setLoginButtonStatus(
+            AsCancelButtonEnabled {
+              // We don't really support this yet.
+              throw UnimplementedCodeException()
+            }
+          )
         } else {
           this.setLoginButtonStatus(AsCancelButtonDisabled)
         }
@@ -760,14 +768,16 @@ class AccountFragment : Fragment() {
         this.loginProgressText.text = loginState.status
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginFormLock()
-        this.setLoginButtonStatus(AsCancelButtonEnabled {
-          this.profilesController.profileAccountLogin(
-            OAuthWithIntermediaryCancel(
-              accountId = this.account.id,
-              description = loginState.description as AccountProviderAuthenticationDescription.OAuthWithIntermediary
+        this.setLoginButtonStatus(
+          AsCancelButtonEnabled {
+            this.profilesController.profileAccountLogin(
+              OAuthWithIntermediaryCancel(
+                accountId = this.account.id,
+                description = loginState.description as AccountProviderAuthenticationDescription.OAuthWithIntermediary
+              )
             )
-          )
-        })
+          }
+        )
       }
 
       is AccountLoginFailed -> {
@@ -775,10 +785,12 @@ class AccountFragment : Fragment() {
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginFormUnlock()
         this.cancelImageButtonLoading()
-        this.setLoginButtonStatus(AsLoginButtonEnabled {
-          this.loginFormLock()
-          this.tryLogin()
-        })
+        this.setLoginButtonStatus(
+          AsLoginButtonEnabled {
+            this.loginFormLock()
+            this.tryLogin()
+          }
+        )
         this.loginButtonErrorDetails.visibility = View.VISIBLE
         this.loginButtonErrorDetails.setOnClickListener {
           this.openErrorPage(loginState.taskResult.steps)
@@ -808,17 +820,22 @@ class AccountFragment : Fragment() {
 
         this.loginFormLock()
         this.loginButtonErrorDetails.visibility = View.GONE
-        this.setLoginButtonStatus(AsLogoutButtonEnabled {
-          this.loginFormLock()
-          this.tryLogout()
-        })
+        this.setLoginButtonStatus(
+          AsLogoutButtonEnabled {
+            this.loginFormLock()
+            this.tryLogout()
+          }
+        )
         this.authenticationAlternativesHide()
 
         if (this.viewModel.loginExplicitlyRequested && this.parameters.closeOnLoginSuccess) {
           this.logger.debug("scheduling explicit close of account fragment")
-          this.uiThread.runOnUIThreadDelayed({
-            this.explicitlyClose()
-          }, 2_000L)
+          this.uiThread.runOnUIThreadDelayed(
+            {
+              this.explicitlyClose()
+            },
+            2_000L
+          )
           return
         } else {
           // Doing nothing.
@@ -858,10 +875,12 @@ class AccountFragment : Fragment() {
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.cancelImageButtonLoading()
         this.loginFormLock()
-        this.setLoginButtonStatus(AsLogoutButtonEnabled {
-          this.loginFormLock()
-          this.tryLogout()
-        })
+        this.setLoginButtonStatus(
+          AsLogoutButtonEnabled {
+            this.loginFormLock()
+            this.tryLogout()
+          }
+        )
 
         this.loginButtonErrorDetails.visibility = View.VISIBLE
         this.loginButtonErrorDetails.setOnClickListener {
@@ -973,20 +992,23 @@ class AccountFragment : Fragment() {
       this.imageLoader.loader.load(uri.toString())
         .fit()
         .tag(this.imageButtonLoadingTag)
-        .into(view, object : com.squareup.picasso.Callback {
-          override fun onSuccess() {
-            this@AccountFragment.uiThread.runOnUIThread {
-              onSuccess.invoke()
+        .into(
+          view,
+          object : com.squareup.picasso.Callback {
+            override fun onSuccess() {
+              this@AccountFragment.uiThread.runOnUIThread {
+                onSuccess.invoke()
+              }
             }
-          }
 
-          override fun onError(e: Exception) {
-            this@AccountFragment.logger.error("failed to load authentication logo: ", e)
-            this@AccountFragment.uiThread.runOnUIThread {
-              view.visibility = View.GONE
+            override fun onError(e: Exception) {
+              this@AccountFragment.logger.error("failed to load authentication logo: ", e)
+              this@AccountFragment.uiThread.runOnUIThread {
+                view.visibility = View.GONE
+              }
             }
           }
-        })
+        )
     }
   }
 
@@ -1063,9 +1085,11 @@ class AccountFragment : Fragment() {
     return when (accountEvent) {
       is AccountEventLoginStateChanged ->
         if (accountEvent.accountID == this.parameters.accountId) {
-          this.uiThread.runOnUIThread(Runnable {
-            this.reconfigureAccountUI()
-          })
+          this.uiThread.runOnUIThread(
+            Runnable {
+              this.reconfigureAccountUI()
+            }
+          )
         } else {
         }
       else -> {
@@ -1203,7 +1227,6 @@ class AccountFragment : Fragment() {
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     if (requestCode == this.cardCreatorResultCode) {
-
       when (resultCode) {
         Activity.RESULT_OK -> {
           if (data != null) {

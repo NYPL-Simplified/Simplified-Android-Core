@@ -195,9 +195,11 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
   ) {
     val newFormat = synchronized(this.dataLock) {
       FileUtilities.fileWriteBytes(
-        data, this.fileManifest)
+        data, this.fileManifest
+      )
       FileUtilities.fileWriteUTF8Atomically(
-        this.fileManifestURI, this.fileManifestURITmp, manifestURI.toString())
+        this.fileManifestURI, this.fileManifestURITmp, manifestURI.toString()
+      )
 
       this.formatRef =
         this.formatRef.copy(

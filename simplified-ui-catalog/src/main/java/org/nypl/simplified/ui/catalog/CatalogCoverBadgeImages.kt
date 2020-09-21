@@ -33,7 +33,8 @@ class CatalogCoverBadgeImages private constructor(
           bitmap = this.audioBookIcon,
           width = this.screenSize.dpToPixels(24).toInt(),
           height = this.screenSize.dpToPixels(24).toInt(),
-          backgroundColorRGBA = { this.backgroundColorRGBA() })
+          backgroundColorRGBA = { this.backgroundColorRGBA() }
+        )
       }
       BOOK_FORMAT_PDF -> {
         null
@@ -59,7 +60,8 @@ class CatalogCoverBadgeImages private constructor(
       return CatalogCoverBadgeImages(
         audioBookIcon = audioBookIcon,
         backgroundColorRGBA = backgroundColorRGBA,
-        screenSize = screenSize)
+        screenSize = screenSize
+      )
     }
   }
 }

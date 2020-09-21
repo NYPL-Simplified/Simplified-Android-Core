@@ -25,7 +25,8 @@ open class SimplifiedBearerTokenContract {
       org.nypl.simplified.books.controller.SimplifiedBearerToken(
         accessToken = "ee22988f-c5a1-4944-8fa4-567e6933fd83",
         expiration = baseTime.plusSeconds(60),
-        location = URI.create("http://example.com"))
+        location = URI.create("http://example.com")
+      )
 
     val serialized =
       org.nypl.simplified.books.controller.SimplifiedBearerTokenJSON.serializeToText(objectMapper, baseTime, expected)
@@ -46,7 +47,8 @@ open class SimplifiedBearerTokenContract {
       org.nypl.simplified.books.controller.SimplifiedBearerToken(
         accessToken = "ee22988f-c5a1-4944-8fa4-567e6933fd83",
         expiration = baseTime.plusSeconds(60),
-        location = URI.create("http://example.com"))
+        location = URI.create("http://example.com")
+      )
 
     org.nypl.simplified.books.controller.SimplifiedBearerTokenJSON.serializeToFile(objectMapper, baseTime, expected, file)
 

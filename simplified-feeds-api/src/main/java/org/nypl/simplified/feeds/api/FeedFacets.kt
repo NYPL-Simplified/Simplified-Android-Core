@@ -37,7 +37,6 @@ object FeedFacets {
   fun findEntryPointFacetGroup(
     groups: Map<String, List<FeedFacet>>
   ): List<FeedFacet>? {
-
     for (groupName in groups.keys) {
       val facets = groups[groupName]!!
       if (!facets.isEmpty()) {

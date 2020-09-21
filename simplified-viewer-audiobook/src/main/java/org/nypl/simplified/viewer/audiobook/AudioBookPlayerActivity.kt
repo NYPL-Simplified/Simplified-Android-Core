@@ -74,8 +74,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  * The main activity for playing audio books.
  */
 
-class AudioBookPlayerActivity : AppCompatActivity(),
-  AudioBookLoadingFragmentListenerType, PlayerFragmentListenerType {
+class AudioBookPlayerActivity :
+  AppCompatActivity(),
+  AudioBookLoadingFragmentListenerType,
+  PlayerFragmentListenerType {
 
   private val log: Logger = LoggerFactory.getLogger(AudioBookPlayerActivity::class.java)
 
@@ -569,11 +571,14 @@ class AudioBookPlayerActivity : AppCompatActivity(),
        * to return the book.
        */
 
-      this.playerScheduledExecutor.schedule({
-        if (!this.destroying) {
-          this.uiThread.runOnUIThread { this.loanReturnShowDialog() }
-        }
-      }, 5L, TimeUnit.SECONDS)
+      this.playerScheduledExecutor.schedule(
+        {
+          if (!this.destroying) {
+            this.uiThread.runOnUIThread { this.loanReturnShowDialog() }
+          }
+        },
+        5L, TimeUnit.SECONDS
+      )
     }
   }
 
@@ -634,7 +639,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerPlaybackRateShouldOpen() {
-
     /*
      * The player fragment wants us to open the playback rate selection dialog.
      */
@@ -647,7 +651,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerSleepTimerShouldOpen() {
-
     /*
      * The player fragment wants us to open the sleep timer.
      */
@@ -660,7 +663,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerTOCShouldOpen() {
-
     /*
      * The player fragment wants us to open the table of contents. Load and display it, and
      * also set the action bar title.
@@ -684,7 +686,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerTOCWantsClose() {
-
     /*
      * The player fragment wants to close the table of contents dialog. Pop it from the back
      * stack and set the action bar title back to the original title.
@@ -703,7 +704,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerWantsCoverImage(view: ImageView) {
-
     /*
      * Use the cover provider to load a cover image into the image view. The width and height
      * are essentially hints; the target image view almost certainly won't have a usable size

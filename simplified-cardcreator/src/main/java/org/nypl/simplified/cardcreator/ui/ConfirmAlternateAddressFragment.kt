@@ -55,7 +55,7 @@ class ConfirmAlternateAddressFragment : Fragment() {
       ${address.line_1}
       ${address.city}
       ${address.state} ${address.zip}
-    """.trimIndent()
+      """.trimIndent()
     }
 
     nextAction = ConfirmAlternateAddressFragmentDirections.actionNext()

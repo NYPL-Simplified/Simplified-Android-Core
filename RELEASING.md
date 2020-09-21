@@ -131,6 +131,22 @@ This updates the remote Git repository with the new branches.
 
 #### Push To Maven Central
 
+Replace `username` and `password` with your Maven Central username and
+password, respectively:
+
+```
+$ ./maven-central-deploy.sh username password
+```
+
+## The End
+
+You're done. The binaries will appear on Maven Central within roughly
+15 minutes.
+
+## Epilogue
+
+#### How Does Pushing To Maven Central Work?
+
 We currently use the [brooklime](https://www.io7m.com/software/brooklime)
 tool to do reliable Maven Central deployments. This documentation
 makes references to a `brooklime.jar` file, and this should be understood

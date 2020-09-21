@@ -88,7 +88,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenExistingNotDirectory() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -129,7 +128,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenExistingBadSubdirectory() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -155,7 +153,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenExistingJSONMissing() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -181,7 +178,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenExistingJSONUnparseable() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -210,7 +206,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testOpenExistingEmpty() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -234,7 +229,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testCreateAccount() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -293,7 +287,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testCreateAccountProviderAlreadyUsed() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -322,7 +315,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testCreateReopen() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -370,7 +362,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testSetCredentials() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -406,7 +397,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testSetProviderWrongID() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()
@@ -437,7 +427,6 @@ abstract class AccountsDatabaseContract {
   @Test
   @Throws(Exception::class)
   fun testSetProviderOK() {
-
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
     fileProfiles.mkdirs()

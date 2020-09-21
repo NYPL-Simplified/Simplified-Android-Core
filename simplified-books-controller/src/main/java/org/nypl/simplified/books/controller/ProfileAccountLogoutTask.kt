@@ -43,7 +43,8 @@ class ProfileAccountLogoutTask(
   init {
     Preconditions.checkState(
       this.profile.accounts().containsKey(this.account.id),
-      "Profile must contain the given account")
+      "Profile must contain the given account"
+    )
   }
 
   private lateinit var credentials: AccountAuthenticationCredentials
@@ -91,7 +92,9 @@ class ProfileAccountLogoutTask(
       this.steps.currentStepFailedAppending(
         this.logoutStrings.logoutUnexpectedException,
         "unexpectedException",
-        e)
+        e
+      )
+
       val failure = this.steps.finishFailure<Unit>()
       this.account.setLoginState(AccountLogoutFailed(failure, this.credentials))
       failure
@@ -145,7 +148,8 @@ class ProfileAccountLogoutTask(
         debug = { message -> this.debug(message) },
         vendorID = adobeCredentials.vendorID,
         userID = postActivation.userID,
-        clientToken = adobeCredentials.clientToken)
+        clientToken = adobeCredentials.clientToken
+      )
 
     try {
       adeptFuture.get(1L, TimeUnit.MINUTES)
@@ -188,7 +192,8 @@ class ProfileAccountLogoutTask(
     this.http.delete(
       Option.some(httpAuthentication),
       deviceManagerURI,
-      "vnd.librarysimplified/drm-device-id-list")
+      "vnd.librarysimplified/drm-device-id-list"
+    )
 
     this.steps.currentStepSucceeded(this.logoutStrings.logoutDeviceDeactivationPostDeviceManagerFinished)
   }
@@ -203,14 +208,18 @@ class ProfileAccountLogoutTask(
         this.steps.currentStepFailed(
           this.logoutStrings.logoutDeactivatingDeviceAdobeFailed("UNKNOWN", ex),
           "unexpectedException",
-          ex)
+          ex
+        )
       }
     }
 
   private fun updateLoggingOutState() {
-    this.account.setLoginState(AccountLoggingOut(
-      this.credentials,
-      this.steps.currentStep()?.description ?: ""))
+    this.account.setLoginState(
+      AccountLoggingOut(
+        this.credentials,
+        this.steps.currentStep()?.description ?: ""
+      )
+    )
   }
 
   private fun runBookRegistryClear() {
@@ -225,7 +234,8 @@ class ProfileAccountLogoutTask(
     } catch (e: Throwable) {
       this.error("could not clear book registry: ", e)
       this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookRegistryFailed, "unexpectedException")
+        this.logoutStrings.logoutClearingBookRegistryFailed, "unexpectedException"
+      )
     }
 
     this.steps.beginNewStep(this.logoutStrings.logoutClearingBookDatabase)
@@ -235,7 +245,8 @@ class ProfileAccountLogoutTask(
     } catch (e: Throwable) {
       this.error("could not clear book database: ", e)
       this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookDatabaseFailed, "unexpectedException")
+        this.logoutStrings.logoutClearingBookDatabaseFailed, "unexpectedException"
+      )
     }
   }
 }

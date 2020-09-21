@@ -43,7 +43,8 @@ abstract class ProfileDescriptionJSONContract {
     val description_0 =
       ProfileDescription(
         displayName = "Kermit",
-        preferences = ProfilePreferences(ProfileDateOfBirth(dateTime, true),
+        preferences = ProfilePreferences(
+          ProfileDateOfBirth(dateTime, true),
           showTestingLibraries = false,
           hasSeenLibrarySelectionScreen = false,
           readerPreferences = ReaderPreferences.builder().build(),
@@ -81,7 +82,6 @@ abstract class ProfileDescriptionJSONContract {
 
   @Test
   fun testLFA_1() {
-
     val mapper = ObjectMapper()
 
     val description =
@@ -97,7 +97,6 @@ abstract class ProfileDescriptionJSONContract {
 
   @Test
   fun testNYPL_0() {
-
     val mapper = ObjectMapper()
 
     val description =
@@ -110,7 +109,8 @@ abstract class ProfileDescriptionJSONContract {
   private fun ofResource(name: String): String {
     val bytes =
       ProfileDescriptionJSONContract::class.java.getResourceAsStream(
-        "/org/nypl/simplified/tests/books/$name")
+        "/org/nypl/simplified/tests/books/$name"
+      )
         .readBytes()
 
     val text = String(bytes)

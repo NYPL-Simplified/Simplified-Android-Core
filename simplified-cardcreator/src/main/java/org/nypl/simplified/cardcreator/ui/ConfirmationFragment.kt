@@ -83,7 +83,6 @@ class ConfirmationFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-
       if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
         != PackageManager.PERMISSION_GRANTED
       ) {

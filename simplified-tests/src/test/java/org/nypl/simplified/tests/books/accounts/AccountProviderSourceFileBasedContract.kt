@@ -23,9 +23,11 @@ abstract class AccountProviderSourceFileBasedContract {
 
   @Test
   fun testProvidersAll() {
-    val provider = AccountProviderSourceFileBased(getFile = {
-      this.readAllFromResource("providers-all.json")
-    })
+    val provider = AccountProviderSourceFileBased(
+      getFile = {
+        this.readAllFromResource("providers-all.json")
+      }
+    )
 
     val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)

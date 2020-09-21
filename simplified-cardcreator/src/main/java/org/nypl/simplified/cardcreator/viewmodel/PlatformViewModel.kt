@@ -69,15 +69,15 @@ class PlatformViewModel : ViewModel() {
   fun createJuvenileCardWithBarcodeParent(juvenilePatron: BarcodeParent, token: String) {
     val apiErrorAdapter: JsonAdapter<DependentEligibilityError> = Moshi.Builder().build().adapter(DependentEligibilityError::class.java)
     viewModelScope.launch {
-        val nyplPlatformService = NYPLPlatformService(token)
-        val response =
-          nyplPlatformService.createJuvenilePatronWithBarcodeParent(juvenilePatron)
-        if (response.isSuccessful) {
-          juvenilePatronResponse.postValue(response.body())
-        } else {
-          val error = apiErrorAdapter.fromJson(response.errorBody()?.string())?.message
-          apiErrorMessage.postValue(error)
-        }
+      val nyplPlatformService = NYPLPlatformService(token)
+      val response =
+        nyplPlatformService.createJuvenilePatronWithBarcodeParent(juvenilePatron)
+      if (response.isSuccessful) {
+        juvenilePatronResponse.postValue(response.body())
+      } else {
+        val error = apiErrorAdapter.fromJson(response.errorBody()?.string())?.message
+        apiErrorMessage.postValue(error)
+      }
     }
   }
 

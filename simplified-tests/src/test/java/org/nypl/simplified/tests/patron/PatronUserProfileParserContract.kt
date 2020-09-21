@@ -63,13 +63,16 @@ abstract class PatronUserProfileParserContract {
 
     Assert.assertEquals(
       "6120696828384",
-      profile.authorization?.identifier)
+      profile.authorization?.identifier
+    )
     Assert.assertEquals(
       "2019-08-02T00:00:00.000Z",
-      profile.authorization?.expires.toString())
+      profile.authorization?.expires.toString()
+    )
     Assert.assertEquals(
       true,
-      profile.settings.synchronizeAnnotations)
+      profile.settings.synchronizeAnnotations
+    )
 
     Assert.assertEquals(1, profile.drm.size)
 
@@ -93,13 +96,16 @@ abstract class PatronUserProfileParserContract {
 
     Assert.assertEquals(
       "6120696828384",
-      profile.authorization?.identifier)
+      profile.authorization?.identifier
+    )
     Assert.assertEquals(
       "2019-08-02T00:00:00.000Z",
-      profile.authorization?.expires.toString())
+      profile.authorization?.expires.toString()
+    )
     Assert.assertEquals(
       true,
-      profile.settings.synchronizeAnnotations)
+      profile.settings.synchronizeAnnotations
+    )
 
     Assert.assertEquals(1, profile.drm.size)
 
@@ -124,13 +130,16 @@ abstract class PatronUserProfileParserContract {
 
     Assert.assertEquals(
       "6120696828384",
-      profile.authorization?.identifier)
+      profile.authorization?.identifier
+    )
     Assert.assertEquals(
       "2019-08-02T00:00:00.000Z",
-      profile.authorization?.expires.toString())
+      profile.authorization?.expires.toString()
+    )
     Assert.assertEquals(
       true,
-      profile.settings.synchronizeAnnotations)
+      profile.settings.synchronizeAnnotations
+    )
 
     Assert.assertEquals(0, profile.drm.size)
     Assert.assertEquals(1, result.warnings.size)
@@ -151,13 +160,16 @@ abstract class PatronUserProfileParserContract {
 
     Assert.assertEquals(
       "1278371823781",
-      profile.authorization?.identifier)
+      profile.authorization?.identifier
+    )
     Assert.assertEquals(
       "2020-04-13T00:00:00.000Z",
-      profile.authorization?.expires.toString())
+      profile.authorization?.expires.toString()
+    )
     Assert.assertEquals(
       false,
-      profile.settings.synchronizeAnnotations)
+      profile.settings.synchronizeAnnotations
+    )
 
     Assert.assertEquals(1, profile.drm.size)
     Assert.assertEquals(0, result.warnings.size)

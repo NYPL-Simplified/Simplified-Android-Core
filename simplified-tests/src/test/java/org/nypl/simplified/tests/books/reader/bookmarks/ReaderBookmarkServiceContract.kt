@@ -79,7 +79,8 @@ abstract class ReaderBookmarkServiceContract {
       stream,
       bytes.size.toLong(),
       mutableMapOf(),
-      0L)
+      0L
+    )
   }
 
   @After
@@ -97,17 +98,21 @@ abstract class ReaderBookmarkServiceContract {
     val http = MockingHTTP()
     http.addResponse(
       "http://www.example.com/patron",
-      this.okResponse("""
+      this.okResponse(
+        """
     {
       "settings": {
         "simplified:synchronize_annotations": true
       }
     }
-    """))
+    """
+      )
+    )
 
     http.addResponse(
       "http://www.example.com/annotations",
-      this.okResponse("""
+      this.okResponse(
+        """
     {
        "id" : "http://www.example.com/annotations/",
        "type" : [
@@ -125,7 +130,9 @@ abstract class ReaderBookmarkServiceContract {
           "id" : "http://www.example.com/annotations/"
        }
     }
-    """))
+    """
+      )
+    )
 
     val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, http)
 
@@ -198,13 +205,15 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+    )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+    )
   }
 
   /**
@@ -217,17 +226,21 @@ abstract class ReaderBookmarkServiceContract {
     val http = MockingHTTP()
     http.addResponse(
       "http://www.example.com/patron",
-      this.okResponse("""
+      this.okResponse(
+        """
     {
       "settings": {
         "simplified:synchronize_annotations": true
       }
     }
-    """))
+    """
+      )
+    )
 
     http.addResponse(
       "http://www.example.com/annotations",
-      this.okResponse("""
+      this.okResponse(
+        """
     {
        "id" : "http://www.example.com/annotations/",
        "type" : [
@@ -262,7 +275,9 @@ abstract class ReaderBookmarkServiceContract {
           "id" : "http://www.example.com/annotations/"
        }
     }
-    """))
+    """
+      )
+    )
 
     val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, http)
 
@@ -371,24 +386,28 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+    )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSaved::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+    )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       2,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+    )
 
     Assert.assertEquals(1, receivedBookmarks.size)
     Assert.assertEquals(
       "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-      receivedBookmarks[0].opdsId)
+      receivedBookmarks[0].opdsId
+    )
   }
 
   /**
@@ -401,13 +420,16 @@ abstract class ReaderBookmarkServiceContract {
     val http = MockingHTTP()
     http.addResponse(
       "http://www.example.com/patron",
-      this.okResponse("""
+      this.okResponse(
+        """
     {
       "settings": {
         "simplified:synchronize_annotations": true
       }
     }
-    """))
+    """
+      )
+    )
 
     val responseText = """
     {
@@ -464,15 +486,18 @@ abstract class ReaderBookmarkServiceContract {
       mutableListOf<Bookmark>()
 
     val startingBookmarks =
-      listOf(Bookmark(
-        opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-        location = BookLocation(BookChapterProgress(0, 0.5), null, "x"),
-        kind = BookmarkKind.ReaderBookmarkLastReadLocation,
-        time = LocalDateTime.now(),
-        chapterTitle = "A Title",
-        bookProgress = 0.5,
-        deviceID = "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",
-        uri = null))
+      listOf(
+        Bookmark(
+          opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
+          location = BookLocation(BookChapterProgress(0, 0.5), null, "x"),
+          kind = BookmarkKind.ReaderBookmarkLastReadLocation,
+          time = LocalDateTime.now(),
+          chapterTitle = "A Title",
+          bookProgress = 0.5,
+          deviceID = "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",
+          uri = null
+        )
+      )
 
     val format =
       BookFormat.BookFormatEPUB(
@@ -566,26 +591,31 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+    )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSaved::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+    )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       2,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+    )
 
     Assert.assertEquals(2, receivedBookmarks.size)
     Assert.assertEquals(
       "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-      receivedBookmarks[0].opdsId)
+      receivedBookmarks[0].opdsId
+    )
     Assert.assertEquals(
       "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-      receivedBookmarks[1].opdsId)
+      receivedBookmarks[1].opdsId
+    )
   }
 }

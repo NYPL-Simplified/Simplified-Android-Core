@@ -25,7 +25,8 @@ class AccountProviderDescriptionParsers : AccountProviderDescriptionParsersType 
     return AccountProviderDescriptionParser(
       uri = uri,
       objectNode = { objectNode },
-      warningsAsErrors = warningsAsErrors)
+      warningsAsErrors = warningsAsErrors
+    )
   }
 
   override fun createParser(
@@ -36,6 +37,7 @@ class AccountProviderDescriptionParsers : AccountProviderDescriptionParsersType 
     return AccountProviderDescriptionParser(
       uri = uri,
       objectNode = { JSONParserUtilities.checkObject(null, ObjectMapper().readTree(stream)) },
-      warningsAsErrors = warningsAsErrors)
+      warningsAsErrors = warningsAsErrors
+    )
   }
 }

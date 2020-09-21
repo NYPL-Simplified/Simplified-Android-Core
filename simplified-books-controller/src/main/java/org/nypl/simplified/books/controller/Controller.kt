@@ -198,7 +198,8 @@ class Controller private constructor(
         ProfileAccountProviderUpdatedTask(
           profile = profileCurrent,
           accountProviderID = event.id,
-          accountProviders = this.accountProviders)
+          accountProviders = this.accountProviders
+        )
       }
     } else {
       this.logger.debug("no profile is current")
@@ -253,35 +254,41 @@ class Controller private constructor(
   override fun profileDelete(
     profileID: ProfileID
   ): FluentFuture<ProfileDeletionEvent> {
-    return this.submitTask(ProfileDeletionTask(
-      this.profiles,
-      this.profileEvents,
-      profileID
-    ))
+    return this.submitTask(
+      ProfileDeletionTask(
+        this.profiles,
+        this.profileEvents,
+        profileID
+      )
+    )
   }
 
   override fun profileCreate(
     accountProvider: AccountProviderType,
     description: ProfileDescription
   ): FluentFuture<ProfileCreationEvent> {
-    return this.submitTask(ProfileCreationTask(
-      profiles = this.profiles,
-      profileEvents = this.profileEvents,
-      accountProvider = accountProvider,
-      description = description
-    ))
+    return this.submitTask(
+      ProfileCreationTask(
+        profiles = this.profiles,
+        profileEvents = this.profileEvents,
+        accountProvider = accountProvider,
+        description = description
+      )
+    )
   }
 
   override fun profileSelect(
     profileID: ProfileID
   ): FluentFuture<Unit> {
-    return this.submitTask(ProfileSelectionTask(
-      analytics = this.analytics,
-      bookRegistry = this.bookRegistry,
-      events = this.profileEvents,
-      id = profileID,
-      profiles = this.profiles
-    ))
+    return this.submitTask(
+      ProfileSelectionTask(
+        analytics = this.analytics,
+        bookRegistry = this.bookRegistry,
+        events = this.profileEvents,
+        id = profileID,
+        profiles = this.profiles
+      )
+    )
   }
 
   override fun profileAccountLogin(
@@ -328,51 +335,59 @@ class Controller private constructor(
   override fun profileAccountCreateOrReturnExisting(
     provider: URI
   ): FluentFuture<TaskResult<AccountType>> {
-    return this.submitTask(ProfileAccountCreateOrReturnExistingTask(
-      accountEvents = this.accountEvents,
-      accountProviderID = provider,
-      accountProviders = this.accountProviders,
-      profiles = this.profiles,
-      strings = this.profileAccountCreationStringResources
-    ))
+    return this.submitTask(
+      ProfileAccountCreateOrReturnExistingTask(
+        accountEvents = this.accountEvents,
+        accountProviderID = provider,
+        accountProviders = this.accountProviders,
+        profiles = this.profiles,
+        strings = this.profileAccountCreationStringResources
+      )
+    )
   }
 
   override fun profileAccountCreateCustomOPDS(
     opdsFeed: URI
   ): FluentFuture<TaskResult<AccountType>> {
-    return this.submitTask(ProfileAccountCreateCustomOPDSTask(
-      accountEvents = this.accountEvents,
-      accountProviderRegistry = this.accountProviders,
-      http = this.http,
-      opdsURI = opdsFeed,
-      opdsFeedParser = this.feedParser,
-      profiles = this.profiles,
-      strings = this.profileAccountCreationStringResources
-    ))
+    return this.submitTask(
+      ProfileAccountCreateCustomOPDSTask(
+        accountEvents = this.accountEvents,
+        accountProviderRegistry = this.accountProviders,
+        http = this.http,
+        opdsURI = opdsFeed,
+        opdsFeedParser = this.feedParser,
+        profiles = this.profiles,
+        strings = this.profileAccountCreationStringResources
+      )
+    )
   }
 
   override fun profileAccountCreate(
     provider: URI
   ): FluentFuture<TaskResult<AccountType>> {
-    return this.submitTask(ProfileAccountCreateTask(
-      accountEvents = this.accountEvents,
-      accountProviderID = provider,
-      accountProviders = this.accountProviders,
-      profiles = this.profiles,
-      strings = this.profileAccountCreationStringResources
-    ))
+    return this.submitTask(
+      ProfileAccountCreateTask(
+        accountEvents = this.accountEvents,
+        accountProviderID = provider,
+        accountProviders = this.accountProviders,
+        profiles = this.profiles,
+        strings = this.profileAccountCreationStringResources
+      )
+    )
   }
 
   override fun profileAccountDeleteByProvider(
     provider: URI
   ): FluentFuture<TaskResult<Unit>> {
-    return this.submitTask(ProfileAccountDeleteTask(
-      accountEvents = this.accountEvents,
-      accountProviderID = provider,
-      profiles = this.profiles,
-      profileEvents = this.profileEvents,
-      strings = this.profileAccountDeletionStringResources
-    ))
+    return this.submitTask(
+      ProfileAccountDeleteTask(
+        accountEvents = this.accountEvents,
+        accountProviderID = provider,
+        profiles = this.profiles,
+        profileEvents = this.profileEvents,
+        strings = this.profileAccountDeletionStringResources
+      )
+    )
   }
 
   @Throws(ProfileNoneCurrentException::class, AccountsDatabaseNonexistentException::class)
@@ -392,7 +407,8 @@ class Controller private constructor(
       this.profileCurrent()
         .accountsByProvider()
         .values
-        .map { account -> account.provider })
+        .map { account -> account.provider }
+    )
   }
 
   override fun profileAccountLogout(
@@ -443,11 +459,13 @@ class Controller private constructor(
   override fun profileFeed(
     request: ProfileFeedRequest
   ): FluentFuture<Feed.FeedWithoutGroups> {
-    return this.submitTask(ProfileFeedTask(
-      bookRegistry = this.bookRegistry,
-      profiles = this,
-      request = request
-    ))
+    return this.submitTask(
+      ProfileFeedTask(
+        bookRegistry = this.bookRegistry,
+        profiles = this,
+        request = request
+      )
+    )
   }
 
   @Throws(ProfileNoneCurrentException::class, AccountsDatabaseNonexistentException::class)
@@ -492,14 +510,16 @@ class Controller private constructor(
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDownload(bookID)
-    return this.submitTask(BookBorrowWithDefaultAcquisitionTask(
-      accountId = accountID,
-      bookId = bookID,
-      cacheDirectory = this.cacheDirectory,
-      downloads = this.downloads,
-      entry = entry,
-      services = this.bookTaskRequiredServices
-    ))
+    return this.submitTask(
+      BookBorrowWithDefaultAcquisitionTask(
+        accountId = accountID,
+        bookId = bookID,
+        cacheDirectory = this.cacheDirectory,
+        downloads = this.downloads,
+        entry = entry,
+        services = this.bookTaskRequiredServices
+      )
+    )
   }
 
   override fun bookBorrow(
@@ -509,22 +529,27 @@ class Controller private constructor(
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDownload(bookID)
-    return this.submitTask(BookBorrowTask(
-      accountId = accountID,
-      acquisition = acquisition,
-      bookId = bookID,
-      cacheDirectory = this.cacheDirectory,
-      downloads = this.downloads,
-      entry = entry,
-      services = this.bookTaskRequiredServices
-    ))
+    return this.submitTask(
+      BookBorrowTask(
+        accountId = accountID,
+        acquisition = acquisition,
+        bookId = bookID,
+        cacheDirectory = this.cacheDirectory,
+        downloads = this.downloads,
+        entry = entry,
+        services = this.bookTaskRequiredServices
+      )
+    )
   }
 
   private fun publishRequestingDownload(bookID: BookID) {
     this.bookRegistry.bookOrNull(bookID)?.let { bookWithStatus ->
-      this.bookRegistry.update(BookWithStatus(
-        book = bookWithStatus.book,
-        status = BookStatus.RequestingDownload(bookID)))
+      this.bookRegistry.update(
+        BookWithStatus(
+          book = bookWithStatus.book,
+          status = BookStatus.RequestingDownload(bookID)
+        )
+      )
     }
   }
 
@@ -532,11 +557,13 @@ class Controller private constructor(
     account: AccountType,
     bookID: BookID
   ) {
-    this.submitTask(BookBorrowFailedDismissTask(
-      bookDatabase = account.bookDatabase,
-      bookRegistry = this.bookRegistry,
-      id = bookID
-    ))
+    this.submitTask(
+      BookBorrowFailedDismissTask(
+        bookDatabase = account.bookDatabase,
+        bookRegistry = this.bookRegistry,
+        id = bookID
+      )
+    )
   }
 
   override fun bookBorrowFailedDismiss(
@@ -577,25 +604,29 @@ class Controller private constructor(
     feedEntry: FeedEntry.FeedEntryOPDS,
     reportType: String
   ): FluentFuture<Unit> {
-    return this.submitTask(BookReportTask(
-      http = this.http,
-      account = account,
-      feedEntry = feedEntry,
-      reportType = reportType
-    ))
+    return this.submitTask(
+      BookReportTask(
+        http = this.http,
+        account = account,
+        feedEntry = feedEntry,
+        reportType = reportType
+      )
+    )
   }
 
   override fun booksSync(
     account: AccountType
   ): FluentFuture<Unit> {
-    return this.submitTask(BookSyncTask(
-      account = account,
-      accountRegistry = this.accountProviders,
-      bookRegistry = this.bookRegistry,
-      booksController = this,
-      feedParser = this.feedParser,
-      http = this.http
-    ))
+    return this.submitTask(
+      BookSyncTask(
+        account = account,
+        accountRegistry = this.accountProviders,
+        bookRegistry = this.bookRegistry,
+        booksController = this,
+        feedParser = this.feedParser,
+        http = this.http
+      )
+    )
   }
 
   override fun bookRevoke(
@@ -603,14 +634,16 @@ class Controller private constructor(
     bookId: BookID
   ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDelete(bookId)
-    return this.submitTask(BookRevokeTask(
-      account = account,
-      adobeDRM = this.adobeDrm,
-      bookID = bookId,
-      bookRegistry = this.bookRegistry,
-      feedLoader = this.feedLoader,
-      revokeStrings = this.revokeStrings
-    ))
+    return this.submitTask(
+      BookRevokeTask(
+        account = account,
+        adobeDRM = this.adobeDrm,
+        bookID = bookId,
+        bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
+        revokeStrings = this.revokeStrings
+      )
+    )
   }
 
   override fun bookRevoke(
@@ -628,12 +661,14 @@ class Controller private constructor(
     bookId: BookID
   ): FluentFuture<Unit> {
     this.publishRequestingDelete(bookId)
-    return this.submitTask(BookDeleteTask(
-      accountId = account,
-      bookRegistry = this.bookRegistry,
-      bookId = bookId,
-      profiles = this.profiles
-    ))
+    return this.submitTask(
+      BookDeleteTask(
+        accountId = account,
+        bookRegistry = this.bookRegistry,
+        bookId = bookId,
+        profiles = this.profiles
+      )
+    )
   }
 
   override fun bookDelete(
@@ -641,19 +676,24 @@ class Controller private constructor(
     bookId: BookID
   ): FluentFuture<Unit> {
     this.publishRequestingDelete(bookId)
-    return this.submitTask(BookDeleteTask(
-      accountId = account.id,
-      bookRegistry = this.bookRegistry,
-      bookId = bookId,
-      profiles = this.profiles
-    ))
+    return this.submitTask(
+      BookDeleteTask(
+        accountId = account.id,
+        bookRegistry = this.bookRegistry,
+        bookId = bookId,
+        profiles = this.profiles
+      )
+    )
   }
 
   private fun publishRequestingDelete(bookId: BookID) {
     this.bookRegistry.bookOrNull(bookId)?.let { bookWithStatus ->
-      this.bookRegistry.update(BookWithStatus(
-        book = bookWithStatus.book,
-        status = BookStatus.RequestingRevoke(bookId)))
+      this.bookRegistry.update(
+        BookWithStatus(
+          book = bookWithStatus.book,
+          status = BookStatus.RequestingRevoke(bookId)
+        )
+      )
     }
   }
 
@@ -670,11 +710,13 @@ class Controller private constructor(
     account: AccountType,
     bookID: BookID
   ): FluentFuture<Unit> {
-    return this.submitTask(BookRevokeFailedDismissTask(
-      bookDatabase = account.bookDatabase,
-      bookRegistry = this.bookRegistry,
-      bookId = bookID
-    ))
+    return this.submitTask(
+      BookRevokeFailedDismissTask(
+        bookDatabase = account.bookDatabase,
+        bookRegistry = this.bookRegistry,
+        bookId = bookID
+      )
+    )
   }
 
   override fun profileAnyIsCurrent(): Boolean =

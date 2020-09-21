@@ -228,32 +228,34 @@ class AccountsDatabase private constructor(
     }
 
     override fun setAccountProvider(accountProvider: AccountProviderType) {
-      this.setDescription(FunctionType { existing ->
+      this.setDescription(
+        FunctionType { existing ->
 
-        val existingProvider = existing.provider()
-        if (existingProvider.id != accountProvider.id) {
-          throw AccountsDatabaseWrongProviderException(
-            "Provider id ${accountProvider.id} does not match the existing id ${existingProvider.id}"
-          )
-        }
-        if (existingProvider.updated.isAfter(accountProvider.updated)) {
-          logger.warn(
-            "attempted to update provider {} with an older definition",
-            existingProvider.id
-          )
-          return@FunctionType existing
-        }
+          val existingProvider = existing.provider()
+          if (existingProvider.id != accountProvider.id) {
+            throw AccountsDatabaseWrongProviderException(
+              "Provider id ${accountProvider.id} does not match the existing id ${existingProvider.id}"
+            )
+          }
+          if (existingProvider.updated.isAfter(accountProvider.updated)) {
+            logger.warn(
+              "attempted to update provider {} with an older definition",
+              existingProvider.id
+            )
+            return@FunctionType existing
+          }
 
-        val modifiedDescription =
-          existing.toBuilder()
-            .setProvider(accountProvider)
-            .build()
+          val modifiedDescription =
+            existing.toBuilder()
+              .setProvider(accountProvider)
+              .build()
 
-        check(accountProvider == modifiedDescription.provider()) {
-          "Account providers must match"
+          check(accountProvider == modifiedDescription.provider()) {
+            "Account providers must match"
+          }
+          modifiedDescription
         }
-        modifiedDescription
-      })
+      )
     }
 
     override val provider: AccountProviderType
@@ -302,9 +304,11 @@ class AccountsDatabase private constructor(
 
     @Throws(AccountsDatabaseException::class)
     override fun setPreferences(preferences: AccountPreferences) {
-      this.setDescription(FunctionType { accountDescription ->
-        accountDescription.toBuilder().setPreferences(preferences).build()
-      })
+      this.setDescription(
+        FunctionType { accountDescription ->
+          accountDescription.toBuilder().setPreferences(preferences).build()
+        }
+      )
     }
 
     @Throws(AccountsDatabaseIOException::class)
@@ -422,7 +426,6 @@ class AccountsDatabase private constructor(
       accountProviders: AccountProviderRegistryType,
       directory: File
     ): AccountsDatabaseType {
-
       this.logger.debug("opening account database: {}", directory)
 
       val accounts = ConcurrentSkipListMap<AccountID, Account>()
@@ -483,9 +486,12 @@ class AccountsDatabase private constructor(
         accountProviders.findAccountProviderDescription(URI(id)) ?: return null
 
       val result =
-        accountProviders.resolve({ _, message ->
-          accountEvents.onNext(AccountEventCreation.AccountEventCreationInProgress(message))
-        }, description)
+        accountProviders.resolve(
+          { _, message ->
+            accountEvents.onNext(AccountEventCreation.AccountEventCreationInProgress(message))
+          },
+          description
+        )
 
       return when (result) {
         is TaskResult.Success -> result.result
@@ -505,7 +511,6 @@ class AccountsDatabase private constructor(
       errors: MutableList<Exception>,
       objectMapper: ObjectMapper
     ) {
-
       val accountDirs = directory.list()
       if (accountDirs != null) {
         for (index in accountDirs.indices) {
@@ -564,7 +569,6 @@ class AccountsDatabase private constructor(
       directory: File,
       accountIdName: String
     ): AccountID? {
-
       /*
        * If the account directory is not a directory, then give up.
        */
@@ -600,7 +604,6 @@ class AccountsDatabase private constructor(
       ownerDirectory: File,
       existingDirectory: File
     ): AccountID? {
-
       this.logger.debug("attempting to migrate {} directory", existingDirectory)
 
       for (index in 0..99) {
@@ -646,7 +649,6 @@ class AccountsDatabase private constructor(
       errors: MutableList<Exception>,
       objectMapper: ObjectMapper
     ): Account? {
-
       val accountId =
         this.openOneAccountDirectory(errors, directory, accountIdName) ?: return null
       val accountDir =
@@ -722,7 +724,6 @@ class AccountsDatabase private constructor(
       accountFileTemp: File,
       description: AccountDescription
     ) {
-
       FileLocking.withFileThreadLocked<Unit, IOException>(
         accountLock, 1000L
       ) {

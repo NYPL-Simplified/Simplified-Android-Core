@@ -144,7 +144,6 @@ abstract class ProfilesControllerContract {
     profiles: ProfilesDatabaseType,
     accountProviders: AccountProviderRegistryType
   ): ProfilesControllerType {
-
     val parser =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
     val transport =
@@ -317,7 +316,6 @@ abstract class ProfilesControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testProfilesCurrentNoneCurrent() {
-
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
     val controller =
@@ -339,7 +337,6 @@ abstract class ProfilesControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testProfilesCurrentSelectCurrent() {
-
     val accountProvider =
       MockAccountProviders.fakeProvider("urn:fake:0")
     val accountProviders =
@@ -373,7 +370,6 @@ abstract class ProfilesControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testProfilesCreateDuplicate() {
-
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
 
@@ -414,7 +410,6 @@ abstract class ProfilesControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testProfilesPreferences() {
-
     val profiles =
       this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
     val accountProvider =
@@ -449,14 +444,14 @@ abstract class ProfilesControllerContract {
     controller.profileUpdate { description ->
       description.copy(
         preferences =
-        description.preferences.copy(
-          readerPreferences = ReaderPreferences.builder()
-            .setBrightness(0.2)
-            .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
-            .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
-            .setFontScale(2.0)
-            .build()
-        )
+          description.preferences.copy(
+            readerPreferences = ReaderPreferences.builder()
+              .setBrightness(0.2)
+              .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
+              .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
+              .setFontScale(2.0)
+              .build()
+          )
       )
     }.get()
 
@@ -478,7 +473,6 @@ abstract class ProfilesControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testProfilesFeed() {
-
     val accountProvider =
       MockAccountProviders.fakeProvider("urn:fake:0")
     val accountProviders =
@@ -514,7 +508,8 @@ abstract class ProfilesControllerContract {
               get() = "Author"
             override val sortByTitle: String
               get() = "Title"
-          })
+          }
+        )
       ).get()
 
     Assert.assertEquals(0L, feed.size.toLong())

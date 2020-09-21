@@ -26,7 +26,8 @@ sealed class TaskResult<A> : PresentableType {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
-        "Must have logged at least one step")
+        "Must have logged at least one step"
+      )
     }
 
     override val message: String
@@ -44,7 +45,8 @@ sealed class TaskResult<A> : PresentableType {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
-        "Must have logged at least one step")
+        "Must have logged at least one step"
+      )
     }
 
     override val exception: Throwable?

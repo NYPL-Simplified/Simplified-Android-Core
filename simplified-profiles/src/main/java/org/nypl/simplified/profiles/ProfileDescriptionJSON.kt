@@ -90,7 +90,6 @@ object ProfileDescriptionJSON {
     objectMapper: ObjectMapper,
     node: JsonNode
   ): ProfileDescription {
-
     val obj =
       JSONParserUtilities.checkObject(null, node)
     val version =
@@ -160,7 +159,6 @@ object ProfileDescriptionJSON {
     objectMapper: ObjectMapper,
     objectNode: ObjectNode
   ): ProfilePreferences {
-
     val dateFormatter =
       this.standardDateFormatter()
 
@@ -207,7 +205,6 @@ object ProfileDescriptionJSON {
     objectMapper: ObjectMapper,
     objectNode: ObjectNode
   ): ProfilePreferences {
-
     val dateFormatter =
       this.standardDateFormatter()
 

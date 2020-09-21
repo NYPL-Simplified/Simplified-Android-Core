@@ -88,7 +88,8 @@ object AccountDescriptionJSON {
     val preferences: AccountPreferences
     if (obj.has("preferences")) {
       preferences = AccountPreferencesJSON.deserializeFromJSON(
-        JSONParserUtilities.getObject(obj, "preferences"))
+        JSONParserUtilities.getObject(obj, "preferences")
+      )
     } else {
       preferences = AccountPreferences.defaultPreferences()
     }
@@ -97,7 +98,8 @@ object AccountDescriptionJSON {
       when (val value = obj["provider"]) {
         is ObjectNode ->
           AccountProvidersJSON.deserializeFromJSON(
-            JSONParserUtilities.getObject(obj, "provider"))
+            JSONParserUtilities.getObject(obj, "provider")
+          )
 
         is TextNode -> {
           this.logger.warn("encountered old-style provider ID in account JSON")
@@ -130,15 +132,16 @@ object AccountDescriptionJSON {
     objectMapper: ObjectMapper,
     description: AccountDescription
   ): ObjectNode {
-
     val objectNode = objectMapper.createObjectNode()
     objectNode.put("@version", 20191204)
     objectNode.set<JsonNode>(
       "provider",
-      AccountProvidersJSON.serializeToJSON(description.provider()))
+      AccountProvidersJSON.serializeToJSON(description.provider())
+    )
     objectNode.set<JsonNode>(
       "preferences",
-      AccountPreferencesJSON.serializeToJSON(objectMapper, description.preferences()))
+      AccountPreferencesJSON.serializeToJSON(objectMapper, description.preferences())
+    )
 
     return objectNode
   }

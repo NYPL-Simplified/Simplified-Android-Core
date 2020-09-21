@@ -45,6 +45,8 @@ class ReviewFragment : Fragment() {
   private val viewModel: PatronViewModel by viewModels()
   private val platformViewModel: PlatformViewModel by viewModels()
 
+  private var dialog: AlertDialog? = null
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -80,83 +82,101 @@ class ReviewFragment : Fragment() {
       goBack()
     }
 
-    viewModel.createPatronResponse.observe(viewLifecycleOwner, Observer { response ->
-      showLoading(false)
-      Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-      if (response.type == cardGranted) {
-        logger.debug("User navigated to the next screen")
-        logger.debug("Card granted")
-        nextAction = ReviewFragmentDirections.actionNext(
-          response.username,
-          response.barcode,
-          response.pin,
-          response.type,
-          response.temporary,
-          response.message,
-          "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}")
-        navController.navigate(nextAction)
+    viewModel.createPatronResponse.observe(
+      viewLifecycleOwner,
+      Observer { response ->
+        showLoading(false)
+        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+        if (response.type == cardGranted) {
+          logger.debug("User navigated to the next screen")
+          logger.debug("Card granted")
+          nextAction = ReviewFragmentDirections.actionNext(
+            response.username,
+            response.barcode,
+            response.pin,
+            response.type,
+            response.temporary,
+            response.message,
+            "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}"
+          )
+          navController.navigate(nextAction)
+        }
       }
-    })
+    )
 
-    platformViewModel.juvenilePatronResponse.observe(viewLifecycleOwner, Observer { response ->
-      showLoading(false)
-      Toast.makeText(activity, "Card created", Toast.LENGTH_SHORT).show()
-      if (response.status == 200) {
-        logger.debug("User navigated to the next screen")
-        logger.debug("Card granted")
-        nextAction = ReviewFragmentDirections.actionNext(
-          response.data.dependent.username,
-          response.data.dependent.barcode,
-          response.data.dependent.pin,
-          "dependent",
-          false,
-          "Card created",
-          "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}")
-        navController.navigate(nextAction)
+    platformViewModel.juvenilePatronResponse.observe(
+      viewLifecycleOwner,
+      Observer { response ->
+        showLoading(false)
+        Toast.makeText(activity, "Card created", Toast.LENGTH_SHORT).show()
+        if (response.status == 200) {
+          logger.debug("User navigated to the next screen")
+          logger.debug("Card granted")
+          nextAction = ReviewFragmentDirections.actionNext(
+            response.data.dependent.username,
+            response.data.dependent.barcode,
+            response.data.dependent.pin,
+            "dependent",
+            false,
+            "Card created",
+            "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}"
+          )
+          navController.navigate(nextAction)
+        }
       }
-    })
+    )
 
-    viewModel.apiError.observe(viewLifecycleOwner, Observer {
-      showLoading(false)
-      var error = getString(R.string.create_card_general_error)
-      if (it != null) {
-        error = getString(R.string.create_card_error, it)
+    viewModel.apiError.observe(
+      viewLifecycleOwner,
+      Observer {
+        showLoading(false)
+        var error = getString(R.string.create_card_general_error)
+        if (it != null) {
+          error = getString(R.string.create_card_error, it)
+        }
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setMessage(error)
+          .setCancelable(false)
+          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+            createPatron()
+          }
+          .setNegativeButton(getString(R.string.quit)) { _, _ ->
+            Cache(requireContext()).clear()
+            requireActivity().setResult(Activity.RESULT_CANCELED)
+            requireActivity().finish()
+          }
+        if (dialog == null) {
+          dialog = dialogBuilder.create()
+        }
+        dialog?.show()
       }
-      val dialogBuilder = AlertDialog.Builder(requireContext())
-      dialogBuilder.setMessage(error)
-        .setCancelable(false)
-        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-          createPatron()
-        }
-        .setNegativeButton(getString(R.string.quit)) { _, _ ->
-          Cache(requireContext()).clear()
-          requireActivity().setResult(Activity.RESULT_CANCELED)
-          requireActivity().finish()
-        }
-      val alert = dialogBuilder.create()
-      alert.show()
-    })
+    )
 
-    platformViewModel.apiError.observe(viewLifecycleOwner, Observer {
-      showLoading(false)
-      var error = getString(R.string.create_card_general_error)
-      if (it != null) {
-        error = getString(R.string.create_card_error, it)
+    platformViewModel.apiError.observe(
+      viewLifecycleOwner,
+      Observer {
+        showLoading(false)
+        var error = getString(R.string.create_card_general_error)
+        if (it != null) {
+          error = getString(R.string.create_card_error, it)
+        }
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setMessage(error)
+          .setCancelable(false)
+          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+            createJuvenilePatron()
+          }
+          .setNegativeButton(getString(R.string.quit)) { _, _ ->
+            Cache(requireContext()).clear()
+            requireActivity().setResult(Activity.RESULT_CANCELED)
+            requireActivity().finish()
+          }
+        if (dialog == null) {
+          dialog = dialogBuilder.create()
+        }
+        dialog?.show()
       }
-      val dialogBuilder = AlertDialog.Builder(requireContext())
-      dialogBuilder.setMessage(error)
-        .setCancelable(false)
-        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-          createJuvenilePatron()
-        }
-        .setNegativeButton(getString(R.string.quit)) { _, _ ->
-          Cache(requireContext()).clear()
-          requireActivity().setResult(Activity.RESULT_CANCELED)
-          requireActivity().finish()
-        }
-      val alert = dialogBuilder.create()
-      alert.show()
-    })
+    )
 
     val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
       goBack()
@@ -173,7 +193,8 @@ class ReviewFragment : Fragment() {
     viewModel.createPatron(
       getPatron(),
       requireActivity().intent.extras.getString("username"),
-      requireActivity().intent.extras.getString("password"))
+      requireActivity().intent.extras.getString("password")
+    )
   }
 
   private fun createJuvenilePatron() {
@@ -186,7 +207,8 @@ class ReviewFragment : Fragment() {
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
         ),
-        getCache().token!!)
+        getCache().token!!
+      )
     } else {
       platformViewModel.createJuvenileCardWithUsernameParent(
         UsernameParent(
@@ -195,7 +217,8 @@ class ReviewFragment : Fragment() {
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
         ),
-        getCache().token!!)
+        getCache().token!!
+      )
     }
   }
 
@@ -216,7 +239,8 @@ class ReviewFragment : Fragment() {
           personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
-          null)
+          null
+        )
       }
       cache.getSchoolAddress().line_1.isEmpty() -> {
         return Patron(
@@ -227,7 +251,8 @@ class ReviewFragment : Fragment() {
           personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
-          workAddress)
+          workAddress
+        )
       }
       else -> {
         return Patron(
@@ -238,7 +263,8 @@ class ReviewFragment : Fragment() {
           personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
-          schoolAddress)
+          schoolAddress
+        )
       }
     }
   }
@@ -300,5 +326,10 @@ class ReviewFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }

@@ -80,7 +80,6 @@ object CatalogBookAvailabilityStrings {
     resources: Resources,
     expiryOpt: OptionType<DateTime>
   ): String {
-
     /*
      * If there is an expiry time, display it.
      */
@@ -89,7 +88,8 @@ object CatalogBookAvailabilityStrings {
       val expiry = expiryOpt.get()
       val now = DateTime.now()
       return resources.getString(
-        R.string.catalogBookAvailabilityLoanedTimed, this.intervalString(resources, now, expiry))
+        R.string.catalogBookAvailabilityLoanedTimed, this.intervalString(resources, now, expiry)
+      )
     }
 
     /*
@@ -103,7 +103,6 @@ object CatalogBookAvailabilityStrings {
     resources: Resources,
     expiryOpt: OptionType<DateTime>
   ): String {
-
     /*
      * If there is an expiry time, display it.
      */
@@ -113,7 +112,8 @@ object CatalogBookAvailabilityStrings {
       val now = DateTime.now()
       return resources.getString(
         R.string.catalogBookAvailabilityReservedTimed,
-        this.intervalString(resources, now, expiry))
+        this.intervalString(resources, now, expiry)
+      )
     }
 
     /*
@@ -128,7 +128,6 @@ object CatalogBookAvailabilityStrings {
     endDateOpt: OptionType<DateTime>,
     queuePositionOpt: OptionType<Int>
   ): String {
-
     /*
      * If there is an availability date, show this in preference to
      * anything else.
@@ -139,7 +138,8 @@ object CatalogBookAvailabilityStrings {
       val now = DateTime.now()
       return resources.getString(
         R.string.catalogBookAvailabilityHeldTimed,
-        this.intervalString(resources, now, endDate))
+        this.intervalString(resources, now, endDate)
+      )
     }
 
     /*
@@ -178,7 +178,6 @@ object CatalogBookAvailabilityStrings {
     lower: DateTime,
     upper: DateTime
   ): String {
-
     val hours = this.calendarHoursBetween(lower, upper)
 
     if (hours < 1) {
@@ -208,7 +207,6 @@ object CatalogBookAvailabilityStrings {
     lower: DateTime,
     upper: DateTime
   ): String {
-
     val hours = this.calendarHoursBetween(lower, upper)
     val days = TimeUnit.HOURS.toDays(hours)
     val weeks = days / 7

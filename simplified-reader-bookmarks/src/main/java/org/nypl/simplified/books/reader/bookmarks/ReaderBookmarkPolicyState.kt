@@ -22,7 +22,8 @@ data class ReaderBookmarkPolicyState(
 
   val bookmarksAll: Lazy<Map<BookmarkID, ReaderBookmarkState>> = lazy {
     this.bookmarksByAccount.values.fold(mapOf<BookmarkID, ReaderBookmarkState>()) {
-      accumulated, current -> accumulated.plus(current)
+      accumulated, current ->
+      accumulated.plus(current)
     }
   }
 
@@ -35,7 +36,8 @@ data class ReaderBookmarkPolicyState(
     fun empty(): ReaderBookmarkPolicyState {
       return create(
         initialAccounts = setOf(),
-        locallySaved = mapOf())
+        locallySaved = mapOf()
+      )
     }
 
     /**
@@ -49,15 +51,18 @@ data class ReaderBookmarkPolicyState(
       initialAccounts: Set<ReaderBookmarkPolicyAccountState>,
       locallySaved: Map<AccountID, Set<Bookmark>>
     ): ReaderBookmarkPolicyState {
-
       val states: Map<AccountID, Map<BookmarkID, ReaderBookmarkState>> =
         locallySaved.mapValues { savedEntry ->
           savedEntry.value.map { bookmark ->
-            Pair(bookmark.bookmarkId, ReaderBookmarkState(
-              account = savedEntry.key,
-              bookmark = bookmark,
-              localState = ReaderBookmarkLocalState.Saved,
-              remoteState = ReaderBookmarkRemoteState.Unknown))
+            Pair(
+              bookmark.bookmarkId,
+              ReaderBookmarkState(
+                account = savedEntry.key,
+                bookmark = bookmark,
+                localState = ReaderBookmarkLocalState.Saved,
+                remoteState = ReaderBookmarkRemoteState.Unknown
+              )
+            )
           }.toMap()
         }
 
@@ -66,7 +71,8 @@ data class ReaderBookmarkPolicyState(
 
       return ReaderBookmarkPolicyState(
         accountState = accounts,
-        bookmarksByAccount = states.toMap())
+        bookmarksByAccount = states.toMap()
+      )
     }
   }
 }

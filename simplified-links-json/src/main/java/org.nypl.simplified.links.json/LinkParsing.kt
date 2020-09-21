@@ -52,29 +52,29 @@ object LinkParsing {
       ParseResult.Success(
         warnings = listOf(),
         result =
-        if (templated) {
-          Link.LinkTemplated(
-            href = JSONParserUtilities.getString(objectNode, "href"),
-            type = mime,
-            relation = relation,
-            title = title,
-            width = width,
-            height = height,
-            duration = duration,
-            bitrate = bitrate
-          )
-        } else {
-          Link.LinkBasic(
-            href = JSONParserUtilities.getURI(objectNode, "href"),
-            type = mime,
-            relation = relation,
-            title = title,
-            width = width,
-            height = height,
-            duration = duration,
-            bitrate = bitrate
-          )
-        }
+          if (templated) {
+            Link.LinkTemplated(
+              href = JSONParserUtilities.getString(objectNode, "href"),
+              type = mime,
+              relation = relation,
+              title = title,
+              width = width,
+              height = height,
+              duration = duration,
+              bitrate = bitrate
+            )
+          } else {
+            Link.LinkBasic(
+              href = JSONParserUtilities.getURI(objectNode, "href"),
+              type = mime,
+              relation = relation,
+              title = title,
+              width = width,
+              height = height,
+              duration = duration,
+              bitrate = bitrate
+            )
+          }
       )
     } catch (e: JSONParseException) {
       this.logger.error("error parsing link object: ", e)

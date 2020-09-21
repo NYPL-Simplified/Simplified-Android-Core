@@ -129,7 +129,8 @@ class ProfileAccountLoginTask(
     } catch (e: Throwable) {
       this.logger.error("error during login process: ", e)
       this.steps.currentStepFailedAppending(
-        this.loginStrings.loginUnexpectedException, "unexpectedException", e)
+        this.loginStrings.loginUnexpectedException, "unexpectedException", e
+      )
       val failure = this.steps.finishFailure<Unit>()
       this.account.setLoginState(AccountLoginFailed(failure))
       failure

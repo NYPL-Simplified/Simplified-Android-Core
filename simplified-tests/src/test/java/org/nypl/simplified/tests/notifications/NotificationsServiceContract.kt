@@ -81,14 +81,16 @@ abstract class NotificationsServiceContract {
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
         MIMEParser.parseRaisingException("application/vnd.adobe.adept+xml"),
-        listOf())
+        listOf()
+      )
 
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder.addAcquisition(acquisition)
 
     val opdsEntryBuilder2 =
@@ -96,7 +98,8 @@ abstract class NotificationsServiceContract {
         "b",
         "Title B",
         DateTime.now(),
-        OPDSAvailabilityLoanable.get())
+        OPDSAvailabilityLoanable.get()
+      )
     opdsEntryBuilder2.addAcquisition(acquisition)
 
     val opdsEntry =
@@ -115,7 +118,8 @@ abstract class NotificationsServiceContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
-        formats = listOf())
+        formats = listOf()
+      )
 
     val bookId2 =
       BookID.create("b")
@@ -127,7 +131,8 @@ abstract class NotificationsServiceContract {
         cover = null,
         thumbnail = null,
         entry = opdsEntry2,
-        formats = listOf())
+        formats = listOf()
+      )
 
     val bookStatusHeld = Mockito.mock(BookStatus.Held.HeldInQueue::class.java)
     Mockito.`when`(bookStatusHeld.id).thenReturn(bookId)
@@ -217,7 +222,6 @@ abstract class NotificationsServiceContract {
 
   @Test(timeout = 3_000L)
   fun testProfileEventSubscriptionAndUnsubscription() {
-
     /**
      * Create a countdown latch that only accepts one count down.
      */

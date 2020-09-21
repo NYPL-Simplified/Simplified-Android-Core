@@ -26,5 +26,6 @@ data class ParseWarning(
       message = this.message,
       line = this.line,
       column = this.column,
-      exception = this.exception)
+      exception = this.exception
+    )
 }

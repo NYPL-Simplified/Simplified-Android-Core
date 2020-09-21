@@ -35,7 +35,8 @@ class BookCoverGeneratorRequestHandler(
       val bitmap = this.generator.generateImage(
         NullCheck.notNull(URI.create(request.uri.toString())),
         request.targetWidth,
-        request.targetHeight)
+        request.targetHeight
+      )
       return Result(bitmap, LoadedFrom.MEMORY)
     } catch (e: Throwable) {
       throw IOException(e)

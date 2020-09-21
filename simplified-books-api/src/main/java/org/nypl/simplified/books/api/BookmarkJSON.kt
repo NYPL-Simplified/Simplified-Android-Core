@@ -39,7 +39,8 @@ object BookmarkJSON {
     return deserializeFromJSON(
       objectMapper = objectMapper,
       kind = kind,
-      node = JSONParserUtilities.checkObject(null, node))
+      node = JSONParserUtilities.checkObject(null, node)
+    )
   }
 
   /**
@@ -59,16 +60,34 @@ object BookmarkJSON {
     kind: BookmarkKind,
     node: ObjectNode
   ): Bookmark {
+    // Older bookmarks store chapter progress in a top-level property, instead of inside
+    // location.progress.
+
+    val chapterProgress = JSONParserUtilities.getDouble(node, "chapterProgress")
+
+    val deserializedLocation = BookLocationJSON.deserializeFromJSON(
+      objectMapper, JSONParserUtilities.getObject(node, "location")
+    )
+
+    val location =
+      if (deserializedLocation.progress == null && chapterProgress != null) {
+        // If this is an older bookmark, move the chapter progress into location.progress. In this
+        // case the chapter index is unknown.
+        deserializedLocation.copy(progress = BookChapterProgress(0, chapterProgress))
+      } else {
+        deserializedLocation
+      }
 
     return Bookmark(
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
-      location = BookLocationJSON.deserializeFromJSON(objectMapper, JSONParserUtilities.getObject(node, "location")),
+      location = location,
       time = LocalDateTime.parse(JSONParserUtilities.getString(node, "time")),
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
       uri = toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
-      deviceID = JSONParserUtilities.getStringDefault(node, "deviceID", null))
+      deviceID = JSONParserUtilities.getStringDefault(node, "deviceID", null)
+    )
   }
 
   private fun <T> toNullable(option: OptionType<T>): T? {
@@ -91,7 +110,6 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     description: Bookmark
   ): ObjectNode {
-
     val node = objectMapper.createObjectNode()
     node.put("opdsId", description.opdsId)
     val location = BookLocationJSON.serializeToJSON(objectMapper, description.location)
@@ -116,7 +134,6 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     bookmarks: List<Bookmark>
   ): ArrayNode {
-
     val node = objectMapper.createArrayNode()
     bookmarks.forEach { bookmark -> node.add(serializeToJSON(objectMapper, bookmark)) }
     return node
@@ -136,7 +153,6 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     description: Bookmark
   ): String {
-
     val json = serializeToJSON(objectMapper, description)
     val output = ByteArrayOutputStream(1024)
     JSONSerializerUtilities.serialize(json, output)
@@ -157,7 +173,6 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     bookmarks: List<Bookmark>
   ): String {
-
     val json = serializeToJSON(objectMapper, bookmarks)
     val output = ByteArrayOutputStream(1024)
     val writer = objectMapper.writerWithDefaultPrettyPrinter()

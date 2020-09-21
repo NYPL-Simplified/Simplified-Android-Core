@@ -253,7 +253,6 @@ sealed class Feed {
       feedFacets: List<FeedFacet>,
       feedFacetGroups: Map<String, List<FeedFacet>>
     ): FeedWithoutGroups {
-
       val mutableGroups =
         feedFacetGroups.mapValues { entry ->
           entry.value.toMutableList()
@@ -291,7 +290,6 @@ sealed class Feed {
       filter: (OPDSAcquisitionFeedEntry) -> Boolean,
       search: OPDSOpenSearch1_1?
     ): Feed {
-
       return if (feed.feedGroups.isEmpty()) {
         this.withoutGroups(accountId, feed, filter, search)
       } else {
@@ -313,7 +311,6 @@ sealed class Feed {
       filter: (OPDSAcquisitionFeedEntry) -> Boolean,
       search: OPDSOpenSearch1_1?
     ): FeedWithoutGroups {
-
       val facetsByGroup =
         this.constructFacetGroups(feed)
       val facetsOrder =
@@ -360,7 +357,6 @@ sealed class Feed {
       feed: OPDSAcquisitionFeed,
       search: OPDSOpenSearch1_1?
     ): FeedWithGroups {
-
       val facetsByGroup =
         this.constructFacetGroups(feed)
       val facetsOrder =

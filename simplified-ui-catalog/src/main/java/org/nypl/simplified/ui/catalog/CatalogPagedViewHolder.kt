@@ -383,10 +383,12 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
-    this.idleButtons.addView(this.buttonCreator.createDownloadButton {
-      this.openLoginDialogIfNecessary(book.account)
-      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-    })
+    this.idleButtons.addView(
+      this.buttonCreator.createDownloadButton {
+        this.openLoginDialogIfNecessary(book.account)
+        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+      }
+    )
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
@@ -399,10 +401,12 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
-    this.idleButtons.addView(this.buttonCreator.createGetButton {
-      this.openLoginDialogIfNecessary(book.account)
-      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-    })
+    this.idleButtons.addView(
+      this.buttonCreator.createGetButton {
+        this.openLoginDialogIfNecessary(book.account)
+        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+      }
+    )
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
@@ -415,10 +419,12 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.idleButtons.removeAllViews()
-    this.idleButtons.addView(this.buttonCreator.createReserveButton {
-      this.openLoginDialogIfNecessary(book.account)
-      this.borrowViewModel.tryReserveMaybeAuthenticated(book)
-    })
+    this.idleButtons.addView(
+      this.buttonCreator.createReserveButton {
+        this.openLoginDialogIfNecessary(book.account)
+        this.borrowViewModel.tryReserveMaybeAuthenticated(book)
+      }
+    )
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
@@ -438,12 +444,15 @@ class CatalogPagedViewHolder(
       this.idleButtons.addView(
         this.buttonCreator.createRevokeHoldButton {
           this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
-        })
+        }
+      )
     }
-    this.idleButtons.addView(this.buttonCreator.createGetButton {
-      this.openLoginDialogIfNecessary(book.account)
-      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-    })
+    this.idleButtons.addView(
+      this.buttonCreator.createGetButton {
+        this.openLoginDialogIfNecessary(book.account)
+        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+      }
+    )
   }
 
   @UiThread
@@ -461,7 +470,8 @@ class CatalogPagedViewHolder(
       this.idleButtons.addView(
         this.buttonCreator.createRevokeHoldButton {
           this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
-        })
+        }
+      )
       this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
       this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
     } else {
@@ -483,14 +493,18 @@ class CatalogPagedViewHolder(
     when (val format = book.findPreferredFormat()) {
       is BookFormat.BookFormatPDF,
       is BookFormat.BookFormatEPUB -> {
-        this.idleButtons.addView(this.buttonCreator.createReadButton {
-          this.navigation().openViewer(this.context, book, format)
-        })
+        this.idleButtons.addView(
+          this.buttonCreator.createReadButton {
+            this.navigation().openViewer(this.context, book, format)
+          }
+        )
       }
       is BookFormat.BookFormatAudioBook -> {
-        this.idleButtons.addView(this.buttonCreator.createListenButton {
-          this.navigation().openViewer(this.context, book, format)
-        })
+        this.idleButtons.addView(
+          this.buttonCreator.createListenButton {
+            this.navigation().openViewer(this.context, book, format)
+          }
+        )
       }
       null -> {
         this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
