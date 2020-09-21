@@ -156,8 +156,7 @@ class BookDatabase private constructor(
   override fun entry(id: BookID): BookDatabaseEntryType {
     synchronized(this.maps.mapsLock) {
       return this.maps.entries[id] ?: throw BookDatabaseException(
-        "Nonexistent book entry: " + id.value(),
-        emptyList()
+        "Nonexistent book entry: " + id.value(), emptyList()
       )
     }
   }
@@ -182,8 +181,7 @@ class BookDatabase private constructor(
       if (errors.isNotEmpty()) {
         errors.forEach { exception -> LOG.error("error opening book database: ", exception) }
         throw BookDatabaseException(
-          "One or more errors occurred whilst trying to open a book database.",
-          errors
+          "One or more errors occurred whilst trying to open a book database.", errors
         )
       }
 

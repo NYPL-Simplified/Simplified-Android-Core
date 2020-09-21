@@ -119,8 +119,7 @@ internal class ProfilesDatabase internal constructor(
 
     Preconditions.checkArgument(
       !this.profiles.containsKey(next),
-      "Profile ID %s cannot have been used",
-      next
+      "Profile ID %s cannot have been used", next
     )
 
     val profile =

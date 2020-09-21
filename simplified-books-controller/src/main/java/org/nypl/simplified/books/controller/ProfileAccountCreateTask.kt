@@ -77,16 +77,14 @@ class ProfileAccountCreateTask(
   private fun publishSuccessEvent(account: AccountType) =
     this.accountEvents.onNext(
       AccountEventCreationSucceeded(
-        this.strings.creatingAccountSucceeded,
-        account.id
+        this.strings.creatingAccountSucceeded, account.id
       )
     )
 
   private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
     this.accountEvents.onNext(
       AccountEventCreationFailed(
-        step.resolution.message,
-        this.taskRecorder.finishFailure<AccountType>()
+        step.resolution.message, this.taskRecorder.finishFailure<AccountType>()
       )
     )
 

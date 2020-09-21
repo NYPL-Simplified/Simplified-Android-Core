@@ -32,17 +32,14 @@ internal object AudioBookHelpers {
     val contentType = manifest.contentType
     if (handle == null) {
       this.logger.error(
-        "Bug: Book database entry has no audio book format handle",
-        IllegalStateException()
+        "Bug: Book database entry has no audio book format handle", IllegalStateException()
       )
       return
     }
 
     if (!handle.formatDefinition.supports(contentType)) {
       this.logger.error(
-        "Server delivered an unsupported content type: {}: ",
-        contentType,
-        IOException()
+        "Server delivered an unsupported content type: {}: ", contentType, IOException()
       )
       return
     }

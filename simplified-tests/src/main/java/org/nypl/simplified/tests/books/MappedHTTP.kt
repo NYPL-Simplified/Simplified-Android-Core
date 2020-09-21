@@ -54,8 +54,7 @@ class MappedHTTP(
     return HTTPResultError(
       404,
       "NOT FOUND",
-      0L,
-      mapOf(),
+      0L, mapOf(),
       0L,
       ByteArrayInputStream(ByteArray(1)),
       Option.none()

@@ -62,9 +62,7 @@ object Viewers {
       val supported = viewerProvider.canSupport(preferences, book, format)
       if (supported) {
         this.logger.debug(
-          "[{}] viewer provider {} supports the book, using it!",
-          index,
-          viewerProvider.name
+          "[{}] viewer provider {} supports the book, using it!", index, viewerProvider.name
         )
 
         /* Publish 'BookOpened' event. */
@@ -91,9 +89,7 @@ object Viewers {
         return
       } else {
         this.logger.debug(
-          "[{}] viewer provider {} does not support the book",
-          index,
-          viewerProvider.name
+          "[{}] viewer provider {} does not support the book", index, viewerProvider.name
         )
       }
     }

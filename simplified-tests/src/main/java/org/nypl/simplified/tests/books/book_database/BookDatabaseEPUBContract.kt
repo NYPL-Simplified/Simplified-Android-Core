@@ -62,8 +62,7 @@ abstract class BookDatabaseEPUBContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle != null
+        "Format is present", formatHandle != null
       )
 
       formatHandle!!
@@ -166,8 +165,7 @@ abstract class BookDatabaseEPUBContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle != null
+        "Format is present", formatHandle != null
       )
 
       formatHandle!!
@@ -190,8 +188,7 @@ abstract class BookDatabaseEPUBContract {
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle != null
+        "Format is present", formatHandle != null
       )
 
       formatHandle!!

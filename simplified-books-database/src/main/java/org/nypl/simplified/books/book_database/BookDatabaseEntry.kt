@@ -268,9 +268,7 @@ internal class BookDatabaseEntry internal constructor(
             if (existingFormats.containsKey(constructor.classType)) {
               logger.debug(
                 "[{}]: skipping duplicate format {} for content type {}",
-                owner.book.id.brief(),
-                constructor.classType.simpleName,
-                contentType
+                owner.book.id.brief(), constructor.classType.simpleName, contentType
               )
               continue
             }
@@ -278,9 +276,7 @@ internal class BookDatabaseEntry internal constructor(
             // Add new handler for type
             logger.debug(
               "[{}]: instantiating format {} for content type {}",
-              owner.book.id.brief(),
-              constructor.classType.simpleName,
-              contentType
+              owner.book.id.brief(), constructor.classType.simpleName, contentType
             )
 
             val params =

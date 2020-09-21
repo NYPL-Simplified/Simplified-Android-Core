@@ -108,10 +108,11 @@ class ProfileAccountLoginTask(
     this.logger.warn("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
   private fun run(): TaskResult<AccountLoginErrorData, Unit> {
-    val step =
-      this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
     return try {
-      if (!this.updateLoggingInState(step)) {
+      if (!this.updateLoggingInState(
+          this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
+        )
+      ) {
         return this.steps.finishSuccess(Unit)
       }
 

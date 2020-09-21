@@ -187,13 +187,11 @@ abstract class BookDatabaseContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle0 != null
+        "Format is present", formatHandle0 != null
       )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry0,
-        BookDatabaseEntryFormatHandleEPUB::class.java
+        databaseEntry0, BookDatabaseEntryFormatHandleEPUB::class.java
       )
 
       val epubFormat = databaseEntry0.book.findFormat(BookFormatEPUB::class.java)
@@ -224,13 +222,11 @@ abstract class BookDatabaseContract {
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle1 != null
+        "Format is present", formatHandle1 != null
       )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry1,
-        BookDatabaseEntryFormatHandleEPUB::class.java
+        databaseEntry1, BookDatabaseEntryFormatHandleEPUB::class.java
       )
 
       val epubFormat = databaseEntry1.book.findFormat(BookFormatEPUB::class.java)
@@ -279,13 +275,11 @@ abstract class BookDatabaseContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle0 != null
+        "Format is present", formatHandle0 != null
       )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry0,
-        BookDatabaseEntryFormatHandlePDF::class.java
+        databaseEntry0, BookDatabaseEntryFormatHandlePDF::class.java
       )
 
       val pdfFormat = databaseEntry0.book.findFormat(BookFormatPDF::class.java)
@@ -316,13 +310,11 @@ abstract class BookDatabaseContract {
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandlePDF::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle1 != null
+        "Format is present", formatHandle1 != null
       )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry1,
-        BookDatabaseEntryFormatHandlePDF::class.java
+        databaseEntry1, BookDatabaseEntryFormatHandlePDF::class.java
       )
 
       val pdfFormat = databaseEntry1.book.findFormat(BookFormatPDF::class.java)
@@ -371,13 +363,11 @@ abstract class BookDatabaseContract {
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle0 != null
+        "Format is present", formatHandle0 != null
       )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry0,
-        BookDatabaseEntryFormatHandleAudioBook::class.java
+        databaseEntry0, BookDatabaseEntryFormatHandleAudioBook::class.java
       )
 
       val audioFormat = databaseEntry0.book.findFormat(BookFormatAudioBook::class.java)
@@ -408,13 +398,11 @@ abstract class BookDatabaseContract {
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
       Assert.assertTrue(
-        "Format is present",
-        formatHandle1 != null
+        "Format is present", formatHandle1 != null
       )
 
       this.checkOtherFormatsAreNotPresent(
-        databaseEntry1,
-        BookDatabaseEntryFormatHandleAudioBook::class.java
+        databaseEntry1, BookDatabaseEntryFormatHandleAudioBook::class.java
       )
 
       val audioFormat = databaseEntry1.book.findFormat(BookFormatAudioBook::class.java)

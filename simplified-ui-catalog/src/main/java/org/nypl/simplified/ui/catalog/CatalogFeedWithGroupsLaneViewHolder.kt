@@ -28,9 +28,7 @@ class CatalogFeedWithGroupsLaneViewHolder(
     scrollView.apply {
       setHasFixedSize(true)
       layoutManager = LinearLayoutManager(
-        this.context,
-        LinearLayoutManager.HORIZONTAL,
-        false
+        this.context, LinearLayoutManager.HORIZONTAL, false
       )
       addItemDecoration(
         SpaceItemDecoration(
@@ -61,9 +59,7 @@ class CatalogFeedWithGroupsLaneViewHolder(
 
     val filtered = group.groupEntries.filterIsInstance<FeedEntry.FeedEntryOPDS>()
     this.scrollView.adapter = CatalogLaneAdapter(
-      filtered,
-      coverLoader,
-      onBookSelected
+      filtered, coverLoader, onBookSelected
     )
   }
 

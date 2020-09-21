@@ -8,7 +8,10 @@ import java.util.regex.Pattern
 
 data class BuildConfigOAuthScheme(val scheme: String) {
   init {
-    if (!VALID_SCHEME_PATTERN.matcher(this.scheme).matches()) {
+    if (!VALID_SCHEME_PATTERN.matcher(
+        this.scheme
+      ).matches()
+    ) {
       throw IllegalArgumentException("Scheme '${this.scheme}' must match '$VALID_SCHEME_PATTERN'")
     }
   }

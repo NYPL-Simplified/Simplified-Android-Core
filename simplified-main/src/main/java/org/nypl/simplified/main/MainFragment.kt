@@ -168,20 +168,16 @@ class MainFragment : Fragment() {
 
     this.uiThread.runOnUIThread {
       this.navigationControllerDirectory.updateNavigationController(
-        CatalogNavigationControllerType::class.java,
-        this.bottomNavigator
+        CatalogNavigationControllerType::class.java, this.bottomNavigator
       )
       this.navigationControllerDirectory.updateNavigationController(
-        AccountNavigationControllerType::class.java,
-        this.bottomNavigator
+        AccountNavigationControllerType::class.java, this.bottomNavigator
       )
       this.navigationControllerDirectory.updateNavigationController(
-        SettingsNavigationControllerType::class.java,
-        this.bottomNavigator
+        SettingsNavigationControllerType::class.java, this.bottomNavigator
       )
       this.navigationControllerDirectory.updateNavigationController(
-        NavigationControllerType::class.java,
-        this.bottomNavigator
+        NavigationControllerType::class.java, this.bottomNavigator
       )
     }
 

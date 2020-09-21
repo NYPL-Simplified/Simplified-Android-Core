@@ -710,8 +710,7 @@ class BookBorrowTask(
         override fun onRevoked(a: OPDSAvailabilityRevoked): Boolean {
           throw UnreachableCodeException()
         }
-      }
-    )
+      })
 
     if (wantFulfill) {
       this.runAcquisitionFulfill(feedEntry.feedEntry)
@@ -1192,8 +1191,7 @@ class BookBorrowTask(
   ): MIMEType {
     this.steps.beginNewStep(
       this.services.borrowStrings.borrowBookSavingCheckingContentType(
-        receivedContentType,
-        expectedContentTypes
+        receivedContentType, expectedContentTypes
       )
     )
 

@@ -112,8 +112,7 @@ class AccountsDatabase private constructor(
       this.logger.debug("creating account {} (provider {})", accountId, accountProvider.id)
       Preconditions.checkArgument(
         !this.accounts.containsKey(accountId),
-        "Account ID %s cannot have been used",
-        accountId
+        "Account ID %s cannot have been used", accountId
       )
     }
 
@@ -463,8 +462,7 @@ class AccountsDatabase private constructor(
         }
 
         throw AccountsDatabaseOpenException(
-          "One or more errors occurred whilst trying to open the account database.",
-          errors
+          "One or more errors occurred whilst trying to open the account database.", errors
         )
       }
 
@@ -727,8 +725,7 @@ class AccountsDatabase private constructor(
       description: AccountDescription
     ) {
       FileLocking.withFileThreadLocked<Unit, IOException>(
-        accountLock,
-        1000L
+        accountLock, 1000L
       ) {
         FileUtilities.fileWriteUTF8Atomically(
           accountFile,

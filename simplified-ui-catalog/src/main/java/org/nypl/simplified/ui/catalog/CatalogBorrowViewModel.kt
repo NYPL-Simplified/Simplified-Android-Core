@@ -134,8 +134,7 @@ class CatalogBorrowViewModel(
   ) {
     this.bookRegistry.updateIfStatusIsMoreImportant(
       BookWithStatus(
-        book,
-        BookStatus.RequestingLoan(book.id, "")
+        book, BookStatus.RequestingLoan(book.id, "")
       )
     )
 
@@ -173,8 +172,7 @@ class CatalogBorrowViewModel(
   ) {
     this.bookRegistry.updateIfStatusIsMoreImportant(
       BookWithStatus(
-        book,
-        BookStatus.RequestingRevoke(book.id)
+        book, BookStatus.RequestingRevoke(book.id)
       )
     )
 
@@ -212,8 +210,7 @@ class CatalogBorrowViewModel(
   ) {
     this.bookRegistry.updateIfStatusIsMoreImportant(
       BookWithStatus(
-        book,
-        BookStatus.RequestingLoan(book.id, "")
+        book, BookStatus.RequestingLoan(book.id, "")
       )
     )
 

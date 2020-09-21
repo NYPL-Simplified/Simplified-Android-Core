@@ -577,8 +577,7 @@ class AudioBookPlayerActivity :
             this.uiThread.runOnUIThread { this.loanReturnShowDialog() }
           }
         },
-        5L,
-        TimeUnit.SECONDS
+        5L, TimeUnit.SECONDS
       )
     }
   }

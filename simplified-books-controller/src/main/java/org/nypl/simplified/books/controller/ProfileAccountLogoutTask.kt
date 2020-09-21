@@ -240,8 +240,7 @@ class ProfileAccountLogoutTask(
     } catch (e: Throwable) {
       this.error("could not clear book registry: ", e)
       this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookRegistryFailed,
-        AccountLogoutUnexpectedException(e)
+        this.logoutStrings.logoutClearingBookRegistryFailed, AccountLogoutUnexpectedException(e)
       )
     }
 
@@ -252,8 +251,7 @@ class ProfileAccountLogoutTask(
     } catch (e: Throwable) {
       this.error("could not clear book database: ", e)
       this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookDatabaseFailed,
-        AccountLogoutUnexpectedException(e)
+        this.logoutStrings.logoutClearingBookDatabaseFailed, AccountLogoutUnexpectedException(e)
       )
     }
   }

@@ -179,16 +179,13 @@ abstract class AccountProviderDescriptionRegistryContract {
     Assert.assertEquals(URI.create("urn:2"), description2!!.id)
 
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"),
-      description0.updated
+      DateTime.parse("1900-01-01T00:00:00Z"), description0.updated
     )
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"),
-      description1.updated
+      DateTime.parse("1900-01-01T00:00:00Z"), description1.updated
     )
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"),
-      description2.updated
+      DateTime.parse("1900-01-01T00:00:00Z"), description2.updated
     )
 
     Assert.assertEquals(5, this.events.size)

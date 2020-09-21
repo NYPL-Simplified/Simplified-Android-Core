@@ -405,9 +405,7 @@ class SettingsFragmentDebug : Fragment() {
   private fun drmACSSupportRow(): TableRow {
     val row =
       this.layoutInflater.inflate(
-        R.layout.settings_version_table_item,
-        this.drmTable,
-        false
+        R.layout.settings_version_table_item, this.drmTable, false
       ) as TableRow
     val key =
       row.findViewById<TextView>(R.id.key)

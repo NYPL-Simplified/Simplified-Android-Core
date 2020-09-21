@@ -115,11 +115,7 @@ class ReaderBookmarkHTTPCalls(
 
   private fun <T> logAndFail(uri: URI, error: HTTPResultError<InputStream>): T {
     HTTPProblemReportLogging.logError(
-      this.logger,
-      uri,
-      error.message,
-      error.status,
-      error.problemReport
+      this.logger, uri, error.message, error.status, error.problemReport
     )
     throw IOException("$uri received ${error.status} ${error.message}")
   }
