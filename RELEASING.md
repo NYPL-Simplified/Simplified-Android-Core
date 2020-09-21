@@ -143,6 +143,8 @@ $ ./maven-central-deploy.sh username password
 You're done. The binaries will appear on Maven Central within roughly
 15 minutes.
 
+## Epilogue
+
 #### How Does Pushing To Maven Central Work?
 
 We currently use the [brooklime](https://www.io7m.com/software/brooklime)
