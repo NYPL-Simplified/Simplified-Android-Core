@@ -22,7 +22,6 @@ object MainBookFormatSupport {
     feedbooksSecretService: AudioBookFeedbooksSecretServiceType?,
     overdriveSecretService: AudioBookOverdriveSecretServiceType?
   ): BookFormatSupportType {
-
     val parameters =
       BookFormatSupportParameters(
         supportsPDF = this.isPDFSupported(),

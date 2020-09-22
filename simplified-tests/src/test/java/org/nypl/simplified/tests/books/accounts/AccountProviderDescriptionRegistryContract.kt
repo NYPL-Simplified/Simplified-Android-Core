@@ -55,13 +55,15 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf())
+        listOf()
+      )
 
     registry.events.subscribe { e -> this.events.add(e) }
 
     val notFound =
       registry.findAccountProviderDescription(
-        URI.create("urn:uuid:6ba13d1e-c790-4247-9c80-067c6a7257f0"))
+        URI.create("urn:uuid:6ba13d1e-c790-4247-9c80-067c6a7257f0")
+      )
 
     Assert.assertEquals(Idle, registry.status)
     Assert.assertEquals(null, notFound)
@@ -76,7 +78,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf(CrashingSource()))
+        listOf(CrashingSource())
+      )
 
     registry.events.subscribe { e -> this.events.add(e) }
     registry.refresh(true)
@@ -107,7 +110,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf(OKSource()))
+        listOf(OKSource())
+      )
 
     registry.events.subscribe { this.events.add(it) }
     registry.refresh(true)
@@ -154,7 +158,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf(OKSource(), OKAncientSource()))
+        listOf(OKSource(), OKAncientSource())
+      )
 
     registry.events.subscribe { this.events.add(it) }
     registry.refresh(true)
@@ -173,11 +178,14 @@ abstract class AccountProviderDescriptionRegistryContract {
     Assert.assertEquals(URI.create("urn:2"), description2!!.id)
 
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"), description0.updated)
+      DateTime.parse("1900-01-01T00:00:00Z"), description0.updated
+    )
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"), description1.updated)
+      DateTime.parse("1900-01-01T00:00:00Z"), description1.updated
+    )
     Assert.assertNotEquals(
-      DateTime.parse("1900-01-01T00:00:00Z"), description2.updated)
+      DateTime.parse("1900-01-01T00:00:00Z"), description2.updated
+    )
 
     Assert.assertEquals(5, this.events.size)
 
@@ -207,7 +215,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf(OKSource(), CrashingSource()))
+        listOf(OKSource(), CrashingSource())
+      )
 
     registry.events.subscribe { this.events.add(it) }
     registry.refresh(true)
@@ -255,7 +264,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf(OKSource(), FailingSource()))
+        listOf(OKSource(), FailingSource())
+      )
 
     registry.events.subscribe { this.events.add(it) }
     registry.refresh(true)
@@ -304,7 +314,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf(OKSource(), OKAncientSource()))
+        listOf(OKSource(), OKAncientSource())
+      )
 
     registry.events.subscribe { this.events.add(it) }
     registry.refresh(true)
@@ -329,7 +340,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf())
+        listOf()
+      )
 
     registry.events.subscribe { this.events.add(it) }
     registry.refresh(true)
@@ -361,7 +373,8 @@ abstract class AccountProviderDescriptionRegistryContract {
     val registry =
       this.createRegistry(
         MockAccountProviders.fakeProvider("urn:fake:0"),
-        listOf(OKSource()))
+        listOf(OKSource())
+      )
 
     val eventsWithRefreshing =
       mutableListOf<AccountProviderRegistryStatus>()
@@ -392,7 +405,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true)
+        isProduction = true
+      )
 
     private fun fail(): TaskResult.Failure<AccountProviderType> {
       val taskRecorder = TaskRecorder.create()
@@ -400,7 +414,8 @@ abstract class AccountProviderDescriptionRegistryContract {
       taskRecorder.currentStepFailed(
         message = "x",
         errorCode = "unexpectedException",
-        exception = exception)
+        exception = exception
+      )
       return taskRecorder.finishFailure()
     }
 
@@ -412,7 +427,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true)
+        isProduction = true
+      )
 
     val description2 =
       AccountProviderDescription(
@@ -422,7 +438,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true)
+        isProduction = true
+      )
 
     val descriptionOld0 =
       AccountProviderDescription(
@@ -432,7 +449,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true)
+        isProduction = true
+      )
 
     val descriptionOld1 =
       AccountProviderDescription(
@@ -442,7 +460,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true)
+        isProduction = true
+      )
 
     val descriptionOld2 =
       AccountProviderDescription(
@@ -452,7 +471,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true)
+        isProduction = true
+      )
   }
 
   class OKAncientSource : AccountProviderSourceType {
@@ -461,7 +481,9 @@ abstract class AccountProviderDescriptionRegistryContract {
         mapOf(
           Pair(descriptionOld0.id, descriptionOld0),
           Pair(descriptionOld1.id, descriptionOld1),
-          Pair(descriptionOld2.id, descriptionOld2)))
+          Pair(descriptionOld2.id, descriptionOld2)
+        )
+      )
     }
 
     override fun clear(context: Context) {}
@@ -484,7 +506,9 @@ abstract class AccountProviderDescriptionRegistryContract {
         mapOf(
           Pair(description0.id, description0),
           Pair(description1.id, description1),
-          Pair(description2.id, description2)))
+          Pair(description2.id, description2)
+        )
+      )
     }
 
     override fun clear(context: Context) {}

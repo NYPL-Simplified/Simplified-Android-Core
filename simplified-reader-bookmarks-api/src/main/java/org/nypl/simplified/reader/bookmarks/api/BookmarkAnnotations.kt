@@ -65,7 +65,6 @@ object BookmarkAnnotations {
     objectMapper: ObjectMapper,
     annotation: BookmarkAnnotation
   ): Bookmark {
-
     val locationJSON =
       BookLocationJSON.deserializeFromString(objectMapper, annotation.target.selector.value)
 
@@ -85,7 +84,6 @@ object BookmarkAnnotations {
     objectMapper: ObjectMapper,
     bookmark: Bookmark
   ): BookmarkAnnotation {
-
     val bodyAnnotation =
       BookmarkAnnotationBodyNode(
         timestamp = bookmark.time.toString(),

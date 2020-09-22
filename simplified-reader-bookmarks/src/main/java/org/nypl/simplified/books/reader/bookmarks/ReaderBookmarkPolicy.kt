@@ -53,7 +53,8 @@ data class ReaderBookmarkPolicy<T>(
         ReaderBookmarkPolicyEvaluation(
           result = f.invoke(evaluated.result),
           newState = evaluated.newState,
-          outputs = evaluated.outputs)
+          outputs = evaluated.outputs
+        )
       }
     }
 
@@ -215,8 +216,10 @@ data class ReaderBookmarkPolicy<T>(
       accountID: AccountID,
       bookmarksState: Map<BookmarkID, ReaderBookmarkState>
     ): ReaderBookmarkPolicy<Unit> {
-      return sequenceDiscarding(bookmarksThatRequireSyncingInAccount(accountID, bookmarksState)
-        .map { bookmark -> emitOutput(RemotelySendBookmark(accountID, bookmark.bookmark)) })
+      return sequenceDiscarding(
+        bookmarksThatRequireSyncingInAccount(accountID, bookmarksState)
+          .map { bookmark -> emitOutput(RemotelySendBookmark(accountID, bookmark.bookmark)) }
+      )
     }
 
     private fun remoteFetchAllBookmarks(account: AccountID): ReaderBookmarkPolicy<Unit> {
@@ -256,7 +259,6 @@ data class ReaderBookmarkPolicy<T>(
       account: AccountID,
       bookmark: ReaderBookmarkState
     ): Boolean {
-
       return if (bookmark.account == account) {
         when (bookmark.remoteState) {
           is ReaderBookmarkRemoteState.Sending -> false
@@ -299,7 +301,6 @@ data class ReaderBookmarkPolicy<T>(
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
-
             /*
              * If the bookmark was previously deleted, then recreate it and send it to the
              * server (if possible).
@@ -311,7 +312,8 @@ data class ReaderBookmarkPolicy<T>(
                   account = event.accountID,
                   bookmark = event.bookmark,
                   localState = ReaderBookmarkLocalState.Saved,
-                  remoteState = ReaderBookmarkRemoteState.Unknown)
+                  remoteState = ReaderBookmarkRemoteState.Unknown
+                )
 
               updateBookmark(newBookmarkState)
                 .andThen { remoteSendAllUnsentBookmarksIfPossible(event.accountID) }
@@ -325,7 +327,6 @@ data class ReaderBookmarkPolicy<T>(
               emitOutput(LocalBookmarkAlreadyExists(event.accountID, event.bookmark))
           }
         } else {
-
           /*
            * If nothing is known about the bookmark, then save it locally and then sync
            * with the server (if possible).
@@ -336,7 +337,8 @@ data class ReaderBookmarkPolicy<T>(
               account = event.accountID,
               bookmark = event.bookmark,
               localState = ReaderBookmarkLocalState.Saved,
-              remoteState = ReaderBookmarkRemoteState.Unknown)
+              remoteState = ReaderBookmarkRemoteState.Unknown
+            )
 
           updateBookmark(newBookmarkState)
             .andThen { emitOutput(LocallySaveBookmark(event.accountID, event.bookmark)) }
@@ -351,7 +353,6 @@ data class ReaderBookmarkPolicy<T>(
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
-
             /*
              * If the bookmark is already deleted, then ignore it.
              */
@@ -369,14 +370,14 @@ data class ReaderBookmarkPolicy<T>(
                   account = event.accountID,
                   bookmark = event.bookmark,
                   localState = ReaderBookmarkLocalState.Deleted,
-                  remoteState = ReaderBookmarkRemoteState.Deleting)
+                  remoteState = ReaderBookmarkRemoteState.Deleting
+                )
 
               updateBookmark(newBookmarkState)
                 .andThen { remoteDeleteBookmarkIfPossible(event.accountID, newBookmarkState) }
             }
           }
         } else {
-
           /*
            * If the bookmark isn't known, then ignore it.
            */
@@ -392,7 +393,6 @@ data class ReaderBookmarkPolicy<T>(
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
           when (bookmarkState.localState) {
-
             /*
              * If the bookmark has been deleted locally, but the server has sent it to us, then
              * tell the server we want it deleted.
@@ -404,7 +404,8 @@ data class ReaderBookmarkPolicy<T>(
                   account = event.accountID,
                   bookmark = event.bookmark,
                   localState = ReaderBookmarkLocalState.Deleted,
-                  remoteState = ReaderBookmarkRemoteState.Deleting)
+                  remoteState = ReaderBookmarkRemoteState.Deleting
+                )
 
               updateBookmark(newBookmarkState)
                 .andThen { remoteDeleteBookmarkIfPossible(event.accountID, newBookmarkState) }
@@ -420,14 +421,14 @@ data class ReaderBookmarkPolicy<T>(
                   account = event.accountID,
                   bookmark = event.bookmark,
                   localState = ReaderBookmarkLocalState.Saved,
-                  remoteState = ReaderBookmarkRemoteState.Saved)
+                  remoteState = ReaderBookmarkRemoteState.Saved
+                )
 
               updateBookmark(newBookmarkState)
                 .andThen { emitOutput(LocalBookmarkAlreadyExists(event.accountID, event.bookmark)) }
             }
           }
         } else {
-
           /*
            * If nothing is known about the bookmark locally, then save it to disk.
            */
@@ -437,7 +438,8 @@ data class ReaderBookmarkPolicy<T>(
               account = event.accountID,
               bookmark = event.bookmark,
               localState = ReaderBookmarkLocalState.Saved,
-              remoteState = ReaderBookmarkRemoteState.Saved)
+              remoteState = ReaderBookmarkRemoteState.Saved
+            )
 
           updateBookmark(newBookmarkState)
             .andThen { emitOutput(LocallySaveBookmark(event.accountID, event.bookmark)) }
@@ -450,14 +452,12 @@ data class ReaderBookmarkPolicy<T>(
     ): ReaderBookmarkPolicy<Unit> {
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
         if (bookmarkState != null) {
-
           /*
            * If the bookmark is known, then mark it as having been saved remotely.
            */
 
           updateBookmark(bookmarkState.copy(remoteState = ReaderBookmarkRemoteState.Saved))
         } else {
-
           /*
            * If nothing is known about the bookmark locally, then ignore it.
            */

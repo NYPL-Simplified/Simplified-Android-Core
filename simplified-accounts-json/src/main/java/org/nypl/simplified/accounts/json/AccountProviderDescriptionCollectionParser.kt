@@ -43,15 +43,18 @@ class AccountProviderDescriptionCollectionParser internal constructor(
         warning.line,
         warning.column,
         warning.message,
-        warning.exception)
+        warning.exception
+      )
 
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = warning.message,
-        line = 0,
-        column = 0,
-        exception = warning.exception
-      ))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = warning.message,
+          line = 0,
+          column = 0,
+          exception = warning.exception
+        )
+      )
     } else {
       this.logger.warn(
         "{}:{}:{}: {}: ",
@@ -59,27 +62,32 @@ class AccountProviderDescriptionCollectionParser internal constructor(
         warning.line,
         warning.column,
         warning.message,
-        warning.exception)
+        warning.exception
+      )
       this.warnings.add(warning)
     }
   }
 
   private fun publishErrorForException(e: Exception) {
     this.logger.error("{}: ", this.uri, e)
-    this.errors.add(ParseError(
-      source = this.uri,
-      message = e.message ?: "",
-      exception = e
-    ))
+    this.errors.add(
+      ParseError(
+        source = this.uri,
+        message = e.message ?: "",
+        exception = e
+      )
+    )
   }
 
   private fun publishErrorForString(message: String) {
     this.logger.error("{}: {}", this.uri, message)
-    this.errors.add(ParseError(
-      source = this.uri,
-      message = message,
-      exception = null
-    ))
+    this.errors.add(
+      ParseError(
+        source = this.uri,
+        message = message,
+        exception = null
+      )
+    )
   }
 
   override fun parse(): ParseResult<AccountProviderDescriptionCollection> {
@@ -101,7 +109,9 @@ class AccountProviderDescriptionCollectionParser internal constructor(
           result = AccountProviderDescriptionCollection(
             providers = catalogs,
             links = links,
-            metadata = metadata))
+            metadata = metadata
+          )
+        )
       } else {
         ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
       }
@@ -116,15 +126,20 @@ class AccountProviderDescriptionCollectionParser internal constructor(
       val metaNode = JSONParserUtilities.getObject(root, "metadata")!!
       return AccountProviderDescriptionCollection.Metadata(
         adobeVendorID = parseAdobeVendorID(metaNode),
-        title = parseTitle(metaNode))
+        title = parseTitle(metaNode)
+      )
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'metadata' field as an object",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'metadata' field as an object",
+          exception = e
+        )
+      )
       return AccountProviderDescriptionCollection.Metadata(
         adobeVendorID = null,
-        title = "")
+        title = ""
+      )
     }
   }
 
@@ -132,10 +147,13 @@ class AccountProviderDescriptionCollectionParser internal constructor(
     return try {
       JSONParserUtilities.getStringOrNull(metaNode, "title") ?: ""
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'title' field as a string",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'title' field as a string",
+          exception = e
+        )
+      )
       ""
     }
   }
@@ -145,10 +163,13 @@ class AccountProviderDescriptionCollectionParser internal constructor(
       JSONParserUtilities.getStringOrNull(metaNode, "adobe_vendor_id")
         ?.let(::AdobeVendorID)
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'adobe_vendor_id' field as a vendor ID",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'adobe_vendor_id' field as a vendor ID",
+          exception = e
+        )
+      )
       null
     }
   }
@@ -171,10 +192,13 @@ class AccountProviderDescriptionCollectionParser internal constructor(
       }
       results
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'links' field as array",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'links' field as array",
+          exception = e
+        )
+      )
       listOf()
     }
   }
@@ -183,10 +207,13 @@ class AccountProviderDescriptionCollectionParser internal constructor(
     val array = try {
       JSONParserUtilities.getArray(root, "catalogs")
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'catalogs' field as an array",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'catalogs' field as an array",
+          exception = e
+        )
+      )
       null
     }
 

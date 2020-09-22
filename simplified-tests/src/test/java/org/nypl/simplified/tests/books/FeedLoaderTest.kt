@@ -20,10 +20,7 @@ import java.net.URI
 
 class FeedLoaderTest : FeedLoaderContract() {
 
-  override fun createFeedLoader(
-    exec: ListeningExecutorService
-  ): FeedLoaderType {
-
+  override fun createFeedLoader(exec: ListeningExecutorService): FeedLoaderType {
     val entryParser =
       OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
@@ -39,11 +36,13 @@ class FeedLoaderTest : FeedLoaderContract() {
     }
 
     val bookFormatSupport =
-      BookFormatSupport.create(BookFormatSupportParameters(
-        supportsPDF = false,
-        supportsAdobeDRM = false,
-        supportsAudioBooks = null
-      ))
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsAdobeDRM = false,
+          supportsAudioBooks = null
+        )
+      )
 
     val contentResolver =
       Mockito.mock(ContentResolver::class.java)

@@ -39,7 +39,6 @@ class SplashSelectionFragment : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-
     val main =
       inflater.inflate(R.layout.splash_selection, container, false) as ViewGroup
     this.selectionButton =

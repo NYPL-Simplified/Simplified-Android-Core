@@ -481,7 +481,7 @@ class MainActivity :
         },
         accountEvents = profilesController.accountEvents(),
         applicationProfileIsAnonymous =
-        profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_ENABLED,
+          profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_ENABLED,
         applicationVersion = this.applicationVersion(),
         context = this
       )

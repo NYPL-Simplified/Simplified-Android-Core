@@ -175,10 +175,12 @@
 
         <argument
             android:name="username"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue='""' />
         <argument
             android:name="barcode"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue='""' />
         <argument
             android:name="pin"
             app:argType="string" />

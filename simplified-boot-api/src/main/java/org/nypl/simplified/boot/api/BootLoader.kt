@@ -40,7 +40,8 @@ class BootLoader<T>(
         val thread = Thread(runnable)
         thread.name = "simplified-boot-${thread.id}"
         thread
-      })
+      }
+    )
 
   private val eventsActual = PublishSubject.create<BootEvent>()
   private val bootLock: Any = Any()
@@ -79,11 +80,13 @@ class BootLoader<T>(
           BootEvent.BootFailed(
             message = e.message,
             exception = PresentableException(e.message, e),
-            attributes = e.attributes)
+            attributes = e.attributes
+          )
         } else {
           BootEvent.BootFailed(
             message = strings.bootFailedGeneric,
-            exception = PresentableException(strings.bootFailedGeneric, e))
+            exception = PresentableException(strings.bootFailedGeneric, e)
+          )
         }
 
         this.eventsActual.onNext(event)

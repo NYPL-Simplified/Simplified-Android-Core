@@ -78,7 +78,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -113,11 +114,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -137,7 +140,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         0L,
         ByteArrayInputStream(ByteArray(0)),
         Option.none()
-      ))
+      )
+    )
 
     val result =
       description.resolve { _, message -> this.logger.debug("{}", message) }
@@ -161,11 +165,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -180,7 +186,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       HTTPResultException(
         URI("http://www.example.com/auth"),
         IOException("Connection failed")
-      ))
+      )
+    )
 
     val result =
       description.resolve { _, message -> this.logger.debug("{}", message) }
@@ -204,11 +211,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -227,10 +236,12 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         2,
         mapOf(),
         0L
-      ))
+      )
+    )
 
     Mockito.`when`(
-      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean()))
+      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean())
+    )
       .thenReturn(this.authDocumentParser)
 
     Mockito.`when`(this.authDocumentParser.parse())
@@ -258,11 +269,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -281,10 +294,12 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         2,
         mapOf(),
         0L
-      ))
+      )
+    )
 
     Mockito.`when`(
-      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean()))
+      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean())
+    )
       .thenReturn(this.authDocumentParser)
 
     val authDocument =
@@ -297,26 +312,36 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           enabled = setOf("https://librarysimplified.org/rel/policy/reservations"),
           disabled = setOf()
         ),
-        authentication = listOf(AuthenticationObject(
-          type = URI(BASIC_TYPE),
-          description = "Basic Auth",
-          labels = mapOf(
-            Pair("LOGIN", "LOGIN!"),
-            Pair("PASSWORD", "PASSWORD!")),
-          inputs = mapOf(
-            Pair("LOGIN", AuthenticationObjectNYPLInput(
-              fieldName = "LOGIN",
-              keyboardType = "DEFAULT",
-              maximumLength = 20,
-              barcodeFormat = "CODABAR"
-            )),
-            Pair("PASSWORD", AuthenticationObjectNYPLInput(
-              fieldName = "PASSWORD",
-              keyboardType = "DEFAULT",
-              maximumLength = 20,
-              barcodeFormat = "CODABAR"
-            )))
-        )),
+        authentication = listOf(
+          AuthenticationObject(
+            type = URI(BASIC_TYPE),
+            description = "Basic Auth",
+            labels = mapOf(
+              Pair("LOGIN", "LOGIN!"),
+              Pair("PASSWORD", "PASSWORD!")
+            ),
+            inputs = mapOf(
+              Pair(
+                "LOGIN",
+                AuthenticationObjectNYPLInput(
+                  fieldName = "LOGIN",
+                  keyboardType = "DEFAULT",
+                  maximumLength = 20,
+                  barcodeFormat = "CODABAR"
+                )
+              ),
+              Pair(
+                "PASSWORD",
+                AuthenticationObjectNYPLInput(
+                  fieldName = "PASSWORD",
+                  keyboardType = "DEFAULT",
+                  maximumLength = 20,
+                  barcodeFormat = "CODABAR"
+                )
+              )
+            )
+          )
+        ),
         links = listOf(
           Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
@@ -354,7 +379,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
             href = URI("http://www.example.com/logo.png"),
             relation = "logo"
           )
-        ))
+        )
+      )
 
     Mockito.`when`(this.authDocumentParser.parse())
       .thenReturn(ParseResult.Success(listOf(), authDocument))
@@ -376,7 +402,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
         labels = mapOf(
           Pair("LOGIN", "LOGIN!"),
-          Pair("PASSWORD", "PASSWORD!")),
+          Pair("PASSWORD", "PASSWORD!")
+        ),
         logoURI = null
       ),
       authenticationAlternatives = listOf(),
@@ -397,7 +424,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      updated = DateTime.parse("1970-01-01T00:00:00.000Z"))
+      updated = DateTime.parse("1970-01-01T00:00:00.000Z")
+    )
 
     Assert.assertEquals(provider, result.result)
   }
@@ -416,11 +444,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -439,10 +469,12 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         2,
         mapOf(),
         0L
-      ))
+      )
+    )
 
     Mockito.`when`(
-      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean()))
+      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean())
+    )
       .thenReturn(this.authDocumentParser)
 
     val authDocument =
@@ -455,21 +487,24 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           enabled = setOf("https://librarysimplified.org/rel/policy/reservations"),
           disabled = setOf()
         ),
-        authentication = listOf(AuthenticationObject(
-          type = URI(COPPA_TYPE),
-          description = "COPPA Age Gate",
-          labels = mapOf(),
-          inputs = mapOf(),
-          links = listOf(
-            Link.LinkBasic(
-              href = URI("http://www.example.com/feed-13.xml"),
-              relation = "http://librarysimplified.org/terms/rel/authentication/restriction-met"
-            ),
-            Link.LinkBasic(
-              href = URI("http://www.example.com/feed-under-13.xml"),
-              relation = "http://librarysimplified.org/terms/rel/authentication/restriction-not-met"
-            ))
-        )),
+        authentication = listOf(
+          AuthenticationObject(
+            type = URI(COPPA_TYPE),
+            description = "COPPA Age Gate",
+            labels = mapOf(),
+            inputs = mapOf(),
+            links = listOf(
+              Link.LinkBasic(
+                href = URI("http://www.example.com/feed-13.xml"),
+                relation = "http://librarysimplified.org/terms/rel/authentication/restriction-met"
+              ),
+              Link.LinkBasic(
+                href = URI("http://www.example.com/feed-under-13.xml"),
+                relation = "http://librarysimplified.org/terms/rel/authentication/restriction-not-met"
+              )
+            )
+          )
+        ),
         links = listOf(
           Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
@@ -507,7 +542,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
             href = URI("http://www.example.com/logo.png"),
             relation = "logo"
           )
-        ))
+        )
+      )
 
     Mockito.`when`(this.authDocumentParser.parse())
       .thenReturn(ParseResult.Success(listOf(), authDocument))
@@ -543,7 +579,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      updated = DateTime.parse("1970-01-01T00:00:00.000Z"))
+      updated = DateTime.parse("1970-01-01T00:00:00.000Z")
+    )
 
     Assert.assertEquals(provider, result.result)
   }
@@ -562,11 +599,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -585,10 +624,12 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         2,
         mapOf(),
         0L
-      ))
+      )
+    )
 
     Mockito.`when`(
-      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean()))
+      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean())
+    )
       .thenReturn(this.authDocumentParser)
 
     val authDocument =
@@ -639,7 +680,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
             href = URI("http://www.example.com/logo.png"),
             relation = "logo"
           )
-        ))
+        )
+      )
 
     Mockito.`when`(this.authDocumentParser.parse())
       .thenReturn(ParseResult.Success(listOf(), authDocument))
@@ -672,7 +714,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      updated = DateTime.parse("1970-01-01T00:00:00.000Z"))
+      updated = DateTime.parse("1970-01-01T00:00:00.000Z")
+    )
 
     Assert.assertEquals(provider, result.result)
   }
@@ -691,11 +734,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -714,10 +759,12 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         2,
         mapOf(),
         0L
-      ))
+      )
+    )
 
     Mockito.`when`(
-      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean()))
+      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean())
+    )
       .thenReturn(this.authDocumentParser)
 
     val authDocument =
@@ -730,13 +777,15 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           enabled = setOf("https://librarysimplified.org/rel/policy/reservations"),
           disabled = setOf()
         ),
-        authentication = listOf(AuthenticationObject(
-          type = URI(COPPA_TYPE),
-          description = "COPPA Age Gate",
-          labels = mapOf(),
-          inputs = mapOf(),
-          links = listOf()
-        )),
+        authentication = listOf(
+          AuthenticationObject(
+            type = URI(COPPA_TYPE),
+            description = "COPPA Age Gate",
+            labels = mapOf(),
+            inputs = mapOf(),
+            links = listOf()
+          )
+        ),
         links = listOf(
           Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
@@ -774,7 +823,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
             href = URI("http://www.example.com/logo.png"),
             relation = "logo"
           )
-        ))
+        )
+      )
 
     Mockito.`when`(this.authDocumentParser.parse())
       .thenReturn(ParseResult.Success(listOf(), authDocument))
@@ -802,11 +852,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -825,10 +877,12 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         2,
         mapOf(),
         0L
-      ))
+      )
+    )
 
     Mockito.`when`(
-      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean()))
+      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean())
+    )
       .thenReturn(this.authDocumentParser)
 
     val authDocument =
@@ -841,13 +895,15 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           enabled = setOf("https://librarysimplified.org/rel/policy/reservations"),
           disabled = setOf()
         ),
-        authentication = listOf(AuthenticationObject(
-          type = URI("urn:unknown"),
-          description = "COPPA Age Gate",
-          labels = mapOf(),
-          inputs = mapOf(),
-          links = listOf()
-        )),
+        authentication = listOf(
+          AuthenticationObject(
+            type = URI("urn:unknown"),
+            description = "COPPA Age Gate",
+            labels = mapOf(),
+            inputs = mapOf(),
+            links = listOf()
+          )
+        ),
         links = listOf(
           Link.LinkBasic(
             href = URI("http://www.example.com/feed.xml"),
@@ -885,7 +941,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
             href = URI("http://www.example.com/logo.png"),
             relation = "logo"
           )
-        ))
+        )
+      )
 
     Mockito.`when`(this.authDocumentParser.parse())
       .thenReturn(ParseResult.Success(listOf(), authDocument))
@@ -912,11 +969,13 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         links = listOf(
           Link.LinkBasic(
             URI.create("http://www.example.com/auth"),
-            AUTH_DOCUMENT_TYPE)
+            AUTH_DOCUMENT_TYPE
+          )
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false)
+        isAutomatic = false
+      )
 
     val description =
       AccountProviderResolution(
@@ -935,10 +994,12 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         2,
         mapOf(),
         0L
-      ))
+      )
+    )
 
     Mockito.`when`(
-      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean()))
+      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean())
+    )
       .thenReturn(this.authDocumentParser)
 
     val authDocument =
@@ -985,7 +1046,8 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
             href = URI("http://www.example.com/logo.png"),
             relation = "logo"
           )
-        ))
+        )
+      )
 
     Mockito.`when`(this.authDocumentParser.parse())
       .thenReturn(ParseResult.Success(listOf(), authDocument))

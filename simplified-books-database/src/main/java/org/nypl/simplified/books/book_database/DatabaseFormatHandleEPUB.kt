@@ -116,12 +116,14 @@ internal class DatabaseFormatHandleEPUB internal constructor(
       if (bookmark != null) {
         Preconditions.checkArgument(
           bookmark.kind == ReaderBookmarkLastReadLocation,
-          "Must use a last-read-location bookmark")
+          "Must use a last-read-location bookmark"
+        )
 
         FileUtilities.fileWriteUTF8Atomically(
           this.fileLastRead,
           this.fileLastReadTmp,
-          BookmarkJSON.serializeToString(this.parameters.objectMapper, bookmark))
+          BookmarkJSON.serializeToString(this.parameters.objectMapper, bookmark)
+        )
       } else {
         FileUtilities.fileDelete(this.fileLastRead)
       }
@@ -138,7 +140,8 @@ internal class DatabaseFormatHandleEPUB internal constructor(
       FileUtilities.fileWriteUTF8Atomically(
         this.fileBookmarks,
         this.fileBookmarksTmp,
-        BookmarkJSON.serializeToString(this.parameters.objectMapper, bookmarks))
+        BookmarkJSON.serializeToString(this.parameters.objectMapper, bookmarks)
+      )
       this.formatRef = this.formatRef.copy(bookmarks = bookmarks)
       this.formatRef
     }

@@ -56,7 +56,6 @@ internal interface NYPLPlatformService {
 
   companion object {
     operator fun invoke(token: String): NYPLPlatformService {
-
       val authInterceptor = Interceptor {
         val request = it.request().newBuilder()
           .addHeader("Authorization", "Bearer $token")

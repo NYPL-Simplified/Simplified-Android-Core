@@ -81,7 +81,6 @@ abstract class ReaderBookmarkHTTPCallsContract {
     objectMapper: ObjectMapper,
     jsonText: String
   ): HTTPResultType<InputStream> {
-
     val node = objectMapper.readTree(jsonText)
     val data = objectMapper.writeValueAsBytes(node)
     val stream = ByteArrayInputStream(data)
@@ -91,7 +90,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
       stream,
       data.size.toLong(),
       mutableMapOf(),
-      0L)
+      0L
+    )
   }
 
   class JSONParsingHTTP(private val objectMapper: ObjectMapper) : HTTPType {
@@ -170,7 +170,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
             "simplified:synchronize_annotations": "false"
           }
         }
-      """.trimIndent())
+      """.trimIndent()
+    )
   }
 
   @Test
@@ -183,7 +184,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
             "simplified:synchronize_annotations": null
           }
         }
-      """.trimIndent())
+      """.trimIndent()
+    )
   }
 
   @Test
@@ -196,7 +198,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
 
           }
         }
-      """.trimIndent())
+      """.trimIndent()
+    )
   }
 
   @Test
@@ -209,7 +212,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
             "simplified:synchronize_annotations": true
           }
         }
-      """.trimIndent())
+      """.trimIndent()
+    )
   }
 
   @Test
@@ -228,20 +232,21 @@ abstract class ReaderBookmarkHTTPCallsContract {
              "id": "https://example.com/annotations/"
           }
         }
-      """.trimIndent())
+      """.trimIndent()
+    )
   }
 
   val bookmark0 =
     BookmarkAnnotation(
       context = null,
       body =
-      BookmarkAnnotationBodyNode(
-        timestamp = "2019-02-08T15:37:46+0000",
-        device = "urn:uuid:d8c5a487-646b-4c75-a83f-80599e8cf9d1",
-        chapterTitle = null,
-        chapterProgress = null,
-        bookProgress = null
-      ),
+        BookmarkAnnotationBodyNode(
+          timestamp = "2019-02-08T15:37:46+0000",
+          device = "urn:uuid:d8c5a487-646b-4c75-a83f-80599e8cf9d1",
+          chapterTitle = null,
+          chapterProgress = null,
+          bookProgress = null
+        ),
       id = "https://example.com/annotations/book0",
       type = "Annotation",
       motivation = "http://librarysimplified.org/terms/annotation/idling",
@@ -249,19 +254,22 @@ abstract class ReaderBookmarkHTTPCallsContract {
         source = "urn:book0",
         selector = BookmarkAnnotationSelectorNode(
           type = "FragmentSelector",
-          value = "zoom!")))
+          value = "zoom!"
+        )
+      )
+    )
 
   val bookmark1 =
     BookmarkAnnotation(
       context = null,
       body =
-      BookmarkAnnotationBodyNode(
-        timestamp = "2019-02-08T15:37:47+0000",
-        device = "urn:uuid:d8c5a487-646b-4c75-a83f-80599e8cf9d1",
-        chapterTitle = null,
-        chapterProgress = null,
-        bookProgress = null
-      ),
+        BookmarkAnnotationBodyNode(
+          timestamp = "2019-02-08T15:37:47+0000",
+          device = "urn:uuid:d8c5a487-646b-4c75-a83f-80599e8cf9d1",
+          chapterTitle = null,
+          chapterProgress = null,
+          bookProgress = null
+        ),
       id = "https://example.com/annotations/book0",
       type = "Annotation",
       motivation = "http://librarysimplified.org/terms/annotation/idling",
@@ -269,7 +277,10 @@ abstract class ReaderBookmarkHTTPCallsContract {
         source = "urn:book0",
         selector = BookmarkAnnotationSelectorNode(
           type = "FragmentSelector",
-          value = "zoom!")))
+          value = "zoom!"
+        )
+      )
+    )
 
   @Test
   fun testGetBookmarksSimple() {
@@ -320,7 +331,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
              "id": "https://example.com/annotations/"
           }
         }
-      """.trimIndent())
+      """.trimIndent()
+    )
   }
 
   @Test
@@ -348,7 +360,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
         mutableMapOf(),
         0L,
         ByteArrayInputStream(ByteArray(1)),
-        Option.none())
+        Option.none()
+      )
 
     this.expectedException.expect(IOException::class.java)
     calls.syncingIsEnabled(targetURI, credentials)
@@ -379,7 +392,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
         mutableMapOf(),
         0L,
         ByteArrayInputStream(ByteArray(1)),
-        Option.none())
+        Option.none()
+      )
 
     this.expectedException.expect(IOException::class.java)
     calls.bookmarksGet(targetURI, credentials)
@@ -410,7 +424,8 @@ abstract class ReaderBookmarkHTTPCallsContract {
         mutableMapOf(),
         0L,
         ByteArrayInputStream(ByteArray(1)),
-        Option.none())
+        Option.none()
+      )
 
     this.expectedException.expect(IOException::class.java)
     calls.bookmarkAdd(targetURI, credentials, this.bookmark0)

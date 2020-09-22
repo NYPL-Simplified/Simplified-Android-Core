@@ -128,32 +128,37 @@ class SettingsFragmentCustomOPDS : Fragment() {
         },
         onArrowClicked = {
           this.findNavigationController().popBackStack()
-        })
+        }
+      )
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
     }
   }
 
   private fun onCreationFinished() {
-    this.uiThread.runOnUIThread(Runnable {
-      this.progress.visibility = View.INVISIBLE
-      this.create.isEnabled = true
-    })
+    this.uiThread.runOnUIThread(
+      Runnable {
+        this.progress.visibility = View.INVISIBLE
+        this.create.isEnabled = true
+      }
+    )
   }
 
   private fun onAccountEvent(event: AccountEvent) {
-    this.uiThread.runOnUIThread(Runnable {
-      this.progressText.append(event.message)
-      this.progressText.append("\n")
-
-      for (name in event.attributes.keys) {
-        this.progressText.append("    ")
-        this.progressText.append(name)
-        this.progressText.append(": ")
-        this.progressText.append(event.attributes[name])
+    this.uiThread.runOnUIThread(
+      Runnable {
+        this.progressText.append(event.message)
         this.progressText.append("\n")
+
+        for (name in event.attributes.keys) {
+          this.progressText.append("    ")
+          this.progressText.append(name)
+          this.progressText.append(": ")
+          this.progressText.append(event.attributes[name])
+          this.progressText.append("\n")
+        }
       }
-    })
+    )
   }
 
   private fun isValidURI(): Boolean {

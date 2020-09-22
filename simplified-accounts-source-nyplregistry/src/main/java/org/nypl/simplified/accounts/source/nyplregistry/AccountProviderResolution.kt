@@ -136,7 +136,8 @@ class AccountProviderResolution(
       taskRecorder.currentStepFailedAppending(
         message = this.stringResources.resolvingUnexpectedException,
         errorCode = unexpectedException(this.description),
-        exception = e)
+        exception = e
+      )
       taskRecorder.finishFailure()
     }
   }
@@ -187,7 +188,6 @@ class AccountProviderResolution(
     taskRecorder: TaskRecorderType,
     authDocument: AuthenticationDocument
   ): Pair<AccountProviderAuthenticationDescription, List<AccountProviderAuthenticationDescription>> {
-
     if (authDocument.authentication.isEmpty()) {
       return Pair(AccountProviderAuthenticationDescription.Anonymous, listOf())
     }
@@ -199,15 +199,18 @@ class AccountProviderResolution(
       when (val authType = authObject.type.toASCIIString()) {
         OAUTH_INTERMEDIARY_TYPE -> {
           authObjects.add(
-            this.extractAuthenticationDescriptionOAuthIntermediary(taskRecorder, authObject))
+            this.extractAuthenticationDescriptionOAuthIntermediary(taskRecorder, authObject)
+          )
         }
         BASIC_TYPE -> {
           authObjects.add(
-            this.extractAuthenticationDescriptionBasic(authObject))
+            this.extractAuthenticationDescriptionBasic(authObject)
+          )
         }
         COPPA_TYPE -> {
           authObjects.add(
-            this.extractAuthenticationDescriptionCOPPA(taskRecorder, authObject))
+            this.extractAuthenticationDescriptionCOPPA(taskRecorder, authObject)
+          )
         }
         ANONYMOUS_TYPE -> {
           authObjects.clear()
@@ -234,7 +237,6 @@ class AccountProviderResolution(
     taskRecorder: TaskRecorderType,
     authObject: AuthenticationObject
   ): AccountProviderAuthenticationDescription {
-
     val authenticate =
       authObject.links.find { link -> link.relation == "authenticate" }
     val logo =
@@ -257,7 +259,6 @@ class AccountProviderResolution(
   private fun extractAuthenticationDescriptionBasic(
     authObject: AuthenticationObject
   ): AccountProviderAuthenticationDescription.Basic {
-
     val loginRestrictions =
       authObject.inputs[LABEL_LOGIN]
     val passwordRestrictions =
@@ -342,7 +343,8 @@ class AccountProviderResolution(
             taskRecorder.addAttributes(Presentables.problemReportAsAttributes(problem))
             taskRecorder.currentStepFailed(
               message,
-              httpRequestFailed(targetLink.hrefURI, result.status, result.message))
+              httpRequestFailed(targetLink.hrefURI, result.status, result.message)
+            )
             throw IOException(message)
           }
 

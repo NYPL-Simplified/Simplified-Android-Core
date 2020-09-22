@@ -10,7 +10,8 @@ data class BuildConfigOAuthScheme(val scheme: String) {
   init {
     if (!VALID_SCHEME_PATTERN.matcher(
         this.scheme
-      ).matches()) {
+      ).matches()
+    ) {
       throw IllegalArgumentException("Scheme '${this.scheme}' must match '$VALID_SCHEME_PATTERN'")
     }
   }

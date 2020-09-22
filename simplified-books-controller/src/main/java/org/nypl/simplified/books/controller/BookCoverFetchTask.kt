@@ -81,10 +81,10 @@ class BookCoverFetchTask(
       this.taskRecorder.currentStepFailedAppending(
         this.services.borrowStrings.borrowBookCoverUnexpectedException,
         "unexpectedException",
-        e)
+        e
+      )
       this.taskRecorder.finishFailure()
     } finally {
-
       /*
        * Refresh the entry in the book registry so that anything that's observing the book
        * will see the new cover.
@@ -124,7 +124,8 @@ class BookCoverFetchTask(
       }
       is HTTPResultError -> {
         this.taskRecorder.addAttributes(
-          Presentables.problemReportAsAttributes(this.someOrNull(result.problemReport)))
+          Presentables.problemReportAsAttributes(this.someOrNull(result.problemReport))
+        )
         this.taskRecorder.currentStepFailed(message, "httpRequestFailed ${result.status}")
         this.taskRecorder.finishFailure()
       }

@@ -40,6 +40,8 @@ class AccountInformationFragment : Fragment() {
 
   private val viewModel: UsernameViewModel by viewModels()
 
+  private var dialog: AlertDialog? = null
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -93,43 +95,54 @@ class AccountInformationFragment : Fragment() {
 
   private fun validateUsername() {
     showLoading(true)
-    viewModel.validateUsernameResponse.observe(viewLifecycleOwner, Observer { response ->
-      if (!back) {
-        showLoading(false)
-        if (response.type == usernameAvailable) {
-          logger.debug("Username is valid")
-          Cache(requireContext()).setAccountInformation(binding.usernameEt.text.toString(),
-            binding.pinEt.text.toString())
-          nextAction = AccountInformationFragmentDirections.actionNext()
-          navController.navigate(nextAction)
-        } else {
-          Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+    viewModel.validateUsernameResponse.observe(
+      viewLifecycleOwner,
+      Observer { response ->
+        if (!back) {
+          showLoading(false)
+          if (response.type == usernameAvailable) {
+            logger.debug("Username is valid")
+            Cache(requireContext()).setAccountInformation(
+              binding.usernameEt.text.toString(),
+              binding.pinEt.text.toString()
+            )
+            nextAction = AccountInformationFragmentDirections.actionNext()
+            navController.navigate(nextAction)
+          } else {
+            Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+          }
         }
       }
-    })
+    )
 
-    viewModel.apiError.observe(viewLifecycleOwner, Observer {
-      showLoading(false)
-      var error = getString(R.string.validate_username_general_error)
-      if (it != null) {
-        error = getString(R.string.validate_username_error, it)
+    viewModel.apiError.observe(
+      viewLifecycleOwner,
+      Observer {
+        showLoading(false)
+        var error = getString(R.string.validate_username_general_error)
+        if (it != null) {
+          error = getString(R.string.validate_username_error, it)
+        }
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setMessage(error)
+          .setCancelable(false)
+          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+            validateUsername()
+          }
+          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+            dialog.cancel()
+          }
+        if (dialog == null) {
+          dialog = dialogBuilder.create()
+        }
+        dialog?.show()
       }
-      val dialogBuilder = AlertDialog.Builder(requireContext())
-      dialogBuilder.setMessage(error)
-        .setCancelable(false)
-        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-          validateUsername()
-        }
-        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-          dialog.cancel()
-        }
-      val alert = dialogBuilder.create()
-      alert.show()
-    })
+    )
     viewModel.validateUsername(
       binding.usernameEt.text.toString(),
       requireActivity().intent.extras.getString("username"),
-      requireActivity().intent.extras.getString("password"))
+      requireActivity().intent.extras.getString("password")
+    )
   }
 
   private fun validateForm() {
@@ -162,5 +175,10 @@ class AccountInformationFragment : Fragment() {
     val accountInformation = Cache(requireContext()).getAccountInformation()
     binding.pinEt.setText(accountInformation.pin, TextView.BufferType.EDITABLE)
     binding.usernameEt.setText(accountInformation.username, TextView.BufferType.EDITABLE)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }

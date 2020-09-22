@@ -167,7 +167,6 @@ abstract class BooksControllerContract {
     timerExec: ExecutorService,
     patronUserProfileParsers: PatronUserProfileParsersType
   ): BooksControllerType {
-
     val parser =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
     val transport =
@@ -190,47 +189,68 @@ abstract class BooksControllerContract {
 
     val services = MutableServiceDirectory()
     services.putService(
-      AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
+      AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies
+    )
     services.putService(
-      AnalyticsType::class.java, this.analytics)
+      AnalyticsType::class.java, this.analytics
+    )
     services.putService(
-      AccountLoginStringResourcesType::class.java, this.accountLoginStringResources)
+      AccountLoginStringResourcesType::class.java, this.accountLoginStringResources
+    )
     services.putService(
-      AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources)
+      AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources
+    )
     services.putService(
-      AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings)
+      AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings
+    )
     services.putService(
-      AccountProviderRegistryType::class.java, accountProviders)
+      AccountProviderRegistryType::class.java, accountProviders
+    )
     services.putService(
-      AuthenticationDocumentParsersType::class.java, this.authDocumentParsers)
+      AuthenticationDocumentParsersType::class.java, this.authDocumentParsers
+    )
     services.putService(
-      BookRegistryType::class.java, this.bookRegistry)
+      BookRegistryType::class.java, this.bookRegistry
+    )
     services.putService(
-      BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources)
+      BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources
+    )
     services.putService(
-      BundledContentResolverType::class.java, bundledContent)
+      BundledContentResolverType::class.java, bundledContent
+    )
     services.putService(
-      DownloaderType::class.java, downloader)
+      DownloaderType::class.java, downloader
+    )
     services.putService(
-      FeedLoaderType::class.java, feedLoader)
+      FeedLoaderType::class.java, feedLoader
+    )
     services.putService(
-      OPDSFeedParserType::class.java, parser)
+      OPDSFeedParserType::class.java, parser
+    )
     services.putService(
-      HTTPType::class.java, http)
+      HTTPType::class.java, http
+    )
     services.putService(
-      PatronUserProfileParsersType::class.java, patronUserProfileParsers)
+      PatronUserProfileParsersType::class.java, patronUserProfileParsers
+    )
     services.putService(
-      ProfileAccountCreationStringResourcesType::class.java, profileAccountCreationStringResources)
+      ProfileAccountCreationStringResourcesType::class.java, profileAccountCreationStringResources
+    )
     services.putService(
-      ProfileAccountDeletionStringResourcesType::class.java, profileAccountDeletionStringResources)
+      ProfileAccountDeletionStringResourcesType::class.java, profileAccountDeletionStringResources
+    )
     services.putService(
-      ProfilesDatabaseType::class.java, profiles)
+      ProfilesDatabaseType::class.java, profiles
+    )
     services.putService(
-      BookRevokeStringResourcesType::class.java, revokeStringResources)
+      BookRevokeStringResourcesType::class.java, revokeStringResources
+    )
     services.putService(
-      ProfileIdleTimerType::class.java, InoperableIdleTimer())
+      ProfileIdleTimerType::class.java, InoperableIdleTimer()
+    )
     services.putService(
-      ClockType::class.java, Clock)
+      ClockType::class.java, Clock
+    )
 
     return Controller.createFromServiceDirectory(
       services = services,
@@ -301,7 +321,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -318,7 +339,9 @@ abstract class BooksControllerContract {
         HashMap(),
         0L,
         ByteArrayInputStream(ByteArray(0)),
-        Option.none<HTTPProblemReport>()))
+        Option.none<HTTPProblemReport>()
+      )
+    )
 
     this.expected.expect(ExecutionException::class.java)
     this.expected.expectCause(IsInstanceOf.instanceOf<IOException>(IOException::class.java))
@@ -334,7 +357,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncRemote401() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -347,7 +369,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -364,7 +387,9 @@ abstract class BooksControllerContract {
         HashMap(),
         0L,
         ByteArrayInputStream(ByteArray(0)),
-        Option.none<HTTPProblemReport>()))
+        Option.none<HTTPProblemReport>()
+      )
+    )
 
     controller.booksSync(account).get()
     Assert.assertEquals(AccountNotLoggedIn, account.loginState)
@@ -379,7 +404,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncWithoutAuthSupport() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -392,7 +416,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeProvider("urn:fake:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -414,7 +439,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncMissingCredentials() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -427,7 +451,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -448,7 +473,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncBadFeed() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -461,7 +485,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -477,7 +502,9 @@ abstract class BooksControllerContract {
         ByteArrayInputStream(byteArrayOf(0x23, 0x10, 0x39, 0x59)),
         4L,
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.expected.expect(ExecutionException::class.java)
     this.expected.expectCause(IsInstanceOf.instanceOf<OPDSParseException>(OPDSParseException::class.java))
@@ -493,7 +520,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncNewEntries() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -506,7 +532,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -522,7 +549,9 @@ abstract class BooksControllerContract {
         resource("testBooksSyncNewEntries.xml"),
         resourceSize("testBooksSyncNewEntries.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
 
@@ -531,11 +560,14 @@ abstract class BooksControllerContract {
     Assert.assertEquals(3L, this.bookRegistry.books().size.toLong())
 
     this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    )
     this.bookRegistry.bookOrException(
-      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
+      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
+    )
     this.bookRegistry.bookOrException(
-      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
+      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
+    )
 
     EventAssertions.isTypeAndMatches(
       BookStatusEvent::class.java,
@@ -563,7 +595,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksSyncRemoveEntries() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -576,7 +607,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -596,16 +628,21 @@ abstract class BooksControllerContract {
         resource("testBooksSyncNewEntries.xml"),
         resourceSize("testBooksSyncNewEntries.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     controller.booksSync(account).get()
 
     this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    )
     this.bookRegistry.bookOrException(
-      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f"))
+      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
+    )
     this.bookRegistry.bookOrException(
-      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113"))
+      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
+    )
 
     this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
 
@@ -621,7 +658,9 @@ abstract class BooksControllerContract {
         resource("testBooksSyncRemoveEntries.xml"),
         resourceSize("testBooksSyncRemoveEntries.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     controller.booksSync(account).get()
     Assert.assertEquals(1L, this.bookRegistry.books().size.toLong())
@@ -643,7 +682,8 @@ abstract class BooksControllerContract {
     ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_REMOVED) }
 
     this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f"))
+      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    )
 
     checkBookIsNotInRegistry("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
     checkBookIsNotInRegistry("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
@@ -667,7 +707,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksDelete() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -680,7 +719,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -696,7 +736,9 @@ abstract class BooksControllerContract {
         resource("testBooksDelete.xml"),
         resourceSize("testBooksDelete.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     controller.booksSync(account).get()
 
@@ -706,7 +748,8 @@ abstract class BooksControllerContract {
       "Book must not have a saved EPUB file",
       this.bookRegistry.bookOrException(bookId)
         .book
-        .isDownloaded)
+        .isDownloaded
+    )
 
     /*
      * Manually reach into the database and create a book in order to have something to delete.
@@ -735,7 +778,8 @@ abstract class BooksControllerContract {
 
     Assert.assertTrue(
       "Book must not have a saved EPUB file",
-      this.bookRegistry.book(bookId).isNone)
+      this.bookRegistry.book(bookId).isNone
+    )
 
     // Assert.assertFalse("EPUB must not exist", file.exists());
   }
@@ -749,7 +793,6 @@ abstract class BooksControllerContract {
   @Test(timeout = 3_000L)
   @Throws(Exception::class)
   fun testBooksRevokeDismissHasNotFailed() {
-
     val controller =
       createController(
         exec = this.executorBooks,
@@ -762,7 +805,8 @@ abstract class BooksControllerContract {
         timerExec = this.executorTimer,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        patronUserProfileParsers = this.patronUserProfileParsers)
+        patronUserProfileParsers = this.patronUserProfileParsers
+      )
 
     val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -778,7 +822,9 @@ abstract class BooksControllerContract {
         resource("testBooksSyncNewEntries.xml"),
         resourceSize("testBooksSyncNewEntries.xml"),
         HashMap(),
-        0L))
+        0L
+      )
+    )
 
     controller.booksSync(account).get()
 
@@ -826,7 +872,8 @@ abstract class BooksControllerContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialsStore,
       AccountsDatabases,
-      dirProfiles)
+      dirProfiles
+    )
   }
 
   private fun onAccountResolution(

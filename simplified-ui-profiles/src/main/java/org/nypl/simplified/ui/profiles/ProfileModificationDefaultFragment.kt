@@ -292,7 +292,8 @@ class ProfileModificationDefaultFragment : Fragment() {
       },
       shouldArrowBePresent = {
         true
-      })
+      }
+    )
 
     this.profileSubscription =
       this.profilesController.profileEvents()

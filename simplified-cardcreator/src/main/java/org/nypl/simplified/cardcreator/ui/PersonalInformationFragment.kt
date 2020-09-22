@@ -82,13 +82,15 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
     binding.nextBtn.setOnClickListener {
       if (isOver13()) {
         logger.debug("User navigated to the next screen")
-        Cache(requireContext()).setPersonalInformation(PersonalInformation(
-          binding.firstNameEt.text.toString(),
-          binding.middleNameEt.text.toString(),
-          binding.lastNameEt.text.toString(),
-          birthDate!!,
-          binding.emailEt.text.toString()
-        ))
+        Cache(requireContext()).setPersonalInformation(
+          PersonalInformation(
+            binding.firstNameEt.text.toString(),
+            binding.middleNameEt.text.toString(),
+            binding.lastNameEt.text.toString(),
+            birthDate!!,
+            binding.emailEt.text.toString()
+          )
+        )
         hideKeyboard()
         navController.navigate(nextAction)
       }

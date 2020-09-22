@@ -147,7 +147,8 @@ class BookRevokeTask(
             this.bookID.value(),
             "",
             DateTime.now(),
-            OPDSAvailabilityLoanable.get())
+            OPDSAvailabilityLoanable.get()
+          )
             .build()
 
         Book(
@@ -156,7 +157,8 @@ class BookRevokeTask(
           null,
           null,
           entry,
-          listOf())
+          listOf()
+        )
       }
 
     this.bookRegistry.update(BookWithStatus(book, status))
@@ -187,7 +189,8 @@ class BookRevokeTask(
       this.error("revoke failed: ", e)
 
       this.steps.currentStepFailedAppending(
-        this.revokeStrings.revokeUnexpectedException, "unexpectedException", e)
+        this.revokeStrings.revokeUnexpectedException, "unexpectedException", e
+      )
 
       val failure = this.steps.finishFailure<Unit>()
       this.publishBookStatus(BookStatus.FailedRevoke(this.bookID, failure))
@@ -299,7 +302,8 @@ class BookRevokeTask(
       this.databaseEntry.writeOPDSEntry(entry.feedEntry)
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeServerNotifySavingEntryFailed, "unexpectedException", e)
+        this.revokeStrings.revokeServerNotifySavingEntryFailed, "unexpectedException", e
+      )
       throw e
     }
   }
@@ -313,7 +317,8 @@ class BookRevokeTask(
       this.databaseEntry.delete()
     } catch (e: Throwable) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeUnexpectedException, "unexpectedException", e)
+        this.revokeStrings.revokeUnexpectedException, "unexpectedException", e
+      )
       throw e
     }
   }
@@ -491,7 +496,6 @@ class BookRevokeTask(
     adobeDRM: AdobeAdeptExecutorType,
     adobeRights: AdobeAdeptLoan
   ) {
-
     val credentials =
       this.revokeFormatHandleEPUBAdobeWithConnectorGetCredentials()
 
@@ -572,7 +576,8 @@ class BookRevokeTask(
       }
     } catch (e: Exception) {
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeACSDeleteRightsFailed, "unexpectedException", e)
+        this.revokeStrings.revokeACSDeleteRightsFailed, "unexpectedException", e
+      )
       throw e
     }
   }
@@ -608,7 +613,8 @@ class BookRevokeTask(
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
       this.steps.currentStepFailed(
-        this.revokeStrings.revokeBookDatabaseLookupFailed, "unexpectedException", e)
+        this.revokeStrings.revokeBookDatabaseLookupFailed, "unexpectedException", e
+      )
       throw e
     }
   }

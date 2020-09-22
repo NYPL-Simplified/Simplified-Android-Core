@@ -86,7 +86,6 @@ class BookFormatSupport private constructor(
   override fun isSupportedPath(
     typePath: List<MIMEType>
   ): Boolean {
-
     /*
      * An empty path is trivially unsupported.
      */
@@ -122,7 +121,8 @@ class BookFormatSupport private constructor(
 
     val typeSet = typePath.toSet()
     if (typeSet.contains(StandardFormatNames.genericPDFFiles) &&
-      typeSet.contains(StandardFormatNames.adobeACSMFiles)) {
+      typeSet.contains(StandardFormatNames.adobeACSMFiles)
+    ) {
       this.logger.warn("Adobe-encrypted PDFs are not supported")
       return false
     }

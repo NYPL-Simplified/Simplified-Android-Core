@@ -27,15 +27,21 @@ class ProfileAccountDeleteTask(
   private val taskRecorder = TaskRecorder.create()
 
   private fun publishFailureEvent() =
-    this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionFailed(
-      this.taskRecorder.finishFailure<Unit>()))
+    this.accountEvents.onNext(
+      AccountEventDeletion.AccountEventDeletionFailed(
+        this.taskRecorder.finishFailure<Unit>()
+      )
+    )
 
   private fun publishProgressEvent(step: TaskStep) =
     this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionInProgress(step.description))
 
   private fun publishSuccessEvent(accountThen: AccountID) =
-    this.accountEvents.onNext(AccountEventDeletion.AccountEventDeletionSucceeded(
-      this.strings.deletionSucceeded, accountThen))
+    this.accountEvents.onNext(
+      AccountEventDeletion.AccountEventDeletionSucceeded(
+        this.strings.deletionSucceeded, accountThen
+      )
+    )
 
   override fun call(): TaskResult<Unit> {
     return try {

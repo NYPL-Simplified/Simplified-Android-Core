@@ -117,7 +117,6 @@ class SplashFragment : Fragment() {
     container: ViewGroup?,
     state: Bundle?
   ): View? {
-
     val stackView =
       inflater.inflate(R.layout.splash_stack, container, false) as ViewGroup
     val imageView =
@@ -138,20 +137,23 @@ class SplashFragment : Fragment() {
         sendError = imageView.findViewById(R.id.splashSendError),
         version = imageView.findViewById(R.id.splashVersion),
         exception = imageView.findViewById(R.id.splashException),
-        text = imageView.findViewById(R.id.splashText))
+        text = imageView.findViewById(R.id.splashText)
+      )
 
     this.viewsForEULA =
       ViewsEULA(
         container = eulaView,
         eulaAgree = eulaView.findViewById(R.id.splashEulaAgree),
         eulaDisagree = eulaView.findViewById(R.id.splashEulaDisagree),
-        eulaWebView = eulaView.findViewById(R.id.splashEulaWebView))
+        eulaWebView = eulaView.findViewById(R.id.splashEulaWebView)
+      )
 
     this.viewsForMigrationRunning =
       ViewsMigrationRunning(
         container = migrationProgressView,
         text = migrationProgressView.findViewById(R.id.splashMigrationProgressText),
-        progress = migrationProgressView.findViewById(R.id.splashMigrationProgress))
+        progress = migrationProgressView.findViewById(R.id.splashMigrationProgress)
+      )
 
     this.viewsForMigrationReport =
       ViewsMigrationReport(
@@ -159,7 +161,8 @@ class SplashFragment : Fragment() {
         text = migrationReportView.findViewById(R.id.splashMigrationReportTitle),
         list = migrationReportView.findViewById(R.id.splashMigrationReportList),
         sendButton = migrationReportView.findViewById(R.id.splashMigrationReportSend),
-        okButton = migrationReportView.findViewById(R.id.splashMigrationReportOK))
+        okButton = migrationReportView.findViewById(R.id.splashMigrationReportOK)
+      )
 
     this.configureViewsForImage()
 
@@ -176,7 +179,6 @@ class SplashFragment : Fragment() {
   }
 
   private fun configureViewsForImage() {
-
     /*
      * Initially, only the image is shown.
      */
@@ -315,7 +317,8 @@ class SplashFragment : Fragment() {
           context = this.requireContext(),
           address = reportEmail,
           subject = this.reportEmailSubject(report),
-          body = this.reportEmailBody(report))
+          body = this.reportEmailBody(report)
+        )
       }
     } else {
       this.viewsForMigrationReport.sendButton.visibility = View.INVISIBLE
@@ -364,15 +367,18 @@ class SplashFragment : Fragment() {
      * of important "boot completed" or "boot failed" messages.
      */
 
-    this.bootFuture.addListener(Runnable {
-      try {
-        this.bootFuture.get(1L, TimeUnit.SECONDS)
-        this.onBootFinished()
-      } catch (e: Throwable) {
-        val actual = if (e is ExecutionException) { e.cause } else { e }
-        this.onBootEvent(BootEvent.BootFailed(actual?.message ?: "", Exception(e)))
-      }
-    }, MoreExecutors.directExecutor())
+    this.bootFuture.addListener(
+      Runnable {
+        try {
+          this.bootFuture.get(1L, TimeUnit.SECONDS)
+          this.onBootFinished()
+        } catch (e: Throwable) {
+          val actual = if (e is ExecutionException) { e.cause } else { e }
+          this.onBootEvent(BootEvent.BootFailed(actual?.message ?: "", Exception(e)))
+        }
+      },
+      MoreExecutors.directExecutor()
+    )
   }
 
   override fun onStop() {
@@ -426,7 +432,8 @@ class SplashFragment : Fragment() {
         context = this.requireContext(),
         address = this.parameters.splashMigrationReportEmail ?: "",
         subject = "[application startup failure]",
-        body = event.message)
+        body = event.message
+      )
     }
   }
 
@@ -509,7 +516,8 @@ class SplashFragment : Fragment() {
           this.processMigrationCrashed(e)
         }
       },
-      MoreExecutors.directExecutor())
+      MoreExecutors.directExecutor()
+    )
   }
 
   private fun onMigrationsDone() {

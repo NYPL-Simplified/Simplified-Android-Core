@@ -41,11 +41,13 @@ interface ServiceDirectoryType {
   ): List<T> {
     val services = this.optionalServices(serviceClass)
     if (services.isEmpty()) {
-      throw ServiceConfigurationException(buildString {
-        this.append("No service implementation is available\n")
-        this.append("  Service: ${serviceClass.canonicalName}\n")
-        this.append("Note that this might indicate a circular dependency between services!\n")
-      })
+      throw ServiceConfigurationException(
+        buildString {
+          this.append("No service implementation is available\n")
+          this.append("  Service: ${serviceClass.canonicalName}\n")
+          this.append("Note that this might indicate a circular dependency between services!\n")
+        }
+      )
     }
     return services
   }

@@ -75,7 +75,6 @@ data class AudioBookPlayerParameters(
     credentials: AccountAuthenticationCredentials?,
     cacheDirectory: File
   ): AudioBookManifestStrategyType {
-
     val manifestContentType =
       MIMEParser.parseRaisingException(this.manifestContentType)
     val userAgent =

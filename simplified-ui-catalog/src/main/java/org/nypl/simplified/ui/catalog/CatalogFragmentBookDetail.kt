@@ -519,18 +519,24 @@ class CatalogFragmentBookDetail : Fragment() {
     this.uiThread.checkIsUIThread()
 
     this.buttons.removeAllViews()
-    this.buttons.addView(this.buttonCreator.createDismissButton {
-      this.borrowViewModel.tryDismissBorrowError(this.parameters.feedEntry.accountID, book.id)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createDismissButton {
+        this.borrowViewModel.tryDismissBorrowError(this.parameters.feedEntry.accountID, book.id)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createDetailsButton {
-      this.tryShowError(book, bookStatus.result)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createDetailsButton {
+        this.tryShowError(book, bookStatus.result)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createRetryButton {
-      this.openLoginDialogIfNecessary()
-      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createRetryButton {
+        this.openLoginDialogIfNecessary()
+        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+      }
+    )
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -582,10 +588,12 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.buttons.addView(this.buttonCreator.createGetButton {
-      this.openLoginDialogIfNecessary()
-      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createGetButton {
+        this.openLoginDialogIfNecessary()
+        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
 
@@ -606,10 +614,12 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.buttons.addView(this.buttonCreator.createReserveButton {
-      this.openLoginDialogIfNecessary()
-      this.borrowViewModel.tryReserveMaybeAuthenticated(book)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createReserveButton {
+        this.openLoginDialogIfNecessary()
+        this.borrowViewModel.tryReserveMaybeAuthenticated(book)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
 
@@ -637,7 +647,8 @@ class CatalogFragmentBookDetail : Fragment() {
             this.buttonCreator.createRevokeHoldButton {
               this.openLoginDialogIfNecessary()
               this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
-            })
+            }
+          )
           this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
         } else {
           this.buttons.addView(
@@ -651,12 +662,15 @@ class CatalogFragmentBookDetail : Fragment() {
             this.buttonCreator.createRevokeHoldButton {
               this.openLoginDialogIfNecessary()
               this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
-            })
+            }
+          )
         }
-        this.buttons.addView(this.buttonCreator.createGetButton {
-          this.openLoginDialogIfNecessary()
-          this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-        })
+        this.buttons.addView(
+          this.buttonCreator.createGetButton {
+            this.openLoginDialogIfNecessary()
+            this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+          }
+        )
       }
     }
     this.checkButtonViewCount()
@@ -678,40 +692,50 @@ class CatalogFragmentBookDetail : Fragment() {
     this.buttons.removeAllViews()
     when (bookStatus) {
       is BookStatus.Loaned.LoanedNotDownloaded ->
-        this.buttons.addView(this.buttonCreator.createDownloadButton {
-          this.openLoginDialogIfNecessary()
-          this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-        })
+        this.buttons.addView(
+          this.buttonCreator.createDownloadButton {
+            this.openLoginDialogIfNecessary()
+            this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+          }
+        )
 
       is BookStatus.Loaned.LoanedDownloaded ->
         when (val format = book.findPreferredFormat()) {
           is BookFormat.BookFormatPDF,
           is BookFormat.BookFormatEPUB -> {
-            this.buttons.addView(this.buttonCreator.createReadButton {
-              this.findNavigationController().openViewer(this.requireActivity(), book, format)
-            })
+            this.buttons.addView(
+              this.buttonCreator.createReadButton {
+                this.findNavigationController().openViewer(this.requireActivity(), book, format)
+              }
+            )
           }
           is BookFormat.BookFormatAudioBook -> {
-            this.buttons.addView(this.buttonCreator.createListenButton {
-              this.findNavigationController().openViewer(this.requireActivity(), book, format)
-            })
+            this.buttons.addView(
+              this.buttonCreator.createListenButton {
+                this.findNavigationController().openViewer(this.requireActivity(), book, format)
+              }
+            )
           }
         }
     }
 
     if (bookStatus.returnable) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
-      this.buttons.addView(this.buttonCreator.createRevokeLoanButton {
-        this.openLoginDialogIfNecessary()
-        this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
-      })
+      this.buttons.addView(
+        this.buttonCreator.createRevokeLoanButton {
+          this.openLoginDialogIfNecessary()
+          this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+        }
+      )
     }
 
     if (this.shouldShowDeleteButton(book)) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
-      this.buttons.addView(this.buttonCreator.createDeleteButton {
-        this.borrowViewModel.tryDelete(book.account, book.id)
-      })
+      this.buttons.addView(
+        this.buttonCreator.createDeleteButton {
+          this.borrowViewModel.tryDelete(book.account, book.id)
+        }
+      )
     }
 
     this.checkButtonViewCount()
@@ -779,9 +803,11 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.buttons.addView(this.buttonCreator.createCancelDownloadButton {
-      this.borrowViewModel.tryCancelDownload(book.account, book.id)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createCancelDownloadButton {
+        this.borrowViewModel.tryCancelDownload(book.account, book.id)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
 
@@ -832,18 +858,24 @@ class CatalogFragmentBookDetail : Fragment() {
     this.uiThread.checkIsUIThread()
 
     this.buttons.removeAllViews()
-    this.buttons.addView(this.buttonCreator.createDismissButton {
-      this.borrowViewModel.tryDismissBorrowError(book.account, book.id)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createDismissButton {
+        this.borrowViewModel.tryDismissBorrowError(book.account, book.id)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createDetailsButton {
-      this.tryShowError(book, bookStatus.result)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createDetailsButton {
+        this.tryShowError(book, bookStatus.result)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createRetryButton {
-      this.openLoginDialogIfNecessary()
-      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createRetryButton {
+        this.openLoginDialogIfNecessary()
+        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+      }
+    )
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -860,18 +892,24 @@ class CatalogFragmentBookDetail : Fragment() {
     this.uiThread.checkIsUIThread()
 
     this.buttons.removeAllViews()
-    this.buttons.addView(this.buttonCreator.createDismissButton {
-      this.borrowViewModel.tryDismissRevokeError(book.account, book.id)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createDismissButton {
+        this.borrowViewModel.tryDismissRevokeError(book.account, book.id)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createDetailsButton {
-      this.tryShowError(book, bookStatus.result)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createDetailsButton {
+        this.tryShowError(book, bookStatus.result)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
-    this.buttons.addView(this.buttonCreator.createRetryButton {
-      this.openLoginDialogIfNecessary()
-      this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createRetryButton {
+        this.openLoginDialogIfNecessary()
+        this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+      }
+    )
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.INVISIBLE
@@ -886,11 +924,13 @@ class CatalogFragmentBookDetail : Fragment() {
 
     if (this.borrowViewModel.isLoginRequired(this.parameters.feedEntry.accountID)) {
       this.findNavigationController()
-        .openSettingsAccount(AccountFragmentParameters(
-          accountId = this.parameters.feedEntry.accountID,
-          closeOnLoginSuccess = true,
-          showPleaseLogInTitle = true
-        ))
+        .openSettingsAccount(
+          AccountFragmentParameters(
+            accountId = this.parameters.feedEntry.accountID,
+            closeOnLoginSuccess = true,
+            showPleaseLogInTitle = true
+          )
+        )
     }
   }
 

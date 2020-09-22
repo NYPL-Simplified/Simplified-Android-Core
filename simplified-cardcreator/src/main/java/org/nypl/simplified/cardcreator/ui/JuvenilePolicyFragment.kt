@@ -43,6 +43,8 @@ class JuvenilePolicyFragment : Fragment() {
   private val viewModel: TokenViewModel by viewModels()
   private val platformViewModel: PlatformViewModel by viewModels()
 
+  private var dialog: AlertDialog? = null
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -101,72 +103,95 @@ class JuvenilePolicyFragment : Fragment() {
       }
     }
 
-    viewModel.issoTokenData.observe(viewLifecycleOwner, Observer {
-      getCache().token = it.access_token
-      getEligibility()
-    })
-
-    platformViewModel.dependentEligibilityData.observe(viewLifecycleOwner, Observer {
-      if (it.eligible) {
-        nextAction = JuvenilePolicyFragmentDirections.actionLocation()
-        navController.navigate(nextAction)
-      } else {
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage(it.description)
-          .setCancelable(false)
-          .setNegativeButton(getString(R.string.cancel)) { _, _ ->
-            requireActivity().setResult(Activity.RESULT_CANCELED)
-            requireActivity().finish()
-          }
-        val alert = dialogBuilder.create()
-        alert.show()
+    viewModel.issoTokenData.observe(
+      viewLifecycleOwner,
+      Observer {
+        getCache().token = it.access_token
+        getEligibility()
       }
-    })
+    )
 
-    platformViewModel.apiErrorMessage.observe(viewLifecycleOwner, Observer {
-      binding.progress.visibility = View.GONE
-      val dialogBuilder = AlertDialog.Builder(requireContext())
-      dialogBuilder.setMessage("$it")
-        .setCancelable(false)
-        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-          getToken()
+    platformViewModel.dependentEligibilityData.observe(
+      viewLifecycleOwner,
+      Observer {
+        if (it.eligible) {
+          nextAction = JuvenilePolicyFragmentDirections.actionLocation()
+          navController.navigate(nextAction)
+        } else {
+          val dialogBuilder = AlertDialog.Builder(requireContext())
+          dialogBuilder.setMessage(it.description)
+            .setCancelable(false)
+            .setNegativeButton(getString(R.string.cancel)) { _, _ ->
+              requireActivity().setResult(Activity.RESULT_CANCELED)
+              requireActivity().finish()
+            }
+          if (dialog == null) {
+            dialog = dialogBuilder.create()
+          }
+          dialog?.show()
         }
-        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-          dialog.cancel()
-        }
-      val alert = dialogBuilder.create()
-      alert.show()
-    })
+      }
+    )
 
-    platformViewModel.apiError.observe(viewLifecycleOwner, Observer {
-      binding.progress.visibility = View.GONE
-      val dialogBuilder = AlertDialog.Builder(requireContext())
-      dialogBuilder.setMessage("$it Error")
-        .setCancelable(false)
-        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-          getToken()
+    platformViewModel.apiErrorMessage.observe(
+      viewLifecycleOwner,
+      Observer {
+        binding.progress.visibility = View.GONE
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setMessage("$it")
+          .setCancelable(false)
+          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+            getToken()
+          }
+          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+            dialog.cancel()
+          }
+        if (dialog == null) {
+          dialog = dialogBuilder.create()
         }
-        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-          dialog.cancel()
-        }
-      val alert = dialogBuilder.create()
-      alert.show()
-    })
+        dialog?.show()
+      }
+    )
 
-    viewModel.apiError.observe(viewLifecycleOwner, Observer {
-      binding.progress.visibility = View.GONE
-      val dialogBuilder = AlertDialog.Builder(requireContext())
-      dialogBuilder.setMessage("$it Error")
-        .setCancelable(false)
-        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-          getToken()
+    platformViewModel.apiError.observe(
+      viewLifecycleOwner,
+      Observer {
+        binding.progress.visibility = View.GONE
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setMessage("$it Error")
+          .setCancelable(false)
+          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+            getToken()
+          }
+          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+            dialog.cancel()
+          }
+        if (dialog == null) {
+          dialog = dialogBuilder.create()
         }
-        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-          dialog.cancel()
+        dialog?.show()
+      }
+    )
+
+    viewModel.apiError.observe(
+      viewLifecycleOwner,
+      Observer {
+        binding.progress.visibility = View.GONE
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setMessage("$it Error")
+          .setCancelable(false)
+          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+            getToken()
+          }
+          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+            dialog.cancel()
+          }
+        if (dialog == null) {
+          dialog = dialogBuilder.create()
         }
-      val alert = dialogBuilder.create()
-      alert.show()
-    })
+        dialog?.show()
+      }
+    )
 
     val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
       requireActivity().setResult(Activity.RESULT_CANCELED)
@@ -192,7 +217,8 @@ class JuvenilePolicyFragment : Fragment() {
     binding.progress.visibility = View.VISIBLE
     viewModel.getToken(
       requireActivity().intent.extras.getString("clientId"),
-      requireActivity().intent.extras.getString("clientSecret"))
+      requireActivity().intent.extras.getString("clientSecret")
+    )
   }
 
   /**
@@ -209,5 +235,10 @@ class JuvenilePolicyFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }

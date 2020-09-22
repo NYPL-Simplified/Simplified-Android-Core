@@ -71,7 +71,8 @@ class MainCatalogBookBorrowStrings(
   override fun borrowBookBorrowForAvailability(availability: OPDSAvailabilityType): String {
     return this.resources.getString(
       R.string.borrowBookBorrowForAvailability,
-      availability.javaClass.simpleName)
+      availability.javaClass.simpleName
+    )
   }
 
   override fun borrowBookFulfillDownloaded(file: File, contentType: MIMEType): String {

@@ -1,5 +1,7 @@
 package org.nypl.simplified.books.api
 
+import java.io.Serializable
+
 /**
  * Progress through a specific chapter.
  */
@@ -17,4 +19,4 @@ data class BookChapterProgress(
    */
 
   val chapterProgress: Double
-)
+) : Serializable
