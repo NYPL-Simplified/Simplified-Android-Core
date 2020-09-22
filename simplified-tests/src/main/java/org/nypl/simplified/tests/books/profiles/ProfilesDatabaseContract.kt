@@ -125,7 +125,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
   }
 
   /**
@@ -150,7 +151,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
   }
 
   /**
@@ -177,7 +179,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
   }
 
   private fun accountsDatabases(): AccountsDatabaseFactoryType {
@@ -206,7 +209,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
   }
 
   /**
@@ -235,7 +239,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
   }
 
   /**
@@ -256,7 +261,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     Assert.assertEquals(0, db.profiles().size.toLong())
     Assert.assertEquals(fileProfiles, db.directory())
@@ -280,14 +286,15 @@ abstract class ProfilesDatabaseContract {
 
     val db =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
-      this.context(),
-      this.analytics,
-      this.accountEvents,
-      accountProviders,
-      AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialStore,
-      this.accountsDatabases(),
-      fileProfiles)
+        this.context(),
+        this.analytics,
+        this.accountEvents,
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        fileProfiles
+      )
 
     val accountProvider = accountProviderList[0]
     val p0 = db.createProfile(accountProvider, "Kermit")
@@ -308,27 +315,33 @@ abstract class ProfilesDatabaseContract {
 
     Assert.assertTrue(
       "Kermit profile exists",
-      p0.directory.isDirectory)
+      p0.directory.isDirectory
+    )
 
     Assert.assertTrue(
       "Kermit profile file exists",
-      File(p0.directory, "profile.json").isFile)
+      File(p0.directory, "profile.json").isFile
+    )
 
     Assert.assertTrue(
       "Gonzo profile exists",
-      p1.directory.isDirectory)
+      p1.directory.isDirectory
+    )
 
     Assert.assertTrue(
       "Gonzo profile file exists",
-      File(p1.directory, "profile.json").isFile)
+      File(p1.directory, "profile.json").isFile
+    )
 
     Assert.assertTrue(
       "Beaker profile exists",
-      p1.directory.isDirectory)
+      p1.directory.isDirectory
+    )
 
     Assert.assertTrue(
       "Beaker profile file exists",
-      File(p2.directory, "profile.json").isFile)
+      File(p2.directory, "profile.json").isFile
+    )
 
     Assert.assertFalse(p0.isCurrent)
     Assert.assertFalse(p1.isCurrent)
@@ -357,7 +370,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc =
       MockAccountProviders.fakeProvider("urn:fake:0")
@@ -374,7 +388,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val pr0 = db1.profiles()[p0.id]!!
     val pr1 = db1.profiles()[p1.id]!!
@@ -411,7 +426,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
@@ -426,7 +442,8 @@ abstract class ProfilesDatabaseContract {
 
     Assert.assertEquals(
       ProfileDateOfBirth(DateTime(20L), true),
-      p0.preferences().dateOfBirth)
+      p0.preferences().dateOfBirth
+    )
   }
 
   /**
@@ -447,7 +464,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
@@ -476,7 +494,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
@@ -503,7 +522,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
@@ -533,7 +553,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
@@ -566,7 +587,8 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        fileProfiles)
+        fileProfiles
+      )
 
     Assert.assertEquals(1L, db0.profiles().size.toLong())
 
@@ -597,7 +619,8 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        fileProfiles)
+        fileProfiles
+      )
 
     this.expected.expect(org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException::class.java)
     db0.setProfileCurrent(ProfileID.generate())
@@ -622,7 +645,8 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        fileProfiles)
+        fileProfiles
+      )
 
     val acc0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -656,7 +680,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -688,7 +713,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -719,7 +745,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     val acc0 =
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
@@ -730,11 +757,13 @@ abstract class ProfilesDatabaseContract {
     db0.setProfileCurrent(p0.id)
 
     val acci1 = p0.createAccount(acc1)
-    p0.setDescription(p0.description().copy(
-      preferences = p0.preferences().copy(
-        mostRecentAccount = acci1.id
+    p0.setDescription(
+      p0.description().copy(
+        preferences = p0.preferences().copy(
+          mostRecentAccount = acci1.id
+        )
       )
-    ))
+    )
 
     Assert.assertEquals(acci1.id, p0.preferences().mostRecentAccount)
     p0.deleteAccountByProvider(acc1.id)
@@ -759,7 +788,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
 
     this.expected.expect(ProfileAnonymousDisabledException::class.java)
     this.expected.expectMessage(StringContains.containsString("The anonymous profile is not enabled"))
@@ -793,7 +823,8 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        fileProfiles)
+        fileProfiles
+      )
 
     val accountProvider0 =
       accountProviderList[0]
@@ -811,7 +842,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      fileProfiles)
+      fileProfiles
+    )
   }
 
   /**
@@ -843,21 +875,23 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        fileProfiles)
+        fileProfiles
+      )
 
     val p0 =
       db0.createProfile(accountProviderList[0], "Kermit")
 
     val db1 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
-      this.context(),
-      this.analytics,
-      this.accountEvents,
-      accountProvidersOnly1,
-      AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialStore,
-      this.accountsDatabases(),
-      fileProfiles)
+        this.context(),
+        this.analytics,
+        this.accountEvents,
+        accountProvidersOnly1,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        fileProfiles
+      )
 
     val p0After = db1.profiles()[db1.profiles().firstKey()]!!
     Assert.assertEquals(1, p0After.accounts().size)
@@ -887,7 +921,8 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        fileProfiles)
+        fileProfiles
+      )
 
     val acc =
       MockAccountProviders.fakeProvider("urn:fake:0")
@@ -905,7 +940,8 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        fileProfiles)
+        fileProfiles
+      )
 
     val p1 = db1.anonymousProfile()
 
@@ -925,7 +961,8 @@ abstract class ProfilesDatabaseContract {
 
     val accountProviders =
       MockAccountProviderRegistry.withProviders(
-        MockAccountProviders.fakeAccountProviderListWithAutomatic())
+        MockAccountProviders.fakeAccountProviderListWithAutomatic()
+      )
 
     val db0 =
       ProfilesDatabases.openWithAnonymousProfileDisabled(
@@ -936,7 +973,8 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
-        fileProfiles)
+        fileProfiles
+      )
 
     val acc =
       MockAccountProviders.fakeProvider("urn:fake:0")
@@ -978,7 +1016,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      f_pro
+    )
 
     val p0 = db0.currentProfileUnsafe()
     this.expected.expect(ProfileDatabaseDeleteAnonymousException::class.java)
@@ -1011,7 +1050,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      f_pro
+    )
 
     val p0 = db0.createProfile(acc0, "Kermit")
     Assert.assertEquals(Option.none<ProfileType>(), db0.currentProfile())
@@ -1029,7 +1069,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      f_pro
+    )
 
     Assert.assertEquals(0L, db1.profiles().size.toLong())
   }
@@ -1057,7 +1098,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      f_pro
+    )
 
     val acc0 = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
     val acc1 = MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")
@@ -1092,7 +1134,8 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
-      f_pro)
+      f_pro
+    )
 
     val acc0 = MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
     val acc1 = MockAccountProviders.fakeProvider("http://www.example.com/accounts1/")

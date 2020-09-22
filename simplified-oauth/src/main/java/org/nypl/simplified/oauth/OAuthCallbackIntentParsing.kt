@@ -52,13 +52,15 @@ object OAuthCallbackIntentParsing {
       val accountId =
         UUID.fromString(user)
       val fakeURI =
-        parseUri.invoke(buildString {
-          this.append(requiredScheme)
-          this.append("://")
-          this.append(accountId)
-          this.append("@authenticated?")
-          this.append(data.encodedFragment)
-        })
+        parseUri.invoke(
+          buildString {
+            this.append(requiredScheme)
+            this.append("://")
+            this.append(accountId)
+            this.append("@authenticated?")
+            this.append(data.encodedFragment)
+          }
+        )
       val value =
         fakeURI.getQueryParameter("access_token")
 

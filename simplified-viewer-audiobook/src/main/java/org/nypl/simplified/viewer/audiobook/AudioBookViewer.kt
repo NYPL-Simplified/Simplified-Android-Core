@@ -4,6 +4,7 @@ import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.http.core.HTTP
+import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.nypl.simplified.viewer.spi.ViewerProviderType
 import org.slf4j.LoggerFactory
 
@@ -20,6 +21,7 @@ class AudioBookViewer : ViewerProviderType {
     "org.nypl.simplified.viewer.audiobook.AudioBookViewer"
 
   override fun canSupport(
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   ): Boolean {
@@ -36,6 +38,7 @@ class AudioBookViewer : ViewerProviderType {
 
   override fun open(
     activity: Activity,
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   ) {

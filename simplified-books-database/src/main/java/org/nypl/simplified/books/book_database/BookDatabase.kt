@@ -43,9 +43,17 @@ class BookDatabase private constructor(
   private class BookMaps internal constructor() {
 
     internal val mapsLock: Any = Any()
+
     @GuardedBy("mapsLock")
     internal val entries: ConcurrentSkipListMap<BookID, BookDatabaseEntry> =
       ConcurrentSkipListMap()
+
+    internal fun contains(key: BookID): Boolean {
+      synchronized(mapsLock) {
+        LOG.debug("BookMaps.contains")
+        return this.entries.containsKey(key)
+      }
+    }
 
     internal fun clear() {
       synchronized(this.mapsLock) {
@@ -95,8 +103,12 @@ class BookDatabase private constructor(
     id: BookID,
     entry: OPDSAcquisitionFeedEntry
   ): BookDatabaseEntryType {
-
     synchronized(this.maps.mapsLock) {
+      if (this.maps.contains(id)) {
+        LOG.debug("Updating entry for {}", id)
+      } else {
+        LOG.debug("Adding entry for {}", id)
+      }
       try {
         val bookDir = File(this.directory, id.value())
         DirectoryUtilities.directoryCreate(bookDir)
@@ -104,19 +116,24 @@ class BookDatabase private constructor(
         val fileMeta = File(bookDir, "meta.json")
         val fileMetaTmp = File(bookDir, "meta.json.tmp")
 
+        val cover = fileOrNull(directory, BookDatabaseEntry.COVER_FILENAME)
+        val thumb = fileOrNull(directory, BookDatabaseEntry.THUMB_FILENAME)
+
         FileUtilities.fileWriteUTF8Atomically(
           fileMeta,
           fileMetaTmp,
-          JSONSerializerUtilities.serializeToString(this.serializer.serializeFeedEntry(entry)))
+          JSONSerializerUtilities.serializeToString(this.serializer.serializeFeedEntry(entry))
+        )
 
         val book =
           Book(
             id = id,
             account = this.owner,
-            cover = null,
-            thumbnail = null,
+            cover = cover,
+            thumbnail = thumb,
             entry = entry,
-            formats = listOf())
+            formats = listOf()
+          )
 
         val dbEntry =
           BookDatabaseEntry(
@@ -124,7 +141,8 @@ class BookDatabase private constructor(
             bookDir = bookDir,
             serializer = this.serializer,
             bookRef = book,
-            onDelete = Runnable { this.maps.delete(id) })
+            onDelete = Runnable { this.maps.delete(id) }
+          )
 
         this.maps.addEntry(dbEntry)
         return dbEntry
@@ -138,7 +156,8 @@ class BookDatabase private constructor(
   override fun entry(id: BookID): BookDatabaseEntryType {
     synchronized(this.maps.mapsLock) {
       return this.maps.entries[id] ?: throw BookDatabaseException(
-        "Nonexistent book entry: " + id.value(), emptyList())
+        "Nonexistent book entry: " + id.value(), emptyList()
+      )
     }
   }
 
@@ -154,7 +173,6 @@ class BookDatabase private constructor(
       owner: AccountID,
       directory: File
     ): BookDatabaseType {
-
       LOG.debug("opening book database: {}", directory)
       val maps = BookMaps()
       val errors = ArrayList<Exception>()
@@ -163,7 +181,8 @@ class BookDatabase private constructor(
       if (errors.isNotEmpty()) {
         errors.forEach { exception -> LOG.error("error opening book database: ", exception) }
         throw BookDatabaseException(
-          "One or more errors occurred whilst trying to open a book database.", errors)
+          "One or more errors occurred whilst trying to open a book database.", errors
+        )
       }
 
       return BookDatabase(context, owner, directory, maps, serializer)
@@ -178,7 +197,6 @@ class BookDatabase private constructor(
       maps: BookMaps,
       errors: MutableList<Exception>
     ) {
-
       if (!directory.exists()) {
         directory.mkdirs()
       }
@@ -200,7 +218,8 @@ class BookDatabase private constructor(
             directory = bookDirectory,
             maps = maps,
             errors = errors,
-            name = bookID)
+            name = bookID
+          )
             ?: continue
           maps.addEntry(entry)
         }
@@ -218,7 +237,6 @@ class BookDatabase private constructor(
       errors: MutableList<Exception>,
       name: String
     ): BookDatabaseEntry? {
-
       try {
         LOG.debug("open: {}", directory)
 
@@ -233,18 +251,8 @@ class BookDatabase private constructor(
             parser.parseAcquisitionFeedEntryFromStream(stream)
           }
 
-        val fileCover = File(directory, "cover.jpg")
-        val cover = if (fileCover.isFile) {
-          fileCover
-        } else {
-          null
-        }
-        val fileThumb = File(directory, "thumb.jpg")
-        val thumb = if (fileThumb.isFile) {
-          fileThumb
-        } else {
-          null
-        }
+        val cover = fileOrNull(directory, BookDatabaseEntry.COVER_FILENAME)
+        val thumb = fileOrNull(directory, BookDatabaseEntry.THUMB_FILENAME)
 
         val book =
           Book(
@@ -253,14 +261,16 @@ class BookDatabase private constructor(
             cover = cover,
             thumbnail = thumb,
             entry = entry,
-            formats = listOf())
+            formats = listOf()
+          )
 
         return BookDatabaseEntry(
           context = context,
           bookDir = directory,
           serializer = serializer,
           bookRef = book,
-          onDelete = Runnable { maps.delete(bookId) })
+          onDelete = Runnable { maps.delete(bookId) }
+        )
       } catch (e: IOException) {
         errors.add(e)
         return null
@@ -268,3 +278,10 @@ class BookDatabase private constructor(
     }
   }
 }
+
+/** Return the file, or null if it does not exist or is not a file. */
+
+private fun fileOrNull(bookDir: File, filename: String) = File(bookDir, filename)
+  .run {
+    if (isFile) this else null
+  }

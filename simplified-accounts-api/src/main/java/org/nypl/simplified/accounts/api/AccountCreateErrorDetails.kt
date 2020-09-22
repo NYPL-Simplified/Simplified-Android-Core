@@ -24,7 +24,8 @@ sealed class AccountCreateErrorDetails : PresentableErrorType {
     init {
       Preconditions.checkArgument(
         this.errorValues.isNotEmpty(),
-        "Must have logged at least one error")
+        "Must have logged at least one error"
+      )
     }
 
     override val attributes: Map<String, String>

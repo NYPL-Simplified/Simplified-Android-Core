@@ -24,6 +24,32 @@ public final class BookLocationJSON {
   }
 
   /**
+   * Deserialize chapter progress from the given JSON node.
+   *
+   * @param jom  A JSON object mapper
+   * @param node A JSON node
+   * @return A parsed description
+   * @throws JSONParseException On parse errors
+   */
+
+  public static BookChapterProgress deserializeProgressFromJSON(
+    final ObjectMapper jom,
+    final JsonNode node)
+    throws JSONParseException {
+
+    Objects.requireNonNull(jom, "Object mapper");
+    Objects.requireNonNull(node, "JSON");
+
+    final ObjectNode obj =
+      JSONParserUtilities.checkObject(null, node);
+
+    return new BookChapterProgress(
+      JSONParserUtilities.getInteger(obj, "chapterIndex"),
+      JSONParserUtilities.getDouble(obj, "chapterProgress")
+    );
+  }
+
+  /**
    * Deserialize reader book locations from the given JSON node.
    *
    * @param jom  A JSON object mapper
@@ -42,10 +68,21 @@ public final class BookLocationJSON {
 
     final ObjectNode obj =
       JSONParserUtilities.checkObject(null, node);
+    final ObjectNode progressNode =
+      JSONParserUtilities.getObjectOrNull(obj, "progress");
 
-    return BookLocation.create(
-      JSONParserUtilities.getStringOptional(obj, "contentCFI"),
-      JSONParserUtilities.getString(obj, "idref"));
+    final BookChapterProgress progress;
+    if (progressNode != null) {
+      progress = deserializeProgressFromJSON(jom, progressNode);
+    } else {
+      progress = null;
+    }
+
+    return new BookLocation(
+      progress,
+      JSONParserUtilities.getStringOrNull(obj, "contentCFI"),
+      JSONParserUtilities.getStringOrNull(obj, "idref")
+    );
   }
 
   /**
@@ -63,8 +100,22 @@ public final class BookLocationJSON {
     Objects.requireNonNull(description, "Description");
 
     final ObjectNode jo = jom.createObjectNode();
-    description.contentCFI().map_(cfi -> jo.put("contentCFI", cfi));
-    jo.put("idref", description.idRef());
+    final String contentCFI = description.getContentCFI();
+    if (contentCFI != null) {
+      jo.put("contentCFI", contentCFI);
+    }
+    final String idRef = description.getIdRef();
+    if (idRef != null) {
+      jo.put("idref", idRef);
+    }
+
+    final BookChapterProgress progress = description.getProgress();
+    if (progress != null) {
+      final ObjectNode progressNode = jom.createObjectNode();
+      progressNode.put("chapterIndex", progress.getChapterIndex());
+      progressNode.put("chapterProgress", progress.getChapterProgress());
+      jo.set("progress", progressNode);
+    }
     return jo;
   }
 

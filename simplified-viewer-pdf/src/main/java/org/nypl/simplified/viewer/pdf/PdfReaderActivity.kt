@@ -22,8 +22,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
-class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfContentsFragmentListenerType {
+class PdfReaderActivity :
+  AppCompatActivity(),
+  PdfFragmentListenerType,
+  TableOfContentsFragmentListenerType {
 
   companion object {
     const val TABLE_OF_CONTENTS = "table_of_contents"
@@ -37,7 +41,6 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
       from: Activity,
       parameters: PdfReaderParameters
     ) {
-
       val b = Bundle()
       b.putSerializable(PARAMS_ID, parameters)
       val i = Intent(from, PdfReaderActivity::class.java)
@@ -53,7 +56,7 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
   private lateinit var pdfFile: File
   private lateinit var accountId: AccountID
   private lateinit var id: BookID
-  private lateinit var profile: ProfileReadableType
+  private lateinit var currentProfile: ProfileReadableType
   private lateinit var account: AccountType
   private lateinit var books: BookDatabaseType
   private lateinit var entry: BookDatabaseEntryType
@@ -74,12 +77,12 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
     this.accountId = intentParams.accountId
     this.id = intentParams.id
 
-    this.profile =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-        .profileCurrent()
+    val services =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
 
-    this.account = profile.account(accountId)
+    this.currentProfile =
+      services.requireService(ProfilesControllerType::class.java).profileCurrent()
+    this.account = currentProfile.account(accountId)
     this.books = account.bookDatabase
 
     try {
@@ -90,11 +93,7 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
       log.error("Could not get lastReadLocation, defaulting to the 1st page", e)
     }
 
-    if (savedInstanceState != null) {
-      this.tableOfContentsList = savedInstanceState.getParcelableArrayList(TABLE_OF_CONTENTS)
-        ?: arrayListOf()
-    } else {
-
+    if (savedInstanceState == null) {
       // Get the new instance of the reader you want to load here.
       val readerFragment = PdfViewerFragment.newInstance()
 
@@ -102,6 +101,9 @@ class PdfReaderActivity : AppCompatActivity(), PdfFragmentListenerType, TableOfC
         .beginTransaction()
         .replace(R.id.pdf_reader_fragment_holder, readerFragment, "READER")
         .commit()
+    } else {
+      this.tableOfContentsList =
+        savedInstanceState.getParcelableArrayList(TABLE_OF_CONTENTS) ?: arrayListOf()
     }
   }
 

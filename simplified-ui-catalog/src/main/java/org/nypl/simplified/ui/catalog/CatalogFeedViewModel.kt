@@ -16,16 +16,18 @@ import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.FilteringForAccount
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting
-import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
+import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
+import org.nypl.simplified.futures.FluentFutureExtensions.fluentFutureOfAll
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onAnyError
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
@@ -58,6 +60,8 @@ class CatalogFeedViewModel(
 
   private val feedLoader: FeedLoaderType =
     this.services.requireService(FeedLoaderType::class.java)
+  private val booksController: BooksControllerType =
+    this.services.requireService(BooksControllerType::class.java)
   private val profilesController: ProfilesControllerType =
     this.services.requireService(ProfilesControllerType::class.java)
   private val instanceId =
@@ -103,21 +107,38 @@ class CatalogFeedViewModel(
       ProfileFeedRequest(
         facetTitleProvider = CatalogFacetPseudoTitleProvider(this.context.resources),
         feedSelection = arguments.selection,
-        filterByAccountID = null,
+        filterByAccountID = arguments.filterAccount,
         search = arguments.searchTerms,
         sortBy = arguments.sortBy,
-        title = this.context.getString(R.string.feedTitleBooks),
+        title = arguments.title,
         uri = booksUri
       )
 
-    val future =
-      this.profilesController.profileFeed(request)
-        .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
-        .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
+    val profile =
+      this.profilesController.profileCurrent()
+    val accountsToSync =
+      if (request.filterByAccountID == null) {
+        // Sync all accounts
+        profile.accounts()
+      } else {
+        // Sync the account we're filtering on
+        profile.accounts().filterKeys { it == request.filterByAccountID }
+      }
+
+    val syncFuture =
+      fluentFutureOfAll(
+        accountsToSync.values.map { account ->
+          this.booksController.booksSync(account)
+        }
+      )
+
+    val future = this.profilesController.profileFeed(request)
+      .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
+      .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
 
     return this.createNewStatus(
       arguments = arguments,
-      future = future
+      future = syncFuture.flatMap { future }
     )
   }
 
@@ -199,7 +220,6 @@ class CatalogFeedViewModel(
 
     future.map { feedLoaderResult ->
       this.onFeedStatusUpdated(feedLoaderResult, newState)
-      feedLoaderResult
     }
     return newState
   }
@@ -238,7 +258,6 @@ class CatalogFeedViewModel(
     state: CatalogFeedState,
     result: FeedLoaderResult.FeedLoaderFailure
   ): CatalogFeedState.CatalogFeedLoadFailed {
-
     /*
      * If the failure is due to bad credentials, then subscribe to events for the account
      * and try refreshing the feed when an account login has occurred.
@@ -323,7 +342,6 @@ class CatalogFeedViewModel(
     state: CatalogFeedState,
     feed: Feed.FeedWithoutGroups
   ): CatalogFeedLoaded {
-
     if (feed.entriesInOrder.isEmpty()) {
       return CatalogFeedEmpty(
         arguments = state.arguments,
@@ -415,8 +433,11 @@ class CatalogFeedViewModel(
           title = title
         )
 
-      is CatalogFeedArgumentsLocalBooks ->
-        throw IllegalStateException("Cannot transition from a local feed to a remote feed.")
+      is CatalogFeedArgumentsLocalBooks -> {
+        throw IllegalStateException(
+          "Can't transition local to remote feed: ${this.feedArguments.title} -> $title"
+        )
+      }
     }
   }
 
@@ -452,7 +473,7 @@ class CatalogFeedViewModel(
 
           is Sorting ->
             CatalogFeedArgumentsLocalBooks(
-              filterAccount = null,
+              filterAccount = currentArguments.filterAccount,
               ownership = currentArguments.ownership,
               searchTerms = currentArguments.searchTerms,
               selection = currentArguments.selection,
@@ -466,7 +487,7 @@ class CatalogFeedViewModel(
               ownership = currentArguments.ownership,
               searchTerms = currentArguments.searchTerms,
               selection = currentArguments.selection,
-              sortBy = SortBy.SORT_BY_TITLE,
+              sortBy = currentArguments.sortBy,
               title = facet.title
             )
         }

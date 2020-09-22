@@ -2,8 +2,8 @@ package org.nypl.simplified.books.book_database.api
 
 import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerPosition
-import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookFormat.BookFormatAudioBook
 import org.nypl.simplified.books.api.BookFormat.BookFormatEPUB
@@ -11,6 +11,9 @@ import org.nypl.simplified.books.api.BookFormat.BookFormatPDF
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
 import java.io.IOException
@@ -41,6 +44,16 @@ interface BookDatabaseEntryType {
 
   @Throws(BookDatabaseException::class)
   fun setCover(file: File)
+
+  /**
+   * Copy the thumbnail file into the database.
+   *
+   * @param file The cover file
+   * @throws BookDatabaseException On errors
+   */
+
+  @Throws(BookDatabaseException::class)
+  fun setThumbnail(file: File)
 
   /**
    * Copy the OPDS entry into the database.
@@ -93,8 +106,8 @@ interface BookDatabaseEntryType {
   fun findFormatHandleForContentType(contentType: MIMEType): BookDatabaseEntryFormatHandle? {
     return this.formatHandles
       .find { handle ->
-        handle.formatDefinition.supportedContentTypes().any {
-          type -> type.fullType == contentType.fullType
+        handle.formatDefinition.supportedContentTypes().any { type ->
+          type.fullType == contentType.fullType
         }
       }
   }
@@ -118,6 +131,22 @@ interface BookDatabaseEntryType {
  */
 
 sealed class BookDatabaseEntryFormatHandle {
+
+  /**
+   * The DRM information handle
+   */
+
+  abstract val drmInformationHandle: BookDRMInformationHandle
+
+  /**
+   * Change the DRM type to the specified kind. Note that this will invalidate any existing
+   * DRM information handle for the format.
+   *
+   * @throws IOException On I/O errors
+   */
+
+  @Throws(IOException::class)
+  abstract fun setDRMKind(kind: BookDRMKind)
 
   /**
    * @return The format definition
@@ -148,6 +177,9 @@ sealed class BookDatabaseEntryFormatHandle {
 
     abstract override val format: BookFormatEPUB
 
+    override val formatDefinition: BookFormats.BookFormatDefinition =
+      BOOK_FORMAT_EPUB
+
     /**
      * Copy the given EPUB file into the directory as the book data.
      *
@@ -158,17 +190,6 @@ sealed class BookDatabaseEntryFormatHandle {
 
     @Throws(IOException::class)
     abstract fun copyInBook(file: File)
-
-    /**
-     * Set the Adobe rights information for the book.
-     *
-     * @param loan The loan
-     *
-     * @throws IOException On I/O errors
-     */
-
-    @Throws(IOException::class)
-    abstract fun setAdobeRightsInformation(loan: AdobeAdeptLoan?)
 
     /**
      * Set the last read location for the book.
@@ -201,6 +222,9 @@ sealed class BookDatabaseEntryFormatHandle {
 
     abstract override val format: BookFormatPDF
 
+    override val formatDefinition: BookFormats.BookFormatDefinition =
+      BOOK_FORMAT_PDF
+
     /**
      * Copy the given PDF file into the directory as the book data.
      *
@@ -230,6 +254,9 @@ sealed class BookDatabaseEntryFormatHandle {
   abstract class BookDatabaseEntryFormatHandleAudioBook : BookDatabaseEntryFormatHandle() {
 
     abstract override val format: BookFormatAudioBook
+
+    override val formatDefinition: BookFormats.BookFormatDefinition =
+      BOOK_FORMAT_AUDIO
 
     /**
      * Save the manifest and the URI that can be used to fetch more up-to-date copies of it

@@ -15,6 +15,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -26,18 +27,17 @@ import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
-import org.nypl.simplified.ui.catalog.CatalogConfigurationServiceType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
 
 /**
  * The main application fragment.
@@ -50,11 +50,10 @@ class MainFragment : Fragment() {
 
   private lateinit var bottomNavigator: TabbedNavigationController
   private lateinit var bottomView: BottomNavigationView
-  private lateinit var catalogConfig: CatalogConfigurationServiceType
+  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var accountProviders: AccountProviderRegistryType
   private lateinit var profilesController: ProfilesControllerType
-  private lateinit var settingsConfiguration: SettingsConfigurationServiceType
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var viewModel: MainFragmentViewModel
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
@@ -68,18 +67,17 @@ class MainFragment : Fragment() {
     this.navigationControllerDirectory =
       NavigationControllers.findDirectory(this.requireActivity())
 
-    val services = Services.serviceDirectory()
+    val services =
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
 
     this.accountProviders =
       services.requireService(AccountProviderRegistryType::class.java)
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
-    this.settingsConfiguration =
-      services.requireService(SettingsConfigurationServiceType::class.java)
+    this.buildConfig =
+      services.requireService(BuildConfigurationServiceType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
-    this.catalogConfig =
-      services.requireService(CatalogConfigurationServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -92,6 +90,34 @@ class MainFragment : Fragment() {
 
     this.bottomView =
       layout.findViewById(R.id.bottomNavigator)
+
+    this.viewModel =
+      ViewModelProviders.of(this.requireActivity())
+        .get(MainFragmentViewModel::class.java)
+
+    /*
+     * Hide various tabs based on build configuration and other settings.
+     */
+
+    val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
+    holdsItem.isVisible = this.buildConfig.showHoldsTab
+    holdsItem.isEnabled = this.buildConfig.showHoldsTab
+
+    val settingsItem = this.bottomView.menu.findItem(R.id.tabSettings)
+    settingsItem.isVisible = this.buildConfig.showSettingsTab
+    settingsItem.isEnabled = this.buildConfig.showSettingsTab
+
+    val profilesVisible =
+      this.profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED
+
+    val profilesItem = this.bottomView.menu.findItem(R.id.tabProfile)
+    profilesItem.isVisible = profilesVisible
+    profilesItem.isEnabled = profilesVisible
+    return layout
+  }
+
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
 
     /*
      * This extremely unfortunate workaround (delaying the creation of the navigator by scheduling
@@ -116,17 +142,13 @@ class MainFragment : Fragment() {
      * foreground/background switches.
      */
 
-    this.viewModel =
-      ViewModelProviders.of(this.requireActivity())
-        .get(MainFragmentViewModel::class.java)
-
     this.uiThread.runOnUIThread {
       this.bottomNavigator =
         TabbedNavigationController.create(
           activity = this.requireActivity(),
           accountProviders = this.accountProviders,
           profilesController = this.profilesController,
-          settingsConfiguration = this.settingsConfiguration,
+          settingsConfiguration = this.buildConfig,
           fragmentContainerId = R.id.tabbedFragmentHolder,
           navigationView = this.bottomView
         )
@@ -136,26 +158,6 @@ class MainFragment : Fragment() {
         this.viewModel.clearHistory = false
       }
     }
-
-    /*
-     * Hide various tabs based on build configuration and other settings.
-     */
-
-    val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
-    holdsItem.isVisible = this.catalogConfig.showHoldsTab
-    holdsItem.isEnabled = this.catalogConfig.showHoldsTab
-
-    val settingsItem = this.bottomView.menu.findItem(R.id.tabSettings)
-    settingsItem.isVisible = this.catalogConfig.showSettingsTab
-    settingsItem.isEnabled = this.catalogConfig.showSettingsTab
-
-    val profilesVisible =
-      this.profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED
-
-    val profilesItem = this.bottomView.menu.findItem(R.id.tabProfile)
-    profilesItem.isVisible = profilesVisible
-    profilesItem.isEnabled = profilesVisible
-    return layout
   }
 
   override fun onStart() {
@@ -166,13 +168,17 @@ class MainFragment : Fragment() {
 
     this.uiThread.runOnUIThread {
       this.navigationControllerDirectory.updateNavigationController(
-        CatalogNavigationControllerType::class.java, this.bottomNavigator)
+        CatalogNavigationControllerType::class.java, this.bottomNavigator
+      )
       this.navigationControllerDirectory.updateNavigationController(
-        AccountNavigationControllerType::class.java, this.bottomNavigator)
+        AccountNavigationControllerType::class.java, this.bottomNavigator
+      )
       this.navigationControllerDirectory.updateNavigationController(
-        SettingsNavigationControllerType::class.java, this.bottomNavigator)
+        SettingsNavigationControllerType::class.java, this.bottomNavigator
+      )
       this.navigationControllerDirectory.updateNavigationController(
-        NavigationControllerType::class.java, this.bottomNavigator)
+        NavigationControllerType::class.java, this.bottomNavigator
+      )
     }
 
     this.accountSubscription =
@@ -198,7 +204,6 @@ class MainFragment : Fragment() {
 
   private fun onAccountEvent(event: AccountEvent) {
     return when (event) {
-
       /*
        * We don't know which fragments on the backstack might refer to accounts that
        * have been deleted so we need to clear the history when an account is deleted.
@@ -254,12 +259,14 @@ class MainFragment : Fragment() {
         val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
         this.bottomNavigator.clearHistory()
         this.bottomNavigator.popBackStack()
-        this.bottomNavigator.openFeed(CatalogFeedArguments.CatalogFeedArgumentsRemote(
-          title = account.provider.displayName,
-          ownership = CatalogFeedOwnership.OwnedByAccount(id),
-          feedURI = account.provider.catalogURIForAge(age),
-          isSearchResults = false
-        ))
+        this.bottomNavigator.openFeed(
+          CatalogFeedArguments.CatalogFeedArgumentsRemote(
+            title = account.provider.displayName,
+            ownership = CatalogFeedOwnership.OwnedByAccount(id),
+            feedURI = account.provider.catalogURIForAge(age),
+            isSearchResults = false
+          )
+        )
       }
     }
   }
@@ -301,12 +308,16 @@ class MainFragment : Fragment() {
     this.accountSubscription?.dispose()
 
     this.navigationControllerDirectory.removeNavigationController(
-      CatalogNavigationControllerType::class.java)
+      CatalogNavigationControllerType::class.java
+    )
     this.navigationControllerDirectory.removeNavigationController(
-      AccountNavigationControllerType::class.java)
+      AccountNavigationControllerType::class.java
+    )
     this.navigationControllerDirectory.removeNavigationController(
-      SettingsNavigationControllerType::class.java)
+      SettingsNavigationControllerType::class.java
+    )
     this.navigationControllerDirectory.removeNavigationController(
-      NavigationControllerType::class.java)
+      NavigationControllerType::class.java
+    )
   }
 }

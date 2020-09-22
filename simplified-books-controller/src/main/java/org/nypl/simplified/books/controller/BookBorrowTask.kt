@@ -29,9 +29,11 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillmentException
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.audio.AudioBookCredentials
 import org.nypl.simplified.books.audio.AudioBookManifestRequest
+import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
@@ -58,12 +60,12 @@ import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.Un
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedAcquisition
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnsupportedType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.UnusableAcquisitions
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails.WrongAvailability
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadCancelled
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadFailed
 import org.nypl.simplified.books.controller.BookBorrowTask.DownloadResult.DownloadOK
+import org.nypl.simplified.books.controller.BookCoverFetchTask.Type
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionBadBorrowFeed
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionDeviceNotActivated
 import org.nypl.simplified.books.controller.api.BookBorrowExceptionNoCredentials
@@ -140,6 +142,8 @@ class BookBorrowTask(
     MIMEParser.parseRaisingException("application/epub+zip")
   private val contentTypeOctetStream =
     MIMEParser.parseRaisingException("application/octet-stream")
+  private val contentTypeJson =
+    MIMEParser.parseRaisingException("application/json")
 
   private val adobeACS =
     "Adobe ACS"
@@ -167,6 +171,9 @@ class BookBorrowTask(
 
   @Volatile
   private lateinit var fulfillURI: URI
+
+  @Volatile
+  private var drmKind = BookDRMKind.NONE
 
   /**
    * The initial book value. Note that this is a synthesized value because we need to be
@@ -534,7 +541,6 @@ class BookBorrowTask(
     uri: URI,
     groups: List<FeedGroup>
   ): List<FeedGroup> {
-
     val attribute =
       Pair("Feed URI", this.acquisition.uri.toASCIIString())
 
@@ -562,7 +568,6 @@ class BookBorrowTask(
     uri: URI,
     entries: List<FeedEntry>
   ): List<FeedEntry> {
-
     val attribute =
       Pair("Feed URI", this.acquisition.uri.toASCIIString())
 
@@ -657,9 +662,7 @@ class BookBorrowTask(
          */
 
         override fun onHoldable(a: OPDSAvailabilityHoldable): Boolean {
-          this@BookBorrowTask.debug("book is holdable, cannot continue!")
-          this@BookBorrowTask.publishBookStatus(BookStatus.Holdable(this@BookBorrowTask.bookId))
-          return false
+          throw IllegalStateException("book is holdable, cannot continue!")
         }
 
         /**
@@ -671,8 +674,7 @@ class BookBorrowTask(
          */
 
         override fun onLoanable(a: OPDSAvailabilityLoanable): Boolean {
-          this@BookBorrowTask.debug("book is loanable, this is a server bug!")
-          return false
+          throw IllegalStateException("book is loanable, this is a server bug!")
         }
 
         /**
@@ -684,7 +686,7 @@ class BookBorrowTask(
           this@BookBorrowTask.publishBookStatus(
             BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
           )
-          return java.lang.Boolean.TRUE
+          return true
         }
 
         /**
@@ -697,7 +699,7 @@ class BookBorrowTask(
           this@BookBorrowTask.publishBookStatus(
             BookStatus.RequestingDownload(this@BookBorrowTask.bookId)
           )
-          return java.lang.Boolean.TRUE
+          return true
         }
 
         /**
@@ -710,18 +712,10 @@ class BookBorrowTask(
         }
       })
 
-    return if (wantFulfill) {
+    if (wantFulfill) {
       this.runAcquisitionFulfill(feedEntry.feedEntry)
     } else {
-      val exception = IllegalStateException()
-      val message =
-        this.services.borrowStrings.borrowBookBorrowAvailabilityInappropriate(availability)
-      this.steps.currentStepFailed(
-        message = message,
-        errorValue = WrongAvailability(message, this.currentAttributesWith()),
-        exception = exception
-      )
-      throw exception
+      this.steps.currentStepSucceeded("Borrow succeeded with availability $availability.")
     }
   }
 
@@ -770,19 +764,45 @@ class BookBorrowTask(
     this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
     this.debug("fetching cover")
 
-    return when (val result =
-      BookCoverFetchTask(
-        services = this.services,
-        databaseEntry = this.databaseEntry,
-        feedEntry = opdsEntry,
-        httpAuth = httpAuth
-      ).call()) {
+    when (
+      val result =
+        BookCoverFetchTask(
+          services = this.services,
+          databaseEntry = this.databaseEntry,
+          feedEntry = opdsEntry,
+          type = Type.COVER,
+          httpAuth = httpAuth
+        ).call()
+    ) {
       is TaskResult.Success -> {
         this.debug("fetched cover successfully")
         this.steps.addAll(result.steps)
       }
       is TaskResult.Failure -> {
         this.debug("failed to fetch cover")
+        this.steps.addAll(result.steps)
+      }
+    }
+
+    this.steps.beginNewStep(this.services.borrowStrings.borrowBookFetchingCover)
+    this.debug("fetching thumbnail")
+
+    when (
+      val result =
+        BookCoverFetchTask(
+          services = this.services,
+          databaseEntry = this.databaseEntry,
+          feedEntry = opdsEntry,
+          type = Type.THUMBNAIL,
+          httpAuth = httpAuth
+        ).call()
+    ) {
+      is TaskResult.Success -> {
+        this.debug("fetched thumbnail successfully")
+        this.steps.addAll(result.steps)
+      }
+      is TaskResult.Failure -> {
+        this.debug("failed to fetch thumbnail")
         this.steps.addAll(result.steps)
       }
     }
@@ -924,7 +944,6 @@ class BookBorrowTask(
     acquisition: OPDSAcquisition,
     httpAuth: OptionType<HTTPAuthType>
   ): FileAndType {
-
     /*
      * Point the downloader at the acquisition link. The result will be an
      * EPUB, ACSM file, or Simplified bearer token. ACSM files have to be
@@ -999,7 +1018,8 @@ class BookBorrowTask(
           contentType = targetContentType,
           userAgent = PlayerUserAgent(HTTP.userAgent()),
           credentials = audioBookCredentials,
-          services = this.services.services
+          services = this.services.services,
+          cacheDirectory = this.cacheDirectory
         )
       )
 
@@ -1119,10 +1139,22 @@ class BookBorrowTask(
     }
 
     return if (formatHandle != null) {
+      formatHandle.setDRMKind(this.drmKind)
+
+      when (val drmHandle = formatHandle.drmInformationHandle) {
+        is BookDRMInformationHandle.ACSHandle -> {
+          drmHandle.setAdobeRightsInformation(this.adobeLoan)
+          Unit
+        }
+        is BookDRMInformationHandle.LCPHandle,
+        is BookDRMInformationHandle.NoneHandle -> {
+          // Nothing required
+        }
+      }
+
       when (formatHandle) {
         is BookDatabaseEntryFormatHandleEPUB -> {
           formatHandle.copyInBook(file)
-          formatHandle.setAdobeRightsInformation(this.adobeLoan)
           updateStatus()
         }
         is BookDatabaseEntryFormatHandlePDF -> {
@@ -1157,7 +1189,6 @@ class BookBorrowTask(
     expectedContentTypes: Set<MIMEType>,
     receivedContentType: MIMEType
   ): MIMEType {
-
     this.steps.beginNewStep(
       this.services.borrowStrings.borrowBookSavingCheckingContentType(
         receivedContentType, expectedContentTypes
@@ -1168,6 +1199,46 @@ class BookBorrowTask(
       !expectedContentTypes.isEmpty(),
       "At least one expected content type"
     )
+
+    /*
+     * Attempt to find our received type in our set of expected types.
+     */
+
+    for (expectedContentType in expectedContentTypes) {
+      if (expectedContentType.fullType == receivedContentType.fullType) {
+        return receivedContentType
+      }
+    }
+
+    /*
+     * Handle the 'application/json' type as an exception.
+     *
+     * SIMPLY-2928: Overdrive may return 'application/json' instead of
+     * the expected 'application/vnd.overdrive.circulation.api+json' type.
+     */
+
+    val isAudiobook = expectedContentTypes
+      .intersect(BookFormats.audioBookMimeTypes())
+      .isNotEmpty()
+
+    if (isAudiobook) {
+      when (receivedContentType.fullType) {
+        this.contentTypeJson.fullType -> {
+          this.debug(
+            "expected one of {} but received {} (acceptable)",
+            expectedContentTypes,
+            receivedContentType
+          )
+
+          this.steps.currentStepSucceeded(this.services.borrowStrings.borrowBookSavingCheckingContentTypeOK)
+          return expectedContentTypes.first()
+        }
+      }
+    }
+
+    /*
+     * Handle the 'application/octet-stream' type as an exception.
+     */
 
     if (receivedContentType == this.contentTypeOctetStream) {
       this.debug(
@@ -1180,11 +1251,9 @@ class BookBorrowTask(
       return expectedContentTypes.first()
     }
 
-    for (expectedContentType in expectedContentTypes) {
-      if (expectedContentType.fullType == receivedContentType.fullType) {
-        return receivedContentType
-      }
-    }
+    /*
+     * No match found!
+     */
 
     this.debug(
       "expected {} but received {} (unacceptable)",
@@ -1195,14 +1264,14 @@ class BookBorrowTask(
     val exception =
       BookUnexpectedTypeException(
         message =
-        StringBuilder("Unexpected content type\n")
-          .append("  Expected: One of ")
-          .append(expectedContentTypes)
-          .append('\n')
-          .append("  Received: ")
-          .append(receivedContentType)
-          .append('\n')
-          .toString(),
+          StringBuilder("Unexpected content type\n")
+            .append("  Expected: One of ")
+            .append(expectedContentTypes)
+            .append('\n')
+            .append("  Received: ")
+            .append(receivedContentType)
+            .append('\n')
+            .toString(),
         expected = expectedContentTypes,
         received = receivedContentType
       )
@@ -1246,6 +1315,7 @@ class BookBorrowTask(
       unconditional = true
     )
 
+    this.drmKind = BookDRMKind.ACS
     val adept = this.services.adobeDRM
     return if (adept != null) {
       this.debug("DRM support is available, using DRM connector")
@@ -1784,7 +1854,6 @@ class BookBorrowTask(
     expectedTotal: Long,
     unconditional: Boolean
   ) {
-
     /*
      * Because "data received" updates happen at such a huge rate, we want
      * to ensure that updates to the book status are rate limited to avoid

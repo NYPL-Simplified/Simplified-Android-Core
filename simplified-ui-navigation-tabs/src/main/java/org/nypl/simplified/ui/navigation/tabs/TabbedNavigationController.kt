@@ -17,6 +17,7 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy.SORT_BY_TITLE
@@ -37,13 +38,13 @@ import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
-import org.nypl.simplified.ui.settings.SettingsConfigurationServiceType
 import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
 import org.nypl.simplified.ui.settings.SettingsFragmentMain
-import org.nypl.simplified.ui.settings.SettingsFragmentVersion
+import org.nypl.simplified.ui.settings.SettingsFragmentDebug
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.viewer.api.Viewers
+import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.slf4j.LoggerFactory
 
 /**
@@ -54,7 +55,8 @@ import org.slf4j.LoggerFactory
  */
 
 class TabbedNavigationController private constructor(
-  private val settingsConfiguration: SettingsConfigurationServiceType,
+  private val settingsConfiguration: BuildConfigurationServiceType,
+  private val profilesController: ProfilesControllerType,
   private val navigator: BottomNavigator
 ) : SettingsNavigationControllerType, CatalogNavigationControllerType {
 
@@ -74,11 +76,10 @@ class TabbedNavigationController private constructor(
       activity: FragmentActivity,
       accountProviders: AccountProviderRegistryType,
       profilesController: ProfilesControllerType,
-      settingsConfiguration: SettingsConfigurationServiceType,
+      settingsConfiguration: BuildConfigurationServiceType,
       @IdRes fragmentContainerId: Int,
       navigationView: BottomNavigationView
     ): TabbedNavigationController {
-
       this.logger.debug("creating bottom navigator")
       val navigator =
         BottomNavigator.onCreate(
@@ -90,16 +91,27 @@ class TabbedNavigationController private constructor(
                 context = activity,
                 id = R.id.tabCatalog,
                 feedArguments = catalogFeedArguments(
+                  activity,
                   profilesController,
                   accountProviders.defaultProvider
                 )
               )
             },
             R.id.tabBooks to {
-              this.createBooksFragment(activity, R.id.tabBooks)
+              this.createBooksFragment(
+                context = activity,
+                id = R.id.tabBooks,
+                profilesController = profilesController,
+                defaultProvider = accountProviders.defaultProvider
+              )
             },
             R.id.tabHolds to {
-              this.createHoldsFragment(activity, R.id.tabBooks)
+              this.createHoldsFragment(
+                context = activity,
+                id = R.id.tabHolds,
+                profilesController = profilesController,
+                defaultProvider = accountProviders.defaultProvider
+              )
             },
             R.id.tabSettings to {
               this.createSettingsFragment(R.id.tabSettings)
@@ -118,7 +130,8 @@ class TabbedNavigationController private constructor(
 
       return TabbedNavigationController(
         navigator = navigator,
-        settingsConfiguration = settingsConfiguration
+        settingsConfiguration = settingsConfiguration,
+        profilesController = profilesController
       )
     }
 
@@ -166,16 +179,17 @@ class TabbedNavigationController private constructor(
     }
 
     private fun catalogFeedArguments(
+      context: Context,
       profilesController: ProfilesControllerType,
       defaultProvider: AccountProviderType
     ): CatalogFeedArguments.CatalogFeedArgumentsRemote {
       val age = this.currentAge(profilesController)
       val account = this.pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFeedArguments.CatalogFeedArgumentsRemote(
-        title = account.provider.displayName,
         ownership = CatalogFeedOwnership.OwnedByAccount(account.id),
         feedURI = account.provider.catalogURIForAge(age),
-        isSearchResults = false
+        isSearchResults = false,
+        title = context.getString(R.string.tabCatalog)
       )
     }
 
@@ -202,12 +216,20 @@ class TabbedNavigationController private constructor(
 
     private fun createHoldsFragment(
       context: Context,
-      id: Int
+      id: Int,
+      profilesController: ProfilesControllerType,
+      defaultProvider: AccountProviderType
     ): Fragment {
       this.logger.debug("[{}]: creating holds fragment", id)
+
+      /*
+       * SIMPLY-2923: Filter by the default account until 'All' view is approved by UX.
+       */
+
+      val account = pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFragmentFeed.create(
         CatalogFeedArgumentsLocalBooks(
-          filterAccount = null,
+          filterAccount = account.id,
           ownership = CatalogFeedOwnership.CollectedFromAccounts,
           searchTerms = null,
           selection = FeedBooksSelection.BOOKS_FEED_HOLDS,
@@ -219,12 +241,20 @@ class TabbedNavigationController private constructor(
 
     private fun createBooksFragment(
       context: Context,
-      id: Int
+      id: Int,
+      profilesController: ProfilesControllerType,
+      defaultProvider: AccountProviderType
     ): Fragment {
       this.logger.debug("[{}]: creating books fragment", id)
+
+      /*
+       * SIMPLY-2923: Filter by the default account until 'All' view is approved by UX.
+       */
+
+      val account = pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFragmentFeed.create(
         CatalogFeedArgumentsLocalBooks(
-          filterAccount = null,
+          filterAccount = account.id,
           ownership = CatalogFeedOwnership.CollectedFromAccounts,
           searchTerms = null,
           selection = FeedBooksSelection.BOOKS_FEED_LOANED,
@@ -254,7 +284,7 @@ class TabbedNavigationController private constructor(
           shouldShowLibraryRegistryMenu = this.settingsConfiguration.allowAccountsRegistryAccess
         )
       ),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 
@@ -272,8 +302,8 @@ class TabbedNavigationController private constructor(
 
   override fun openSettingsVersion() {
     this.navigator.addFragment(
-      fragment = SettingsFragmentVersion(),
-      tab = this.navigator.currentTab()
+      fragment = SettingsFragmentDebug(),
+      tab = R.id.tabSettings
     )
   }
 
@@ -302,7 +332,7 @@ class TabbedNavigationController private constructor(
   override fun openSettingsAccount(parameters: AccountFragmentParameters) {
     this.navigator.addFragment(
       fragment = AccountFragment.create(parameters),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 
@@ -332,7 +362,7 @@ class TabbedNavigationController private constructor(
   override fun openSettingsAccountRegistry() {
     this.navigator.addFragment(
       fragment = AccountRegistryFragment(),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 
@@ -346,6 +376,23 @@ class TabbedNavigationController private constructor(
     book: Book,
     format: BookFormat
   ) {
-    Viewers.openViewer(activity, book, format)
+    /*
+     * XXX: Enable or disable support for R2 based on the current profile's preferences. When R2
+     * moves from being experimental, this code can be removed.
+     */
+
+    val profile =
+      this.profilesController.profileCurrent()
+    val viewerPreferences =
+      ViewerPreferences(
+        flags = mapOf(Pair("useExperimentalR2", profile.preferences().useExperimentalR2))
+      )
+
+    Viewers.openViewer(
+      activity = activity,
+      preferences = viewerPreferences,
+      book = book,
+      format = format
+    )
   }
 }

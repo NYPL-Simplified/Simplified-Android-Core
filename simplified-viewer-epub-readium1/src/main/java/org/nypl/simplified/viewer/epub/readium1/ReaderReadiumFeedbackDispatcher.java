@@ -48,6 +48,20 @@ public final class ReaderReadiumFeedbackDispatcher
     }
   }
 
+  private static void onContentDocumentLoaded(
+    final ReaderReadiumFeedbackListenerType l)
+  {
+    try {
+      l.onReadiumContentDocumentLoaded();
+    } catch (final Throwable e) {
+      try {
+        l.onReadiumContentDocumentLoadedError(e);
+      } catch (final Throwable x1) {
+        ReaderReadiumFeedbackDispatcher.LOG.error("{}", x1.getMessage(), x1);
+      }
+    }
+  }
+
   private static void onMediaOverlayStatusChanged(
     final ReaderReadiumFeedbackListenerType l,
     final String[] parts)
@@ -142,6 +156,11 @@ public final class ReaderReadiumFeedbackDispatcher
         final String function = NullCheck.notNull(parts[0]);
         if ("initialize".equals(function)) {
           ReaderReadiumFeedbackDispatcher.onInitialize(l);
+          return;
+        }
+
+        if ("content-document-loaded".equals(function)) {
+          ReaderReadiumFeedbackDispatcher.onContentDocumentLoaded(l);
           return;
         }
 

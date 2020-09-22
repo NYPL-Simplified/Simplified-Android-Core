@@ -25,6 +25,7 @@ dependencies {
   api libraries.nyplAudiobookManifestParserAPI
   api libraries.nyplAudiobookManifestWebPub
   api libraries.nyplAudiobookOpenAccess
+  api libraries.nyplAudiobookRBDigital
   api libraries.nyplAudiobookViews
 
   implementation libraries.androidXActivity

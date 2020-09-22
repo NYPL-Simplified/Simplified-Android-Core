@@ -11,6 +11,6 @@
   <item
     android:width="32dp"
     android:height="32dp"
-    android:drawable="@drawable/ic_file_download"
+    android:drawable="@drawable/ic_local_library"
     android:gravity="center" />
 </layer-list>

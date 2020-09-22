@@ -88,7 +88,18 @@ public final class HTTP implements HTTPType {
     final long offset) {
     final OptionType<byte[]> data = Option.none();
     final OptionType<String> content_type = Option.none();
-    return this.requestInternal("GET", auth_opt, uri, offset, data, content_type);
+    return this.requestInternal("GET", auth_opt, uri, offset, data, content_type, false);
+  }
+
+  @Override
+  public HTTPResultType<InputStream> get(
+    OptionType<HTTPAuthType> auth_opt,
+    URI uri,
+    long offset,
+    Boolean noCache) {
+    final OptionType<byte[]> data = Option.none();
+    final OptionType<String> content_type = Option.none();
+    return this.requestInternal("GET", auth_opt, uri, offset, data, content_type, noCache);
   }
 
   @Override
@@ -97,7 +108,7 @@ public final class HTTP implements HTTPType {
     final URI uri) {
     final OptionType<byte[]> data = Option.none();
     final OptionType<String> content_type = Option.none();
-    return this.requestInternal("PUT", auth_opt, uri, 0, data, content_type);
+    return this.requestInternal("PUT", auth_opt, uri, 0, data, content_type, false);
   }
 
   @Override
@@ -106,7 +117,7 @@ public final class HTTP implements HTTPType {
     final URI uri,
     final byte[] data,
     final String content_type) {
-    return this.requestInternal("PUT", auth_opt, uri, 0, Option.some(data), Option.some(content_type));
+    return this.requestInternal("PUT", auth_opt, uri, 0, Option.some(data), Option.some(content_type), false);
   }
 
   @Override
@@ -115,7 +126,7 @@ public final class HTTP implements HTTPType {
     final URI uri,
     final byte[] data,
     final String content_type) {
-    return this.requestInternal("POST", auth_opt, uri, 0, Option.some(data), Option.some(content_type));
+    return this.requestInternal("POST", auth_opt, uri, 0, Option.some(data), Option.some(content_type), false);
   }
 
   @Override
@@ -123,7 +134,7 @@ public final class HTTP implements HTTPType {
     final OptionType<HTTPAuthType> auth_opt,
     final URI uri,
     final String content_type) {
-    return this.requestInternal("DELETE", auth_opt, uri, 0, Option.<byte[]>none(), Option.some(content_type));
+    return this.requestInternal("DELETE", auth_opt, uri, 0, Option.<byte[]>none(), Option.some(content_type), false);
   }
 
   private HTTPResultType<InputStream> requestInternal(
@@ -132,7 +143,8 @@ public final class HTTP implements HTTPType {
     final URI uri,
     final long offset,
     final OptionType<byte[]> data_opt,
-    final OptionType<String> content_type_opt) {
+    final OptionType<String> content_type_opt,
+    final Boolean noCache) {
     NullCheck.notNull(method);
     NullCheck.notNull(auth_opt);
     HTTP.checkURI(uri);
@@ -171,6 +183,10 @@ public final class HTTP implements HTTPType {
         final OutputStream os = conn.getOutputStream();
         os.write(data);
         os.close();
+      }
+
+      if (noCache) {
+        conn.addRequestProperty("Cache-Control", "no-cache");
       }
 
       conn.connect();

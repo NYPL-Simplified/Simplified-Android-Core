@@ -30,9 +30,11 @@ class CatalogFeedWithGroupsLaneViewHolder(
       layoutManager = LinearLayoutManager(
         this.context, LinearLayoutManager.HORIZONTAL, false
       )
-      addItemDecoration(SpaceItemDecoration(
-        this.resources.getDimensionPixelSize(R.dimen.catalogFeedCoversSpace)
-      ))
+      addItemDecoration(
+        SpaceItemDecoration(
+          this.resources.getDimensionPixelSize(R.dimen.catalogFeedCoversSpace)
+        )
+      )
     }
   }
 

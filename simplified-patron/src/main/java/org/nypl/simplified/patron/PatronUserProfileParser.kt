@@ -41,41 +41,50 @@ internal class PatronUserProfileParser(
 
   private fun publishWarning(warning: ParseWarning) {
     if (this.warningsAsErrors) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = warning.message,
-        line = 0,
-        column = 0,
-        exception = warning.exception
-      ))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = warning.message,
+          line = 0,
+          column = 0,
+          exception = warning.exception
+        )
+      )
     } else {
       this.warnings.add(warning)
     }
   }
 
   private fun publishWarningMessage(message: String) {
-    return this.publishWarning(ParseWarning(
-      uri,
-      message,
-      line = 0,
-      column = 0,
-      exception = null))
+    return this.publishWarning(
+      ParseWarning(
+        uri,
+        message,
+        line = 0,
+        column = 0,
+        exception = null
+      )
+    )
   }
 
   private fun publishErrorForException(e: Exception) {
-    this.errors.add(ParseError(
-      source = this.uri,
-      message = e.message ?: "",
-      exception = e
-    ))
+    this.errors.add(
+      ParseError(
+        source = this.uri,
+        message = e.message ?: "",
+        exception = e
+      )
+    )
   }
 
   private fun publishErrorForString(message: String) {
-    this.errors.add(ParseError(
-      source = this.uri,
-      message = message,
-      exception = null
-    ))
+    this.errors.add(
+      ParseError(
+        source = this.uri,
+        message = message,
+        exception = null
+      )
+    )
   }
 
   override fun parse(): ParseResult<PatronUserProfile> {
@@ -99,7 +108,9 @@ internal class PatronUserProfileParser(
           result = PatronUserProfile(
             settings = settings,
             drm = drm,
-            authorization = authorization))
+            authorization = authorization
+          )
+        )
       } else {
         ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
       }
@@ -167,7 +178,8 @@ internal class PatronUserProfileParser(
       vendor = vendor,
       scheme = scheme,
       clientToken = clientToken,
-      deviceManagerURI = deviceManagerURI)
+      deviceManagerURI = deviceManagerURI
+    )
   }
 
   private data class Link(

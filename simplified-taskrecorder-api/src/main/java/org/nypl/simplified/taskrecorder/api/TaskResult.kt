@@ -22,7 +22,8 @@ sealed class TaskResult<E : Serializable, A> {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
-        "Must have logged at least one step")
+        "Must have logged at least one step"
+      )
     }
   }
 
@@ -36,7 +37,8 @@ sealed class TaskResult<E : Serializable, A> {
     init {
       Preconditions.checkArgument(
         this.steps.isNotEmpty(),
-        "Must have logged at least one step")
+        "Must have logged at least one step"
+      )
     }
 
     /**
@@ -71,7 +73,8 @@ sealed class TaskResult<E : Serializable, A> {
       is Success ->
         Success(
           result = f(this.result),
-          steps = this.steps)
+          steps = this.steps
+        )
       is Failure ->
         Failure(this.steps)
     }
@@ -88,7 +91,8 @@ sealed class TaskResult<E : Serializable, A> {
           is Success ->
             Success(
               result = next.result,
-              steps = this.steps.plus(next.steps))
+              steps = this.steps.plus(next.steps)
+            )
           is Failure ->
             Failure(steps = this.steps.plus(next.steps))
         }

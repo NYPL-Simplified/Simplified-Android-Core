@@ -334,11 +334,13 @@ abstract class MigrationFrom3MasterContract {
      * Because account creation failed, the original files are not removed.
      */
 
-    for (file in listOf(
-      accountsDir,
-      accountFile,
-      deviceFile
-    )) {
+    for (
+      file in listOf(
+        accountsDir,
+        accountFile,
+        deviceFile
+      )
+    ) {
       Assert.assertTrue("$file exists", file.exists())
     }
 
@@ -514,16 +516,18 @@ abstract class MigrationFrom3MasterContract {
     val deviceFile = File(this.tempDir, "device.xml")
     deviceFile.writeBytes(ByteArray(16))
 
-    for (file in listOf(
-      booksDir,
-      booksDataDir,
-      bookDir,
-      bookEPUBFile,
-      bookMetaFile,
-      bookAnnotationsFile,
-      accountFile,
-      deviceFile
-    )) {
+    for (
+      file in listOf(
+        booksDir,
+        booksDataDir,
+        bookDir,
+        bookEPUBFile,
+        bookMetaFile,
+        bookAnnotationsFile,
+        accountFile,
+        deviceFile
+      )
+    ) {
       Assert.assertTrue("$file no exists", file.exists())
     }
 
@@ -549,17 +553,19 @@ abstract class MigrationFrom3MasterContract {
      * All files should be gone.
      */
 
-    for (file in listOf(
-      booksDir,
-      booksDataDir,
-      bookDir,
-      bookEPUBFile,
-      bookMetaFile,
-      bookAnnotationsFile,
-      accountsSubDir,
-      accountFile,
-      deviceFile
-    )) {
+    for (
+      file in listOf(
+        booksDir,
+        booksDataDir,
+        bookDir,
+        bookEPUBFile,
+        bookMetaFile,
+        bookAnnotationsFile,
+        accountsSubDir,
+        accountFile,
+        deviceFile
+      )
+    ) {
       Assert.assertTrue("$file no longer exists", !file.exists())
     }
 
@@ -671,8 +677,6 @@ abstract class MigrationFrom3MasterContract {
     File(accountsDir, "account.json").writeBytes(this.resource("account.json"))
     File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
 
-    Mockito.`when`(bookDatabaseEntryFormatHandle.setAdobeRightsInformation(Mockito.any()))
-      .thenThrow(IOException("Bad rights"))
     Mockito.`when`(bookDatabaseEntryFormatHandle.setBookmarks(Mockito.anyList()))
       .thenThrow(IOException("Bad bookmarks"))
     Mockito.`when`(bookDatabaseEntryFormatHandle.copyInBook(bookEPUBFile))
@@ -683,14 +687,13 @@ abstract class MigrationFrom3MasterContract {
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(7, report.events.size)
+    Assert.assertEquals(6, report.events.size)
     Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
     Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
     Assert.assertEquals("errorBookCopyFailure: Bossypants", report.events[2].message)
     Assert.assertEquals("errorBookmarksCopyFailure: Bossypants", report.events[3].message)
-    Assert.assertEquals("errorBookAdobeDRMCopyFailure: Bossypants", report.events[4].message)
-    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[5].message)
-    Assert.assertEquals("successDeletedOldData", report.events[6].message)
+    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
+    Assert.assertEquals("successDeletedOldData", report.events[5].message)
 
     Assert.assertFalse(bookDatabase.books().contains(bookId))
 
@@ -812,17 +815,19 @@ abstract class MigrationFrom3MasterContract {
      * Because everything except authentication succeeded, the original files can be deleted.
      */
 
-    for (file in listOf(
-      booksDir,
-      booksDataDir,
-      bookDir,
-      bookEPUBFile,
-      bookMetaFile,
-      bookAnnotationsFile,
-      accountsSubDir,
-      accountFile,
-      deviceFile
-    )) {
+    for (
+      file in listOf(
+        booksDir,
+        booksDataDir,
+        bookDir,
+        bookEPUBFile,
+        bookMetaFile,
+        bookAnnotationsFile,
+        accountsSubDir,
+        accountFile,
+        deviceFile
+      )
+    ) {
       Assert.assertTrue("$file no longer exists", !file.exists())
     }
 
@@ -847,8 +852,8 @@ abstract class MigrationFrom3MasterContract {
 
   private fun resource(name: String): ByteArray {
     return MigrationFrom3MasterContract::class.java.getResource(
-        "/org/nypl/simplified/tests/migration/from3master/$name"
-      )
+      "/org/nypl/simplified/tests/migration/from3master/$name"
+    )
       .readBytes()
   }
 }

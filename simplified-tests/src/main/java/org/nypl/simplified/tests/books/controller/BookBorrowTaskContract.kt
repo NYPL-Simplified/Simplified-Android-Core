@@ -260,7 +260,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowOpenAccessEPUB() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -334,7 +333,6 @@ abstract class BookBorrowTaskContract {
     val formatHandle =
       bookDatabase.entry(bookId).findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
 
-    Assert.assertEquals(null, formatHandle.format.adobeRights)
     Assert.assertNotEquals(null, formatHandle.format.file)
   }
 
@@ -344,7 +342,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowOpenAccessPDF() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -445,7 +442,6 @@ abstract class BookBorrowTaskContract {
 
   @Test
   fun testBorrowOpenAccessAudioBook() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -602,7 +598,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowBundledEPUB() {
-
     val tempFile =
       File.createTempFile("nypl-test", "epub")
     val feedLoader =
@@ -697,8 +692,6 @@ abstract class BookBorrowTaskContract {
      */
 
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(tempFile)
   }
 
@@ -708,7 +701,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowBundledEPUBMissing() {
-
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
     val bundledContent =
@@ -785,7 +777,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUB() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -889,8 +880,6 @@ abstract class BookBorrowTaskContract {
      */
 
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
 
@@ -900,7 +889,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBGeneric() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -992,8 +980,6 @@ abstract class BookBorrowTaskContract {
      */
 
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
 
@@ -1003,7 +989,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBContentTypeExact() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1110,8 +1095,6 @@ abstract class BookBorrowTaskContract {
      */
 
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
 
@@ -1121,7 +1104,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBFeedGarbageFails0() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1202,7 +1184,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBFeedGarbageFails1() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1306,7 +1287,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBFeedGarbageFails2() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1434,7 +1414,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBFeedGarbageFails3() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1530,7 +1509,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBFeedGarbageFails4() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1657,7 +1635,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBFeedLoaderCrashes() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1740,7 +1717,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUB404Fails() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1821,7 +1797,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUB401Fails() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -1920,7 +1895,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBCredentialsNeededButMissing() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -2021,7 +1995,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBContentTypeNonsense() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -2141,7 +2114,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedEPUBNoUsableAcquisition() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -2238,7 +2210,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowBearerToken() {
-
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
     val account =
@@ -2350,8 +2321,6 @@ abstract class BookBorrowTaskContract {
      */
 
     Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
-    Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000002.data"))
   }
 
@@ -2361,7 +2330,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowBearerTokenUnparseable() {
-
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
     val account =
@@ -2487,7 +2455,8 @@ abstract class BookBorrowTaskContract {
     this.downloader =
       Mockito.mock(DownloaderType::class.java)
     this.services.putService(
-      DownloaderType::class.java, this.downloader)
+      DownloaderType::class.java, this.downloader
+    )
     this.bookTaskRequiredServices =
       BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
 
@@ -2605,7 +2574,8 @@ abstract class BookBorrowTaskContract {
     this.downloader =
       Mockito.mock(DownloaderType::class.java)
     this.services.putService(
-      DownloaderType::class.java, this.downloader)
+      DownloaderType::class.java, this.downloader
+    )
     this.bookTaskRequiredServices =
       BookTaskRequiredServices.createFromServices(this.contentResolver, this.services)
 
@@ -2729,7 +2699,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowUnsupportedAcquisition() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -2803,7 +2772,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowDatabaseFailure() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -2875,7 +2843,6 @@ abstract class BookBorrowTaskContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowCoverOK() {
-
     val feedLoader =
       Mockito.mock(FeedLoaderType::class.java)
     val account =
@@ -2989,8 +2956,6 @@ abstract class BookBorrowTaskContract {
 
     Mockito.verify(bookDatabaseEntry, Mockito.times(1))
       .setCover(tempCoverFile)
-    Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
     Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }
@@ -3112,8 +3077,6 @@ abstract class BookBorrowTaskContract {
 
     Mockito.verify(bookDatabaseEntry, Mockito.times(0))
       .setCover(tempCoverFile)
-    Mockito.verify(formatHandle, Mockito.times(1))
-      .setAdobeRightsInformation(null)
     Mockito.verify(formatHandle, Mockito.times(1))
       .copyInBook(File(this.directoryDownloads, "0000000000000001.data"))
   }

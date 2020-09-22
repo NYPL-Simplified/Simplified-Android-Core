@@ -23,7 +23,6 @@ object BookAcquisitionSelection {
    */
 
   fun preferredAcquisition(acquisitions: List<OPDSAcquisition>): OPDSAcquisition? {
-
     val onlySupportedRelations: List<OPDSAcquisition> =
       acquisitions.filter { acquisition -> relationIsSupported(acquisition) }
 

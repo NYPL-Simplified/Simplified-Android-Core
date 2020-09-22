@@ -47,11 +47,13 @@ class OAuthActivity : AppCompatActivity() {
   }
 
   override fun onNewIntent(intent: Intent) {
-    when (val result = OAuthCallbackIntentParsing.processIntent(
-      intent = intent,
-      requiredScheme = this.oauthScheme,
-      parseUri = Uri::parse
-    )) {
+    when (
+      val result = OAuthCallbackIntentParsing.processIntent(
+        intent = intent,
+        requiredScheme = this.oauthScheme,
+        parseUri = Uri::parse
+      )
+    ) {
       is OAuthParseResult.Failed ->
         this.logger.warn("failed to parse incoming intent: {}", result.message)
       is OAuthParseResult.Success -> {

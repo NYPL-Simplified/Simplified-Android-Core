@@ -8,7 +8,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.ColorMatrixColorFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +33,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.librarysimplified.services.api.Services;
+import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials;
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
@@ -43,15 +43,8 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentExce
 import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.reader.ReaderColorSchemes;
-import org.nypl.simplified.profiles.api.ProfilePreferences;
-import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOC;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCElement;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCParameters;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelection;
-import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelectionListenerType;
+import org.nypl.simplified.books.api.BookChapterProgress;
+import org.nypl.simplified.books.api.BookDRMInformation;
 import org.nypl.simplified.books.api.BookFormat;
 import org.nypl.simplified.books.api.BookID;
 import org.nypl.simplified.books.api.BookLocation;
@@ -63,14 +56,23 @@ import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
+import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileUpdated;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.reader.api.ReaderColorScheme;
 import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks;
+import org.nypl.simplified.ui.screen.ScreenSizeInformationType;
 import org.nypl.simplified.ui.theme.ThemeControl;
 import org.nypl.simplified.ui.theme.ThemeServiceType;
+import org.nypl.simplified.ui.thread.api.UIThreadServiceType;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOC;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCElement;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCParameters;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelection;
+import org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCSelectionListenerType;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -87,6 +89,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.reactivex.disposables.Disposable;
+import kotlin.Pair;
+
 import static org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import static org.nypl.simplified.viewer.epub.readium1.ReaderReadiumViewerSettings.ScrollMode.AUTO;
 import static org.nypl.simplified.viewer.epub.readium1.ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE;
@@ -326,12 +330,7 @@ public final class ReaderActivity extends AppCompatActivity implements
     final ReaderPreferences readerPreferences;
 
     try {
-      readerPreferences =
-        Services.INSTANCE.serviceDirectory()
-          .requireService(ProfilesControllerType.class)
-          .profileCurrent()
-          .preferences()
-          .getReaderPreferences();
+      readerPreferences = getProfileCurrentReaderPreferences();
     } catch (final ProfileNoneCurrentException e) {
       this.onEPUBLoadFailed(e);
       this.finish();
@@ -444,10 +443,8 @@ public final class ReaderActivity extends AppCompatActivity implements
     });
 
     // Allow the webview to be debuggable only if this is a dev build
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-        WebView.setWebContentsDebuggingEnabled(true);
-      }
+    if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+      WebView.setWebContentsDebuggingEnabled(true);
     }
 
     final WebSettings s = Objects.requireNonNull(in_webview.getSettings());
@@ -484,13 +481,24 @@ public final class ReaderActivity extends AppCompatActivity implements
       Services.INSTANCE.serviceDirectory().requireService(ReaderReadiumEPUBLoaderType.class);
     final ReaderReadiumEPUBLoadRequest request =
       ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
-        .setAdobeRightsFile(Option.of(format.getAdobeRightsFile()))
+        .setAdobeRightsFile(getAdobeRightsFrom(format))
         .build();
 
     LOG.debug("onCreate: loading EPUB");
     loader.loadEPUB(request, this);
     LOG.debug("onCreate: applying viewer color filters");
     this.applyViewerColorFilters();
+  }
+
+  private OptionType<File> getAdobeRightsFrom(final BookFormat.BookFormatEPUB format) {
+    final BookDRMInformation info = format.getDrmInformation();
+    if (info instanceof BookDRMInformation.ACS) {
+      final Pair<File, AdobeAdeptLoan> rights = ((BookDRMInformation.ACS) info).getRights();
+      if (rights != null) {
+        return Option.of(rights.component1());
+      }
+    }
+    return Option.none();
   }
 
   private void onProfileEvent(final ProfileEvent event) {
@@ -510,16 +518,15 @@ public final class ReaderActivity extends AppCompatActivity implements
   }
 
   private void applyReaderPreferences(final ReaderPreferences preferences) {
-    LOG.debug("applyReaderPreferences: scheduling task to run later");
-
-    uiThread.runOnUIThreadDelayed(() -> {
+    uiThread.runOnUIThread(() -> {
       LOG.debug("applyReaderPreferences: executing now");
 
       // Get the CFI from the ReadiumSDK before applying the new
       // page style settings.
       this.simplified_js_api.getReadiumCFI();
 
-      this.readium_js_api.setPageStyleSettings(preferences);
+      this.readium_js_api.setBookStyles(preferences);
+      this.readium_js_api.updateSettings(preferences);
 
       // Once they are applied, go to the CFI that is stored in the
       // JS ReadiumSDK instance.
@@ -529,7 +536,16 @@ public final class ReaderActivity extends AppCompatActivity implements
 
       this.readium_js_api.getCurrentPage(this);
       this.readium_js_api.mediaOverlayIsAvailable(this);
-    }, 300L);
+    });
+  }
+
+  private ReaderPreferences getProfileCurrentReaderPreferences() throws ProfileNoneCurrentException {
+    return
+      Services.INSTANCE.serviceDirectory()
+        .requireService(ProfilesControllerType.class)
+        .profileCurrent()
+        .preferences()
+        .getReaderPreferences();
   }
 
   @Override
@@ -542,14 +558,20 @@ public final class ReaderActivity extends AppCompatActivity implements
     Objects.requireNonNull(location);
     LOG.debug("onCurrentPageReceived: {}", location);
 
+    // Add the current chapter progress to the location.
+
+    BookLocation currentLocation = new BookLocation(
+      new BookChapterProgress(current_page_index, currentChapterProgress()),
+      location.getContentCFI(),
+      location.getIdRef());
+
     final Bookmark bookmark =
       new Bookmark(
         this.feed_entry.getID(),
-        location,
+        currentLocation,
         BookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
         LocalDateTime.now(),
         this.current_chapter_title,
-        currentChapterProgress(),
         currentBookProgress(),
         getDeviceIDString(),
         null);
@@ -617,8 +639,7 @@ public final class ReaderActivity extends AppCompatActivity implements
             .getUuid(),
           this.current_account.getProvider().getId(),
           this.current_account.getId().getUuid(),
-          this.feed_entry.getID(),
-          this.feed_entry.getTitle()));
+          this.feed_entry));
     } catch (ProfileNoneCurrentException ex) {
       LOG.error("profile is not current: ", ex);
     }
@@ -806,18 +827,19 @@ public final class ReaderActivity extends AppCompatActivity implements
     in_progress_bar.setVisibility(View.VISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
 
+    ReaderPreferences preferences;
+
     try {
-      this.applyReaderPreferences(
-        Services.INSTANCE.serviceDirectory()
-          .requireService(ProfilesControllerType.class)
-          .profileCurrent()
-          .preferences()
-          .getReaderPreferences());
-    } catch (final ProfileNoneCurrentException e) {
-      throw new IllegalStateException(e);
+      preferences = getProfileCurrentReaderPreferences();
+    } catch (ProfileNoneCurrentException e) {
+      throw new IllegalStateException("No current profile");
     }
 
+    this.applyViewerColorScheme(preferences.colorScheme());
+
     uiThread.runOnUIThread(() -> {
+      this.readium_js_api.setBookStyles(preferences);
+
       in_media_play.setOnClickListener(view -> {
         LOG.debug("toggling media overlay");
         this.readium_js_api.mediaOverlayToggle();
@@ -846,6 +868,16 @@ public final class ReaderActivity extends AppCompatActivity implements
       "Unable to initialize Readium",
       e,
       this::finish);
+  }
+
+  @Override
+  public void onReadiumContentDocumentLoaded() {
+    LOG.debug("onReadiumContentDocumentLoaded");
+  }
+
+  @Override
+  public void onReadiumContentDocumentLoadedError(final Throwable e) {
+    LOG.error("onReadiumContentDocumentLoadedError: {}", e.getMessage(), e);
   }
 
   /**
@@ -916,8 +948,7 @@ public final class ReaderActivity extends AppCompatActivity implements
                 .getUuid(),
               this.current_account.getProvider().getId(),
               this.current_account.getId().getUuid(),
-              this.feed_entry.getID(),
-              this.feed_entry.getTitle(),
+              this.feed_entry,
               this.current_page_index,
               this.current_page_count,
               this.current_chapter_title));
@@ -1091,16 +1122,29 @@ public final class ReaderActivity extends AppCompatActivity implements
   private void navigateTo(final OptionType<Bookmark> location) {
     LOG.debug("navigateTo: {}", location);
 
-    OptionType<ReaderOpenPageRequestType> page_request = location.map((actual) -> {
-      LOG.debug("navigateTo: Creating Page Req for: {}", actual);
-      this.current_location = actual;
-      return ReaderOpenPageRequest.fromBookLocation(actual.getLocation());
-    });
+    OptionType<ReaderOpenPageRequestType> page_request;
+    if (location.isSome()) {
+      final Bookmark locReal = ((Some<Bookmark>) location).get();
+
+      try {
+        LOG.debug("navigateTo: Creating Page Req for: {}", locReal);
+        final ReaderOpenPageRequestType request =
+          ReaderOpenPageRequest.fromBookLocation(locReal.getLocation());
+        this.current_location = locReal;
+        page_request = Option.of(request);
+      } catch (Exception e) {
+        LOG.error("navigateTo: failed to create page request: ", e);
+        page_request = Option.none();
+      }
+    } else {
+      page_request = Option.none();
+    }
 
     this.readium_js_api.openBook(
       this.epub_container.getDefaultPackage(),
       this.viewer_settings,
-      page_request);
+      page_request
+    );
   }
 
   @Override

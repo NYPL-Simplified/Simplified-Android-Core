@@ -32,6 +32,21 @@ public interface ReaderReadiumFeedbackListenerType
     Throwable e);
 
   /**
+   * Called on receipt of a {@code readium:content-document-loaded} request.
+   */
+
+  void onReadiumContentDocumentLoaded();
+
+  /**
+   * Called when {@link #onReadiumContentDocumentLoaded()} raises an exception.
+   *
+   * @param e The raised exception
+   */
+
+  void onReadiumContentDocumentLoadedError(
+    Throwable e);
+
+  /**
    * Called on receipt of a {@code readium:pagination-changed} request.
    *
    * @param e The pagination event

@@ -23,6 +23,7 @@ import org.mockito.internal.verification.Times
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -1990,7 +1991,8 @@ abstract class BookRevokeTaskContract {
       BookFormat.BookFormatAudioBook(
         manifest = null,
         position = null,
-        contentType = BookFormats.audioBookGenericMimeTypes().first()
+        contentType = BookFormats.audioBookGenericMimeTypes().first(),
+        drmInformation = BookDRMInformation.None
       )
 
     val acquisition =
@@ -2104,7 +2106,8 @@ abstract class BookRevokeTaskContract {
       BookFormat.BookFormatPDF(
         lastReadLocation = null,
         file = null,
-        contentType = BookFormats.pdfMimeTypes().first()
+        contentType = BookFormats.pdfMimeTypes().first(),
+        drmInformation = BookDRMInformation.None
       )
 
     val acquisition =

@@ -16,7 +16,8 @@ data class BookmarkID(val value: String) : Serializable {
   init {
     if (!VALID_BOOKMARK_ID.matcher(value).matches()) {
       throw IllegalArgumentException(
-        "Bookmark IDs must be non-empty, alphanumeric lowercase (" + VALID_BOOKMARK_ID.pattern() + ")")
+        "Bookmark IDs must be non-empty, alphanumeric lowercase (" + VALID_BOOKMARK_ID.pattern() + ")"
+      )
     }
   }
 

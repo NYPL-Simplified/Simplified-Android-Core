@@ -147,9 +147,11 @@ class AccountsFragment : Fragment() {
 
     this.accountList.adapter = this.accountListAdapter
 
-    this.uiThread.runOnUIThread(Runnable {
-      this.reconfigureAccountListUI()
-    })
+    this.uiThread.runOnUIThread(
+      Runnable {
+        this.reconfigureAccountListUI()
+      }
+    )
   }
 
   private fun configureToolbar() {
@@ -182,7 +184,8 @@ class AccountsFragment : Fragment() {
         },
         onArrowClicked = {
           this.findNavigationController().popBackStack()
-        })
+        }
+      )
     } else {
       throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
     }
@@ -193,16 +196,19 @@ class AccountsFragment : Fragment() {
       is AccountEventCreation.AccountEventCreationSucceeded,
       is AccountEventDeletionSucceeded,
       is AccountEventUpdated -> {
-
-        this.uiThread.runOnUIThread(Runnable {
-          this.reconfigureAccountListUI()
-        })
+        this.uiThread.runOnUIThread(
+          Runnable {
+            this.reconfigureAccountListUI()
+          }
+        )
       }
 
       is AccountEventDeletionFailed -> {
-        this.uiThread.runOnUIThread(Runnable {
-          this.showAccountDeletionFailedDialog(accountEvent)
-        })
+        this.uiThread.runOnUIThread(
+          Runnable {
+            this.showAccountDeletionFailedDialog(accountEvent)
+          }
+        )
       }
 
       else -> {
@@ -230,7 +236,7 @@ class AccountsFragment : Fragment() {
 
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.errorReportEmail,
+        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
         body = "",
         subject = "[simplye-error-report]",
         attributes = accountEvent.attributes.toSortedMap(),
@@ -251,7 +257,7 @@ class AccountsFragment : Fragment() {
       profile
         .accounts()
         .values
-        .sortedBy { account -> account.provider.displayName }
+        .sortedWith(AccountComparator())
 
     this.accountListData.clear()
     this.accountListData.addAll(accountList)

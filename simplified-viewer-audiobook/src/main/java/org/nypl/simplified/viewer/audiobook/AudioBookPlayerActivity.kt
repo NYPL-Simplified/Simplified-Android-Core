@@ -74,8 +74,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  * The main activity for playing audio books.
  */
 
-class AudioBookPlayerActivity : AppCompatActivity(),
-  AudioBookLoadingFragmentListenerType, PlayerFragmentListenerType {
+class AudioBookPlayerActivity :
+  AppCompatActivity(),
+  AudioBookLoadingFragmentListenerType,
+  PlayerFragmentListenerType {
 
   private val log: Logger = LoggerFactory.getLogger(AudioBookPlayerActivity::class.java)
 
@@ -133,7 +135,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   @Volatile
   private var destroying: Boolean = false
 
-  override fun onCreate(state: Bundle?) {
+  override fun onCreate(savedInstanceState: Bundle?) {
     this.log.debug("onCreate")
     super.onCreate(null)
 
@@ -148,7 +150,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
 
     this.setTheme(
-      Services.serviceDirectory()
+      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
         .requireService(ThemeServiceType::class.java)
         .findCurrentTheme()
         .themeWithActionBar
@@ -404,12 +406,16 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      */
 
     this.uiThread.runOnUIThread {
-      this.playerFragment = PlayerFragment.newInstance(PlayerFragmentParameters())
+      // Sanity check; Verify the state of the lifecycle before continuing as it's possible the
+      // activity could be finishing.
+      if (!this.isFinishing && !this.supportFragmentManager.isDestroyed) {
+        this.playerFragment = PlayerFragment.newInstance(PlayerFragmentParameters())
 
-      this.supportFragmentManager
-        .beginTransaction()
-        .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
-        .commit()
+        this.supportFragmentManager
+          .beginTransaction()
+          .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
+          .commitAllowingStateLoss()
+      }
     }
   }
 
@@ -421,7 +427,8 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       this.parameters.toManifestStrategy(
         strategies = this.strategies,
         isNetworkAvailable = { this.networkConnectivity.isNetworkAvailable },
-        credentials = credentials
+        credentials = credentials,
+        cacheDirectory = this.cacheDir
       )
     return when (val strategyResult = strategy.execute()) {
       is TaskResult.Success -> {
@@ -564,11 +571,14 @@ class AudioBookPlayerActivity : AppCompatActivity(),
        * to return the book.
        */
 
-      this.playerScheduledExecutor.schedule({
-        if (!this.destroying) {
-          this.uiThread.runOnUIThread { this.loanReturnShowDialog() }
-        }
-      }, 5L, TimeUnit.SECONDS)
+      this.playerScheduledExecutor.schedule(
+        {
+          if (!this.destroying) {
+            this.uiThread.runOnUIThread { this.loanReturnShowDialog() }
+          }
+        },
+        5L, TimeUnit.SECONDS
+      )
     }
   }
 
@@ -629,7 +639,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerPlaybackRateShouldOpen() {
-
     /*
      * The player fragment wants us to open the playback rate selection dialog.
      */
@@ -642,7 +651,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerSleepTimerShouldOpen() {
-
     /*
      * The player fragment wants us to open the sleep timer.
      */
@@ -655,7 +663,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerTOCShouldOpen() {
-
     /*
      * The player fragment wants us to open the table of contents. Load and display it, and
      * also set the action bar title.
@@ -679,7 +686,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerTOCWantsClose() {
-
     /*
      * The player fragment wants to close the table of contents dialog. Pop it from the back
      * stack and set the action bar title back to the original title.
@@ -698,7 +704,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerWantsCoverImage(view: ImageView) {
-
     /*
      * Use the cover provider to load a cover image into the image view. The width and height
      * are essentially hints; the target image view almost certainly won't have a usable size

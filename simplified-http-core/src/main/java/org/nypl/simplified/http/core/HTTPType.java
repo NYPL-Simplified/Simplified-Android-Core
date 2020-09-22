@@ -29,6 +29,25 @@ public interface HTTPType
     final long offset);
 
   /**
+   * Retrieve the content at {@code uri}, using authentication details
+   * {@code auth}. The content returned will have been requested with the
+   * initial byte offset {@code offset}.
+   *
+   * @param auth    The authentication details, if any
+   * @param uri     The URI
+   * @param offset  The byte offset
+   * @param noCache True to add the request property "Cache-Control", "no-cache".
+   *
+   * @return A result
+   */
+
+  HTTPResultType<InputStream> get(
+    final OptionType<HTTPAuthType> auth,
+    final URI uri,
+    final long offset,
+    final Boolean noCache);
+
+  /**
    * Make a put request to {@code uri}, and return the results,
    * using authentication details {@code auth}.
    *

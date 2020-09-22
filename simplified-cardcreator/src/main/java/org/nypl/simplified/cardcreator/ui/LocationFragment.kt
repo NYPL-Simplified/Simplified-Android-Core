@@ -44,11 +44,20 @@ class LocationFragment : Fragment(), LocationListener {
 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
+  private lateinit var locationManager: LocationManager
+
   private var isNewYork = false
   private var locationMock = false
   private var initialLocationCheckCompleted = false
 
   private val locationRequestCode = 102
+
+  private var dialog: AlertDialog? = null
+
+  override fun onAttach(context: Context) {
+    super.onAttach(context)
+    locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -64,6 +73,12 @@ class LocationFragment : Fragment(), LocationListener {
     if (initialLocationCheckCompleted) {
       checkIfInNewYorkState()
     }
+  }
+
+  override fun onPause() {
+    super.onPause()
+    locationManager.removeUpdates(this)
+    dialog?.dismiss()
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -109,13 +124,7 @@ class LocationFragment : Fragment(), LocationListener {
   }
 
   private fun goBack() {
-    if (requireActivity().intent.extras.getBoolean("isLoggedIn")) {
-      nextAction = LocationFragmentDirections.actionJuvenileBack()
-      navController.navigate(nextAction)
-    } else {
-      nextAction = LocationFragmentDirections.actionBack()
-      navController.navigate(nextAction)
-    }
+    navController.popBackStack()
   }
 
   /**
@@ -133,8 +142,10 @@ class LocationFragment : Fragment(), LocationListener {
         initialLocationCheckCompleted = true
         dialog.cancel()
       }
-    val alert = dialogBuilder.create()
-    alert.show()
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
   }
 
   /**
@@ -151,8 +162,10 @@ class LocationFragment : Fragment(), LocationListener {
       .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
         dialog.cancel()
       }
-    val alert = dialogBuilder.create()
-    alert.show()
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
   }
 
   /**
@@ -173,7 +186,6 @@ class LocationFragment : Fragment(), LocationListener {
       logger.debug("Location permission granted")
       try {
         logger.debug("Getting current location")
-        val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val isNetworkLocationEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (isNetworkLocationEnabled) {
@@ -197,7 +209,6 @@ class LocationFragment : Fragment(), LocationListener {
   // TODO: This function is doing to much, break it up into smaller pieces
   private fun checkIfInNewYorkState() {
     logger.debug("Checking to see if user is in New York")
-    val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
     binding.nextBtn.isEnabled = false || locationMock
     val maxResults = 1
     val location = getLocation()
@@ -258,12 +269,13 @@ class LocationFragment : Fragment(), LocationListener {
 
   override fun onLocationChanged(location: Location?) {
     logger.debug("Location has changed")
-    val locationManager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val activity = this.activity ?: return
+
     if (location != null) {
       logger.debug("Checking to see if user is in New York")
       binding.nextBtn.isEnabled = false || locationMock
       val maxResults = 1
-      val geocoder = Geocoder(requireActivity(), Locale.getDefault())
+      val geocoder = Geocoder(activity, Locale.getDefault())
 
       // Address found using the Geocoder.
       val address: Address?

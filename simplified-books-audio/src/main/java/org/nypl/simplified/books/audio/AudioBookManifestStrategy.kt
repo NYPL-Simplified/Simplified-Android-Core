@@ -180,7 +180,7 @@ class AudioBookManifestStrategy(
             Option.some(problemReport)
           )
         } else {
-          String.format("%s: %s %s", serverData.uri, serverData.code)
+          "${serverData.uri}: ${serverData.code}"
         }
     }
   }
@@ -309,7 +309,8 @@ class AudioBookManifestStrategy(
                 )
               is AudioBookCredentials.BearerToken ->
                 throw UnsupportedOperationException(
-                  "Can't use bearer tokens for audio book fulfillment")
+                  "Can't use bearer tokens for audio book fulfillment"
+                )
             }
           },
           userAgent = this.request.userAgent
@@ -349,7 +350,8 @@ class AudioBookManifestStrategy(
         LicenseCheckParameters(
           manifest = manifest,
           userAgent = this.request.userAgent,
-          checks = this.request.licenseChecks
+          checks = this.request.licenseChecks,
+          cacheDirectory = this.request.cacheDirectory
         )
       )
 

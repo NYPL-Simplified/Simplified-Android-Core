@@ -74,28 +74,23 @@ abstract class AccountProviderNYPLRegistryContract {
         readAllFromResource("libraryregistry.json"),
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = mockHTTP,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers())
+        serializers = AccountProviderDescriptionCollectionSerializers()
+      )
 
     val result = provider.load(this.context, false)
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
     Assert.assertEquals(43, success.results.size)
-    Assert.assertEquals(
-      "The correct number of providers are in production",
-      43,
-      success.results.values.filter { p -> p.isProduction }.size)
-    Assert.assertEquals(
-      "The correct number of providers are not in production",
-      0,
-      success.results.values.filter { p -> !p.isProduction }.size)
   }
 
   /**
@@ -114,7 +109,9 @@ abstract class AccountProviderNYPLRegistryContract {
         readAllFromResource("libraryregistry.json"),
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     mockHTTP.addResponse(
       "https://libraryregistry.librarysimplified.org/libraries/qa",
@@ -124,28 +121,23 @@ abstract class AccountProviderNYPLRegistryContract {
         readAllFromResource("libraryregistry-qa.json"),
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = mockHTTP,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers())
+        serializers = AccountProviderDescriptionCollectionSerializers()
+      )
 
     val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
     Assert.assertEquals(182, success.results.size)
-    Assert.assertEquals(
-      "The correct number of providers are in production",
-      43,
-      success.results.values.filter { p -> p.isProduction }.size)
-    Assert.assertEquals(
-      "The correct number of providers are not in production",
-      139,
-      success.results.values.filter { p -> !p.isProduction }.size)
   }
 
   /**
@@ -166,7 +158,8 @@ abstract class AccountProviderNYPLRegistryContract {
         http = mockHTTP,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers())
+        serializers = AccountProviderDescriptionCollectionSerializers()
+      )
 
     val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
@@ -195,7 +188,9 @@ abstract class AccountProviderNYPLRegistryContract {
         readAllFromResource("libraryregistry.json"),
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     mockHTTP.addResponse(
       "https://libraryregistry.librarysimplified.org/libraries/qa",
@@ -205,29 +200,23 @@ abstract class AccountProviderNYPLRegistryContract {
         readAllFromResource("libraryregistry-qa.json"),
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = mockHTTP,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers())
+        serializers = AccountProviderDescriptionCollectionSerializers()
+      )
 
     val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
     Assert.assertEquals(182, success.results.size)
-    Assert.assertEquals(
-      "The correct number of providers are in production",
-      43,
-      success.results.values.filter { p -> p.isProduction }.size)
-    Assert.assertEquals(
-      "The correct number of providers are not in production",
-      139,
-      success.results.values.filter { p -> !p.isProduction }.size)
-
     Assert.assertNotEquals("Nonsense!", cacheFile.readText())
   }
 
@@ -247,7 +236,9 @@ abstract class AccountProviderNYPLRegistryContract {
         ByteArrayInputStream("Nonsense!".toByteArray()) as InputStream,
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     mockHTTP.addResponse(
       "https://libraryregistry.librarysimplified.org/libraries/qa",
@@ -257,14 +248,17 @@ abstract class AccountProviderNYPLRegistryContract {
         ByteArrayInputStream("Nonsense!".toByteArray()) as InputStream,
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = mockHTTP,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers())
+        serializers = AccountProviderDescriptionCollectionSerializers()
+      )
 
     val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
@@ -291,7 +285,8 @@ abstract class AccountProviderNYPLRegistryContract {
         http = mockHTTP,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers())
+        serializers = AccountProviderDescriptionCollectionSerializers()
+      )
 
     run {
       val result = provider.load(this.context, true)
@@ -309,7 +304,9 @@ abstract class AccountProviderNYPLRegistryContract {
         readAllFromResource("libraryregistry.json"),
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     mockHTTP.addResponse(
       "https://libraryregistry.librarysimplified.org/libraries/qa",
@@ -319,7 +316,9 @@ abstract class AccountProviderNYPLRegistryContract {
         readAllFromResource("libraryregistry-qa.json"),
         0L,
         mapOf(),
-        0L))
+        0L
+      )
+    )
 
     // Expire the cache
     DateTimeUtils.setCurrentMillisOffset(1000 * 43200)
@@ -354,7 +353,8 @@ abstract class AccountProviderNYPLRegistryContract {
         http = mockHTTP,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers())
+        serializers = AccountProviderDescriptionCollectionSerializers()
+      )
 
     run {
       val result1 = provider.load(this.context, true)

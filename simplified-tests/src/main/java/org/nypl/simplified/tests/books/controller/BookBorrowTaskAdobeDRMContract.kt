@@ -36,6 +36,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookEvent
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
@@ -270,7 +271,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test // (timeout = 5_000L)
   fun testBorrowFeedACSMForEPUB() {
-
     val account =
       Mockito.mock(AccountType::class.java)
     val bookDatabase =
@@ -414,7 +414,7 @@ abstract class BookBorrowTaskAdobeDRMContract {
     val formatHandle =
       bookDatabase.entry(bookId).findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
 
-    Assert.assertEquals(loan, formatHandle.format.adobeRights)
+    Assert.assertEquals(loan, (formatHandle.format.drmInformation as BookDRMInformation.ACS).rights!!.second)
     Assert.assertNotEquals(null, formatHandle.format.file)
   }
 
@@ -424,7 +424,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMForEPUBUnavailableDRM() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -539,7 +538,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMForNonEPUB() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -691,7 +689,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMDeviceNotActive() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -809,7 +806,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMUnparseable() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -910,7 +906,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5000L)
   fun testBorrowFeedACSMCancellation() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =
@@ -1028,7 +1023,6 @@ abstract class BookBorrowTaskAdobeDRMContract {
 
   @Test(timeout = 5_000L)
   fun testBorrowFeedACSMFailsErrorCode() {
-
     val bookDatabase =
       this.createBookDatabase()
     val account =

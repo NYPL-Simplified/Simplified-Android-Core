@@ -28,7 +28,6 @@ object HTTPProblemReportLogging {
     statusCode: Int,
     reportOption: OptionType<HTTPProblemReport>
   ): String {
-
     val text =
       StringBuilder(128)
         .append("Error retrieving URI\n")
@@ -44,7 +43,8 @@ object HTTPProblemReportLogging {
 
     if (reportOption.isSome) {
       val report = (reportOption as Some<HTTPProblemReport>).get()
-      logger.error("{}",
+      logger.error(
+        "{}",
         text.append("  Report:\n")
           .append("    Status: ")
           .append(report.problemStatus)
@@ -58,12 +58,15 @@ object HTTPProblemReportLogging {
           .append("    Detail: ")
           .append(report.problemDetail)
           .append("\n")
-          .toString())
+          .toString()
+      )
     } else {
-      logger.error("{}",
+      logger.error(
+        "{}",
         text.append("  Report: No problem report available\n")
           .append("\n")
-          .toString())
+          .toString()
+      )
     }
 
     return text.toString()

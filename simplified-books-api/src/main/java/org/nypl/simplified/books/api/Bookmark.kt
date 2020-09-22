@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.api
 
-import com.io7m.jfunctional.Some
 import org.joda.time.LocalDateTime
 import java.io.Serializable
 import java.net.URI
@@ -49,12 +48,6 @@ data class Bookmark(
   val chapterTitle: String,
 
   /**
-   * An estimate of the current chapter progress, in the range [0, 1]
-   */
-
-  val chapterProgress: Double,
-
-  /**
    * An estimate of the current book progress, in the range [0, 1]
    */
 
@@ -72,6 +65,13 @@ data class Bookmark(
 
   val uri: URI?
 ) : Serializable {
+
+  /**
+   * An estimate of the current chapter progress, in the range [0, 1]
+   */
+
+  val chapterProgress: Double =
+    this.location.progress?.chapterProgress ?: 0.0
 
   /**
    * The ID of the book to which the bookmark belongs.
@@ -116,11 +116,22 @@ data class Bookmark(
         val messageDigest = MessageDigest.getInstance("SHA-256")
         val utf8 = Charset.forName("UTF-8")
         messageDigest.update(book.value().toByteArray(utf8))
-        val cfiOpt = location.contentCFI()
-        if (cfiOpt is Some<String>) {
-          messageDigest.update(cfiOpt.get().toByteArray(utf8))
+
+        val chapterProgress = location.progress
+        if (chapterProgress != null) {
+          messageDigest.update(chapterProgress.chapterIndex.toString().toByteArray(utf8))
+          val truncatedProgress = String.format("%.6f", chapterProgress.chapterProgress)
+          messageDigest.update(truncatedProgress.toByteArray(utf8))
         }
-        messageDigest.update(location.idRef().toByteArray(utf8))
+
+        val cfi = location.contentCFI
+        if (cfi != null) {
+          messageDigest.update(cfi.toByteArray(utf8))
+        }
+        val idRef = location.idRef
+        if (idRef != null) {
+          messageDigest.update(idRef.toByteArray(utf8))
+        }
         messageDigest.update(kind.motivationURI.toByteArray(utf8))
 
         val digestResult = messageDigest.digest()

@@ -14,15 +14,11 @@ import org.nypl.simplified.reader.api.ReaderPreferences
 
 data class ProfilePreferences(
 
-  /**
-   * @return The date of birth of the reader (if one has been explicitly specified)
-   */
+  /** @return The date of birth of the reader (if one has been explicitly specified) */
 
   val dateOfBirth: ProfileDateOfBirth?,
 
-  /**
-   * @return `true` if non-production libraries should be displayed
-   */
+  /** @return `true` if non-production libraries should be displayed */
 
   val showTestingLibraries: Boolean,
 
@@ -33,15 +29,19 @@ data class ProfilePreferences(
 
   val hasSeenLibrarySelectionScreen: Boolean,
 
-  /**
-   * @return The reader-specific preferences
-   */
+  /** @return The reader-specific preferences */
 
   val readerPreferences: ReaderPreferences,
 
-  /**
-   * The most recently used account provider.
-   */
+  /** The most recently used account provider. */
 
-  val mostRecentAccount: AccountID?
+  val mostRecentAccount: AccountID?,
+
+  /** Use the experimental R2 reader for DRM-free books. */
+
+  val useExperimentalR2: Boolean = false,
+
+  /** @return `true` if the debug settings should be visible. */
+
+  val showDebugSettings: Boolean = false
 )

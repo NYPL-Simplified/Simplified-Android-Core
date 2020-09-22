@@ -4,19 +4,9 @@ import android.content.res.Resources
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.joda.time.Hours
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
-import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
-import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
-import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
-import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
-import org.nypl.simplified.opds.core.OPDSAvailabilityType
 import java.util.concurrent.TimeUnit
 
 /**
@@ -24,50 +14,6 @@ import java.util.concurrent.TimeUnit
  */
 
 object CatalogBookAvailabilityStrings {
-
-  /**
-   * Produce a human-readable string for the given OPDS availability value.
-   *
-   * @param resources The application resources
-   * @param availability The availability value
-   *
-   * @return A descriptive string
-   */
-  fun opdsAvailabilityString(
-    resources: Resources,
-    availability: OPDSAvailabilityType
-  ): String {
-    return availability.matchAvailability(
-      object : OPDSAvailabilityMatcherType<String, UnreachableCodeException> {
-        override fun onHeldReady(a: OPDSAvailabilityHeldReady): String {
-          return this@CatalogBookAvailabilityStrings.onReserved(resources, a.endDate)
-        }
-
-        override fun onHeld(a: OPDSAvailabilityHeld): String {
-          return this@CatalogBookAvailabilityStrings.onHeld(resources, a.endDate, a.position)
-        }
-
-        override fun onHoldable(a: OPDSAvailabilityHoldable): String {
-          return this@CatalogBookAvailabilityStrings.onHoldable(resources)
-        }
-
-        override fun onLoaned(a: OPDSAvailabilityLoaned): String {
-          return this@CatalogBookAvailabilityStrings.onLoaned(resources, a.endDate)
-        }
-
-        override fun onLoanable(a: OPDSAvailabilityLoanable): String {
-          return this@CatalogBookAvailabilityStrings.onLoanable(resources)
-        }
-
-        override fun onOpenAccess(a: OPDSAvailabilityOpenAccess): String {
-          return this@CatalogBookAvailabilityStrings.onOpenAccess(resources)
-        }
-
-        override fun onRevoked(a: OPDSAvailabilityRevoked): String {
-          return this@CatalogBookAvailabilityStrings.onRevoked(resources)
-        }
-      })
-  }
 
   /**
    * Produce a human-readable string for the given book status.
@@ -134,7 +80,6 @@ object CatalogBookAvailabilityStrings {
     resources: Resources,
     expiryOpt: OptionType<DateTime>
   ): String {
-
     /*
      * If there is an expiry time, display it.
      */
@@ -143,7 +88,8 @@ object CatalogBookAvailabilityStrings {
       val expiry = expiryOpt.get()
       val now = DateTime.now()
       return resources.getString(
-        R.string.catalogBookAvailabilityLoanedTimed, this.intervalString(resources, now, expiry))
+        R.string.catalogBookAvailabilityLoanedTimed, this.intervalString(resources, now, expiry)
+      )
     }
 
     /*
@@ -157,7 +103,6 @@ object CatalogBookAvailabilityStrings {
     resources: Resources,
     expiryOpt: OptionType<DateTime>
   ): String {
-
     /*
      * If there is an expiry time, display it.
      */
@@ -167,7 +112,8 @@ object CatalogBookAvailabilityStrings {
       val now = DateTime.now()
       return resources.getString(
         R.string.catalogBookAvailabilityReservedTimed,
-        this.intervalString(resources, now, expiry))
+        this.intervalString(resources, now, expiry)
+      )
     }
 
     /*
@@ -182,7 +128,6 @@ object CatalogBookAvailabilityStrings {
     endDateOpt: OptionType<DateTime>,
     queuePositionOpt: OptionType<Int>
   ): String {
-
     /*
      * If there is an availability date, show this in preference to
      * anything else.
@@ -193,7 +138,8 @@ object CatalogBookAvailabilityStrings {
       val now = DateTime.now()
       return resources.getString(
         R.string.catalogBookAvailabilityHeldTimed,
-        this.intervalString(resources, now, endDate))
+        this.intervalString(resources, now, endDate)
+      )
     }
 
     /*
@@ -232,7 +178,6 @@ object CatalogBookAvailabilityStrings {
     lower: DateTime,
     upper: DateTime
   ): String {
-
     val hours = this.calendarHoursBetween(lower, upper)
 
     if (hours < 1) {
@@ -262,7 +207,6 @@ object CatalogBookAvailabilityStrings {
     lower: DateTime,
     upper: DateTime
   ): String {
-
     val hours = this.calendarHoursBetween(lower, upper)
     val days = TimeUnit.HOURS.toDays(hours)
     val weeks = days / 7

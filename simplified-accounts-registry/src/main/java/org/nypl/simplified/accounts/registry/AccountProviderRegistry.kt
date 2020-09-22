@@ -43,7 +43,7 @@ class AccountProviderRegistry private constructor(
   @Volatile
   private var statusRef: AccountProviderRegistryStatus = Idle
 
-  private val descriptions = ConcurrentHashMap<URI, AccountProviderDescription>()
+  private val descriptions = Collections.synchronizedMap(LinkedHashMap<URI, AccountProviderDescription>())
   private val descriptionsReadOnly = Collections.unmodifiableMap(this.descriptions)
   private val resolved = ConcurrentHashMap<URI, AccountProviderType>()
   private val resolvedReadOnly = Collections.unmodifiableMap(this.resolved)
@@ -102,6 +102,8 @@ class AccountProviderRegistry private constructor(
   }
 
   override fun clear() {
+    this.descriptions.clear()
+    this.resolved.clear()
     for (source in this.sources) {
       source.clear(this.context)
     }
@@ -113,7 +115,8 @@ class AccountProviderRegistry private constructor(
     if (existing != null) {
       Preconditions.checkState(
         id == existing.id,
-        "ID $id must match existing id ${existing.id}")
+        "ID $id must match existing id ${existing.id}"
+      )
       if (existing.updated.isAfter(accountProvider.updated)) {
         return existing
       }
@@ -130,13 +133,13 @@ class AccountProviderRegistry private constructor(
   override fun updateDescription(
     description: AccountProviderDescription
   ): AccountProviderDescription {
-
     val id = description.id
     val existing = this.descriptions[id]
     if (existing != null) {
       Preconditions.checkState(
         id == existing.id,
-        "ID $id must match existing id ${existing.id}")
+        "ID $id must match existing id ${existing.id}"
+      )
       if (existing.updated.isAfter(description.updated)) {
         return existing
       }

@@ -3,6 +3,7 @@ package org.nypl.simplified.viewer.pdf
 import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.nypl.simplified.viewer.spi.ViewerProviderType
 import org.slf4j.LoggerFactory
 
@@ -15,6 +16,7 @@ class PdfViewerProvider : ViewerProviderType {
     "org.nypl.simplified.viewer.pdf.PdfViewerProvider"
 
   override fun canSupport(
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   ): Boolean {
@@ -32,6 +34,7 @@ class PdfViewerProvider : ViewerProviderType {
 
   override fun open(
     activity: Activity,
+    preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
   ) {

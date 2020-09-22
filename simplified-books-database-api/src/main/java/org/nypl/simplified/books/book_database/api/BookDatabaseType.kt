@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.book_database.api
 
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.util.SortedSet
 import javax.annotation.concurrent.ThreadSafe
@@ -50,7 +51,7 @@ interface BookDatabaseType {
 
   @Throws(BookDatabaseException::class)
   fun createOrUpdate(
-    id: org.nypl.simplified.books.api.BookID,
+    id: BookID,
     entry: OPDSAcquisitionFeedEntry
   ): BookDatabaseEntryType
 
@@ -63,5 +64,5 @@ interface BookDatabaseType {
    */
 
   @Throws(BookDatabaseException::class)
-  fun entry(id: org.nypl.simplified.books.api.BookID): BookDatabaseEntryType
+  fun entry(id: BookID): BookDatabaseEntryType
 }

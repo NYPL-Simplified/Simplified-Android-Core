@@ -35,15 +35,18 @@ class AccountProviderDescriptionParser internal constructor(
         warning.line,
         warning.column,
         warning.message,
-        warning.exception)
+        warning.exception
+      )
 
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = warning.message,
-        line = 0,
-        column = 0,
-        exception = warning.exception
-      ))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = warning.message,
+          line = 0,
+          column = 0,
+          exception = warning.exception
+        )
+      )
     } else {
       this.logger.warn(
         "{}:{}:{}: {}: ",
@@ -51,7 +54,8 @@ class AccountProviderDescriptionParser internal constructor(
         warning.line,
         warning.column,
         warning.message,
-        warning.exception)
+        warning.exception
+      )
 
       this.warnings.add(warning)
     }
@@ -60,11 +64,13 @@ class AccountProviderDescriptionParser internal constructor(
   private fun publishErrorForException(e: Exception) {
     this.logger.error("{}: ", this.uri, e)
 
-    this.errors.add(ParseError(
-      source = this.uri,
-      message = e.message ?: "",
-      exception = e
-    ))
+    this.errors.add(
+      ParseError(
+        source = this.uri,
+        message = e.message ?: "",
+        exception = e
+      )
+    )
   }
 
   private data class Metadata(
@@ -93,17 +99,21 @@ class AccountProviderDescriptionParser internal constructor(
             links = links,
             images = images,
             isAutomatic = metadata.isAutomatic,
-            isProduction = metadata.isProduction))
+            isProduction = metadata.isProduction
+          )
+        )
       } else {
         ParseResult.Failure(
           warnings = this.warnings.toList(),
-          errors = this.errors.toList())
+          errors = this.errors.toList()
+        )
       }
     } catch (e: Exception) {
       this.publishErrorForException(e)
       ParseResult.Failure(
         warnings = this.warnings.toList(),
-        errors = this.errors.toList())
+        errors = this.errors.toList()
+      )
     }
   }
 
@@ -116,10 +126,13 @@ class AccountProviderDescriptionParser internal constructor(
     val updated = try {
       parseMetadataUpdated(metadata)
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'updated' field as timestamp",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'updated' field as timestamp",
+          exception = e
+        )
+      )
       DateTime.now()
     }
 
@@ -129,7 +142,8 @@ class AccountProviderDescriptionParser internal constructor(
       id = parseMetadataId(metadata),
       title = parseMetadataTitle(metadata),
       isProduction = JSONParserUtilities.getBooleanDefault(metadata, "isProduction", false),
-      isAutomatic = JSONParserUtilities.getBooleanDefault(metadata, "isAutomatic", false))
+      isAutomatic = JSONParserUtilities.getBooleanDefault(metadata, "isAutomatic", false)
+    )
   }
 
   private fun parseMetadataUpdated(root: ObjectNode): DateTime {
@@ -137,10 +151,13 @@ class AccountProviderDescriptionParser internal constructor(
       ISODateTimeFormat.dateTimeParser()
         .parseDateTime(JSONParserUtilities.getString(root, "updated"))
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'updated' field as timestamp",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'updated' field as timestamp",
+          exception = e
+        )
+      )
       return DateTime.now()
     }
   }
@@ -149,10 +166,13 @@ class AccountProviderDescriptionParser internal constructor(
     return try {
       JSONParserUtilities.getString(root, "title")
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'title' field as string",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'title' field as string",
+          exception = e
+        )
+      )
       return ""
     }
   }
@@ -161,10 +181,13 @@ class AccountProviderDescriptionParser internal constructor(
     return try {
       JSONParserUtilities.getStringOrNull(root, "description") ?: ""
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'description' field as string",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'description' field as string",
+          exception = e
+        )
+      )
       return ""
     }
   }
@@ -173,10 +196,13 @@ class AccountProviderDescriptionParser internal constructor(
     return try {
       JSONParserUtilities.getURI(root, "id")
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'id' field as URI",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'id' field as URI",
+          exception = e
+        )
+      )
       return URI.create("urn:invalid")
     }
   }
@@ -200,10 +226,13 @@ class AccountProviderDescriptionParser internal constructor(
       }
       results
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'images' field as array",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'images' field as array",
+          exception = e
+        )
+      )
       listOf()
     }
   }
@@ -226,10 +255,13 @@ class AccountProviderDescriptionParser internal constructor(
       }
       results
     } catch (e: Exception) {
-      this.errors.add(ParseError(
-        source = this.uri,
-        message = "Could not parse 'links' field as array",
-        exception = e))
+      this.errors.add(
+        ParseError(
+          source = this.uri,
+          message = "Could not parse 'links' field as array",
+          exception = e
+        )
+      )
       listOf()
     }
   }

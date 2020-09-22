@@ -20,7 +20,8 @@ internal class ServiceDirectoryBuilder(
   ): ServiceDirectoryBuilderType {
     Preconditions.checkArgument(
       interfaces.isNotEmpty(),
-      "Must supply at least one interface type")
+      "Must supply at least one interface type"
+    )
 
     this.logger.debug("adding service {}", service.javaClass)
     for (inter in interfaces) {

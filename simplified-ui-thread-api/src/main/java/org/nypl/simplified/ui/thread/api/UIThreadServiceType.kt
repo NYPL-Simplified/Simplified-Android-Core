@@ -17,7 +17,8 @@ interface UIThreadServiceType {
     check(isUIThread() != false) {
       String.format(
         "Current thread '%s' is not the Android UI thread",
-        Thread.currentThread())
+        Thread.currentThread()
+      )
     }
   }
 
@@ -48,9 +49,11 @@ interface UIThreadServiceType {
    */
 
   fun runOnUIThread(f: () -> Unit) =
-    this.runOnUIThread(Runnable {
-      f.invoke()
-    })
+    this.runOnUIThread(
+      Runnable {
+        f.invoke()
+      }
+    )
 
   /**
    * Run the given Runnable on the UI thread after the specified delay.

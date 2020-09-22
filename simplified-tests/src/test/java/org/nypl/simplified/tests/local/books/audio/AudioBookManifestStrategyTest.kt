@@ -2,7 +2,9 @@ package org.nypl.simplified.tests.local.books.audio
 
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.librarysimplified.audiobook.api.PlayerResult
 import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.audiobook.manifest_fulfill.api.ManifestFulfillmentStrategyRegistryType
@@ -32,6 +34,10 @@ class AudioBookManifestStrategyTest {
   private lateinit var manifestParsers: ManifestParsersType
   private lateinit var services: MutableServiceDirectory
   private lateinit var strategies: ManifestFulfillmentStrategyRegistryType
+
+  @Rule
+  @JvmField
+  val tempFolder = TemporaryFolder()
 
   @Before
   fun testSetup() {
@@ -65,7 +71,8 @@ class AudioBookManifestStrategyTest {
           credentials = null,
           services = this.services,
           isNetworkAvailable = { true },
-          strategyRegistry = this.strategies
+          strategyRegistry = this.strategies,
+          cacheDirectory = tempFolder.newFolder("cache")
         )
       )
 
@@ -78,7 +85,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoBasicStrategyFails() {
-
     Mockito.`when`(
       this.strategies.findStrategy(
         this.any((ManifestFulfillmentBasicType::class.java)::class.java)
@@ -109,7 +115,8 @@ class AudioBookManifestStrategyTest {
           credentials = null,
           services = this.services,
           isNetworkAvailable = { true },
-          strategyRegistry = this.strategies
+          strategyRegistry = this.strategies,
+          cacheDirectory = tempFolder.newFolder("cache")
         )
       )
 
@@ -123,7 +130,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoBasicStrategyParseFails() {
-
     Mockito.`when`(
       this.strategies.findStrategy(
         this.any((ManifestFulfillmentBasicType::class.java)::class.java)
@@ -161,7 +167,8 @@ class AudioBookManifestStrategyTest {
           isNetworkAvailable = { true },
           strategyRegistry = this.strategies,
           manifestParsers = AudioBookFailingParsers,
-          extensions = emptyList()
+          extensions = emptyList(),
+          cacheDirectory = tempFolder.newFolder("cache")
         )
       )
 
@@ -173,7 +180,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoBasicStrategyLicenseCheckFails() {
-
     Mockito.`when`(
       this.strategies.findStrategy(
         this.any((ManifestFulfillmentBasicType::class.java)::class.java)
@@ -212,7 +218,8 @@ class AudioBookManifestStrategyTest {
           strategyRegistry = this.strategies,
           manifestParsers = AudioBookSucceedingParsers,
           extensions = emptyList(),
-          licenseChecks = listOf(AudioBookFailingLicenseChecks)
+          licenseChecks = listOf(AudioBookFailingLicenseChecks),
+          cacheDirectory = tempFolder.newFolder("cache")
         )
       )
 
@@ -224,7 +231,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoBasicStrategySucceeds() {
-
     Mockito.`when`(
       this.strategies.findStrategy(
         this.any((ManifestFulfillmentBasicType::class.java)::class.java)
@@ -263,7 +269,8 @@ class AudioBookManifestStrategyTest {
           strategyRegistry = this.strategies,
           manifestParsers = AudioBookSucceedingParsers,
           extensions = emptyList(),
-          licenseChecks = listOf()
+          licenseChecks = listOf(),
+          cacheDirectory = tempFolder.newFolder("cache")
         )
       )
 
@@ -273,7 +280,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoNetworkLoadFails() {
-
     val strategy =
       AudioBookManifestStrategy(
         AudioBookManifestRequest(
@@ -282,7 +288,8 @@ class AudioBookManifestStrategyTest {
           userAgent = PlayerUserAgent("test"),
           credentials = null,
           services = this.services,
-          isNetworkAvailable = { false }
+          isNetworkAvailable = { false },
+          cacheDirectory = tempFolder.newFolder("cache")
         )
       )
 
@@ -296,7 +303,6 @@ class AudioBookManifestStrategyTest {
 
   @Test
   fun testNoNetworkLoadSucceeds() {
-
     val strategy =
       AudioBookManifestStrategy(
         AudioBookManifestRequest(
@@ -314,7 +320,8 @@ class AudioBookManifestStrategyTest {
           manifestParsers = AudioBookSucceedingParsers,
           isNetworkAvailable = { false },
           strategyRegistry = this.strategies,
-          licenseChecks = listOf()
+          licenseChecks = listOf(),
+          cacheDirectory = tempFolder.newFolder("cache")
         )
       )
 

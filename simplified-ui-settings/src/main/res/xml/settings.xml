@@ -1,46 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools">
 
   <Preference
+    android:icon="@drawable/ic_settings_account"
     android:key="settingsAccounts"
-    android:title="@string/accounts"
-    android:summary="@string/settingsAccountsSummary" />
+    android:summary="@string/settingsAccountsSummary"
+    android:title="@string/accounts" />
 
-  <PreferenceCategory android:title="@string/settingsDocumentation">
+  <PreferenceCategory android:title="@string/settingsDocumentation" app:isPreferenceVisible="false">
     <Preference
       android:key="settingsAcknowledgements"
-      android:title="@string/settingsAcknowledgements"
-      android:summary="@string/settingsAcknowledgementsSummary" />
+      android:summary="@string/settingsAcknowledgementsSummary"
+      android:title="@string/settingsAcknowledgements" />
 
     <Preference
       android:key="settingsAbout"
-      android:title="@string/settingsAbout"
-      android:summary="@string/settingsAboutSummary" />
+      android:summary="@string/settingsAboutSummary"
+      android:title="@string/settingsAbout" />
 
     <Preference
       android:key="settingsEULA"
-      android:title="@string/settingsEULA"
-      android:summary="@string/settingsEULASummary" />
+      android:summary="@string/settingsEULASummary"
+      android:title="@string/settingsEULA" />
 
     <Preference
       android:key="settingsFaq"
-      android:title="@string/settingsFaq"
-      android:summary="@string/settingsFaqSummary" />
+      android:summary="@string/settingsFaqSummary"
+      android:title="@string/settingsFaq" />
 
     <Preference
       android:key="settingsLicense"
-      android:title="@string/settingsLicense"
-      android:summary="@string/settingsLicenseSummary" />
+      android:summary="@string/settingsLicenseSummary"
+      android:title="@string/settingsLicense" />
   </PreferenceCategory>
 
   <PreferenceCategory android:title="@string/settingsInfo">
     <Preference
+      android:icon="@drawable/ic_settings_info"
       android:key="settingsVersion"
-      android:title="@string/settingsVersion"
       android:summary="@string/settingsVersionSummary"
-      tools:summary="" />
-  </PreferenceCategory>
+      android:title="@string/settingsVersion"
+      app:enableCopying="true"
+      tools:summary="5.0.1-debug (4164)" />
 
-</androidx.preference.PreferenceScreen>
+    <Preference
+      android:key="settingsVersionCore"
+      android:summary="@string/settingsVersionCoreSummary"
+      android:title="@string/settingsVersionCore"
+      app:enableCopying="true"
+      tools:summary="6.2.0-SNAPSHOT" />
+
+    <Preference
+      android:icon="@drawable/ic_settings_build"
+      android:key="settingsBuild"
+      android:summary="@string/settingsBuildSummary"
+      android:title="@string/settingsBuild"
+      app:enableCopying="true"
+      tools:summary="b3069242e" />
+
+    <Preference
+      android:icon="@drawable/ic_settings_code"
+      android:key="settingsDebug"
+      android:summary="@string/settingsDebugSummary"
+      android:title="@string/settingsDebug"
+      app:isPreferenceVisible="false"
+      tools:isPreferenceVisible="true" />
+  </PreferenceCategory>
+</PreferenceScreen>

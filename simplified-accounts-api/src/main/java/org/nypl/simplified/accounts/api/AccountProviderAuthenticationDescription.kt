@@ -167,7 +167,8 @@ sealed class AccountProviderAuthenticationDescription {
     init {
       Preconditions.checkArgument(
         this.barcodeFormat?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
-        "Barcode format ${this.barcodeFormat} must be uppercase")
+        "Barcode format ${this.barcodeFormat} must be uppercase"
+      )
     }
   }
 

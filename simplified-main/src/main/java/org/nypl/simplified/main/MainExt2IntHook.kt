@@ -47,9 +47,10 @@ class MainExt2IntHook : BootPreHookType {
           target = newDirectory,
           overwrite = false,
           onError = { file, exception ->
-          this.logger.error("failed to copy file: {}: ", file, exception)
-          OnErrorAction.SKIP
-        })
+            this.logger.error("failed to copy file: {}: ", file, exception)
+            OnErrorAction.SKIP
+          }
+        )
         oldDirectory.deleteRecursively()
         this.logger.debug("deleted old directory")
       }

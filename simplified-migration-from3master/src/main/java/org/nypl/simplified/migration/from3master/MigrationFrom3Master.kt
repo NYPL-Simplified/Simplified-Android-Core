@@ -5,7 +5,6 @@ import android.os.Environment
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Option
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
@@ -29,6 +28,7 @@ import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
+import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
@@ -105,18 +105,22 @@ class MigrationFrom3Master(
     this.noticesObservable
 
   private fun publishStepSucceeded(subject: Subject, message: String) {
-    this.noticesObservable.onNext(MigrationStepSucceeded(
-      message = message,
-      subject = subject
-    ))
+    this.noticesObservable.onNext(
+      MigrationStepSucceeded(
+        message = message,
+        subject = subject
+      )
+    )
   }
 
   private fun publishStepSucceeded(subject: Subject, message: String, steps: List<PresentableType>) {
-    this.noticesObservable.onNext(MigrationStepSucceeded(
-      message = message,
-      subject = subject,
-      causes = steps
-    ))
+    this.noticesObservable.onNext(
+      MigrationStepSucceeded(
+        message = message,
+        subject = subject,
+        causes = steps
+      )
+    )
   }
 
   private fun publishStepSucceeded(message: String) {
@@ -250,7 +254,8 @@ class MigrationFrom3Master(
         this.services.applicationVersion,
         this.javaClass.canonicalName,
         time,
-        this.noticesLog.toList())
+        this.noticesLog.toList()
+      )
     } finally {
       subscription.dispose()
     }
@@ -277,7 +282,8 @@ class MigrationFrom3Master(
         is AccountProviderAuthenticationDescription.COPPAAgeGate,
         is AccountProviderAuthenticationDescription.Anonymous -> {
           this.publishStepSucceeded(
-            ACCOUNT, this.strings.successAuthenticatedAccountNotRequired(accountTitle))
+            ACCOUNT, this.strings.successAuthenticatedAccountNotRequired(accountTitle)
+          )
           return
         }
         is AccountProviderAuthenticationDescription.Basic -> {
@@ -286,13 +292,16 @@ class MigrationFrom3Master(
 
       val accountData = createdAccount.loadedAccount.account
       if (accountData == null) {
-        this.publishStepError(MigrationStepError(
-          message = this.strings.errorAccountAuthenticationNoCredentials(accountTitle),
-          exception = java.lang.Exception("Missing credentials"),
-          attributes = mapOf(
-            Pair("accountID", createdAccount.account.id.uuid.toString()),
-            Pair("accountTitle", accountTitle)
-          )))
+        this.publishStepError(
+          MigrationStepError(
+            message = this.strings.errorAccountAuthenticationNoCredentials(accountTitle),
+            exception = java.lang.Exception("Missing credentials"),
+            attributes = mapOf(
+              Pair("accountID", createdAccount.account.id.uuid.toString()),
+              Pair("accountTitle", accountTitle)
+            )
+          )
+        )
         return
       }
 
@@ -323,13 +332,16 @@ class MigrationFrom3Master(
       }
     } catch (e: Exception) {
       this.logger.error("failed to authenticate account: ", e)
-      this.publishStepError(MigrationStepError(
-        message = this.strings.errorAccountAuthenticationFailure(accountTitle),
-        attributes = mapOf(
-          Pair("accountID", createdAccount.account.id.uuid.toString()),
-          Pair("accountTitle", accountTitle)
-        ),
-        exception = e))
+      this.publishStepError(
+        MigrationStepError(
+          message = this.strings.errorAccountAuthenticationFailure(accountTitle),
+          attributes = mapOf(
+            Pair("accountID", createdAccount.account.id.uuid.toString()),
+            Pair("accountTitle", accountTitle)
+          ),
+          exception = e
+        )
+      )
     }
   }
 
@@ -388,14 +400,17 @@ class MigrationFrom3Master(
         this.logger.error("strange format handle encountered")
         val formatName = this.formatHandleName(formatHandle)
         val exception = Exception("Unexpected format: $formatName")
-        this.publishStepError(MigrationStepError(
-          message = this.strings.errorBookUnexpectedFormat(book.bookEntry.title, formatName),
-          attributes = mapOf(
-            Pair("bookTitle", book.bookEntry.title),
-            Pair("bookFormat", formatName),
-            Pair("bookID", book.bookID.value())
-          ),
-          exception = exception))
+        this.publishStepError(
+          MigrationStepError(
+            message = this.strings.errorBookUnexpectedFormat(book.bookEntry.title, formatName),
+            attributes = mapOf(
+              Pair("bookTitle", book.bookEntry.title),
+              Pair("bookFormat", formatName),
+              Pair("bookID", book.bookID.value())
+            ),
+            exception = exception
+          )
+        )
         null
       }
     }
@@ -416,7 +431,8 @@ class MigrationFrom3Master(
     if (book.audioBookManifest != null) {
       handle.copyInManifestAndURI(
         data = book.audioBookManifest.manifestFile.readBytes(),
-        manifestURI = book.audioBookManifest.manifestURI)
+        manifestURI = book.audioBookManifest.manifestURI
+      )
     }
     if (book.audioBookPosition != null) {
       handle.savePlayerPosition(book.audioBookPosition)
@@ -428,7 +444,6 @@ class MigrationFrom3Master(
     handle: BookDatabaseEntryFormatHandleEPUB,
     book: LoadedBook
   ): CopiedBook? {
-
     var result: CopiedBook? = CopiedBook(book)
 
     try {
@@ -437,13 +452,16 @@ class MigrationFrom3Master(
       }
     } catch (e: Exception) {
       this.logger.error("failed to copy epub: ", e)
-      this.publishStepError(MigrationStepError(
-        message = this.strings.errorBookCopyFailure(book.bookEntry.title),
-        attributes = mapOf(
-          Pair("bookTitle", book.bookEntry.title),
-          Pair("bookID", book.bookID.value())
-        ),
-        exception = e))
+      this.publishStepError(
+        MigrationStepError(
+          message = this.strings.errorBookCopyFailure(book.bookEntry.title),
+          attributes = mapOf(
+            Pair("bookTitle", book.bookEntry.title),
+            Pair("bookID", book.bookID.value())
+          ),
+          exception = e
+        )
+      )
       result = null
     }
 
@@ -451,33 +469,48 @@ class MigrationFrom3Master(
       if (book.epubBookmarks != null) {
         handle.setBookmarks(book.epubBookmarks)
         this.publishStepSucceeded(BOOKMARK, this.strings.successCopiedBookmarks(book.bookEntry.title, book.epubBookmarks.size))
-        handle.setLastReadLocation(book.epubBookmarks.find { bookmark ->
-          bookmark.kind == BookmarkKind.ReaderBookmarkLastReadLocation
-        })
+        handle.setLastReadLocation(
+          book.epubBookmarks.find { bookmark ->
+            bookmark.kind == BookmarkKind.ReaderBookmarkLastReadLocation
+          }
+        )
       }
     } catch (e: Exception) {
       this.logger.error("failed to copy bookmarks: ", e)
-      this.publishStepError(MigrationStepError(
-        message = this.strings.errorBookmarksCopyFailure(book.bookEntry.title),
-        attributes = mapOf(
-          Pair("bookTitle", book.bookEntry.title),
-          Pair("bookID", book.bookID.value())
-        ),
-        exception = e))
+      this.publishStepError(
+        MigrationStepError(
+          message = this.strings.errorBookmarksCopyFailure(book.bookEntry.title),
+          attributes = mapOf(
+            Pair("bookTitle", book.bookEntry.title),
+            Pair("bookID", book.bookID.value())
+          ),
+          exception = e
+        )
+      )
       result = null
     }
 
     try {
-      handle.setAdobeRightsInformation(book.epubAdobeLoan)
+      when (val drm = handle.drmInformationHandle) {
+        is BookDRMInformationHandle.ACSHandle ->
+          drm.setAdobeRightsInformation(book.epubAdobeLoan)
+        is BookDRMInformationHandle.LCPHandle,
+        is BookDRMInformationHandle.NoneHandle -> {
+          // Nothing required
+        }
+      }
     } catch (e: Exception) {
       this.logger.error("failed to copy adobe DRM information: ", e)
-      this.publishStepError(MigrationStepError(
-        message = this.strings.errorBookAdobeDRMCopyFailure(book.bookEntry.title),
-        attributes = mapOf(
-          Pair("bookTitle", book.bookEntry.title),
-          Pair("bookID", book.bookID.value())
-        ),
-        exception = e))
+      this.publishStepError(
+        MigrationStepError(
+          message = this.strings.errorBookAdobeDRMCopyFailure(book.bookEntry.title),
+          attributes = mapOf(
+            Pair("bookTitle", book.bookEntry.title),
+            Pair("bookID", book.bookID.value())
+          ),
+          exception = e
+        )
+      )
       result = null
     }
 
@@ -551,38 +584,47 @@ class MigrationFrom3Master(
             if (fileAudioManifest.isFile) {
               BookFormat.AudioBookManifestReference(
                 manifestURI = this.loadAudioPlayerManifestURI(fileAudioManifestURI),
-                manifestFile = fileAudioManifest)
+                manifestFile = fileAudioManifest
+              )
             } else {
               null
             }
 
-          loadedBooks.add(LoadedBook(
-            owner = createdAccount,
-            bookID = BookIDs.newFromOPDSEntry(bookEntry),
-            bookDirectory = bookDirectory,
-            bookEntry = bookEntry,
-            epubFile = fileEPUB,
-            epubAdobeLoan = epubAdobeLoan,
-            epubBookmarks = epubBookmarks,
-            audioBookManifest = audioBookManifest,
-            audioBookPosition = audioBookPosition
-          ))
+          loadedBooks.add(
+            LoadedBook(
+              owner = createdAccount,
+              bookID = BookIDs.newFromOPDSEntry(bookEntry),
+              bookDirectory = bookDirectory,
+              bookEntry = bookEntry,
+              epubFile = fileEPUB,
+              epubAdobeLoan = epubAdobeLoan,
+              epubBookmarks = epubBookmarks,
+              audioBookManifest = audioBookManifest,
+              audioBookPosition = audioBookPosition
+            )
+          )
         } catch (e: Exception) {
           this.logger.error("could not load book: ", e)
-          this.publishStepError(MigrationStepError(
-            message = this.strings.errorBookLoadTitledFailure(bookEntry.title),
-            attributes = mapOf(
-              Pair("bookDirectory", bookDirectory.toString()),
-              Pair("bookTitle", bookEntry.title)
-            ),
-            exception = e))
+          this.publishStepError(
+            MigrationStepError(
+              message = this.strings.errorBookLoadTitledFailure(bookEntry.title),
+              attributes = mapOf(
+                Pair("bookDirectory", bookDirectory.toString()),
+                Pair("bookTitle", bookEntry.title)
+              ),
+              exception = e
+            )
+          )
         }
       } catch (e: Exception) {
         this.logger.error("could not load book: ", e)
-        this.publishStepError(MigrationStepError(
-          message = this.strings.errorBookLoadFailure(entry),
-          attributes = mapOf(Pair("bookDirectory", bookDirectory.toString())),
-          exception = e))
+        this.publishStepError(
+          MigrationStepError(
+            message = this.strings.errorBookLoadFailure(entry),
+            attributes = mapOf(Pair("bookDirectory", bookDirectory.toString())),
+            exception = e
+          )
+        )
       }
     }
     return loadedBooks.toList()
@@ -604,14 +646,16 @@ class MigrationFrom3Master(
       }
     } catch (e: Exception) {
       this.logger.error("could not parse bookmarks: ", e)
-      this.publishStepError(MigrationStepError(
-        message = this.strings.errorBookmarksParseFailure(title),
-        exception = e,
-        attributes = mapOf(
-          Pair("bookTitle", title)
-        ),
-        subject = BOOKMARK
-      ))
+      this.publishStepError(
+        MigrationStepError(
+          message = this.strings.errorBookmarksParseFailure(title),
+          exception = e,
+          attributes = mapOf(
+            Pair("bookTitle", title)
+          ),
+          subject = BOOKMARK
+        )
+      )
       null
     }
   }
@@ -623,8 +667,11 @@ class MigrationFrom3Master(
   private fun parseBookmarks(stream: InputStream): List<BookmarkAnnotation> {
     val mapper = ObjectMapper()
     val jsonObj: Map<String, List<BookmarkAnnotation>> =
-      mapper.readValue(stream, object : TypeReference<Map<String, List<BookmarkAnnotation>>>() {
-      })
+      mapper.readValue(
+        stream,
+        object : TypeReference<Map<String, List<BookmarkAnnotation>>>() {
+        }
+      )
     return jsonObj["bookmarks"] ?: listOf()
   }
 
@@ -636,20 +683,17 @@ class MigrationFrom3Master(
     title: String,
     annotation: BookmarkAnnotation
   ): Bookmark? {
-
     val formatter = ISODateTimeFormat.dateTimeParser()
 
     return try {
       val bookLocation =
-        BookLocation.create(Option.none(), "x")
+        BookLocation(null, null, "x")
       val kind =
         BookmarkKind.ofMotivation(annotation.motivation)
       val time =
         formatter.parseLocalDateTime(annotation.body.timestamp)
       val chapterTitle =
         annotation.body.chapterTitle ?: ""
-      val chapterProgress =
-        annotation.body.chapterProgress?.toDouble() ?: 0.0
       val bookProgress =
         annotation.body.bookProgress?.toDouble() ?: 0.0
       val deviceId =
@@ -663,21 +707,22 @@ class MigrationFrom3Master(
         kind = kind,
         time = time,
         chapterTitle = chapterTitle,
-        chapterProgress = chapterProgress,
         bookProgress = bookProgress,
         deviceID = deviceId,
         uri = uri
       )
     } catch (e: Exception) {
       this.logger.error("could not parse bookmarks: ", e)
-      this.publishStepError(MigrationStepError(
-        message = this.strings.errorBookmarksParseFailure(title),
-        exception = e,
-        attributes = mapOf(
-          Pair("bookTitle", title)
-        ),
-        subject = BOOKMARK
-      ))
+      this.publishStepError(
+        MigrationStepError(
+          message = this.strings.errorBookmarksParseFailure(title),
+          exception = e,
+          attributes = mapOf(
+            Pair("bookTitle", title)
+          ),
+          subject = BOOKMARK
+        )
+      )
       null
     }
   }
@@ -701,7 +746,8 @@ class MigrationFrom3Master(
         val objectMapper = ObjectMapper()
         val result =
           PlayerPositions.parseFromObjectNode(
-            JSONParserUtilities.checkObject(null, objectMapper.readTree(stream)))
+            JSONParserUtilities.checkObject(null, objectMapper.readTree(stream))
+          )
 
         when (result) {
           is PlayerResult.Success -> result.result
@@ -720,8 +766,10 @@ class MigrationFrom3Master(
    */
 
   private fun createAccount(account: LoadedAccount): CreatedAccount? {
-    return when (val taskResult =
-      this.services.createAccount(account.enumeratedAccount.idURI)) {
+    return when (
+      val taskResult =
+        this.services.createAccount(account.enumeratedAccount.idURI)
+    ) {
       is TaskResult.Success -> {
         CreatedAccount(account, taskResult.result)
       }
@@ -790,15 +838,19 @@ class MigrationFrom3Master(
         booksDataDirectory = booksDataDirectory,
         accountSubDirectory = accountAccounts,
         accountFile = accountFile,
-        account = accountData)
+        account = accountData
+      )
     } catch (e: java.lang.Exception) {
       this.logger.error("could not load account: ", e)
-      this.publishStepError(MigrationStepError(
-        message = this.strings.errorAccountLoadFailure(account.idNumeric),
-        attributes = mapOf(
-          Pair("idNumeric", account.idNumeric.toString())
-        ),
-        exception = e))
+      this.publishStepError(
+        MigrationStepError(
+          message = this.strings.errorAccountLoadFailure(account.idNumeric),
+          attributes = mapOf(
+            Pair("idNumeric", account.idNumeric.toString())
+          ),
+          exception = e
+        )
+      )
       null
     }
   }
@@ -816,7 +868,8 @@ class MigrationFrom3Master(
     if (nyplAccounts.isDirectory) {
       this.enumerateAccount(
         accountDirectory = this.oldBaseAccountsDirectory,
-        idNumeric = 0)
+        idNumeric = 0
+      )
         ?.let { enumeratedAccounts.add(it) }
     }
 
@@ -840,7 +893,8 @@ class MigrationFrom3Master(
           val accountDirectory = File(this.oldBaseAccountsDirectory, id.toString())
           this.enumerateAccount(
             accountDirectory = accountDirectory,
-            idNumeric = id)
+            idNumeric = id
+          )
             ?.let { enumeratedAccounts.add(it) }
         }
       }
@@ -858,10 +912,13 @@ class MigrationFrom3Master(
 
     if (idURI == null) {
       this.logger.error("no account provider for id $idNumeric")
-      this.publishStepError(MigrationStepError(
-        message = this.strings.errorUnknownAccountProvider(idNumeric),
-        attributes = mapOf(Pair("idNumeric", idNumeric.toString())),
-        exception = Exception()))
+      this.publishStepError(
+        MigrationStepError(
+          message = this.strings.errorUnknownAccountProvider(idNumeric),
+          attributes = mapOf(Pair("idNumeric", idNumeric.toString())),
+          exception = Exception()
+        )
+      )
       return null
     }
 
@@ -870,7 +927,8 @@ class MigrationFrom3Master(
       baseDirectory = accountDirectory,
       adobeDeviceXML = this.isFileOrNull(adobeDeviceXML),
       idURI = idURI,
-      idNumeric = idNumeric)
+      idNumeric = idNumeric
+    )
   }
 
   private fun pushFileToDeletionQueue(file: File) {
@@ -891,7 +949,6 @@ class MigrationFrom3Master(
    */
 
   private fun determineDiskDataDirectory(context: Context): File {
-
     /*
      * If external storage is mounted and is on a device that doesn't allow
      * the storage to be removed, use the external storage for data.

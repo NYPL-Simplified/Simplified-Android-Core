@@ -5,13 +5,13 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputType
 import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Switch
@@ -20,6 +20,8 @@ import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnimplementedCodeException
@@ -27,12 +29,9 @@ import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountPassword
-import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
-import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
@@ -40,7 +39,13 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
+import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput.EMAIL_ADDRESS
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput.NO_INPUT
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput.NUMBER_PAD
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
@@ -90,13 +95,12 @@ class AccountFragment : Fragment() {
   private lateinit var authenticationAlternatives: ViewGroup
   private lateinit var authenticationAlternativesButtons: ViewGroup
   private lateinit var authenticationBasic: ViewGroup
-  private lateinit var authenticationBasicLogo: Button
-  private lateinit var authenticationBasicPass: EditText
-  private lateinit var authenticationBasicPassLabel: TextView
+  private lateinit var authenticationBasicPass: TextInputEditText
+  private lateinit var authenticationBasicPassLabel: TextInputLayout
   private lateinit var authenticationBasicPassListener: OnTextChangeListener
   private lateinit var authenticationBasicShowPass: CheckBox
-  private lateinit var authenticationBasicUser: EditText
-  private lateinit var authenticationBasicUserLabel: TextView
+  private lateinit var authenticationBasicUser: TextInputEditText
+  private lateinit var authenticationBasicUserLabel: TextInputLayout
   private lateinit var authenticationBasicUserListener: OnTextChangeListener
   private lateinit var authenticationCOPPA: ViewGroup
   private lateinit var authenticationCOPPAOver13: Switch
@@ -121,13 +125,15 @@ class AccountFragment : Fragment() {
   private lateinit var signUpLabel: TextView
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var viewModel: AccountFragmentViewModel
+
   private val cardCreatorResultCode = 101
   private val closing = AtomicBoolean(false)
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
+  private val nyplCardCreatorScheme = "nypl.card-creator"
+
   private var accountSubscription: Disposable? = null
   private var cardCreatorService: CardCreatorServiceType? = null
   private var profileSubscription: Disposable? = null
-  private val nyplCardCreatorScheme = "nypl.card-creator"
 
   companion object {
 
@@ -200,22 +206,20 @@ class AccountFragment : Fragment() {
 
     this.authenticationBasic =
       this.authentication.findViewById(R.id.authBasic)
-    this.authenticationBasicLogo =
-      this.authenticationBasic.findViewById(R.id.authBasicLogo)
     this.authenticationBasicUser =
-      this.authenticationBasic.findViewById(R.id.authBasicUserNameField)
+      this.authenticationBasic.findViewById(R.id.authBasicUserField)
     this.authenticationBasicUserLabel =
-      this.authenticationBasic.findViewById(R.id.authBasicUserNameLabel)
+      this.authenticationBasic.findViewById(R.id.authBasicUserLabel)
     this.authenticationBasicUserListener =
       OnTextChangeListener(this::onBasicUserChanged)
     this.authenticationBasicPass =
-      this.authenticationBasic.findViewById(R.id.authBasicPasswordField)
+      this.authenticationBasic.findViewById(R.id.authBasicPassField)
     this.authenticationBasicPassLabel =
-      this.authenticationBasic.findViewById(R.id.authBasicPasswordLabel)
+      this.authenticationBasic.findViewById(R.id.authBasicPassLabel)
     this.authenticationBasicPassListener =
       OnTextChangeListener(this::onBasicPasswordChanged)
     this.authenticationBasicShowPass =
-      this.authenticationBasic.findViewById(R.id.authBasicPasswordShow)
+      this.authenticationBasic.findViewById(R.id.authBasicShowPass)
 
     this.authenticationCOPPA.visibility = View.INVISIBLE
 
@@ -291,16 +295,11 @@ class AccountFragment : Fragment() {
       }
 
       is AccountProviderAuthenticationDescription.Basic -> {
-        val eulaOk =
-          this.determineEULAIsSatisfied()
-        val noUserRequired =
-          auth.keyboard == KeyboardInput.NO_INPUT
-        val noPasswordRequired =
-          auth.passwordKeyboard == KeyboardInput.NO_INPUT
-        val userOk =
-          this.authenticationBasicUser.text.isNotBlank() || noUserRequired
-        val passOk =
-          this.authenticationBasicPass.text.isNotBlank() || noPasswordRequired
+        val eulaOk = this.determineEULAIsSatisfied()
+        val noUserRequired = auth.keyboard == NO_INPUT
+        val noPasswordRequired = auth.passwordKeyboard == NO_INPUT
+        val userOk = !this.authenticationBasicUser.text.isNullOrBlank() || noUserRequired
+        val passOk = !this.authenticationBasicPass.text.isNullOrBlank() || noPasswordRequired
 
         this.logger.debug("login: eula ok: {}, user ok: {}, pass ok: {}", eulaOk, userOk, passOk)
         if (userOk && passOk && eulaOk) {
@@ -344,7 +343,6 @@ class AccountFragment : Fragment() {
      */
 
     return if (cardCreatorURI != null) {
-
       /*
        * Unless the URI refers to the NYPL Card Creator and we don't have that enabled
        * in this build.
@@ -465,13 +463,7 @@ class AccountFragment : Fragment() {
      */
 
     this.authenticationBasicShowPass.setOnCheckedChangeListener { _, isChecked ->
-      if (isChecked) {
-        this.authenticationBasicPass.transformationMethod =
-          null
-      } else {
-        this.authenticationBasicPass.transformationMethod =
-          PasswordTransformationMethod.getInstance()
-      }
+      setPasswordVisible(isChecked)
     }
 
     /*
@@ -649,9 +641,11 @@ class AccountFragment : Fragment() {
   private fun onProfileEvent(event: ProfileEvent) {
     return when (event) {
       is ProfileUpdated -> {
-        this.uiThread.runOnUIThread(Runnable {
-          this.reconfigureAccountUI()
-        })
+        this.uiThread.runOnUIThread(
+          Runnable {
+            this.reconfigureAccountUI()
+          }
+        )
       }
       else -> {
       }
@@ -661,6 +655,9 @@ class AccountFragment : Fragment() {
   @UiThread
   private fun reconfigureAccountUI() {
     this.uiThread.checkIsUIThread()
+
+    // Sanity check; may not be attached!
+    if (context == null) return
 
     val isPermitted = this.account.preferences.bookmarkSyncingPermitted
     val isSupported = this.account.provider.supportsSimplyESynchronization
@@ -680,45 +677,46 @@ class AccountFragment : Fragment() {
         this.authenticationCOPPA.visibility = View.INVISIBLE
         this.authenticationBasic.visibility = View.VISIBLE
 
-        /*
-         * Configure the presence of the individual fields based on keyboard input values
-         * given in the authentication document.
-         *
-         * TODO: Add the extra input validation for the more precise types such as NUMBER_PAD.
-         */
+        // Set input labels
+        this.authenticationBasicUserLabel.hint =
+          auth.labels["LOGIN"] ?: getString(R.string.accountUserName)
+        this.authenticationBasicPassLabel.hint =
+          auth.labels["PASSWORD"] ?: getString(R.string.accountPassword)
+        this.authenticationBasicShowPass.text =
+          getString(
+            R.string.accountPasswordShow,
+            (auth.labels["PASSWORD"] ?: getString(R.string.accountPassword))
+          )
 
-        when (auth.keyboard) {
-          KeyboardInput.NO_INPUT -> {
-            this.authenticationBasicUserLabel.visibility = View.GONE
-            this.authenticationBasicUser.visibility = View.GONE
-          }
-          KeyboardInput.DEFAULT,
-          KeyboardInput.EMAIL_ADDRESS,
-          KeyboardInput.NUMBER_PAD -> {
-            this.authenticationBasicUserLabel.visibility = View.VISIBLE
-            this.authenticationBasicUser.visibility = View.VISIBLE
-          }
+        // Set input types
+        this.logger.debug("Setting {} for user input type", auth.keyboard)
+        this.authenticationBasicUser.inputType = when (auth.keyboard) {
+          DEFAULT, NO_INPUT ->
+            (InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL)
+          EMAIL_ADDRESS ->
+            (InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
+          NUMBER_PAD ->
+            (InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_NORMAL)
         }
 
-        when (auth.passwordKeyboard) {
-          KeyboardInput.NO_INPUT -> {
-            this.authenticationBasicPassLabel.visibility = View.GONE
-            this.authenticationBasicPass.visibility = View.GONE
-            this.authenticationBasicShowPass.visibility = View.GONE
-          }
-          KeyboardInput.DEFAULT,
-          KeyboardInput.EMAIL_ADDRESS,
-          KeyboardInput.NUMBER_PAD -> {
-            this.authenticationBasicPassLabel.visibility = View.VISIBLE
-            this.authenticationBasicPass.visibility = View.VISIBLE
-            this.authenticationBasicShowPass.visibility = View.VISIBLE
-          }
+        this.logger.debug("Setting {} for password input type", auth.passwordKeyboard)
+        this.authenticationBasicPass.inputType = when (auth.passwordKeyboard) {
+          DEFAULT, NO_INPUT, EMAIL_ADDRESS ->
+            (InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
+          NUMBER_PAD ->
+            (InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD)
         }
 
-        this.authenticationBasicUserLabel.text =
-          auth.labels["LOGIN"] ?: this.authenticationBasicUserLabel.text
-        this.authenticationBasicPassLabel.text =
-          auth.labels["PASSWORD"] ?: this.authenticationBasicPassLabel.text
+        // Toggle visibility of fields
+        this.authenticationBasicUserLabel.visibility =
+          if (auth.keyboard == NO_INPUT) View.GONE else View.VISIBLE
+        this.authenticationBasicPassLabel.visibility =
+          if (auth.passwordKeyboard == NO_INPUT) View.GONE else View.VISIBLE
+        this.authenticationBasicShowPass.visibility =
+          if (auth.passwordKeyboard == NO_INPUT) View.GONE else View.VISIBLE
+
+        // Reset password visibility
+        setPasswordVisible(this.authenticationBasicShowPass.isChecked)
       }
 
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
@@ -739,10 +737,12 @@ class AccountFragment : Fragment() {
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginProgress.visibility = View.INVISIBLE
         this.loginProgressText.text = ""
-        this.setLoginButtonStatus(AsLoginButtonEnabled {
-          this.loginFormLock()
-          this.tryLogin()
-        })
+        this.setLoginButtonStatus(
+          AsLoginButtonEnabled {
+            this.loginFormLock()
+            this.tryLogin()
+          }
+        )
         this.loginFormUnlock()
       }
 
@@ -753,10 +753,12 @@ class AccountFragment : Fragment() {
         this.loginFormLock()
 
         if (loginState.cancellable) {
-          this.setLoginButtonStatus(AsCancelButtonEnabled {
-            // We don't really support this yet.
-            throw UnimplementedCodeException()
-          })
+          this.setLoginButtonStatus(
+            AsCancelButtonEnabled {
+              // We don't really support this yet.
+              throw UnimplementedCodeException()
+            }
+          )
         } else {
           this.setLoginButtonStatus(AsCancelButtonDisabled)
         }
@@ -767,14 +769,16 @@ class AccountFragment : Fragment() {
         this.loginProgressText.text = loginState.status
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginFormLock()
-        this.setLoginButtonStatus(AsCancelButtonEnabled {
-          this.profilesController.profileAccountLogin(
-            OAuthWithIntermediaryCancel(
-              accountId = this.account.id,
-              description = loginState.description as AccountProviderAuthenticationDescription.OAuthWithIntermediary
+        this.setLoginButtonStatus(
+          AsCancelButtonEnabled {
+            this.profilesController.profileAccountLogin(
+              OAuthWithIntermediaryCancel(
+                accountId = this.account.id,
+                description = loginState.description as AccountProviderAuthenticationDescription.OAuthWithIntermediary
+              )
             )
-          )
-        })
+          }
+        )
       }
 
       is AccountLoginFailed -> {
@@ -782,10 +786,12 @@ class AccountFragment : Fragment() {
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginFormUnlock()
         this.cancelImageButtonLoading()
-        this.setLoginButtonStatus(AsLoginButtonEnabled {
-          this.loginFormLock()
-          this.tryLogin()
-        })
+        this.setLoginButtonStatus(
+          AsLoginButtonEnabled {
+            this.loginFormLock()
+            this.tryLogin()
+          }
+        )
         this.loginButtonErrorDetails.visibility = View.VISIBLE
         this.loginButtonErrorDetails.setOnClickListener {
           this.openErrorPage(loginState.taskResult.steps)
@@ -815,17 +821,22 @@ class AccountFragment : Fragment() {
 
         this.loginFormLock()
         this.loginButtonErrorDetails.visibility = View.GONE
-        this.setLoginButtonStatus(AsLogoutButtonEnabled {
-          this.loginFormLock()
-          this.tryLogout()
-        })
+        this.setLoginButtonStatus(
+          AsLogoutButtonEnabled {
+            this.loginFormLock()
+            this.tryLogout()
+          }
+        )
         this.authenticationAlternativesHide()
 
         if (this.viewModel.loginExplicitlyRequested && this.parameters.closeOnLoginSuccess) {
           this.logger.debug("scheduling explicit close of account fragment")
-          this.uiThread.runOnUIThreadDelayed({
-            this.explicitlyClose()
-          }, 2_000L)
+          this.uiThread.runOnUIThreadDelayed(
+            {
+              this.explicitlyClose()
+            },
+            2_000L
+          )
           return
         } else {
           // Doing nothing.
@@ -865,10 +876,12 @@ class AccountFragment : Fragment() {
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.cancelImageButtonLoading()
         this.loginFormLock()
-        this.setLoginButtonStatus(AsLogoutButtonEnabled {
-          this.loginFormLock()
-          this.tryLogout()
-        })
+        this.setLoginButtonStatus(
+          AsLogoutButtonEnabled {
+            this.loginFormLock()
+            this.tryLogout()
+          }
+        )
 
         this.loginButtonErrorDetails.visibility = View.VISIBLE
         this.loginButtonErrorDetails.setOnClickListener {
@@ -876,6 +889,19 @@ class AccountFragment : Fragment() {
         }
       }
     }
+  }
+
+  private fun setPasswordVisible(visible: Boolean) {
+    this.authenticationBasicPass.transformationMethod =
+      if (visible) {
+        null
+      } else {
+        PasswordTransformationMethod.getInstance()
+      }
+
+    // Reset the cursor position
+    val length = this.authenticationBasicPass.length()
+    this.authenticationBasicPass.setSelection(length)
   }
 
   private fun cancelImageButtonLoading() {
@@ -915,6 +941,7 @@ class AccountFragment : Fragment() {
       AsLoginButtonDisabled -> {
         this.loginButton.setText(R.string.accountLogin)
         this.signUpLabel.setText(R.string.accountCardCreatorLabel)
+        this.signUpLabel.isEnabled = true
         this.loginButton.isEnabled = false
       }
       is AsCancelButtonEnabled -> {
@@ -924,13 +951,16 @@ class AccountFragment : Fragment() {
       }
       is AsLogoutButtonEnabled -> {
         this.loginButton.setText(R.string.accountLogout)
-        this.signUpLabel.setText(R.string.accountWantChildCard)
         this.loginButton.isEnabled = true
+        this.signUpButton.isEnabled = isNypl()
+        this.signUpLabel.isEnabled = isNypl()
+        if (isNypl()) this.signUpLabel.setText(R.string.accountWantChildCard)
+        this.signUpLabel.isEnabled = isNypl()
         this.loginButton.setOnClickListener { status.onClick.invoke() }
       }
       AsLogoutButtonDisabled -> {
         this.loginButton.setText(R.string.accountLogout)
-        this.signUpLabel.setText(R.string.accountWantChildCard)
+        if (isNypl()) this.signUpLabel.setText(R.string.accountWantChildCard)
         this.loginButton.isEnabled = false
       }
       AsCancelButtonDisabled -> {
@@ -938,6 +968,18 @@ class AccountFragment : Fragment() {
         this.loginButton.isEnabled = false
       }
     }
+  }
+
+  /**
+   * Returns if the user is viewing the NYPL account
+   */
+  private fun isNypl(): Boolean {
+    var isNypl = false
+    val cardCreatorURI = this.account.provider.cardCreatorURI
+    if (cardCreatorURI != null) {
+      isNypl = cardCreatorURI.scheme == this.nyplCardCreatorScheme
+    }
+    return isNypl
   }
 
   private fun loadAuthenticationLogoIfNecessary(
@@ -951,20 +993,23 @@ class AccountFragment : Fragment() {
       this.imageLoader.loader.load(uri.toString())
         .fit()
         .tag(this.imageButtonLoadingTag)
-        .into(view, object : com.squareup.picasso.Callback {
-          override fun onSuccess() {
-            this@AccountFragment.uiThread.runOnUIThread {
-              onSuccess.invoke()
+        .into(
+          view,
+          object : com.squareup.picasso.Callback {
+            override fun onSuccess() {
+              this@AccountFragment.uiThread.runOnUIThread {
+                onSuccess.invoke()
+              }
             }
-          }
 
-          override fun onError(e: Exception) {
-            this@AccountFragment.logger.error("failed to load authentication logo: ", e)
-            this@AccountFragment.uiThread.runOnUIThread {
-              view.visibility = View.GONE
+            override fun onError(e: Exception) {
+              this@AccountFragment.logger.error("failed to load authentication logo: ", e)
+              this@AccountFragment.uiThread.runOnUIThread {
+                view.visibility = View.GONE
+              }
             }
           }
-        })
+        )
     }
   }
 
@@ -974,7 +1019,7 @@ class AccountFragment : Fragment() {
 
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.errorReportEmail,
+        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
         body = "",
         subject = "[simplye-error-report]",
         attributes = sortedMapOf(),
@@ -1013,6 +1058,8 @@ class AccountFragment : Fragment() {
     val loginSatisfied = this.determineLoginIsSatisfied()
     this.setLoginButtonStatus(loginSatisfied)
     this.authenticationAlternativesShow()
+    this.signUpButton.isEnabled = true
+    this.signUpLabel.isEnabled = true
   }
 
   private fun authenticationAlternativesMake() {
@@ -1039,9 +1086,11 @@ class AccountFragment : Fragment() {
     return when (accountEvent) {
       is AccountEventLoginStateChanged ->
         if (accountEvent.accountID == this.parameters.accountId) {
-          this.uiThread.runOnUIThread(Runnable {
-            this.reconfigureAccountUI()
-          })
+          this.uiThread.runOnUIThread(
+            Runnable {
+              this.reconfigureAccountUI()
+            }
+          )
         } else {
         }
       else -> {
@@ -1179,7 +1228,6 @@ class AccountFragment : Fragment() {
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     if (requestCode == this.cardCreatorResultCode) {
-
       when (resultCode) {
         Activity.RESULT_OK -> {
           if (data != null) {

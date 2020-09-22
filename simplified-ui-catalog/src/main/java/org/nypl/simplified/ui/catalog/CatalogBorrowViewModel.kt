@@ -253,9 +253,15 @@ class CatalogBorrowViewModel(
     } catch (e: Throwable) {
       this.logger.error("failed to start borrow task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e) { ex ->
-          BookStatusDownloadErrorDetails.UnexpectedException(ex)
-        }))
+        BookWithStatus(
+          book,
+          BookStatus.FailedLoan(
+            book.id,
+            this.failMinimal(e) { ex ->
+              BookStatusDownloadErrorDetails.UnexpectedException(ex)
+            }
+          )
+        )
       )
     }
   }
@@ -273,9 +279,15 @@ class CatalogBorrowViewModel(
     } catch (e: Throwable) {
       this.logger.error("failed to start revocation task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(book, BookStatus.FailedRevoke(book.id, this.failMinimal(e) { ex ->
-          BookStatusRevokeErrorDetails.UnexpectedException(ex)
-        }))
+        BookWithStatus(
+          book,
+          BookStatus.FailedRevoke(
+            book.id,
+            this.failMinimal(e) { ex ->
+              BookStatusRevokeErrorDetails.UnexpectedException(ex)
+            }
+          )
+        )
       )
     }
   }
@@ -294,9 +306,15 @@ class CatalogBorrowViewModel(
     } catch (e: Throwable) {
       this.logger.error("failed to start borrow task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e) { ex ->
-          BookStatusDownloadErrorDetails.UnexpectedException(ex)
-        }))
+        BookWithStatus(
+          book,
+          BookStatus.FailedLoan(
+            book.id,
+            this.failMinimal(e) { ex ->
+              BookStatusDownloadErrorDetails.UnexpectedException(ex)
+            }
+          )
+        )
       )
     }
   }

@@ -66,7 +66,8 @@ class ErrorPageFragment : Fragment() {
         this.listener = activity
       } else {
         throw IllegalStateException(
-          "The activity hosting this fragment must implement $className")
+          "The activity hosting this fragment must implement $className"
+        )
       }
     }
   }
@@ -76,7 +77,6 @@ class ErrorPageFragment : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-
     val viewRoot =
       inflater.inflate(R.layout.error_page, container, false)
 
@@ -89,7 +89,7 @@ class ErrorPageFragment : Fragment() {
 
     this.parameters =
       this.arguments!!.getSerializable(PARAMETERS_ID)
-        as ErrorPageParameters<PresentableErrorType>
+      as ErrorPageParameters<PresentableErrorType>
 
     if (parameters.attributes.isEmpty()) {
       this.errorDetails.visibility = View.GONE
@@ -135,7 +135,8 @@ class ErrorPageFragment : Fragment() {
         toolbar.subtitle = ""
       } else {
         throw IllegalStateException(
-          "The activity hosting this fragment must implement $className")
+          "The activity hosting this fragment must implement $className"
+        )
       }
     }
 

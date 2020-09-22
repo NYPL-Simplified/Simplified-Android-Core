@@ -3,8 +3,20 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
   android:layout_height="@dimen/catalogFeedCellHeight">
-  <include layout="@layout/book_cell_idle" />
-  <include layout="@layout/book_cell_in_progress" />
-  <include layout="@layout/book_cell_corrupt" />
-  <include layout="@layout/book_cell_error" />
+
+  <include
+    layout="@layout/book_cell_idle"
+    android:visibility="gone" />
+
+  <include
+    layout="@layout/book_cell_in_progress"
+    android:visibility="gone" />
+
+  <include
+    layout="@layout/book_cell_corrupt"
+    android:visibility="gone" />
+
+  <include
+    layout="@layout/book_cell_error"
+    android:visibility="gone" />
 </FrameLayout>

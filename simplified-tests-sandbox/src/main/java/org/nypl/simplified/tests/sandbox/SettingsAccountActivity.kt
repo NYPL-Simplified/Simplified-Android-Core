@@ -88,10 +88,24 @@ class SettingsAccountActivity : AppCompatActivity(), ServiceDirectoryProviderTyp
 
     this.services = MutableServiceDirectory()
     val buildConfiguration = object : BuildConfigurationServiceType {
+      override val allowAccountsAccess: Boolean
+        get() = true
+      override val allowAccountsRegistryAccess: Boolean
+        get() = true
+      override val showDebugBookDetailStatus: Boolean
+        get() = true
+      override val showSettingsTab: Boolean
+        get() = true
+      override val showHoldsTab: Boolean
+        get() = true
       override val vcsCommit: String =
         "abcd"
-      override val errorReportEmail: String =
-        "errors@example.com"
+      override val simplifiedVersion: String
+        get() = "zyxw"
+      override val supportErrorReportEmailAddress: String
+        get() = "errors@example.com"
+      override val supportErrorReportSubject: String
+        get() = "[error]"
       override val oauthCallbackScheme: BuildConfigOAuthScheme =
         BuildConfigOAuthScheme("simplified-sandbox-oauth")
     }

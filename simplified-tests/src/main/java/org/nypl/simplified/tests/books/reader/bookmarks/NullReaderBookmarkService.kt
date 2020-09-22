@@ -30,10 +30,14 @@ class NullReaderBookmarkService(
   }
 
   override fun bookmarkLoad(accountID: AccountID, book: BookID): FluentFuture<ReaderBookmarks> {
-    return FluentFuture.from(Futures.immediateFuture(
-      ReaderBookmarks(
-        lastRead = null,
-        bookmarks = listOf())))
+    return FluentFuture.from(
+      Futures.immediateFuture(
+        ReaderBookmarks(
+          lastRead = null,
+          bookmarks = listOf()
+        )
+      )
+    )
   }
 
   companion object : ReaderBookmarkServiceProviderType {

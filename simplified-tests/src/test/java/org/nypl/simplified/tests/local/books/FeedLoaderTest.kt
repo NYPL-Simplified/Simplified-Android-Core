@@ -19,7 +19,6 @@ import java.net.URI
 class FeedLoaderTest : FeedLoaderContract() {
 
   override fun createFeedLoader(exec: ListeningExecutorService): org.nypl.simplified.feeds.api.FeedLoaderType {
-
     val entryParser =
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
     val parser =

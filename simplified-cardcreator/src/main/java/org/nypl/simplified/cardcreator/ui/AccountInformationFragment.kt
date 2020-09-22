@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -38,6 +39,8 @@ class AccountInformationFragment : Fragment() {
   private val usernameAvailable = "available-username"
 
   private val viewModel: UsernameViewModel by viewModels()
+
+  private var dialog: AlertDialog? = null
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -87,47 +90,59 @@ class AccountInformationFragment : Fragment() {
       navController.popBackStack()
     }
 
-    viewModel.validateUsernameResponse.observe(viewLifecycleOwner, Observer { response ->
-      if (!back) {
-        showLoading(false)
-        if (response.type == usernameAvailable) {
-          logger.debug("Username is valid")
-          Cache(requireContext()).setAccountInformation(binding.usernameEt.text.toString(),
-            binding.pinEt.text.toString())
-          nextAction = AccountInformationFragmentDirections.actionNext()
-          navController.navigate(nextAction)
-        } else {
-          Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-        }
-      }
-    })
-
-    viewModel.apiError.observe(viewLifecycleOwner, Observer {
-      showLoading(false)
-      var error = getString(R.string.validate_username_general_error)
-      if (it != null) {
-        error = getString(R.string.validate_username_error, it)
-      }
-      val dialogBuilder = AlertDialog.Builder(requireContext())
-      dialogBuilder.setMessage(error)
-        .setCancelable(false)
-        .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-          validateUsername()
-        }
-        .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-          dialog.cancel()
-        }
-      val alert = dialogBuilder.create()
-      alert.show()
-    })
+    restoreViewData()
   }
 
   private fun validateUsername() {
     showLoading(true)
+    viewModel.validateUsernameResponse.observe(
+      viewLifecycleOwner,
+      Observer { response ->
+        if (!back) {
+          showLoading(false)
+          if (response.type == usernameAvailable) {
+            logger.debug("Username is valid")
+            Cache(requireContext()).setAccountInformation(
+              binding.usernameEt.text.toString(),
+              binding.pinEt.text.toString()
+            )
+            nextAction = AccountInformationFragmentDirections.actionNext()
+            navController.navigate(nextAction)
+          } else {
+            Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+          }
+        }
+      }
+    )
+
+    viewModel.apiError.observe(
+      viewLifecycleOwner,
+      Observer {
+        showLoading(false)
+        var error = getString(R.string.validate_username_general_error)
+        if (it != null) {
+          error = getString(R.string.validate_username_error, it)
+        }
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setMessage(error)
+          .setCancelable(false)
+          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+            validateUsername()
+          }
+          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+            dialog.cancel()
+          }
+        if (dialog == null) {
+          dialog = dialogBuilder.create()
+        }
+        dialog?.show()
+      }
+    )
     viewModel.validateUsername(
       binding.usernameEt.text.toString(),
       requireActivity().intent.extras.getString("username"),
-      requireActivity().intent.extras.getString("password"))
+      requireActivity().intent.extras.getString("password")
+    )
   }
 
   private fun validateForm() {
@@ -151,5 +166,19 @@ class AccountInformationFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
+  }
+
+  /**
+   * Restores cached data
+   */
+  private fun restoreViewData() {
+    val accountInformation = Cache(requireContext()).getAccountInformation()
+    binding.pinEt.setText(accountInformation.pin, TextView.BufferType.EDITABLE)
+    binding.usernameEt.setText(accountInformation.username, TextView.BufferType.EDITABLE)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    dialog?.dismiss()
   }
 }

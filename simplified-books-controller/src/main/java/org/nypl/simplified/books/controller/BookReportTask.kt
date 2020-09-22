@@ -27,14 +27,16 @@ class BookReportTask(
         "[{}]: running {} for {}",
         this.account.id.uuid,
         this.reportType,
-        this.feedEntry.bookID.brief())
+        this.feedEntry.bookID.brief()
+      )
 
       val issuesURIOpt = this.feedEntry.feedEntry.issues
       if (!(issuesURIOpt is Some<URI>)) {
         this.logger.debug(
           "[{}]: no issues URI for {}, giving up",
           this.account.id.uuid,
-          this.feedEntry.bookID.brief())
+          this.feedEntry.bookID.brief()
+        )
         return
       }
 
@@ -52,36 +54,47 @@ class BookReportTask(
           authenticatedHTTP,
           issuesURI,
           serializeProblem(),
-          "application/problem+json")
+          "application/problem+json"
+        )
 
-      result.match<Unit, Exception>({ error ->
-        HTTPProblemReportLogging.logError(
-          this.logger,
-          issuesURI,
-          error.message,
-          error.status,
-          error.problemReport)
-        Unit
-      }, { error ->
-        this.logger.error("[{}]: http exception for {}: ",
-          this.account.id.uuid,
-          this.feedEntry.bookID.brief(),
-          error.error)
-        Unit
-      }, { ok ->
-        this.logger.debug("[{}]: succeeded for {} ({} {})",
-          this.account.id.uuid,
-          this.feedEntry.bookID.brief(),
-          ok.status,
-          ok.message)
-        Unit
-      })
+      result.match<Unit, Exception>(
+        { error ->
+          HTTPProblemReportLogging.logError(
+            this.logger,
+            issuesURI,
+            error.message,
+            error.status,
+            error.problemReport
+          )
+          Unit
+        },
+        { error ->
+          this.logger.error(
+            "[{}]: http exception for {}: ",
+            this.account.id.uuid,
+            this.feedEntry.bookID.brief(),
+            error.error
+          )
+          Unit
+        },
+        { ok ->
+          this.logger.debug(
+            "[{}]: succeeded for {} ({} {})",
+            this.account.id.uuid,
+            this.feedEntry.bookID.brief(),
+            ok.status,
+            ok.message
+          )
+          Unit
+        }
+      )
     } catch (e: Exception) {
       this.logger.error(
         "[{}]: failed for {}: ",
         this.account.id.uuid,
         this.feedEntry.bookID.brief(),
-        e)
+        e
+      )
       throw e
     }
   }

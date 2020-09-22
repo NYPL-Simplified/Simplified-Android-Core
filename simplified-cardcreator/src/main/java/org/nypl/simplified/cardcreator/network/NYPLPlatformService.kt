@@ -47,7 +47,7 @@ internal interface NYPLPlatformService {
   @POST("patrons/dependents")
   suspend fun createJuvenilePatronWithBarcodeParent(
     @Body juvenilePatron: BarcodeParent
-  ): JuvenilePatronResponse
+  ): Response<JuvenilePatronResponse>
 
   @POST("patrons/dependents")
   suspend fun createJuvenilePatronWithUsernameParent(
@@ -56,7 +56,6 @@ internal interface NYPLPlatformService {
 
   companion object {
     operator fun invoke(token: String): NYPLPlatformService {
-
       val authInterceptor = Interceptor {
         val request = it.request().newBuilder()
           .addHeader("Authorization", "Bearer $token")

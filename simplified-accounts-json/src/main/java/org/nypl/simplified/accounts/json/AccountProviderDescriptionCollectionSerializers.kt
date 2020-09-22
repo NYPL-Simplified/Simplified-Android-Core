@@ -25,6 +25,7 @@ class AccountProviderDescriptionCollectionSerializers : AccountProviderDescripti
       uri = uri,
       stream = stream,
       document = document,
-      serializers = this.serializers)
+      serializers = this.serializers
+    )
   }
 }

@@ -31,20 +31,30 @@ class ErrorPageActivity : AppCompatActivity(), ErrorPageListenerType {
     taskSteps.add(
       TaskStep(
         "Rearranging furniture.",
-        TaskStepSucceeded("Furniture successfully rearranged.")))
+        TaskStepSucceeded("Furniture successfully rearranged.")
+      )
+    )
     taskSteps.add(
       TaskStep(
         "Shampooing carpet.",
-        TaskStepSucceeded("Carpet successfully cleaned.")))
+        TaskStepSucceeded("Carpet successfully cleaned.")
+      )
+    )
     taskSteps.add(
       TaskStep(
         "Sorting cornflakes alphabetically.",
-        TaskStepSucceeded("Cornflakes successfully filed under 'C'.")))
+        TaskStepSucceeded("Cornflakes successfully filed under 'C'.")
+      )
+    )
     taskSteps.add(
       TaskStep(
         "Ironing clothes.",
-        TaskStepFailed("Ironing failed: The ironing board did not survive the attempt.",
-          ExampleError("Ouch"), Exception())))
+        TaskStepFailed(
+          "Ironing failed: The ironing board did not survive the attempt.",
+          ExampleError("Ouch"), Exception()
+        )
+      )
+    )
 
     val attributes =
       sortedMapOf(

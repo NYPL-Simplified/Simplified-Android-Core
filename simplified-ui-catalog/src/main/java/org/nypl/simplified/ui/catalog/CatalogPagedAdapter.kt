@@ -21,7 +21,8 @@ class CatalogPagedAdapter(
   private val context: FragmentActivity,
   private val navigation: () -> CatalogNavigationControllerType,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
-  private val services: ServiceDirectoryType
+  private val services: ServiceDirectoryType,
+  private val ownership: CatalogFeedOwnership
 ) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
 
   private val logger =
@@ -47,7 +48,8 @@ class CatalogPagedAdapter(
       onBookSelected = this.onBookSelected,
       parent = LayoutInflater.from(parent.context).inflate(R.layout.book_cell, parent, false),
       registrySubscriptions = this.registrySubscriptions,
-      services = this.services
+      services = this.services,
+      ownership = this.ownership
     )
   }
 

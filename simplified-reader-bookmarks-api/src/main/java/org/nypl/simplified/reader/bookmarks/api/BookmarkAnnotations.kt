@@ -65,7 +65,6 @@ object BookmarkAnnotations {
     objectMapper: ObjectMapper,
     annotation: BookmarkAnnotation
   ): Bookmark {
-
     val locationJSON =
       BookLocationJSON.deserializeFromString(objectMapper, annotation.target.selector.value)
 
@@ -75,7 +74,6 @@ object BookmarkAnnotations {
       kind = BookmarkKind.ofMotivation(annotation.motivation),
       time = ISODateTimeFormat.dateTimeParser().parseLocalDateTime(annotation.body.timestamp),
       chapterTitle = annotation.body.chapterTitle ?: "",
-      chapterProgress = annotation.body.chapterProgress?.toDouble() ?: 0.0,
       bookProgress = annotation.body.bookProgress?.toDouble() ?: 0.0,
       uri = if (annotation.id != null) URI.create(annotation.id) else null,
       deviceID = annotation.body.device
@@ -86,7 +84,6 @@ object BookmarkAnnotations {
     objectMapper: ObjectMapper,
     bookmark: Bookmark
   ): BookmarkAnnotation {
-
     val bodyAnnotation =
       BookmarkAnnotationBodyNode(
         timestamp = bookmark.time.toString(),

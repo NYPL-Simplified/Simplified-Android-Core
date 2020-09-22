@@ -1,15 +1,16 @@
 package org.nypl.simplified.books.book_database
 
 import android.content.Context
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
-import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookFormats
-import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -64,7 +65,7 @@ internal class BookDatabaseEntry internal constructor(
 
   private val formatHandleConstructors:
     EnumMap<BookFormats.BookFormatDefinition, DatabaseBookFormatHandleConstructor> =
-    EnumMap(BookFormats.BookFormatDefinition::class.java)
+      EnumMap(BookFormats.BookFormatDefinition::class.java)
 
   init {
     for (format in BookFormats.BookFormatDefinition.values()) {
@@ -74,23 +75,27 @@ internal class BookDatabaseEntry internal constructor(
             DatabaseBookFormatHandleConstructor(
               classType = DatabaseFormatHandleEPUB::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { params -> DatabaseFormatHandleEPUB(params) })
+              constructor = { params -> DatabaseFormatHandleEPUB(params) }
+            )
           }
           BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO -> {
             DatabaseBookFormatHandleConstructor(
               classType = DatabaseFormatHandleAudioBook::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { params -> DatabaseFormatHandleAudioBook(params) })
+              constructor = { params -> DatabaseFormatHandleAudioBook(params) }
+            )
           }
           BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF -> {
             DatabaseBookFormatHandleConstructor(
               classType = DatabaseFormatHandlePDF::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { params -> DatabaseFormatHandlePDF(params) })
+              constructor = { params -> DatabaseFormatHandlePDF(params) }
+            )
           }
         }
     }
 
+    val objectMapper = ObjectMapper()
     synchronized(this.bookLock) {
       this.bookRef.entry.acquisitions.forEach { acquisition ->
         createFormatHandleIfRequired(
@@ -101,7 +106,9 @@ internal class BookDatabaseEntry internal constructor(
           ownerDirectory = this.bookDir,
           onUpdate = { format -> this.onFormatUpdated(format) },
           existingFormats = this.formatHandlesRef,
-          contentTypes = acquisition.availableFinalContentTypes())
+          contentTypes = acquisition.availableFinalContentTypes(),
+          objectMapper = objectMapper
+        )
       }
 
       this.bookRef =
@@ -113,7 +120,8 @@ internal class BookDatabaseEntry internal constructor(
     synchronized(this.bookLock) {
       LOG.debug("onFormatUpdated: {}", format.javaClass.canonicalName)
       this.bookRef = this.bookRef.copy(
-        formats = this.formatHandles.map { handle -> handle.format })
+        formats = this.formatHandles.map { handle -> handle.format }
+      )
     }
   }
 
@@ -122,7 +130,6 @@ internal class BookDatabaseEntry internal constructor(
 
   @Throws(BookDatabaseException::class)
   override fun writeOPDSEntry(opdsEntry: OPDSAcquisitionFeedEntry) {
-
     synchronized(this.bookLock) {
       Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
@@ -136,7 +143,9 @@ internal class BookDatabaseEntry internal constructor(
           fileMeta,
           fileMetaTmp,
           JSONSerializerUtilities.serializeToString(
-            this.serializer.serializeFeedEntry(opdsEntry)))
+            this.serializer.serializeFeedEntry(opdsEntry)
+          )
+        )
 
         this.bookRef = this.bookRef.copy(entry = opdsEntry)
       } catch (e: IOException) {
@@ -191,13 +200,28 @@ internal class BookDatabaseEntry internal constructor(
     synchronized(this.bookLock) {
       Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
-      val fileCover = File(this.bookDir, "cover.jpg")
-      val fileCoverTmp = File(this.bookDir, "cover.jpg.tmp")
+      val fileCover = File(this.bookDir, COVER_FILENAME)
+      val fileCoverTmp = File(this.bookDir, "$COVER_FILENAME.tmp")
 
       FileUtilities.fileCopy(file, fileCoverTmp)
       FileUtilities.fileRename(fileCoverTmp, fileCover)
 
       this.bookRef = this.bookRef.copy(cover = fileCover)
+    }
+  }
+
+  @Throws(IOException::class)
+  override fun setThumbnail(file: File) {
+    synchronized(this.bookLock) {
+      Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
+
+      val fileThumb = File(this.bookDir, THUMB_FILENAME)
+      val fileThumbTmp = File(this.bookDir, "$THUMB_FILENAME.tmp")
+
+      FileUtilities.fileCopy(file, fileThumbTmp)
+      FileUtilities.fileRename(fileThumbTmp, fileThumb)
+
+      this.bookRef = this.bookRef.copy(thumbnail = fileThumb)
     }
   }
 
@@ -218,6 +242,8 @@ internal class BookDatabaseEntry internal constructor(
   }
 
   companion object {
+    const val COVER_FILENAME = "cover.jpg"
+    const val THUMB_FILENAME = "thumb.jpg"
 
     /**
      * Create a format handle if required. This checks to see if there is a content type that is
@@ -227,6 +253,7 @@ internal class BookDatabaseEntry internal constructor(
     private fun createFormatHandleIfRequired(
       context: Context,
       logger: Logger,
+      objectMapper: ObjectMapper,
       constructors: EnumMap<BookFormats.BookFormatDefinition, DatabaseBookFormatHandleConstructor>,
       ownerDirectory: File,
       owner: BookDatabaseEntryType,
@@ -235,29 +262,36 @@ internal class BookDatabaseEntry internal constructor(
       contentTypes: Set<MIMEType>
     ) {
       for (contentType in contentTypes) {
-        for (formatDefinition in constructors.keys) {
-          val constructor = constructors[formatDefinition]!!
-          if (formatDefinition.supportedContentTypes().contains(contentType)) {
-            if (!existingFormats.containsKey(constructor.classType)) {
-              val bookID = owner.book.id
-              logger.debug("[{}]: instantiating format {} for content type {}",
-                bookID.brief(),
-                constructor.classType.simpleName,
-                contentType)
-
-              val params =
-                DatabaseFormatHandleParameters(
-                  context = context,
-                  bookID = owner.book.id,
-                  directory = ownerDirectory,
-                  onUpdated = onUpdate,
-                  entry = owner,
-                  contentType = contentType
-                )
-
-              existingFormats[constructor.classType] = constructor.constructor.invoke(params)
-              return
+        for ((format, constructor) in constructors) {
+          if (format.supports(contentType)) {
+            // Skip if handler already exists for type
+            if (existingFormats.containsKey(constructor.classType)) {
+              logger.debug(
+                "[{}]: skipping duplicate format {} for content type {}",
+                owner.book.id.brief(), constructor.classType.simpleName, contentType
+              )
+              continue
             }
+
+            // Add new handler for type
+            logger.debug(
+              "[{}]: instantiating format {} for content type {}",
+              owner.book.id.brief(), constructor.classType.simpleName, contentType
+            )
+
+            val params =
+              DatabaseFormatHandleParameters(
+                context = context,
+                bookID = owner.book.id,
+                directory = ownerDirectory,
+                onUpdated = onUpdate,
+                entry = owner,
+                contentType = contentType,
+                objectMapper = objectMapper
+              )
+
+            existingFormats[constructor.classType] = constructor.constructor.invoke(params)
+            return
           }
         }
       }

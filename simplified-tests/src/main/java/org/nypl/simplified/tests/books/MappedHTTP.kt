@@ -30,10 +30,21 @@ class MappedHTTP(
         resource.stream,
         resource.size,
         mutableMapOf(Pair("Content-Type", listOf(contentType))),
-        0L)
+        0L
+      )
   }
 
   override fun get(auth: OptionType<HTTPAuthType>, uri: URI, offset: Long): HTTPResultType<InputStream> {
+    this.logger.debug("get: {} {} {}", auth, uri, offset)
+    return this.content[uri.toASCIIString()] ?: this.notFound(uri)
+  }
+
+  override fun get(
+    auth: OptionType<HTTPAuthType>?,
+    uri: URI,
+    offset: Long,
+    noCache: Boolean?
+  ): HTTPResultType<InputStream> {
     this.logger.debug("get: {} {} {}", auth, uri, offset)
     return this.content[uri.toASCIIString()] ?: this.notFound(uri)
   }
@@ -46,7 +57,8 @@ class MappedHTTP(
       0L, mapOf(),
       0L,
       ByteArrayInputStream(ByteArray(1)),
-      Option.none())
+      Option.none()
+    )
   }
 
   override fun put(

@@ -23,6 +23,8 @@
   <string name="settingsAccountsSummary">Add, remove, or configure accounts</string>
   <string name="settingsAcknowledgements">Acknowledgements</string>
   <string name="settingsAcknowledgementsSummary" />
+  <string name="settingsBuild">Build</string>
+  <string name="settingsBuildSummary" />
   <string name="settingsCancel">Cancel</string>
   <string name="settingsCardCreatorLabel">Don\'t have a library card?</string>
   <string name="settingsCardCreatorSignUp">Sign up</string>
@@ -33,6 +35,8 @@
   <string name="settingsCustomOPDSCreate">Create</string>
   <string name="settingsCustomOPDSInvalidURI">Not a valid URI.</string>
   <string name="settingsCustomOPDSURL">Custom feed URL…</string>
+  <string name="settingsDebug">Debug options</string>
+  <string name="settingsDebugSummary" />
   <string name="settingsDelete">Delete</string>
   <string name="settingsDetails">Details</string>
   <string name="settingsDocumentation">Documentation</string>
@@ -41,7 +45,7 @@
   <string name="settingsEULASummary" />
   <string name="settingsFaq">FAQ</string>
   <string name="settingsFaqSummary" />
-  <string name="settingsInfo">Information</string>
+  <string name="settingsInfo">App info</string>
   <string name="settingsLicense">License</string>
   <string name="settingsLicenseSummary">Software license information</string>
   <string name="settingsLogin">Log in</string>
@@ -54,10 +58,10 @@
   <string name="settingsPlaceholder">Lorem ipsum dolor sit amet, probatus volutpat has at, vis adhuc iuvaret omittantur an, sadipscing conclusionemque his ad. Eam ut simul tempor. Primis consetetur appellantur vim eu, eum an iudico dolorum. Ad vis utamur honestatis, sanctus debitis referrentur an eam.</string>
   <string name="settingsReportIssue">Report an issue…</string>
   <string name="settingsSyncBookmarks">Sync bookmarks</string>
+  <string name="settingsTapToDebug">Debug mode in %1$d&#8230;</string>
   <string name="settingsUserName">User Name</string>
   <string name="settingsVersion">App version</string>
-  <string name="settingsVersionBuild">Build</string>
-  <string name="settingsVersionDeveloper">Developer Options</string>
   <string name="settingsVersionSummary" />
-  <string name="settingsVersionVersion">Version</string>
+  <string name="settingsVersionCore">Core version</string>
+  <string name="settingsVersionCoreSummary" />
 </resources>

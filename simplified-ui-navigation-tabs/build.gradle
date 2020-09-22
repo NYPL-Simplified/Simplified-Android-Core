@@ -1,4 +1,5 @@
 dependencies {
+  api project(":simplified-buildconfig-api")
   api project(":simplified-ui-accounts")
   api project(":simplified-ui-catalog")
   api project(":simplified-ui-navigation-api")
@@ -8,6 +9,7 @@ dependencies {
 
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-viewer-api")
+  implementation project(":simplified-viewer-spi")
 
   api libraries.bottomNavigator
 

@@ -2,6 +2,7 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/bookCellIdle"
   android:layout_width="match_parent"
   android:layout_height="@dimen/catalogFeedCellHeight">
@@ -10,6 +11,7 @@
     android:id="@+id/bookCellIdleCover"
     android:layout_width="@dimen/catalogFeedCellImageWidth"
     android:layout_height="@dimen/catalogFeedCellHeight"
+    android:contentDescription="@null"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
@@ -29,31 +31,45 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
-    android:layout_marginTop="16dp"
     android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
     android:ellipsize="end"
     android:maxLines="1"
-    android:text="@string/catalogPlaceholder"
-    android:textSize="14sp"
+    android:textSize="16sp"
     android:textStyle="bold"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
-    app:layout_constraintTop_toTopOf="parent" />
+    app:layout_constraintTop_toTopOf="parent"
+    tools:text="The Modern Prometheus" />
 
   <TextView
     android:id="@+id/bookCellIdleAuthor"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
-    android:layout_marginTop="8dp"
     android:layout_marginEnd="16dp"
     android:ellipsize="end"
     android:maxLines="1"
-    android:text="@string/catalogPlaceholder"
     android:textSize="14sp"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
-    app:layout_constraintTop_toBottomOf="@id/bookCellIdleTitle" />
+    app:layout_constraintTop_toBottomOf="@id/bookCellIdleTitle"
+    tools:text="Mary Shelley" />
+
+  <TextView
+    android:id="@+id/bookCellIdleMeta"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:textSize="12sp"
+    android:textStyle="italic"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
+    app:layout_constraintTop_toBottomOf="@id/bookCellIdleAuthor"
+    tools:text="eBook - The New York Public Library" />
 
   <LinearLayout
     android:id="@+id/bookCellIdleButtons"
@@ -61,40 +77,51 @@
     android:layout_height="@dimen/catalogFeedCellButtonsHeight"
     android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
-    android:layout_marginBottom="16dp"
+    android:layout_marginBottom="8dp"
     android:orientation="horizontal"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellIdleCover">
+    app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
+    app:layout_constraintBottom_toBottomOf="parent">
+
+    <!-- These views are removed at runtime and are just present for the sake of the UI editor preview -->
 
     <Button
       android:layout_width="0dp"
       android:layout_height="@dimen/catalogFeedCellButtonsHeight"
       android:layout_weight="1"
       android:maxWidth="64dp"
-      android:text="@string/catalogDismiss" />
+      android:visibility="gone"
+      tools:text="@string/catalogDismiss"
+      tools:visibility="visible" />
 
     <Space
       android:layout_width="16dp"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      tools:visibility="visible" />
 
     <Button
       android:layout_width="0dp"
       android:layout_height="@dimen/catalogFeedCellButtonsHeight"
       android:layout_weight="1"
       android:maxWidth="64dp"
-      android:text="@string/catalogDetails" />
+      android:visibility="gone"
+      tools:text="@string/catalogDetails"
+      tools:visibility="visible" />
 
     <Space
       android:layout_width="16dp"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      tools:visibility="visible" />
 
     <Button
       android:layout_width="0dp"
       android:layout_height="@dimen/catalogFeedCellButtonsHeight"
       android:layout_weight="1"
       android:maxWidth="64dp"
-      android:text="@string/catalogRetry" />
+      android:visibility="gone"
+      tools:text="@string/catalogRetry"
+      tools:visibility="visible" />
   </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

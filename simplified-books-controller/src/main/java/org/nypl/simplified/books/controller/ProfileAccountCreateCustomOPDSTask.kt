@@ -67,9 +67,12 @@ class ProfileAccountCreateCustomOPDSTask(
         this.createAccountProviderDescription()
 
       val resolutionResult =
-        this.accountProviderRegistry.resolve({ _, message ->
-          this.publishProgressEvent(this.taskRecorder.beginNewStep(message))
-        }, accountProviderDescription)
+        this.accountProviderRegistry.resolve(
+          { _, message ->
+            this.publishProgressEvent(this.taskRecorder.beginNewStep(message))
+          },
+          accountProviderDescription
+        )
 
       when (resolutionResult) {
         is TaskResult.Success ->
@@ -105,7 +108,6 @@ class ProfileAccountCreateCustomOPDSTask(
   private fun createAccount(
     accountProviderDescription: AccountProviderDescription
   ): TaskResult<AccountCreateErrorDetails, AccountType> {
-
     val createResult =
       ProfileAccountCreateTask(
         accountEvents = this.accountEvents,

@@ -20,7 +20,6 @@ object AccountPreferencesJSON {
     objectMapper: ObjectMapper,
     preferences: org.nypl.simplified.accounts.api.AccountPreferences
   ): ObjectNode {
-
     val node = objectMapper.createObjectNode()
     node.put("bookmarkSyncingPermitted", preferences.bookmarkSyncingPermitted)
     return node
@@ -33,7 +32,8 @@ object AccountPreferencesJSON {
   @Throws(JSONParseException::class)
   fun deserializeFromJSON(node: ObjectNode): org.nypl.simplified.accounts.api.AccountPreferences {
     return org.nypl.simplified.accounts.api.AccountPreferences(
-      bookmarkSyncingPermitted = JSONParserUtilities.getBoolean(node, "bookmarkSyncingPermitted"))
+      bookmarkSyncingPermitted = JSONParserUtilities.getBoolean(node, "bookmarkSyncingPermitted")
+    )
   }
 
   /**

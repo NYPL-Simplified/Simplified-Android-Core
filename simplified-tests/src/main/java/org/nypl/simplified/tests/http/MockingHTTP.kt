@@ -39,7 +39,6 @@ class MockingHTTP : HTTPType {
     uri: URI,
     result: HTTPResultType<InputStream>
   ) {
-
     synchronized(this.responses) {
       val xs: MutableList<HTTPResultType<InputStream>>
       if (this.responses.containsKey(uri)) {
@@ -71,7 +70,16 @@ class MockingHTTP : HTTPType {
     uri: URI,
     offset: Long
   ): HTTPResultType<InputStream> {
+    LOG.debug("get: {} {} {}", auth, uri, offset)
+    return response(uri)
+  }
 
+  override fun get(
+    auth: OptionType<HTTPAuthType>?,
+    uri: URI,
+    offset: Long,
+    noCache: Boolean?
+  ): HTTPResultType<InputStream> {
     LOG.debug("get: {} {} {}", auth, uri, offset)
     return response(uri)
   }
@@ -90,7 +98,6 @@ class MockingHTTP : HTTPType {
     auth: OptionType<HTTPAuthType>,
     uri: URI
   ): HTTPResultType<InputStream> {
-
     LOG.debug("put: {} {}", auth, uri)
     return response(uri)
   }
@@ -111,7 +118,6 @@ class MockingHTTP : HTTPType {
     data: ByteArray,
     content_type: String
   ): HTTPResultType<InputStream> {
-
     LOG.debug("post: {} {} {} {}", auth, uri, data, content_type)
     return response(uri)
   }
@@ -121,7 +127,6 @@ class MockingHTTP : HTTPType {
     uri: URI,
     content_type: String
   ): HTTPResultType<InputStream> {
-
     LOG.debug("delete: {} {} {}", auth, uri, content_type)
     return response(uri)
   }
@@ -130,7 +135,6 @@ class MockingHTTP : HTTPType {
     auth: OptionType<HTTPAuthType>,
     uri: URI
   ): HTTPResultType<InputStream> {
-
     LOG.debug("head: {} {}", auth, uri)
     return response(uri)
   }
