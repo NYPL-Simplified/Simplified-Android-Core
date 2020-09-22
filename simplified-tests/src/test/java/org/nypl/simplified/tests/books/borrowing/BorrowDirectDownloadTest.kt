@@ -396,11 +396,14 @@ class BorrowDirectDownloadTest {
       MockResponse()
         .setResponseCode(200)
         .setHeader("Content-Type", LSHTTPBearerTokenInterceptors.bearerTokenContentType)
-        .setBody("""{
+        .setBody(
+          """{
           "access_token": "abcd",
           "expires_in": 1000,
           "location": "http://localhost:20000/book.epub"
-        }""".trimIndent())
+        }
+          """.trimIndent()
+        )
 
     val response1 =
       MockResponse()
@@ -432,7 +435,8 @@ class BorrowDirectDownloadTest {
   private fun opdsFeedEntryOfType(
     mime: String
   ): OPDSAcquisitionFeedEntry {
-    val parsedEntry = this.opdsFeedEntryOf("""
+    val parsedEntry = this.opdsFeedEntryOf(
+      """
     <entry xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
       <title>Example</title>
       <updated>2020-09-17T16:48:51+0000</updated>
@@ -443,7 +447,8 @@ class BorrowDirectDownloadTest {
         <opds:copies available="5" total="5" />
       </link>
     </entry>
-    """)
+    """
+    )
     check(parsedEntry.availability is OPDSAvailabilityLoaned) { "Feed entry must be Loanable" }
     return parsedEntry
   }

@@ -61,7 +61,6 @@ class BorrowTaskTest {
   private val logger = LoggerFactory.getLogger(BorrowTaskTest::class.java)
 
   private fun createTask(request: BorrowRequest): BorrowTaskType {
-
     this.book =
       Book(
         id = BookIDs.newFromOPDSEntry(request.opdsAcquisitionFeedEntry),
@@ -171,12 +170,14 @@ class BorrowTaskTest {
         "Book",
         DateTime.now(),
         OPDSAvailabilityOpenAccess.get(Option.none())
-      ).addAcquisition(OPDSAcquisition(
-        OPDSAcquisition.Relation.ACQUISITION_GENERIC,
-        URI.create("http://www.example.com"),
-        StandardFormatNames.genericEPUBFiles,
-        listOf()
-      )).build()
+      ).addAcquisition(
+        OPDSAcquisition(
+          OPDSAcquisition.Relation.ACQUISITION_GENERIC,
+          URI.create("http://www.example.com"),
+          StandardFormatNames.genericEPUBFiles,
+          listOf()
+        )
+      ).build()
   }
 
   /**

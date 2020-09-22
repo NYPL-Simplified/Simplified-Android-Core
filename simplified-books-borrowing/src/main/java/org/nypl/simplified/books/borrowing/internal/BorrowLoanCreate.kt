@@ -108,11 +108,13 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     if (report != null) {
       if (report.type == "http://librarysimplified.org/terms/problem/loan-already-exists") {
         context.taskRecorder.currentStepSucceeded("It turns out we already had a loan for this book.")
-        context.bookPublishStatus(LoanedNotDownloaded(
-          id = context.bookCurrent.id,
-          loanExpiryDate = null,
-          returnable = false
-        ))
+        context.bookPublishStatus(
+          LoanedNotDownloaded(
+            id = context.bookCurrent.id,
+            loanExpiryDate = null,
+            returnable = false
+          )
+        )
         return
       }
     }
@@ -167,23 +169,27 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
       object : OPDSAvailabilityMatcherType<Unit, BorrowSubtaskException> {
         override fun onHeldReady(a: OPDSAvailabilityHeldReady) {
           context.taskRecorder.currentStepSucceeded("Book is held and ready.")
-          context.bookPublishStatus(HeldReady(
-            id = context.bookCurrent.id,
-            endDate = a.endDateOrNull,
-            isRevocable = a.revoke.isSome
-          ))
+          context.bookPublishStatus(
+            HeldReady(
+              id = context.bookCurrent.id,
+              endDate = a.endDateOrNull,
+              isRevocable = a.revoke.isSome
+            )
+          )
           throw BorrowSubtaskHaltedEarly()
         }
 
         override fun onHeld(a: OPDSAvailabilityHeld) {
           context.taskRecorder.currentStepSucceeded("Book is held.")
-          context.bookPublishStatus(HeldInQueue(
-            id = context.bookCurrent.id,
-            queuePosition = a.positionOrNull,
-            startDate = a.startDateOrNull,
-            isRevocable = a.revoke.isSome,
-            endDate = a.endDateOrNull
-          ))
+          context.bookPublishStatus(
+            HeldInQueue(
+              id = context.bookCurrent.id,
+              queuePosition = a.positionOrNull,
+              startDate = a.startDateOrNull,
+              isRevocable = a.revoke.isSome,
+              endDate = a.endDateOrNull
+            )
+          )
           throw BorrowSubtaskHaltedEarly()
         }
 
@@ -202,11 +208,13 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
 
         override fun onLoaned(a: OPDSAvailabilityLoaned) {
           context.taskRecorder.currentStepSucceeded("Book is loaned.")
-          context.bookPublishStatus(LoanedNotDownloaded(
-            id = context.bookCurrent.id,
-            loanExpiryDate = a.endDateOrNull,
-            returnable = a.revoke.isSome
-          ))
+          context.bookPublishStatus(
+            LoanedNotDownloaded(
+              id = context.bookCurrent.id,
+              loanExpiryDate = a.endDateOrNull,
+              returnable = a.revoke.isSome
+            )
+          )
         }
 
         /**
@@ -224,11 +232,13 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
 
         override fun onOpenAccess(a: OPDSAvailabilityOpenAccess) {
           context.taskRecorder.currentStepSucceeded("Book is open access.")
-          context.bookPublishStatus(LoanedNotDownloaded(
-            id = context.bookCurrent.id,
-            loanExpiryDate = a.endDateOrNull,
-            returnable = a.revoke.isSome
-          ))
+          context.bookPublishStatus(
+            LoanedNotDownloaded(
+              id = context.bookCurrent.id,
+              loanExpiryDate = a.endDateOrNull,
+              returnable = a.revoke.isSome
+            )
+          )
         }
 
         /**

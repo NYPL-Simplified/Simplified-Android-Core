@@ -352,7 +352,7 @@ class BorrowLoanCreateTest {
     <opds:copies available="5" total="5" />
   </link>
 </entry>
-""".trimIndent()
+    """.trimIndent()
 
     val response =
       MockResponse()
@@ -401,17 +401,20 @@ class BorrowLoanCreateTest {
     <opds:copies available="5" total="5" />
   </link>
 </entry>
-""".trimIndent()
+    """.trimIndent()
 
     val response0 =
       MockResponse()
         .setResponseCode(200)
         .setHeader("Content-Type", LSHTTPBearerTokenInterceptors.bearerTokenContentType)
-        .setBody("""{
+        .setBody(
+          """{
           "access_token": "abcd",
           "expires_in": 1000,
           "location": "${this.webServer.url("/book.epub")}"
-        }""".trimIndent())
+        }
+          """.trimIndent()
+        )
 
     val response1 =
       MockResponse()
@@ -463,7 +466,7 @@ class BorrowLoanCreateTest {
     <opds:copies available="0" total="5"/>
   </link>
 </entry>
-""".trimIndent()
+    """.trimIndent()
 
     val response =
       MockResponse()
@@ -517,7 +520,7 @@ class BorrowLoanCreateTest {
     <opds:copies available="0" total="5"/>
   </link>
 </entry>
-""".trimIndent()
+    """.trimIndent()
 
     val response =
       MockResponse()
@@ -569,7 +572,7 @@ class BorrowLoanCreateTest {
     <opds:copies available="0" total="5"/>
   </link>
 </entry>
-""".trimIndent()
+    """.trimIndent()
 
     val response =
       MockResponse()
@@ -616,9 +619,12 @@ class BorrowLoanCreateTest {
       MockResponse()
         .setResponseCode(400)
         .setHeader("Content-Type", "application/api-problem+json")
-        .setBody("""{
+        .setBody(
+          """{
   "type": "http://librarysimplified.org/terms/problem/loan-already-exists"
-}""".trimIndent())
+}
+          """.trimIndent()
+        )
 
     this.webServer.enqueue(response)
 
