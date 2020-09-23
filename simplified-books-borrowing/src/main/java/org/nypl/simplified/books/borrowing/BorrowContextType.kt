@@ -2,6 +2,7 @@ package org.nypl.simplified.books.borrowing
 
 import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
@@ -22,9 +23,16 @@ import java.net.URI
 
 interface BorrowContextType {
   val account: AccountReadableType
+  val adobeExecutor: AdobeAdeptExecutorType?
   val clock: () -> Instant
   val httpClient: LSHTTPClientType
   val taskRecorder: TaskRecorderType
+
+  /**
+   * The timeout value that will be used when waiting for ACS operations to complete.
+   */
+
+  val adobeExecutorTimeout: BorrowTimeoutConfiguration
 
   /**
    * A flag that indicates a borrow task has been cancelled. Subtasks should take care to

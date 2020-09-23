@@ -73,6 +73,7 @@ class BorrowTaskTest {
 
     return BorrowTask.createBorrowTask(
       requirements = BorrowRequirements(
+        adobeExecutor = null,
         bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
         clock = { Instant.now() },

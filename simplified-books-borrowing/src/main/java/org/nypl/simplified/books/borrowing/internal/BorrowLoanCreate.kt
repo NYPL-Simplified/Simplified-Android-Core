@@ -10,19 +10,17 @@ import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldReady
 import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedNotDownloaded
 import org.nypl.simplified.books.borrowing.BorrowContextType
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpConnectionFailed
-import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpContentTypeIncompatible
-import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpEmptyBody
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpRequestFailed
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryHoldable
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryLoanable
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryNoNext
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryParseError
+import org.nypl.simplified.books.borrowing.internal.BorrowHTTP.isMimeTypeAcceptable
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskHaltedEarly
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
-import org.nypl.simplified.books.formats.api.StandardFormatNames.opdsAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
@@ -36,6 +34,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSParseException
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.net.URI
 
@@ -132,25 +131,11 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     uri: URI,
     status: LSHTTPResponseStatus.Responded.OK
   ) {
-    val expectedType = opdsAcquisitionFeedEntry
-    val receivedType = status.contentType
-    if (!MIMECompatibility.isCompatibleLax(receivedType, expectedType)) {
-      context.taskRecorder.currentStepFailed(
-        message = "The server returned an incompatible context type: We wanted something compatible with ${expectedType.fullType} but received ${receivedType.fullType}.",
-        errorCode = httpContentTypeIncompatible
-      )
+    if (!isMimeTypeAcceptable(context, status.contentType)) {
       throw BorrowSubtaskFailed()
     }
 
-    val inputStream = status.bodyStream
-    if (inputStream == null) {
-      context.taskRecorder.currentStepFailed(
-        message = "The server returned an empty HTTP body.",
-        errorCode = httpEmptyBody
-      )
-      throw BorrowSubtaskFailed()
-    }
-
+    val inputStream = status.bodyStream ?: ByteArrayInputStream(ByteArray(0))
     val entry = this.parseOPDSFeedEntry(context, inputStream, uri)
     context.bookDatabaseEntry.writeOPDSEntry(entry)
 

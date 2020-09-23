@@ -2,6 +2,7 @@ package org.nypl.simplified.books.borrowing
 
 import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
@@ -33,6 +34,7 @@ import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 /**
  * The primary borrow task implementation.
@@ -136,9 +138,10 @@ class BorrowTask private constructor(
     val context =
       BorrowContext(
         account = this.account,
+        adobeExecutor = this.requirements.adobeExecutor,
         bookDatabaseEntry = this.databaseEntry!!,
-        bookRegistry = this.requirements.bookRegistry,
         bookInitial = book,
+        bookRegistry = this.requirements.bookRegistry,
         clock = this.requirements.clock,
         currentOPDSAcquisitionPathElement = path.elements.first(),
         httpClient = this.requirements.httpClient,
@@ -310,8 +313,12 @@ class BorrowTask private constructor(
     private val bookRegistry: BookRegistryType,
     private val logger: Logger,
     private val temporaryDirectory: File,
-    var currentOPDSAcquisitionPathElement: OPDSAcquisitionPathElement
+    var currentOPDSAcquisitionPathElement: OPDSAcquisitionPathElement,
+    override val adobeExecutor: AdobeAdeptExecutorType?
   ) : BorrowContextType {
+
+    override val adobeExecutorTimeout: BorrowTimeoutConfiguration =
+      BorrowTimeoutConfiguration(300L, TimeUnit.SECONDS)
 
     @Volatile
     override var isCancelled =

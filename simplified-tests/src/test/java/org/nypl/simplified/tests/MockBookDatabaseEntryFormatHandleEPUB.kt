@@ -1,6 +1,5 @@
 package org.nypl.simplified.tests
 
-import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookFormat
@@ -55,7 +54,6 @@ class MockBookDatabaseEntryFormatHandleEPUB(
     get() = this.drmInformationHandleField
 
   override fun setDRMKind(kind: BookDRMKind) {
-    throw UnimplementedCodeException()
   }
 
   override fun deleteBookData() {

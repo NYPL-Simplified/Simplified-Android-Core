@@ -2,6 +2,7 @@ package org.nypl.simplified.tests.books.borrowing
 
 import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
@@ -9,6 +10,7 @@ import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.borrowing.BorrowContextType
+import org.nypl.simplified.books.borrowing.BorrowTimeoutConfiguration
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
@@ -17,6 +19,7 @@ import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 class MockBorrowContext(
   val logger: Logger,
@@ -31,6 +34,10 @@ class MockBorrowContext(
   bookInitial: Book
 ) : BorrowContextType {
 
+  override var adobeExecutorTimeout: BorrowTimeoutConfiguration =
+    BorrowTimeoutConfiguration(2L, TimeUnit.SECONDS)
+
+  override var adobeExecutor: AdobeAdeptExecutorType? = null
   override lateinit var currentAcquisitionPathElement: OPDSAcquisitionPathElement
   override lateinit var opdsAcquisitionPath: OPDSAcquisitionPath
   override var bookCurrent: Book = bookInitial

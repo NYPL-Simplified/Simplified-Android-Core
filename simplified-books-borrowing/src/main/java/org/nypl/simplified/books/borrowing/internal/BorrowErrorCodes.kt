@@ -7,12 +7,18 @@ package org.nypl.simplified.books.borrowing.internal
  */
 
 object BorrowErrorCodes {
+  const val accountCredentialsRequired = "accountCredentialsRequired"
   const val accountsDatabaseException = "accountsDatabaseException"
+  const val acsNoCredentialsPost = "acsNoCredentialsPost"
+  const val acsNoCredentialsPre = "acsNoCredentialsPre"
+  const val acsNotSupported = "acsNotSupported"
+  const val acsTimedOut = "acsTimedOut"
+  const val acsUnparseableACSM = "acsUnparseableACSM"
   const val bookDatabaseFailed = "bookDatabaseFailed"
   const val httpConnectionFailed = "httpConnectionFailed"
   const val httpContentTypeIncompatible = "httpContentTypeIncompatible"
-  const val httpEmptyBody: String = "httpEmptyBody"
-  const val httpRequestFailed: String = "httpRequestFailed"
+  const val httpRequestFailed = "httpRequestFailed"
+  const val noFormatHandle = "noFormatHandle"
   const val noSubtaskAvailable = "noSubtaskAvailable"
   const val noSupportedAcquisitions = "noSupportedAcquisitions"
   const val opdsFeedEntryHoldable = "opdsFeedEntryHoldable"

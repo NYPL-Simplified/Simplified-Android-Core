@@ -2,6 +2,7 @@ package org.nypl.simplified.books.borrowing
 
 import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
@@ -13,6 +14,7 @@ import java.io.File
  */
 
 data class BorrowRequirements(
+  val adobeExecutor: AdobeAdeptExecutorType?,
   val bookFormatSupport: BookFormatSupportType,
   val bookRegistry: BookRegistryType,
   val clock: () -> Instant,

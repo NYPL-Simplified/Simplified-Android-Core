@@ -5,9 +5,11 @@ dependencies {
   api project(":simplified-opds-core")
   api project(":simplified-profiles-api")
 
+  implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-taskrecorder-api")
 
   implementation libraries.kotlinStdlib
   implementation libraries.nyplHttpAPI
+  implementation libraries.nyplHttpDownloads
   implementation libraries.slf4j
 }

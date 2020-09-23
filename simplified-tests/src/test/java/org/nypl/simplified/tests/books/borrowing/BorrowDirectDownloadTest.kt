@@ -38,10 +38,7 @@ import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.requiredURI
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericPDFFiles
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
@@ -52,7 +49,6 @@ import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
-import java.net.URI
 
 class BorrowDirectDownloadTest {
 
@@ -98,7 +94,7 @@ class BorrowDirectDownloadTest {
     this.bookRegistry =
       BookRegistry.create()
     this.bookStates =
-      mutableListOf<BookStatus>()
+      mutableListOf()
     this.bookEvents =
       mutableListOf()
     this.bookRegistrySub =
@@ -127,8 +123,7 @@ class BorrowDirectDownloadTest {
       AccountID.generate()
 
     val initialFeedEntry =
-      this.opdsFeedEntryOfType(genericEPUBFiles.fullType)
-
+      BorrowTests.opdsLoanedFeedEntryOfType(this.webServer, genericEPUBFiles.fullType)
     this.bookID =
       BookIDs.newFromOPDSEntry(initialFeedEntry)
 
@@ -307,7 +302,9 @@ class BorrowDirectDownloadTest {
     this.context.currentAcquisitionPathElement =
       OPDSAcquisitionPathElement(genericPDFFiles, null)
 
-    this.bookDatabaseEntry.writeOPDSEntry(this.opdsFeedEntryOfType(genericPDFFiles.fullType))
+    this.bookDatabaseEntry.writeOPDSEntry(
+      BorrowTests.opdsLoanedFeedEntryOfType(this.webServer, genericPDFFiles.fullType)
+    )
     this.bookDatabaseEntry.entryWrites = 0
     this.bookDatabaseEntry.formatHandlesField.clear()
     this.bookDatabaseEntry.formatHandlesField.add(this.pdfHandle)
@@ -430,31 +427,5 @@ class BorrowDirectDownloadTest {
     assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
     assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
     assertEquals(0, this.bookStates.size)
-  }
-
-  private fun opdsFeedEntryOfType(
-    mime: String
-  ): OPDSAcquisitionFeedEntry {
-    val parsedEntry = this.opdsFeedEntryOf(
-      """
-    <entry xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
-      <title>Example</title>
-      <updated>2020-09-17T16:48:51+0000</updated>
-      <id>7264f7f8-7bea-4ce6-906e-615406ca38cb</id>
-      <link href="${this.webServer.url("/next")}" rel="http://opds-spec.org/acquisition" type="$mime">
-        <opds:availability since="2020-09-17T16:48:51+0000" status="available" until="2020-09-17T16:48:51+0000" />
-        <opds:holds total="0" />
-        <opds:copies available="5" total="5" />
-      </link>
-    </entry>
-    """
-    )
-    check(parsedEntry.availability is OPDSAvailabilityLoaned) { "Feed entry must be Loanable" }
-    return parsedEntry
-  }
-
-  private fun opdsFeedEntryOf(text: String): OPDSAcquisitionFeedEntry {
-    return OPDSAcquisitionFeedEntryParser.newParser()
-      .parseEntryStream(URI.create("urn:stdin"), text.byteInputStream())
   }
 }
