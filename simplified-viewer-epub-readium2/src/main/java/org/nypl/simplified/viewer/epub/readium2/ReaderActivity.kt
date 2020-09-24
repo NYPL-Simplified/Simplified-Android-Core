@@ -35,6 +35,8 @@ import org.librarysimplified.r2.views.SR2ReaderFragment
 import org.librarysimplified.r2.views.SR2ReaderFragmentParameters
 import org.librarysimplified.r2.views.SR2TOCFragment
 import org.librarysimplified.services.api.Services
+import org.nypl.drm.core.ContentProtectionProvider
+import org.nypl.drm.core.DRMProtectedFile
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookID
@@ -47,8 +49,11 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.readium.r2.streamer.Streamer
+import org.readium.r2.streamer.parser.epub.EpubParser
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.ServiceLoader
 import java.util.concurrent.TimeUnit
 
 /**
@@ -64,6 +69,8 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       "org.nypl.simplified.app.ReaderActivity.book"
     private const val ARG_FILE =
       "org.nypl.simplified.app.ReaderActivity.file"
+    private const val ARG_ADOBE_RIGHTS_FILE =
+      "org.nypl.simplified.app.ReaderActivity.adobeRightsFile"
     private const val ARG_ENTRY =
       "org.nypl.simplified.app.ReaderActivity.entry"
 
@@ -77,6 +84,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
       accountId: AccountID,
       bookId: BookID,
       file: File,
+      adobeRightsFile: File?,
       entry: FeedEntry.FeedEntryOPDS
     ) {
       val intent = Intent(context, ReaderActivity::class.java)
@@ -85,6 +93,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         this.putSerializable(this@Companion.ARG_ACCOUNT_ID, accountId)
         this.putSerializable(this@Companion.ARG_BOOK_ID, bookId)
         this.putSerializable(this@Companion.ARG_FILE, file)
+        this.putSerializable(this@Companion.ARG_ADOBE_RIGHTS_FILE, adobeRightsFile)
         this.putSerializable(this@Companion.ARG_ENTRY, entry)
       }
       intent.putExtras(bundle)
@@ -125,6 +134,28 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
     this.bookEntry =
       this.intent?.extras?.getSerializable(ARG_ENTRY) as FeedEntry.FeedEntryOPDS
 
+    val contentProtections =
+      ServiceLoader.load(ContentProtectionProvider::class.java)
+        .mapNotNull {
+          it.create(this)?.also { cp ->
+            this.logger.debug("created content protection of class ${cp::class.java.canonicalName}")
+          }
+        }
+
+    val streamer = Streamer(
+      context = this,
+      parsers = listOf(EpubParser()),
+      ignoreDefaultParsers = true,
+      contentProtections = contentProtections
+    )
+
+    val adobeRightsFile = this.intent?.extras?.getSerializable(ARG_ADOBE_RIGHTS_FILE) as File?
+
+    val drmProtectedFile = DRMProtectedFile(bookFile, adobeRightsFile)
+
+    val fragmentParameters = SR2ReaderFragmentParameters(streamer, drmProtectedFile)
+    supportFragmentManager.fragmentFactory = SR2ReaderFragment.createFactory(fragmentParameters)
+
     if (savedInstanceState == null) {
       this.setContentView(R.layout.reader2)
 
@@ -138,8 +169,7 @@ class ReaderActivity : AppCompatActivity(), SR2ControllerHostType {
         this.setDisplayHomeAsUpEnabled(true)
       }
 
-      val fragment =
-        SR2ReaderFragment.create(SR2ReaderFragmentParameters(this.bookFile))
+      val fragment = SR2ReaderFragment(fragmentParameters)
 
       this.supportFragmentManager
         .beginTransaction()

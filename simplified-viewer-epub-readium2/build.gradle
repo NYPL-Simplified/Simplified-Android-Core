@@ -10,7 +10,10 @@ dependencies {
   implementation libraries.androidXLifecycle
   implementation libraries.androidXLifecycleViewmodel
   implementation libraries.kotlinStdlib
+  implementation libraries.nyplDRMCore
   implementation libraries.nyplR2API
   implementation libraries.nyplR2Vanilla
   implementation libraries.nyplR2Views
+  implementation libraries.r2Shared
+  implementation libraries.r2Streamer
 }
