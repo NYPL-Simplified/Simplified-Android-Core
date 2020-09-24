@@ -50,7 +50,7 @@
       android:summary="@string/settingsVersionCoreSummary"
       android:title="@string/settingsVersionCore"
       app:enableCopying="true"
-      tools:summary="6.2.0-SNAPSHOT" />
+      tools:summary="6.2.0" />
 
     <Preference
       android:icon="@drawable/ic_settings_build"
