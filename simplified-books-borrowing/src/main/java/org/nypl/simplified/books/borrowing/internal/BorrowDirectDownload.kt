@@ -79,6 +79,8 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
     context: BorrowContextType,
     temporaryFile: File
   ) {
+    context.taskRecorder.beginNewStep("Saving book...")
+
     return when (val formatHandle = context.bookDatabaseEntry.findFormatHandleForContentType(context.currentAcquisitionPathElement.mimeType)) {
       is BookDatabaseEntryFormatHandleEPUB -> {
         formatHandle.copyInBook(temporaryFile)

@@ -15,6 +15,7 @@ object BorrowErrorCodes {
   const val acsTimedOut = "acsTimedOut"
   const val acsUnparseableACSM = "acsUnparseableACSM"
   const val bookDatabaseFailed = "bookDatabaseFailed"
+  const val contentFileNotFound = "contentFileNotFound"
   const val httpConnectionFailed = "httpConnectionFailed"
   const val httpContentTypeIncompatible = "httpContentTypeIncompatible"
   const val httpRequestFailed = "httpRequestFailed"

@@ -20,6 +20,8 @@ import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.unexpectedE
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskCancelled
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskHaltedEarly
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
@@ -142,7 +144,9 @@ class BorrowTask private constructor(
         bookDatabaseEntry = this.databaseEntry!!,
         bookInitial = book,
         bookRegistry = this.requirements.bookRegistry,
+        bundledContent = this.requirements.bundledContent,
         clock = this.requirements.clock,
+        contentResolver = this.requirements.contentResolver,
         currentOPDSAcquisitionPathElement = path.elements.first(),
         httpClient = this.requirements.httpClient,
         logger = this.logger,
@@ -305,6 +309,8 @@ class BorrowTask private constructor(
   private class BorrowContext(
     override val account: AccountReadableType,
     override val clock: () -> Instant,
+    override val contentResolver: ContentResolverType,
+    override val bundledContent: BundledContentResolverType,
     override val bookDatabaseEntry: BookDatabaseEntryType,
     override val httpClient: LSHTTPClientType,
     override val taskRecorder: TaskRecorderType,

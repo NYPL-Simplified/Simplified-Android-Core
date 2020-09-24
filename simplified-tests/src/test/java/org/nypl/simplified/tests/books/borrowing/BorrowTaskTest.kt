@@ -26,8 +26,10 @@ import org.nypl.simplified.books.borrowing.BorrowTaskType
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.formats.api.StandardFormatNames
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
@@ -35,6 +37,8 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.MockBundledContentResolver
+import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -51,6 +55,8 @@ class BorrowTaskTest {
   private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookID: BookID
   private lateinit var bookRegistry: BookRegistryType
+  private lateinit var bundledContent: BundledContentResolverType
+  private lateinit var contentResolver: ContentResolverType
   private lateinit var httpClient: LSHTTPClientType
   private lateinit var opdsEmptyFeedEntry: OPDSAcquisitionFeedEntry
   private lateinit var opdsOpenEPUBFeedEntry: OPDSAcquisitionFeedEntry
@@ -76,7 +82,9 @@ class BorrowTaskTest {
         adobeExecutor = null,
         bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
+        bundledContent = this.bundledContent,
         clock = { Instant.now() },
+        contentResolver = this.contentResolver,
         httpClient = this.httpClient,
         profile = this.profile,
         subtasks = this.subtasks,
@@ -118,6 +126,10 @@ class BorrowTaskTest {
       Mockito.mock(BookDatabaseType::class.java)
     this.bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
+    this.contentResolver =
+      MockContentResolver()
+    this.bundledContent =
+      MockBundledContentResolver()
     this.profile =
       Mockito.mock(ProfileReadableType::class.java)
     this.accountId =

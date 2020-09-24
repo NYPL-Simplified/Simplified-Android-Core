@@ -11,6 +11,8 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.borrowing.BorrowContextType
 import org.nypl.simplified.books.borrowing.BorrowTimeoutConfiguration
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
@@ -25,8 +27,10 @@ class MockBorrowContext(
   val logger: Logger,
   val temporaryDirectory: File,
   val bookRegistry: BookRegistryType,
+  override var bundledContent: BundledContentResolverType,
   override var account: AccountReadableType,
   override var clock: () -> Instant,
+  override var contentResolver: ContentResolverType,
   override var httpClient: LSHTTPClientType,
   override var taskRecorder: TaskRecorderType,
   override var isCancelled: Boolean,

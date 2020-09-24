@@ -10,6 +10,8 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskCancelled
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
+import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
@@ -25,6 +27,8 @@ interface BorrowContextType {
   val account: AccountReadableType
   val adobeExecutor: AdobeAdeptExecutorType?
   val clock: () -> Instant
+  val bundledContent: BundledContentResolverType
+  val contentResolver: ContentResolverType
   val httpClient: LSHTTPClientType
   val taskRecorder: TaskRecorderType
 

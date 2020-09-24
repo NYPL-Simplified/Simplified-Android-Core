@@ -51,6 +51,8 @@ import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockBookDatabase
 import org.nypl.simplified.tests.MockBookDatabaseEntry
+import org.nypl.simplified.tests.MockBundledContentResolver
+import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 
@@ -59,13 +61,15 @@ class BorrowLoanCreateTest {
   private lateinit var account: AccountType
   private lateinit var accountId: AccountID
   private lateinit var accountProvider: AccountProvider
-  private lateinit var bookStates: MutableList<BookStatus>
   private lateinit var bookDatabase: MockBookDatabase
   private lateinit var bookDatabaseEntry: MockBookDatabaseEntry
   private lateinit var bookEvents: MutableList<BookStatusEvent>
   private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookID: BookID
   private lateinit var bookRegistry: BookRegistryType
+  private lateinit var bookStates: MutableList<BookStatus>
+  private lateinit var bundledContent: MockBundledContentResolver
+  private lateinit var contentResolver: MockContentResolver
   private lateinit var context: MockBorrowContext
   private lateinit var httpClient: LSHTTPClientType
   private lateinit var profile: ProfileReadableType
@@ -87,6 +91,10 @@ class BorrowLoanCreateTest {
   fun testSetup() {
     this.taskRecorder =
       TaskRecorder.create()
+    this.contentResolver =
+      MockContentResolver()
+    this.bundledContent =
+      MockBundledContentResolver()
 
     this.bookFormatSupport =
       Mockito.mock(BookFormatSupportType::class.java)
@@ -144,6 +152,7 @@ class BorrowLoanCreateTest {
       MockBorrowContext(
         logger = this.logger,
         bookRegistry = this.bookRegistry,
+        bundledContent = this.bundledContent,
         temporaryDirectory = TestDirectories.temporaryDirectory(),
         account = this.account,
         clock = { Instant.now() },
@@ -151,7 +160,8 @@ class BorrowLoanCreateTest {
         taskRecorder = this.taskRecorder,
         isCancelled = false,
         bookDatabaseEntry = this.bookDatabaseEntry,
-        bookInitial = bookInitial
+        bookInitial = bookInitial,
+        contentResolver = this.contentResolver
       )
 
     this.context.currentAcquisitionPathElement =

@@ -69,6 +69,8 @@ import org.nypl.simplified.tests.MockAdobeAdeptResourceProvider
 import org.nypl.simplified.tests.MockBookDatabase
 import org.nypl.simplified.tests.MockBookDatabaseEntry
 import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.tests.MockBundledContentResolver
+import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.MockDRMInformationACSHandle
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
@@ -98,13 +100,13 @@ class BorrowACSMTest {
       .setHeader("content-type", adobeACSMFiles.fullType)
       .setBody(this.validACSM)
 
-  private lateinit var adobeExecutorService: ExecutorService
   private lateinit var account: AccountType
   private lateinit var accountId: AccountID
   private lateinit var accountProvider: AccountProvider
   private lateinit var acsHandle: MockDRMInformationACSHandle
   private lateinit var adobeConnector: MockAdobeAdeptConnector
   private lateinit var adobeExecutor: MockAdobeAdeptExecutor
+  private lateinit var adobeExecutorService: ExecutorService
   private lateinit var adobeNetProvider: MockAdobeAdeptNetProvider
   private lateinit var adobeResourceProvider: MockAdobeAdeptResourceProvider
   private lateinit var bookDatabase: MockBookDatabase
@@ -115,6 +117,8 @@ class BorrowACSMTest {
   private lateinit var bookID: BookID
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var bookStates: MutableList<BookStatus>
+  private lateinit var bundledContent: MockBundledContentResolver
+  private lateinit var contentResolver: MockContentResolver
   private lateinit var context: MockBorrowContext
   private lateinit var httpClient: LSHTTPClientType
   private lateinit var profile: ProfileReadableType
@@ -140,6 +144,10 @@ class BorrowACSMTest {
 
     this.taskRecorder =
       TaskRecorder.create()
+    this.contentResolver =
+      MockContentResolver()
+    this.bundledContent =
+      MockBundledContentResolver()
 
     this.bookFormatSupport =
       Mockito.mock(BookFormatSupportType::class.java)
@@ -243,6 +251,7 @@ class BorrowACSMTest {
       MockBorrowContext(
         logger = this.logger,
         bookRegistry = this.bookRegistry,
+        bundledContent = this.bundledContent,
         temporaryDirectory = TestDirectories.temporaryDirectory(),
         account = this.account,
         clock = { Instant.now() },
@@ -250,7 +259,8 @@ class BorrowACSMTest {
         taskRecorder = this.taskRecorder,
         isCancelled = false,
         bookDatabaseEntry = this.bookDatabaseEntry,
-        bookInitial = bookInitial
+        bookInitial = bookInitial,
+        contentResolver = this.contentResolver
       )
 
     this.context.adobeExecutor = this.adobeExecutor
