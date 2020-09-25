@@ -1,6 +1,8 @@
 package org.nypl.simplified.books.borrowing.internal
 
 import com.io7m.junreachable.UnreachableCodeException
+import one.irradia.mime.api.MIMECompatibility
+import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.books.audio.AudioBookCredentials
@@ -13,6 +15,7 @@ import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.audioStrate
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
+import org.nypl.simplified.books.formats.api.StandardFormatNames
 import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import java.io.File
@@ -30,6 +33,18 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
 
     override fun createSubtask(): BorrowSubtaskType {
       return BorrowAudioBook()
+    }
+
+    override fun isApplicableFor(
+      type: MIMEType,
+      target: URI?
+    ): Boolean {
+      for (audioType in StandardFormatNames.allAudioBooks) {
+        if (MIMECompatibility.isCompatibleStrictWithoutAttributes(type, audioType)) {
+          return true
+        }
+      }
+      return false
     }
   }
 

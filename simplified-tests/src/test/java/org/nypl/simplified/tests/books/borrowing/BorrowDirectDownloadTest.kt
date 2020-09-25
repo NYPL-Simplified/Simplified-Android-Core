@@ -82,9 +82,6 @@ class BorrowDirectDownloadTest {
     assertEquals(clazz, registryStatus.javaClass)
   }
 
-  private fun <T> anyNonNull(): T =
-    Mockito.argThat { x -> x != null }
-
   @Before
   fun testSetup() {
     this.webServer = MockWebServer()

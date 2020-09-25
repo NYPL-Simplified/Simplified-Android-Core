@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.borrowing.subtasks
 
-import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
+import one.irradia.mime.api.MIMEType
+import java.net.URI
 
 /**
  * A directory of subtasks.
@@ -9,10 +10,24 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 interface BorrowSubtaskDirectoryType {
 
   /**
-   * Find a suitable subtask for the given acquisition path element.
+   * @return All of the available subtasks in the directory
+   */
+
+  val subtasks: List<BorrowSubtaskFactoryType>
+
+  /**
+   * Find a suitable subtask for the given URI and MIME type.
    */
 
   fun findSubtaskFor(
-    pathElement: OPDSAcquisitionPathElement
-  ): BorrowSubtaskFactoryType?
+    mimeType: MIMEType,
+    target: URI?
+  ): BorrowSubtaskFactoryType? {
+    for (factory in this.subtasks) {
+      if (factory.isApplicableFor(mimeType, target)) {
+        return factory
+      }
+    }
+    return null
+  }
 }

@@ -55,6 +55,8 @@ class MockBookDatabaseEntry(private val bookInitial: Book) : BookDatabaseEntryTy
   }
 
   override fun writeOPDSEntry(opdsEntry: OPDSAcquisitionFeedEntry) {
+    this.logger.debug("[{}]: writeOPDSEntry", this.bookInitial.id)
+
     this.addNecessaryHandles(opdsEntry)
     this.entryField = opdsEntry
     this.entryWrites++
@@ -87,6 +89,7 @@ class MockBookDatabaseEntry(private val bookInitial: Book) : BookDatabaseEntryTy
         continue
       }
     }
+    this.logger.debug("[{}]: creating {} format handles", this.bookInitial.id, formats.size)
     return formats.toList()
   }
 

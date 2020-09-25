@@ -1,12 +1,17 @@
 package org.nypl.simplified.tests.books.borrowing
 
-import com.io7m.jfunctional.Option
-import org.joda.time.DateTime
+import android.content.Context
+import io.reactivex.disposables.Disposable
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.Instant
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProvider
@@ -14,37 +19,41 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
-import org.nypl.simplified.books.book_database.api.BookDatabaseType
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatus.Downloading
+import org.nypl.simplified.books.book_registry.BookStatus.FailedLoan
+import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedDownloaded
+import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedNotDownloaded
+import org.nypl.simplified.books.book_registry.BookStatus.RequestingLoan
+import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.borrowing.BorrowRequest
 import org.nypl.simplified.books.borrowing.BorrowRequirements
+import org.nypl.simplified.books.borrowing.BorrowSubtasks
 import org.nypl.simplified.books.borrowing.BorrowTask
 import org.nypl.simplified.books.borrowing.BorrowTaskType
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
-import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
-import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
-import org.nypl.simplified.books.formats.api.BookFormatSupportType
-import org.nypl.simplified.books.formats.api.StandardFormatNames
+import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
+import org.nypl.simplified.books.formats.api.StandardFormatNames.opdsAcquisitionFeedEntry
 import org.nypl.simplified.content.api.ContentResolverType
-import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
-import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
-import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockAudioBookManifestStrategies
+import org.nypl.simplified.tests.MockBookDatabase
+import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.tests.MockBookFormatSupport
+import org.nypl.simplified.tests.MockBorrowSubtaskDirectory
 import org.nypl.simplified.tests.MockBundledContentResolver
 import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.net.URI
 
 class BorrowTaskTest {
 
@@ -53,11 +62,12 @@ class BorrowTaskTest {
   private lateinit var accountProvider: AccountProvider
   private lateinit var audioBookManifestStrategies: MockAudioBookManifestStrategies
   private lateinit var book: Book
-  private lateinit var bookDatabase: BookDatabaseType
-  private lateinit var bookDatabaseEntry: BookDatabaseEntryType
-  private lateinit var bookFormatSupport: BookFormatSupportType
+  private lateinit var bookDatabase: MockBookDatabase
+  private lateinit var bookEvents: MutableList<BookStatusEvent>
+  private lateinit var bookFormatSupport: MockBookFormatSupport
   private lateinit var bookID: BookID
   private lateinit var bookRegistry: BookRegistryType
+  private lateinit var bookStates: MutableList<BookStatus>
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
   private lateinit var contentResolver: ContentResolverType
@@ -66,8 +76,10 @@ class BorrowTaskTest {
   private lateinit var opdsOpenEPUBFeedEntry: OPDSAcquisitionFeedEntry
   private lateinit var profile: ProfileReadableType
   private lateinit var services: MutableServiceDirectory
-  private lateinit var subtasks: BorrowSubtaskDirectoryType
+  private lateinit var subtasks: MockBorrowSubtaskDirectory
   private lateinit var temporaryDirectory: File
+  private lateinit var webServer: MockWebServer
+  private var bookRegistrySub: Disposable? = null
 
   private val logger = LoggerFactory.getLogger(BorrowTaskTest::class.java)
 
@@ -102,12 +114,9 @@ class BorrowTaskTest {
     )
   }
 
-  private fun <T> anyNonNull(): T =
-    Mockito.argThat { x -> x != null }
-
-  private fun verifyBookRegistryHasFailureStatus() {
+  private fun verifyBookRegistryHasStatus(clazz: Class<*>) {
     val registryStatus = this.bookRegistry.bookStatusOrNull(this.bookID)!!
-    assertEquals(BookStatus.FailedLoan::class.java, registryStatus.javaClass)
+    assertEquals(clazz, registryStatus.javaClass)
   }
 
   private fun executeAssumingFailure(task: BorrowTaskType): TaskResult.Failure<*> {
@@ -124,46 +133,75 @@ class BorrowTaskTest {
 
   @Before
   fun testSetup() {
+    this.webServer = MockWebServer()
+    this.webServer.start(20000)
+
+    this.opdsEmptyFeedEntry =
+      BorrowTests.opdsEmptyFeedEntryOfType()
+
+    this.opdsOpenEPUBFeedEntry =
+      BorrowTests.opdsOpenAccessFeedEntryOfType(
+        this.webServer,
+        genericEPUBFiles.fullType
+      )
+
+    this.accountId =
+      AccountID.generate()
+    this.bookID =
+      BookIDs.newFromOPDSEntry(this.opdsOpenEPUBFeedEntry)
+
+    this.bookDatabase =
+      MockBookDatabase(this.accountId)
+
+    this.bookRegistry =
+      BookRegistry.create()
+    this.bookStates =
+      mutableListOf()
+    this.bookEvents =
+      mutableListOf()
+    this.bookRegistrySub =
+      this.bookRegistry.bookEvents()
+        .subscribe(this::recordBookEvent)
+    this.bookFormatSupport =
+      MockBookFormatSupport()
+
     this.temporaryDirectory =
       TestDirectories.temporaryDirectory()
     this.cacheDirectory =
       TestDirectories.temporaryDirectory()
     this.audioBookManifestStrategies =
       MockAudioBookManifestStrategies()
-    this.bookFormatSupport =
-      Mockito.mock(BookFormatSupportType::class.java)
-    this.bookRegistry =
-      BookRegistry.create()
-    this.bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
-    this.bookDatabaseEntry =
-      Mockito.mock(BookDatabaseEntryType::class.java)
     this.contentResolver =
       MockContentResolver()
     this.bundledContent =
       MockBundledContentResolver()
     this.profile =
       Mockito.mock(ProfileReadableType::class.java)
-    this.accountId =
-      AccountID.generate()
-    this.bookID =
-      BookIDs.newFromText("x")
     this.account =
       Mockito.mock(AccountType::class.java)
     this.accountProvider =
       MockAccountProviders.fakeProvider("urn:uuid:ea9480d4-5479-4ef1-b1d1-84ccbedb680f")
-    this.httpClient =
-      Mockito.mock(LSHTTPClientType::class.java)
     this.services =
       MutableServiceDirectory()
     this.subtasks =
-      object : BorrowSubtaskDirectoryType {
-        override fun findSubtaskFor(
-          pathElement: OPDSAcquisitionPathElement
-        ): BorrowSubtaskFactoryType? {
-          return null
-        }
-      }
+      MockBorrowSubtaskDirectory()
+
+    val androidContext =
+      Mockito.mock(Context::class.java)
+
+    this.httpClient =
+      LSHTTPClients()
+        .create(
+          context = androidContext,
+          configuration = LSHTTPClientConfiguration(
+            "simplified-tests",
+            "999.999.0"
+          )
+        )
+
+    this.subtasks.subtasks =
+      BorrowSubtasks.directory()
+        .subtasks
 
     Mockito.`when`(this.profile.account(this.accountId))
       .thenReturn(this.account)
@@ -171,40 +209,20 @@ class BorrowTaskTest {
       .thenReturn(this.bookDatabase)
     Mockito.`when`(this.account.provider)
       .thenReturn(this.accountProvider)
-    Mockito.`when`(this.bookDatabase.createOrUpdate(this.anyNonNull(), this.anyNonNull()))
-      .thenReturn(this.bookDatabaseEntry)
+  }
 
-    Mockito.`when`(this.bookDatabaseEntry.book)
-      .then {
-        return@then this.book
-      }
-    Mockito.`when`(this.bookDatabaseEntry.writeOPDSEntry(anyNonNull()))
-      .then {
-        throw java.lang.IllegalStateException("Not implemented!")
-      }
+  @After
+  fun tearDown() {
+    this.bookRegistrySub?.dispose()
+    this.webServer.close()
+  }
 
-    this.opdsEmptyFeedEntry =
-      OPDSAcquisitionFeedEntry.newBuilder(
-        "x",
-        "Book",
-        DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none())
-      ).build()
-
-    this.opdsOpenEPUBFeedEntry =
-      OPDSAcquisitionFeedEntry.newBuilder(
-        "x",
-        "Book",
-        DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.none())
-      ).addAcquisition(
-        OPDSAcquisition(
-          OPDSAcquisition.Relation.ACQUISITION_GENERIC,
-          URI.create("http://www.example.com"),
-          StandardFormatNames.genericEPUBFiles,
-          listOf()
-        )
-      ).build()
+  private fun recordBookEvent(event: BookStatusEvent) {
+    this.logger.debug("event: {}", event)
+    val status = this.bookRegistry.bookStatusOrNull(event.book())!!
+    this.logger.debug("status: {}", status)
+    this.bookStates.add(status)
+    this.bookEvents.add(event)
   }
 
   /**
@@ -224,7 +242,7 @@ class BorrowTaskTest {
     val result = this.executeAssumingFailure(task)
     assertEquals(BorrowErrorCodes.bookDatabaseFailed, result.lastErrorCode)
 
-    this.verifyBookRegistryHasFailureStatus()
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
   }
 
   /**
@@ -244,7 +262,7 @@ class BorrowTaskTest {
     val result = this.executeAssumingFailure(task)
     assertEquals(BorrowErrorCodes.accountsDatabaseException, result.lastErrorCode)
 
-    this.verifyBookRegistryHasFailureStatus()
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
   }
 
   /**
@@ -261,7 +279,7 @@ class BorrowTaskTest {
     val result = this.executeAssumingFailure(task)
     assertEquals(BorrowErrorCodes.noSupportedAcquisitions, result.lastErrorCode)
 
-    this.verifyBookRegistryHasFailureStatus()
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
   }
 
   /**
@@ -275,14 +293,95 @@ class BorrowTaskTest {
     val task =
       this.createTask(request)
 
-    Mockito.`when`(this.bookFormatSupport.isSupportedPath(this.anyNonNull()))
-      .thenReturn(true)
-    Mockito.`when`(this.bookFormatSupport.isSupportedFinalContentType(this.anyNonNull()))
-      .thenReturn(true)
+    this.subtasks.subtasks = listOf()
 
     val result = this.executeAssumingFailure(task)
     assertEquals(BorrowErrorCodes.noSubtaskAvailable, result.lastErrorCode)
 
-    this.verifyBookRegistryHasFailureStatus()
+    this.verifyBookRegistryHasStatus(FailedLoan::class.java)
+  }
+
+  /**
+   * A simple direct EPUB download succeeds.
+   */
+
+  @Test
+  fun testSimpleEPUB() {
+    this.bookDatabase.entries.clear()
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("A cold star looked down on his creations")
+    )
+
+    val request =
+      BorrowRequest.Start(this.accountId, this.opdsOpenEPUBFeedEntry)
+    val task =
+      this.createTask(request)
+
+    val result = this.executeAssumingSuccess(task)
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
+
+    val entry = this.bookDatabase.entries[this.bookID]!!
+    val handle =
+      entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java) as MockBookDatabaseEntryFormatHandleEPUB
+
+    assertEquals("A cold star looked down on his creations", handle.bookData)
+  }
+
+  /**
+   * Creating a loan and then downloading an EPUB succeeds.
+   */
+
+  @Test
+  fun testLoanEPUB() {
+    this.bookDatabase.entries.clear()
+
+    val loanable =
+      BorrowTests.opdsLoanableIndirectFeedEntryOfType(this.webServer, genericEPUBFiles.fullType)
+    val loaned =
+      BorrowTests.opdsLoanedTextOfType(this.webServer, genericEPUBFiles.fullType)
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", opdsAcquisitionFeedEntry.fullType)
+        .setBody(loaned)
+    )
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("A cold star looked down on his creations")
+    )
+
+    val request =
+      BorrowRequest.Start(this.accountId, loanable)
+    val task =
+      this.createTask(request)
+
+    val result = this.executeAssumingSuccess(task)
+
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedNotDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
+
+    val entry = this.bookDatabase.entries[this.bookID]!!
+    val handle =
+      entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java) as MockBookDatabaseEntryFormatHandleEPUB
+
+    assertEquals("A cold star looked down on his creations", handle.bookData)
   }
 }

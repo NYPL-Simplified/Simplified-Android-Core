@@ -3,6 +3,7 @@ package org.nypl.simplified.books.borrowing.internal
 import com.io7m.junreachable.UnreachableCodeException
 import one.irradia.mime.api.MIMECompatibility
 import one.irradia.mime.api.MIMECompatibility.applicationOctetStream
+import one.irradia.mime.api.MIMEType
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Put
 import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldInQueue
@@ -21,6 +22,7 @@ import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.Borro
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskHaltedEarly
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
+import org.nypl.simplified.books.formats.api.StandardFormatNames.allOPDSFeeds
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
@@ -50,6 +52,18 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
 
     override fun createSubtask(): BorrowSubtaskType {
       return BorrowLoanCreate()
+    }
+
+    override fun isApplicableFor(
+      type: MIMEType,
+      target: URI?
+    ): Boolean {
+      for (opdsType in allOPDSFeeds) {
+        if (MIMECompatibility.isCompatibleStrictWithoutAttributes(opdsType, type)) {
+          return true
+        }
+      }
+      return false
     }
   }
 

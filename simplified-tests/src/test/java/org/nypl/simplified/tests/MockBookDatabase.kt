@@ -6,11 +6,15 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.slf4j.LoggerFactory
 import java.util.SortedSet
 
 class MockBookDatabase(
   val owner: AccountID
 ) : BookDatabaseType {
+
+  private val logger =
+    LoggerFactory.getLogger(MockBookDatabase::class.java)
 
   var deleted = false
   val entries = mutableMapOf<BookID, MockBookDatabaseEntry>()
@@ -31,11 +35,16 @@ class MockBookDatabase(
     id: BookID,
     entry: OPDSAcquisitionFeedEntry
   ): BookDatabaseEntryType {
+    this.logger.debug("createOrUpdate: [{}]", id)
+
     val existing = this.entries[id]
     if (existing != null) {
+      this.logger.debug("createOrUpdate: [{}]: rewriting existing", id)
       existing.writeOPDSEntry(entry)
       return existing
     }
+
+    this.logger.debug("createOrUpdate: [{}]: creating new entry", id)
 
     val newEntry =
       MockBookDatabaseEntry(
@@ -50,6 +59,7 @@ class MockBookDatabase(
       )
 
     newEntry.writeOPDSEntry(entry)
+    this.entries[id] = newEntry
     return newEntry
   }
 

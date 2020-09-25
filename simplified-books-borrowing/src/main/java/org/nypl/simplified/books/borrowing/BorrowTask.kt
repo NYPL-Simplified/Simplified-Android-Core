@@ -167,7 +167,7 @@ class BorrowTask private constructor(
         elementQueue.removeAt(0)
         context.currentOPDSAcquisitionPathElement = pathElement
         context.currentRemainingOPDSPathElements = elementQueue.toList()
-        val subtaskFactory = this.subtaskFindForPathElement(pathElement, book)
+        val subtaskFactory = this.subtaskFindForPathElement(context, pathElement, book)
         this.subtaskExecute(subtaskFactory, context, book)
       } catch (e: BorrowSubtaskHaltedEarly) {
         this.logger.debug("subtask halted early: ", e)
@@ -213,11 +213,13 @@ class BorrowTask private constructor(
    */
 
   private fun subtaskFindForPathElement(
+    context: BorrowContext,
     pathElement: OPDSAcquisitionPathElement,
     book: Book
   ): BorrowSubtaskFactoryType {
     this.taskRecorder.beginNewStep("Finding subtask for acquisition path element...")
-    val subtaskFactory = this.requirements.subtasks.findSubtaskFor(pathElement)
+    val subtaskFactory =
+      this.requirements.subtasks.findSubtaskFor(pathElement.mimeType, context.currentURI())
     if (subtaskFactory == null) {
       this.taskRecorder.currentStepFailed(
         message = "We don't know how to handle this kind of acquisition.",

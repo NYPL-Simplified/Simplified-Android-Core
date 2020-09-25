@@ -1,6 +1,8 @@
 package org.nypl.simplified.books.borrowing.internal
 
 import com.io7m.junreachable.UnreachableCodeException
+import one.irradia.mime.api.MIMECompatibility
+import one.irradia.mime.api.MIMEType
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadCancelled
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadCompletedSuccessfully
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadFailed.DownloadFailedExceptionally
@@ -33,7 +35,9 @@ import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.Borro
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
+import org.nypl.simplified.books.formats.api.StandardFormatNames.adobeACSMFiles
 import java.io.File
+import java.net.URI
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeoutException
@@ -51,6 +55,13 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
 
     override fun createSubtask(): BorrowSubtaskType {
       return BorrowACSM()
+    }
+
+    override fun isApplicableFor(
+      type: MIMEType,
+      target: URI?
+    ): Boolean {
+      return MIMECompatibility.isCompatibleStrictWithoutAttributes(type, adobeACSMFiles)
     }
   }
 

@@ -1,6 +1,8 @@
 package org.nypl.simplified.books.borrowing.internal
 
 import com.io7m.junreachable.UnreachableCodeException
+import one.irradia.mime.api.MIMECompatibility
+import one.irradia.mime.api.MIMEType
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadCancelled
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadCompletedSuccessfully
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadFailed.DownloadFailedExceptionally
@@ -15,7 +17,10 @@ import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.Borro
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
+import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
+import org.nypl.simplified.books.formats.api.StandardFormatNames.genericPDFFiles
 import java.io.File
+import java.net.URI
 
 /**
  * A task that downloads a file directly and saves it to the book database. It _does not_
@@ -31,6 +36,19 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
 
     override fun createSubtask(): BorrowSubtaskType {
       return BorrowDirectDownload()
+    }
+
+    override fun isApplicableFor(
+      type: MIMEType,
+      target: URI?
+    ): Boolean {
+      if (MIMECompatibility.isCompatibleStrictWithoutAttributes(type, genericEPUBFiles)) {
+        return true
+      }
+      if (MIMECompatibility.isCompatibleStrictWithoutAttributes(type, genericPDFFiles)) {
+        return true
+      }
+      return false
     }
   }
 
