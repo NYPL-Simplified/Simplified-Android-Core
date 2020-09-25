@@ -2,11 +2,13 @@ package org.nypl.simplified.books.borrowing
 
 import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -141,16 +143,19 @@ class BorrowTask private constructor(
       BorrowContext(
         account = this.account,
         adobeExecutor = this.requirements.adobeExecutor,
+        audioBookManifestStrategies = this.requirements.audioBookManifestStrategies,
         bookDatabaseEntry = this.databaseEntry!!,
         bookInitial = book,
         bookRegistry = this.requirements.bookRegistry,
         bundledContent = this.requirements.bundledContent,
+        cacheDirectory = this.requirements.cacheDirectory,
         clock = this.requirements.clock,
         contentResolver = this.requirements.contentResolver,
         currentOPDSAcquisitionPathElement = path.elements.first(),
         httpClient = this.requirements.httpClient,
         logger = this.logger,
         opdsAcquisitionPath = path,
+        services = this.requirements.services,
         taskRecorder = this.taskRecorder,
         temporaryDirectory = this.requirements.temporaryDirectory
       )
@@ -308,6 +313,7 @@ class BorrowTask private constructor(
 
   private class BorrowContext(
     override val account: AccountReadableType,
+    override val audioBookManifestStrategies: AudioBookManifestStrategiesType,
     override val clock: () -> Instant,
     override val contentResolver: ContentResolverType,
     override val bundledContent: BundledContentResolverType,
@@ -320,8 +326,13 @@ class BorrowTask private constructor(
     private val logger: Logger,
     private val temporaryDirectory: File,
     var currentOPDSAcquisitionPathElement: OPDSAcquisitionPathElement,
-    override val adobeExecutor: AdobeAdeptExecutorType?
+    override val adobeExecutor: AdobeAdeptExecutorType?,
+    override val services: ServiceDirectoryType,
+    private val cacheDirectory: File
   ) : BorrowContextType {
+
+    override fun cacheDirectory(): File =
+      this.cacheDirectory
 
     override val adobeExecutorTimeout: BorrowTimeoutConfiguration =
       BorrowTimeoutConfiguration(300L, TimeUnit.SECONDS)

@@ -2,9 +2,11 @@ package org.nypl.simplified.tests.books.borrowing
 
 import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -16,6 +18,7 @@ import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
+import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.Logger
 import java.io.File
 import java.io.IOException
@@ -37,6 +40,15 @@ class MockBorrowContext(
   override var bookDatabaseEntry: BookDatabaseEntryType,
   bookInitial: Book
 ) : BorrowContextType {
+
+  var cacheDirectory = TestDirectories.temporaryDirectory()
+
+  override fun cacheDirectory(): File {
+    return this.cacheDirectory
+  }
+
+  override lateinit var audioBookManifestStrategies: AudioBookManifestStrategiesType
+  override lateinit var services: ServiceDirectoryType
 
   override var adobeExecutorTimeout: BorrowTimeoutConfiguration =
     BorrowTimeoutConfiguration(2L, TimeUnit.SECONDS)

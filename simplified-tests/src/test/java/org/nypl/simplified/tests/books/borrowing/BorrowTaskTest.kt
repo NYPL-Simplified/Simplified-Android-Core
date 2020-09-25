@@ -37,8 +37,10 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.MockAudioBookManifestStrategies
 import org.nypl.simplified.tests.MockBundledContentResolver
 import org.nypl.simplified.tests.MockContentResolver
+import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -49,6 +51,7 @@ class BorrowTaskTest {
   private lateinit var account: AccountType
   private lateinit var accountId: AccountID
   private lateinit var accountProvider: AccountProvider
+  private lateinit var audioBookManifestStrategies: MockAudioBookManifestStrategies
   private lateinit var book: Book
   private lateinit var bookDatabase: BookDatabaseType
   private lateinit var bookDatabaseEntry: BookDatabaseEntryType
@@ -56,11 +59,13 @@ class BorrowTaskTest {
   private lateinit var bookID: BookID
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var bundledContent: BundledContentResolverType
+  private lateinit var cacheDirectory: File
   private lateinit var contentResolver: ContentResolverType
   private lateinit var httpClient: LSHTTPClientType
   private lateinit var opdsEmptyFeedEntry: OPDSAcquisitionFeedEntry
   private lateinit var opdsOpenEPUBFeedEntry: OPDSAcquisitionFeedEntry
   private lateinit var profile: ProfileReadableType
+  private lateinit var services: MutableServiceDirectory
   private lateinit var subtasks: BorrowSubtaskDirectoryType
   private lateinit var temporaryDirectory: File
 
@@ -80,6 +85,7 @@ class BorrowTaskTest {
     return BorrowTask.createBorrowTask(
       requirements = BorrowRequirements(
         adobeExecutor = null,
+        audioBookManifestStrategies = this.audioBookManifestStrategies,
         bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent,
@@ -88,7 +94,9 @@ class BorrowTaskTest {
         httpClient = this.httpClient,
         profile = this.profile,
         subtasks = this.subtasks,
-        temporaryDirectory = this.temporaryDirectory
+        temporaryDirectory = this.temporaryDirectory,
+        services = this.services,
+        cacheDirectory = this.cacheDirectory
       ),
       request = request
     )
@@ -118,6 +126,10 @@ class BorrowTaskTest {
   fun testSetup() {
     this.temporaryDirectory =
       TestDirectories.temporaryDirectory()
+    this.cacheDirectory =
+      TestDirectories.temporaryDirectory()
+    this.audioBookManifestStrategies =
+      MockAudioBookManifestStrategies()
     this.bookFormatSupport =
       Mockito.mock(BookFormatSupportType::class.java)
     this.bookRegistry =
@@ -142,6 +154,8 @@ class BorrowTaskTest {
       MockAccountProviders.fakeProvider("urn:uuid:ea9480d4-5479-4ef1-b1d1-84ccbedb680f")
     this.httpClient =
       Mockito.mock(LSHTTPClientType::class.java)
+    this.services =
+      MutableServiceDirectory()
     this.subtasks =
       object : BorrowSubtaskDirectoryType {
         override fun findSubtaskFor(

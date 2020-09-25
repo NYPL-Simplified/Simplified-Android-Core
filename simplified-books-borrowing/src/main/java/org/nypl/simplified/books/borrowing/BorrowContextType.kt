@@ -2,9 +2,11 @@ package org.nypl.simplified.books.borrowing
 
 import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
@@ -26,11 +28,19 @@ import java.net.URI
 interface BorrowContextType {
   val account: AccountReadableType
   val adobeExecutor: AdobeAdeptExecutorType?
-  val clock: () -> Instant
+  val audioBookManifestStrategies: AudioBookManifestStrategiesType
   val bundledContent: BundledContentResolverType
+  val clock: () -> Instant
   val contentResolver: ContentResolverType
   val httpClient: LSHTTPClientType
+  val services: ServiceDirectoryType
   val taskRecorder: TaskRecorderType
+
+  /**
+   * The current cache directory.
+   */
+
+  fun cacheDirectory(): File
 
   /**
    * The timeout value that will be used when waiting for ACS operations to complete.
