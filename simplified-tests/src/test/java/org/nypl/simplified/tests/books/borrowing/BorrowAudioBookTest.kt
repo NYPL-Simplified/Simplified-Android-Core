@@ -147,7 +147,7 @@ class BorrowAudioBookTest {
       AccountID.generate()
 
     val initialFeedEntry =
-      BorrowTests.opdsContentURILoanedFeedEntryOfType(genericAudioBooks.first().fullType)
+      BorrowTestFeeds.opdsContentURILoanedFeedEntryOfType(genericAudioBooks.first().fullType)
     this.bookID =
       BookIDs.newFromOPDSEntry(initialFeedEntry)
 

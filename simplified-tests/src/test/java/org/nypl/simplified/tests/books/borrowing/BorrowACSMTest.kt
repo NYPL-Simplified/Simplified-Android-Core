@@ -4,11 +4,12 @@ import android.content.Context
 import io.reactivex.disposables.Disposable
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import one.irradia.mime.api.MIMEType
 import org.joda.time.Instant
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
@@ -52,6 +53,8 @@ import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.acsUnparsea
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpContentTypeIncompatible
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.httpRequestFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskCancelled
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskHaltedEarly
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.formats.api.StandardFormatNames.adobeACSMFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
@@ -73,9 +76,8 @@ import org.nypl.simplified.tests.MockBundledContentResolver
 import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.MockDRMInformationACSHandle
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.TestDirectories.temporaryFileOf
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.lang.IllegalStateException
 import java.net.URI
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
@@ -161,7 +163,7 @@ class BorrowACSMTest {
     this.profile =
       Mockito.mock(ProfileReadableType::class.java)
     val initialFeedEntry =
-      BorrowTests.opdsLoanedFeedEntryOfType(this.webServer, genericEPUBFiles.fullType)
+      BorrowTestFeeds.opdsLoanedFeedEntryOfType(this.webServer, genericEPUBFiles.fullType)
     this.bookID =
       BookIDs.newFromOPDSEntry(initialFeedEntry)
     this.account =
@@ -322,8 +324,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -352,8 +354,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -391,8 +393,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -435,8 +437,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -470,8 +472,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -501,7 +503,7 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
+      fail()
     } catch (e: BorrowSubtaskCancelled) {
       this.logger.error("exception: ", e)
     }
@@ -545,7 +547,7 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
+      fail()
     } catch (e: BorrowSubtaskCancelled) {
       this.logger.error("exception: ", e)
     }
@@ -583,8 +585,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -620,13 +622,68 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
     this.verifyBookRegistryHasStatus(FailedDownload::class.java)
     assertEquals(acsUnparseableACSM, this.taskRecorder.finishFailure<Unit>().lastErrorCode)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(FailedDownload::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
+
+    assertTrue(this.acsHandle.info.acsmFile == null)
+    assertTrue(this.bookDatabaseEPUBHandle.format.file == null)
+  }
+
+  /**
+   * If the ACSM downloads successfully, but the target content type is nonsense, downloading
+   * fails.
+   */
+
+  @Test
+  fun testACSMNonsenseFormat() {
+    val task = BorrowACSM.createSubtask()
+
+    this.context.currentURIField =
+      this.webServer.url("/book.acsm").toUri()
+    this.context.opdsAcquisitionPath =
+      this.context.opdsAcquisitionPath.copy(
+        elements = listOf(
+          OPDSAcquisitionPathElement(
+            adobeACSMFiles,
+            this.webServer.url("/book.acsm").toUri()
+          ),
+          OPDSAcquisitionPathElement(
+            MIMEType("text", "plain", mapOf()),
+            this.webServer.url("/book.epub").toUri()
+          )
+        )
+      )
+    this.context.currentRemainingOPDSPathElements =
+      listOf(
+        OPDSAcquisitionPathElement(
+          MIMEType("text", "plain", mapOf()),
+          this.webServer.url("/book.epub").toUri()
+        )
+      )
+
+    this.webServer.enqueue(this.validACSMResponse)
+
+    try {
+      task.execute(this.context)
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
+      this.logger.debug("correctly failed: ", e)
+    }
+
+    this.verifyBookRegistryHasStatus(FailedDownload::class.java)
+    assertEquals("noFormatHandle", this.taskRecorder.finishFailure<Unit>().lastErrorCode)
     assertEquals(0, this.bookDatabaseEntry.entryWrites)
 
     assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
@@ -658,8 +715,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -703,8 +760,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -742,8 +799,8 @@ class BorrowACSMTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
-    } catch (e: Exception) {
+      fail()
+    } catch (e: BorrowSubtaskFailed) {
       this.logger.error("exception: ", e)
     }
 
@@ -775,21 +832,28 @@ class BorrowACSMTest {
 
     this.webServer.enqueue(this.validACSMResponse)
 
-    val temporaryFile = File(TestDirectories.temporaryDirectory(), "book.epub")
-    val buffer = ByteBuffer.wrap("BOOK!".toByteArray())
-    temporaryFile.writeBytes(buffer.array())
-
+    val temporaryFile =
+      temporaryFileOf("book.epub", "A cold star looked down on his creations")
     val adobeLoanID =
       AdobeLoanID("4cca8916-d0fe-44ed-85d9-a8212764375d")
 
     this.adobeConnector.onFulfill = { listener, acsm, user ->
       listener.onFulfillmentSuccess(
         temporaryFile,
-        AdobeAdeptLoan(adobeLoanID, buffer, false)
+        AdobeAdeptLoan(
+          adobeLoanID,
+          ByteBuffer.wrap("You're a blank. You don't have rights.".toByteArray()),
+          false
+        )
       )
     }
 
-    task.execute(this.context)
+    try {
+      task.execute(this.context)
+      fail()
+    } catch (e: BorrowSubtaskHaltedEarly) {
+      this.logger.debug("correctly halted early: ", e)
+    }
 
     this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
     assertEquals(0, this.bookDatabaseEntry.entryWrites)

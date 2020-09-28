@@ -7,19 +7,35 @@ import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.Instant
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
+import org.nypl.drm.core.AdobeAdeptLoan
+import org.nypl.drm.core.AdobeDeviceID
+import org.nypl.drm.core.AdobeLoanID
+import org.nypl.drm.core.AdobeUserID
+import org.nypl.drm.core.AdobeVendorID
+import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
+import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
+import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.book_database.BookDRMInformationHandleACS
+import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -36,33 +52,62 @@ import org.nypl.simplified.books.borrowing.BorrowTask
 import org.nypl.simplified.books.borrowing.BorrowTaskType
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
+import org.nypl.simplified.books.formats.api.StandardFormatNames.adobeACSMFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.opdsAcquisitionFeedEntry
 import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSJSONParser
+import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.MockAdobeAdeptConnector
+import org.nypl.simplified.tests.MockAdobeAdeptExecutor
+import org.nypl.simplified.tests.MockAdobeAdeptNetProvider
+import org.nypl.simplified.tests.MockAdobeAdeptResourceProvider
 import org.nypl.simplified.tests.MockAudioBookManifestStrategies
-import org.nypl.simplified.tests.MockBookDatabase
-import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.tests.MockBookFormatSupport
 import org.nypl.simplified.tests.MockBorrowSubtaskDirectory
 import org.nypl.simplified.tests.MockBundledContentResolver
 import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.TestDirectories.temporaryFileOf
+import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.FeedRequirements
+import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.PathElement
+import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.Status.LOANABLE
+import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.Status.LOANED
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.net.URI
+import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class BorrowTaskTest {
+
+  private val validACSM = """
+<fulfillmentToken
+  xmlns="http://ns.adobe.com/adept"
+  xmlns:f="http://purl.org/dc/elements/1.1/">
+  <resourceItemInfo></resourceItemInfo>
+  <metadata></metadata>
+  <f:format>application/epub+zip</f:format>
+</fulfillmentToken>
+  """
 
   private lateinit var account: AccountType
   private lateinit var accountId: AccountID
   private lateinit var accountProvider: AccountProvider
+  private lateinit var adobeConnector: MockAdobeAdeptConnector
+  private lateinit var adobeExecutor: MockAdobeAdeptExecutor
+  private lateinit var adobeExecutorService: ExecutorService
+  private lateinit var adobeNetProvider: MockAdobeAdeptNetProvider
+  private lateinit var adobeResourceProvider: MockAdobeAdeptResourceProvider
   private lateinit var audioBookManifestStrategies: MockAudioBookManifestStrategies
   private lateinit var book: Book
-  private lateinit var bookDatabase: MockBookDatabase
+  private lateinit var bookDatabase: BookDatabaseType
   private lateinit var bookEvents: MutableList<BookStatusEvent>
   private lateinit var bookFormatSupport: MockBookFormatSupport
   private lateinit var bookID: BookID
@@ -96,7 +141,7 @@ class BorrowTaskTest {
 
     return BorrowTask.createBorrowTask(
       requirements = BorrowRequirements(
-        adobeExecutor = null,
+        adobeExecutor = this.adobeExecutor,
         audioBookManifestStrategies = this.audioBookManifestStrategies,
         bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
@@ -137,10 +182,10 @@ class BorrowTaskTest {
     this.webServer.start(20000)
 
     this.opdsEmptyFeedEntry =
-      BorrowTests.opdsEmptyFeedEntryOfType()
+      BorrowTestFeeds.opdsEmptyFeedEntryOfType()
 
     this.opdsOpenEPUBFeedEntry =
-      BorrowTests.opdsOpenAccessFeedEntryOfType(
+      BorrowTestFeeds.opdsOpenAccessFeedEntryOfType(
         this.webServer,
         genericEPUBFiles.fullType
       )
@@ -150,8 +195,17 @@ class BorrowTaskTest {
     this.bookID =
       BookIDs.newFromOPDSEntry(this.opdsOpenEPUBFeedEntry)
 
+    val androidContext =
+      Mockito.mock(Context::class.java)
+
     this.bookDatabase =
-      MockBookDatabase(this.accountId)
+      BookDatabase.open(
+        context = androidContext,
+        parser = OPDSJSONParser.newParser(),
+        serializer = OPDSJSONSerializer.newSerializer(),
+        owner = this.accountId,
+        directory = TestDirectories.temporaryDirectory()
+      )
 
     this.bookRegistry =
       BookRegistry.create()
@@ -186,9 +240,6 @@ class BorrowTaskTest {
     this.subtasks =
       MockBorrowSubtaskDirectory()
 
-    val androidContext =
-      Mockito.mock(Context::class.java)
-
     this.httpClient =
       LSHTTPClients()
         .create(
@@ -209,6 +260,41 @@ class BorrowTaskTest {
       .thenReturn(this.bookDatabase)
     Mockito.`when`(this.account.provider)
       .thenReturn(this.accountProvider)
+
+    Mockito.`when`(this.account.loginState)
+      .thenReturn(
+        AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("user"),
+            password = AccountPassword("password"),
+            adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
+              vendorID = AdobeVendorID("vendor"),
+              clientToken = AccountAuthenticationAdobeClientToken(
+                userName = "user",
+                password = "password",
+                rawToken = "b85e7fd7-cf6e-4e39-8da6-8df8c9ee9779"
+              ),
+              deviceManagerURI = URI.create("http://www.example.com"),
+              postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+                deviceID = AdobeDeviceID("ca887d21-a56c-4314-811e-952d885d2115"),
+                userID = AdobeUserID("19b25c06-8b39-4643-8813-5980bee45651")
+              )
+            ),
+            authenticationDescription = "Basic"
+          )
+        )
+      )
+
+    this.adobeNetProvider =
+      MockAdobeAdeptNetProvider()
+    this.adobeResourceProvider =
+      MockAdobeAdeptResourceProvider()
+    this.adobeConnector =
+      MockAdobeAdeptConnector(this.adobeNetProvider, this.adobeResourceProvider)
+    this.adobeExecutorService =
+      Executors.newSingleThreadExecutor()
+    this.adobeExecutor =
+      MockAdobeAdeptExecutor(this.adobeExecutorService, this.adobeConnector)
   }
 
   @After
@@ -307,8 +393,6 @@ class BorrowTaskTest {
 
   @Test
   fun testSimpleEPUB() {
-    this.bookDatabase.entries.clear()
-
     this.webServer.enqueue(
       MockResponse()
         .setResponseCode(200)
@@ -329,11 +413,11 @@ class BorrowTaskTest {
     assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
     assertEquals(0, this.bookStates.size)
 
-    val entry = this.bookDatabase.entries[this.bookID]!!
+    val entry = this.bookDatabase.entry(this.bookID)
     val handle =
-      entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java) as MockBookDatabaseEntryFormatHandleEPUB
+      entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
 
-    assertEquals("A cold star looked down on his creations", handle.bookData)
+    assertEquals("A cold star looked down on his creations", handle.format.file!!.readText())
   }
 
   /**
@@ -342,12 +426,29 @@ class BorrowTaskTest {
 
   @Test
   fun testLoanEPUB() {
-    this.bookDatabase.entries.clear()
+    val loanableRequirements =
+      FeedRequirements(
+        status = LOANABLE,
+        base = this.webServer.url("/").toUri(),
+        path = listOf(
+          PathElement(opdsAcquisitionFeedEntry.fullType, "/loan"),
+          PathElement(genericEPUBFiles.fullType, "/epub")
+        )
+      )
+
+    val loanedRequirements =
+      FeedRequirements(
+        status = LOANED,
+        base = this.webServer.url("/").toUri(),
+        path = listOf(
+          PathElement(genericEPUBFiles.fullType, "/epub")
+        )
+      )
 
     val loanable =
-      BorrowTests.opdsLoanableIndirectFeedEntryOfType(this.webServer, genericEPUBFiles.fullType)
+      BorrowTestFeeds.feed(loanableRequirements)
     val loaned =
-      BorrowTests.opdsLoanedTextOfType(this.webServer, genericEPUBFiles.fullType)
+      BorrowTestFeeds.feedText(loanedRequirements)
 
     this.webServer.enqueue(
       MockResponse()
@@ -378,10 +479,101 @@ class BorrowTaskTest {
     assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
     assertEquals(0, this.bookStates.size)
 
-    val entry = this.bookDatabase.entries[this.bookID]!!
+    val entry = this.bookDatabase.entry(this.bookID)
     val handle =
-      entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java) as MockBookDatabaseEntryFormatHandleEPUB
+      entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
 
-    assertEquals("A cold star looked down on his creations", handle.bookData)
+    assertEquals("A cold star looked down on his creations", handle.format.file!!.readText())
+  }
+
+  /**
+   * Creating a loan and then downloading an EPUB via an ACSM file succeeds.
+   */
+
+  @Test
+  fun testLoanACSM() {
+    val loanableRequirements =
+      FeedRequirements(
+        status = LOANABLE,
+        base = this.webServer.url("/").toUri(),
+        path = listOf(
+          PathElement(opdsAcquisitionFeedEntry.fullType, "/loan"),
+          PathElement(adobeACSMFiles.fullType, "/acsm"),
+          PathElement(genericEPUBFiles.fullType, "/epub")
+        )
+      )
+
+    val loanedRequirements =
+      FeedRequirements(
+        status = LOANED,
+        base = this.webServer.url("/").toUri(),
+        path = listOf(
+          PathElement(adobeACSMFiles.fullType, "/acsm"),
+          PathElement(genericEPUBFiles.fullType, "/epub")
+        )
+      )
+
+    val loanable =
+      BorrowTestFeeds.feed(loanableRequirements)
+    val loaned =
+      BorrowTestFeeds.feedText(loanedRequirements)
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", opdsAcquisitionFeedEntry.fullType)
+        .setBody(loaned)
+    )
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", adobeACSMFiles.fullType)
+        .setBody(this.validACSM)
+    )
+
+    val temporaryFile =
+      temporaryFileOf("book.epub", "A cold star looked down on his creations")
+    val adobeLoanID =
+      AdobeLoanID("4cca8916-d0fe-44ed-85d9-a8212764375d")
+
+    this.adobeConnector.onFulfill = { listener, acsm, user ->
+      listener.onFulfillmentSuccess(
+        temporaryFile,
+        AdobeAdeptLoan(
+          adobeLoanID,
+          ByteBuffer.wrap("You're a blank. You don't have rights.".toByteArray()),
+          false
+        )
+      )
+    }
+
+    val request =
+      BorrowRequest.Start(this.accountId, loanable)
+    val task =
+      this.createTask(request)
+
+    val result = this.executeAssumingSuccess(task)
+
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedNotDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
+
+    val entry =
+      this.bookDatabase.entry(this.bookID)
+    val handle =
+      entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
+    val drm =
+      handle.drmInformationHandle as BookDRMInformationHandleACS
+
+    assertEquals("A cold star looked down on his creations", handle.format.file!!.readText())
+    assertEquals(adobeLoanID, drm.info.rights!!.second.id)
+    assertNotNull(drm.info.acsmFile)
   }
 }

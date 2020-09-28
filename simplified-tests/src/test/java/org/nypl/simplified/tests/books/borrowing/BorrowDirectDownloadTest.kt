@@ -127,7 +127,7 @@ class BorrowDirectDownloadTest {
       AccountID.generate()
 
     val initialFeedEntry =
-      BorrowTests.opdsLoanedFeedEntryOfType(this.webServer, genericEPUBFiles.fullType)
+      BorrowTestFeeds.opdsLoanedFeedEntryOfType(this.webServer, genericEPUBFiles.fullType)
     this.bookID =
       BookIDs.newFromOPDSEntry(initialFeedEntry)
 
@@ -309,7 +309,7 @@ class BorrowDirectDownloadTest {
       OPDSAcquisitionPathElement(genericPDFFiles, null)
 
     this.bookDatabaseEntry.writeOPDSEntry(
-      BorrowTests.opdsLoanedFeedEntryOfType(this.webServer, genericPDFFiles.fullType)
+      BorrowTestFeeds.opdsLoanedFeedEntryOfType(this.webServer, genericPDFFiles.fullType)
     )
     this.bookDatabaseEntry.entryWrites = 0
     this.bookDatabaseEntry.formatHandlesField.clear()

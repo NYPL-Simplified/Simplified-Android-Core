@@ -33,6 +33,7 @@ import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.acsUnparsea
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.noFormatHandle
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskCancelled
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskHaltedEarly
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
 import org.nypl.simplified.books.formats.api.StandardFormatNames.adobeACSMFiles
@@ -351,6 +352,14 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
       }
 
       this.saveFulfilledBook(context, fulfillment)
+
+      /*
+       * Adobe ACS is a special case in the sense that it supersedes any acquisition
+       * path elements that might follow this one. We mark this subtask as having halted
+       * early.
+       */
+
+      throw BorrowSubtaskHaltedEarly()
     } finally {
       temporaryFile.delete()
     }

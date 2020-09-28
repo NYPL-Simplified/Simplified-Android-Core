@@ -120,7 +120,7 @@ class BorrowCopyTest {
       AccountID.generate()
 
     val initialFeedEntry =
-      BorrowTests.opdsContentURILoanedFeedEntryOfType(genericEPUBFiles.fullType)
+      BorrowTestFeeds.opdsContentURILoanedFeedEntryOfType(genericEPUBFiles.fullType)
     this.bookID =
       BookIDs.newFromOPDSEntry(initialFeedEntry)
 
@@ -266,7 +266,7 @@ class BorrowCopyTest {
       OPDSAcquisitionPathElement(genericPDFFiles, null)
 
     this.bookDatabaseEntry.writeOPDSEntry(
-      BorrowTests.opdsContentURILoanedFeedEntryOfType(genericPDFFiles.fullType)
+      BorrowTestFeeds.opdsContentURILoanedFeedEntryOfType(genericPDFFiles.fullType)
     )
     this.bookDatabaseEntry.entryWrites = 0
     this.bookDatabaseEntry.formatHandlesField.clear()
@@ -303,7 +303,7 @@ class BorrowCopyTest {
       OPDSAcquisitionPathElement(genericPDFFiles, null)
 
     this.bookDatabaseEntry.writeOPDSEntry(
-      BorrowTests.opdsContentURILoanedFeedEntryOfType(genericPDFFiles.fullType)
+      BorrowTestFeeds.opdsContentURILoanedFeedEntryOfType(genericPDFFiles.fullType)
     )
     this.bookDatabaseEntry.entryWrites = 0
     this.bookDatabaseEntry.formatHandlesField.clear()
