@@ -6,10 +6,12 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.Instant
 import org.junit.After
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -32,8 +34,10 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.audio.AudioBookManifestData
 import org.nypl.simplified.books.book_database.BookDRMInformationHandleACS
 import org.nypl.simplified.books.book_database.BookDatabase
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_registry.BookRegistry
@@ -53,6 +57,7 @@ import org.nypl.simplified.books.borrowing.BorrowTaskType
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.formats.api.StandardFormatNames.adobeACSMFiles
+import org.nypl.simplified.books.formats.api.StandardFormatNames.genericAudioBooks
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.opdsAcquisitionFeedEntry
 import org.nypl.simplified.content.api.ContentResolverType
@@ -60,6 +65,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockAdobeAdeptConnector
@@ -74,6 +80,7 @@ import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.TestDirectories.temporaryFileOf
+import org.nypl.simplified.tests.books.audio.AudioBookSucceedingParsers.playerManifest
 import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.FeedRequirements
 import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.PathElement
 import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.Status.LOANABLE
@@ -575,5 +582,85 @@ class BorrowTaskTest {
     assertEquals("A cold star looked down on his creations", handle.format.file!!.readText())
     assertEquals(adobeLoanID, drm.info.rights!!.second.id)
     assertNotNull(drm.info.acsmFile)
+  }
+
+  /**
+   * Creating a loan and then downloading an audio book succeeds.
+   */
+
+  @Test
+  fun testLoanAudioBook() {
+    val loanableRequirements =
+      FeedRequirements(
+        status = LOANABLE,
+        base = this.webServer.url("/").toUri(),
+        path = listOf(
+          PathElement(opdsAcquisitionFeedEntry.fullType, "/loan"),
+          PathElement(genericAudioBooks.first().fullType, "/audio-book")
+        )
+      )
+
+    val loanedRequirements =
+      FeedRequirements(
+        status = LOANED,
+        base = this.webServer.url("/").toUri(),
+        path = listOf(
+          PathElement(genericAudioBooks.first().fullType, "/audio-book")
+        )
+      )
+
+    val loanable =
+      BorrowTestFeeds.feed(loanableRequirements)
+    val loaned =
+      BorrowTestFeeds.feedText(loanedRequirements)
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", opdsAcquisitionFeedEntry.fullType)
+        .setBody(loaned)
+    )
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("A cold star looked down on his creations")
+    )
+
+    this.audioBookManifestStrategies.strategy.onExecute = {
+      val taskRecorder = TaskRecorder.create()
+      taskRecorder.beginNewStep("Succeeding...")
+      taskRecorder.finishSuccess(
+        AudioBookManifestData(
+          manifest = playerManifest,
+          fulfilled = ManifestFulfilled(
+            contentType = genericAudioBooks.first(),
+            data = playerManifest.originalBytes
+          )
+        )
+      )
+    }
+
+    val request =
+      BorrowRequest.Start(this.accountId, loanable)
+    val task =
+      this.createTask(request)
+
+    val result = this.executeAssumingSuccess(task)
+
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+    assertEquals(RequestingLoan::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedNotDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
+
+    val entry = this.bookDatabase.entry(this.bookID)
+    val handle =
+      entry.findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)!!
+
+    val manifest = handle.format.manifest!!
+    assertEquals(this.webServer.url("/audio-book").toUri(), manifest.manifestURI)
+    assertArrayEquals(playerManifest.originalBytes, manifest.manifestFile.readBytes())
   }
 }
