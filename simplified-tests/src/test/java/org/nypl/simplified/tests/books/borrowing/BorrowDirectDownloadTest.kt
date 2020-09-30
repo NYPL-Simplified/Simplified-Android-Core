@@ -15,8 +15,12 @@ import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.bearer_token.LSHTTPBearerTokenInterceptors
 import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProvider
+import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
@@ -107,6 +111,17 @@ class BorrowDirectDownloadTest {
 
     this.account =
       Mockito.mock(AccountType::class.java)
+
+    Mockito.`when`(this.account.loginState)
+      .thenReturn(AccountLoginState.AccountLoggedIn(
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername("someone"),
+          password = AccountPassword("not a password"),
+          adobeCredentials = null,
+          authenticationDescription = "Basic"
+        )
+      ))
+
     this.accountProvider =
       MockAccountProviders.fakeProvider("urn:uuid:ea9480d4-5479-4ef1-b1d1-84ccbedb680f")
 
@@ -420,7 +435,7 @@ class BorrowDirectDownloadTest {
     task.execute(this.context)
 
     val sent0 = this.webServer.takeRequest()
-    assertEquals(null, sent0.getHeader("Authorization"))
+    assertEquals("Basic c29tZW9uZTpub3QgYSBwYXNzd29yZA==", sent0.getHeader("Authorization"))
     val sent1 = this.webServer.takeRequest()
     assertEquals("Bearer abcd", sent1.getHeader("Authorization"))
 

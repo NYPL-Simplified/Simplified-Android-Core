@@ -2,6 +2,9 @@ package org.nypl.simplified.books.borrowing.internal
 
 import one.irradia.mime.api.MIMECompatibility
 import one.irradia.mime.api.MIMEType
+import org.librarysimplified.http.api.LSHTTPAuthorizationBasic
+import org.librarysimplified.http.api.LSHTTPAuthorizationBearerToken
+import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.librarysimplified.http.api.LSHTTPProblemReport
 import org.librarysimplified.http.downloads.LSHTTPDownloadRequest
 import org.librarysimplified.http.downloads.LSHTTPDownloadState
@@ -12,6 +15,15 @@ import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadRe
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadFailed.DownloadFailedExceptionally
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadFailed.DownloadFailedServer
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadFailed.DownloadFailedUnacceptableMIME
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.borrowing.BorrowContextType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import java.io.File
@@ -55,6 +67,7 @@ object BorrowHTTP {
   ): LSHTTPDownloadRequest {
     val request =
       context.httpClient.newRequest(target)
+        .setAuthorization(authorizationOf(context.account))
         .build()
 
     return LSHTTPDownloadRequest(
@@ -71,6 +84,31 @@ object BorrowHTTP {
       },
       clock = context.clock
     )
+  }
+
+  private fun authorizationOf(
+    account: AccountReadableType
+  ): LSHTTPAuthorizationType? {
+    return when (val state = account.loginState) {
+      is AccountLoggedIn -> {
+        when (val creds = state.credentials) {
+          is AccountAuthenticationCredentials.Basic ->
+            LSHTTPAuthorizationBasic.ofUsernamePassword(
+              userName = creds.userName.value,
+              password = creds.password.value
+            )
+          is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+            LSHTTPAuthorizationBearerToken.ofToken(creds.accessToken)
+        }
+      }
+      AccountNotLoggedIn ,
+      is AccountLoggingIn ,
+      is AccountLoggingInWaitingForExternalAuthentication,
+      is AccountLoginFailed,
+      is AccountLoggingOut,
+      is AccountLogoutFailed ->
+        null
+    }
   }
 
   /**
