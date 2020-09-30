@@ -49,7 +49,6 @@ import org.nypl.simplified.books.borrowing.BorrowSubtasks
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
-import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
@@ -670,12 +669,6 @@ internal object MainServices {
       serviceConstructor = {
         AccountProviderSourceResolutionStrings(context.resources)
       }
-    )
-
-    addService(
-      message = strings.bootingStrings("borrow"),
-      interfaceType = BookBorrowStringResourcesType::class.java,
-      serviceConstructor = { MainCatalogBookBorrowStrings(context.resources) }
     )
 
     addService(

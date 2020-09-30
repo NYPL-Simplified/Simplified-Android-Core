@@ -38,7 +38,6 @@ import org.nypl.simplified.books.borrowing.BorrowSubtasks
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
-import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
@@ -75,7 +74,6 @@ import org.nypl.simplified.tests.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.MockAccountProviders
 import org.nypl.simplified.tests.MockAnalytics
-import org.nypl.simplified.tests.MockBorrowStringResources
 import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
@@ -136,8 +134,6 @@ abstract class BooksControllerContract {
     MockAccountLoginStringResources()
   private val accountLogoutStringResources =
     MockAccountLogoutStringResources()
-  private val bookBorrowStringResources =
-    MockBorrowStringResources()
   private val revokeStringResources =
     MockRevokeStringResources()
   private val profileAccountDeletionStringResources =
@@ -195,7 +191,6 @@ abstract class BooksControllerContract {
     services.putService(AnalyticsType::class.java, this.analytics)
     services.putService(AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
     services.putService(AuthenticationDocumentParsersType::class.java, this.authDocumentParsers)
-    services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources)
     services.putService(BookFormatSupportType::class.java, this.bookFormatSupport)
     services.putService(BookRegistryType::class.java, this.bookRegistry)
     services.putService(BorrowSubtaskDirectoryType::class.java, this.borrowSubtasks)

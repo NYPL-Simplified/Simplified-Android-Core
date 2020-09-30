@@ -50,7 +50,6 @@ import org.nypl.simplified.tests.MockAccountCreationStringResources
 import org.nypl.simplified.tests.MockAccountProviderRegistry
 import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockBorrowStringResources
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
@@ -102,8 +101,6 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   private lateinit var opdsFeedParser: OPDSFeedParserType
   private lateinit var profileAccountCreationStrings: MockAccountCreationStringResources
   private lateinit var profilesDatabase: ProfilesDatabaseType
-
-  private val bookBorrowStrings = MockBorrowStringResources()
 
   @Before
   @Throws(Exception::class)

@@ -542,7 +542,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
-    this.statusFailedText.text = bookStatus.message
+    this.statusFailedText.text = this.resources.getText(R.string.catalogOperationFailed)
   }
 
   @UiThread
@@ -915,7 +915,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
-    this.statusFailedText.text = bookStatus.message
+    this.statusFailedText.text = this.resources.getText(R.string.catalogOperationFailed)
   }
 
   @UiThread
