@@ -77,10 +77,10 @@ ext {
     useNYPLNexusDepend = true
   }
 
-  nyplAudioBookAPIVersion = "6.0.0"
+  nyplAudioBookAPIVersion = "6.0.1"
   nyplR2Version = "0.0.5"
-  nyplHTTPVersion = "0.0.11"
-  irradiaMimeVersion = "1.1.0"
+  nyplHTTPVersion = "0.0.12"
+  irradiaMimeVersion = "1.1.1"
 }
 
 subprojects {
