@@ -104,6 +104,13 @@ object StandardFormatNames {
    */
 
   val opdsAcquisitionFeedEntry =
+    this.mimeOf("application/atom+xml;type=entry;profile=opds-catalog")
+
+  /**
+   * The MIME type used for OPDS feed entries (Old style).
+   */
+
+  val opdsAcquisitionFeedEntryOld =
     this.mimeOf("application/atom+xml;relation=entry;profile=opds-catalog")
 
   /**
@@ -116,6 +123,7 @@ object StandardFormatNames {
       types.add(this.opdsFeed)
       types.add(this.opdsFeedCatalog)
       types.add(this.opdsAcquisitionFeedEntry)
+      types.add(this.opdsAcquisitionFeedEntryOld)
       types.toSet()
     }
 }
