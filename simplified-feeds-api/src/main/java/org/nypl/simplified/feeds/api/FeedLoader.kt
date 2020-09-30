@@ -40,6 +40,7 @@ import java.net.URI
 import java.util.SortedMap
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The default implementation of the [FeedLoaderType] interface.
@@ -95,6 +96,16 @@ class FeedLoader private constructor(
     )
   }
 
+  private val filterFlag =
+    AtomicBoolean(true)
+
+  override var showOnlySupportedBooks: Boolean
+    get() = this.filterFlag.get()
+    set(value) {
+      this.filterFlag.set(value)
+      this.cache.clear()
+    }
+
   override fun fetchURI(
     accountId: AccountID,
     uri: URI,
@@ -147,6 +158,10 @@ class FeedLoader private constructor(
   private fun isEntrySupported(
     entry: OPDSAcquisitionFeedEntry
   ): Boolean {
+    if (!this.showOnlySupportedBooks) {
+      return true
+    }
+
     val linearizedPaths = OPDSAcquisitionPaths.linearize(entry)
     for (path in linearizedPaths) {
       if (this.isRelationSupported(path.source.relation) && this.isTypePathSupported(path)) {

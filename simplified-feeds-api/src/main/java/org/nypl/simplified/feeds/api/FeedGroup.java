@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import kotlin.jvm.functions.Function1;
+
 /**
  * A feed group.
  */
@@ -49,6 +51,7 @@ public final class FeedGroup
 
   public static FeedGroup fromOPDSGroup(
     final AccountID accountID,
+    final Function1<? super OPDSAcquisitionFeedEntry, Boolean> filter,
     final OPDSGroup b)
   {
     Objects.requireNonNull(accountID, "accountID");
@@ -59,7 +62,9 @@ public final class FeedGroup
     final int max = be_list.size();
     for (int index = 0; index < max; ++index) {
       final OPDSAcquisitionFeedEntry be = NullCheck.notNull(be_list.get(index));
-      es.add(new FeedEntry.FeedEntryOPDS(accountID, be));
+      if (filter.invoke(be)) {
+        es.add(new FeedEntry.FeedEntryOPDS(accountID, be));
+      }
     }
 
     return new FeedGroup(b.getGroupTitle(), b.getGroupURI(), es);
@@ -73,6 +78,7 @@ public final class FeedGroup
 
   public static Map<String, FeedGroup> fromOPDSGroups(
     final AccountID accountID,
+    final Function1<? super OPDSAcquisitionFeedEntry, Boolean> filter,
     final Map<String, OPDSGroup> bs)
   {
     Objects.requireNonNull(accountID, "accountID");
@@ -81,7 +87,7 @@ public final class FeedGroup
     final Map<String, FeedGroup> rm = new HashMap<String, FeedGroup>(32);
     for (final String name : bs.keySet()) {
       final OPDSGroup block = NullCheck.notNull(bs.get(name));
-      rm.put(name, FeedGroup.fromOPDSGroup(accountID, block));
+      rm.put(name, FeedGroup.fromOPDSGroup(accountID, filter, block));
     }
 
     return rm;

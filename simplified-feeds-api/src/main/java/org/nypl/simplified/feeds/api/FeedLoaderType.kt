@@ -1,19 +1,23 @@
-package org.nypl.simplified.feeds.api;
+package org.nypl.simplified.feeds.api
 
-import com.google.common.util.concurrent.FluentFuture;
-import com.io7m.jfunctional.OptionType;
-
-import org.nypl.simplified.accounts.api.AccountID;
-import org.nypl.simplified.http.core.HTTPAuthType;
-
-import java.net.URI;
+import com.google.common.util.concurrent.FluentFuture
+import com.io7m.jfunctional.OptionType
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.http.core.HTTPAuthType
+import java.net.URI
 
 /**
  * The type of feed loaders.
  */
 
-public interface FeedLoaderType
-{
+interface FeedLoaderType {
+
+  /**
+   * `true` if feeds should contain only books that the application can open
+   */
+
+  var showOnlySupportedBooks: Boolean
+
   /**
    * Load a feed from the given URI, caching feeds that are successfully
    * fetched.
@@ -24,11 +28,11 @@ public interface FeedLoaderType
    * @return A future that can be used to cancel the loading feed
    */
 
-  FluentFuture<FeedLoaderResult> fetchURI(
-    AccountID account,
-    URI uri,
-    OptionType<HTTPAuthType> auth
-  );
+  fun fetchURI(
+    account: AccountID,
+    uri: URI,
+    auth: OptionType<HTTPAuthType>
+  ): FluentFuture<FeedLoaderResult>
 
   /**
    * Load a feed from the given URI, bypassing any cache, and caching feeds that
@@ -41,12 +45,12 @@ public interface FeedLoaderType
    * @return A future that can be used to cancel the loading feed
    */
 
-  FluentFuture<FeedLoaderResult> fetchURIRefreshing(
-    AccountID account,
-    URI uri,
-    OptionType<HTTPAuthType> auth,
-    String method
-  );
+  fun fetchURIRefreshing(
+    account: AccountID,
+    uri: URI,
+    auth: OptionType<HTTPAuthType>,
+    method: String
+  ): FluentFuture<FeedLoaderResult>
 
   /**
    * Load a feed from the given URI, caching feeds that are successfully
@@ -60,18 +64,19 @@ public interface FeedLoaderType
    * @return A future that can be used to cancel the loading feed
    */
 
-  FluentFuture<FeedLoaderResult> fetchURIWithBookRegistryEntries(
-    AccountID account,
-    URI uri,
-    OptionType<HTTPAuthType> auth
-  );
+  fun fetchURIWithBookRegistryEntries(
+    account: AccountID,
+    uri: URI,
+    auth: OptionType<HTTPAuthType>
+  ): FluentFuture<FeedLoaderResult>
 
   /**
-   * Invalidate the cached feed for URI {@code uri}, if any.
+   * Invalidate the cached feed for URI `uri`, if any.
    *
    * @param uri The URI
    */
 
-  void invalidate(
-    URI uri);
+  fun invalidate(
+    uri: URI
+  )
 }
