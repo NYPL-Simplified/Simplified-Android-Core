@@ -27,6 +27,7 @@ class BookFormatSupport private constructor(
   private fun collectKnownTypes(): Set<MIMEType> {
     val types = mutableSetOf<MIMEType>()
     types.add(StandardFormatNames.genericEPUBFiles)
+    types.add(StandardFormatNames.simplifiedBearerToken)
     types.addAll(StandardFormatNames.allOPDSFeeds)
 
     this.collectSupportedAudioBookTypesInto(types)

@@ -79,7 +79,7 @@ ext {
 
   nyplAudioBookAPIVersion = "6.0.0"
   nyplR2Version = "0.0.5"
-  nyplHTTPVersion = "0.0.10"
+  nyplHTTPVersion = "0.0.11"
   irradiaMimeVersion = "1.1.0"
 }
 

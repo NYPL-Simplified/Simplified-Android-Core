@@ -13,4 +13,10 @@ interface BorrowTaskType {
    */
 
   fun execute(): TaskResult<*>
+
+  /**
+   * Mark the borrow task as being cancelled.
+   */
+
+  fun cancel()
 }

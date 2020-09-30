@@ -1,6 +1,5 @@
 package org.nypl.simplified.tests.books.controller
 
-import android.content.ContentResolver
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
@@ -12,6 +11,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.librarysimplified.http.api.LSHTTPClientType
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
@@ -24,6 +24,8 @@ import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.borrowing.BorrowSubtasks
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
@@ -31,8 +33,7 @@ import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
-import org.nypl.simplified.downloader.core.DownloaderHTTP
-import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
@@ -104,16 +105,15 @@ abstract class ProfilesControllerContract {
   private lateinit var bookFormatSupport: BookFormatSupportType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var cacheDirectory: File
-  private lateinit var contentResolver: ContentResolver
+  private lateinit var contentResolver: ContentResolverType
   private lateinit var credentialsStore: FakeAccountCredentialStorage
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
-  private lateinit var downloader: DownloaderType
   private lateinit var executorBooks: ExecutorService
-  private lateinit var executorDownloads: ExecutorService
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ExecutorService
   private lateinit var http: MockingHTTP
+  private lateinit var lsHTTP: LSHTTPClientType
   private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
   private lateinit var profileEvents: PublishSubject<ProfileEvent>
   private lateinit var profileEventsReceived: MutableList<ProfileEvent>
@@ -165,75 +165,33 @@ abstract class ProfilesControllerContract {
       )
 
     val services = MutableServiceDirectory()
-    services.putService(
-      AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies
-    )
-    services.putService(
-      AnalyticsType::class.java, this.analyticsLogger
-    )
-    services.putService(
-      AccountLoginStringResourcesType::class.java, this.accountLoginStringResources
-    )
-    services.putService(
-      AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources
-    )
-    services.putService(
-      AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings
-    )
-    services.putService(
-      AccountProviderRegistryType::class.java, accountProviders
-    )
-    services.putService(
-      AuthenticationDocumentParsersType::class.java, this.authDocumentParsers
-    )
-    services.putService(
-      BookRegistryType::class.java, this.bookRegistry
-    )
-    services.putService(
-      BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources
-    )
-    services.putService(
-      BundledContentResolverType::class.java, bundledContent
-    )
-    services.putService(
-      DownloaderType::class.java, this.downloader
-    )
-    services.putService(
-      FeedLoaderType::class.java, feedLoader
-    )
-    services.putService(
-      OPDSFeedParserType::class.java, parser
-    )
-    services.putService(
-      HTTPType::class.java, this.http
-    )
-    services.putService(
-      PatronUserProfileParsersType::class.java, this.patronUserProfileParsers
-    )
-    services.putService(
-      ProfileAccountCreationStringResourcesType::class.java,
-      this.profileAccountCreationStringResources
-    )
-    services.putService(
-      ProfileAccountDeletionStringResourcesType::class.java,
-      this.profileAccountDeletionStringResources
-    )
-    services.putService(
-      ProfilesDatabaseType::class.java, profiles
-    )
-    services.putService(
-      BookRevokeStringResourcesType::class.java, this.bookRevokeStringResources
-    )
-    services.putService(
-      ProfileIdleTimerType::class.java, InoperableIdleTimer()
-    )
-    services.putService(
-      ClockType::class.java, Clock
-    )
+    services.putService(AccountLoginStringResourcesType::class.java, this.accountLoginStringResources)
+    services.putService(AccountLogoutStringResourcesType::class.java, this.accountLogoutStringResources)
+    services.putService(AccountProviderRegistryType::class.java, accountProviders)
+    services.putService(AccountProviderResolutionStringsType::class.java, this.accountProviderResolutionStrings)
+    services.putService(AnalyticsType::class.java, this.analyticsLogger)
+    services.putService(AudioBookManifestStrategiesType::class.java, this.audioBookManifestStrategies)
+    services.putService(AuthenticationDocumentParsersType::class.java, this.authDocumentParsers)
+    services.putService(BookBorrowStringResourcesType::class.java, this.bookBorrowStringResources)
+    services.putService(BookFormatSupportType::class.java, this.bookFormatSupport)
+    services.putService(BookRegistryType::class.java, this.bookRegistry)
+    services.putService(BookRevokeStringResourcesType::class.java, this.bookRevokeStringResources)
+    services.putService(BorrowSubtaskDirectoryType::class.java, BorrowSubtasks.directory())
+    services.putService(BundledContentResolverType::class.java, bundledContent)
+    services.putService(ClockType::class.java, Clock)
+    services.putService(ContentResolverType::class.java, this.contentResolver)
+    services.putService(FeedLoaderType::class.java, feedLoader)
+    services.putService(HTTPType::class.java, this.http)
+    services.putService(LSHTTPClientType::class.java, this.lsHTTP)
+    services.putService(OPDSFeedParserType::class.java, parser)
+    services.putService(PatronUserProfileParsersType::class.java, this.patronUserProfileParsers)
+    services.putService(ProfileAccountCreationStringResourcesType::class.java, this.profileAccountCreationStringResources)
+    services.putService(ProfileAccountDeletionStringResourcesType::class.java, this.profileAccountDeletionStringResources)
+    services.putService(ProfileIdleTimerType::class.java, InoperableIdleTimer())
+    services.putService(ProfilesDatabaseType::class.java, profiles)
 
     return Controller.createFromServiceDirectory(
       services = services,
-      contentResolver = this.contentResolver,
       executorService = this.executorBooks,
       accountEvents = this.accountEvents,
       profileEvents = this.profileEvents,
@@ -247,8 +205,8 @@ abstract class ProfilesControllerContract {
     this.audioBookManifestStrategies = Mockito.mock(AudioBookManifestStrategiesType::class.java)
     this.credentialsStore = FakeAccountCredentialStorage()
     this.http = MockingHTTP()
+    this.lsHTTP = Mockito.mock(LSHTTPClientType::class.java)
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
-    this.executorDownloads = Executors.newCachedThreadPool()
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorBooks = Executors.newCachedThreadPool()
     this.executorTimer = Executors.newCachedThreadPool()
@@ -261,11 +219,9 @@ abstract class ProfilesControllerContract {
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
-    this.contentResolver = Mockito.mock(ContentResolver::class.java)
+    this.contentResolver = Mockito.mock(ContentResolverType::class.java)
     this.readerBookmarkEvents = PublishSubject.create()
     this.bookRegistry = BookRegistry.create()
-    this.downloader =
-      DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.patronUserProfileParsers = Mockito.mock(PatronUserProfileParsersType::class.java)
     this.bookFormatSupport = Mockito.mock(BookFormatSupportType::class.java)
   }
@@ -275,7 +231,6 @@ abstract class ProfilesControllerContract {
   fun tearDown() {
     this.executorBooks.shutdown()
     this.executorFeeds.shutdown()
-    this.executorDownloads.shutdown()
     this.executorTimer.shutdown()
   }
 

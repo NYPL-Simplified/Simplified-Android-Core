@@ -17,6 +17,7 @@ import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.accountsDat
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.bookDatabaseFailed
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.noSubtaskAvailable
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.noSupportedAcquisitions
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.profileNotFound
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.subtaskFailed
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.unexpectedException
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskCancelled
@@ -27,6 +28,8 @@ import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
+import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -39,6 +42,7 @@ import java.io.IOException
 import java.net.URI
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The primary borrow task implementation.
@@ -65,6 +69,8 @@ class BorrowTask private constructor(
     LoggerFactory.getLogger(BorrowTask::class.java)
   private val bookIdBrief =
     BookIDs.newFromOPDSEntry(this.request.opdsAcquisitionFeedEntry).brief()
+  private val cancelled =
+    AtomicBoolean(false)
 
   private var databaseEntry: BookDatabaseEntryType? = null
   private lateinit var account: AccountType
@@ -99,12 +105,17 @@ class BorrowTask private constructor(
     }
   }
 
+  override fun cancel() {
+    this.cancelled.set(true)
+  }
+
   private fun messageOrName(e: Throwable) =
     e.message ?: e.javaClass.name
 
   private fun executeStart(start: BorrowRequest.Start): TaskResult<*> {
     this.taskRecorder.addAttribute("Book", start.opdsAcquisitionFeedEntry.title)
     this.taskRecorder.addAttribute("Author", start.opdsAcquisitionFeedEntry.authorsCommaSeparated)
+    this.taskRecorder.addAttribute("Profile ID", start.profile.uuid.toString())
 
     /*
      * The initial book value. Note that this is a synthesized value because we need to be
@@ -124,7 +135,8 @@ class BorrowTask private constructor(
         formats = listOf()
       )
 
-    this.findAccount(bookInitial)
+    val profile = this.findProfile(start.profile, bookInitial)
+    this.findAccount(profile, bookInitial)
     val book = this.createBookDatabaseEntry(bookInitial, start.opdsAcquisitionFeedEntry)
     val path = this.pickAcquisitionPath(book, start.opdsAcquisitionFeedEntry)
     this.executeSubtasksForPath(book, path)
@@ -149,6 +161,7 @@ class BorrowTask private constructor(
         bookRegistry = this.requirements.bookRegistry,
         bundledContent = this.requirements.bundledContent,
         cacheDirectory = this.requirements.cacheDirectory,
+        cancelled = this.cancelled,
         clock = this.requirements.clock,
         contentResolver = this.requirements.contentResolver,
         currentOPDSAcquisitionPathElement = path.elements.first(),
@@ -262,15 +275,43 @@ class BorrowTask private constructor(
   }
 
   /**
+   * Locate the given profile.
+   */
+
+  private fun findProfile(
+    profileID: ProfileID,
+    book: Book
+  ): ProfileReadableType {
+    this.taskRecorder.beginNewStep("Locating profile ${profileID.uuid}...")
+
+    val profile = this.requirements.profiles.profiles()[profileID]
+    return if (profile == null) {
+      this.error("[{}]: failed to find profile: ", profileID.uuid)
+      this.taskRecorder.currentStepFailedAppending(
+        message = "Failed to find profile.",
+        errorCode = profileNotFound,
+        exception = IllegalArgumentException()
+      )
+      this.publishBookFailure(book)
+      throw BorrowFailedHandled(null)
+    } else {
+      profile
+    }
+  }
+
+  /**
    * Locate the account in the current profile.
    */
 
-  private fun findAccount(book: Book) {
-    this.taskRecorder.beginNewStep("Locating account ${book.account.uuid} in the current profile...")
+  private fun findAccount(
+    profile: ProfileReadableType,
+    book: Book
+  ) {
+    this.taskRecorder.beginNewStep("Locating account ${book.account.uuid} in the profile...")
     this.taskRecorder.addAttribute("Account ID", book.account.uuid.toString())
 
     this.account = try {
-      this.requirements.profile.account(this.request.accountId)
+      profile.account(this.request.accountId)
     } catch (e: Throwable) {
       this.error("[{}]: failed to find account: ", book.id.brief(), e)
       this.taskRecorder.currentStepFailedAppending(
@@ -330,7 +371,8 @@ class BorrowTask private constructor(
     var currentOPDSAcquisitionPathElement: OPDSAcquisitionPathElement,
     override val adobeExecutor: AdobeAdeptExecutorType?,
     override val services: ServiceDirectoryType,
-    private val cacheDirectory: File
+    private val cacheDirectory: File,
+    private val cancelled: AtomicBoolean
   ) : BorrowContextType {
 
     override fun cacheDirectory(): File =
@@ -339,9 +381,9 @@ class BorrowTask private constructor(
     override val adobeExecutorTimeout: BorrowTimeoutConfiguration =
       BorrowTimeoutConfiguration(300L, TimeUnit.SECONDS)
 
-    @Volatile
-    override var isCancelled =
-      false
+    override var isCancelled
+      get() = this.cancelled.get()
+      set(value) = this.cancelled.set(value)
 
     var currentRemainingOPDSPathElements =
       this.opdsAcquisitionPath.elements

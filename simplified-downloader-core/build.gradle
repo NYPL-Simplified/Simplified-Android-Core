@@ -1,7 +1,0 @@
-dependencies {
-  implementation project(':simplified-http-core')
-
-  implementation libraries.io7mJFunctional
-  implementation libraries.io7mJNull
-  implementation libraries.slf4j
-}

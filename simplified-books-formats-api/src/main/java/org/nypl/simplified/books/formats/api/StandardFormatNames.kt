@@ -19,6 +19,13 @@ object StandardFormatNames {
     this.mimesOfList(names.toList())
 
   /**
+   * The standard format name for Simplified bearer tokens.
+   */
+
+  val simplifiedBearerToken: MIMEType =
+    mimeOf("application/vnd.librarysimplified.bearer-token+json")
+
+  /**
    * The standard format name for Findaway audio books.
    *
    * @see "https://findaway.com"

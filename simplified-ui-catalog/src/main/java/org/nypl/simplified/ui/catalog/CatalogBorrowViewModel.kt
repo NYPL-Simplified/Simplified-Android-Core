@@ -241,9 +241,8 @@ class CatalogBorrowViewModel(
   ) {
     this.logger.debug("reserving: {}", book.id)
     return try {
-      this.booksController.bookBorrowWithDefaultAcquisition(
+      this.booksController.bookBorrow(
         accountID = book.account,
-        bookID = book.id,
         entry = book.entry
       )
       Unit
@@ -278,9 +277,8 @@ class CatalogBorrowViewModel(
   ) {
     this.logger.debug("borrowing: {}", book.id)
     return try {
-      this.booksController.bookBorrowWithDefaultAcquisition(
+      this.booksController.bookBorrow(
         accountID = book.account,
-        bookID = book.id,
         entry = book.entry
       )
       Unit

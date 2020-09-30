@@ -27,6 +27,7 @@ object BorrowErrorCodes {
   const val opdsFeedEntryLoanable = "opdsFeedEntryLoanable"
   const val opdsFeedEntryNoNext = "opdsFeedEntryNoNext"
   const val opdsFeedEntryParseError = "opdsFeedEntryParseError"
+  const val profileNotFound = "profileNotFound"
   const val requiredURIMissing = "requiredURIMissing"
   const val subtaskFailed = "subtaskFailed"
   const val unexpectedException = "unexpectedException"

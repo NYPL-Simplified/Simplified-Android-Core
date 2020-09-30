@@ -60,11 +60,14 @@ import org.nypl.simplified.books.formats.api.StandardFormatNames.adobeACSMFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericAudioBooks
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.opdsAcquisitionFeedEntry
+import org.nypl.simplified.books.formats.api.StandardFormatNames.simplifiedBearerToken
 import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
-import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockAccountProviders
@@ -126,7 +129,8 @@ class BorrowTaskTest {
   private lateinit var httpClient: LSHTTPClientType
   private lateinit var opdsEmptyFeedEntry: OPDSAcquisitionFeedEntry
   private lateinit var opdsOpenEPUBFeedEntry: OPDSAcquisitionFeedEntry
-  private lateinit var profile: ProfileReadableType
+  private lateinit var profile: ProfileType
+  private lateinit var profiles: ProfilesDatabaseType
   private lateinit var services: MutableServiceDirectory
   private lateinit var subtasks: MockBorrowSubtaskDirectory
   private lateinit var temporaryDirectory: File
@@ -153,14 +157,14 @@ class BorrowTaskTest {
         bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent,
+        cacheDirectory = this.cacheDirectory,
         clock = { Instant.now() },
         contentResolver = this.contentResolver,
         httpClient = this.httpClient,
-        profile = this.profile,
-        subtasks = this.subtasks,
-        temporaryDirectory = this.temporaryDirectory,
+        profiles = this.profiles,
         services = this.services,
-        cacheDirectory = this.cacheDirectory
+        subtasks = this.subtasks,
+        temporaryDirectory = this.temporaryDirectory
       ),
       request = request
     )
@@ -237,7 +241,9 @@ class BorrowTaskTest {
     this.bundledContent =
       MockBundledContentResolver()
     this.profile =
-      Mockito.mock(ProfileReadableType::class.java)
+      Mockito.mock(ProfileType::class.java)
+    this.profiles =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     this.account =
       Mockito.mock(AccountType::class.java)
     this.accountProvider =
@@ -261,6 +267,12 @@ class BorrowTaskTest {
       BorrowSubtasks.directory()
         .subtasks
 
+    val profileId = ProfileID.generate()
+
+    Mockito.`when`(this.profiles.profiles())
+      .thenReturn(sortedMapOf(Pair(profileId, this.profile)))
+    Mockito.`when`(this.profile.id)
+      .thenReturn(profileId)
     Mockito.`when`(this.profile.account(this.accountId))
       .thenReturn(this.account)
     Mockito.`when`(this.account.bookDatabase)
@@ -325,7 +337,7 @@ class BorrowTaskTest {
   @Test
   fun testBrokenBookDatabase() {
     val request =
-      BorrowRequest.Start(this.accountId, this.opdsEmptyFeedEntry)
+      BorrowRequest.Start(this.accountId, this.profile.id, this.opdsEmptyFeedEntry)
     val task =
       this.createTask(request)
 
@@ -345,7 +357,7 @@ class BorrowTaskTest {
   @Test
   fun testNoAccount() {
     val request =
-      BorrowRequest.Start(this.accountId, this.opdsEmptyFeedEntry)
+      BorrowRequest.Start(this.accountId, this.profile.id, this.opdsEmptyFeedEntry)
     val task =
       this.createTask(request)
 
@@ -365,7 +377,7 @@ class BorrowTaskTest {
   @Test
   fun testNoAvailableAcquisitions() {
     val request =
-      BorrowRequest.Start(this.accountId, this.opdsEmptyFeedEntry)
+      BorrowRequest.Start(this.accountId, this.profile.id, this.opdsEmptyFeedEntry)
     val task =
       this.createTask(request)
 
@@ -382,7 +394,7 @@ class BorrowTaskTest {
   @Test
   fun testNoSubtasks() {
     val request =
-      BorrowRequest.Start(this.accountId, this.opdsOpenEPUBFeedEntry)
+      BorrowRequest.Start(this.accountId, this.profile.id, this.opdsOpenEPUBFeedEntry)
     val task =
       this.createTask(request)
 
@@ -407,7 +419,7 @@ class BorrowTaskTest {
     )
 
     val request =
-      BorrowRequest.Start(this.accountId, this.opdsOpenEPUBFeedEntry)
+      BorrowRequest.Start(this.accountId, this.profile.id, this.opdsOpenEPUBFeedEntry)
     val task =
       this.createTask(request)
 
@@ -471,7 +483,7 @@ class BorrowTaskTest {
     )
 
     val request =
-      BorrowRequest.Start(this.accountId, loanable)
+      BorrowRequest.Start(this.accountId, this.profile.id, loanable)
     val task =
       this.createTask(request)
 
@@ -556,7 +568,7 @@ class BorrowTaskTest {
     }
 
     val request =
-      BorrowRequest.Start(this.accountId, loanable)
+      BorrowRequest.Start(this.accountId, this.profile.id, loanable)
     val task =
       this.createTask(request)
 
@@ -642,7 +654,7 @@ class BorrowTaskTest {
     }
 
     val request =
-      BorrowRequest.Start(this.accountId, loanable)
+      BorrowRequest.Start(this.accountId, this.profile.id, loanable)
     val task =
       this.createTask(request)
 
@@ -662,5 +674,66 @@ class BorrowTaskTest {
     val manifest = handle.format.manifest!!
     assertEquals(this.webServer.url("/audio-book").toUri(), manifest.manifestURI)
     assertArrayEquals(playerManifest.originalBytes, manifest.manifestFile.readBytes())
+  }
+
+  /**
+   * Borrowing via a bearer token works.
+   */
+
+  @Test
+  fun testBearerTokenEPUB() {
+    val loanedRequirements =
+      FeedRequirements(
+        status = LOANED,
+        base = this.webServer.url("/").toUri(),
+        path = listOf(
+          PathElement(simplifiedBearerToken.fullType, "/epub"),
+          PathElement(genericEPUBFiles.fullType, "/epub")
+        )
+      )
+
+    val loanable =
+      BorrowTestFeeds.feed(loanedRequirements)
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", simplifiedBearerToken.fullType)
+        .setBody(
+          """{
+          "access_token": "abcd",
+          "expires_in": 1000,
+          "location": "http://localhost:20000/book.epub"
+        }
+          """.trimIndent()
+        )
+    )
+
+    this.webServer.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("A cold star looked down on his creations")
+    )
+
+    val request =
+      BorrowRequest.Start(this.accountId, this.profile.id, loanable)
+    val task =
+      this.createTask(request)
+
+    val result = this.executeAssumingSuccess(task)
+
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
+
+    val entry = this.bookDatabase.entry(this.bookID)
+    val handle =
+      entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)!!
+
+    assertEquals("A cold star looked down on his creations", handle.format.file!!.readText())
   }
 }
