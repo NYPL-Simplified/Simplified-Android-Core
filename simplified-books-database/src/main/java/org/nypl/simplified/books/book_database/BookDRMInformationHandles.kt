@@ -7,6 +7,7 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileNotFoundException
 
 /**
  * Functions to open DRM information handle.
@@ -33,6 +34,8 @@ object BookDRMInformationHandles {
     val drmKind =
       try {
         BookDRMKind.valueOf(drmInfoFile.readText().trim())
+      } catch (e: FileNotFoundException) {
+        this.inferDRMKind(directory, format)
       } catch (e: Exception) {
         this.logger.error("could not read {}: ", drmInfoFile, e)
         this.inferDRMKind(directory, format)
