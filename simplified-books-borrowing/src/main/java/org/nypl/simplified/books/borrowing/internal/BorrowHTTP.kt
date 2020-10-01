@@ -86,7 +86,11 @@ object BorrowHTTP {
     )
   }
 
-  private fun authorizationOf(
+  /**
+   * Create HTTP authorization values for the given account.
+   */
+
+  fun authorizationOf(
     account: AccountReadableType
   ): LSHTTPAuthorizationType? {
     return when (val state = account.loginState) {
