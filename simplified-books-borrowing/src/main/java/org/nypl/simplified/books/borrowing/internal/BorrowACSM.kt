@@ -274,6 +274,7 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
     try {
       val executor = context.adobeExecutor!!
       var netProvider: AdobeAdeptNetProviderType? = null
+      val unitsPerSecond = BorrowUnitsPerSecond(context.clock)
 
       val future =
         AdobeDRMExtensions.fulfill(
@@ -302,16 +303,19 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
             if (context.isCancelled) {
               netProvider?.cancel()
             }
-            context.bookDownloadIsRunning(
-              expectedSize = 100L,
-              receivedSize = progress.toLong(),
-              bytesPerSecond = 1L,
-              message = BorrowHTTP.downloadingMessage(
-                expectedSize = 100,
-                currentSize = progress.toLong(),
-                perSecond = 1L
+
+            if (unitsPerSecond.update(progress.toLong())) {
+              context.bookDownloadIsRunning(
+                expectedSize = 100L,
+                receivedSize = progress.toLong(),
+                bytesPerSecond = 1L,
+                message = BorrowHTTP.downloadingMessage(
+                  expectedSize = 100,
+                  currentSize = progress.toLong(),
+                  perSecond = 1L
+                )
               )
-            )
+            }
           },
           outputFile = temporaryFile,
           data = acsm.acsmBytes,

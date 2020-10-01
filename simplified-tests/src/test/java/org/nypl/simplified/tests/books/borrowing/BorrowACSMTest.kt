@@ -868,4 +868,69 @@ class BorrowACSMTest {
     assertTrue(this.acsHandle.info.acsmFile != null)
     assertTrue(this.bookDatabaseEPUBHandle.format.file != null)
   }
+
+  /**
+   * Obnoxiously fast updates are throttled.
+   */
+
+  @Test
+  fun testACSOkThrottled() {
+    val task = BorrowACSM.createSubtask()
+
+    this.context.currentURIField =
+      this.webServer.url("/book.acsm").toUri()
+    this.context.adobeExecutorTimeout =
+      BorrowTimeoutConfiguration(10L, TimeUnit.SECONDS)
+
+    this.webServer.enqueue(this.validACSMResponse)
+
+    val temporaryFile =
+      temporaryFileOf("book.epub", "A cold star looked down on his creations")
+    val adobeLoanID =
+      AdobeLoanID("4cca8916-d0fe-44ed-85d9-a8212764375d")
+
+    this.adobeConnector.onFulfill = { listener, acsm, user ->
+      for (i in 0 until 3000) {
+        listener.onFulfillmentProgress(i.toDouble() / 3000.0)
+        Thread.sleep(1L)
+      }
+
+      listener.onFulfillmentSuccess(
+        temporaryFile,
+        AdobeAdeptLoan(
+          adobeLoanID,
+          ByteBuffer.wrap("You're a blank. You don't have rights.".toByteArray()),
+          false
+        )
+      )
+    }
+
+    try {
+      task.execute(this.context)
+      fail()
+    } catch (e: BorrowSubtaskHaltedEarly) {
+      this.logger.debug("correctly halted early: ", e)
+    }
+
+    this.verifyBookRegistryHasStatus(LoanedDownloaded::class.java)
+    assertEquals(0, this.bookDatabaseEntry.entryWrites)
+
+    var downloadCount = 0
+    while (true) {
+      if (this.bookStates.get(0) is Downloading) {
+        ++downloadCount
+        this.bookStates.removeAt(0)
+      } else {
+        break
+      }
+    }
+
+    assertTrue(downloadCount >= 3)
+    assertTrue(downloadCount < 10)
+    assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
+    assertEquals(0, this.bookStates.size)
+
+    assertTrue(this.acsHandle.info.acsmFile != null)
+    assertTrue(this.bookDatabaseEPUBHandle.format.file != null)
+  }
 }

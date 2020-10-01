@@ -105,8 +105,8 @@ object BorrowHTTP {
             LSHTTPAuthorizationBearerToken.ofToken(creds.accessToken)
         }
       }
-      AccountNotLoggedIn ,
-      is AccountLoggingIn ,
+      AccountNotLoggedIn,
+      is AccountLoggingIn,
       is AccountLoggingInWaitingForExternalAuthentication,
       is AccountLoginFailed,
       is AccountLoggingOut,

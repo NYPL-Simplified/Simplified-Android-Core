@@ -119,14 +119,16 @@ class BorrowLoanCreateTest {
       MockAccountProviders.fakeProvider("urn:uuid:ea9480d4-5479-4ef1-b1d1-84ccbedb680f")
 
     Mockito.`when`(this.account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.Basic(
-          userName = AccountUsername("someone"),
-          password = AccountPassword("not a password"),
-          adobeCredentials = null,
-          authenticationDescription = "Basic"
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("someone"),
+            password = AccountPassword("not a password"),
+            adobeCredentials = null,
+            authenticationDescription = "Basic"
+          )
         )
-      ))
+      )
 
     val androidContext =
       Mockito.mock(Context::class.java)

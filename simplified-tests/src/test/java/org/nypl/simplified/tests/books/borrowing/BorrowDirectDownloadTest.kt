@@ -113,14 +113,16 @@ class BorrowDirectDownloadTest {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(this.account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(
-        AccountAuthenticationCredentials.Basic(
-          userName = AccountUsername("someone"),
-          password = AccountPassword("not a password"),
-          adobeCredentials = null,
-          authenticationDescription = "Basic"
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          AccountAuthenticationCredentials.Basic(
+            userName = AccountUsername("someone"),
+            password = AccountPassword("not a password"),
+            adobeCredentials = null,
+            authenticationDescription = "Basic"
+          )
         )
-      ))
+      )
 
     this.accountProvider =
       MockAccountProviders.fakeProvider("urn:uuid:ea9480d4-5479-4ef1-b1d1-84ccbedb680f")

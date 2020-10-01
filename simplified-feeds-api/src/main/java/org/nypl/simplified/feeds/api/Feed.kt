@@ -358,7 +358,6 @@ sealed class Feed {
       filter: (OPDSAcquisitionFeedEntry) -> Boolean,
       search: OPDSOpenSearch1_1?
     ): FeedWithGroups {
-
       val facetsByGroup =
         this.constructFacetGroups(feed)
       val facetsOrder =
