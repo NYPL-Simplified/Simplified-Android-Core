@@ -236,19 +236,24 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
 |[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
+|[org.librarysimplified.books.borrowing](simplified-books-borrowing)|Book borrowing|
 |[org.librarysimplified.books.bundled.api](simplified-books-bundled-api)|Bundled books API|
 |[org.librarysimplified.books.controller](simplified-books-controller)|Books/Profiles controller implementation|
 |[org.librarysimplified.books.controller.api](simplified-books-controller-api)|Books controller API|
 |[org.librarysimplified.books.covers](simplified-books-covers)|Book cover loading and generation|
 |[org.librarysimplified.books.database](simplified-books-database)|Book database implementation|
 |[org.librarysimplified.books.database.api](simplified-books-database-api)|Book database API|
+|[org.librarysimplified.books.formats](simplified-books-formats)|Book formats implementation|
+|[org.librarysimplified.books.formats.api](simplified-books-formats-api)|Book formats API|
 |[org.librarysimplified.books.registry.api](simplified-books-registry-api)|Book registry API|
 |[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
 |[org.librarysimplified.buildconfig.api](simplified-buildconfig-api)|Build-time configuration API|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
 |[org.librarysimplified.clock](simplified-clock)|Clock API|
+|[org.librarysimplified.content.api](simplified-content-api)|Content resolver API|
+|[org.librarysimplified.crashlytics](simplified-crashlytics)|Crashlytics|
+|[org.librarysimplified.crashlytics.api](simplified-crashlytics-api)|Crashlytics functionality|
 |[org.librarysimplified.documents](simplified-documents)|Documents API|
-|[org.librarysimplified.downloader.core](simplified-downloader-core)|Downloader|
 |[org.librarysimplified.feeds.api](simplified-feeds-api)|Feed API|
 |[org.librarysimplified.files](simplified-files)|File utilities|
 |[org.librarysimplified.futures](simplified-futures)|Guava Future extensions|
@@ -283,9 +288,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.taskrecorder.api](simplified-taskrecorder-api)|Task recorder API|
 |[org.librarysimplified.tenprint](simplified-tenprint)|10PRINT implementation|
 |[org.librarysimplified.tests](simplified-tests)|Test suite|
-|[org.librarysimplified.tests.android](simplified-tests-android)|On-device test suite|
 |[org.librarysimplified.tests.sandbox](simplified-tests-sandbox)|Sandbox for informal testing|
-|[org.librarysimplified.tests.strings](simplified-tests-strings)|Mock strings for test suites|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 |[org.librarysimplified.ui.accounts](simplified-ui-accounts)|Accounts UI components|
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
@@ -304,6 +307,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.viewer.api](simplified-viewer-api)|Viewer API|
 |[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|
 |[org.librarysimplified.viewer.epub.readium1](simplified-viewer-epub-readium1)|Readium 1 EPUB reader|
+|[org.librarysimplified.viewer.epub.readium2](simplified-viewer-epub-readium2)|Readium 2 EPUB reader|
 |[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|
 |[org.librarysimplified.viewer.spi](simplified-viewer-spi)|Viewer SPI|
 
