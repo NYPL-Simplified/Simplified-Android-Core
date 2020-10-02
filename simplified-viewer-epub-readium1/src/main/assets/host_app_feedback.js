@@ -92,7 +92,21 @@ $(document).ready(function()
       var opts = {
         needsFixedLayoutScalerWorkAround: true,
         el: "#viewport",
-        annotationCSSUrl: '/readium_Annotations.css'
+        annotationCSSUrl: '/readium_Annotations.css',
+        fonts: [
+          {
+            fontFamily: "serif",
+            url: "/fonts.css"
+          },
+          {
+            fontFamily: "sans-serif",
+            url: "/fonts.css"
+          },
+          {
+            fontFamily: "OpenDyslexic3",
+            url: "/fonts.css"
+          }
+        ]
       };
 
       ReadiumSDK.reader = new ReaderView(opts);
