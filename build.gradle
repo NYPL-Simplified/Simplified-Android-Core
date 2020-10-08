@@ -77,7 +77,7 @@ ext {
     useNYPLNexusDepend = true
   }
 
-  nyplAudioBookAPIVersion = "6.0.1"
+  nyplAudioBookAPIVersion = "6.0.2"
   nyplR2Version = "0.0.5"
   nyplHTTPVersion = "0.0.13"
   irradiaMimeVersion = "1.1.1"
@@ -321,3 +321,19 @@ subprojects { project ->
 // the tasks for each subproject individually.
 
 apply from: file("$rootDir/ktlint.gradle")
+
+/**
+ * Translate a semantic version into a numeric version code.
+ */
+static Integer versionCode(String versionName) {
+  def (major, minor, patch) = versionName
+    .replaceAll('[-+].*', '') // strip all metadata from version
+    .tokenize('.')
+
+  major = major.toInteger()
+  minor = minor.toInteger()
+  patch = patch.toInteger()
+
+  // Return version code padded with leading zeros
+  return String.format('%02d%02d%02d', major, minor, patch).toInteger()
+}
