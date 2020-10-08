@@ -80,7 +80,6 @@ class BootLoader<T>(
           BootEvent.BootFailed(
             message = e.message,
             exception = PresentableException(e.message, e),
-            causes = listOf(e),
             attributes = e.attributes
           )
         } else {

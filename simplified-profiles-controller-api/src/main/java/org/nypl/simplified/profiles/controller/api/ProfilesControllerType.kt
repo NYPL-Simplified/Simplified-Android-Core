@@ -3,12 +3,8 @@ package org.nypl.simplified.profiles.controller.api
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.Observable
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
-import org.nypl.simplified.accounts.api.AccountDeleteErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
@@ -115,7 +111,7 @@ interface ProfilesControllerType {
 
   fun profileAccountLogin(
     request: ProfileAccountLoginRequest
-  ): FluentFuture<TaskResult<AccountLoginErrorData, Unit>>
+  ): FluentFuture<TaskResult<Unit>>
 
   /**
    * Create an account using the given account provider. The operation will fail if
@@ -127,7 +123,7 @@ interface ProfilesControllerType {
 
   fun profileAccountCreate(
     provider: URI
-  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>>
+  ): FluentFuture<TaskResult<AccountType>>
 
   /**
    * Create an account using the URI of an OPDS feed. The given feed is parsed in order to
@@ -139,7 +135,7 @@ interface ProfilesControllerType {
 
   fun profileAccountCreateCustomOPDS(
     opdsFeed: URI
-  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>>
+  ): FluentFuture<TaskResult<AccountType>>
 
   /**
    * Create an account using the given account provider, or return an existing account
@@ -151,7 +147,7 @@ interface ProfilesControllerType {
 
   fun profileAccountCreateOrReturnExisting(
     provider: URI
-  ): FluentFuture<TaskResult<AccountCreateErrorDetails, AccountType>>
+  ): FluentFuture<TaskResult<AccountType>>
 
   /**
    * Create an account using the given account provider. The operation will fail if
@@ -164,7 +160,7 @@ interface ProfilesControllerType {
 
   fun profileAccountDeleteByProvider(
     provider: URI
-  ): FluentFuture<TaskResult<AccountDeleteErrorDetails, Unit>>
+  ): FluentFuture<TaskResult<Unit>>
 
   /**
    * Find an account int the current profile using the given provider.
@@ -206,7 +202,7 @@ interface ProfilesControllerType {
 
   fun profileAccountLogout(
     accountID: AccountID
-  ): FluentFuture<TaskResult<AccountLogoutErrorData, Unit>>
+  ): FluentFuture<TaskResult<Unit>>
 
   /**
    * Update values for the current profile.

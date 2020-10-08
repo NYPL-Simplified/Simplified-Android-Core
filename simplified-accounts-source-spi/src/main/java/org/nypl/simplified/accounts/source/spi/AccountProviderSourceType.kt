@@ -2,11 +2,9 @@ package org.nypl.simplified.accounts.source.spi
 
 import android.content.Context
 import org.nypl.simplified.accounts.api.AccountProviderDescription
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import java.lang.Exception
 import java.net.URI
 
 /**
@@ -74,5 +72,5 @@ interface AccountProviderSourceType {
   fun resolve(
     onProgress: AccountProviderResolutionListenerType,
     description: AccountProviderDescription
-  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType>
+  ): TaskResult<AccountProviderType>
 }

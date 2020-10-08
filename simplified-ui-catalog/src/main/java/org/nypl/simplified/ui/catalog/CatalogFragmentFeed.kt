@@ -57,8 +57,7 @@ import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
@@ -1157,24 +1156,19 @@ class CatalogFragmentFeed : Fragment() {
 
   private fun errorPageParameters(
     failure: FeedLoaderFailure
-  ): ErrorPageParameters<FeedLoaderFailure> {
-    val step =
-      TaskStep(
-        description = this.resources.getString(R.string.catalogFeedLoading),
-        resolution =
-          TaskStepResolution.TaskStepFailed(
-            message = failure.message,
-            errorValue = failure,
-            exception = failure.exception
-          )
-      )
+  ): ErrorPageParameters {
+    val taskRecorder = TaskRecorder.create()
+    taskRecorder.beginNewStep(this.resources.getString(R.string.catalogFeedLoading))
+    taskRecorder.addAttributes(failure.attributes)
+    taskRecorder.currentStepFailed(failure.message, "feedLoadingFailed", failure.exception)
+    val taskFailure = taskRecorder.finishFailure<Unit>()
 
     return ErrorPageParameters(
       emailAddress = this.configurationService.supportErrorReportEmailAddress,
       body = "",
       subject = this.configurationService.supportErrorReportSubject,
-      attributes = failure.attributes.toSortedMap(),
-      taskSteps = listOf(step)
+      attributes = taskFailure.attributes.toSortedMap(),
+      taskSteps = taskFailure.steps
     )
   }
 }

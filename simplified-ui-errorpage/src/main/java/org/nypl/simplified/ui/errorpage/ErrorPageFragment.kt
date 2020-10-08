@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
@@ -36,8 +35,8 @@ class ErrorPageFragment : Fragment() {
      * Create a new error page fragment.
      */
 
-    fun <E : PresentableErrorType> create(
-      parameters: ErrorPageParameters<E>
+    fun create(
+      parameters: ErrorPageParameters
     ): ErrorPageFragment {
       val args = Bundle()
       args.putSerializable(this.PARAMETERS_ID, parameters)
@@ -51,7 +50,7 @@ class ErrorPageFragment : Fragment() {
   private lateinit var errorDetails: TextView
   private lateinit var errorStepsList: RecyclerView
   private lateinit var listener: ErrorPageListenerType
-  private lateinit var parameters: ErrorPageParameters<PresentableErrorType>
+  private lateinit var parameters: ErrorPageParameters
   private lateinit var sendButton: Button
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,7 +88,7 @@ class ErrorPageFragment : Fragment() {
 
     this.parameters =
       this.arguments!!.getSerializable(PARAMETERS_ID)
-      as ErrorPageParameters<PresentableErrorType>
+      as ErrorPageParameters
 
     if (parameters.attributes.isEmpty()) {
       this.errorDetails.visibility = View.GONE

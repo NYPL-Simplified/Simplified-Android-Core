@@ -1,6 +1,7 @@
 package org.nypl.simplified.viewer.spi
 
 import android.app.Activity
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 
@@ -31,6 +32,20 @@ interface ViewerProviderType {
     preferences: ViewerPreferences,
     book: Book,
     format: BookFormat
+  ): Boolean
+
+  /**
+   * Determine if the current provider can support books of the given type. Note that this method
+   * is advisory in the sense that providers may return false positives if support for a given
+   * type is conditional upon information only known at book loading time. Essentially, this
+   * method may return `true` for all types that are potentially supported, but the actual support
+   * may be more restricted. For accurate results, see [canSupport].
+   *
+   * @return `true` if the provider can support the given type
+   */
+
+  fun canPotentiallySupportType(
+    type: MIMEType
   ): Boolean
 
   /**

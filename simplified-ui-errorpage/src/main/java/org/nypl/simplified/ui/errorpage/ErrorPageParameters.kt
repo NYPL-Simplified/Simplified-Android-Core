@@ -1,6 +1,5 @@
 package org.nypl.simplified.ui.errorpage
 
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import java.io.Serializable
 import java.util.SortedMap
@@ -9,7 +8,7 @@ import java.util.SortedMap
  * Parameters for instantiating an error page fragment.
  */
 
-data class ErrorPageParameters<E : PresentableErrorType>(
+data class ErrorPageParameters(
 
   /**
    * The email address of the technical support provider.
@@ -40,6 +39,5 @@ data class ErrorPageParameters<E : PresentableErrorType>(
    * The steps that lead up to the current error.
    */
 
-  val taskSteps: List<TaskStep<E>>
-) :
-  Serializable
+  val taskSteps: List<TaskStep>
+) : Serializable

@@ -16,15 +16,12 @@ import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusDownloadErrorDetails
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
-import java.io.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -253,15 +250,7 @@ class CatalogBorrowViewModel(
     } catch (e: Throwable) {
       this.logger.error("failed to start borrow task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(
-          book,
-          BookStatus.FailedLoan(
-            book.id,
-            this.failMinimal(e) { ex ->
-              BookStatusDownloadErrorDetails.UnexpectedException(ex)
-            }
-          )
-        )
+        BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e)))
       )
     }
   }
@@ -279,15 +268,7 @@ class CatalogBorrowViewModel(
     } catch (e: Throwable) {
       this.logger.error("failed to start revocation task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(
-          book,
-          BookStatus.FailedRevoke(
-            book.id,
-            this.failMinimal(e) { ex ->
-              BookStatusRevokeErrorDetails.UnexpectedException(ex)
-            }
-          )
-        )
+        BookWithStatus(book, BookStatus.FailedRevoke(book.id, this.failMinimal(e)))
       )
     }
   }
@@ -306,15 +287,7 @@ class CatalogBorrowViewModel(
     } catch (e: Throwable) {
       this.logger.error("failed to start borrow task: ", e)
       this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(
-          book,
-          BookStatus.FailedLoan(
-            book.id,
-            this.failMinimal(e) { ex ->
-              BookStatusDownloadErrorDetails.UnexpectedException(ex)
-            }
-          )
-        )
+        BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e)))
       )
     }
   }
@@ -367,17 +340,16 @@ class CatalogBorrowViewModel(
     }
   }
 
-  private fun <T : Serializable> failMinimal(
-    exception: Throwable,
-    errorMake: (Throwable) -> T
-  ): TaskResult.Failure<T, Unit> {
-    val recorder = TaskRecorder.create<T>()
+  private fun failMinimal(
+    exception: Throwable
+  ): TaskResult.Failure<Unit> {
+    val recorder = TaskRecorder.create()
     recorder.beginNewStep("Starting revocation task...")
     recorder.currentStepFailed(
       message = exception.message ?: exception.javaClass.canonicalName,
-      errorValue = errorMake.invoke(exception),
+      errorCode = "revokeFailed",
       exception = exception
     )
-    return recorder.finishFailure<Unit>()
+    return recorder.finishFailure()
   }
 }

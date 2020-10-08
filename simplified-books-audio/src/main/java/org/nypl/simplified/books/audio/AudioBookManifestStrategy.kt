@@ -53,8 +53,8 @@ class AudioBookManifestStrategy(
   override val events: Observable<String> =
     this.eventSubject
 
-  override fun execute(): TaskResult<String, AudioBookManifestData> {
-    val taskRecorder = TaskRecorder.create<String>()
+  override fun execute(): TaskResult<AudioBookManifestData> {
+    val taskRecorder = TaskRecorder.create()
 
     try {
       val downloadResult =
@@ -69,7 +69,7 @@ class AudioBookManifestStrategy(
       if (downloadResult is PlayerResult.Failure) {
         taskRecorder.currentStepFailed(
           message = downloadResult.failure.message,
-          errorValue = formatServerData(
+          errorCode = formatServerData(
             message = downloadResult.failure.message,
             serverData = downloadResult.failure.serverData
           )
@@ -210,8 +210,8 @@ class AudioBookManifestStrategy(
     parsedManifest: PlayerManifest,
     downloadBytes: ByteArray,
     contentType: MIMEType,
-    taskRecorder: TaskRecorderType<String>
-  ): TaskResult<String, AudioBookManifestData> {
+    taskRecorder: TaskRecorderType
+  ): TaskResult<AudioBookManifestData> {
     return taskRecorder.finishSuccess(
       AudioBookManifestData(
         manifest = parsedManifest,

@@ -1,0 +1,75 @@
+<feed
+  xmlns:simplified="http://librarysimplified.org/terms/"
+  xmlns:app="http://www.w3.org/2007/app"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:opds="http://opds-spec.org/2010/catalog"
+  xmlns:schema="http://schema.org/"
+  xmlns="http://www.w3.org/2005/Atom">
+  <id>http://circulation.alpha.librarysimplified.org/feed/Picture%20Books
+  </id>
+  <title>Picture Books: By author</title>
+  <updated>2015-05-12T20:17:38Z</updated>
+  <link
+    href="http://circulation.alpha.librarysimplified.org/feed/Picture%20Books"
+    rel="self" />
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F64647fbc-2dd2-45ba-9080-a5820afd0e9a
+    </id>
+    <title>50 Favourite Nursery Rhymes</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">50 favourite nursery rhymes, contains lots of the most
+      common nursery rhymes and all those you may have forgotten!
+    </summary>
+    <updated>2015-05-12T20:17:38Z</updated>
+    <simplified:pwid>842012bb-8a58-8ea9-7c31-0dae8f75563b</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/64647fbc-2dd2-45ba-9080-a5820afd0e9a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/64647fbc-2dd2-45ba-9080-a5820afd0e9a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Nonfiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>AudioGO Ltd</dcterms:publisher>
+    <published>2014-11-14T20:14:29Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/64647fbc-2dd2-45ba-9080-a5820afd0e9a/borrow"
+      type="application/atom+xml;relation=entry;profile=opds-catalog"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <link
+    href="http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=title"
+    opds:facetGroup="Sort by"
+    simplified:facetGroupType="Something"
+    rel="http://opds-spec.org/facet"
+    title="Title" />
+  <link
+    opds:activeFacet="true"
+    href="http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=author"
+    opds:facetGroup="Sort by"
+    simplified:facetGroupType="Something"
+    rel="http://opds-spec.org/facet"
+    title="Author" />
+  <link
+    href="http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?after=70276&amp;order=author&amp;size=50"
+    rel="next" />
+  <link
+    href="http://circulation.alpha.librarysimplified.org/search/Picture%20Books"
+    type="application/opensearchdescription+xml"
+    rel="search" />
+</feed>

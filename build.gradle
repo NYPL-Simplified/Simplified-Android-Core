@@ -79,6 +79,7 @@ ext {
 
   nyplAudioBookAPIVersion = "6.0.2"
   nyplR2Version = "0.0.5"
+  nyplHTTPVersion = "0.0.4"
 }
 
 subprojects {
@@ -157,6 +158,9 @@ ext.libraries = [
   nyplR2API                        : "org.librarysimplified.r2:org.librarysimplified.r2.vanilla:${nyplR2Version}",
   nyplR2Vanilla                    : "org.librarysimplified.r2:org.librarysimplified.r2.api:${nyplR2Version}",
   nyplR2Views                      : "org.librarysimplified.r2:org.librarysimplified.r2.views:${nyplR2Version}",
+  nyplHttpAPI                      : "org.librarysimplified.http:org.librarysimplified.http.api:${nyplHTTPVersion}",
+  nyplHttpVanilla                  : "org.librarysimplified.http:org.librarysimplified.http.vanilla:${nyplHTTPVersion}",
+  nyplHttpChucker                  : "org.librarysimplified.http:org.librarysimplified.http.chucker:${nyplHTTPVersion}",
   picasso                          : "com.squareup.picasso:picasso:2.71828",
   readium                          : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
   readiumSharedJS                  : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",

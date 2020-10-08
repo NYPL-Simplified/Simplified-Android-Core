@@ -47,9 +47,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
     final ObjectNode node = jom.createObjectNode();
     node.put("type", a.getRelation().toString());
     node.put("uri", a.getUri().toString());
-
-    a.getType().map_(type -> node.put("content_type", type.getFullType()));
-
+    node.put("content_type", a.getType().getFullType());
     node.set("indirect_acquisitions", serializeIndirectAcquisitions(a.getIndirectAcquisitions()));
     return node;
   }

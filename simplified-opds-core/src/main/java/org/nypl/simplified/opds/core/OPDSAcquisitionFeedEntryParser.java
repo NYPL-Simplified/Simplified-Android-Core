@@ -21,11 +21,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -58,13 +55,8 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
 
   private static final Logger LOG = LoggerFactory.getLogger(OPDSAcquisitionFeedEntryParser.class);
 
-  private final Set<MIMEType> supported_book_formats;
+  private OPDSAcquisitionFeedEntryParser() {
 
-  private OPDSAcquisitionFeedEntryParser(
-    final Set<MIMEType> supported_book_formats) {
-    this.supported_book_formats =
-      Collections.unmodifiableSet(new HashSet<>(
-        Objects.requireNonNull(supported_book_formats, "Supported book formats")));
   }
 
   private void findAcquisitionAuthors(
@@ -95,9 +87,8 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
    * @return A new feed entry parser
    */
 
-  public static OPDSAcquisitionFeedEntryParserType newParser(
-    final Set<MIMEType> supported_book_formats) {
-    return new OPDSAcquisitionFeedEntryParser(supported_book_formats);
+  public static OPDSAcquisitionFeedEntryParserType newParser() {
+    return new OPDSAcquisitionFeedEntryParser();
   }
 
   private OPDSAcquisitionFeedEntry parseAcquisitionEntry(
@@ -279,10 +270,13 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
             continue;
           }
 
-          final List<OPDSIndirectAcquisition> indirects = parseIndirectAcquisitions(link);
-          final OptionType<MIMEType> type = typeAttributeWithSupportedValue(link);
+          final List<OPDSIndirectAcquisition> indirects =
+            parseIndirectAcquisitions(link);
+          final OptionType<MIMEType> typeOpt =
+            typeAttributeWithSupportedValue(link);
 
-          if (type.isSome() || hasSupportedIndirectAcquisition(indirects)) {
+          if (typeOpt.isSome()) {
+            final MIMEType type = ((Some<MIMEType>) typeOpt).get();
             final OPDSAcquisition acquisition = new OPDSAcquisition(v, href, type, indirects);
             entry_builder.addAcquisition(acquisition);
 
@@ -298,18 +292,6 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
 
       tryConsumeDRMLicensorInformation(entry_builder, link);
     }
-  }
-
-  private boolean hasSupportedIndirectAcquisition(
-    final List<OPDSIndirectAcquisition> indirects) {
-    for (final OPDSIndirectAcquisition indirect : indirects) {
-      for (final MIMEType supported : supported_book_formats) {
-        if (indirect.findTypeOptional(supported).isSome()) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   private void parseCategories(
@@ -595,10 +577,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     return Option.none();
   }
 
-  private OptionType<MIMEType> typeAttributeWithSupportedValue(
-    final Element acquisition
-  ) throws OPDSParseException {
-
+  private OptionType<MIMEType> typeAttributeWithSupportedValue(final Element acquisition) {
     final String attributeText = acquisition.getAttribute("type");
     if (attributeText == null) {
       return Option.none();
@@ -609,14 +588,10 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
 
     try {
       final MIMEType elementType = MIMEParser.Companion.parseRaisingException(attributeText);
-      for (MIMEType format : this.supported_book_formats) {
-        if (format.getFullType().equals(elementType.getFullType())) {
-          return Option.of(elementType);
-        }
-      }
-      return Option.none();
+      return Option.of(elementType);
     } catch (final Exception e) {
-      throw new OPDSParseException(e);
+      LOG.warn("unparseable MIME type: ", e);
+      return Option.none();
     }
   }
 

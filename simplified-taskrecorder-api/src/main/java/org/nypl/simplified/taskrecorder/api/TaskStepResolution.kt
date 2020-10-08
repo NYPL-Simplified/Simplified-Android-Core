@@ -6,9 +6,17 @@ import java.io.Serializable
  * The resolution of a task step.
  */
 
-sealed class TaskStepResolution<E : Serializable> : Serializable {
+sealed class TaskStepResolution : Serializable {
+
+  /**
+   * The step resolution message.
+   */
 
   abstract val message: String
+
+  /**
+   * The exception associated with the step resolution.
+   */
 
   abstract val exception: Throwable?
 
@@ -16,9 +24,9 @@ sealed class TaskStepResolution<E : Serializable> : Serializable {
    * The task succeeded.
    */
 
-  data class TaskStepSucceeded<E : Serializable>(
+  data class TaskStepSucceeded(
     override val message: String
-  ) : TaskStepResolution<E>() {
+  ) : TaskStepResolution() {
     override val exception: Throwable? = null
   }
 
@@ -26,9 +34,9 @@ sealed class TaskStepResolution<E : Serializable> : Serializable {
    * The task failed.
    */
 
-  data class TaskStepFailed<E : Serializable>(
+  data class TaskStepFailed(
     override val message: String,
-    val errorValue: E,
-    override val exception: Throwable?
-  ) : TaskStepResolution<E>()
+    override val exception: Throwable?,
+    val errorCode: String
+  ) : TaskStepResolution()
 }

@@ -11,9 +11,6 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData.AccountLogoutDRMFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutErrorData.AccountLogoutUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
@@ -41,7 +38,7 @@ class ProfileAccountLogoutTask(
   private val http: HTTPType,
   private val logoutStrings: AccountLogoutStringResourcesType,
   private val profile: ProfileReadableType
-) : Callable<TaskResult<AccountLogoutErrorData, Unit>> {
+) : Callable<TaskResult<Unit>> {
 
   init {
     Preconditions.checkState(
@@ -56,7 +53,7 @@ class ProfileAccountLogoutTask(
     LoggerFactory.getLogger(ProfileAccountLogoutTask::class.java)
 
   private val steps =
-    TaskRecorder.create<AccountLogoutErrorData>()
+    TaskRecorder.create()
 
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
@@ -67,7 +64,7 @@ class ProfileAccountLogoutTask(
   private fun error(message: String, vararg arguments: Any?) =
     this.logger.error("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
-  override fun call(): TaskResult<AccountLogoutErrorData, Unit> {
+  override fun call(): TaskResult<Unit> {
     this.steps.beginNewStep(this.logoutStrings.logoutStarted)
 
     this.credentials =
@@ -93,9 +90,9 @@ class ProfileAccountLogoutTask(
       return this.steps.finishSuccess(Unit)
     } catch (e: Throwable) {
       this.steps.currentStepFailedAppending(
-        message = this.logoutStrings.logoutUnexpectedException,
-        errorValue = AccountLogoutUnexpectedException(e),
-        exception = e
+        this.logoutStrings.logoutUnexpectedException,
+        "unexpectedException",
+        e
       )
 
       val failure = this.steps.finishFailure<Unit>()
@@ -204,16 +201,13 @@ class ProfileAccountLogoutTask(
   private fun handleAdobeDRMConnectorException(ex: Throwable) =
     when (ex) {
       is AdobeDRMExtensions.AdobeDRMLogoutConnectorException -> {
-        this.steps.currentStepFailed(
-          this.logoutStrings.logoutDeactivatingDeviceAdobeFailed(ex.errorCode, ex),
-          AccountLogoutDRMFailure(ex.errorCode),
-          ex
-        )
+        val message = this.logoutStrings.logoutDeactivatingDeviceAdobeFailed(ex.errorCode, ex)
+        this.steps.currentStepFailed(message, "Adobe ACS: ${ex.errorCode}", ex)
       }
       else -> {
         this.steps.currentStepFailed(
           this.logoutStrings.logoutDeactivatingDeviceAdobeFailed("UNKNOWN", ex),
-          AccountLogoutUnexpectedException(ex),
+          "unexpectedException",
           ex
         )
       }
@@ -240,7 +234,7 @@ class ProfileAccountLogoutTask(
     } catch (e: Throwable) {
       this.error("could not clear book registry: ", e)
       this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookRegistryFailed, AccountLogoutUnexpectedException(e)
+        this.logoutStrings.logoutClearingBookRegistryFailed, "unexpectedException"
       )
     }
 
@@ -251,7 +245,7 @@ class ProfileAccountLogoutTask(
     } catch (e: Throwable) {
       this.error("could not clear book database: ", e)
       this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookDatabaseFailed, AccountLogoutUnexpectedException(e)
+        this.logoutStrings.logoutClearingBookDatabaseFailed, "unexpectedException"
       )
     }
   }

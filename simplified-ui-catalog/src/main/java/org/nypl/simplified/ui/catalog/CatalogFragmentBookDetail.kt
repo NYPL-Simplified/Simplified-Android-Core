@@ -45,11 +45,8 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepFailed
-import org.nypl.simplified.taskrecorder.api.TaskStepResolution.TaskStepSucceeded
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.catalog.R.string
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -58,7 +55,6 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.SortedMap
 
 /**
  * A book detail page.
@@ -546,10 +542,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
-
-    // Get the problem report message, if any.
-    this.statusFailedText.text =
-      bookStatus.problemReport?.problemDetail ?: this.getString(R.string.catalogOperationFailed)
+    this.statusFailedText.text = bookStatus.message
   }
 
   @UiThread
@@ -922,10 +915,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgress.visibility = View.INVISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.VISIBLE
-
-    // Get the problem report message, if any.
-    this.statusFailedText.text =
-      bookStatus.problemReport?.problemDetail ?: this.getString(R.string.catalogOperationFailed)
+    this.statusFailedText.text = bookStatus.message
   }
 
   @UiThread
@@ -957,9 +947,9 @@ class CatalogFragmentBookDetail : Fragment() {
     this.bookRegistrySubscription?.dispose()
   }
 
-  private fun <E : PresentableErrorType> tryShowError(
+  private fun tryShowError(
     book: Book,
-    result: TaskResult.Failure<E, *>
+    result: TaskResult.Failure<*>
   ) {
     this.logger.debug("showing error: {}", book.id)
 
@@ -967,7 +957,7 @@ class CatalogFragmentBookDetail : Fragment() {
       emailAddress = this.configurationService.supportErrorReportEmailAddress,
       body = "",
       subject = this.configurationService.supportErrorReportSubject,
-      attributes = this.collectAttributes(result),
+      attributes = result.attributes.toSortedMap(),
       taskSteps = result.steps
     )
     this.findNavigationController().openErrorPage(errorPageParameters)
@@ -978,20 +968,4 @@ class CatalogFragmentBookDetail : Fragment() {
       activity = this.requireActivity(),
       interfaceType = CatalogNavigationControllerType::class.java
     )
-
-  private fun <E : PresentableErrorType> collectAttributes(
-    result: TaskResult.Failure<E, *>
-  ): SortedMap<String, String> {
-    val attributes = mutableMapOf<String, String>()
-    for (step in result.steps) {
-      when (val resolution = step.resolution) {
-        is TaskStepSucceeded -> {
-        }
-        is TaskStepFailed -> {
-          attributes.putAll(resolution.errorValue.attributes)
-        }
-      }
-    }
-    return attributes.toSortedMap()
-  }
 }

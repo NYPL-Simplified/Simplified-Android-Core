@@ -3,7 +3,6 @@ package org.nypl.simplified.tests.notifications
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
-import com.io7m.jfunctional.Option
 import io.reactivex.subjects.PublishSubject
 import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
@@ -29,7 +28,6 @@ import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.tests.R
-import org.nypl.simplified.tests.books.book_database.BookDatabaseContract
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
@@ -38,7 +36,7 @@ import java.util.concurrent.ThreadFactory
 
 abstract class NotificationsServiceContract {
   private val logger =
-    LoggerFactory.getLogger(BookDatabaseContract::class.java)
+    LoggerFactory.getLogger(NotificationsServiceContract::class.java)
 
   private lateinit var mockContext: Context
   private lateinit var profileEvents: PublishSubject<ProfileEvent>
@@ -81,7 +79,7 @@ abstract class NotificationsServiceContract {
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
         URI.create("http://www.example.com/0.feed"),
-        Option.some(MIMEParser.parseRaisingException("application/vnd.adobe.adept+xml")),
+        MIMEParser.parseRaisingException("application/vnd.adobe.adept+xml"),
         listOf()
       )
 

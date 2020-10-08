@@ -15,16 +15,6 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingOut
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginConnectionFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginCredentialsIncorrect
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMFailure
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginDRMTooManyActivations
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginMissingInformation
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginNotRequired
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginServerParseError
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData.AccountLoginUnexpectedException
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
@@ -43,6 +33,7 @@ import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.patron.api.PatronDRM
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
@@ -74,7 +65,7 @@ class ProfileAccountLoginTask(
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType,
   private val request: ProfileAccountLoginRequest
-) : Callable<TaskResult<AccountLoginErrorData, Unit>> {
+) : Callable<TaskResult<Unit>> {
 
   init {
     Preconditions.checkState(
@@ -89,7 +80,7 @@ class ProfileAccountLoginTask(
   private var adobeDRM: PatronDRMAdobe? =
     null
 
-  private val steps: TaskRecorderType<AccountLoginErrorData> =
+  private val steps: TaskRecorderType =
     TaskRecorder.create()
 
   private val logger =
@@ -107,7 +98,7 @@ class ProfileAccountLoginTask(
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}][{}] $message", this.profile.id.uuid, this.account.id, *arguments)
 
-  private fun run(): TaskResult<AccountLoginErrorData, Unit> {
+  private fun run(): TaskResult<Unit> {
     return try {
       if (!this.updateLoggingInState(
           this.steps.beginNewStep(this.loginStrings.loginCheckAuthRequired)
@@ -118,8 +109,7 @@ class ProfileAccountLoginTask(
 
       if (!this.validateRequest()) {
         this.debug("account does not support the given authentication")
-        val details = AccountLoginNotRequired(this.loginStrings.loginAuthNotRequired)
-        this.steps.currentStepFailed(details.message, details)
+        this.steps.currentStepFailed(this.loginStrings.loginAuthNotRequired, "loginAuthNotRequired")
         this.account.setLoginState(AccountLoginFailed(this.steps.finishFailure<Unit>()))
         return this.steps.finishFailure()
       }
@@ -138,13 +128,9 @@ class ProfileAccountLoginTask(
       }
     } catch (e: Throwable) {
       this.logger.error("error during login process: ", e)
-
       this.steps.currentStepFailedAppending(
-        message = this.loginStrings.loginUnexpectedException,
-        errorValue = AccountLoginUnexpectedException(this.loginStrings.loginUnexpectedException, e),
-        exception = e
+        this.loginStrings.loginUnexpectedException, "unexpectedException", e
       )
-
       val failure = this.steps.finishFailure<Unit>()
       this.account.setLoginState(AccountLoginFailed(failure))
       failure
@@ -153,7 +139,7 @@ class ProfileAccountLoginTask(
 
   private fun runOAuthWithIntermediaryCancel(
     request: OAuthWithIntermediaryCancel
-  ): TaskResult<AccountLoginErrorData, Unit> {
+  ): TaskResult<Unit> {
     this.steps.beginNewStep("Cancelling login...")
     return when (this.account.loginState) {
       is AccountLoggingIn,
@@ -178,7 +164,7 @@ class ProfileAccountLoginTask(
 
   private fun runOAuthWithIntermediaryComplete(
     request: OAuthWithIntermediaryComplete
-  ): TaskResult<AccountLoginErrorData, Unit> {
+  ): TaskResult<Unit> {
     this.steps.beginNewStep("Accepting login token...")
     return when (this.account.loginState) {
       is AccountLoggingIn,
@@ -211,7 +197,7 @@ class ProfileAccountLoginTask(
 
   private fun runOAuthWithIntermediaryInitiate(
     request: OAuthWithIntermediaryInitiate
-  ): TaskResult.Success<AccountLoginErrorData, Unit> {
+  ): TaskResult.Success<Unit> {
     this.account.setLoginState(
       AccountLoggingInWaitingForExternalAuthentication(
         description = request.description,
@@ -223,7 +209,7 @@ class ProfileAccountLoginTask(
 
   private fun runBasicLogin(
     request: Basic
-  ): TaskResult.Success<AccountLoginErrorData, Unit> {
+  ): TaskResult.Success<Unit> {
     this.credentials =
       AccountAuthenticationCredentials.Basic(
         userName = request.username,
@@ -336,29 +322,17 @@ class ProfileAccountLoginTask(
     }
   }
 
-  private fun handleAdobeDRMConnectorException(ex: Throwable): TaskStep<AccountLoginErrorData> {
+  private fun handleAdobeDRMConnectorException(ex: Throwable): TaskStep {
     val text = this.loginStrings.loginDeviceActivationFailed(ex)
     return when (ex) {
       is AdobeDRMExtensions.AdobeDRMLoginNoActivationsException -> {
-        this.steps.currentStepFailed(
-          text,
-          AccountLoginDRMTooManyActivations(text),
-          ex
-        )
+        this.steps.currentStepFailed(text, "Adobe ACS: drmNoAvailableActivations", ex)
       }
       is AdobeDRMExtensions.AdobeDRMLoginConnectorException -> {
-        this.steps.currentStepFailed(
-          text,
-          AccountLoginDRMFailure(text, ex.errorCode),
-          ex
-        )
+        this.steps.currentStepFailed(text, "Adobe ACS: ${ex.errorCode}", ex)
       }
       else -> {
-        this.steps.currentStepFailed(
-          text,
-          AccountLoginUnexpectedException(text, ex),
-          ex
-        )
+        this.steps.currentStepFailed(text, "Adobe ACS: drmUnspecifiedError", ex)
       }
     }
   }
@@ -425,11 +399,10 @@ class ProfileAccountLoginTask(
 
     val patronSettingsURI = this.account.provider.patronSettingsURI
     if (patronSettingsURI == null) {
-      this.steps.currentStepFailed(
-        this.loginStrings.loginPatronSettingsRequestNoURI,
-        AccountLoginMissingInformation(this.loginStrings.loginPatronSettingsRequestNoURI)
-      )
-      throw Exception()
+      val message = this.loginStrings.loginPatronSettingsRequestNoURI
+      val exception = Exception()
+      this.steps.currentStepFailed(message, "noPatronURI", exception)
+      throw exception
     }
 
     val httpAuthentication =
@@ -473,15 +446,9 @@ class ProfileAccountLoginTask(
             this.loginStrings.loginPatronSettingsRequestParseFailed(
               parseResult.errors.map(this::showParseError)
             )
-          this.steps.currentStepFailed(
-            message = message,
-            errorValue = AccountLoginServerParseError(
-              message = message,
-              warnings = parseResult.warnings,
-              errors = parseResult.errors
-            )
-          )
-          throw Exception()
+          val exception = Exception()
+          this.steps.currentStepFailed(message, "parseErrorPatronSettings", exception)
+          throw exception
         }
       }
     }
@@ -540,11 +507,7 @@ class ProfileAccountLoginTask(
     result: HTTPResultException<InputStream>
   ) {
     val message = this.loginStrings.loginPatronSettingsConnectionFailed
-    this.steps.currentStepFailed(
-      message = message,
-      errorValue = AccountLoginConnectionFailure(message),
-      exception = result.error
-    )
+    this.steps.currentStepFailed(message, "connectionFailed", result.error)
     throw result.error
   }
 
@@ -554,33 +517,23 @@ class ProfileAccountLoginTask(
   ) {
     this.error("received http error: {}: {}: {}", patronSettingsURI, result.message, result.status)
 
+    val exception = Exception()
     when (result.status) {
       HttpURLConnection.HTTP_UNAUTHORIZED -> {
         val message = this.loginStrings.loginPatronSettingsInvalidCredentials
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = AccountLoginCredentialsIncorrect(message)
-        )
-        throw Exception()
+        this.steps.currentStepFailed(message, "invalidCredentials", exception)
+        throw exception
       }
       else -> {
         val message = this.loginStrings.loginServerError(result.status, result.message)
-        this.steps.currentStepFailed(
-          message = message,
-          errorValue = AccountLoginServerError(
-            message = message,
-            uri = patronSettingsURI,
-            statusCode = result.status,
-            errorMessage = result.message,
-            problemReport = this.someOrNull(result.problemReport)
-          )
-        )
-        throw Exception()
+        this.steps.addAttributes(Presentables.problemReportAsAttributes(this.someOrNull(result.problemReport)))
+        this.steps.currentStepFailed(message, "httpError ${result.status} $patronSettingsURI", exception)
+        throw exception
       }
     }
   }
 
-  private fun updateLoggingInState(step: TaskStep<AccountLoginErrorData>): Boolean {
+  private fun updateLoggingInState(step: TaskStep): Boolean {
     return when (this.request) {
       is Basic,
       is OAuthWithIntermediaryInitiate -> {

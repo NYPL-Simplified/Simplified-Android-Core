@@ -441,7 +441,7 @@ class AudioBookPlayerActivity :
         strategyResult.result.manifest
       }
       is TaskResult.Failure ->
-        throw IOException(strategyResult.errors().get(0))
+        throw IOException(strategyResult.message)
     }
   }
 

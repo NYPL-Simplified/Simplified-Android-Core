@@ -1,8 +1,10 @@
 package org.nypl.simplified.viewer.pdf
 
 import android.app.Activity
+import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.formats.api.StandardFormatNames
 import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.nypl.simplified.viewer.spi.ViewerProviderType
 import org.slf4j.LoggerFactory
@@ -30,6 +32,10 @@ class PdfViewerProvider : ViewerProviderType {
         true
       }
     }
+  }
+
+  override fun canPotentiallySupportType(type: MIMEType): Boolean {
+    return type == StandardFormatNames.genericPDFFiles
   }
 
   override fun open(

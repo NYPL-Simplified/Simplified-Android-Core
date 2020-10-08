@@ -125,11 +125,7 @@ class BookSyncTask(
         newProviderResult.result
       }
       is TaskResult.Failure -> {
-        this.logger.error("failed to resolve account provider")
-        newProviderResult.errors()
-          .forEach {
-            this.logger.error("account provider resolution: {}: ", it.message, it.exception)
-          }
+        this.logger.error("failed to resolve account provider: ", newProviderResult.exception)
         oldProvider
       }
     }
