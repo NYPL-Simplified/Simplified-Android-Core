@@ -293,7 +293,7 @@ sealed class Feed {
       return if (feed.feedGroups.isEmpty()) {
         this.withoutGroups(accountId, feed, filter, search)
       } else {
-        this.withGroups(accountId, feed, search)
+        this.withGroups(accountId, feed, filter, search)
       }
     }
 
@@ -355,6 +355,7 @@ sealed class Feed {
     private fun withGroups(
       accountId: AccountID,
       feed: OPDSAcquisitionFeed,
+      filter: (OPDSAcquisitionFeedEntry) -> Boolean,
       search: OPDSOpenSearch1_1?
     ): FeedWithGroups {
       val facetsByGroup =
@@ -382,7 +383,7 @@ sealed class Feed {
         feedNext = this.mapNull(feed.feedNext),
         facetsByGroupData = facetsByGroup,
         facetsOrderData = facetsOrder,
-        feedGroupsData = FeedGroup.fromOPDSGroups(accountId, feed.feedGroups),
+        feedGroupsData = FeedGroup.fromOPDSGroups(accountId, filter, feed.feedGroups),
         feedGroupsOrderData = feed.feedGroupsOrder
       )
     }

@@ -1,7 +1,5 @@
 package org.nypl.simplified.feeds.api
 
-import android.content.ContentResolver
-import android.net.Uri
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -14,6 +12,7 @@ import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
 import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
@@ -41,6 +40,7 @@ import java.net.URI
 import java.util.SortedMap
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The default implementation of the [FeedLoaderType] interface.
@@ -54,7 +54,7 @@ class FeedLoader private constructor(
   private val bookRegistry: BookRegistryReadableType,
   private val bundledContent: BundledContentResolverType,
   private val cache: ExpiringMap<URI, Feed>,
-  private val contentResolver: ContentResolver,
+  private val contentResolver: ContentResolverType,
   private val exec: ListeningExecutorService,
   private val parser: OPDSFeedParserType,
   private val searchParser: OPDSSearchParserType,
@@ -95,6 +95,16 @@ class FeedLoader private constructor(
       )
     )
   }
+
+  private val filterFlag =
+    AtomicBoolean(true)
+
+  override var showOnlySupportedBooks: Boolean
+    get() = this.filterFlag.get()
+    set(value) {
+      this.filterFlag.set(value)
+      this.cache.clear()
+    }
 
   override fun fetchURI(
     accountId: AccountID,
@@ -148,6 +158,10 @@ class FeedLoader private constructor(
   private fun isEntrySupported(
     entry: OPDSAcquisitionFeedEntry
   ): Boolean {
+    if (!this.showOnlySupportedBooks) {
+      return true
+    }
+
     val linearizedPaths = OPDSAcquisitionPaths.linearize(entry)
     for (path in linearizedPaths) {
       if (this.isRelationSupported(path.source.relation) && this.isTypePathSupported(path)) {
@@ -255,7 +269,7 @@ class FeedLoader private constructor(
     accountId: AccountID,
     uri: URI
   ): FeedLoaderResult {
-    val streamMaybe = this.contentResolver.openInputStream(Uri.parse(uri.toString()))
+    val streamMaybe = this.contentResolver.openInputStream(uri)
     return if (streamMaybe != null) {
       streamMaybe.use { stream ->
         FeedLoaderSuccess(
@@ -380,7 +394,7 @@ class FeedLoader private constructor(
 
     fun create(
       bookFormatSupport: BookFormatSupportType,
-      contentResolver: ContentResolver,
+      contentResolver: ContentResolverType,
       exec: ListeningExecutorService,
       parser: OPDSFeedParserType,
       searchParser: OPDSSearchParserType,

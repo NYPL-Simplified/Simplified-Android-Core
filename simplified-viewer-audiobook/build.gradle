@@ -5,7 +5,6 @@ dependencies {
   implementation project(":simplified-books-controller-api")
   implementation project(":simplified-books-covers")
   implementation project(":simplified-books-database-api")
-  implementation project(":simplified-downloader-core")
   implementation project(":simplified-files")
   implementation project(":simplified-networkconnectivity-api")
   implementation project(":simplified-profiles-controller-api")

@@ -1,6 +1,5 @@
 package org.nypl.simplified.tests.books.controller
 
-import android.content.ContentResolver
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -38,8 +37,7 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookRevokeTask
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
-import org.nypl.simplified.downloader.core.DownloaderHTTP
-import org.nypl.simplified.downloader.core.DownloaderType
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
@@ -96,12 +94,10 @@ abstract class BookRevokeTaskContract {
   private lateinit var bundledContent: BundledContentResolverType
   private lateinit var cacheDirectory: File
   private lateinit var clock: () -> Instant
-  private lateinit var contentResolver: ContentResolver
+  private lateinit var contentResolver: ContentResolverType
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
-  private lateinit var downloader: DownloaderType
   private lateinit var executorBooks: ListeningExecutorService
-  private lateinit var executorDownloads: ListeningExecutorService
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var feedLoader: FeedLoaderType
@@ -113,7 +109,6 @@ abstract class BookRevokeTaskContract {
   @Throws(Exception::class)
   fun setUp() {
     this.http = MockingHTTP()
-    this.executorDownloads = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorBooks = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorTimer = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
@@ -124,12 +119,10 @@ abstract class BookRevokeTaskContract {
     this.bundledContent =
       BundledContentResolverType { uri -> throw FileNotFoundException("missing") }
     this.bookFormatSupport = Mockito.mock(BookFormatSupportType::class.java)
-    this.contentResolver = Mockito.mock(ContentResolver::class.java)
+    this.contentResolver = Mockito.mock(ContentResolverType::class.java)
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
-    this.downloader =
-      DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
     this.clock = { Instant.now() }
   }
@@ -139,7 +132,6 @@ abstract class BookRevokeTaskContract {
   fun tearDown() {
     this.executorBooks.shutdown()
     this.executorFeeds.shutdown()
-    this.executorDownloads.shutdown()
     this.executorTimer.shutdown()
   }
 

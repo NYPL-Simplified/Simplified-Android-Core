@@ -5,7 +5,6 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.taskrecorder.api.TaskResult
 
@@ -19,32 +18,13 @@ interface BooksControllerType {
    * Attempt to borrow the given book.
    *
    * @param accountID The account that will receive the book
-   * @param id The ID of the book
-   * @param acquisition The acquisition entry for the book
    * @param entry The OPDS feed entry for the book
    */
 
   fun bookBorrow(
     accountID: AccountID,
-    bookID: BookID,
-    acquisition: OPDSAcquisition,
     entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<Unit>>
-
-  /**
-   * Attempt to borrow the given book. The controller will pick the acquisition.
-   *
-   * @param accountID The account that will receive the book
-   * @param id The ID of the book
-   * @param entry The OPDS feed entry for the book
-   * @see org.nypl.simplified.books.book_database.api.BookAcquisitionSelection.preferredAcquisition
-   */
-
-  fun bookBorrowWithDefaultAcquisition(
-    accountID: AccountID,
-    bookID: BookID,
-    entry: OPDSAcquisitionFeedEntry
-  ): FluentFuture<TaskResult<Unit>>
+  ): FluentFuture<TaskResult<*>>
 
   /**
    * Dismiss a failed book borrowing.

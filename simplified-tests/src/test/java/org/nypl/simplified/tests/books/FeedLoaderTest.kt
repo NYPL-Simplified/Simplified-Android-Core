@@ -1,6 +1,5 @@
 package org.nypl.simplified.tests.books
 
-import android.content.ContentResolver
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.OptionType
 import org.mockito.Mockito
@@ -8,6 +7,7 @@ import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.formats.BookFormatSupport
 import org.nypl.simplified.books.formats.BookFormatSupportParameters
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.http.core.HTTPAuthType
@@ -45,7 +45,7 @@ class FeedLoaderTest : FeedLoaderContract() {
       )
 
     val contentResolver =
-      Mockito.mock(ContentResolver::class.java)
+      Mockito.mock(ContentResolverType::class.java)
 
     return FeedLoader.create(
       bookFormatSupport = bookFormatSupport,

@@ -2,12 +2,16 @@ package org.nypl.simplified.taskrecorder.api
 
 import com.google.common.base.Preconditions
 import org.nypl.simplified.presentableerror.api.Presentables
+import org.slf4j.LoggerFactory
 
 /**
  * A task step recorder.
  */
 
 class TaskRecorder private constructor() : TaskRecorderType {
+
+  private val logger =
+    LoggerFactory.getLogger(TaskRecorder::class.java)
 
   companion object {
 
@@ -36,6 +40,8 @@ class TaskRecorder private constructor() : TaskRecorderType {
   }
 
   override fun beginNewStep(message: String): TaskStep {
+    this.logger.debug("step started: {}", message)
+
     val step = TaskStep(description = message)
     this.steps.add(step)
     return step
@@ -44,6 +50,7 @@ class TaskRecorder private constructor() : TaskRecorderType {
   override fun currentStepSucceeded(message: String): TaskStep {
     Preconditions.checkState(this.steps.isNotEmpty(), "A step must be active")
 
+    this.logger.debug("step succeeded: {}", message)
     val step = this.steps.last()
     step.resolution = TaskStepResolution.TaskStepSucceeded(message)
     return step
@@ -56,6 +63,7 @@ class TaskRecorder private constructor() : TaskRecorderType {
   ): TaskStep {
     Preconditions.checkState(this.steps.isNotEmpty(), "A step must be active")
 
+    this.logger.debug("step failed: {} ({}): ", message, errorCode, exception)
     val step = this.steps.last()
     step.resolution =
       TaskStepResolution.TaskStepFailed(
@@ -73,6 +81,7 @@ class TaskRecorder private constructor() : TaskRecorderType {
   ): TaskStep {
     Preconditions.checkState(this.steps.isNotEmpty(), "A step must be active")
 
+    this.logger.debug("step failed: {} ({}): ", message, errorCode, exception)
     val step = this.steps.last()
     return when (val resolution = step.resolution) {
       is TaskStepResolution.TaskStepSucceeded -> {
