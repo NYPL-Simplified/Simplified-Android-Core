@@ -23,11 +23,6 @@ interface BorrowSubtaskDirectoryType {
     mimeType: MIMEType,
     target: URI?
   ): BorrowSubtaskFactoryType? {
-    for (factory in this.subtasks) {
-      if (factory.isApplicableFor(mimeType, target)) {
-        return factory
-      }
-    }
-    return null
+    return this.subtasks.firstOrNull { factory -> factory.isApplicableFor(mimeType, target) }
   }
 }

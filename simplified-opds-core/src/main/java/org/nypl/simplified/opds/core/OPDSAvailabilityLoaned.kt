@@ -23,7 +23,7 @@ data class OPDSAvailabilityLoaned private constructor(
 
   val revoke: OptionType<URI>,
 
-  private val end_date: OptionType<DateTime>
+  private val endDate: OptionType<DateTime>
 ) : OPDSAvailabilityType {
 
   val startDateOrNull: DateTime?
@@ -40,7 +40,7 @@ data class OPDSAvailabilityLoaned private constructor(
    */
 
   override fun getEndDate(): OptionType<DateTime> {
-    return this.end_date
+    return this.endDate
   }
 
   override fun <A, E : Exception?> matchAvailability(
@@ -53,7 +53,7 @@ data class OPDSAvailabilityLoaned private constructor(
     val fmt = ISODateTimeFormat.dateTime()
     val b = StringBuilder(128)
     b.append("[OPDSAvailabilityLoaned end_date=")
-    b.append(this.end_date.map { c: DateTime? -> fmt.print(c) })
+    b.append(this.endDate.map { c: DateTime? -> fmt.print(c) })
     b.append(" start_date=")
     b.append(this.startDate.map { c: DateTime? -> fmt.print(c) })
     b.append(" revoke=")
@@ -82,7 +82,7 @@ data class OPDSAvailabilityLoaned private constructor(
       return OPDSAvailabilityLoaned(
         startDate = startDate,
         revoke = revoke,
-        end_date = endDate
+        endDate = endDate
       )
     }
   }

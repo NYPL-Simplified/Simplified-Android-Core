@@ -13,7 +13,7 @@ import java.net.URI
 data class OPDSAvailabilityHeld private constructor(
   val startDate: OptionType<DateTime>,
   val position: OptionType<Int>,
-  private val end_date: OptionType<DateTime>,
+  private val endDate: OptionType<DateTime>,
 
   /**
    * @return A URI for revoking the hold, if any
@@ -40,7 +40,7 @@ data class OPDSAvailabilityHeld private constructor(
    */
 
   override fun getEndDate(): OptionType<DateTime> {
-    return this.end_date
+    return this.endDate
   }
 
   override fun <A, E : Exception?> matchAvailability(
@@ -60,7 +60,7 @@ data class OPDSAvailabilityHeld private constructor(
       Unit.unit()
     }
     b.append(" end_date=")
-    this.end_date.map { e: DateTime? ->
+    this.endDate.map { e: DateTime? ->
       b.append(fmt.print(e))
       Unit.unit()
     }
@@ -91,7 +91,7 @@ data class OPDSAvailabilityHeld private constructor(
       return OPDSAvailabilityHeld(
         startDate = startDate,
         position = position,
-        end_date = endDate,
+        endDate = endDate,
         revoke = revoke
       )
     }
