@@ -42,6 +42,13 @@ object StandardFormatNames {
     this.mimeOf("application/vnd.overdrive.circulation.api+json;profile=audiobook")
 
   /**
+   * The standard format name for DPLA audio books.
+   */
+
+  val dplaAudioBooks =
+    this.mimeOf("application/audiobook+json;profile=http://www.feedbooks.com/audiobooks/access-restriction")
+
+  /**
    * Various standard format names used for generic, unencrypted audio books.
    */
 
@@ -60,6 +67,7 @@ object StandardFormatNames {
       val types = mutableSetOf<MIMEType>()
       types.add(this.findawayAudioBooks)
       types.add(this.overdriveAudioBooks)
+      types.add(this.dplaAudioBooks)
       types.addAll(this.genericAudioBooks)
       types.toSet()
     }

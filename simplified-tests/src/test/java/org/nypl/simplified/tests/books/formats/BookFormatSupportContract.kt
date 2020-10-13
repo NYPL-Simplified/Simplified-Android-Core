@@ -151,6 +151,135 @@ abstract class BookFormatSupportContract {
   }
 
   /**
+   * DPLA audio book support is correctly handled.
+   */
+
+  @Test
+  fun testAudioSupportedDPLA() {
+    val supportWith =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsAdobeDRM = false,
+          supportsAudioBooks = BookFormatAudioSupportParameters(
+            supportsFindawayAudioBooks = false,
+            supportsOverdriveAudioBooks = false,
+            supportsDPLAAudioBooks = true
+          )
+        )
+      )
+    val supportWithout =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsAdobeDRM = false,
+          supportsAudioBooks = null
+        )
+      )
+
+    Assert.assertTrue(
+      supportWith.isSupportedPath(
+        listOf(
+          StandardFormatNames.dplaAudioBooks
+        )
+      )
+    )
+    Assert.assertFalse(
+      supportWithout.isSupportedPath(
+        listOf(
+          StandardFormatNames.dplaAudioBooks
+        )
+      )
+    )
+  }
+
+  /**
+   * Overdrive audio book support is correctly handled.
+   */
+
+  @Test
+  fun testAudioSupportedOverdrive() {
+    val supportWith =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsAdobeDRM = false,
+          supportsAudioBooks = BookFormatAudioSupportParameters(
+            supportsFindawayAudioBooks = false,
+            supportsOverdriveAudioBooks = true,
+            supportsDPLAAudioBooks = false
+          )
+        )
+      )
+    val supportWithout =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsAdobeDRM = false,
+          supportsAudioBooks = null
+        )
+      )
+
+    Assert.assertTrue(
+      supportWith.isSupportedPath(
+        listOf(
+          StandardFormatNames.overdriveAudioBooks
+        )
+      )
+    )
+    Assert.assertFalse(
+      supportWithout.isSupportedPath(
+        listOf(
+          StandardFormatNames.overdriveAudioBooks
+        )
+      )
+    )
+  }
+
+  /**
+   * Findaway audio book support is correctly handled.
+   */
+
+  @Test
+  fun testAudioSupportedFindaway() {
+    val supportWith =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsAdobeDRM = false,
+          supportsAudioBooks = BookFormatAudioSupportParameters(
+            supportsFindawayAudioBooks = true,
+            supportsOverdriveAudioBooks = false,
+            supportsDPLAAudioBooks = false
+          )
+        )
+      )
+    val supportWithout =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsAdobeDRM = false,
+          supportsAudioBooks = null
+        )
+      )
+
+    Assert.assertTrue(
+      supportWith.isSupportedPath(
+        listOf(
+          StandardFormatNames.findawayAudioBooks
+        )
+      )
+    )
+    Assert.assertFalse(
+      supportWithout.isSupportedPath(
+        listOf(
+          StandardFormatNames.findawayAudioBooks
+        )
+      )
+    )
+  }
+
+  /**
    * Some types can't be final types.
    */
 
