@@ -62,6 +62,9 @@ class BookFormatSupport private constructor(
       if (audio.supportsOverdriveAudioBooks) {
         types.add(StandardFormatNames.overdriveAudioBooks)
       }
+      if (audio.supportsDPLAAudioBooks) {
+        types.add(StandardFormatNames.dplaAudioBooks)
+      }
     }
   }
 
