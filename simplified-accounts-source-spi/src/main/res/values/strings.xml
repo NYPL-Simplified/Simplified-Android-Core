@@ -10,6 +10,10 @@
   <string name="resolvingAuthDocumentOAuthMalformed">The description of an OAuth system must contain an authentication URI.</string>
   <string name="resolvingAuthDocumentParseFailed">The authentication document was malformed and could not be parsed.</string>
   <string name="resolvingAuthDocumentRetrievalFailed">The authentication document could not be retrieved from the server.</string>
+  <string name="resolvingAuthDocumentRetrievalFailedWithProblem">
+The authentication document could not be retrieved from the server.
+
+  </string>
   <string name="resolvingAuthDocumentUnusableLink">We couldn\'t understand the authentication document link.</string>
   <string name="resolvingUnexpectedException">Received an unexpected exception during resolution!</string>
 </resources>

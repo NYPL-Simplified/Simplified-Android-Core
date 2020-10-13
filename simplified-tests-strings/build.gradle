@@ -1,6 +1,0 @@
-dependencies {
-  api project(":simplified-books-controller-api")
-  api project(":simplified-profiles-controller-api")
-
-  implementation libraries.kotlinStdlib
-}

@@ -50,7 +50,6 @@ sealed class MigrationEvent : PresentableType {
     override val message: String,
     override val exception: Exception? = null,
     override val attributes: Map<String, String> = mapOf(),
-    override val causes: List<PresentableErrorType> = listOf(),
     override val subject: Subject? = null
   ) : MigrationEvent(), PresentableErrorType
 }

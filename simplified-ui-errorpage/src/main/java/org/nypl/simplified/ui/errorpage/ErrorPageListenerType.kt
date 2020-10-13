@@ -11,6 +11,6 @@ interface ErrorPageListenerType {
    */
 
   fun onErrorPageSendReport(
-    parameters: ErrorPageParameters<*>
+    parameters: ErrorPageParameters
   )
 }

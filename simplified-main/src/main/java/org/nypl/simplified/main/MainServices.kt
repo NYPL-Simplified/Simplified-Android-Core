@@ -6,13 +6,13 @@ import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.Color
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.squareup.picasso.Picasso
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
+import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectory
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
@@ -42,13 +42,13 @@ import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.audio.AudioBookManifests
 import org.nypl.simplified.books.audio.AudioBookOverdriveSecretServiceType
-import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.borrowing.BorrowSubtasks
+import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
-import org.nypl.simplified.books.controller.api.BookBorrowStringResourcesType
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
@@ -56,6 +56,7 @@ import org.nypl.simplified.books.covers.BookCoverGenerator
 import org.nypl.simplified.books.covers.BookCoverGeneratorType
 import org.nypl.simplified.books.covers.BookCoverProvider
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService
 import org.nypl.simplified.boot.api.BootEvent
@@ -65,10 +66,10 @@ import org.nypl.simplified.cardcreator.CardCreatorService
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.clock.Clock
 import org.nypl.simplified.clock.ClockType
+import org.nypl.simplified.content.api.ContentResolverSane
+import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.documents.store.DocumentStore
 import org.nypl.simplified.documents.store.DocumentStoreType
-import org.nypl.simplified.downloader.core.DownloaderHTTP
-import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -250,14 +251,6 @@ internal object MainServices {
       override val dataDirectoryName: String
         get() = this@MainServices.CURRENT_DATA_VERSION
     }
-  }
-
-  private fun createDownloader(
-    execDownloader: ListeningScheduledExecutorService,
-    directories: Directories,
-    http: HTTPType
-  ): DownloaderType {
-    return DownloaderHTTP.newDownloader(execDownloader, directories.directoryStorageDownloads, http)
   }
 
   private fun createLocalImageLoader(context: Context): ImageLoaderType {
@@ -442,11 +435,12 @@ internal object MainServices {
   }
 
   private fun createFeedLoader(
-    context: Context,
     http: HTTPType,
     opdsFeedParser: OPDSFeedParserType,
+    bookFormatSupport: BookFormatSupportType,
     bookRegistry: BookRegistryType,
-    bundledContent: BundledContentResolverType
+    bundledContent: BundledContentResolverType,
+    contentResolver: ContentResolverType
   ): FeedLoaderType {
     val execCatalogFeeds =
       NamedThreadPools.namedThreadPool(1, "catalog-feed", 19)
@@ -454,10 +448,12 @@ internal object MainServices {
       OPDSSearchParser.newParser()
     val feedTransport =
       FeedHTTPTransport.newTransport(http)
+
     return FeedLoader.create(
+      bookFormatSupport = bookFormatSupport,
       bookRegistry = bookRegistry,
       bundledContent = bundledContent,
-      contentResolver = context.contentResolver,
+      contentResolver = contentResolver,
       exec = execCatalogFeeds,
       parser = opdsFeedParser,
       searchParser = feedSearchParser,
@@ -466,11 +462,7 @@ internal object MainServices {
   }
 
   private fun createFeedParser(): OPDSFeedParserType {
-    return OPDSFeedParser.newParser(
-      OPDSAcquisitionFeedEntryParser.newParser(
-        BookFormats.supportedBookMimeTypes()
-      )
-    )
+    return OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
   }
 
   private fun <T : Any> optionalFromServiceLoader(interfaceType: Class<T>): T? {
@@ -680,12 +672,6 @@ internal object MainServices {
     )
 
     addService(
-      message = strings.bootingStrings("borrow"),
-      interfaceType = BookBorrowStringResourcesType::class.java,
-      serviceConstructor = { MainCatalogBookBorrowStrings(context.resources) }
-    )
-
-    addService(
       message = strings.bootingStrings("account creation"),
       interfaceType = ProfileAccountCreationStringResourcesType::class.java,
       serviceConstructor = { MainProfileAccountCreationStringResources(context.resources) }
@@ -714,11 +700,12 @@ internal object MainServices {
     val directories = this.initializeDirectories(context)
 
     val adobeConfiguration = this.findAdobeConfiguration(context.resources)
-    addServiceOptionally(
-      message = strings.bootingAdobeDRM,
-      interfaceType = AdobeAdeptExecutorType::class.java,
-      serviceConstructor = { AdobeDRMServices.newAdobeDRMOrNull(context, adobeConfiguration) }
-    )
+    val adobeDRM =
+      addServiceOptionally(
+        message = strings.bootingAdobeDRM,
+        interfaceType = AdobeAdeptExecutorType::class.java,
+        serviceConstructor = { AdobeDRMServices.newAdobeDRMOrNull(context, adobeConfiguration) }
+      )
 
     val screenSize =
       addService(
@@ -738,15 +725,6 @@ internal object MainServices {
       message = strings.bootingUIThreadService,
       interfaceType = UIThreadServiceType::class.java,
       serviceConstructor = { MainUIThreadService() }
-    )
-
-    val execDownloader =
-      NamedThreadPools.namedThreadPool(1, "downloader", 19)
-
-    addService(
-      message = strings.bootingDownloadService,
-      interfaceType = DownloaderType::class.java,
-      serviceConstructor = { this.createDownloader(execDownloader, directories, http) }
     )
 
     val bookRegistry =
@@ -799,6 +777,25 @@ internal object MainServices {
       serviceConstructor = { this.findBuildConfiguration() }
     )
 
+    val contentResolver =
+      addService(
+        message = "Starting content resolver...",
+        interfaceType = ContentResolverType::class.java,
+        serviceConstructor = { ContentResolverSane(context.contentResolver) }
+      )
+
+    addService(
+      message = "Starting LSHTTP...",
+      interfaceType = LSHTTPClientType::class.java,
+      serviceConstructor = { MainHTTP.create(context) }
+    )
+
+    addService(
+      message = "Starting borrow subtask directory...",
+      interfaceType = BorrowSubtaskDirectoryType::class.java,
+      serviceConstructor = { BorrowSubtasks.directory() }
+    )
+
     addService(
       message = strings.bootingDocumentStore,
       interfaceType = DocumentStoreType::class.java,
@@ -807,7 +804,7 @@ internal object MainServices {
           assets = assets,
           clock = clock,
           http = http,
-          exec = execDownloader,
+          exec = NamedThreadPools.namedThreadPool(1, "documents", 19),
           directory = directories.directoryStorageDocuments
         )
       }
@@ -893,14 +890,42 @@ internal object MainServices {
         }
       )
 
+    val feedbooksSecretService =
+      addServiceOptionally(
+        message = strings.bootingFeedbooksSecretService,
+        interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
+        serviceConstructor = { MainFeedbooksSecretService.createConditionally(context) }
+      )
+
+    val overdriveSecretService =
+      addServiceOptionally(
+        message = strings.bootingOverdriveSecretService,
+        interfaceType = AudioBookOverdriveSecretServiceType::class.java,
+        serviceConstructor = { MainOverdriveSecretService.createConditionally(context) }
+      )
+
+    val bookFormatService =
+      addService(
+        message = strings.bootingBookFormatSupport,
+        interfaceType = BookFormatSupportType::class.java,
+        serviceConstructor = {
+          MainBookFormatSupport.createBookFormatSupport(
+            adobeDRM = adobeDRM,
+            feedbooksSecretService = feedbooksSecretService,
+            overdriveSecretService = overdriveSecretService
+          )
+        }
+      )
+
     addService(
       message = strings.bootingFeedLoader,
       interfaceType = FeedLoaderType::class.java,
       serviceConstructor = {
         this.createFeedLoader(
+          bookFormatSupport = bookFormatService,
           bookRegistry = bookRegistry,
           bundledContent = bundledContent,
-          context = context,
+          contentResolver = contentResolver,
           http = http,
           opdsFeedParser = opdsFeedParser
         )
@@ -951,11 +976,10 @@ internal object MainServices {
       val controller =
         Controller.createFromServiceDirectory(
           services = services.build(),
-          cacheDirectory = context.cacheDir,
-          contentResolver = context.contentResolver,
-          profileEvents = profileEvents,
+          executorService = execBooks,
           accountEvents = accountEvents,
-          executorService = execBooks
+          profileEvents = profileEvents,
+          cacheDirectory = context.cacheDir
         )
       addService(
         message = strings.bootingBookController,

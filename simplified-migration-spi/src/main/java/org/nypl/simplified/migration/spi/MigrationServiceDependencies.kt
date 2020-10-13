@@ -3,9 +3,7 @@ package org.nypl.simplified.migration.spi
 import android.content.Context
 import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginErrorData
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import java.net.URI
@@ -21,13 +19,13 @@ data class MigrationServiceDependencies(
    * current profile.
    */
 
-  val createAccount: (URI) -> TaskResult<AccountCreateErrorDetails, AccountType>,
+  val createAccount: (URI) -> TaskResult<AccountType>,
 
   /**
    * A function that, given an account, tries to log in.
    */
 
-  val loginAccount: (AccountType, AccountAuthenticationCredentials) -> TaskResult<AccountLoginErrorData, Unit>,
+  val loginAccount: (AccountType, AccountAuthenticationCredentials) -> TaskResult<Unit>,
 
   /**
    * A source of account events.

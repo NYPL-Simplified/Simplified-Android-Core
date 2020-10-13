@@ -24,15 +24,18 @@ dependencies {
   api project(":simplified-adobe-extensions")
   api project(":simplified-analytics-api")
   api project(":simplified-books-audio")
+  api project(":simplified-books-borrowing")
   api project(":simplified-books-controller")
   api project(":simplified-books-controller-api")
+  api project(":simplified-books-formats")
+  api project(":simplified-books-formats-api")
   api project(":simplified-boot-api")
   api project(":simplified-buildconfig-api")
   api project(":simplified-cardcreator")
   api project(":simplified-clock")
+  api project(":simplified-content-api")
   api project(":simplified-crashlytics-api")
   api project(":simplified-documents")
-  api project(":simplified-downloader-core")
   api project(":simplified-files")
   api project(":simplified-networkconnectivity")
   api project(":simplified-networkconnectivity-api")
@@ -67,6 +70,9 @@ dependencies {
   api libraries.androidAsync
   api libraries.androidXAppCompat
   api libraries.kotlinStdlib
+  api libraries.nyplHttpAPI
+  api libraries.nyplHttpBearerToken
+  api libraries.nyplHttpVanilla
   api libraries.slf4j
 
   api libraries.logbackAndroid

@@ -1,27 +1,18 @@
-def versionValues() {
-  def props = new Properties()
-  file("version.properties").withInputStream { props.load(it) }
+def versionName = '5.0.0'
 
-  // Load properties
-  def versionName = props.getProperty("versionName")
-  def versionCode = props.getProperty("versionCode").toInteger()
-
-  // Increment version using the build number, if on Travis CI
-  def buildNumber = (System.getenv('TRAVIS_BUILD_NUMBER') ?: "0").toInteger()
-  if (buildNumber > 0) {
-    logger.info("Incrementing version code: $versionCode + $buildNumber = ${versionCode + buildNumber}")
-    versionCode += buildNumber
-  }
-  return new Tuple(versionName, versionCode)
+// Append build number to version name, if on Travis CI
+def buildNumber = (System.getenv('TRAVIS_BUILD_NUMBER') ?: "0").toInteger()
+if (buildNumber > 0) {
+  versionName = "$versionName+$buildNumber"
 }
 
-android {
-  def version = versionValues()
+def versionCode = versionCode(versionName)
 
+android {
   defaultConfig {
-    versionName = version.get(0)
-    versionCode = version.get(1)
-    setProperty("archivesBaseName", "${versionName}-${versionCode}")
+    versionName = versionName
+    versionCode = versionCode
+    setProperty("archivesBaseName", versionName)
   }
 
   packagingOptions {

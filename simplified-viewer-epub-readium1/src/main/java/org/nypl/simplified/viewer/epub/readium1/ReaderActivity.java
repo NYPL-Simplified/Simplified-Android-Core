@@ -60,6 +60,7 @@ import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileUpdated;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.reader.api.ReaderColorScheme;
+import org.nypl.simplified.reader.api.ReaderFontSelection;
 import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks;
@@ -339,7 +340,11 @@ public final class ReaderActivity extends AppCompatActivity implements
 
     this.viewer_settings =
       new ReaderReadiumViewerSettings(
-        SINGLE, AUTO, (int) readerPreferences.fontScale(), 20);
+        SINGLE,
+        AUTO,
+        readerPreferences.fontFamily(),
+        (int) readerPreferences.fontScale(),
+        20);
 
     final ReaderReadiumFeedbackDispatcherType rd =
       ReaderReadiumFeedbackDispatcher.newDispatcher();
@@ -509,34 +514,29 @@ public final class ReaderActivity extends AppCompatActivity implements
 
   private void onProfileEventPreferencesChanged(
     final ProfileUpdated.Succeeded event) {
-    final ProfilePreferences oldPreferences = event.getOldDescription().getPreferences();
-    final ProfilePreferences newPreferences = event.getNewDescription().getPreferences();
-    if (!oldPreferences.equals(newPreferences)) {
-      LOG.debug("onProfileEventPreferencesChanged: reader settings changed");
-      applyReaderPreferences(newPreferences.getReaderPreferences());
+
+    final ReaderPreferences oldPreferences =
+      event.getOldDescription().getPreferences().getReaderPreferences();
+    final ReaderPreferences newPreferences =
+      event.getNewDescription().getPreferences().getReaderPreferences();
+
+    if (
+      !oldPreferences.fontFamily().equals(newPreferences.fontFamily())
+      || oldPreferences.fontScale() != newPreferences.fontScale()
+    ) {
+      LOG.debug("onProfileEventPreferencesChanged: font family/scale changed");
+
+      uiThread.runOnUIThread(() -> {
+        this.readium_js_api.updateSettings(newPreferences);
+      });
+    } else if (!oldPreferences.colorScheme().equals(newPreferences.colorScheme())) {
+      LOG.debug("onProfileEventPreferencesChanged: color scheme changed");
+
+      uiThread.runOnUIThread(() -> {
+        this.readium_js_api.setBookStyles(newPreferences);
+        this.applyViewerColorScheme(newPreferences.colorScheme());
+      });
     }
-  }
-
-  private void applyReaderPreferences(final ReaderPreferences preferences) {
-    uiThread.runOnUIThread(() -> {
-      LOG.debug("applyReaderPreferences: executing now");
-
-      // Get the CFI from the ReadiumSDK before applying the new
-      // page style settings.
-      this.simplified_js_api.getReadiumCFI();
-
-      this.readium_js_api.setBookStyles(preferences);
-      this.readium_js_api.updateSettings(preferences);
-
-      // Once they are applied, go to the CFI that is stored in the
-      // JS ReadiumSDK instance.
-      this.simplified_js_api.setReadiumCFI();
-
-      this.applyViewerColorScheme(preferences.colorScheme());
-
-      this.readium_js_api.getCurrentPage(this);
-      this.readium_js_api.mediaOverlayIsAvailable(this);
-    });
   }
 
   private ReaderPreferences getProfileCurrentReaderPreferences() throws ProfileNoneCurrentException {
@@ -873,6 +873,7 @@ public final class ReaderActivity extends AppCompatActivity implements
   @Override
   public void onReadiumContentDocumentLoaded() {
     LOG.debug("onReadiumContentDocumentLoaded");
+    uiThread.runOnUIThread(this.simplified_js_api::pageHasChanged);
   }
 
   @Override
@@ -982,10 +983,7 @@ public final class ReaderActivity extends AppCompatActivity implements
         in_web_view.setVisibility(View.VISIBLE);
         in_progress_bar.setVisibility(View.VISIBLE);
         in_progress_text.setVisibility(View.VISIBLE);
-        this.simplified_js_api.pageHasChanged();
       }, 300L);
-    } else {
-      uiThread.runOnUIThread(this.simplified_js_api::pageHasChanged);
     }
   }
 

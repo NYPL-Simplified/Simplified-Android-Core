@@ -12,7 +12,6 @@ import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSerializersType
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.api.AccountProviderType
@@ -156,7 +155,7 @@ class AccountProviderSourceNYPLRegistry(
   override fun resolve(
     onProgress: AccountProviderResolutionListenerType,
     description: AccountProviderDescription
-  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
+  ): TaskResult<AccountProviderType> {
     return AccountProviderResolution(
       stringResources = this.stringResources!!,
       authDocumentParsers = this.authDocumentParsers,

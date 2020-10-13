@@ -21,7 +21,6 @@ dependencies {
   implementation project(":simplified-oauth")
   implementation project(":simplified-services-api")
   implementation project(":simplified-tests")
-  implementation project(":simplified-tests-strings")
   implementation project(":simplified-ui-catalog")
   implementation project(":simplified-ui-errorpage")
   implementation project(":simplified-ui-images")

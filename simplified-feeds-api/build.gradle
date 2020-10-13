@@ -3,7 +3,9 @@ dependencies {
   api project(":simplified-books-api")
   api project(":simplified-books-bundled-api")
   api project(":simplified-books-database-api")
+  api project(":simplified-books-formats-api")
   api project(":simplified-books-registry-api")
+  api project(":simplified-content-api")
   api project(":simplified-http-core")
   api project(":simplified-json-core")
 

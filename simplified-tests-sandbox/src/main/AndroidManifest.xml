@@ -11,53 +11,6 @@
     android:allowBackup="false"
     android:icon="@drawable/sandbox"
     android:label="SimplifiedSandbox">
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.SettingsAccountActivity"
-      android:exported="true"
-      android:launchMode="singleInstance"
-      android:theme="@style/SimplifiedTheme_NoActionBar_Blue">
-    </activity>
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.SettingsAccountsActivity"
-      android:exported="true"
-      android:launchMode="singleInstance"
-      android:theme="@style/SimplifiedTheme_NoActionBar_Blue">
-    </activity>
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.BookDetailActivity"
-      android:exported="true"
-      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.LifeActivity"
-      android:exported="true"
-      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.ProfileActivity"
-      android:exported="true"
-      android:theme="@style/SimplifiedTheme_NoActionBar_Indigo" />
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.OAuthActivity"
-      android:exported="true"
-      android:launchMode="singleInstance"
-      android:theme="@style/SimplifiedTheme_NoActionBar_Indigo">
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="simplified-sandbox-oauth" />
-      </intent-filter>
-    </activity>
-
-    <activity
-      android:name="org.nypl.simplified.tests.sandbox.ErrorPageActivity"
-      android:exported="true"
-      android:theme="@style/SimplifiedTheme_ActionBar_DeepPurple" />
   </application>
 
 </manifest>

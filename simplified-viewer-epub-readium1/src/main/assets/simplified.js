@@ -119,49 +119,15 @@ function Simplified() {
     contentDocument.addEventListener("touchstart", handleTouchStart, false);
     contentDocument.removeEventListener("touchend", handleTouchEnd);
     contentDocument.addEventListener("touchend", handleTouchEnd, false);
+    // SIMPLY-3124: Remove the page turn animation, as this interferes with Readium.
     // Set up the page turning animation. This works because Readium adjusts the
     // `left` property of its iframe document to advance pages.
-    contentDocument.documentElement.style["transition"] = "left 0.2s";
+    // contentDocument.documentElement.style["transition"] = "left 0.2s";
     // Tell the browser to expect the `left` property to change. This allows the
     // the browser to set things up in advance to achieve better performance
     // whenever the property is altered.
-    contentDocument.documentElement.style["will-change"] = "left";
-
-    // Load the font family if it's not already there when the new
-    // page gets rendered.
-    this.linkOpenDyslexicFonts(contentDocument);
+    // contentDocument.documentElement.style["will-change"] = "left";
   };
-
-  /**
-   * TODO:
-   * Even though the OpenDyslexic3 font is now added to the renderer,
-   * there are still underlying issues with rendering this font. Specifically,
-   * pages at the end of chapters get lost when using this
-   * (and only this) font.
-   */
-
-  /**
-   * linkOpenDyslexicFonts
-   * If the current Open Dyslexic font is loaded on the page, do not
-   * load it again. If there's a currently selected font by the user,
-   * update the style to reflect it. This is needed when going from
-   * chapter to chapter.
-   */
-  this.linkOpenDyslexicFonts = function(innerDocument) {
-    var id = 'simplified-opendyslexic';
-    if (innerDocument.getElementById(id)) {
-      return;
-    }
-    var styleElement = document.createElement('style');
-    styleElement.id = id;
-    styleElement.textContent =
-      "@font-face { \
-        font-family: 'OpenDyslexic3'; \
-        src: url('OpenDyslexic3-Regular.ttf'); \
-        font-weight: normal; \
-      }";
-    innerDocument.head.appendChild(styleElement);
-  }
 }
 
 simplified = new Simplified();

@@ -1,0 +1,28 @@
+<entry
+  xmlns:opds="http://opds-spec.org/2010/catalog"
+  xmlns:schema="http://schema.org/"
+  xmlns="http://www.w3.org/2005/Atom"
+  schema:additionalType="http://schema.org/Book">
+  <id>Held-Indefinite-Queued</id>
+  <title>Held-Indefinite-Queued</title>
+  <author>
+    <name>Author</name>
+  </author>
+  <summary type="html"></summary>
+  <updated>2015-08-17T20:37:53Z</updated>
+  <published>2014-08-29T10:46:42Z</published>
+  <link href="http://example.com/Held-Indefinite-Queued"
+        type="application/atom+xml;relation=entry;profile=opds-catalog"
+        rel="http://opds-spec.org/acquisition/borrow">
+    <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+      <opds:indirectAcquisition type="application/epub+zip"/>
+    </opds:indirectAcquisition>
+    <opds:availability
+      status="reserved"
+      since="2000-01-01T00:00:00Z"/>
+    <opds:holds total="0" position="3"/>
+    <opds:copies available="0" total="1"/>
+  </link>
+  <link rel="http://librarysimplified.org/terms/rel/revoke"
+        href="http://example.com/revoke"/>
+</entry>

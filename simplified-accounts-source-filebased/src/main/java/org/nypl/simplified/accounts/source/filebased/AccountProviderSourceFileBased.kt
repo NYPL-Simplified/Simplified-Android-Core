@@ -2,7 +2,6 @@ package org.nypl.simplified.accounts.source.filebased
 
 import android.content.Context
 import org.nypl.simplified.accounts.api.AccountProviderDescription
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.json.AccountProvidersJSON
@@ -65,8 +64,8 @@ class AccountProviderSourceFileBased(
   override fun resolve(
     onProgress: AccountProviderResolutionListenerType,
     description: AccountProviderDescription
-  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType> {
-    val taskRecorder = TaskRecorder.create<AccountProviderResolutionErrorDetails>()
+  ): TaskResult<AccountProviderType> {
+    val taskRecorder = TaskRecorder.create()
     taskRecorder.beginNewStep("Resolving account provider from file cache")
 
     val provider = this.cache?.get(description.id)

@@ -7,13 +7,10 @@ import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.subjects.Subject
 import one.irradia.mime.api.MIMEType
 import org.joda.time.DateTime
-import org.nypl.simplified.accounts.api.AccountCreateErrorDetails
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationInProgress
 import org.nypl.simplified.accounts.api.AccountProviderDescription
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
-import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -23,10 +20,10 @@ import org.nypl.simplified.http.core.HTTPResultException
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.links.Link
-import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSFeedConstants
 import org.nypl.simplified.opds.core.OPDSFeedParserType
+import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -45,20 +42,18 @@ import java.util.concurrent.Callable
 class ProfileAccountCreateCustomOPDSTask(
   private val accountEvents: Subject<AccountEvent>,
   private val accountProviderRegistry: AccountProviderRegistryType,
-  private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val http: HTTPType,
   private val opdsURI: URI,
   private val opdsFeedParser: OPDSFeedParserType,
   private val profiles: ProfilesDatabaseType,
-  private val resolutionStrings: AccountProviderResolutionStringsType,
   private val strings: ProfileAccountCreationStringResourcesType
-) : Callable<TaskResult<AccountCreateErrorDetails, AccountType>> {
+) : Callable<TaskResult<AccountType>> {
 
   private var title: String = ""
   private val logger = LoggerFactory.getLogger(ProfileAccountCreateCustomOPDSTask::class.java)
-  private val taskRecorder = TaskRecorder.create<AccountCreateErrorDetails>()
+  private val taskRecorder = TaskRecorder.create()
 
-  override fun call(): TaskResult<AccountCreateErrorDetails, AccountType> {
+  override fun call(): TaskResult<AccountType> {
     this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.creatingAccount))
     this.logger.debug("creating a custom OPDS account")
 
@@ -82,32 +77,27 @@ class ProfileAccountCreateCustomOPDSTask(
       }
     } catch (e: Throwable) {
       this.logger.error("account creation failed: ", e)
-
-      this.taskRecorder.currentStepFailedAppending(
-        this.strings.unexpectedException,
-        AccountCreateErrorDetails.UnexpectedException(this.strings.unexpectedException, e),
-        e
-      )
-
-      this.publishFailureEvent(this.taskRecorder.currentStep()!!)
+      this.taskRecorder.currentStepFailedAppending(this.strings.unexpectedException, "unexpectedException", e)
+      this.publishFailureEvent()
       this.taskRecorder.finishFailure()
     }
   }
 
   private fun accountResolutionFailed(
-    resolutionResult: TaskResult.Failure<AccountProviderResolutionErrorDetails, AccountProviderType>
-  ): TaskResult.Failure<AccountCreateErrorDetails, AccountType> {
+    resolutionResult: TaskResult.Failure<AccountProviderType>
+  ): TaskResult.Failure<AccountType> {
     this.logger.error("could not resolve an account provider description")
+    this.taskRecorder.addAll(resolutionResult.steps)
+    this.taskRecorder.addAttributes(resolutionResult.attributes)
     this.taskRecorder.currentStepFailed(
-      this.strings.resolvingAccountProviderFailed,
-      AccountCreateErrorDetails.AccountProviderResolutionFailed(resolutionResult.errors())
+      this.strings.resolvingAccountProviderFailed, "resolvingAccountProviderFailed"
     )
     return this.taskRecorder.finishFailure()
   }
 
   private fun createAccount(
     accountProviderDescription: AccountProviderDescription
-  ): TaskResult<AccountCreateErrorDetails, AccountType> {
+  ): TaskResult<AccountType> {
     val createResult =
       ProfileAccountCreateTask(
         accountEvents = this.accountEvents,
@@ -118,12 +108,12 @@ class ProfileAccountCreateCustomOPDSTask(
       ).call()
 
     return when (createResult) {
-      is TaskResult.Success -> {
+      is TaskResult.Success<AccountType> -> {
         this.taskRecorder.addAll(createResult.steps)
         this.publishProgressEvent(this.taskRecorder.currentStepSucceeded(this.strings.creatingAccountSucceeded))
         this.taskRecorder.finishSuccess(createResult.result)
       }
-      is TaskResult.Failure -> {
+      is TaskResult.Failure<AccountType> -> {
         this.taskRecorder.addAll(createResult.steps)
         this.taskRecorder.finishFailure()
       }
@@ -207,13 +197,8 @@ class ProfileAccountCreateCustomOPDSTask(
           this.title = feed.feedTitle
           this.findAuthenticationDocumentLink(feed)
         } catch (e: Exception) {
-          this.publishFailureEvent(
-            this.taskRecorder.currentStepFailed(
-              message = this.strings.parsingOPDSFeedFailed,
-              errorValue = AccountCreateErrorDetails.UnexpectedException(e.message ?: "", e),
-              exception = e
-            )
-          )
+          this.taskRecorder.currentStepFailed(e.message ?: e.javaClass.name, "parsingOPDSFeedFailed")
+          this.publishFailureEvent()
           throw e
         }
       }
@@ -246,17 +231,12 @@ class ProfileAccountCreateCustomOPDSTask(
          * Any other error is fatal.
          */
 
-        this.publishFailureEvent(
-          this.taskRecorder.currentStepFailed(
-            message = this.strings.fetchingOPDSFeedFailed,
-            errorValue = AccountCreateErrorDetails.HTTPRequestFailed(
-              message = this.strings.fetchingOPDSFeedFailed,
-              opdsURI = this.opdsURI,
-              status = result.status,
-              problemReport = someOrNull(result.problemReport)
-            )
-          )
+        this.taskRecorder.addAttributes(
+          Presentables.problemReportAsAttributes(someOrNull(result.problemReport))
         )
+
+        this.taskRecorder.currentStepFailed(this.strings.fetchingOPDSFeedFailed, "fetchingOPDSFeedFailed")
+        this.publishFailureEvent()
         throw IOException()
       }
 
@@ -267,19 +247,13 @@ class ProfileAccountCreateCustomOPDSTask(
          * An exception is fatal.
          */
 
-        this.publishFailureEvent(
-          this.taskRecorder.currentStepFailed(
-            message = this.strings.fetchingOPDSFeedFailed,
-            errorValue = AccountCreateErrorDetails.HTTPRequestFailed(
-              message = this.strings.fetchingOPDSFeedFailed,
-              opdsURI = this.opdsURI,
-              status = -1,
-              problemReport = null
-            ),
-            exception = result.error
-          )
+        this.taskRecorder.currentStepFailed(
+          this.strings.fetchingOPDSFeedFailed,
+          "httpRequestFailed",
+          result.error
         )
 
+        this.publishFailureEvent()
         throw result.error
       }
 
@@ -301,13 +275,9 @@ class ProfileAccountCreateCustomOPDSTask(
     }
   }
 
-  private fun publishFailureEvent(step: TaskStep<AccountCreateErrorDetails>) =
-    this.accountEvents.onNext(
-      AccountEventCreationFailed(
-        step.resolution.message, this.taskRecorder.finishFailure<AccountType>()
-      )
-    )
+  private fun publishFailureEvent() =
+    this.accountEvents.onNext(AccountEventCreationFailed(this.taskRecorder.finishFailure<AccountType>()))
 
-  private fun publishProgressEvent(step: TaskStep<AccountCreateErrorDetails>) =
+  private fun publishProgressEvent(step: TaskStep) =
     this.accountEvents.onNext(AccountEventCreationInProgress(step.description))
 }

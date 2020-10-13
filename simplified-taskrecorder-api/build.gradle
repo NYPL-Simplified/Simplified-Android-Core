@@ -1,4 +1,7 @@
 dependencies {
+  api project(":simplified-presentableerror-api")
+
   implementation libraries.googleGuava
   implementation libraries.kotlinStdlib
+  implementation libraries.slf4j
 }

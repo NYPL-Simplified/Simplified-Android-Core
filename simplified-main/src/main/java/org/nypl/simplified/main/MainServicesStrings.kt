@@ -7,6 +7,9 @@ internal class MainServicesStrings(
   private val resources: Resources
 ) : BootStringResourcesType {
 
+  val bootingBookFormatSupport: String =
+    this.resources.getString(R.string.bootingBookFormatSupport)
+
   val bootingAudioBookManifestStrategiesService: String =
     this.resources.getString(R.string.bootingAudioBookManifestStrategiesService)
 

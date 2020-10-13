@@ -2,7 +2,6 @@ package org.nypl.simplified.accounts.registry.api
 
 import io.reactivex.Observable
 import org.nypl.simplified.accounts.api.AccountProviderDescription
-import org.nypl.simplified.accounts.api.AccountProviderResolutionErrorDetails
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -100,5 +99,5 @@ interface AccountProviderRegistryType {
   fun resolve(
     onProgress: AccountProviderResolutionListenerType,
     description: AccountProviderDescription
-  ): TaskResult<AccountProviderResolutionErrorDetails, AccountProviderType>
+  ): TaskResult<AccountProviderType>
 }
