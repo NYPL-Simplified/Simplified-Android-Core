@@ -1,18 +1,15 @@
-def versionName = '5.0.0'
-
-// Append build number to version name, if on Travis CI
-def buildNumber = (System.getenv('TRAVIS_BUILD_NUMBER') ?: "0").toInteger()
-if (buildNumber > 0) {
-  versionName = "$versionName+$buildNumber"
-}
-
-def versionCode = versionCode(versionName)
-
 android {
   defaultConfig {
-    versionName = versionName
-    versionCode = versionCode
-    setProperty("archivesBaseName", versionName)
+    versionName = project.version
+    versionCode = versionCode(project.version)
+
+    // Append build number to version name, if on Travis CI
+    def buildNumber = (System.getenv('TRAVIS_BUILD_NUMBER') ?: "0").toInteger()
+    if (buildNumber > 0) {
+      versionName = "$versionName+$buildNumber"
+    }
+
+    setProperty("archivesBaseName", "$versionName-$versionCode")
   }
 
   packagingOptions {
