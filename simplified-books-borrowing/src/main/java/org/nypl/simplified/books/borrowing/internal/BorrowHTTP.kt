@@ -5,7 +5,6 @@ import one.irradia.mime.api.MIMEType
 import org.librarysimplified.http.api.LSHTTPAuthorizationBasic
 import org.librarysimplified.http.api.LSHTTPAuthorizationBearerToken
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
-import org.librarysimplified.http.api.LSHTTPProblemReport
 import org.librarysimplified.http.downloads.LSHTTPDownloadRequest
 import org.librarysimplified.http.downloads.LSHTTPDownloadState
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.DownloadReceiving
@@ -34,26 +33,6 @@ import java.net.URI
  */
 
 object BorrowHTTP {
-
-  /**
-   * Encode the given problem report as a set of presentable attributes.
-   */
-
-  fun problemReportAsAttributes(
-    problemReport: LSHTTPProblemReport?
-  ): Map<String, String> {
-    return when (problemReport) {
-      null -> mapOf()
-      else -> {
-        val attributes = mutableMapOf<String, String>()
-        attributes["HTTP problem detail"] = problemReport.detail ?: ""
-        attributes["HTTP problem status"] = problemReport.status.toString()
-        attributes["HTTP problem title"] = problemReport.title ?: ""
-        attributes["HTTP problem type"] = problemReport.type.toString()
-        attributes.toMap()
-      }
-    }
-  }
 
   /**
    * Create a download request for the given URI, downloading content to the given output file.
@@ -148,7 +127,7 @@ object BorrowHTTP {
     result: DownloadFailedServer
   ): BorrowSubtaskFailed {
     val status = result.responseStatus
-    context.taskRecorder.addAttributes(BorrowHTTP.problemReportAsAttributes(status.problemReport))
+    context.taskRecorder.addAttributes(status.problemReport?.toMap() ?: emptyMap())
     context.taskRecorder.currentStepFailed(
       message = "HTTP request failed: ${status.originalStatus} ${status.message}",
       errorCode = BorrowErrorCodes.httpRequestFailed,

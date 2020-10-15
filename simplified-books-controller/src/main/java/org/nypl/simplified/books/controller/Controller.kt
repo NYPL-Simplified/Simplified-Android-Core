@@ -11,6 +11,7 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.Subject
 import org.joda.time.Instant
+import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -112,6 +113,8 @@ class Controller private constructor(
     this.services.requireService(OPDSFeedParserType::class.java)
   private val http =
     this.services.requireService(HTTPType::class.java)
+  private val lsHttp =
+    this.services.requireService(LSHTTPClientType::class.java)
   private val patronUserProfileParsers =
     this.services.requireService(PatronUserProfileParsersType::class.java)
   private val profileAccountCreationStringResources =
@@ -366,7 +369,7 @@ class Controller private constructor(
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviders,
-        http = this.http,
+        httpClient = this.lsHttp,
         opdsURI = opdsFeed,
         opdsFeedParser = this.feedParser,
         profiles = this.profiles,

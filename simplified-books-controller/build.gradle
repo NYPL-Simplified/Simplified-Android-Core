@@ -26,6 +26,7 @@ dependencies {
 
   implementation libraries.kotlinStdlib
   implementation libraries.nyplAudiobookManifestFulfillAPI
+  implementation libraries.nyplHttpAPI
   implementation libraries.slf4j
 
   compileOnly libraries.autoValue
