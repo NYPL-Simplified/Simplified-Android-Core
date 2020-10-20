@@ -192,17 +192,17 @@ class ReviewFragment : Fragment() {
     showLoading(true)
     viewModel.createPatron(
       getPatron(),
-      requireActivity().intent.extras.getString("username"),
-      requireActivity().intent.extras.getString("password")
+      requireActivity().intent.getStringExtra("username")!!,
+      requireActivity().intent.getStringExtra("password")!!
     )
   }
 
   private fun createJuvenilePatron() {
     showLoading(true)
-    if (isBarcode(requireActivity().intent.extras.getString("userIdentifier"))) {
+    if (isBarcode(requireActivity().intent.getStringExtra("userIdentifier")!!)) {
       platformViewModel.createJuvenileCardWithBarcodeParent(
         BarcodeParent(
-          requireActivity().intent.extras.getString("userIdentifier"),
+          requireActivity().intent.getStringExtra("userIdentifier")!!,
           getCache().getPersonalInformation().firstName,
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
@@ -213,7 +213,7 @@ class ReviewFragment : Fragment() {
       platformViewModel.createJuvenileCardWithUsernameParent(
         UsernameParent(
           getCache().getPersonalInformation().firstName,
-          requireActivity().intent.extras.getString("userIdentifier"),
+          requireActivity().intent.getStringExtra("userIdentifier")!!,
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
         ),

@@ -32,7 +32,7 @@ abstract class AccountProviderNYPLRegistryContract {
   @Throws(Exception::class)
   private fun readAllFromResource(name: String): InputStream {
     return AccountProviderNYPLRegistryContract::class.java
-      .getResource("/org/nypl/simplified/tests/books/accounts/descriptions/$name")
+      .getResource("/org/nypl/simplified/tests/books/accounts/descriptions/$name")!!
       .openStream()
   }
 

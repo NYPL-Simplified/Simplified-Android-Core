@@ -19,7 +19,7 @@ abstract class AccountProviderDescriptionCollectionParserContract {
   @Throws(Exception::class)
   private fun resource(name: String): InputStream {
     return AccountProviderDescriptionCollectionParserContract::class.java
-      .getResource("/org/nypl/simplified/tests/books/accounts/descriptions/$name")
+      .getResource("/org/nypl/simplified/tests/books/accounts/descriptions/$name")!!
       .openStream()
   }
 

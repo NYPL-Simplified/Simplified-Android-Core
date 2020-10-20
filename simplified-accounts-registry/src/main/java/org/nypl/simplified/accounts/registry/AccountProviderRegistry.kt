@@ -179,7 +179,7 @@ class AccountProviderRegistry private constructor(
       return taskRecorder.finishFailure()
     } catch (e: Exception) {
       this.logger.error("resolution exception: ", e)
-      val message = e.message ?: e.javaClass.canonicalName
+      val message = e.message ?: e.javaClass.canonicalName ?: "unknown"
       taskRecorder.currentStepFailedAppending(message, "unexpectedException", e)
       return taskRecorder.finishFailure()
     }

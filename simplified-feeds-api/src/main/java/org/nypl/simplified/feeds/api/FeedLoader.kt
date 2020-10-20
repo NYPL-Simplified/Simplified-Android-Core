@@ -107,12 +107,12 @@ class FeedLoader private constructor(
     }
 
   override fun fetchURI(
-    accountId: AccountID,
+    account: AccountID,
     uri: URI,
     auth: OptionType<HTTPAuthType>
   ): FluentFuture<FeedLoaderResult> {
     return this.fetchURICore(
-      accountId = accountId,
+      accountId = account,
       uri = uri,
       auth = auth,
       updateFromRegistry = false
@@ -120,14 +120,14 @@ class FeedLoader private constructor(
   }
 
   override fun fetchURIRefreshing(
-    accountId: AccountID,
+    account: AccountID,
     uri: URI,
     auth: OptionType<HTTPAuthType>,
     method: String
   ): FluentFuture<FeedLoaderResult> {
     this.invalidate(uri)
     return this.fetchURICore(
-      accountId = accountId,
+      accountId = account,
       uri = uri,
       auth = auth,
       updateFromRegistry = false
@@ -135,12 +135,12 @@ class FeedLoader private constructor(
   }
 
   override fun fetchURIWithBookRegistryEntries(
-    accountId: AccountID,
+    account: AccountID,
     uri: URI,
     auth: OptionType<HTTPAuthType>
   ): FluentFuture<FeedLoaderResult> {
     return this.fetchURICore(
-      accountId = accountId,
+      accountId = account,
       uri = uri,
       auth = auth,
       updateFromRegistry = true
@@ -244,14 +244,14 @@ class FeedLoader private constructor(
           problemReport = this.someOrNull(e.problemReport),
           exception = e,
           attributesInitial = this.errorAttributesOf(uri, method),
-          message = e.localizedMessage
+          message = e.localizedMessage ?: ""
         )
       }
       return FeedLoaderFailure.FeedLoaderFailedGeneral(
         problemReport = this.someOrNull(e.problemReport),
         exception = e,
         attributesInitial = this.errorAttributesOf(uri, method),
-        message = e.localizedMessage
+        message = e.localizedMessage ?: ""
       )
     } catch (e: Exception) {
       this.log.error("feed exception: ", e)
@@ -260,7 +260,7 @@ class FeedLoader private constructor(
         problemReport = null,
         exception = e,
         attributesInitial = this.errorAttributesOf(uri, method),
-        message = e.localizedMessage
+        message = e.localizedMessage ?: ""
       )
     }
   }
