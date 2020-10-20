@@ -117,10 +117,10 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     context: BorrowContextType,
     status: LSHTTPResponseStatus.Responded.Error
   ) {
-    context.taskRecorder.addAttributes(BorrowHTTP.problemReportAsAttributes(status.problemReport))
-
     val report = status.problemReport
     if (report != null) {
+      context.taskRecorder.addAttributes(report.toMap())
+
       if (report.type == "http://librarysimplified.org/terms/problem/loan-already-exists") {
         context.taskRecorder.currentStepSucceeded("It turns out we already had a loan for this book.")
         context.bookPublishStatus(

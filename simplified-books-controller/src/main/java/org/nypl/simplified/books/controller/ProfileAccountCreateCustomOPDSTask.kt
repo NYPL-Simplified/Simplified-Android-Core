@@ -1,12 +1,13 @@
 package org.nypl.simplified.books.controller
 
-import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.subjects.Subject
 import one.irradia.mime.api.MIMEType
 import org.joda.time.DateTime
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType.AllowRedirects.ALLOW_REDIRECTS
+import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationFailed
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationInProgress
@@ -14,16 +15,10 @@ import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.http.core.HTTPProblemReportLogging
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultException
-import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.links.Link
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSFeedConstants
 import org.nypl.simplified.opds.core.OPDSFeedParserType
-import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -42,7 +37,7 @@ import java.util.concurrent.Callable
 class ProfileAccountCreateCustomOPDSTask(
   private val accountEvents: Subject<AccountEvent>,
   private val accountProviderRegistry: AccountProviderRegistryType,
-  private val http: HTTPType,
+  private val httpClient: LSHTTPClientType,
   private val opdsURI: URI,
   private val opdsFeedParser: OPDSFeedParserType,
   private val profiles: ProfilesDatabaseType,
@@ -179,86 +174,81 @@ class ProfileAccountCreateCustomOPDSTask(
     this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.findingAuthDocumentURI))
     this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.fetchingOPDSFeed))
 
-    val result =
-      this.http.get(Option.none(), this.opdsURI, 0L)
+    val request =
+      this.httpClient.newRequest(this.opdsURI)
+        .allowRedirects(ALLOW_REDIRECTS)
+        .build()
 
-    return when (result) {
-      is HTTPResultOK -> {
-        this.logger.debug("fetched opds feed")
+    return request.execute().use { response ->
+      this.taskRecorder.addAttributes(response.status.problemReport?.toMap() ?: emptyMap())
 
-        /*
-         * Parse the result as an OPDS feed and then try to find the authentication document
-         * link inside it.
-         */
+      when (val status = response.status) {
+        is LSHTTPResponseStatus.Responded.OK -> {
+          this.logger.debug("fetched opds feed")
 
-        try {
-          this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.parsingOPDSFeed))
-          val feed = this.opdsFeedParser.parse(this.opdsURI, result.value)
-          this.title = feed.feedTitle
-          this.findAuthenticationDocumentLink(feed)
-        } catch (e: Exception) {
-          this.taskRecorder.currentStepFailed(e.message ?: e.javaClass.name, "parsingOPDSFeedFailed")
-          this.publishFailureEvent()
-          throw e
-        }
-      }
+          /*
+           * Parse the result as an OPDS feed and then try to find the authentication document
+           * link inside it.
+           */
 
-      is HTTPResultError -> {
-        this.logger.debug("failed to fetch opds feed")
-
-        HTTPProblemReportLogging.logError(
-          logger = this.logger,
-          uri = this.opdsURI,
-          message = result.message,
-          statusCode = result.status,
-          reportOption = result.problemReport
-        )
-
-        /*
-         * If the server returns an error but delivers an authentication document as a result,
-         * well... We've found the authentication document.
-         */
-
-        val contentTypes = result.responseHeaders["content-type"]
-        if (contentTypes != null) {
-          if (contentTypes.contains("application/vnd.opds.authentication.v1.0+json")) {
-            this.logger.debug("delivered authentication document instead of error")
-            return this.opdsURI
+          try {
+            this.publishProgressEvent(this.taskRecorder.beginNewStep(this.strings.parsingOPDSFeed))
+            val feed = this.opdsFeedParser.parse(this.opdsURI, status.bodyStream)
+            this.title = feed.feedTitle
+            this.findAuthenticationDocumentLink(feed)
+          } catch (e: Exception) {
+            this.taskRecorder.currentStepFailed(
+              e.message
+                ?: e.javaClass.name,
+              "parsingOPDSFeedFailed"
+            )
+            this.publishFailureEvent()
+            throw e
           }
         }
 
-        /*
-         * Any other error is fatal.
-         */
+        is LSHTTPResponseStatus.Responded.Error -> {
+          this.logger.debug("failed to fetch opds feed")
 
-        this.taskRecorder.addAttributes(
-          Presentables.problemReportAsAttributes(someOrNull(result.problemReport))
-        )
+          /*
+           * If the server returns an error but delivers an authentication document as a result,
+           * well... We've found the authentication document.
+           */
 
-        this.taskRecorder.currentStepFailed(this.strings.fetchingOPDSFeedFailed, "fetchingOPDSFeedFailed")
-        this.publishFailureEvent()
-        throw IOException()
+          val contentTypes = status.headers["content-type"]
+          if (contentTypes != null) {
+            if (contentTypes.contains("application/vnd.opds.authentication.v1.0+json")) {
+              this.logger.debug("delivered authentication document instead of error")
+              return this.opdsURI
+            }
+          }
+
+          /*
+           * Any other error is fatal.
+           */
+
+          this.taskRecorder.currentStepFailed(this.strings.fetchingOPDSFeedFailed, "fetchingOPDSFeedFailed")
+          this.publishFailureEvent()
+          throw IOException()
+        }
+
+        is LSHTTPResponseStatus.Failed -> {
+          this.logger.debug("failed to fetch opds feed: ", status.exception)
+
+          /*
+           * An exception is fatal.
+           */
+
+          this.taskRecorder.currentStepFailed(
+            this.strings.fetchingOPDSFeedFailed,
+            "httpRequestFailed",
+            status.exception
+          )
+
+          this.publishFailureEvent()
+          throw status.exception
+        }
       }
-
-      is HTTPResultException -> {
-        this.logger.debug("failed to fetch opds feed: ", result.error)
-
-        /*
-         * An exception is fatal.
-         */
-
-        this.taskRecorder.currentStepFailed(
-          this.strings.fetchingOPDSFeedFailed,
-          "httpRequestFailed",
-          result.error
-        )
-
-        this.publishFailureEvent()
-        throw result.error
-      }
-
-      // XXX: Seal the HTTPResultType
-      else -> throw UnreachableCodeException()
     }
   }
 
