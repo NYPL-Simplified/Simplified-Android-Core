@@ -32,6 +32,7 @@ import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.controller.ProfileAccountLogoutTask
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPResultType
+import org.nypl.simplified.patron.PatronUserProfileParsers
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
@@ -128,6 +129,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
         http = this.http,
+        patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
         logoutStrings = this.logoutStrings
       )
@@ -196,6 +198,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
         http = this.http,
+        patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
         logoutStrings = this.logoutStrings
       )
@@ -279,6 +282,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
         http = this.http,
+        patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
         logoutStrings = this.logoutStrings
       )
@@ -385,6 +389,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adeptExecutor = this.adeptExecutor,
         bookRegistry = this.bookRegistry,
         http = this.http,
+        patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
         logoutStrings = this.logoutStrings
       )
@@ -414,6 +419,9 @@ abstract class ProfileAccountLogoutTaskContract {
     val provider =
       Mockito.mock(AccountProviderType::class.java)
 
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(URI.create("https://example.com/patron"))
+
     Mockito.`when`(provider.authentication)
       .thenReturn(null)
     Mockito.`when`(this.profile.id)
@@ -441,6 +449,22 @@ abstract class ProfileAccountLogoutTaskContract {
 
     Mockito.`when`(this.bookDatabase.books())
       .thenReturn(books)
+
+    val patron =
+      resource("/org/nypl/simplified/tests/patron/example-with-device.json")
+        .readBytes()
+
+    this.http.addResponse(
+      URI.create("https://example.com/patron"),
+      HTTPResultOK(
+        "OK",
+        200,
+        ByteArrayInputStream(patron),
+        patron.size.toLong(),
+        mutableMapOf(),
+        0L
+      ) as HTTPResultType<InputStream>
+    )
 
     this.http.addResponse(
       URI.create("https://example.com/devices"),
@@ -502,6 +526,7 @@ abstract class ProfileAccountLogoutTaskContract {
         bookRegistry = this.bookRegistry,
         http = this.http,
         profile = this.profile,
+        patronParsers = PatronUserProfileParsers(),
         logoutStrings = this.logoutStrings
       )
 
@@ -524,4 +549,10 @@ abstract class ProfileAccountLogoutTaskContract {
 
   private fun <T> anyNonNull(): T =
     Mockito.argThat { x -> x != null }
+
+  private fun resource(
+    name: String
+  ): InputStream {
+    return ProfileAccountLogoutTaskContract::class.java.getResourceAsStream(name)!!
+  }
 }
