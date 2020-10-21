@@ -437,6 +437,7 @@ class Controller private constructor(
         adeptExecutor = this.adobeDrm,
         account = account,
         bookRegistry = this.bookRegistry,
+        patronParsers = this.patronUserProfileParsers,
         http = this.http,
         logoutStrings = this.accountLogoutStringResources,
         profile = profile

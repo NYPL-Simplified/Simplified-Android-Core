@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeVendorID
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP
@@ -23,17 +22,10 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultException
-import org.nypl.simplified.http.core.HTTPResultOKType
 import org.nypl.simplified.http.core.HTTPType
-import org.nypl.simplified.parser.api.ParseError
-import org.nypl.simplified.parser.api.ParseResult
-import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.patron.api.PatronDRM
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
-import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
@@ -45,8 +37,6 @@ import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.slf4j.LoggerFactory
-import java.io.InputStream
-import java.net.HttpURLConnection
 import java.net.URI
 import java.nio.charset.Charset
 import java.util.concurrent.Callable
@@ -176,7 +166,7 @@ class ProfileAccountLoginTask(
             authenticationDescription = this.findCurrentDescription().description
           )
 
-        this.runPatronProfileRequest()
+        this.handlePatronUserProfile()
         this.runDeviceActivation()
         this.account.setLoginState(AccountLoggedIn(this.credentials))
         this.steps.finishSuccess(Unit)
@@ -218,10 +208,22 @@ class ProfileAccountLoginTask(
         adobeCredentials = null
       )
 
-    this.runPatronProfileRequest()
+    this.handlePatronUserProfile()
     this.runDeviceActivation()
     this.account.setLoginState(AccountLoggedIn(this.credentials))
     return this.steps.finishSuccess(Unit)
+  }
+
+  private fun handlePatronUserProfile() {
+    val patronProfile =
+      PatronUserProfiles.runPatronProfileRequest(
+        taskRecorder = this.steps,
+        patronParsers = this.patronParsers,
+        credentials = this.credentials,
+        http = this.http,
+        account = this.account
+      )
+    patronProfile.drm.map(this::onPatronProfileRequestHandleDRM)
   }
 
   private fun validateRequest(): Boolean {
@@ -388,103 +390,6 @@ class ProfileAccountLoginTask(
   }
 
   /**
-   * Execute a patron profile document request. This fetches patron settings from the remote
-   * server and attempts to extract useful information such as DRM-related credentials.
-   */
-
-  private fun runPatronProfileRequest() {
-    this.debug("running patron profile request")
-
-    this.updateLoggingInState(this.steps.beginNewStep(this.loginStrings.loginPatronSettingsRequest))
-
-    val patronSettingsURI = this.account.provider.patronSettingsURI
-    if (patronSettingsURI == null) {
-      val message = this.loginStrings.loginPatronSettingsRequestNoURI
-      val exception = Exception()
-      this.steps.currentStepFailed(message, "noPatronURI", exception)
-      throw exception
-    }
-
-    val httpAuthentication =
-      createAuthenticatedHTTP(this.credentials)
-    val result =
-      this.http.get(Option.some(httpAuthentication), patronSettingsURI, 0L)
-
-    return when (result) {
-      is HTTPResultOKType<InputStream> ->
-        this.onPatronProfileRequestOK(patronSettingsURI, result)
-      is HTTPResultError<InputStream> ->
-        this.onPatronProfileRequestHTTPError(patronSettingsURI, result)
-      is HTTPResultException<InputStream> ->
-        this.onPatronProfileRequestHTTPException(patronSettingsURI, result)
-      else ->
-        throw UnreachableCodeException()
-    }
-  }
-
-  /**
-   * A patron settings document was received. Parse it and try to extract any required
-   * DRM information.
-   */
-
-  private fun onPatronProfileRequestOK(
-    patronSettingsURI: URI,
-    result: HTTPResultOKType<InputStream>
-  ) {
-    this.debug("requested patron profile successfully")
-    return this.patronParsers.createParser(patronSettingsURI, result.value).use { parser ->
-      when (val parseResult = parser.parse()) {
-        is ParseResult.Success -> {
-          this.debug("parsed patron profile successfully")
-          parseResult.warnings.forEach(this::logParseWarning)
-          parseResult.result.drm.forEach(this::onPatronProfileRequestHandleDRM)
-          this.steps.currentStepSucceeded(this.loginStrings.loginPatronSettingsRequestOK)
-        }
-        is ParseResult.Failure -> {
-          this.error("failed to parse patron profile")
-          val message =
-            this.loginStrings.loginPatronSettingsRequestParseFailed(
-              parseResult.errors.map(this::showParseError)
-            )
-          val exception = Exception()
-          this.steps.currentStepFailed(message, "parseErrorPatronSettings", exception)
-          throw exception
-        }
-      }
-    }
-  }
-
-  /**
-   * Log and convert a parse error to a humanly-readable string.
-   */
-
-  private fun showParseError(error: ParseError): String {
-    this.error(
-      "{}:{}:{}: {}: ",
-      error.source,
-      error.line,
-      error.column,
-      error.message,
-      error.exception
-    )
-
-    return buildString {
-      this.append(error.line)
-      this.append(':')
-      this.append(error.column)
-      this.append(": ")
-      this.append(error.message)
-      val ex = error.exception
-      if (ex != null) {
-        this.append(ex.message)
-        this.append(" (")
-        this.append(ex.javaClass.simpleName)
-        this.append(")")
-      }
-    }
-  }
-
-  /**
    * Process a DRM item.
    */
 
@@ -499,38 +404,6 @@ class ProfileAccountLoginTask(
   private fun onPatronProfileRequestHandleDRMAdobe(drm: PatronDRMAdobe) {
     this.debug("received Adobe DRM client token")
     this.adobeDRM = drm
-  }
-
-  @Suppress("UNUSED_PARAMETER")
-  private fun onPatronProfileRequestHTTPException(
-    patronSettingsURI: URI,
-    result: HTTPResultException<InputStream>
-  ) {
-    val message = this.loginStrings.loginPatronSettingsConnectionFailed
-    this.steps.currentStepFailed(message, "connectionFailed", result.error)
-    throw result.error
-  }
-
-  private fun onPatronProfileRequestHTTPError(
-    patronSettingsURI: URI,
-    result: HTTPResultError<InputStream>
-  ) {
-    this.error("received http error: {}: {}: {}", patronSettingsURI, result.message, result.status)
-
-    val exception = Exception()
-    when (result.status) {
-      HttpURLConnection.HTTP_UNAUTHORIZED -> {
-        val message = this.loginStrings.loginPatronSettingsInvalidCredentials
-        this.steps.currentStepFailed(message, "invalidCredentials", exception)
-        throw exception
-      }
-      else -> {
-        val message = this.loginStrings.loginServerError(result.status, result.message)
-        this.steps.addAttributes(Presentables.problemReportAsAttributes(this.someOrNull(result.problemReport)))
-        this.steps.currentStepFailed(message, "httpError ${result.status} $patronSettingsURI", exception)
-        throw exception
-      }
-    }
   }
 
   private fun updateLoggingInState(step: TaskStep): Boolean {
@@ -598,16 +471,5 @@ class ProfileAccountLoginTask(
             throw NoCurrentDescription()
         }
     }
-  }
-
-  private fun logParseWarning(warning: ParseWarning) {
-    this.warn(
-      "{}:{}:{}: {}: ",
-      warning.source,
-      warning.line,
-      warning.column,
-      warning.message,
-      warning.exception
-    )
   }
 }
