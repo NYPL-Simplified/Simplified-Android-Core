@@ -344,7 +344,7 @@ class CatalogBorrowViewModel(
     val recorder = TaskRecorder.create()
     recorder.beginNewStep("Starting revocation task...")
     recorder.currentStepFailed(
-      message = exception.message ?: exception.javaClass.canonicalName,
+      message = exception.message ?: exception.javaClass.canonicalName ?: "unknown",
       errorCode = "revokeFailed",
       exception = exception
     )

@@ -395,7 +395,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   }
 
   private fun resource(file: String): InputStream {
-    return ProfileAccountCreateCustomOPDSContract::class.java.getResourceAsStream(file)
+    return ProfileAccountCreateCustomOPDSContract::class.java.getResourceAsStream(file)!!
   }
 
   @Throws(IOException::class)

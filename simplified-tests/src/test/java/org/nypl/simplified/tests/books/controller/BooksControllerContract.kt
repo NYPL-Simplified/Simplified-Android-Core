@@ -778,7 +778,7 @@ abstract class BooksControllerContract {
   }
 
   private fun resource(file: String): InputStream {
-    return BooksControllerContract::class.java.getResourceAsStream(file)
+    return BooksControllerContract::class.java.getResourceAsStream(file)!!
   }
 
   @Throws(IOException::class)

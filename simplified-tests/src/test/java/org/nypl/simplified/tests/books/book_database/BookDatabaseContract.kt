@@ -750,7 +750,7 @@ abstract class BookDatabaseContract {
     val file = File.createTempFile("simplified-book-database-", ".bin")
     logger.debug("copyToTempFile: {} -> {}", name, file)
     FileOutputStream(file).use { output ->
-      BookDatabaseContract::class.java.getResourceAsStream(name).use { input ->
+      BookDatabaseContract::class.java.getResourceAsStream(name)!!.use { input ->
         val buffer = ByteArray(4096)
         while (true) {
           val r = input.read(buffer)

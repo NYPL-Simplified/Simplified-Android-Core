@@ -17,7 +17,7 @@ class CardCreatorActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     binding = ActivityCardCreatorBinding.inflate(layoutInflater)
     setContentView(binding.root)
-    if (intent.extras.getBoolean("isLoggedIn")) {
+    if (intent.getBooleanExtra("isLoggedIn", false)) {
       Cache(this).isJuvenileCard = true
       binding.toolbarTitleTv.setText(R.string.create_child_card)
     }

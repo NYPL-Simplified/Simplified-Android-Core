@@ -17,7 +17,7 @@ abstract class AccountProviderSourceFileBasedContract {
   @Throws(Exception::class)
   private fun readAllFromResource(name: String): InputStream {
     return AccountProviderSourceFileBasedContract::class.java
-      .getResource("/org/nypl/simplified/tests/books/accounts/$name")
+      .getResource("/org/nypl/simplified/tests/books/accounts/$name")!!
       .openStream()
   }
 

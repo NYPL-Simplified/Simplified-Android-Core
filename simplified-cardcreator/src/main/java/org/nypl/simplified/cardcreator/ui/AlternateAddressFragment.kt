@@ -197,8 +197,8 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
         ),
         false
       ),
-      requireActivity().intent.extras.getString("username"),
-      requireActivity().intent.extras.getString("password")
+      requireActivity().intent.getStringExtra("username")!!,
+      requireActivity().intent.getStringExtra("password")!!
     )
   }
 

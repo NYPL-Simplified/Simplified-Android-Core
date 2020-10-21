@@ -176,7 +176,7 @@ class ConfirmationFragment : Fragment() {
       putExtra("temporary", temporary)
       putExtra("message", message)
     }
-    if (requireActivity().intent.extras.getBoolean("isLoggedIn")) {
+    if (requireActivity().intent.getBooleanExtra("isLoggedIn", false)) {
       requireActivity().setResult(Activity.RESULT_CANCELED, data)
     } else {
       requireActivity().setResult(Activity.RESULT_OK, data)

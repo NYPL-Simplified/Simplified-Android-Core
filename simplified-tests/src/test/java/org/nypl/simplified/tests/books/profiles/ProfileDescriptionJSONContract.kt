@@ -110,8 +110,7 @@ abstract class ProfileDescriptionJSONContract {
     val bytes =
       ProfileDescriptionJSONContract::class.java.getResourceAsStream(
         "/org/nypl/simplified/tests/books/$name"
-      )
-        .readBytes()
+      )!!.readBytes()
 
     val text = String(bytes)
     this.logger.debug("{}: {}", name, text)

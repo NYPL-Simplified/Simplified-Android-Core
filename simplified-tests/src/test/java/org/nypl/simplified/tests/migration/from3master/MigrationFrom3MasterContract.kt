@@ -832,7 +832,6 @@ abstract class MigrationFrom3MasterContract {
   private fun resource(name: String): ByteArray {
     return MigrationFrom3MasterContract::class.java.getResource(
       "/org/nypl/simplified/tests/migration/from3master/$name"
-    )
-      .readBytes()
+    )!!.readBytes()
   }
 }

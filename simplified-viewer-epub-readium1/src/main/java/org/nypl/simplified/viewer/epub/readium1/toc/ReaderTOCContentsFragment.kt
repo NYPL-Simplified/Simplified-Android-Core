@@ -146,7 +146,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter {
   }
 
   override fun getItem(position: Int): Any {
-    return this.adapter.getItem(position)
+    return this.adapter.getItem(position)!!
   }
 
   override fun getItemId(position: Int): Long {
