@@ -13,8 +13,12 @@ object Services : ServiceDirectoryProviderType {
 
   override fun serviceDirectory(): ServiceDirectoryType {
     return synchronized(this.servicesLock) {
-      this.servicesDirectory ?: throw IllegalStateException("No service directory has been created!")
+      this.servicesDirectory ?: throw this.noServiceDirectory()
     }
+  }
+
+  private fun noServiceDirectory(): IllegalStateException {
+    return IllegalStateException("No service directory has been created!")
   }
 
   fun serviceDirectoryFuture(): ListenableFuture<ServiceDirectoryType> =
