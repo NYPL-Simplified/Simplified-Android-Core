@@ -373,7 +373,7 @@ class AccountProviderResolution(
 
   private fun contentTypeOf(result: HTTPResultError<InputStream>): String {
     val contentTypeHeaders = result.responseHeaders["content-type"]
-    return contentTypeHeaders ?.firstOrNull() ?: "application/octet-stream"
+    return contentTypeHeaders?.firstOrNull() ?: "application/octet-stream"
   }
 
   private fun parseAuthenticationDocument(
