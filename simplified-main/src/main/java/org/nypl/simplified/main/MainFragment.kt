@@ -37,7 +37,6 @@ import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
-import java.util.concurrent.TimeUnit
 
 /**
  * The main application fragment.
@@ -68,7 +67,7 @@ class MainFragment : Fragment() {
       NavigationControllers.findDirectory(this.requireActivity())
 
     val services =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
 
     this.accountProviders =
       services.requireService(AccountProviderRegistryType::class.java)
