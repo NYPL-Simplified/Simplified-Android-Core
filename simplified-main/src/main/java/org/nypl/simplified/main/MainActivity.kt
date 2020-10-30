@@ -114,7 +114,7 @@ class MainActivity :
 
   private fun getAvailableEULA(): EULAType? {
     val eulaOpt =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
         .requireService(DocumentStoreType::class.java)
         .eula
 
@@ -207,7 +207,7 @@ class MainActivity :
     this.logger.debug("onStartupFinished")
 
     val services =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
     val profilesController =
       services.requireService(ProfilesControllerType::class.java)
     val accountProviders =
@@ -452,7 +452,7 @@ class MainActivity :
     this.logger.debug("onSplashOpenProfileAnonymous")
 
     val profilesController =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
         .requireService(ProfilesControllerType::class.java)
 
     profilesController.profileSelect(profilesController.profileCurrent().id)
@@ -461,14 +461,14 @@ class MainActivity :
   override fun onSplashWantProfilesMode(): ProfilesDatabaseType.AnonymousProfileEnabled {
     this.logger.debug("onSplashWantProfilesMode")
 
-    return Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+    return Services.serviceDirectory()
       .requireService(ProfilesControllerType::class.java)
       .profileAnonymousEnabled()
   }
 
   override fun onSplashWantMigrations(): MigrationsType {
     val profilesController =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
         .requireService(ProfilesControllerType::class.java)
 
     val migrationServiceDependencies =
@@ -530,7 +530,7 @@ class MainActivity :
 
   override fun onSplashLibrarySelectionNotWanted() {
     val profilesController =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
         .requireService(ProfilesControllerType::class.java)
 
     /*
