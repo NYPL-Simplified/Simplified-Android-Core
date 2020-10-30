@@ -14,7 +14,7 @@ object Services : ServiceDirectoryProviderType {
 
   override fun serviceDirectory(): ServiceDirectoryType {
     try {
-      return this.servicesFuture.get(3L, TimeUnit.MINUTES)
+      return this.servicesFuture.get(30L, TimeUnit.SECONDS)
     } catch (e: Exception) {
       this.logger.error("unable to fetch service directory: ", e)
       throw e
