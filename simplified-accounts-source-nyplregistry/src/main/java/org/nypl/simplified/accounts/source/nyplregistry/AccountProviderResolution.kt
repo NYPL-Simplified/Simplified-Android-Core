@@ -336,8 +336,13 @@ class AccountProviderResolution(
       is Link.LinkBasic -> {
         when (val result = this.http.get(Option.none(), targetLink.href, 0L)) {
           is HTTPResultError -> {
-            val problem =
-              this.someOrNull(result.problemReport)
+            val problem = this.someOrNull(result.problemReport)
+            val contentType = contentTypeOf(result)
+
+            if (contentType == "application/vnd.opds.authentication.v1.0+json") {
+              return this.parseAuthenticationDocument(targetLink.href, result.data, taskRecorder)
+            }
+
             val message = this.stringResources.resolvingAuthDocumentRetrievalFailed
             taskRecorder.addAttribute("Authentication Document", targetLink.href.toString())
             taskRecorder.addAttributes(Presentables.problemReportAsAttributes(problem))
@@ -364,6 +369,11 @@ class AccountProviderResolution(
         throw IOException(message)
       }
     }
+  }
+
+  private fun contentTypeOf(result: HTTPResultError<InputStream>): String {
+    val contentTypeHeaders = result.responseHeaders["content-type"]
+    return contentTypeHeaders?.firstOrNull() ?: "application/octet-stream"
   }
 
   private fun parseAuthenticationDocument(
