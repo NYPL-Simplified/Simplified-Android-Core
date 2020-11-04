@@ -1,13 +1,13 @@
 package org.nypl.simplified.accounts.source.nyplregistry
 
 import android.content.Context
-import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.Duration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
@@ -23,15 +23,11 @@ import org.nypl.simplified.accounts.source.spi.AccountProviderSourceResolutionSt
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.files.FileUtilities
-import org.nypl.simplified.http.core.HTTP
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultException
-import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -44,10 +40,12 @@ import java.util.ServiceLoader
  */
 
 class AccountProviderSourceNYPLRegistry(
-  private val http: HTTPType,
+  private val http: LSHTTPClientType,
   private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val parsers: AccountProviderDescriptionCollectionParsersType,
-  private val serializers: AccountProviderDescriptionCollectionSerializersType
+  private val serializers: AccountProviderDescriptionCollectionSerializersType,
+  private val uriProduction: URI = URI("https://libraryregistry.librarysimplified.org/libraries"),
+  private val uriQA: URI = URI("https://libraryregistry.librarysimplified.org/libraries/qa")
 ) : AccountProviderSourceType {
 
   companion object {
@@ -56,6 +54,12 @@ class AccountProviderSourceNYPLRegistry(
         .firstOrNull()
         ?: throw IllegalStateException("No available implementation of type ${AuthenticationDocumentParsersType::class.java}")
     }
+
+    private fun findHTTPClient(): LSHTTPClientType {
+      return ServiceLoader.load(LSHTTPClientType::class.java)
+        .firstOrNull()
+        ?: throw IllegalStateException("No available implementation of type ${LSHTTPClientType::class.java}")
+    }
   }
 
   /**
@@ -63,7 +67,7 @@ class AccountProviderSourceNYPLRegistry(
    */
 
   constructor() : this(
-    http = HTTP.newHTTP(),
+    http = findHTTPClient(),
     authDocumentParsers = findAuthenticationDocumentParsers(),
     parsers = AccountProviderDescriptionCollectionParsers(),
     serializers = AccountProviderDescriptionCollectionSerializers()
@@ -71,10 +75,6 @@ class AccountProviderSourceNYPLRegistry(
 
   private val logger =
     LoggerFactory.getLogger(AccountProviderSourceNYPLRegistry::class.java)
-  private val uriProduction =
-    URI("https://libraryregistry.librarysimplified.org/libraries")
-  private val uriQA =
-    URI("https://libraryregistry.librarysimplified.org/libraries/qa")
 
   /**
    * An intrinsic lock used to prevent multiple threads from overwriting the cached providers
@@ -321,24 +321,26 @@ class AccountProviderSourceNYPLRegistry(
   }
 
   private fun openStream(target: URI): InputStream {
-    return when (val connectResult = this.http.get(Option.none(), target, 0)) {
-      is HTTPResultOK ->
-        connectResult.value
-      is HTTPResultError ->
+    val request =
+      this.http.newRequest(target)
+        .build()
+
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK ->
+        status.bodyStream ?: ByteArrayInputStream(ByteArray(0))
+      is LSHTTPResponseStatus.Responded.Error ->
         throw ServerReturnedError(
           uri = target,
-          errorCode = connectResult.status,
-          message = connectResult.message,
-          problemReport = this.someOrNull(connectResult.problemReport)
+          errorCode = status.status,
+          message = status.message,
+          problemReport = status.problemReport
         )
-      is HTTPResultException ->
+      is LSHTTPResponseStatus.Failed ->
         throw ServerConnectionFailure(
           uri = target,
-          cause = connectResult.error
+          cause = status.exception
         )
-
-      // XXX: Somebody should seal the HTTPResultType class...
-      else -> throw UnreachableCodeException()
     }
   }
 

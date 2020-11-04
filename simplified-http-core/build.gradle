@@ -3,12 +3,13 @@ dependencies {
 
   implementation project(":simplified-json-core")
 
-  implementation libraries.iharderBase64
   implementation libraries.googleGuava
+  implementation libraries.iharderBase64
   implementation libraries.io7mJNull
   implementation libraries.io7mJUnreachable
   implementation libraries.jacksonDatabind
   implementation libraries.kotlinStdlib
+  implementation libraries.nyplHttpAPI
   implementation libraries.slf4j
 
   compileOnly libraries.autoValue

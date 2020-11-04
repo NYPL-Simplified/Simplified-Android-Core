@@ -1,10 +1,12 @@
 package org.nypl.simplified.accounts.source.nyplregistry
 
-import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnreachableCodeException
+import one.irradia.mime.api.MIMECompatibility
+import one.irradia.mime.api.MIMEType
 import org.joda.time.DateTime
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.ANONYMOUS_TYPE
@@ -21,10 +23,6 @@ import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderResolutio
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderResolutionErrorCodes.authDocumentUnusableLink
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderResolutionErrorCodes.httpRequestFailed
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderResolutionErrorCodes.unexpectedException
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultException
-import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.links.Link
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
@@ -32,11 +30,11 @@ import org.nypl.simplified.opds.auth_document.api.AuthenticationObject
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObject.Companion.LABEL_LOGIN
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObject.Companion.LABEL_PASSWORD
 import org.nypl.simplified.parser.api.ParseResult
-import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
@@ -49,9 +47,12 @@ import java.util.Locale
 class AccountProviderResolution(
   private val stringResources: AccountProviderResolutionStringsType,
   private val authDocumentParsers: AuthenticationDocumentParsersType,
-  private val http: HTTPType,
+  private val http: LSHTTPClientType,
   private val description: AccountProviderDescription
 ) {
+
+  private val authDocumentType =
+    MIMEType("application", "vnd.opds.authentication.v1.0+json", mapOf())
 
   private val logger =
     LoggerFactory.getLogger(AccountProviderResolution::class.java)
@@ -334,27 +335,43 @@ class AccountProviderResolution(
 
     return when (targetLink) {
       is Link.LinkBasic -> {
-        when (val result = this.http.get(Option.none(), targetLink.href, 0L)) {
-          is HTTPResultError -> {
-            val problem =
-              this.someOrNull(result.problemReport)
-            val message = this.stringResources.resolvingAuthDocumentRetrievalFailed
-            taskRecorder.addAttribute("Authentication Document", targetLink.href.toString())
-            taskRecorder.addAttributes(Presentables.problemReportAsAttributes(problem))
-            taskRecorder.currentStepFailed(
-              message,
-              httpRequestFailed(targetLink.hrefURI, result.status, result.message)
+        val request =
+          this.http.newRequest(targetLink.href)
+            .build()
+
+        val result = request.execute()
+        taskRecorder.addAttribute("Authentication Document", targetLink.href.toString())
+        taskRecorder.addAttributes(result.status.problemReport?.toMap() ?: emptyMap())
+
+        when (val status = result.status) {
+          is LSHTTPResponseStatus.Responded.OK -> {
+            this.parseAuthenticationDocument(
+              targetURI = targetLink.href,
+              stream = status.bodyStream ?: emptyStream(),
+              taskRecorder = taskRecorder
             )
-            throw IOException(message)
           }
 
-          is HTTPResultException ->
-            throw result.error
+          is LSHTTPResponseStatus.Responded.Error -> {
+            if (MIMECompatibility.isCompatibleStrictWithoutAttributes(status.contentType, authDocumentType)) {
+              this.parseAuthenticationDocument(
+                targetURI = targetLink.href,
+                stream = status.bodyStream ?: emptyStream(),
+                taskRecorder = taskRecorder
+              )
+            } else {
+              val message = this.stringResources.resolvingAuthDocumentRetrievalFailed
+              taskRecorder.currentStepFailed(
+                message,
+                httpRequestFailed(targetLink.hrefURI, status.originalStatus, status.message)
+              )
+              throw IOException(message)
+            }
+          }
 
-          is HTTPResultOK ->
-            this.parseAuthenticationDocument(targetLink.href, result.value, taskRecorder)
-
-          else -> throw UnreachableCodeException()
+          is LSHTTPResponseStatus.Failed -> {
+            throw IOException(status.exception)
+          }
         }
       }
 
@@ -365,6 +382,8 @@ class AccountProviderResolution(
       }
     }
   }
+
+  private fun emptyStream() = ByteArrayInputStream(ByteArray(0))
 
   private fun parseAuthenticationDocument(
     targetURI: URI,
