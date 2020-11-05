@@ -435,7 +435,7 @@ internal object MainServices {
   }
 
   private fun createFeedLoader(
-    http: HTTPType,
+    http: LSHTTPClientType,
     opdsFeedParser: OPDSFeedParserType,
     bookFormatSupport: BookFormatSupportType,
     bookRegistry: BookRegistryType,
@@ -447,7 +447,7 @@ internal object MainServices {
     val feedSearchParser =
       OPDSSearchParser.newParser()
     val feedTransport =
-      FeedHTTPTransport.newTransport(http)
+      FeedHTTPTransport(http)
 
     return FeedLoader.create(
       bookFormatSupport = bookFormatSupport,
@@ -784,11 +784,12 @@ internal object MainServices {
         serviceConstructor = { ContentResolverSane(context.contentResolver) }
       )
 
-    addService(
-      message = "Starting LSHTTP...",
-      interfaceType = LSHTTPClientType::class.java,
-      serviceConstructor = { MainHTTP.create(context) }
-    )
+    val lsHTTP =
+      addService(
+        message = "Starting LSHTTP...",
+        interfaceType = LSHTTPClientType::class.java,
+        serviceConstructor = { MainHTTP.create(context) }
+      )
 
     addService(
       message = "Starting borrow subtask directory...",
@@ -926,7 +927,7 @@ internal object MainServices {
           bookRegistry = bookRegistry,
           bundledContent = bundledContent,
           contentResolver = contentResolver,
-          http = http,
+          http = lsHTTP,
           opdsFeedParser = opdsFeedParser
         )
       }

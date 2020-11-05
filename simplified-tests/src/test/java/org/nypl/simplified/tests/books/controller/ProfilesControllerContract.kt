@@ -110,7 +110,6 @@ abstract class ProfilesControllerContract {
   private lateinit var executorBooks: ExecutorService
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ExecutorService
-  private lateinit var http: MockingHTTP
   private lateinit var lsHTTP: LSHTTPClientType
   private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
   private lateinit var profileEvents: PublishSubject<ProfileEvent>
@@ -143,7 +142,7 @@ abstract class ProfilesControllerContract {
     val parser =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
     val transport =
-      FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport(this.lsHTTP)
     val bundledContent = BundledContentResolverType { uri ->
       throw FileNotFoundException(uri.toString())
     }
@@ -176,7 +175,6 @@ abstract class ProfilesControllerContract {
     services.putService(ClockType::class.java, Clock)
     services.putService(ContentResolverType::class.java, this.contentResolver)
     services.putService(FeedLoaderType::class.java, feedLoader)
-    services.putService(HTTPType::class.java, this.http)
     services.putService(LSHTTPClientType::class.java, this.lsHTTP)
     services.putService(OPDSFeedParserType::class.java, parser)
     services.putService(PatronUserProfileParsersType::class.java, this.patronUserProfileParsers)
@@ -184,6 +182,7 @@ abstract class ProfilesControllerContract {
     services.putService(ProfileAccountDeletionStringResourcesType::class.java, this.profileAccountDeletionStringResources)
     services.putService(ProfileIdleTimerType::class.java, InoperableIdleTimer())
     services.putService(ProfilesDatabaseType::class.java, profiles)
+    services.putService(HTTPType::class.java, MockingHTTP())
 
     return Controller.createFromServiceDirectory(
       services = services,
@@ -199,7 +198,6 @@ abstract class ProfilesControllerContract {
   fun setUp() {
     this.audioBookManifestStrategies = Mockito.mock(AudioBookManifestStrategiesType::class.java)
     this.credentialsStore = FakeAccountCredentialStorage()
-    this.http = MockingHTTP()
     this.lsHTTP = Mockito.mock(LSHTTPClientType::class.java)
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())

@@ -241,14 +241,14 @@ class FeedLoader private constructor(
 
       if (e.code == 401) {
         return FeedLoaderFailure.FeedLoaderFailedAuthentication(
-          problemReport = this.someOrNull(e.problemReport),
+          problemReport = e.report,
           exception = e,
           attributesInitial = this.errorAttributesOf(uri, method),
           message = e.localizedMessage ?: ""
         )
       }
       return FeedLoaderFailure.FeedLoaderFailedGeneral(
-        problemReport = this.someOrNull(e.problemReport),
+        problemReport = e.report,
         exception = e,
         attributesInitial = this.errorAttributesOf(uri, method),
         message = e.localizedMessage ?: ""
@@ -301,14 +301,6 @@ class FeedLoader private constructor(
       Pair("Feed", uri.toString()),
       Pair("Method", method)
     )
-  }
-
-  private fun <T> someOrNull(x: OptionType<T>): T? {
-    return if (x is Some<T>) {
-      x.get()
-    } else {
-      null
-    }
   }
 
   private fun parseFromBundledContent(

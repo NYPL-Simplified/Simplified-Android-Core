@@ -362,14 +362,14 @@ class BookRevokeTask(
 
       is FeedLoaderFailedGeneral -> {
         val message = this.revokeStrings.revokeServerNotifyFeedFailed
-        this.steps.addAttributes(Presentables.problemReportAsAttributes(feedResult.problemReport))
+        this.steps.addAttributesIfPresent(feedResult.problemReport?.toMap())
         this.steps.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
         throw feedResult.exception
       }
 
       is FeedLoaderFailedAuthentication -> {
         val message = this.revokeStrings.revokeServerNotifyFeedFailed
-        this.steps.addAttributes(Presentables.problemReportAsAttributes(feedResult.problemReport))
+        this.steps.addAttributesIfPresent(feedResult.problemReport?.toMap())
         this.steps.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
         throw feedResult.exception
       }

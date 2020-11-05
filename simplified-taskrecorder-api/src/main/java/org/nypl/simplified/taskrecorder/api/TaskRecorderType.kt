@@ -22,6 +22,14 @@ interface TaskRecorderType {
   fun addAttributes(attributes: Map<String, String>)
 
   /**
+   * Add a set of attributes to the task.
+   */
+
+  fun addAttributesIfPresent(attributes: Map<String, String>?) {
+    this.addAttributes(attributes ?: emptyMap())
+  }
+
+  /**
    * Start a new controller task step.
    */
 
