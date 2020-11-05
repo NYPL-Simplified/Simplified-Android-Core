@@ -1,7 +1,6 @@
 dependencies {
   api project(':simplified-books-bundled-api')
   api project(':simplified-feeds-api')
-  api project(':simplified-http-core')
   api project(':simplified-opds-core')
   api project(':simplified-tenprint')
 
