@@ -1,24 +1,20 @@
 package org.nypl.simplified.books.controller
 
-import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnreachableCodeException
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultException
-import org.nypl.simplified.http.core.HTTPResultOKType
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.patron.api.PatronUserProfile
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
-import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
@@ -36,7 +32,7 @@ internal object PatronUserProfiles {
     taskRecorder: TaskRecorderType,
     patronParsers: PatronUserProfileParsersType,
     credentials: AccountAuthenticationCredentials,
-    http: HTTPType,
+    http: LSHTTPClientType,
     account: AccountType
   ): PatronUserProfile {
     val patronSettingsURI = account.provider.patronSettingsURI
@@ -46,20 +42,32 @@ internal object PatronUserProfiles {
       throw exception
     }
 
-    val httpAuthentication =
-      AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)
-    val result =
-      http.get(Option.some(httpAuthentication), patronSettingsURI, 0L)
+    val request =
+      http.newRequest(patronSettingsURI)
+        .setAuthorization(AccountAuthenticatedHTTP.createAuthorization(credentials))
+        .build()
 
-    return when (result) {
-      is HTTPResultOKType<InputStream> ->
-        this.onPatronProfileRequestOK(taskRecorder, patronSettingsURI, patronParsers, result)
-      is HTTPResultError<InputStream> ->
-        this.onPatronProfileRequestHTTPError(taskRecorder, patronSettingsURI, result)
-      is HTTPResultException<InputStream> ->
-        this.onPatronProfileRequestHTTPException(taskRecorder, patronSettingsURI, result)
-      else ->
-        throw UnreachableCodeException()
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK ->
+        this.onPatronProfileRequestOK(
+          taskRecorder = taskRecorder,
+          patronSettingsURI = patronSettingsURI,
+          patronParsers = patronParsers,
+          stream = status.bodyStream ?: ByteArrayInputStream(ByteArray(0))
+        )
+      is LSHTTPResponseStatus.Responded.Error ->
+        this.onPatronProfileRequestHTTPError(
+          taskRecorder = taskRecorder,
+          patronSettingsURI = patronSettingsURI,
+          result = status
+        )
+      is LSHTTPResponseStatus.Failed ->
+        this.onPatronProfileRequestHTTPException(
+          taskRecorder = taskRecorder,
+          patronSettingsURI = patronSettingsURI,
+          result = status
+        )
     }
   }
 
@@ -72,9 +80,9 @@ internal object PatronUserProfiles {
     taskRecorder: TaskRecorderType,
     patronSettingsURI: URI,
     patronParsers: PatronUserProfileParsersType,
-    result: HTTPResultOKType<InputStream>
+    stream: InputStream
   ): PatronUserProfile {
-    return patronParsers.createParser(patronSettingsURI, result.value).use { parser ->
+    return patronParsers.createParser(patronSettingsURI, stream).use { parser ->
       when (val parseResult = parser.parse()) {
         is ParseResult.Success -> {
           this.logger.debug("parsed patron profile successfully")
@@ -140,16 +148,16 @@ internal object PatronUserProfiles {
   private fun <T> onPatronProfileRequestHTTPException(
     taskRecorder: TaskRecorderType,
     patronSettingsURI: URI,
-    result: HTTPResultException<InputStream>
+    result: LSHTTPResponseStatus.Failed
   ): T {
-    taskRecorder.currentStepFailed("Connection failed when fetching patron user profile.", "connectionFailed", result.error)
-    throw result.error
+    taskRecorder.currentStepFailed("Connection failed when fetching patron user profile.", "connectionFailed", result.exception)
+    throw result.exception
   }
 
   private fun <T> onPatronProfileRequestHTTPError(
     taskRecorder: TaskRecorderType,
     patronSettingsURI: URI,
-    result: HTTPResultError<InputStream>
+    result: LSHTTPResponseStatus.Responded.Error
   ): T {
     this.logger.error("received http error: {}: {}: {}", patronSettingsURI, result.message, result.status)
 
@@ -160,7 +168,7 @@ internal object PatronUserProfiles {
         throw exception
       }
       else -> {
-        taskRecorder.addAttributes(Presentables.problemReportAsAttributes(this.someOrNull(result.problemReport)))
+        taskRecorder.addAttributesIfPresent(result.problemReport?.toMap())
         taskRecorder.currentStepFailed("Server error: ${result.status} ${result.message}", "httpError ${result.status} $patronSettingsURI", exception)
         throw exception
       }

@@ -1,11 +1,10 @@
 package org.nypl.simplified.books.controller
 
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
@@ -36,7 +35,6 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.feeds.api.FeedLoaderType
-import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPHasProblemReportType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -98,33 +96,6 @@ class BookRevokeTask(
       exception = exception,
       message = message,
       problemReport = problemReport
-    )
-  }
-
-  private fun errorDetailsForUnexpectedException(
-    exception: Throwable,
-    attributes: Map<String, String> = mapOf()
-  ): BookStatusRevokeErrorDetails {
-    return this.errorDetailsFor(
-      attributes = attributes,
-      errorCode = "unexpectedException",
-      exception = exception,
-      message = exception.message ?: exception.javaClass.name
-    )
-  }
-
-  private fun errorDetailsForDRM(
-    message: String,
-    drmSystem: String,
-    errorCode: String,
-    exception: Throwable,
-    attributes: Map<String, String> = mapOf()
-  ): BookStatusRevokeErrorDetails {
-    return this.errorDetailsFor(
-      attributes = attributes,
-      errorCode = "$drmSystem: $errorCode",
-      exception = exception,
-      message = message
     )
   }
 
@@ -624,11 +595,11 @@ class BookRevokeTask(
    * are provided, throw an exception.
    */
 
-  private fun createHttpAuthIfRequired(): OptionType<HTTPAuthType> {
+  private fun createHttpAuthIfRequired(): LSHTTPAuthorizationType? {
     return if (this.account.requiresCredentials) {
-      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(this.getRequiredAccountCredentials()))
+      AccountAuthenticatedHTTP.createAuthorization(this.getRequiredAccountCredentials())
     } else {
-      Option.none<HTTPAuthType>()
+      null
     }
   }
 

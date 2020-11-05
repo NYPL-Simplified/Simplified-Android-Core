@@ -1,17 +1,8 @@
 package org.nypl.simplified.feeds.api
 
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnreachableCodeException
-import org.librarysimplified.http.api.LSHTTPAuthorizationBasic
-import org.librarysimplified.http.api.LSHTTPAuthorizationBearerToken
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.librarysimplified.http.api.LSHTTPClientType
-import org.librarysimplified.http.api.LSHTTPRequestBuilderType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
-import org.nypl.simplified.http.core.HTTPAuthBasic
-import org.nypl.simplified.http.core.HTTPAuthOAuth
-import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSFeedTransportException
 import org.nypl.simplified.opds.core.OPDSFeedTransportIOException
@@ -30,14 +21,14 @@ import java.net.URI
 
 class FeedHTTPTransport(
   private val http: LSHTTPClientType
-) : OPDSFeedTransportType<OptionType<HTTPAuthType>> {
+) : OPDSFeedTransportType<LSHTTPAuthorizationType?> {
 
   private val logger =
     LoggerFactory.getLogger(FeedHTTPTransport::class.java)
 
   @Throws(OPDSFeedTransportException::class)
   override fun getStream(
-    auth: OptionType<HTTPAuthType>,
+    auth: LSHTTPAuthorizationType?,
     uri: URI,
     method: String
   ): InputStream {
@@ -45,8 +36,7 @@ class FeedHTTPTransport(
 
     val request =
       this.http.newRequest(uri)
-        .allowRedirects(LSHTTPRequestBuilderType.AllowRedirects.ALLOW_REDIRECTS)
-        .setAuthorization(authorizationOf(auth))
+        .setAuthorization(auth)
         .build()
 
     val response = request.execute()
@@ -67,24 +57,5 @@ class FeedHTTPTransport(
           cause = IOException(status.exception)
         )
     }
-  }
-
-  private fun authorizationOf(
-    authOpt: OptionType<HTTPAuthType>
-  ): LSHTTPAuthorizationType? {
-    if (authOpt is Some<HTTPAuthType>) {
-      val auth = authOpt.get()
-      if (auth is HTTPAuthBasic) {
-        return LSHTTPAuthorizationBasic.ofUsernamePassword(
-          userName = auth.user(),
-          password = auth.password()
-        )
-      }
-      if (auth is HTTPAuthOAuth) {
-        return LSHTTPAuthorizationBearerToken.ofToken(auth.token().value())
-      }
-      throw UnreachableCodeException()
-    }
-    return null
   }
 }
