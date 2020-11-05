@@ -1,12 +1,11 @@
 package org.nypl.simplified.analytics.circulation
 
-import com.io7m.jfunctional.Option
+import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsSystem
-import org.nypl.simplified.http.core.HTTPProblemReportLogging
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.ExecutorService
@@ -45,35 +44,28 @@ class CirculationAnalyticsSystem(
     target: URI,
     credentials: AccountAuthenticationCredentials?
   ) {
-    val httpAuth =
-      if (credentials != null) {
-        Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials))
-      } else {
-        Option.none()
-      }
+    val request =
+      this.configuration.http.newRequest(target)
+        .setAuthorization(AccountAuthenticatedHTTP.createAuthorizationIfPresent(credentials))
+        .build()
 
-    val result =
-      this.configuration.http.get(httpAuth, target, 0L, true)
-
-    return result.match<Unit, Exception>(
-      { error ->
-        HTTPProblemReportLogging.logError(
-          this.logger,
-          target,
-          error.message,
-          error.status,
-          error.problemReport
-        )
-      },
-      { exception ->
-        this.logger.error(
-          "error sending event to {}: ",
-          exception.uri,
-          exception.error
-        )
-      },
-      {
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK ->
+        Unit
+      is LSHTTPResponseStatus.Responded.Error -> {
+        val problemReport = status.problemReport
+        if (problemReport != null) {
+          this.logger.debug("status: {}", problemReport.status)
+          this.logger.debug("title:  {}", problemReport.title)
+          this.logger.debug("type:   {}", problemReport.type)
+          this.logger.debug("detail: {}", problemReport.detail)
+        } else {
+          Unit
+        }
       }
-    )
+      is LSHTTPResponseStatus.Failed ->
+        this.logger.error("error sending event to {}: ", target, status.exception)
+    }
   }
 }

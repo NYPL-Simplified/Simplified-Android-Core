@@ -848,7 +848,7 @@ internal object MainServices {
           Analytics.create(
             AnalyticsConfiguration(
               context = context,
-              http = http
+              http = lsHTTP
             )
           )
         }
