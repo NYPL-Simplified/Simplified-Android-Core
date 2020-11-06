@@ -15,8 +15,6 @@ import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSeri
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.api.AccountProviderType
-import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
-import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerConnectionFailure
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerReturnedError
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceResolutionStrings
@@ -33,7 +31,6 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
-import java.util.ServiceLoader
 
 /**
  * A server-based account provider.
