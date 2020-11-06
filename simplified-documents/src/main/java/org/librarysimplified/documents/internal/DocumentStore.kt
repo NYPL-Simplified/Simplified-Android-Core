@@ -7,6 +7,7 @@ import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.documents.DocumentType
 import org.librarysimplified.documents.EULAType
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.slf4j.LoggerFactory
 import java.io.File
 
 internal class DocumentStore private constructor(
@@ -18,6 +19,10 @@ internal class DocumentStore private constructor(
 ) : DocumentStoreType {
 
   companion object {
+
+    private val logger =
+      LoggerFactory.getLogger(DocumentStore::class.java)
+
     fun create(
       assetManager: AssetManager,
       http: LSHTTPClientType,
@@ -90,6 +95,8 @@ internal class DocumentStore private constructor(
       baseDirectory: File,
       config: DocumentConfiguration
     ): EULAType {
+      this.logger.debug("eula {} ({})", config.name, config.remoteURI)
+
       return EULA(
         http = http,
         initialStreams = {
@@ -119,6 +126,8 @@ internal class DocumentStore private constructor(
       baseDirectory: File,
       config: DocumentConfiguration
     ): DocumentType {
+      this.logger.debug("plain document {} ({})", config.name, config.remoteURI)
+
       return PlainDocument(
         http = http,
         initialStreams = {

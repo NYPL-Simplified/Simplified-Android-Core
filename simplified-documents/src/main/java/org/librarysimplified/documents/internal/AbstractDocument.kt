@@ -20,17 +20,20 @@ internal abstract class AbstractDocument internal constructor(
     LoggerFactory.getLogger(AbstractDocument::class.java)
 
   init {
-    if (!file.isFile) {
+    if (!this.file.isFile) {
+      this.logger.debug("creating initial file {}", this.file)
       initialStreams.invoke().use { stream ->
-        fileTmp.outputStream().use { output ->
+        this.fileTmp.outputStream().use { output ->
           stream.copyTo(output)
         }
-        fileTmp.renameTo(file)
+        this.fileTmp.renameTo(this.file)
       }
     }
   }
 
   override fun update() {
+    this.logger.debug("updating document {} from {}", this.file, this.remoteURL)
+
     val request =
       this.http.newRequest(this.remoteURL.toURI())
         .build()
@@ -40,13 +43,13 @@ internal abstract class AbstractDocument internal constructor(
       is LSHTTPResponseStatus.Responded.OK -> {
         val stream = status.bodyStream
         if (stream != null) {
-          fileTmp.outputStream().use { output ->
+          this.fileTmp.outputStream().use { output ->
             stream.copyTo(output)
           }
-          fileTmp.renameTo(file)
+          this.fileTmp.renameTo(this.file)
           Unit
         } else {
-          logger.debug("no body")
+          this.logger.debug("no body")
         }
       }
       is LSHTTPResponseStatus.Responded.Error,
