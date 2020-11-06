@@ -249,15 +249,13 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
 |[org.librarysimplified.buildconfig.api](simplified-buildconfig-api)|Build-time configuration API|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
-|[org.librarysimplified.clock](simplified-clock)|Clock API|
 |[org.librarysimplified.content.api](simplified-content-api)|Content resolver API|
 |[org.librarysimplified.crashlytics](simplified-crashlytics)|Crashlytics|
 |[org.librarysimplified.crashlytics.api](simplified-crashlytics-api)|Crashlytics functionality|
-|[org.librarysimplified.documents](simplified-documents)|Documents API|
+|[org.librarysimplified.documents](simplified-documents)|Documents|
 |[org.librarysimplified.feeds.api](simplified-feeds-api)|Feed API|
 |[org.librarysimplified.files](simplified-files)|File utilities|
 |[org.librarysimplified.futures](simplified-futures)|Guava Future extensions|
-|[org.librarysimplified.http.core](simplified-http-core)|HTTP API|
 |[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
 |[org.librarysimplified.links](simplified-links)|Link types|
 |[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|
