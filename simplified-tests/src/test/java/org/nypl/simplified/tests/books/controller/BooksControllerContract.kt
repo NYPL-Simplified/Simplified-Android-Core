@@ -45,14 +45,11 @@ import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
-import org.nypl.simplified.clock.Clock
-import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -79,7 +76,6 @@ import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
@@ -195,11 +191,9 @@ abstract class BooksControllerContract {
     services.putService(BorrowSubtaskDirectoryType::class.java, this.borrowSubtasks)
     services.putService(BookRevokeStringResourcesType::class.java, revokeStringResources)
     services.putService(BundledContentResolverType::class.java, bundledContent)
-    services.putService(ClockType::class.java, Clock)
     services.putService(ContentResolverType::class.java, this.contentResolver)
     services.putService(FeedLoaderType::class.java, feedLoader)
     services.putService(LSHTTPClientType::class.java, this.lsHTTP)
-    services.putService(HTTPType::class.java, MockingHTTP())
     services.putService(OPDSFeedParserType::class.java, parser)
     services.putService(PatronUserProfileParsersType::class.java, patronUserProfileParsers)
     services.putService(ProfileAccountCreationStringResourcesType::class.java, profileAccountCreationStringResources)

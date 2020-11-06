@@ -79,7 +79,7 @@ ext {
 
   nyplAudioBookAPIVersion = "6.1.0"
   nyplR2Version = "0.0.5"
-  nyplHTTPVersion = "0.0.14"
+  nyplHTTPVersion = "0.0.17-SNAPSHOT"
   irradiaMimeVersion = "1.1.1"
 }
 
@@ -159,6 +159,7 @@ ext.libraries = [
   nyplHttpBearerToken              : "org.librarysimplified.http:org.librarysimplified.http.bearer_token:${nyplHTTPVersion}",
   nyplHttpChucker                  : "org.librarysimplified.http:org.librarysimplified.http.chucker:${nyplHTTPVersion}",
   nyplHttpDownloads                : "org.librarysimplified.http:org.librarysimplified.http.downloads:${nyplHTTPVersion}",
+  nyplHttpURI                      : "org.librarysimplified.http:org.librarysimplified.http.uri_builder:${nyplHTTPVersion}",
   nyplHttpVanilla                  : "org.librarysimplified.http:org.librarysimplified.http.vanilla:${nyplHTTPVersion}",
   nyplPDFAPI                       : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.api:0.1.0",
   nyplPDFViewer                    : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer:0.1.0",

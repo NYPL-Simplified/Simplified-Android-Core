@@ -3,15 +3,19 @@ package org.nypl.simplified.books.reader.bookmarks
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.io7m.jfunctional.Option
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP
+import one.irradia.mime.api.MIMEType
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Delete
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Post
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Put
+import org.librarysimplified.http.api.LSHTTPResponseStatus
+import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.http.core.HTTPProblemReportLogging
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotation
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
@@ -22,8 +26,8 @@ import java.net.URI
 
 class ReaderBookmarkHTTPCalls(
   private val objectMapper: ObjectMapper,
-  private val http: HTTPType
-) : org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType {
+  private val http: LSHTTPClientType
+) : ReaderBookmarkHTTPCallsType {
 
   private val logger = LoggerFactory.getLogger(ReaderBookmarkHTTPCalls::class.java)
 
@@ -32,15 +36,21 @@ class ReaderBookmarkHTTPCalls(
     credentials: AccountAuthenticationCredentials
   ): List<BookmarkAnnotation> {
     val auth =
-      createAuthenticatedHTTP(credentials)
-    val result =
-      this.http.get(Option.some(auth), annotationsURI, 0L)
+      AccountAuthenticatedHTTP.createAuthorization(credentials)
+    val request =
+      this.http.newRequest(annotationsURI)
+        .setAuthorization(auth)
+        .build()
 
-    return result.match<List<BookmarkAnnotation>, IOException>(
-      { error -> logAndFail(annotationsURI, error) },
-      { exception -> throw exception.error },
-      { success -> deserializeBookmarksFromStream(success.value) }
-    )
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK ->
+        this.deserializeBookmarksFromStream(status.bodyStream ?: this.emptyStream())
+      is LSHTTPResponseStatus.Responded.Error ->
+        this.logAndFail(annotationsURI, status)
+      is LSHTTPResponseStatus.Failed ->
+        throw status.exception
+    }
   }
 
   override fun bookmarkDelete(
@@ -48,16 +58,27 @@ class ReaderBookmarkHTTPCalls(
     credentials: AccountAuthenticationCredentials
   ) {
     val auth =
-      createAuthenticatedHTTP(credentials)
-    val result =
-      this.http.delete(Option.some(auth), bookmarkURI, "application/octet-stream")
+      AccountAuthenticatedHTTP.createAuthorization(credentials)
+    val request =
+      this.http.newRequest(bookmarkURI)
+        .setAuthorization(auth)
+        .setMethod(Delete)
+        .build()
 
-    return result.match<Unit, IOException>(
-      { error -> logAndFail(bookmarkURI, error) },
-      { exception -> throw exception.error },
-      { success -> deserializeBookmarksFromStream(success.value) }
-    )
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK -> {
+        this.deserializeBookmarksFromStream(status.bodyStream ?: this.emptyStream())
+        Unit
+      }
+      is LSHTTPResponseStatus.Responded.Error ->
+        this.logAndFail(bookmarkURI, status)
+      is LSHTTPResponseStatus.Failed ->
+        throw status.exception
+    }
   }
+
+  private fun emptyStream() = ByteArrayInputStream(ByteArray(0))
 
   override fun bookmarkAdd(
     annotationsURI: URI,
@@ -67,15 +88,24 @@ class ReaderBookmarkHTTPCalls(
     val data =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationToBytes(this.objectMapper, bookmark)
     val auth =
-      createAuthenticatedHTTP(credentials)
-    val result =
-      this.http.post(Option.some(auth), annotationsURI, data, "application/ld+json")
+      AccountAuthenticatedHTTP.createAuthorization(credentials)
+    val post =
+      Post(data, MIMEType("application", "ld+json", mapOf()))
+    val request =
+      this.http.newRequest(annotationsURI)
+        .setAuthorization(auth)
+        .setMethod(post)
+        .build()
 
-    return result.match<Unit, IOException>(
-      { error -> logAndFail(annotationsURI, error) },
-      { exception -> throw exception.error },
-      { }
-    )
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK ->
+        Unit
+      is LSHTTPResponseStatus.Responded.Error ->
+        this.logAndFail(annotationsURI, status)
+      is LSHTTPResponseStatus.Failed ->
+        throw status.exception
+    }
   }
 
   override fun syncingEnable(
@@ -84,17 +114,26 @@ class ReaderBookmarkHTTPCalls(
     enabled: Boolean
   ) {
     val data =
-      serializeSynchronizeEnableData(enabled)
+      this.serializeSynchronizeEnableData(enabled)
     val auth =
-      createAuthenticatedHTTP(credentials)
-    val result =
-      this.http.put(Option.some(auth), settingsURI, data, "vnd.librarysimplified/user-profile+json")
+      AccountAuthenticatedHTTP.createAuthorization(credentials)
+    val put =
+      Put(data, MIMEType("vnd.librarysimplified", "user-profile+json", mapOf()))
+    val request =
+      this.http.newRequest(settingsURI)
+        .setAuthorization(auth)
+        .setMethod(put)
+        .build()
 
-    return result.match<Unit, IOException>(
-      { error -> logAndFail(settingsURI, error) },
-      { exception -> throw exception.error },
-      { }
-    )
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK ->
+        Unit
+      is LSHTTPResponseStatus.Responded.Error ->
+        this.logAndFail(settingsURI, status)
+      is LSHTTPResponseStatus.Failed ->
+        throw status.exception
+    }
   }
 
   override fun syncingIsEnabled(
@@ -102,21 +141,34 @@ class ReaderBookmarkHTTPCalls(
     credentials: AccountAuthenticationCredentials
   ): Boolean {
     val auth =
-      createAuthenticatedHTTP(credentials)
-    val result =
-      this.http.get(Option.some(auth), settingsURI, 0L)
+      AccountAuthenticatedHTTP.createAuthorization(credentials)
+    val request =
+      this.http.newRequest(settingsURI)
+        .setAuthorization(auth)
+        .build()
 
-    return result.match<Boolean, IOException>(
-      { error -> logAndFail(settingsURI, error) },
-      { exception -> throw exception.error },
-      { success -> deserializeSyncingEnabledFromStream(success.value) }
-    )
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK ->
+        this.deserializeSyncingEnabledFromStream(status.bodyStream ?: emptyStream())
+      is LSHTTPResponseStatus.Responded.Error ->
+        this.logAndFail(settingsURI, status)
+      is LSHTTPResponseStatus.Failed ->
+        throw status.exception
+    }
   }
 
-  private fun <T> logAndFail(uri: URI, error: HTTPResultError<InputStream>): T {
-    HTTPProblemReportLogging.logError(
-      this.logger, uri, error.message, error.status, error.problemReport
-    )
+  private fun <T> logAndFail(
+    uri: URI,
+    error: LSHTTPResponseStatus.Responded.Error
+  ): T {
+    val problemReport = error.problemReport
+    if (problemReport != null) {
+      this.logger.error("detail: {}", problemReport.detail)
+      this.logger.error("status: {}", problemReport.status)
+      this.logger.error("title:  {}", problemReport.title)
+      this.logger.error("type:   {}", problemReport.type)
+    }
     throw IOException("$uri received ${error.status} ${error.message}")
   }
 
@@ -129,11 +181,11 @@ class ReaderBookmarkHTTPCalls(
   }
 
   private fun deserializeSyncingEnabledFromStream(value: InputStream): Boolean {
-    return deserializeSyncingEnabledFromJSON(this.objectMapper.readTree(value))
+    return this.deserializeSyncingEnabledFromJSON(this.objectMapper.readTree(value))
   }
 
   private fun deserializeSyncingEnabledFromJSON(node: JsonNode): Boolean {
-    return deserializeSyncingEnabledFromJSONObject(JSONParserUtilities.checkObject(null, node))
+    return this.deserializeSyncingEnabledFromJSONObject(JSONParserUtilities.checkObject(null, node))
   }
 
   private fun deserializeSyncingEnabledFromJSONObject(node: ObjectNode): Boolean {

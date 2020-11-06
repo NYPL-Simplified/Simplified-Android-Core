@@ -12,6 +12,9 @@ import com.io7m.jfunctional.Some
 import com.squareup.picasso.Picasso
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
+import org.librarysimplified.documents.DocumentConfigurationServiceType
+import org.librarysimplified.documents.DocumentStoreType
+import org.librarysimplified.documents.DocumentStores
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectory
 import org.librarysimplified.services.api.ServiceDirectoryType
@@ -64,18 +67,12 @@ import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorService
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
-import org.nypl.simplified.clock.Clock
-import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.content.api.ContentResolverSane
 import org.nypl.simplified.content.api.ContentResolverType
-import org.nypl.simplified.documents.store.DocumentStore
-import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.http.core.HTTP
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.networkconnectivity.NetworkConnectivity
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.notifications.NotificationsService
@@ -126,7 +123,6 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.ServerSocket
 import java.util.ServiceLoader
-import java.util.concurrent.ExecutorService
 
 internal object MainServices {
 
@@ -296,38 +292,6 @@ internal object MainServices {
     return ReaderReadiumEPUBLoader.newLoader(context, adobeConfiguration, execEPUB)
   }
 
-  /**
-   * Create a document store and conditionally enable each of the documents based on the
-   * presence of assets.
-   */
-
-  private fun createDocumentStore(
-    assets: AssetManager,
-    clock: ClockType,
-    http: HTTPType,
-    exec: ExecutorService,
-    directory: File
-  ): DocumentStoreType {
-    val documentsBuilder =
-      DocumentStore.newBuilder(clock, http, exec, directory)
-
-    try {
-      val stream = assets.open("eula.html")
-      documentsBuilder.enableEULA { stream }
-    } catch (e: IOException) {
-      this.logger.debug("No EULA defined: ", e)
-    }
-
-    try {
-      val stream = assets.open("software-licenses.html")
-      documentsBuilder.enableLicenses { stream }
-    } catch (e: IOException) {
-      this.logger.debug("No licenses defined: ", e)
-    }
-
-    return documentsBuilder.build()
-  }
-
   private fun loadDefaultAccountProvider(): AccountProviderType {
     val providers =
       ServiceLoader.load(AccountProviderFallbackType::class.java)
@@ -340,11 +304,14 @@ internal object MainServices {
     return providers.first()
   }
 
-  private fun createAccountProviderRegistry(context: Context): AccountProviderRegistryType {
+  private fun createAccountProviderRegistry(
+    context: Context,
+    http: LSHTTPClientType
+  ): AccountProviderRegistryType {
     val defaultAccountProvider =
       this.loadDefaultAccountProvider()
     val accountProviders =
-      AccountProviderRegistry.createFromServiceLoader(context, defaultAccountProvider)
+      AccountProviderRegistry.createFromServiceLoader(context, http, defaultAccountProvider)
     for (id in accountProviders.accountProviderDescriptions().keys) {
       this.logger.debug("loaded account provider: {}", id)
     }
@@ -480,7 +447,7 @@ internal object MainServices {
   }
 
   private fun createReaderBookmarksService(
-    http: HTTPType,
+    http: LSHTTPClientType,
     bookController: ProfilesControllerType
   ): ReaderBookmarkServiceType {
     val threadFactory: (Runnable) -> Thread = { runnable ->
@@ -689,11 +656,11 @@ internal object MainServices {
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) }
     )
 
-    val clock =
+    val lsHTTP =
       addService(
-        message = strings.bootingClock,
-        interfaceType = ClockType::class.java,
-        serviceConstructor = { Clock }
+        message = "Starting LSHTTP...",
+        interfaceType = LSHTTPClientType::class.java,
+        serviceConstructor = { MainHTTP.create(context) }
       )
 
     publishEvent(strings.bootingDirectories)
@@ -712,13 +679,6 @@ internal object MainServices {
         message = strings.bootingScreenSize,
         interfaceType = ScreenSizeInformationType::class.java,
         serviceConstructor = { ScreenSizeInformation(context.resources) }
-      )
-
-    val http =
-      addService(
-        message = strings.bootingHTTP,
-        interfaceType = HTTPType::class.java,
-        serviceConstructor = { HTTP.newHTTP() }
       )
 
     addService(
@@ -784,18 +744,20 @@ internal object MainServices {
         serviceConstructor = { ContentResolverSane(context.contentResolver) }
       )
 
-    val lsHTTP =
-      addService(
-        message = "Starting LSHTTP...",
-        interfaceType = LSHTTPClientType::class.java,
-        serviceConstructor = { MainHTTP.create(context) }
-      )
-
     addService(
       message = "Starting borrow subtask directory...",
       interfaceType = BorrowSubtaskDirectoryType::class.java,
       serviceConstructor = { BorrowSubtasks.directory() }
     )
+
+    val documentConfiguration =
+      addServiceOptionally(
+        message = "Starting document configuration service...",
+        interfaceType = DocumentConfigurationServiceType::class.java,
+        serviceConstructor = {
+          this.optionalFromServiceLoader(DocumentConfigurationServiceType::class.java)
+        }
+      )
 
     addService(
       message = strings.bootingDocumentStore,
@@ -803,10 +765,9 @@ internal object MainServices {
       serviceConstructor = {
         this.createDocumentStore(
           assets = assets,
-          clock = clock,
-          http = http,
-          exec = NamedThreadPools.namedThreadPool(1, "documents", 19),
-          directory = directories.directoryStorageDocuments
+          http = lsHTTP,
+          directory = directories.directoryStorageDocuments,
+          configuration = documentConfiguration
         )
       }
     )
@@ -823,7 +784,7 @@ internal object MainServices {
       addService(
         message = strings.bootingAccountProviders,
         interfaceType = AccountProviderRegistryType::class.java,
-        serviceConstructor = { this.createAccountProviderRegistry(context) }
+        serviceConstructor = { this.createAccountProviderRegistry(context, lsHTTP) }
       )
 
     val accountBundledCredentials =
@@ -997,7 +958,7 @@ internal object MainServices {
 
     publishEvent(strings.bootingReaderBookmarkService)
     val readerBookmarksService =
-      this.createReaderBookmarksService(http, bookController)
+      this.createReaderBookmarksService(lsHTTP, bookController)
 
     addService(
       message = strings.bootingReaderBookmarkService,
@@ -1102,6 +1063,24 @@ internal object MainServices {
     this.logger.debug("boot completed")
     onProgress.invoke(BootEvent.BootCompleted(strings.bootCompleted))
     return finalServices
+  }
+
+  private fun createDocumentStore(
+    assets: AssetManager,
+    http: LSHTTPClientType,
+    configuration: DocumentConfigurationServiceType?,
+    directory: File
+  ): DocumentStoreType {
+    return if (configuration != null) {
+      DocumentStores.create(
+        assetManager = assets,
+        http = http,
+        baseDirectory = directory,
+        configuration = configuration
+      )
+    } else {
+      DocumentStores.createEmpty()
+    }
   }
 
   private fun showThreads() {

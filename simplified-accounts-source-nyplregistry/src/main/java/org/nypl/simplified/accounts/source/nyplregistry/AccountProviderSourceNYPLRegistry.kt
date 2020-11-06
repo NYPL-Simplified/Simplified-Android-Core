@@ -48,31 +48,6 @@ class AccountProviderSourceNYPLRegistry(
   private val uriQA: URI = URI("https://libraryregistry.librarysimplified.org/libraries/qa")
 ) : AccountProviderSourceType {
 
-  companion object {
-    private fun findAuthenticationDocumentParsers(): AuthenticationDocumentParsersType {
-      return ServiceLoader.load(AuthenticationDocumentParsersType::class.java)
-        .firstOrNull()
-        ?: throw IllegalStateException("No available implementation of type ${AuthenticationDocumentParsersType::class.java}")
-    }
-
-    private fun findHTTPClient(): LSHTTPClientType {
-      return ServiceLoader.load(LSHTTPClientType::class.java)
-        .firstOrNull()
-        ?: throw IllegalStateException("No available implementation of type ${LSHTTPClientType::class.java}")
-    }
-  }
-
-  /**
-   * Secondary no-arg constructor for use in [java.util.ServiceLoader].
-   */
-
-  constructor() : this(
-    http = findHTTPClient(),
-    authDocumentParsers = findAuthenticationDocumentParsers(),
-    parsers = AccountProviderDescriptionCollectionParsers(),
-    serializers = AccountProviderDescriptionCollectionSerializers()
-  )
-
   private val logger =
     LoggerFactory.getLogger(AccountProviderSourceNYPLRegistry::class.java)
 

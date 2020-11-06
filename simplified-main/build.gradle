@@ -32,7 +32,6 @@ dependencies {
   api project(":simplified-boot-api")
   api project(":simplified-buildconfig-api")
   api project(":simplified-cardcreator")
-  api project(":simplified-clock")
   api project(":simplified-content-api")
   api project(":simplified-crashlytics-api")
   api project(":simplified-documents")

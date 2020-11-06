@@ -8,5 +8,6 @@ dependencies {
 
   implementation libraries.io7mJFunctional
   implementation libraries.kotlinStdlib
+  implementation libraries.nyplHttpURI
   implementation libraries.slf4j
 }

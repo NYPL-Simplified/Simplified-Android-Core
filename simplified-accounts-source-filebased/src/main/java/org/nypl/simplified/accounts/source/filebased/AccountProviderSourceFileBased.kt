@@ -1,10 +1,12 @@
 package org.nypl.simplified.accounts.source.filebased
 
 import android.content.Context
+import org.librarysimplified.http.api.LSHTTPClientType
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.json.AccountProvidersJSON
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceFactoryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -21,13 +23,8 @@ class AccountProviderSourceFileBased(
   private val getFile: (Context) -> InputStream
 ) : AccountProviderSourceType {
 
-  private val logger = LoggerFactory.getLogger(AccountProviderSourceFileBased::class.java)
-
-  /**
-   * Secondary no-argument public constructor required for [java.util.ServiceLoader].
-   */
-
-  constructor() : this({ context -> context.assets.open("Accounts.json") })
+  private val logger =
+    LoggerFactory.getLogger(AccountProviderSourceFileBased::class.java)
 
   @Volatile
   private var cache: Map<URI, AccountProviderType>? = null

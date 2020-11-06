@@ -31,7 +31,6 @@ import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLInput
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -39,7 +38,6 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
   private lateinit var server: MockWebServer
   private lateinit var http: LSHTTPClientType
-  private lateinit var mockHTTP: MockingHTTP
   private lateinit var authDocumentParser: AuthenticationDocumentParserType
   private lateinit var authDocumentParsers: AuthenticationDocumentParsersType
   private lateinit var stringResources: MockAccountProviderResolutionStrings

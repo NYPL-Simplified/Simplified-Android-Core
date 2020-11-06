@@ -13,8 +13,9 @@ import androidx.lifecycle.ViewModelProviders
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
-import com.io7m.jfunctional.Some
 import io.reactivex.Observable
+import org.librarysimplified.documents.DocumentStoreType
+import org.librarysimplified.documents.EULAType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
@@ -23,8 +24,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.documents.eula.EULAType
-import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.migration.api.Migrations
 import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.migration.spi.MigrationReport
@@ -113,16 +112,9 @@ class MainActivity :
   }
 
   private fun getAvailableEULA(): EULAType? {
-    val eulaOpt =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
-        .requireService(DocumentStoreType::class.java)
-        .eula
-
-    return if (eulaOpt is Some<EULAType>) {
-      eulaOpt.get()
-    } else {
-      null
-    }
+    return Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      .requireService(DocumentStoreType::class.java)
+      .eula
   }
 
   private fun doLoginAccount(

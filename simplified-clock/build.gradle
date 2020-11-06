@@ -1,6 +1,0 @@
-dependencies {
-  api libraries.jodaTime
-
-  implementation libraries.kotlinStdlib
-  implementation libraries.slf4j
-}

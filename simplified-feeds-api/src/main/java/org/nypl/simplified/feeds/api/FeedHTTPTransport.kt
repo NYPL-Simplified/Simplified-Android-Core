@@ -3,7 +3,6 @@ package org.nypl.simplified.feeds.api
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSFeedTransportException
 import org.nypl.simplified.opds.core.OPDSFeedTransportIOException
 import org.nypl.simplified.opds.core.OPDSFeedTransportType

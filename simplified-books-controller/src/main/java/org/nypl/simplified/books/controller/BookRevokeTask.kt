@@ -21,7 +21,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusRevokeErrorDetails
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionBadFeed
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionDeviceNotActivated
@@ -31,12 +30,11 @@ import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
+import org.nypl.simplified.feeds.api.FeedHTTPTransportException
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.feeds.api.FeedLoaderType
-import org.nypl.simplified.http.core.HTTPHasProblemReportType
-import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
@@ -45,7 +43,6 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
-import org.nypl.simplified.presentableerror.api.Presentables
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
@@ -82,22 +79,6 @@ class BookRevokeTask(
 
   private fun warn(message: String, vararg arguments: Any?) =
     this.logger.warn("[{}] $message", this.bookID.brief(), *arguments)
-
-  private fun errorDetailsFor(
-    message: String,
-    errorCode: String,
-    exception: Throwable? = null,
-    attributes: Map<String, String> = mapOf(),
-    problemReport: HTTPProblemReport? = null
-  ): BookStatusRevokeErrorDetails {
-    return BookStatusRevokeErrorDetails(
-      attributes = attributes,
-      errorCode = errorCode,
-      exception = exception,
-      message = message,
-      problemReport = problemReport
-    )
-  }
 
   private fun publishBookStatus(status: BookStatus) {
     val book =
@@ -316,8 +297,8 @@ class BookRevokeTask(
       throw e
     } catch (e: ExecutionException) {
       val ex = e.cause!!
-      if (e is HTTPHasProblemReportType) {
-        this.steps.addAttributes(Presentables.problemReportAsAttributes(e.problemReport))
+      if (ex is FeedHTTPTransportException) {
+        this.steps.addAttributesIfPresent(ex.report?.toMap())
       }
 
       val message = this.revokeStrings.revokeServerNotifyFeedTimedOut

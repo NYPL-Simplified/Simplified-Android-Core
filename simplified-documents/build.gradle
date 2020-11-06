@@ -1,13 +1,5 @@
 dependencies {
-  api project(":simplified-opds-core")
-
-  implementation project(":simplified-clock")
-  implementation project(":simplified-files")
-  implementation project(":simplified-http-core")
-  implementation project(":simplified-json-core")
-
-  implementation libraries.io7mJFunctional
-  implementation libraries.jacksonDatabind
+  implementation libraries.nyplHttpAPI
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j
 }

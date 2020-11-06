@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.audio
 
-import com.io7m.jfunctional.Option
 import com.io7m.junreachable.UnimplementedCodeException
 import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerResult
@@ -25,9 +24,6 @@ import org.librarysimplified.audiobook.parser.api.ParseError
 import org.librarysimplified.audiobook.parser.api.ParseResult
 import org.librarysimplified.audiobook.parser.api.ParseWarning
 import org.nypl.simplified.books.book_database.api.BookFormats
-import org.nypl.simplified.http.core.HTTP
-import org.nypl.simplified.http.core.HTTPProblemReport
-import org.nypl.simplified.http.core.HTTPProblemReportLogging
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -165,23 +161,53 @@ class AudioBookManifestStrategy(
     message: String,
     serverData: ManifestFulfillmentErrorType.ServerData?
   ): String {
-    return when (serverData) {
-      null ->
-        ""
-      else ->
-        if (serverData.receivedContentType == HTTP.HTTP_PROBLEM_REPORT_CONTENT_TYPE) {
-          val problemReport =
-            HTTPProblemReport.fromStream(serverData.receivedBody.inputStream())
-          HTTPProblemReportLogging.logError(
-            this.logger,
-            serverData.uri,
-            message,
-            serverData.code,
-            Option.some(problemReport)
-          )
-        } else {
-          "${serverData.uri}: ${serverData.code}"
+    return buildString {
+      this.append(message)
+      this.append('\n')
+
+      if (serverData != null) {
+        this.append("Server URI: ")
+        this.append(serverData.uri)
+        this.append('\n')
+
+        this.append("Server status: ")
+        this.append(serverData.code)
+        this.append('\n')
+
+        if (serverData.receivedContentType == "application/api-problem+json") {
+          val parser =
+            request.problemReportParsers.createParser(
+              uri = serverData.uri.toString(),
+              stream = serverData.receivedBody.inputStream()
+            )
+
+          try {
+            val report = parser.execute()
+            this.append("Status: ")
+            this.append(report.status)
+            this.append('\n')
+
+            this.append("Type: ")
+            this.append(report.type)
+            this.append('\n')
+
+            this.append("Title: ")
+            this.append(report.title)
+            this.append('\n')
+
+            this.append("Detail: ")
+            this.append(report.detail)
+            this.append('\n')
+
+            logger.error("status: {}", report.status)
+            logger.error("type:   {}", report.type)
+            logger.error("title:  {}", report.title)
+            logger.error("detail: {}", report.detail)
+          } catch (e: Exception) {
+            logger.error("unparseable problem report: ", e)
+          }
         }
+      }
     }
   }
 
