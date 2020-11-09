@@ -1,6 +1,9 @@
 package org.librarysimplified.documents.internal
 
 import android.content.res.AssetManager
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.ListeningExecutorService
 import org.librarysimplified.documents.DocumentConfiguration
 import org.librarysimplified.documents.DocumentConfigurationServiceType
 import org.librarysimplified.documents.DocumentStoreType
@@ -137,6 +140,31 @@ internal class DocumentStore private constructor(
         fileTmp = File(baseDirectory, config.name + ".tmp"),
         remoteURL = config.remoteURI.toURL()
       )
+    }
+  }
+
+  override fun update(executor: ListeningExecutorService): ListenableFuture<*> {
+    return Futures.allAsList(
+      listOf(
+        this.updateOne(executor, this.about),
+        this.updateOne(executor, this.acknowledgements),
+        this.updateOne(executor, this.eula),
+        this.updateOne(executor, this.licenses),
+        this.updateOne(executor, this.privacyPolicy)
+      )
+    )
+  }
+
+  private fun updateOne(
+    executor: ListeningExecutorService,
+    document: DocumentType?
+  ): ListenableFuture<*> {
+    return executor.submit {
+      try {
+        document?.update()
+      } catch (e: Throwable) {
+        logger.debug("unable to update document: ", e)
+      }
     }
   }
 }

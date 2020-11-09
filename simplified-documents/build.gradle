@@ -1,4 +1,6 @@
 dependencies {
+  api libraries.googleGuava
+
   implementation libraries.nyplHttpAPI
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

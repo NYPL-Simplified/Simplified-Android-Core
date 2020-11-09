@@ -1,5 +1,8 @@
 package org.librarysimplified.documents
 
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.ListeningExecutorService
+
 interface DocumentStoreType {
 
   /**
@@ -31,4 +34,10 @@ interface DocumentStoreType {
    */
 
   val licenses: DocumentType?
+
+  /**
+   * Run updates for all of the documents.
+   */
+
+  fun update(executor: ListeningExecutorService): ListenableFuture<*>
 }

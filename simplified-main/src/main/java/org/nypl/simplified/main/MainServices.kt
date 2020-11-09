@@ -1072,12 +1072,19 @@ internal object MainServices {
     directory: File
   ): DocumentStoreType {
     return if (configuration != null) {
-      DocumentStores.create(
-        assetManager = assets,
-        http = http,
-        baseDirectory = directory,
-        configuration = configuration
-      )
+      val exec =
+        NamedThreadPools.namedThreadPool(1, "documents", 19)
+
+      val store =
+        DocumentStores.create(
+          assetManager = assets,
+          http = http,
+          baseDirectory = directory,
+          configuration = configuration
+        )
+
+      store.update(exec).addListener(Runnable { exec.shutdown() }, exec)
+      store
     } else {
       DocumentStores.createEmpty()
     }
