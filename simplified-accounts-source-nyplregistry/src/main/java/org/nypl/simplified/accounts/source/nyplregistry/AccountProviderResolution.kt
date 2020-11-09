@@ -1,7 +1,5 @@
 package org.nypl.simplified.accounts.source.nyplregistry
 
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.Some
 import one.irradia.mime.api.MIMECompatibility
 import one.irradia.mime.api.MIMEType
 import org.joda.time.DateTime
@@ -405,14 +403,6 @@ class AccountProviderResolution(
           throw IOException(message)
         }
       }
-    }
-  }
-
-  private fun <T> someOrNull(option: OptionType<T>): T? {
-    return if (option is Some<T>) {
-      option.get()
-    } else {
-      null
     }
   }
 }
