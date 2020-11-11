@@ -619,19 +619,19 @@ internal object MainServices {
     }
 
     addService(
-      message = strings.bootingStrings("login"),
+      message = strings.bootingGeneral("login strings"),
       interfaceType = AccountLoginStringResourcesType::class.java,
       serviceConstructor = { MainLoginStringResources(context.resources) }
     )
 
     addService(
-      message = strings.bootingStrings("logout"),
+      message = strings.bootingGeneral("logout strings"),
       interfaceType = AccountLogoutStringResourcesType::class.java,
       serviceConstructor = { MainLogoutStringResources(context.resources) }
     )
 
     addService(
-      message = strings.bootingStrings("resolution"),
+      message = strings.bootingGeneral("account resolution strings"),
       interfaceType = AccountProviderResolutionStringsType::class.java,
       serviceConstructor = {
         AccountProviderSourceResolutionStrings(context.resources)
@@ -639,120 +639,120 @@ internal object MainServices {
     )
 
     addService(
-      message = strings.bootingStrings("account creation"),
+      message = strings.bootingGeneral("account creation strings"),
       interfaceType = ProfileAccountCreationStringResourcesType::class.java,
       serviceConstructor = { MainProfileAccountCreationStringResources(context.resources) }
     )
 
     addService(
-      message = strings.bootingStrings("account deletion"),
+      message = strings.bootingGeneral("account deletion strings"),
       interfaceType = ProfileAccountDeletionStringResourcesType::class.java,
       serviceConstructor = { MainProfileAccountDeletionStringResources(context.resources) }
     )
 
     addService(
-      message = strings.bootingStrings("book revocation"),
+      message = strings.bootingGeneral("book revocation strings"),
       interfaceType = BookRevokeStringResourcesType::class.java,
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) }
     )
 
     val lsHTTP =
       addService(
-        message = "Starting LSHTTP...",
+        message = strings.bootingGeneral("LSHTTP"),
         interfaceType = LSHTTPClientType::class.java,
         serviceConstructor = { MainHTTP.create(context) }
       )
 
-    publishEvent(strings.bootingDirectories)
+    publishEvent(strings.bootingGeneral("Directories"))
     val directories = this.initializeDirectories(context)
 
     val adobeConfiguration = this.findAdobeConfiguration(context.resources)
     val adobeDRM =
       addServiceOptionally(
-        message = strings.bootingAdobeDRM,
+        message = strings.bootingGeneral("Adobe DRM"),
         interfaceType = AdobeAdeptExecutorType::class.java,
         serviceConstructor = { AdobeDRMServices.newAdobeDRMOrNull(context, adobeConfiguration) }
       )
 
     val screenSize =
       addService(
-        message = strings.bootingScreenSize,
+        message = strings.bootingGeneral("screen size"),
         interfaceType = ScreenSizeInformationType::class.java,
         serviceConstructor = { ScreenSizeInformation(context.resources) }
       )
 
     addService(
-      message = strings.bootingUIThreadService,
+      message = strings.bootingGeneral("UI thread"),
       interfaceType = UIThreadServiceType::class.java,
       serviceConstructor = { MainUIThreadService() }
     )
 
     val bookRegistry =
       addService(
-        message = strings.bootingBookRegistry,
+        message = strings.bootingGeneral("book registry"),
         interfaceType = BookRegistryType::class.java,
         serviceConstructor = { BookRegistry.create() }
       )
     addService(
-      message = strings.bootingBookRegistry,
+      message = strings.bootingGeneral("book registry"),
       interfaceType = BookRegistryReadableType::class.java,
       serviceConstructor = { bookRegistry }
     )
 
     val tenPrint =
       addService(
-        message = strings.bootingTenPrint,
+        message = strings.bootingGeneral("10Print"),
         interfaceType = TenPrintGeneratorType::class.java,
         serviceConstructor = { TenPrintGenerator.newGenerator() }
       )
 
     val coverGenerator =
       addService(
-        message = strings.bootingCoverGenerator,
+        message = strings.bootingGeneral("cover generator"),
         interfaceType = BookCoverGeneratorType::class.java,
         serviceConstructor = { BookCoverGenerator(tenPrint) }
       )
 
     addService(
-      message = strings.bootingLocalImageLoader,
+      message = strings.bootingGeneral("local image loader"),
       interfaceType = ImageLoaderType::class.java,
       serviceConstructor = { this.createLocalImageLoader(context) }
     )
 
     addService(
-      message = strings.bootingHTTPServer,
+      message = strings.bootingGeneral("reader http server"),
       interfaceType = ReaderHTTPServerType::class.java,
       serviceConstructor = { this.createHTTPServer(assets) }
     )
 
     addService(
-      message = strings.bootingEPUBLoader,
+      message = strings.bootingGeneral("EPUB loader"),
       interfaceType = ReaderReadiumEPUBLoaderType::class.java,
       serviceConstructor = { this.createEPUBLoader(context, adobeConfiguration) }
     )
 
     addService(
-      message = strings.bootingBuildConfigurationService,
+      message = strings.bootingGeneral("build configuration service"),
       interfaceType = BuildConfigurationServiceType::class.java,
       serviceConstructor = { this.findBuildConfiguration() }
     )
 
     val contentResolver =
       addService(
-        message = "Starting content resolver...",
+        message = strings.bootingGeneral("content resolver"),
         interfaceType = ContentResolverType::class.java,
         serviceConstructor = { ContentResolverSane(context.contentResolver) }
       )
 
     addService(
-      message = "Starting borrow subtask directory...",
+      message = strings.bootingGeneral("borrow subtask directory"),
       interfaceType = BorrowSubtaskDirectoryType::class.java,
       serviceConstructor = { BorrowSubtasks.directory() }
     )
 
     val documentConfiguration =
       addServiceOptionally(
-        message = "Starting document configuration service...",
+        message = strings.bootingGeneral("document configuration service"),
         interfaceType = DocumentConfigurationServiceType::class.java,
         serviceConstructor = {
           this.optionalFromServiceLoader(DocumentConfigurationServiceType::class.java)
@@ -760,7 +760,7 @@ internal object MainServices {
       )
 
     addService(
-      message = strings.bootingDocumentStore,
+      message = strings.bootingGeneral("document store"),
       interfaceType = DocumentStoreType::class.java,
       serviceConstructor = {
         this.createDocumentStore(
@@ -773,7 +773,7 @@ internal object MainServices {
     )
 
     addServiceOptionally(
-      message = strings.bootingProfileModificationFragmentService,
+      message = strings.bootingGeneral("profile modification fragment service"),
       interfaceType = ProfileModificationFragmentServiceType::class.java,
       serviceConstructor = {
         this.optionalFromServiceLoader(ProfileModificationFragmentServiceType::class.java)
@@ -782,28 +782,28 @@ internal object MainServices {
 
     val accountProviderRegistry =
       addService(
-        message = strings.bootingAccountProviders,
+        message = strings.bootingGeneral("account providers"),
         interfaceType = AccountProviderRegistryType::class.java,
         serviceConstructor = { this.createAccountProviderRegistry(context, lsHTTP) }
       )
 
     val accountBundledCredentials =
       addService(
-        message = strings.bootingBundledCredentials,
+        message = strings.bootingGeneral("bundled credentials"),
         interfaceType = AccountBundledCredentialsType::class.java,
         serviceConstructor = { this.createAccountBundledCredentials(context) }
       )
 
     val accountCredentials =
       addService(
-        message = strings.bootingCredentialStore,
+        message = strings.bootingGeneral("credentials store"),
         interfaceType = AccountAuthenticationCredentialsStoreType::class.java,
         serviceConstructor = { this.createAccountAuthenticationCredentialsStore(directories) }
       )
 
     val analytics =
       addService(
-        message = strings.bootingAnalytics,
+        message = strings.bootingGeneral("analytics"),
         interfaceType = AnalyticsType::class.java,
         serviceConstructor = {
           Analytics.create(
@@ -820,7 +820,7 @@ internal object MainServices {
 
     val profilesDatabase =
       addService(
-        message = strings.bootingProfilesDatabase,
+        message = strings.bootingGeneral("profiles database"),
         interfaceType = ProfilesDatabaseType::class.java,
         serviceConstructor = {
           this.createProfileDatabase(
@@ -838,14 +838,14 @@ internal object MainServices {
 
     val bundledContent =
       addService(
-        message = strings.bootingBundledContent,
+        message = strings.bootingGeneral("bundled content"),
         interfaceType = BundledContentResolverType::class.java,
         serviceConstructor = { MainBundledContentResolver.create(context.assets) }
       )
 
     val opdsFeedParser =
       addService(
-        message = strings.bootingFeedParser,
+        message = strings.bootingGeneral("feed parser"),
         interfaceType = OPDSFeedParserType::class.java,
         serviceConstructor = {
           this.createFeedParser()
@@ -854,21 +854,21 @@ internal object MainServices {
 
     val feedbooksSecretService =
       addServiceOptionally(
-        message = strings.bootingFeedbooksSecretService,
+        message = strings.bootingGeneral("Feedbook secret service"),
         interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
         serviceConstructor = { MainFeedbooksSecretService.createConditionally(context) }
       )
 
     val overdriveSecretService =
       addServiceOptionally(
-        message = strings.bootingOverdriveSecretService,
+        message = strings.bootingGeneral("Overdrive secret service"),
         interfaceType = AudioBookOverdriveSecretServiceType::class.java,
         serviceConstructor = { MainOverdriveSecretService.createConditionally(context) }
       )
 
     val bookFormatService =
       addService(
-        message = strings.bootingBookFormatSupport,
+        message = strings.bootingGeneral("book format support"),
         interfaceType = BookFormatSupportType::class.java,
         serviceConstructor = {
           MainBookFormatSupport.createBookFormatSupport(
@@ -880,7 +880,7 @@ internal object MainServices {
       )
 
     addService(
-      message = strings.bootingFeedLoader,
+      message = strings.bootingGeneral("feed loader"),
       interfaceType = FeedLoaderType::class.java,
       serviceConstructor = {
         this.createFeedLoader(
@@ -895,44 +895,32 @@ internal object MainServices {
     )
 
     addService(
-      message = strings.bootingPatronProfileParsers,
+      message = strings.bootingGeneral("patron user profile parsers"),
       interfaceType = PatronUserProfileParsersType::class.java,
       serviceConstructor = { PatronUserProfileParsers() }
     )
 
     addService(
-      message = strings.bootingAuthenticationDocumentParsers,
+      message = strings.bootingGeneral("authentication document parsers"),
       interfaceType = AuthenticationDocumentParsersType::class.java,
       serviceConstructor = { AuthenticationDocumentParsers() }
     )
 
     val profileEvents = PublishSubject.create<ProfileEvent>()
     addService(
-      message = strings.bootingProfileTimer,
+      message = strings.bootingGeneral("profile idle timer"),
       interfaceType = ProfileIdleTimerType::class.java,
       serviceConstructor = { this.createProfileIdleTimer(profileEvents) }
     )
 
     addService(
-      message = strings.bootingAudioBookManifestStrategiesService,
+      message = strings.bootingGeneral("audio book manifest strategies"),
       interfaceType = AudioBookManifestStrategiesType::class.java,
       serviceConstructor = { return@addService AudioBookManifests }
     )
 
-    addServiceOptionally(
-      message = strings.bootingFeedbooksSecretService,
-      interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
-      serviceConstructor = { MainFeedbooksSecretService.createConditionally(context) }
-    )
-
-    addServiceOptionally(
-      message = strings.bootingOverdriveSecretService,
-      interfaceType = AudioBookOverdriveSecretServiceType::class.java,
-      serviceConstructor = { MainOverdriveSecretService.createConditionally(context) }
-    )
-
     val bookController = this.run {
-      publishEvent(strings.bootingBookController)
+      publishEvent(strings.bootingGeneral("books controller"))
       val execBooks =
         NamedThreadPools.namedThreadPool(1, "books", 19)
       val controller =
@@ -944,36 +932,36 @@ internal object MainServices {
           cacheDirectory = context.cacheDir
         )
       addService(
-        message = strings.bootingBookController,
+        message = strings.bootingGeneral("books controller"),
         interfaceType = ProfilesControllerType::class.java,
         serviceConstructor = { controller }
       )
       addService(
-        message = strings.bootingBookController,
+        message = strings.bootingGeneral("books controller"),
         interfaceType = BooksControllerType::class.java,
         serviceConstructor = { controller }
       )
       controller
     }
 
-    publishEvent(strings.bootingReaderBookmarkService)
+    publishEvent(strings.bootingGeneral("reader bookmark service"))
     val readerBookmarksService =
       this.createReaderBookmarksService(lsHTTP, bookController)
 
     addService(
-      message = strings.bootingReaderBookmarkService,
+      message = strings.bootingGeneral("reader bookmark service"),
       interfaceType = ReaderBookmarkServiceType::class.java,
       serviceConstructor = { readerBookmarksService }
     )
     addService(
-      message = strings.bootingReaderBookmarkService,
+      message = strings.bootingGeneral("reader bookmark service"),
       interfaceType = ReaderBookmarkServiceUsableType::class.java,
       serviceConstructor = { readerBookmarksService }
     )
 
     val badgeLookup =
       addService(
-        message = strings.bootingCoverBadgeProvider,
+        message = strings.bootingGeneral("book cover badge lookup"),
         interfaceType = BookCoverBadgeLookupType::class.java,
         serviceConstructor = {
           this.createBookCoverBadgeLookup(
@@ -984,7 +972,7 @@ internal object MainServices {
       )
 
     addService(
-      message = strings.bootingCoverProvider,
+      message = strings.bootingGeneral("book cover provider"),
       interfaceType = BookCoverProviderType::class.java,
       serviceConstructor = {
         this.createCoverProvider(
@@ -998,22 +986,16 @@ internal object MainServices {
     )
 
     addService(
-      message = strings.bootingScreenSize,
-      interfaceType = ScreenSizeInformationType::class.java,
-      serviceConstructor = { ScreenSizeInformation(context.resources) }
-    )
-
-    addService(
-      message = strings.bootingNetworkConnectivity,
+      message = strings.bootingGeneral("network connectivity service"),
       interfaceType = NetworkConnectivityType::class.java,
       serviceConstructor = { NetworkConnectivity.create(context) }
     )
 
-    publishEvent(strings.bootingBrandingServices)
+    publishEvent(strings.bootingGeneral("branding service"))
     val brandingThemeOverride = this.loadOptionalBrandingThemeOverride()
 
     addService(
-      message = strings.bootingThemeService,
+      message = strings.bootingGeneral("theme service"),
       interfaceType = ThemeServiceType::class.java,
       serviceConstructor = {
         ThemeService(
@@ -1024,7 +1006,7 @@ internal object MainServices {
 
     val idleTimerConfiguration =
       addService(
-        message = strings.bootingIdleTimerConfigurationService,
+        message = strings.bootingGeneral("idle timer configuration service"),
         interfaceType = ProfileIdleTimerConfigurationServiceType::class.java,
         serviceConstructor = { this.findIdleTimerConfiguration() }
       )
@@ -1034,7 +1016,7 @@ internal object MainServices {
     idleTimer.setMaximumIdleSeconds(idleTimerConfiguration.logOutAfterSeconds)
 
     addService(
-      message = strings.bootingNotificationsService,
+      message = strings.bootingGeneral("notifications service"),
       interfaceType = NotificationsService::class.java,
       serviceConstructor = {
         this.createNotificationsService(context, profileEvents, bookRegistry)
@@ -1042,15 +1024,7 @@ internal object MainServices {
     )
 
     addServiceOptionally(
-      message = strings.bootingAudioBookExtensions,
-      interfaceType = AudioBookFeedbooksSecretServiceType::class.java,
-      serviceConstructor = {
-        this.optionalFromServiceLoader(AudioBookFeedbooksSecretServiceType::class.java)
-      }
-    )
-
-    addServiceOptionally(
-      message = strings.bootingCardCreatorService,
+      message = strings.bootingGeneral("card creator service"),
       interfaceType = CardCreatorServiceType::class.java,
       serviceConstructor = { this.createCardCreatorService(context) }
     )

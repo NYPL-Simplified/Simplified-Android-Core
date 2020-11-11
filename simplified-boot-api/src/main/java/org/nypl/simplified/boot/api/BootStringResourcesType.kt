@@ -7,12 +7,6 @@ package org.nypl.simplified.boot.api
 interface BootStringResourcesType {
 
   /**
-   * Booting started.
-   */
-
-  val bootStarted: String
-
-  /**
    * The boot failed with a generic error message.
    */
 
