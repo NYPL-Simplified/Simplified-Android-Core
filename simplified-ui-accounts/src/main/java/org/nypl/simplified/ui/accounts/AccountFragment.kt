@@ -23,11 +23,11 @@ import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
-import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
+import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -50,8 +50,6 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
-import org.nypl.simplified.documents.eula.EULAType
-import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
@@ -314,9 +312,9 @@ class AccountFragment : Fragment() {
   }
 
   private fun determineEULAIsSatisfied(): Boolean {
-    val eulaOpt = this.documents.eula
-    return if (eulaOpt is Some<EULAType>) {
-      eulaOpt.get().eulaHasAgreed()
+    val eula = this.documents.eula
+    return if (eula != null) {
+      eula.hasAgreed
     } else {
       true
     }
@@ -415,13 +413,12 @@ class AccountFragment : Fragment() {
      * Only show a EULA checkbox if there's actually a EULA.
      */
 
-    val eulaOpt = this.documents.eula
-    if (eulaOpt is Some<EULAType>) {
-      val eula = eulaOpt.get()
+    val eula = this.documents.eula
+    if (eula != null) {
       this.eulaCheckbox.visibility = View.VISIBLE
-      this.eulaCheckbox.isChecked = eula.eulaHasAgreed()
+      this.eulaCheckbox.isChecked = eula.hasAgreed
       this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
-        eula.eulaSetHasAgreed(checked)
+        eula.hasAgreed = checked
         this.setLoginButtonStatus(this.determineLoginIsSatisfied())
       }
     } else {

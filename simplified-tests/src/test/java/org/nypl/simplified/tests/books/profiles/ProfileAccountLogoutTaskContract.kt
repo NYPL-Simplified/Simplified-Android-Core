@@ -1,9 +1,16 @@
 package org.nypl.simplified.tests.books.profiles
 
+import android.content.Context
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okio.Buffer
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.drm.core.AdobeAdeptConnectorType
 import org.nypl.drm.core.AdobeAdeptDeactivationReceiverType
@@ -30,33 +37,29 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.controller.ProfileAccountLogoutTask
-import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.http.core.HTTPResultType
 import org.nypl.simplified.patron.PatronUserProfileParsers
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.tests.MockAccountLogoutStringResources
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
-import java.io.ByteArrayInputStream
 import java.io.InputStream
-import java.net.URI
 import java.util.UUID
 
 abstract class ProfileAccountLogoutTaskContract {
 
-  private lateinit var adeptExecutor: AdobeAdeptExecutorType
-  private lateinit var adeptConnector: AdobeAdeptConnectorType
-  private lateinit var bookDatabase: BookDatabaseType
-  private lateinit var profileID: ProfileID
-  private lateinit var accountID: AccountID
-  private lateinit var bookRegistry: BookRegistryType
-  private lateinit var patronParsers: PatronUserProfileParsersType
-  private lateinit var logoutStrings: AccountLogoutStringResourcesType
   private lateinit var account: AccountType
+  private lateinit var accountID: AccountID
+  private lateinit var adeptConnector: AdobeAdeptConnectorType
+  private lateinit var adeptExecutor: AdobeAdeptExecutorType
+  private lateinit var bookDatabase: BookDatabaseType
+  private lateinit var bookRegistry: BookRegistryType
+  private lateinit var http: LSHTTPClientType
+  private lateinit var logoutStrings: AccountLogoutStringResourcesType
+  private lateinit var patronParsers: PatronUserProfileParsersType
   private lateinit var profile: ProfileReadableType
-  private lateinit var http: MockingHTTP
+  private lateinit var profileID: ProfileID
+  private lateinit var server: MockWebServer
 
   private var loginState: AccountLoginState? = null
 
@@ -64,7 +67,13 @@ abstract class ProfileAccountLogoutTaskContract {
 
   @Before
   fun testSetup() {
-    this.http = MockingHTTP()
+    this.http =
+      LSHTTPClients()
+        .create(
+          context = Mockito.mock(Context::class.java),
+          configuration = LSHTTPClientConfiguration("simplified-tests", "0.0.1")
+        )
+
     this.profile =
       Mockito.mock(ProfileReadableType::class.java)
     this.account =
@@ -86,10 +95,14 @@ abstract class ProfileAccountLogoutTaskContract {
       AccountID(UUID.randomUUID())
     this.profileID =
       ProfileID(UUID.randomUUID())
+
+    this.server = MockWebServer()
+    this.server.start()
   }
 
   @After
   fun testTearDown() {
+    this.server.close()
   }
 
   /**
@@ -265,7 +278,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
           vendorID = AdobeVendorID("OmniConsumerProducts"),
           clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-          deviceManagerURI = URI("https://example.com/devices"),
+          deviceManagerURI = this.server.url("patron").toUri(),
           postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
             deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
             userID = AdobeUserID("someone")
@@ -372,7 +385,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
           vendorID = AdobeVendorID("OmniConsumerProducts"),
           clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-          deviceManagerURI = URI("https://example.com/devices"),
+          deviceManagerURI = this.server.url("patron").toUri(),
           postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
             deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
             userID = AdobeUserID("someone")
@@ -420,7 +433,7 @@ abstract class ProfileAccountLogoutTaskContract {
       Mockito.mock(AccountProviderType::class.java)
 
     Mockito.`when`(provider.patronSettingsURI)
-      .thenReturn(URI.create("https://example.com/patron"))
+      .thenReturn(this.server.url("patron").toUri())
 
     Mockito.`when`(provider.authentication)
       .thenReturn(null)
@@ -454,28 +467,16 @@ abstract class ProfileAccountLogoutTaskContract {
       resource("/org/nypl/simplified/tests/patron/example-with-device.json")
         .readBytes()
 
-    this.http.addResponse(
-      URI.create("https://example.com/patron"),
-      HTTPResultOK(
-        "OK",
-        200,
-        ByteArrayInputStream(patron),
-        patron.size.toLong(),
-        mutableMapOf(),
-        0L
-      ) as HTTPResultType<InputStream>
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().write(patron))
     )
 
-    this.http.addResponse(
-      URI.create("https://example.com/devices"),
-      HTTPResultOK(
-        "OK",
-        200,
-        ByteArrayInputStream(ByteArray(0)),
-        0L,
-        mutableMapOf(),
-        0L
-      ) as HTTPResultType<InputStream>
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("")
     )
 
     /*
@@ -508,7 +509,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adobeCredentials = AccountAuthenticationAdobePreActivationCredentials(
           vendorID = AdobeVendorID("OmniConsumerProducts"),
           clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
-          deviceManagerURI = URI("https://example.com/devices"),
+          deviceManagerURI = this.server.url("patron").toUri(),
           postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
             deviceID = AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
             userID = AdobeUserID("someone")

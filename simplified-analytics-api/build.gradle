@@ -1,9 +1,9 @@
 dependencies {
   api project(":simplified-accounts-api")
-  api project(":simplified-http-core")
   api project(":simplified-opds-core")
 
   api libraries.jodaTime
+  api libraries.nyplHttpAPI
 
   implementation libraries.kotlinStdlib
   implementation libraries.slf4j

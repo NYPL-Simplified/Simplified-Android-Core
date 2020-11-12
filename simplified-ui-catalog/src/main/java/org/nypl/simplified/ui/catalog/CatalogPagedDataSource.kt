@@ -2,8 +2,7 @@ package org.nypl.simplified.ui.catalog
 
 import androidx.paging.PageKeyedDataSource
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
+import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.Feed
@@ -11,7 +10,6 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.futures.FluentFutureExtensions.map
-import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -50,20 +48,18 @@ class CatalogPagedDataSource(
     )
   }
 
-  private fun findAuthenticatedHTTP(): OptionType<HTTPAuthType> {
+  private fun findAuthenticatedHTTP(): LSHTTPAuthorizationType? {
     return when (val ownership = this.ownership) {
       is CatalogFeedOwnership.OwnedByAccount ->
-        Option.of(
-          this.profilesController.profileCurrent()
+        AccountAuthenticatedHTTP.createAuthorizationIfPresent(
+          profilesController.profileCurrent()
             .account(ownership.accountId)
             .loginState
             .credentials
-        ).map { credentials ->
-          AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials!!)
-        }
+        )
 
       is CatalogFeedOwnership.CollectedFromAccounts ->
-        Option.none()
+        null
     }
   }
 

@@ -21,13 +21,8 @@ class AccountProviderSourceFileBased(
   private val getFile: (Context) -> InputStream
 ) : AccountProviderSourceType {
 
-  private val logger = LoggerFactory.getLogger(AccountProviderSourceFileBased::class.java)
-
-  /**
-   * Secondary no-argument public constructor required for [java.util.ServiceLoader].
-   */
-
-  constructor() : this({ context -> context.assets.open("Accounts.json") })
+  private val logger =
+    LoggerFactory.getLogger(AccountProviderSourceFileBased::class.java)
 
   @Volatile
   private var cache: Map<URI, AccountProviderType>? = null

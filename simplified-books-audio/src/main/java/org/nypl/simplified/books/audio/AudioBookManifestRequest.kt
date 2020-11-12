@@ -9,6 +9,7 @@ import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
 import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsers
 import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsersType
 import org.librarysimplified.audiobook.manifest_parser.extension_spi.ManifestParserExtensionType
+import org.librarysimplified.http.api.LSHTTPProblemReportParserFactoryType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import java.io.File
 import java.net.URI
@@ -103,5 +104,13 @@ data class AudioBookManifestRequest(
    * The directory in which to store cache files.
    */
 
-  val cacheDirectory: File
+  val cacheDirectory: File,
+
+  /**
+   * A factory of problem report parsers.
+   */
+
+  val problemReportParsers: LSHTTPProblemReportParserFactoryType =
+    ServiceLoader.load(LSHTTPProblemReportParserFactoryType::class.java)
+      .first()
 )

@@ -2,7 +2,6 @@ package org.nypl.simplified.tests.books
 
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.Option
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -44,7 +43,7 @@ abstract class FeedLoaderContract {
       loader.fetchURI(
         AccountID(UUID.randomUUID()),
         resource("feed-no-usable-acquisitions.xml"),
-        Option.none()
+        null
       )
     val result =
       future.get()
@@ -66,7 +65,7 @@ abstract class FeedLoaderContract {
       loader.fetchURI(
         AccountID(UUID.randomUUID()),
         resource("feed-only-buy-acquisitions.xml"),
-        Option.none()
+        null
       )
     val result =
       future.get()

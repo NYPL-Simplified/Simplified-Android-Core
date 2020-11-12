@@ -1,54 +1,10 @@
 package org.nypl.simplified.presentableerror.api
 
-import org.nypl.simplified.http.core.HTTPProblemReport
-
 /**
  * Functions over presentable values.
  */
 
 object Presentables {
-
-  /**
-   * Merge the given problem report as a set of attributes into the existing attributes.
-   */
-
-  fun mergeProblemReport(
-    map: Map<String, String>,
-    problemReport: HTTPProblemReport
-  ): Map<String, String> {
-    return mergeAttributes(map, problemReportAsAttributes(problemReport))
-  }
-
-  /**
-   * Merge the given problem report as a set of attributes into the existing attributes.
-   */
-
-  fun problemReportAsAttributes(
-    problemReport: HTTPProblemReport?
-  ): Map<String, String> {
-    return when (problemReport) {
-      null -> mapOf()
-      else -> {
-        val attributes = mutableMapOf<String, String>()
-        attributes["HTTP problem detail"] = problemReport.problemDetail ?: ""
-        attributes["HTTP problem status"] = problemReport.problemStatus.toString()
-        attributes["HTTP problem title"] = problemReport.problemTitle ?: ""
-        attributes["HTTP problem type"] = problemReport.problemType.toString()
-        attributes.toMap()
-      }
-    }
-  }
-
-  /**
-   * Merge the given problem report as a set of attributes into the existing attributes.
-   */
-
-  fun mergeProblemReportOptional(
-    map: Map<String, String>,
-    problemReport: HTTPProblemReport?
-  ): Map<String, String> {
-    return problemReport?.let { report -> mergeProblemReport(map, report) } ?: map
-  }
 
   /**
    * Merge all of the attributes of `map0` into `map`, making names unique as necessary.

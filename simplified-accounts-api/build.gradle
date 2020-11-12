@@ -9,8 +9,8 @@ dependencies {
   api libraries.jacksonDatabind
   api libraries.jodaTime
   api libraries.nyplDRMCore
+  api libraries.nyplHttpAPI
 
-  implementation project(':simplified-http-core')
   implementation project(':simplified-opds-core')
 
   implementation libraries.kotlinStdlib

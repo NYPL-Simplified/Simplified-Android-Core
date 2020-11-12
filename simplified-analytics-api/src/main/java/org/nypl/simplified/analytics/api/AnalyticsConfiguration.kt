@@ -1,7 +1,7 @@
 package org.nypl.simplified.analytics.api
 
 import android.content.Context
-import org.nypl.simplified.http.core.HTTPType
+import org.librarysimplified.http.api.LSHTTPClientType
 
 /**
  * General configuration for analytics systems.
@@ -19,5 +19,5 @@ data class AnalyticsConfiguration(
    * The HTTP interface used for analytics requests, if necessary.
    */
 
-  val http: HTTPType
+  val http: LSHTTPClientType
 )

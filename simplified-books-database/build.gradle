@@ -3,7 +3,6 @@ dependencies {
   api project(":simplified-books-database-api")
 
   implementation project(':simplified-files')
-  implementation project(':simplified-http-core')
   implementation project(':simplified-opds-core')
   implementation project(':simplified-json-core')
 

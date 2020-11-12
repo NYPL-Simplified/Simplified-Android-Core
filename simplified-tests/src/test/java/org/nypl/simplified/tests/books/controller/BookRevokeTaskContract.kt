@@ -1,22 +1,29 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.Context
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
 import com.io7m.jfunctional.Option
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okio.Buffer
 import one.irradia.mime.api.MIMEType
 import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Instant
 import org.junit.After
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.mockito.internal.verification.Times
 import org.nypl.simplified.accounts.api.AccountID
@@ -47,7 +54,6 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
@@ -60,13 +66,12 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.tests.MockCrashingFeedLoader
 import org.nypl.simplified.tests.MockRevokeStringResources
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.InputStream
 import java.net.URI
 import java.util.ArrayList
 import java.util.Collections
@@ -101,14 +106,21 @@ abstract class BookRevokeTaskContract {
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var http: MockingHTTP
+  private lateinit var http: LSHTTPClientType
+  private lateinit var server: MockWebServer
 
   private val bookRevokeStrings = MockRevokeStringResources()
 
   @Before
   @Throws(Exception::class)
   fun setUp() {
-    this.http = MockingHTTP()
+    this.http =
+      LSHTTPClients()
+        .create(
+          context = Mockito.mock(Context::class.java),
+          configuration = LSHTTPClientConfiguration("simplified-tests", "1.0.0")
+        )
+
     this.executorBooks = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorTimer = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
@@ -125,6 +137,9 @@ abstract class BookRevokeTaskContract {
     this.cacheDirectory.mkdirs()
     this.feedLoader = this.createFeedLoader(this.executorFeeds)
     this.clock = { Instant.now() }
+
+    this.server = MockWebServer()
+    this.server.start()
   }
 
   @After
@@ -133,6 +148,7 @@ abstract class BookRevokeTaskContract {
     this.executorBooks.shutdown()
     this.executorFeeds.shutdown()
     this.executorTimer.shutdown()
+    this.server.close()
   }
 
   private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
@@ -143,18 +159,22 @@ abstract class BookRevokeTaskContract {
     val searchParser =
       OPDSSearchParser.newParser()
     val transport =
-      FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport(this.http)
 
-    return FeedLoader.create(
-      bookFormatSupport = this.bookFormatSupport,
-      bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent,
-      contentResolver = this.contentResolver,
-      exec = executorFeeds,
-      parser = parser,
-      searchParser = searchParser,
-      transport = transport
-    )
+    val feedLoader =
+      FeedLoader.create(
+        bookFormatSupport = this.bookFormatSupport,
+        bookRegistry = this.bookRegistry,
+        bundledContent = this.bundledContent,
+        contentResolver = this.contentResolver,
+        exec = executorFeeds,
+        parser = parser,
+        searchParser = searchParser,
+        transport = transport
+      )
+
+    feedLoader.showOnlySupportedBooks = false
+    return feedLoader
   }
 
   /**
@@ -227,9 +247,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -306,16 +328,18 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals(
+    assertEquals(
       "I/O error",
       result.steps.last().resolution.exception!!.message
     )
-    Assert.assertEquals(
+    assertEquals(
       BookStatus.FailedRevoke::class.java,
       this.bookRegistry.bookOrException(bookId).status.javaClass
     )
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -356,7 +380,8 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals("I/O error", result.steps.last().resolution.exception!!.message)
+    assertEquals("I/O error", result.steps.last().resolution.exception!!.message)
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -387,7 +412,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -419,32 +444,28 @@ abstract class BookRevokeTaskContract {
         throw IOException("I/O error")
       }
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>436974f2-03ac-4023-8618-84291c6795b7</id>
+  <title>436974f2-03ac-4023-8618-84291c6795b7</title>
+  <updated>2020-01-01T00:00:00Z</updated>
 
-    val feed =
-      Feed.empty(
-        feedID = "x",
-        feedSearch = null,
-        feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"),
-        feedFacets = listOf(),
-        feedFacetGroups = mapOf()
-      )
-
-    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+  <entry>
+    <id>15626ed2-ecd7-43ec-8de2-0eb9be2f8c6a</id>
+    <title>Open-Access</title>
+    <summary type="html"/>
+    <updated>2020-01-01T00:00:00Z</updated>
+    <published>2020-01-01T00:00:00Z</published>
+    <link href="https://example.com/Open-Access" type="application/epub+zip" rel="http://opds-spec.org/acquisition/open-access"/>
+  </entry>
+</feed>
+          """.trimIndent()
+        )
+    )
 
     val task =
       BookRevokeTask(
@@ -460,9 +481,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals("I/O error", result.steps.last().resolution.exception!!.message)
+    assertEquals("I/O error", result.steps.last().resolution.exception!!.message)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -493,12 +516,10 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
-
-    val opdsEntry =
-      opdsEntryBuilder.build()
+    val opdsEntry = opdsEntryBuilder.build()
 
     this.logBookEventsFor(bookId)
 
@@ -521,32 +542,28 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>436974f2-03ac-4023-8618-84291c6795b7</id>
+  <title>436974f2-03ac-4023-8618-84291c6795b7</title>
+  <updated>2020-01-01T00:00:00Z</updated>
 
-    val feed =
-      Feed.empty(
-        feedID = "x",
-        feedSearch = null,
-        feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"),
-        feedFacets = listOf(),
-        feedFacetGroups = mapOf()
-      )
-
-    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+  <entry>
+    <id>15626ed2-ecd7-43ec-8de2-0eb9be2f8c6a</id>
+    <title>Open-Access</title>
+    <summary type="html"/>
+    <updated>2020-01-01T00:00:00Z</updated>
+    <published>2020-01-01T00:00:00Z</published>
+    <link href="https://example.com/Open-Access" type="application/epub+zip" rel="http://opds-spec.org/acquisition/open-access"/>
+  </entry>
+</feed>
+          """.trimIndent()
+        )
+    )
 
     val task =
       BookRevokeTask(
@@ -554,7 +571,7 @@ abstract class BookRevokeTaskContract {
         adobeDRM = null,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
-        feedLoader = feedLoader,
+        feedLoader = this.feedLoader,
         revokeStrings = this.bookRevokeStrings
       )
 
@@ -562,9 +579,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -597,7 +616,7 @@ abstract class BookRevokeTaskContract {
         DateTime.now(),
         OPDSAvailabilityHeldReady.get(
           Option.none(),
-          Option.some(URI("http://www.example.com/revoke/0"))
+          Option.some(this.server.url("revoke").toUri())
         )
       )
     opdsEntryBuilder.addAcquisition(acquisition)
@@ -626,32 +645,39 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>436974f2-03ac-4023-8618-84291c6795b7</id>
+  <title>436974f2-03ac-4023-8618-84291c6795b7</title>
+  <updated>2020-01-01T00:00:00Z</updated>
 
-    val feed =
-      Feed.empty(
-        feedID = "x",
-        feedSearch = null,
-        feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"),
-        feedFacets = listOf(),
-        feedFacetGroups = mapOf()
-      )
-
-    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+  <entry>
+    <id>15626ed2-ecd7-43ec-8de2-0eb9be2f8c6a</id>
+    <title>Open-Access</title>
+    <summary type="html"/>
+    <updated>2020-01-01T00:00:00Z</updated>
+    <published>2020-01-01T00:00:00Z</published>
+    <link href="http://example.com/HeldReady"
+          type="application/atom+xml;relation=entry;profile=opds-catalog"
+          rel="http://opds-spec.org/acquisition/borrow">
+      <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+        <opds:indirectAcquisition type="application/epub+zip"/>
+      </opds:indirectAcquisition>
+      <opds:availability
+        status="ready"
+        since="2020-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="0" total="1"/>
+    </link>
+  </entry>
+</feed>
+          """.trimIndent()
+        )
+    )
 
     val task =
       BookRevokeTask(
@@ -659,7 +685,7 @@ abstract class BookRevokeTaskContract {
         adobeDRM = null,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
-        feedLoader = feedLoader,
+        feedLoader = this.feedLoader,
         revokeStrings = this.bookRevokeStrings
       )
 
@@ -667,9 +693,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -748,9 +776,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -785,7 +815,7 @@ abstract class BookRevokeTaskContract {
           Option.none(),
           Option.none(),
           Option.none(),
-          Option.some(URI("http://www.example.com/revoke/0"))
+          Option.some(this.server.url("revoke").toUri())
         )
       )
     opdsEntryBuilder.addAcquisition(acquisition)
@@ -814,32 +844,39 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>436974f2-03ac-4023-8618-84291c6795b7</id>
+  <title>436974f2-03ac-4023-8618-84291c6795b7</title>
+  <updated>2020-01-01T00:00:00Z</updated>
 
-    val feed =
-      Feed.empty(
-        feedID = "x",
-        feedSearch = null,
-        feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"),
-        feedFacets = listOf(),
-        feedFacetGroups = mapOf()
-      )
-
-    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+  <entry>
+    <id>15626ed2-ecd7-43ec-8de2-0eb9be2f8c6a</id>
+    <title>Open-Access</title>
+    <summary type="html"/>
+    <updated>2020-01-01T00:00:00Z</updated>
+    <published>2020-01-01T00:00:00Z</published>
+    <link href="http://example.com/Held-Indefinite"
+          type="application/atom+xml;relation=entry;profile=opds-catalog"
+          rel="http://opds-spec.org/acquisition">
+      <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+        <opds:indirectAcquisition type="application/epub+zip"/>
+      </opds:indirectAcquisition>
+      <opds:availability
+        status="reserved"
+        since="2000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="0" total="1"/>
+    </link>
+  </entry>
+</feed>
+          """.trimIndent()
+        )
+    )
 
     val task =
       BookRevokeTask(
@@ -855,9 +892,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -962,9 +1001,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -998,7 +1039,7 @@ abstract class BookRevokeTaskContract {
         OPDSAvailabilityLoaned.get(
           Option.none(),
           Option.none(),
-          Option.some(URI("http://www.example.com/revoke/0"))
+          Option.some(this.server.url("revoke").toUri())
         )
       )
     opdsEntryBuilder.addAcquisition(acquisition)
@@ -1027,32 +1068,40 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>436974f2-03ac-4023-8618-84291c6795b7</id>
+  <title>436974f2-03ac-4023-8618-84291c6795b7</title>
+  <updated>2020-01-01T00:00:00Z</updated>
 
-    val feed =
-      Feed.empty(
-        feedID = "x",
-        feedSearch = null,
-        feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"),
-        feedFacets = listOf(),
-        feedFacetGroups = mapOf()
-      )
-
-    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+  <entry>
+    <id>15626ed2-ecd7-43ec-8de2-0eb9be2f8c6a</id>
+    <title>Open-Access</title>
+    <summary type="html"/>
+    <updated>2020-01-01T00:00:00Z</updated>
+    <published>2020-01-01T00:00:00Z</published>
+    <link
+        href="https://example.com/borrow"
+        type="application/atom+xml;relation=entry;profile=opds-catalog"
+        rel="http://opds-spec.org/acquisition">
+      <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+        <opds:indirectAcquisition type="application/epub+zip"/>
+      </opds:indirectAcquisition>
+      <opds:availability
+          status="available"
+          since="2000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
+  </entry>
+</feed>
+          """.trimIndent()
+        )
+    )
 
     val task =
       BookRevokeTask(
@@ -1068,9 +1117,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -1150,9 +1201,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -1183,7 +1236,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityRevoked.get(URI("http://www.example.com/revoke/0"))
+        OPDSAvailabilityRevoked.get(this.server.url("revoke").toUri())
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1211,32 +1264,40 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>436974f2-03ac-4023-8618-84291c6795b7</id>
+  <title>436974f2-03ac-4023-8618-84291c6795b7</title>
+  <updated>2020-01-01T00:00:00Z</updated>
 
-    val feed =
-      Feed.empty(
-        feedID = "x",
-        feedSearch = null,
-        feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"),
-        feedFacets = listOf(),
-        feedFacetGroups = mapOf()
-      )
-
-    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+  <entry>
+    <id>15626ed2-ecd7-43ec-8de2-0eb9be2f8c6a</id>
+    <title>Open-Access</title>
+    <summary type="html"/>
+    <updated>2020-01-01T00:00:00Z</updated>
+    <published>2020-01-01T00:00:00Z</published>
+    <link
+        href="https://example.com/borrow"
+        type="application/atom+xml;relation=entry;profile=opds-catalog"
+        rel="http://opds-spec.org/acquisition">
+      <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+        <opds:indirectAcquisition type="application/epub+zip"/>
+      </opds:indirectAcquisition>
+      <opds:availability
+          status="available"
+          since="2000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
+  </entry>
+</feed>
+          """.trimIndent()
+        )
+    )
 
     val task =
       BookRevokeTask(
@@ -1252,9 +1313,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -1285,7 +1348,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1354,7 +1417,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals(
+    assertEquals(
       BookStatus.FailedRevoke::class.java,
       this.bookRegistry.bookOrException(bookId).status.javaClass
     )
@@ -1390,7 +1453,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1452,7 +1515,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals(
+    assertEquals(
       BookStatus.FailedRevoke::class.java,
       this.bookRegistry.bookOrException(bookId).status.javaClass
     )
@@ -1488,7 +1551,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1543,7 +1606,7 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals(
+    assertEquals(
       BookStatus.FailedRevoke::class.java,
       this.bookRegistry.bookOrException(bookId).status.javaClass
     )
@@ -1581,7 +1644,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1609,17 +1672,7 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
+    this.feedLoader = MockCrashingFeedLoader()
 
     val task =
       BookRevokeTask(
@@ -1636,16 +1689,18 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals(
+    assertEquals(
       BookStatus.FailedRevoke::class.java,
       this.bookRegistry.bookOrException(bookId).status.javaClass
     )
-    Assert.assertEquals(
-      UniqueException::class.java,
+    assertEquals(
+      IOException::class.java,
       result.steps.last().resolution.exception!!.javaClass
     )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
+
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -1666,7 +1721,7 @@ abstract class BookRevokeTaskContract {
     val acquisition =
       OPDSAcquisition(
         OPDSAcquisition.Relation.ACQUISITION_BORROW,
-        URI.create("http://www.example.com/0.feed"),
+        this.server.url("0.feed").toUri(),
         this.mimeOf("application/epub+zip"),
         listOf()
       )
@@ -1676,7 +1731,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -1704,80 +1759,34 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.book)
       .thenReturn(book)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
-
-    /*
-     * Do the tedious work necessary to produce a feed with groups.
-     */
-
-    val feedBuilder =
-      OPDSAcquisitionFeed.newBuilder(
-        URI.create("http://www.example.com/0.feed"),
-        "x",
-        DateTime.now(),
-        "Title"
-      )
-
-    val feedEntryBuilder =
-      OPDSAcquisitionFeedEntry
-        .newBuilder(
-          "x",
-          "Title",
-          DateTime.now(),
-          OPDSAvailabilityOpenAccess.get(Option.none())
-        )
-
-    feedEntryBuilder.addGroup(URI.create("group"), "group")
-
-    val feedEntry =
-      feedEntryBuilder
-        .build()
-
-    feedBuilder.addEntry(feedEntry)
-
-    val rawFeed =
-      feedBuilder.build()
-    val feed =
-      Feed.fromAcquisitionFeed(
-        accountId = account.id,
-        feed = rawFeed,
-        filter = { true },
-        search = null
-      ) as Feed.FeedWithGroups
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
-
     val task =
       BookRevokeTask(
         account = account,
         adobeDRM = null,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
-        feedLoader = feedLoader,
+        feedLoader = this.feedLoader,
         revokeStrings = this.bookRevokeStrings
       )
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.resource("/org/nypl/simplified/tests/opds/acquisition-groups-0.xml"))
+    )
 
     val result = task.call()
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals(
+    assertEquals(
       BookStatus.FailedRevoke::class.java,
       this.bookRegistry.bookOrException(bookId).status.javaClass
     )
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -1863,12 +1872,14 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals(
+    assertEquals(
       BookStatus.FailedRevoke::class.java,
       this.bookRegistry.bookOrException(bookId).status.javaClass
     )
-    Assert.assertEquals("notRevocable", result.lastErrorCode)
+    assertEquals("notRevocable", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
+
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -1954,12 +1965,14 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
 
     result as TaskResult.Failure
-    Assert.assertEquals(
+    assertEquals(
       BookStatus.FailedRevoke::class.java,
       this.bookRegistry.bookOrException(bookId).status.javaClass
     )
-    Assert.assertEquals("notRevocable", result.lastErrorCode)
+    assertEquals("notRevocable", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
+
+    assertEquals(0, this.server.requestCount)
   }
 
   /**
@@ -2001,7 +2014,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -2031,32 +2044,28 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.findPreferredFormatHandle())
       .thenReturn(bookDatabaseFormatHandle)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>436974f2-03ac-4023-8618-84291c6795b7</id>
+  <title>436974f2-03ac-4023-8618-84291c6795b7</title>
+  <updated>2020-01-01T00:00:00Z</updated>
 
-    val feed =
-      Feed.empty(
-        feedID = "x",
-        feedSearch = null,
-        feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"),
-        feedFacets = listOf(),
-        feedFacetGroups = mapOf()
-      )
-
-    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+  <entry>
+    <id>15626ed2-ecd7-43ec-8de2-0eb9be2f8c6a</id>
+    <title>Open-Access</title>
+    <summary type="html"/>
+    <updated>2020-01-01T00:00:00Z</updated>
+    <published>2020-01-01T00:00:00Z</published>
+    <link href="https://example.com/Open-Access" type="application/audiobook+json" rel="http://opds-spec.org/acquisition/open-access"/>
+  </entry>
+</feed>
+          """.trimIndent()
+        )
+    )
 
     val task =
       BookRevokeTask(
@@ -2072,9 +2081,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -2116,7 +2127,7 @@ abstract class BookRevokeTaskContract {
         "a",
         "Title",
         DateTime.now(),
-        OPDSAvailabilityOpenAccess.get(Option.some(URI("http://www.example.com/revoke/0")))
+        OPDSAvailabilityOpenAccess.get(Option.some(this.server.url("revoke").toUri()))
       )
     opdsEntryBuilder.addAcquisition(acquisition)
 
@@ -2146,32 +2157,28 @@ abstract class BookRevokeTaskContract {
     Mockito.`when`(bookDatabaseEntry.findPreferredFormatHandle())
       .thenReturn(bookDatabaseFormatHandle)
 
-    val feedLoader =
-      Mockito.mock(FeedLoaderType::class.java)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>436974f2-03ac-4023-8618-84291c6795b7</id>
+  <title>436974f2-03ac-4023-8618-84291c6795b7</title>
+  <updated>2020-01-01T00:00:00Z</updated>
 
-    val feed =
-      Feed.empty(
-        feedID = "x",
-        feedSearch = null,
-        feedTitle = "Title",
-        feedURI = URI("http://www.example.com/0.feed"),
-        feedFacets = listOf(),
-        feedFacetGroups = mapOf()
-      )
-
-    feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(account.id, opdsEntry))
-
-    val feedResult =
-      FeedLoaderResult.FeedLoaderSuccess(feed)
-
-    Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
-      )
-    ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
+  <entry>
+    <id>15626ed2-ecd7-43ec-8de2-0eb9be2f8c6a</id>
+    <title>Open-Access</title>
+    <summary type="html"/>
+    <updated>2020-01-01T00:00:00Z</updated>
+    <published>2020-01-01T00:00:00Z</published>
+    <link href="https://example.com/Open-Access" type="application/pdf" rel="http://opds-spec.org/acquisition/open-access"/>
+  </entry>
+</feed>
+          """.trimIndent()
+        )
+    )
 
     val task =
       BookRevokeTask(
@@ -2187,9 +2194,11 @@ abstract class BookRevokeTaskContract {
     TaskDumps.dump(this.logger, result)
     result as TaskResult.Success
 
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
+
+    assertEquals(1, this.server.requestCount)
   }
 
   private fun <T> anyNonNull(): T =
@@ -2203,24 +2212,10 @@ abstract class BookRevokeTaskContract {
     }
   }
 
-  private fun resource(file: String): InputStream? {
-    return BookRevokeTaskContract::class.java.getResourceAsStream(file)
-  }
-
-  @Throws(IOException::class)
-  private fun resourceSize(file: String): Long {
-    var total = 0L
-    val buffer = ByteArray(8192)
-    this.resource(file)?.use { stream ->
-      while (true) {
-        val r = stream.read(buffer)
-        if (r <= 0) {
-          break
-        }
-        total += r.toLong()
-      }
-    }
-    return total
+  private fun resource(file: String): Buffer {
+    val buffer = Buffer()
+    buffer.readFrom(BookRevokeTaskContract::class.java.getResourceAsStream(file)!!)
+    return buffer
   }
 
   private fun mimeOf(name: String): MIMEType {
