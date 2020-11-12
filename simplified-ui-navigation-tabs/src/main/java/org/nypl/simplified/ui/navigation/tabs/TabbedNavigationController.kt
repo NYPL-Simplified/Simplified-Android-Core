@@ -186,7 +186,7 @@ class TabbedNavigationController private constructor(
       val account = this.pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFeedArguments.CatalogFeedArgumentsRemote(
         ownership = CatalogFeedOwnership.OwnedByAccount(account.id),
-        feedURI = account.provider.catalogURIForAge(age),
+        feedURI = account.catalogURIForAge(age),
         isSearchResults = false,
         title = context.getString(R.string.tabCatalog)
       )

@@ -38,5 +38,6 @@
   <string name="accountsDetails">Details</string>
   <string name="accountSyncBookmarks">Sync bookmarks</string>
   <string name="accountUserName">User Name</string>
+  <string name="accountCustomOPDS">Custom OPDS Feed URL</string>
   <string name="currentlyBrowsing">You\'re currently browsing</string>
 </resources>

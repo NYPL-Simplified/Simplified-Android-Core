@@ -16,6 +16,17 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 
+  <ImageView
+    android:id="@+id/accountCellBadge"
+    android:layout_width="24dp"
+    android:layout_height="24dp"
+    android:layout_marginEnd="4dp"
+    android:layout_marginBottom="4dp"
+    android:src="@drawable/custom_opds"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="@id/accountCellIcon"
+    app:layout_constraintEnd_toEndOf="@id/accountCellIcon" />
+
   <TextView
     android:id="@+id/accountCellTitle"
     android:layout_width="0dp"

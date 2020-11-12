@@ -36,7 +36,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -330,7 +330,8 @@ class CatalogFragmentFeed : Fragment() {
           // No reload necessary
         }
       }
-      else -> {}
+      else -> {
+      }
     }
   }
 
@@ -340,14 +341,17 @@ class CatalogFragmentFeed : Fragment() {
         val feedState = this.feedModel.feedState()
         when (val ownership = feedState.arguments.ownership) {
           is OwnedByAccount -> {
-            val provider = this.profilesController.profileCurrent()
-              .account(ownership.accountId)
-              .provider
-            onAgeUpdateSuccess(provider, ownership, event)
-          } else -> {}
+            val account =
+              this.profilesController.profileCurrent()
+                .account(ownership.accountId)
+            onAgeUpdateSuccess(account, ownership, event)
+          }
+          else -> {
+          }
         }
       }
-      else -> {}
+      else -> {
+      }
     }
   }
 
@@ -465,7 +469,7 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun onAgeUpdateSuccess(
-    provider: AccountProviderType,
+    account: AccountReadableType,
     ownership: OwnedByAccount,
     result: ProfileUpdated.Succeeded
   ) {
@@ -478,7 +482,7 @@ class CatalogFragmentFeed : Fragment() {
       val newParameters = CatalogFeedArgumentsRemote(
         title = this.parameters.title,
         ownership = ownership,
-        feedURI = provider.catalogURIForAge(age),
+        feedURI = account.catalogURIForAge(age),
         isSearchResults = false
       )
       this.uiThread.runOnUIThread { this.feedModel.reloadFeed(newParameters) }
