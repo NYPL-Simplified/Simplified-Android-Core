@@ -134,7 +134,10 @@ class AccountsDatabase private constructor(
         this.bookDatabases.openDatabase(this.context, accountId, booksDir)
 
       val preferences =
-        AccountPreferences(false)
+        AccountPreferences(
+          bookmarkSyncingPermitted = false,
+          catalogURIOverride = null
+        )
 
       val accountDescription =
         AccountDescription.builder(accountProvider, preferences)
@@ -199,7 +202,7 @@ class AccountsDatabase private constructor(
     }
   }
 
-  private class Account internal constructor(
+  private class Account(
     override val id: AccountID,
     override val directory: File,
     override val bookDatabase: BookDatabaseType,
@@ -256,6 +259,14 @@ class AccountsDatabase private constructor(
           modifiedDescription
         }
       )
+    }
+
+    override fun catalogURIForAge(age: Int): URI {
+      val catalogURIOverride = this.preferences.catalogURIOverride
+      if (catalogURIOverride != null) {
+        return catalogURIOverride
+      }
+      return this.provider.catalogURIForAge(age)
     }
 
     override val provider: AccountProviderType

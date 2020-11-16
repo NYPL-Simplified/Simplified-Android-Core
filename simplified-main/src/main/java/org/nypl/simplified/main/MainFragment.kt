@@ -262,7 +262,7 @@ class MainFragment : Fragment() {
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
             title = account.provider.displayName,
             ownership = CatalogFeedOwnership.OwnedByAccount(id),
-            feedURI = account.provider.catalogURIForAge(age),
+            feedURI = account.catalogURIForAge(age),
             isSearchResults = false
           )
         )

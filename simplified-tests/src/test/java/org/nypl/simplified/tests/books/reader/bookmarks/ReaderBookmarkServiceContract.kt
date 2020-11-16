@@ -171,7 +171,10 @@ abstract class ReaderBookmarkServiceContract {
       .thenReturn(this.server.url("patron").toUri())
 
     val accountPreferences =
-      AccountPreferences(bookmarkSyncingPermitted = true)
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = null
+      )
 
     val account =
       Mockito.mock(AccountType::class.java)
@@ -347,7 +350,10 @@ abstract class ReaderBookmarkServiceContract {
       .thenReturn(this.server.url("patron").toUri())
 
     val accountPreferences =
-      AccountPreferences(bookmarkSyncingPermitted = true)
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = null
+      )
 
     val account =
       Mockito.mock(AccountType::class.java)
@@ -549,7 +555,10 @@ abstract class ReaderBookmarkServiceContract {
       .thenReturn(this.server.url("patron").toUri())
 
     val accountPreferences =
-      AccountPreferences(bookmarkSyncingPermitted = true)
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = null
+      )
 
     val account =
       Mockito.mock(AccountType::class.java)

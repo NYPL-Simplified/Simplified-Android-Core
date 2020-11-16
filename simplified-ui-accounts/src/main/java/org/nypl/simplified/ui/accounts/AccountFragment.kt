@@ -85,6 +85,8 @@ class AccountFragment : Fragment() {
   private val logger = LoggerFactory.getLogger(AccountFragment::class.java)
 
   private lateinit var account: AccountType
+  private lateinit var accountCustomOPDS: ViewGroup
+  private lateinit var accountCustomOPDSField: TextView
   private lateinit var accountIcon: ImageView
   private lateinit var accountSubtitle: TextView
   private lateinit var accountTitle: TextView
@@ -247,6 +249,11 @@ class AccountFragment : Fragment() {
       layout.findViewById(R.id.accountCardCreatorLabel)
     this.settingsCardCreator =
       layout.findViewById(R.id.accountCardCreator)
+
+    this.accountCustomOPDS =
+      layout.findViewById(R.id.accountCustomOPDS)
+    this.accountCustomOPDSField =
+      this.accountCustomOPDS.findViewById(R.id.accountCustomOPDSField)
 
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginProgress.visibility = View.INVISIBLE
@@ -479,6 +486,19 @@ class AccountFragment : Fragment() {
      */
 
     this.authenticationAlternativesMake()
+
+    /*
+     * Show/hide the custom OPDS feed section.
+     */
+
+    val catalogURIOverride = this.account.preferences.catalogURIOverride
+    this.accountCustomOPDSField.text = catalogURIOverride?.toString() ?: ""
+    this.accountCustomOPDS.visibility =
+      if (catalogURIOverride != null) {
+        View.VISIBLE
+      } else {
+        View.GONE
+      }
 
     this.accountSubscription =
       this.profilesController.accountEvents()

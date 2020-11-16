@@ -66,6 +66,14 @@ class MockAccount(override val id: AccountID) : AccountType {
     this.accountProviderCurrent = accountProvider
   }
 
+  override fun catalogURIForAge(age: Int): URI {
+    val catalogURIOverride = this.preferences.catalogURIOverride
+    if (catalogURIOverride != null) {
+      return catalogURIOverride
+    }
+    return this.accountProviderCurrent.catalogURIForAge(age)
+  }
+
   override val directory: File
     get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
 
@@ -83,5 +91,8 @@ class MockAccount(override val id: AccountID) : AccountType {
     get() = this.loginStateMutable
 
   override val preferences: AccountPreferences
-    get() = AccountPreferences(bookmarkSyncingPermitted = true)
+    get() = AccountPreferences(
+      bookmarkSyncingPermitted = true,
+      catalogURIOverride = null
+    )
 }
