@@ -112,21 +112,11 @@ publishing {
     }
 }
 
-signing {
+if (!disableSigning) {
+  apply plugin: "signing"
+
+  signing {
     useGpgCmd()
     sign publishing.publications.basicJar
-}
-
-tasks.withType(Sign) { task ->
-    def isSnapshot = version.endsWith("SNAPSHOT")
-
-    // Sign release versions only; not snapshots
-    onlyIf {
-        if (isSnapshot) {
-            logger.warn("$POM_NAME: '$version' is a snapshot version; artifacts will not be signed")
-        } else {
-            logger.info("$POM_NAME: '$version' is a release version; artifacts will be signed")
-        }
-        return !isSnapshot
-    }
+  }
 }

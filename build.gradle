@@ -73,6 +73,14 @@ ext {
     useNYPLNexusDepend = true
   }
 
+  if (project.hasProperty("org.librarysimplified.no_signing")) {
+    disableSigning = true
+    logger.warn("org.librarysimplified.no_signing is set: We will not sign artifacts")
+  } else {
+    disableSigning = false
+    logger.warn("org.librarysimplified.no_signing is not set: We will attempt to sign artifacts")
+  }
+
   nyplAudioBookAPIVersion = "6.1.0"
   nyplR2Version = "0.0.5"
   nyplHTTPVersion = "0.0.17-SNAPSHOT"
@@ -299,6 +307,14 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     maven { url "https://jitpack.io" }
     jcenter()
   }
+}
+
+/**
+ * An empty task called by CI. We don't do semantic versioning analysis here yet.
+ */
+
+task verifySemanticVersioning {
+
 }
 
 // Configure publishing for appropriate projects
