@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -52,8 +53,8 @@ class SettingsFragmentDebug : PreferenceFragmentCompat() {
   override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
     this.setPreferencesFromResource(R.xml.settings_debug, rootKey)
 
-    // Do not use SharedPreferences as a data store; instead, we'll handle each
-    // preference's data individually.
+    // Do not use the shared preference data store; instead, we're using the
+    // preference views and manually handling data storage.
     this.preferenceManager.preferenceDataStore = NoOpSettingsDataStore()
 
     this.showErrorPage = this.findPreference("pref_key_show_error_page")!!
@@ -79,42 +80,38 @@ class SettingsFragmentDebug : PreferenceFragmentCompat() {
 
     /** Listen for updates from our view models */
 
-    this.profileViewModel.profileEvents.observe(this.viewLifecycleOwner,
-      Observer { event ->
-        when (event) {
-          is Succeeded -> {
-            val old = event.oldDescription.preferences
-            val new = event.newDescription.preferences
+    this.profileViewModel.profileEvents.observe(this.viewLifecycleOwner, { event ->
+      when (event) {
+        is Succeeded -> {
+          val old = event.oldDescription.preferences
+          val new = event.newDescription.preferences
 
-            // Reset the account registry if the 'showTestingLibraries'
-            // preference has changed.
-            if (old.showTestingLibraries != new.showTestingLibraries) {
-              // this.accountRegistry.clear()
-              // this.accountRegistry.refresh(
-              //   includeTestingLibraries = new.showTestingLibraries
-              // )
-              TODO()
-            }
+          // Reset the account registry if the 'showTestingLibraries'
+          // preference has changed.
+          if (old.showTestingLibraries != new.showTestingLibraries) {
+            // this.accountRegistry.clear()
+            // this.accountRegistry.refresh(
+            //   includeTestingLibraries = new.showTestingLibraries
+            // )
+            TODO()
           }
         }
-      })
-    this.profileViewModel.profilePreferences.observe(this.viewLifecycleOwner,
-      Observer {
-        it?.let { newPreferences ->
-          this.showLibrarySelection.isChecked = !newPreferences.hasSeenLibrarySelectionScreen
-          this.showTestingLibraries.isChecked = newPreferences.showTestingLibraries
-          this.enableR2.isChecked = newPreferences.useExperimentalR2
-        }
-      })
-    this.settingsViewModel.cacheDir.observe(this.viewLifecycleOwner,
-      Observer { newFile ->
-        this.cacheLocation.summary = newFile.absolutePath
       }
+    })
+    this.profileViewModel.profilePreferences.observe(this.viewLifecycleOwner, { newPreferences ->
+      newPreferences?.let {
+        this.showLibrarySelection.isChecked = !newPreferences.hasSeenLibrarySelectionScreen
+        this.showTestingLibraries.isChecked = newPreferences.showTestingLibraries
+        this.enableR2.isChecked = newPreferences.useExperimentalR2
+      }
+    })
+    this.settingsViewModel.cacheDir.observe(this.viewLifecycleOwner, { newFile ->
+      this.cacheLocation.summary = newFile.absolutePath
+    }
     )
-    this.settingsViewModel.cacheSize.observe(this.viewLifecycleOwner,
-      Observer { newSize ->
-        this.cacheSize.summary = Formatter.formatFileSize(requireContext(), newSize)
-      })
+    this.settingsViewModel.cacheSize.observe(this.viewLifecycleOwner, { newSize ->
+      this.cacheSize.summary = Formatter.formatFileSize(requireContext(), newSize)
+    })
 
     /** Handle user interactions */
 
