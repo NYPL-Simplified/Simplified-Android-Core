@@ -63,8 +63,8 @@ class TabbedNavigationController private constructor(
 
   private val logger = LoggerFactory.getLogger(TabbedNavigationController::class.java)
 
-  private val infoStream = this.navigator.infoStream().subscribe {
-    this.logger.debug(it.toString())
+  private val infoStream = this.navigator.infoStream().subscribe { action ->
+    this.logger.debug(action.toString())
     this.listener?.onBackStackChanged()
   }
 
@@ -348,15 +348,6 @@ class TabbedNavigationController private constructor(
   }
 
   override fun backStackSize(): Int {
-    this.logger.debug(
-      "stack size: current={}, catalog={}, books={}, holds={}, settings={}, profile={}",
-      this.navigator.currentStackSize(),
-      this.navigator.stackSize(R.id.tabCatalog),
-      this.navigator.stackSize(R.id.tabBooks),
-      this.navigator.stackSize(R.id.tabHolds),
-      this.navigator.stackSize(R.id.tabSettings),
-      this.navigator.stackSize(R.id.tabProfile)
-    )
     return this.navigator.currentStackSize()
   }
 

@@ -327,6 +327,13 @@ class CatalogFragmentFeed : Fragment() {
     inflater.inflate(R.menu.catalog, menu)
   }
 
+  override fun onPrepareOptionsMenu(menu: Menu) {
+    super.onPrepareOptionsMenu(menu)
+
+    // Necessary to reconfigure the Toolbar here due to the "Switch Account" action.
+    this.configureToolbar()
+  }
+
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       R.id.catalogMenuActionSearch -> {

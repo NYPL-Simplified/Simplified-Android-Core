@@ -350,8 +350,10 @@ class MainActivity : AppCompatActivity(),
 
   override fun onBackStackChanged() {
     this.navigationController?.let { controller ->
-      this.logger.debug("controller stack size changed [{}]", controller.backStackSize())
       val isRoot = (1 == controller.backStackSize())
+      this.logger.debug(
+        "controller stack size changed [{}, isRoot={}]", controller.backStackSize(), isRoot
+      )
       this.supportActionBar?.apply {
         setHomeAsUpIndicator(null)
         setHomeActionContentDescription(null)
