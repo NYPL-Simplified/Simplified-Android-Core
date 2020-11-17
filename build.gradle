@@ -1,8 +1,4 @@
 buildscript {
-  if ("$gradle.gradleVersion" != "6.3") {
-    throw new GradleException("Gradle version 6.3 is required (received $gradle.gradleVersion)")
-  }
-
   // https://github.com/gradle/gradle/issues/11308#issuecomment-554317655
   if (System.properties['org.gradle.internal.publish.checksums.insecure'] != 'true') {
     throw new GradleException("org.gradle.internal.publish.checksums.insecure must be 'true'")
@@ -18,7 +14,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.6.3'
+    classpath 'com.android.tools.build:gradle:4.1.1'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
     classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.1"
