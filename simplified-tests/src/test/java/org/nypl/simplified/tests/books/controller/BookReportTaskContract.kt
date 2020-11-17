@@ -1,9 +1,17 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.Context
 import com.io7m.jfunctional.Option
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.DateTime
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
@@ -13,17 +21,31 @@ import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.controller.BookReportTask
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.http.core.HTTPResultType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
-import org.nypl.simplified.tests.http.MockingHTTP
-import java.io.ByteArrayInputStream
-import java.io.InputStream
-import java.net.URI
 
 abstract class BookReportTaskContract {
+
+  private lateinit var http: LSHTTPClientType
+  private lateinit var server: MockWebServer
+
+  @Before
+  fun setup() {
+    this.http =
+      LSHTTPClients()
+        .create(
+          context = Mockito.mock(Context::class.java),
+          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+        )
+
+    this.server = MockWebServer()
+    this.server.start()
+  }
+
+  @After
+  fun tearDown() {
+    this.server.close()
+  }
 
   /**
    * A feed entry that has no issues URI causes the task to give up.
@@ -31,8 +53,6 @@ abstract class BookReportTaskContract {
 
   @Test
   fun testWithFeedEntryMissingURI() {
-    val http = MockingHTTP()
-
     val account = Mockito.mock(AccountType::class.java)
     Mockito.`when`(account.id)
       .thenReturn(AccountID.generate())
@@ -58,18 +78,13 @@ abstract class BookReportTaskContract {
 
   @Test
   fun testWithFeedEntryWithoutCredentials() {
-    val http = MockingHTTP()
-    val issuesURI = URI.create("http://www.example.com/issues/")
-    http.addResponse(
-      uri = issuesURI,
-      result = HTTPResultOK(
-        "OK",
-        200,
-        ByteArrayInputStream(ByteArray(0)),
-        0L,
-        mutableMapOf(),
-        0L
-      ) as HTTPResultType<InputStream>
+    val issuesURI =
+      this.server.url("issues").toUri()
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("")
     )
 
     val account =
@@ -95,10 +110,9 @@ abstract class BookReportTaskContract {
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 
-    Assert.assertTrue(
-      "Responses have been consumed",
-      http.responsesNow()[issuesURI]!!.isEmpty()
-    )
+    val req0 = this.server.takeRequest()
+    Assert.assertEquals(this.server.url("issues"), req0.requestUrl)
+    Assert.assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -107,18 +121,13 @@ abstract class BookReportTaskContract {
 
   @Test
   fun testWithFeedEntryWithCredentials() {
-    val http = MockingHTTP()
-    val issuesURI = URI.create("http://www.example.com/issues/")
-    http.addResponse(
-      uri = issuesURI,
-      result = HTTPResultOK(
-        "OK",
-        200,
-        ByteArrayInputStream(ByteArray(0)),
-        0L,
-        mutableMapOf(),
-        0L
-      ) as HTTPResultType<InputStream>
+    val issuesURI =
+      this.server.url("issues").toUri()
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("")
     )
 
     val account =
@@ -153,10 +162,9 @@ abstract class BookReportTaskContract {
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 
-    Assert.assertTrue(
-      "Responses have been consumed",
-      http.responsesNow()[issuesURI]!!.isEmpty()
-    )
+    val req0 = this.server.takeRequest()
+    Assert.assertEquals(this.server.url("issues"), req0.requestUrl)
+    Assert.assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -165,19 +173,13 @@ abstract class BookReportTaskContract {
 
   @Test
   fun testWithFeedEntryIssuesFailure() {
-    val http = MockingHTTP()
-    val issuesURI = URI.create("http://www.example.com/issues/")
-    http.addResponse(
-      uri = issuesURI,
-      result = HTTPResultError<InputStream>(
-        400,
-        "UH OH",
-        0L,
-        mutableMapOf(),
-        0L,
-        ByteArrayInputStream(ByteArray(0)),
-        Option.none()
-      ) as HTTPResultType<InputStream>
+    val issuesURI =
+      this.server.url("issues").toUri()
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(400)
+        .setBody("")
     )
 
     val account =
@@ -212,9 +214,8 @@ abstract class BookReportTaskContract {
     val task = BookReportTask(http, account, feedEntry, "someType")
     task.call()
 
-    Assert.assertTrue(
-      "Responses have been consumed",
-      http.responsesNow()[issuesURI]!!.isEmpty()
-    )
+    val req0 = this.server.takeRequest()
+    Assert.assertEquals(this.server.url("issues"), req0.requestUrl)
+    Assert.assertEquals(1, this.server.requestCount)
   }
 }

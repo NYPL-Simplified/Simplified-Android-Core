@@ -2,8 +2,6 @@ package org.nypl.simplified.viewer.epub.readium1;
 
 import android.content.res.AssetManager;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.koushikdutta.async.AsyncServer;
@@ -16,8 +14,6 @@ import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
-import org.nypl.simplified.http.core.HTTPRangeType;
-import org.nypl.simplified.http.core.HTTPRanges;
 import org.readium.sdk.android.ManifestItem;
 import org.readium.sdk.android.Package;
 import org.readium.sdk.android.util.ResourceInputStream;
@@ -154,8 +150,8 @@ public final class ReaderHTTPServerAAsync
        * Determine if the current request is a range request.
        */
 
-      final OptionType<HTTPRangeType> range_opt =
-        this.getRangeRequestType(request.getHeaders());
+      final boolean is_range =
+        this.isRangeRequest(request.getHeaders());
 
       /**
        * Guess the mime type.
@@ -251,7 +247,6 @@ public final class ReaderHTTPServerAAsync
            */
 
           final InputStream response_stream;
-          final boolean is_range = range_opt.isSome();
 
           synchronized (read_lock) {
             final ResourceInputStream stream = NullCheck.notNull(
@@ -288,14 +283,8 @@ public final class ReaderHTTPServerAAsync
     }
   }
 
-  private OptionType<HTTPRangeType> getRangeRequestType(final Headers headers)
-  {
-    if (headers.get("range") != null) {
-      final String range_text = NullCheck.notNull(headers.get("range"));
-      return HTTPRanges.fromRangeString(range_text);
-    } else {
-      return Option.none();
-    }
+  private boolean isRangeRequest(Headers headers) {
+    return headers.get("range") != null;
   }
 
   private void setPackage(final Package p)

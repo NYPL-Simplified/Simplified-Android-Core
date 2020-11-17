@@ -6,7 +6,7 @@ import com.io7m.jnull.NullCheck;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.nypl.simplified.http.core.URIQueryBuilder;
+import org.librarysimplified.http.uri_builder.LSHTTPURIQueryBuilder;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
 import org.nypl.simplified.tenprint.TenPrintInput;
 import org.nypl.simplified.tenprint.TenPrintInputBuilderType;
@@ -104,7 +104,10 @@ public final class BookCoverGenerator implements BookCoverGeneratorType
     final SortedMap<String, String> params = new TreeMap<String, String>();
     params.put("title", NullCheck.notNull(title));
     params.put("author", NullCheck.notNull(author));
-    return URIQueryBuilder.encodeQuery(
-      NullCheck.notNull(URI.create("generated-cover://localhost/")), params);
+
+    return LSHTTPURIQueryBuilder.INSTANCE.encodeQuery(
+      URI.create("generated-cover://localhost/"),
+      params
+    );
   }
 }

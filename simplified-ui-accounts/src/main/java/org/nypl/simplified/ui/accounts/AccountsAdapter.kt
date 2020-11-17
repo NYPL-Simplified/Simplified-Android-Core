@@ -42,6 +42,17 @@ class AccountsAdapter(
   ) {
     val account = this.accounts[position]
 
+    /*
+     * If there's a custom catalog URI, then display a badge on the account.
+     */
+
+    holder.accountBadge.visibility =
+      if (account.preferences.catalogURIOverride != null) {
+        View.VISIBLE
+      } else {
+        View.GONE
+      }
+
     holder.accountIcon.setImageDrawable(null)
     holder.accountTitleView.text = account.provider.displayName
     holder.accountSubtitleView.text = account.provider.subtitle
@@ -68,5 +79,7 @@ class AccountsAdapter(
       parent.findViewById<TextView>(R.id.accountCellTitle)
     val accountSubtitleView =
       parent.findViewById<TextView>(R.id.accountCellSubtitle)
+    val accountBadge =
+      parent.findViewById<ImageView>(R.id.accountCellBadge)
   }
 }

@@ -1,9 +1,8 @@
 package org.nypl.simplified.feeds.api
 
 import com.google.common.util.concurrent.FluentFuture
-import com.io7m.jfunctional.OptionType
+import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.http.core.HTTPAuthType
 import java.net.URI
 
 /**
@@ -31,7 +30,7 @@ interface FeedLoaderType {
   fun fetchURI(
     account: AccountID,
     uri: URI,
-    auth: OptionType<HTTPAuthType>
+    auth: LSHTTPAuthorizationType?
   ): FluentFuture<FeedLoaderResult>
 
   /**
@@ -48,7 +47,7 @@ interface FeedLoaderType {
   fun fetchURIRefreshing(
     account: AccountID,
     uri: URI,
-    auth: OptionType<HTTPAuthType>,
+    auth: LSHTTPAuthorizationType?,
     method: String
   ): FluentFuture<FeedLoaderResult>
 
@@ -67,7 +66,7 @@ interface FeedLoaderType {
   fun fetchURIWithBookRegistryEntries(
     account: AccountID,
     uri: URI,
-    auth: OptionType<HTTPAuthType>
+    auth: LSHTTPAuthorizationType?
   ): FluentFuture<FeedLoaderResult>
 
   /**

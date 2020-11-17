@@ -105,6 +105,8 @@ class ProfileAccountCreateCustomOPDSTask(
     return when (createResult) {
       is TaskResult.Success<AccountType> -> {
         this.taskRecorder.addAll(createResult.steps)
+        val account = createResult.result
+        account.setPreferences(account.preferences.copy(catalogURIOverride = this.opdsURI))
         this.publishProgressEvent(this.taskRecorder.currentStepSucceeded(this.strings.creatingAccountSucceeded))
         this.taskRecorder.finishSuccess(createResult.result)
       }

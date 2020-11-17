@@ -2,10 +2,11 @@ package org.nypl.simplified.viewer.audiobook
 
 import android.app.Activity
 import one.irradia.mime.api.MIMEType
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.formats.api.StandardFormatNames
-import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.nypl.simplified.viewer.spi.ViewerProviderType
 import org.slf4j.LoggerFactory
@@ -52,6 +53,9 @@ class AudioBookViewer : ViewerProviderType {
       format as BookFormat.BookFormatAudioBook
     val manifest =
       formatAudio.manifest!!
+    val httpClient =
+      Services.serviceDirectory()
+        .requireService(LSHTTPClientType::class.java)
 
     val params =
       AudioBookPlayerParameters(
@@ -61,7 +65,7 @@ class AudioBookViewer : ViewerProviderType {
         manifestFile = manifest.manifestFile,
         manifestURI = manifest.manifestURI,
         opdsEntry = book.entry,
-        userAgent = HTTP.userAgent()
+        userAgent = httpClient.userAgent()
       )
 
     AudioBookPlayerActivity.startActivity(activity, params)

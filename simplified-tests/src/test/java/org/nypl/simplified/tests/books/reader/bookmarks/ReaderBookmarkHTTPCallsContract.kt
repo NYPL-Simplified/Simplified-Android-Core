@@ -1,41 +1,44 @@
 package org.nypl.simplified.tests.books.reader.bookmarks
 
+import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
+import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
-import org.nypl.simplified.http.core.HTTPAuthType
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.http.core.HTTPResultType
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotation
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationBodyNode
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationSelectorNode
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationTargetNode
-import java.io.ByteArrayInputStream
 import java.io.IOException
-import java.io.InputStream
-import java.net.URI
 
 abstract class ReaderBookmarkHTTPCallsContract {
+
+  private lateinit var http: LSHTTPClientType
+  private lateinit var server: MockWebServer
 
   @JvmField
   @Rule
   val expectedException = ExpectedException.none()
 
-  private fun checkGetSyncing(expected: Boolean, serverResponseText: String) {
+  private fun checkGetSyncing(
+    expected: Boolean,
+    serverResponseText: String
+  ) {
     val objectMapper = ObjectMapper()
-    val http = JSONParsingHTTP(objectMapper)
-    val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
+    val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
     val credentials =
       AccountAuthenticationCredentials.Basic(
@@ -46,9 +49,14 @@ abstract class ReaderBookmarkHTTPCallsContract {
       )
 
     val targetURI =
-      URI.create("https://example.com/me/")
+      this.server.url("me").toUri()
 
-    http.responses[targetURI] = this.httpOKOfData(objectMapper, serverResponseText)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(serverResponseText)
+    )
+
     val enabled0 = calls.syncingIsEnabled(targetURI, credentials)
     Assert.assertEquals(expected, enabled0)
   }
@@ -58,8 +66,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
     serverResponseText: String
   ) {
     val objectMapper = ObjectMapper()
-    val http = JSONParsingHTTP(objectMapper)
-    val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
+    val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
     val credentials =
       AccountAuthenticationCredentials.Basic(
@@ -70,94 +77,34 @@ abstract class ReaderBookmarkHTTPCallsContract {
       )
 
     val targetURI =
-      URI.create("https://example.com/annotations/")
+      this.server.url("annotations").toUri()
 
-    http.responses[targetURI] = this.httpOKOfData(objectMapper, serverResponseText)
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(serverResponseText)
+    )
+
     val receivedBookmarks = calls.bookmarksGet(targetURI, credentials)
     Assert.assertEquals(expectedBookmarks, receivedBookmarks)
   }
 
-  private fun httpOKOfData(
-    objectMapper: ObjectMapper,
-    jsonText: String
-  ): HTTPResultType<InputStream> {
-    val node = objectMapper.readTree(jsonText)
-    val data = objectMapper.writeValueAsBytes(node)
-    val stream = ByteArrayInputStream(data)
-    return HTTPResultOK(
-      "OK",
-      200,
-      stream,
-      data.size.toLong(),
-      mutableMapOf(),
-      0L
-    )
+  @Before
+  fun setup() {
+    this.http =
+      LSHTTPClients()
+        .create(
+          context = Mockito.mock(Context::class.java),
+          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+        )
+
+    this.server = MockWebServer()
+    this.server.start()
   }
 
-  class JSONParsingHTTP(private val objectMapper: ObjectMapper) : HTTPType {
-
-    lateinit var mostRecentlyParsed: ObjectNode
-
-    val responses: MutableMap<URI, HTTPResultType<*>> = mutableMapOf()
-
-    override fun get(
-      auth: OptionType<HTTPAuthType>,
-      uri: URI,
-      offset: Long
-    ): HTTPResultType<InputStream> {
-      return (this.responses[uri] as HTTPResultType<InputStream>)
-    }
-
-    override fun get(
-      auth: OptionType<HTTPAuthType>?,
-      uri: URI?,
-      offset: Long,
-      noCache: Boolean?
-    ): HTTPResultType<InputStream> {
-      return (this.responses[uri] as HTTPResultType<InputStream>)
-    }
-
-    override fun put(
-      auth: OptionType<HTTPAuthType>,
-      uri: URI
-    ): HTTPResultType<InputStream> {
-      return (this.responses[uri] as HTTPResultType<InputStream>)
-    }
-
-    override fun put(
-      auth: OptionType<HTTPAuthType>,
-      uri: URI,
-      data: ByteArray,
-      content_type: String
-    ): HTTPResultType<InputStream> {
-      this.mostRecentlyParsed = this.objectMapper.readTree(data) as ObjectNode
-      return (this.responses[uri] as HTTPResultType<InputStream>)
-    }
-
-    override fun post(
-      auth: OptionType<HTTPAuthType>,
-      uri: URI,
-      data: ByteArray,
-      content_type: String
-    ): HTTPResultType<InputStream> {
-      this.mostRecentlyParsed = this.objectMapper.readTree(data) as ObjectNode
-      return (this.responses[uri] as HTTPResultType<InputStream>)
-    }
-
-    override fun delete(
-      auth: OptionType<HTTPAuthType>,
-      uri: URI,
-      content_type: String
-    ): HTTPResultType<InputStream> {
-      return (this.responses[uri] as HTTPResultType<InputStream>)
-    }
-
-    override fun head(
-      auth: OptionType<HTTPAuthType>,
-      uri: URI
-    ): HTTPResultType<InputStream> {
-      return (this.responses[uri] as HTTPResultType<InputStream>)
-    }
+  @After
+  fun tearDown() {
+    this.server.close()
   }
 
   @Test
@@ -338,8 +285,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
   @Test
   fun testGetSyncingFailure0() {
     val objectMapper = ObjectMapper()
-    val http = JSONParsingHTTP(objectMapper)
-    val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
+    val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
     val credentials =
       AccountAuthenticationCredentials.Basic(
@@ -349,19 +295,11 @@ abstract class ReaderBookmarkHTTPCallsContract {
         authenticationDescription = null
       )
 
-    val targetURI =
-      URI.create("https://example.com/me/")
-
-    http.responses[targetURI] =
-      HTTPResultError<InputStream>(
-        401,
-        "UNAUTHORIZED",
-        0L,
-        mutableMapOf(),
-        0L,
-        ByteArrayInputStream(ByteArray(1)),
-        Option.none()
-      )
+    val targetURI = this.server.url("me").toUri()
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(401)
+    )
 
     this.expectedException.expect(IOException::class.java)
     calls.syncingIsEnabled(targetURI, credentials)
@@ -370,8 +308,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
   @Test
   fun testGetBookmarksFailure0() {
     val objectMapper = ObjectMapper()
-    val http = JSONParsingHTTP(objectMapper)
-    val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
+    val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
     val credentials =
       AccountAuthenticationCredentials.Basic(
@@ -381,19 +318,11 @@ abstract class ReaderBookmarkHTTPCallsContract {
         authenticationDescription = null
       )
 
-    val targetURI =
-      URI.create("https://example.com/annotations/")
-
-    http.responses[targetURI] =
-      HTTPResultError<InputStream>(
-        401,
-        "UNAUTHORIZED",
-        0L,
-        mutableMapOf(),
-        0L,
-        ByteArrayInputStream(ByteArray(1)),
-        Option.none()
-      )
+    val targetURI = this.server.url("annotations").toUri()
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(401)
+    )
 
     this.expectedException.expect(IOException::class.java)
     calls.bookmarksGet(targetURI, credentials)
@@ -402,8 +331,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
   @Test
   fun testAddBookmarksFailure0() {
     val objectMapper = ObjectMapper()
-    val http = JSONParsingHTTP(objectMapper)
-    val calls = ReaderBookmarkHTTPCalls(objectMapper, http)
+    val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
     val credentials =
       AccountAuthenticationCredentials.Basic(
@@ -413,19 +341,11 @@ abstract class ReaderBookmarkHTTPCallsContract {
         authenticationDescription = null
       )
 
-    val targetURI =
-      URI.create("https://example.com/annotations/")
-
-    http.responses[targetURI] =
-      HTTPResultError<InputStream>(
-        401,
-        "UNAUTHORIZED",
-        0L,
-        mutableMapOf(),
-        0L,
-        ByteArrayInputStream(ByteArray(1)),
-        Option.none()
-      )
+    val targetURI = this.server.url("annotations").toUri()
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(401)
+    )
 
     this.expectedException.expect(IOException::class.java)
     calls.bookmarkAdd(targetURI, credentials, this.bookmark0)

@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import java.io.File
+import java.net.URI
 
 /**
  * The read-only interface exposed by accounts.
@@ -13,6 +14,17 @@ import java.io.File
  */
 
 interface AccountReadableType {
+
+  /**
+   * Determine the correct catalog URI to use for readers of a given age. This is analogous
+   * to [AccountProviderType.catalogURIForAge] except that it also considers the
+   * [AccountPreferences.catalogURIOverride] value if it is present.
+   *
+   * @param age The age of the reader
+   * @return The correct catalog URI for the given age
+   */
+
+  fun catalogURIForAge(age: Int): URI
 
   /**
    * @return The account ID

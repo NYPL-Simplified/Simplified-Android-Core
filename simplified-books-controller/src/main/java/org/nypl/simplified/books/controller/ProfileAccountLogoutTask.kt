@@ -1,7 +1,8 @@
 package org.nypl.simplified.books.controller
 
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Option
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
@@ -18,7 +19,6 @@ import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
@@ -39,7 +39,7 @@ class ProfileAccountLogoutTask(
   private val account: AccountType,
   private val adeptExecutor: AdobeAdeptExecutorType?,
   private val bookRegistry: BookRegistryType,
-  private val http: HTTPType,
+  private val http: LSHTTPClientType,
   private val logoutStrings: AccountLogoutStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType
@@ -205,20 +205,20 @@ class ProfileAccountLogoutTask(
     this.steps.beginNewStep(this.logoutStrings.logoutDeviceDeactivationPostDeviceManager)
     this.updateLoggingOutState()
 
-    val httpAuthentication =
-      AccountAuthenticatedHTTP.createAuthenticatedHTTP(this.credentials)
-
     /*
      * We don't care if this fails.
      *
      * XXX: We're not passing the device ID here!
      */
 
-    this.http.delete(
-      Option.some(httpAuthentication),
-      deviceManagerURI,
-      "vnd.librarysimplified/drm-device-id-list"
-    )
+    val request =
+      this.http.newRequest(deviceManagerURI)
+        .setAuthorization(AccountAuthenticatedHTTP.createAuthorizationIfPresent(this.credentials))
+        .setMethod(LSHTTPRequestBuilderType.Method.Delete)
+        .addHeader("Content-Type", "vnd.librarysimplified/drm-device-id-list")
+        .build()
+
+    request.execute()
 
     this.steps.currentStepSucceeded(this.logoutStrings.logoutDeviceDeactivationPostDeviceManagerFinished)
   }

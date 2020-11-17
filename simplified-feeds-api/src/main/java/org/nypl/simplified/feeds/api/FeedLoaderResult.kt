@@ -1,7 +1,6 @@
 package org.nypl.simplified.feeds.api
 
-import org.nypl.simplified.http.core.HTTPHasProblemReportType
-import org.nypl.simplified.http.core.HTTPProblemReport
+import org.librarysimplified.http.api.LSHTTPProblemReport
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.presentableerror.api.Presentables
 import java.net.URI
@@ -24,20 +23,23 @@ sealed class FeedLoaderResult {
    * The feed failed to load.
    */
 
-  sealed class FeedLoaderFailure : FeedLoaderResult(), HTTPHasProblemReportType, PresentableErrorType {
+  sealed class FeedLoaderFailure : FeedLoaderResult(), PresentableErrorType {
 
     /**
      * The feed failed to load due to the given exception.
      */
 
     data class FeedLoaderFailedGeneral(
-      override val problemReport: HTTPProblemReport?,
+      val problemReport: LSHTTPProblemReport?,
       override val exception: Exception,
       override val message: String,
       private val attributesInitial: Map<String, String>
     ) : FeedLoaderFailure() {
       override val attributes: Map<String, String>
-        get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
+        get() = Presentables.mergeAttributes(
+          map0 = this.attributesInitial,
+          map1 = this.problemReport?.toMap() ?: emptyMap()
+        )
     }
 
     /**
@@ -45,13 +47,16 @@ sealed class FeedLoaderResult {
      */
 
     data class FeedLoaderFailedAuthentication(
-      override val problemReport: HTTPProblemReport?,
+      val problemReport: LSHTTPProblemReport?,
       override val exception: Exception,
       override val message: String,
       private val attributesInitial: Map<String, String>
     ) : FeedLoaderFailure() {
       override val attributes: Map<String, String>
-        get() = Presentables.mergeProblemReportOptional(this.attributesInitial, this.problemReport)
+        get() = Presentables.mergeAttributes(
+          map0 = this.attributesInitial,
+          map1 = this.problemReport?.toMap() ?: emptyMap()
+        )
     }
   }
 

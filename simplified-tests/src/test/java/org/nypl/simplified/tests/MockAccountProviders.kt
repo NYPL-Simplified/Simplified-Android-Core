@@ -45,25 +45,29 @@ object MockAccountProviders {
   ): AccountProviderType =
     this.findAccountProviderDangerously(registry, URI.create(id))
 
-  fun fakeProvider(providerId: String): AccountProvider {
+  fun fakeProvider(
+    providerId: String,
+    host: String = "example.com",
+    port: Int = 80
+  ): AccountProvider {
     return AccountProvider(
       addAutomatically = false,
-      annotationsURI = URI.create("http://example.com/accounts0/annotations"),
+      annotationsURI = URI.create("http://$host:$port/accounts0/annotations"),
       authentication = AccountProviderAuthenticationDescription.Anonymous,
       authenticationAlternatives = listOf(),
       authenticationDocumentURI = null,
       cardCreatorURI = null,
-      catalogURI = URI.create("http://www.example.com/accounts0/feed.xml"),
+      catalogURI = URI.create("http://$host:$port/accounts0/feed.xml"),
       displayName = "Fake Library",
       eula = null,
       id = URI.create(providerId),
       idNumeric = -1,
       isProduction = false,
       license = null,
-      loansURI = URI.create("http://www.example.com/accounts0/loans.xml"),
+      loansURI = URI.create("http://$host:$port/accounts0/loans.xml"),
       logo = URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo="),
       mainColor = "#ff0000",
-      patronSettingsURI = URI.create("http://example.com/accounts0/patrons/me"),
+      patronSettingsURI = URI.create("http://$host:$port/accounts0/patrons/me"),
       privacyPolicy = null,
       subtitle = "Imaginary books",
       supportEmail = "postmaster@example.com",
@@ -189,8 +193,12 @@ object MockAccountProviders {
     return registry
   }
 
-  fun fakeAuthProvider(uri: String): AccountProvider {
-    return this.fakeProvider(uri)
+  fun fakeAuthProvider(
+    uri: String,
+    host: String = "example.com",
+    port: Int = 80
+  ): AccountProvider {
+    return this.fakeProvider(uri, host, port)
       .copy(
         authentication = AccountProviderAuthenticationDescription.Basic(
           barcodeFormat = "CODABAR",

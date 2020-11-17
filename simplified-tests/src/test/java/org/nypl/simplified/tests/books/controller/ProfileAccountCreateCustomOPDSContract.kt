@@ -19,6 +19,7 @@ import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseIOException
@@ -242,12 +243,25 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
+    val preferences =
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = null
+      )
+    val preferencesWithURI =
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = opdsURI
+      )
+
     Mockito.`when`(this.profilesDatabase.currentProfileUnsafe())
       .thenReturn(profile)
     Mockito.`when`(profile.createAccount(anyNonNull()))
       .thenReturn(account)
     Mockito.`when`(account.id)
       .thenReturn(accountId)
+    Mockito.`when`(account.preferences)
+      .thenReturn(preferences)
 
     val accountProvider =
       MockAccountProviders.fakeProvider("urn:fake:0")
@@ -274,6 +288,8 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
     Mockito.verify(profile, Mockito.times(1))
       .createAccount(anyNonNull())
+    Mockito.verify(account, Mockito.times(1))
+      .setPreferences(preferencesWithURI)
   }
 
   @Test

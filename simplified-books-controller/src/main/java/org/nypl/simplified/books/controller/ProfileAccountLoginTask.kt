@@ -1,12 +1,12 @@
 package org.nypl.simplified.books.controller
 
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.Some
+import one.irradia.mime.api.MIMEType
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Post
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeVendorID
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP.createAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -22,7 +22,6 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.patron.api.PatronDRM
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
@@ -50,7 +49,7 @@ import java.util.concurrent.TimeUnit
 class ProfileAccountLoginTask(
   private val account: AccountType,
   private val adeptExecutor: AdobeAdeptExecutorType?,
-  private val http: HTTPType,
+  private val http: LSHTTPClientType,
   private val loginStrings: AccountLoginStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType,
@@ -358,10 +357,6 @@ class ProfileAccountLoginTask(
 
     val adobePostActivationCredentials =
       adobePreCredentials.postActivationCredentials!!
-
-    val httpAuthentication =
-      createAuthenticatedHTTP(this.credentials)
-
     val text =
       adobePostActivationCredentials.deviceID.value + "\n"
     val textBytes =
@@ -371,22 +366,21 @@ class ProfileAccountLoginTask(
      * We don't care if this fails.
      */
 
-    this.http.post(
-      Option.some(httpAuthentication),
-      deviceManagerURI,
-      textBytes,
-      "vnd.librarysimplified/drm-device-id-list"
-    )
+    val post =
+      Post(
+        body = textBytes,
+        contentType = MIMEType("vnd.librarysimplified", "drm-device-id-list", mapOf())
+      )
+
+    val request =
+      this.http.newRequest(deviceManagerURI)
+        .setAuthorization(AccountAuthenticatedHTTP.createAuthorizationIfPresent(this.credentials))
+        .setMethod(post)
+        .build()
+
+    request.execute()
 
     this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivationPostDeviceManagerDone)
-  }
-
-  private fun <T> someOrNull(option: OptionType<T>): T? {
-    return if (option is Some<T>) {
-      option.get()
-    } else {
-      null
-    }
   }
 
   /**

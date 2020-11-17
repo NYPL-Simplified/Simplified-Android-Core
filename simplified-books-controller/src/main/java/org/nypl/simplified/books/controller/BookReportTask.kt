@@ -1,19 +1,20 @@
 package org.nypl.simplified.books.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
+import one.irradia.mime.api.MIMEType
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType
+import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.http.core.HTTPProblemReportLogging
-import org.nypl.simplified.http.core.HTTPType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.Callable
 
 class BookReportTask(
-  private val http: HTTPType,
+  private val http: LSHTTPClientType,
   private val account: AccountType,
   private val feedEntry: FeedEntry.FeedEntryOPDS,
   private val reportType: String
@@ -40,54 +41,49 @@ class BookReportTask(
         return
       }
 
-      val credentials = this.account.loginState.credentials
-      val authenticatedHTTP =
-        if (credentials != null) {
-          Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials))
-        } else {
-          Option.none()
-        }
+      val credentials =
+        this.account.loginState.credentials
+      val issuesURI =
+        issuesURIOpt.get()
 
-      val issuesURI = issuesURIOpt.get()
-      val result =
-        this.http.post(
-          authenticatedHTTP,
-          issuesURI,
+      val post =
+        LSHTTPRequestBuilderType.Method.Post(
           serializeProblem(),
-          "application/problem+json"
+          MIMEType("application", "problem+json", mapOf())
         )
 
-      result.match<Unit, Exception>(
-        { error ->
-          HTTPProblemReportLogging.logError(
-            this.logger,
-            issuesURI,
-            error.message,
-            error.status,
-            error.problemReport
+      val request =
+        this.http.newRequest(issuesURI)
+          .setAuthorization(AccountAuthenticatedHTTP.createAuthorizationIfPresent(credentials))
+          .setMethod(post)
+          .build()
+
+      val response = request.execute()
+      when (val status = response.status) {
+        is LSHTTPResponseStatus.Responded.OK -> {
+          this.logger.debug(
+            "[{}]: succeeded for {}",
+            this.account.id.uuid,
+            this.feedEntry.bookID.brief()
           )
-          Unit
-        },
-        { error ->
+        }
+        is LSHTTPResponseStatus.Responded.Error -> {
+          this.logger.error(
+            "[{}]: http error for {}: ",
+            this.account.id.uuid,
+            this.feedEntry.bookID.brief(),
+            status.status
+          )
+        }
+        is LSHTTPResponseStatus.Failed -> {
           this.logger.error(
             "[{}]: http exception for {}: ",
             this.account.id.uuid,
             this.feedEntry.bookID.brief(),
-            error.error
+            status.exception
           )
-          Unit
-        },
-        { ok ->
-          this.logger.debug(
-            "[{}]: succeeded for {} ({} {})",
-            this.account.id.uuid,
-            this.feedEntry.bookID.brief(),
-            ok.status,
-            ok.message
-          )
-          Unit
         }
-      )
+      }
     } catch (e: Exception) {
       this.logger.error(
         "[{}]: failed for {}: ",

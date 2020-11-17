@@ -1,9 +1,10 @@
 package org.nypl.simplified.books.controller
 
 import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.Some
 import org.joda.time.DateTime
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProvider
@@ -18,20 +19,15 @@ import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultException
-import org.nypl.simplified.http.core.HTTPResultMatcherType
-import org.nypl.simplified.http.core.HTTPResultOKType
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
-import java.net.HttpURLConnection
 import java.net.URI
 import java.util.HashSet
 import java.util.concurrent.Callable
@@ -41,7 +37,7 @@ class BookSyncTask(
   private val account: AccountType,
   private val accountRegistry: AccountProviderRegistryType,
   private val bookRegistry: BookRegistryType,
-  private val http: HTTPType,
+  private val http: LSHTTPClientType,
   private val feedParser: OPDSFeedParserType
 ) : Callable<Unit> {
 
@@ -73,28 +69,26 @@ class BookSyncTask(
       return
     }
 
-    val auth =
-      AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)
-    val result =
-      this.http.get(Option.some(auth), provider.loansURI, 0L)
+    val loansURI = provider.loansURI
+    if (loansURI == null) {
+      this.logger.debug("no loans URI, aborting!")
+      return
+    }
 
-    return result.matchResult(
-      object : HTTPResultMatcherType<InputStream, Unit, Exception> {
-        @Throws(Exception::class)
-        override fun onHTTPError(e: HTTPResultError<InputStream>) {
-          return this@BookSyncTask.onHTTPError(e, provider)
-        }
+    val request =
+      this.http.newRequest(loansURI)
+        .setAuthorization(AccountAuthenticatedHTTP.createAuthorization(credentials))
+        .build()
 
-        @Throws(Exception::class)
-        override fun onHTTPException(e: HTTPResultException<InputStream>) {
-          throw e.error
-        }
-
-        @Throws(Exception::class)
-        override fun onHTTPOK(e: HTTPResultOKType<InputStream>) {
-          return this@BookSyncTask.onHTTPOK(e, provider)
-        }
-      })
+    val response = request.execute()
+    return when (val status = response.status) {
+      is LSHTTPResponseStatus.Responded.OK ->
+        this.onHTTPOK(status.bodyStream ?: ByteArrayInputStream(ByteArray(0)), provider)
+      is LSHTTPResponseStatus.Responded.Error ->
+        this.onHTTPError(status, provider)
+      is LSHTTPResponseStatus.Failed ->
+        throw IOException(status.exception)
+    }
   }
 
   private fun updateAccountProvider(): AccountProviderType {
@@ -133,21 +127,20 @@ class BookSyncTask(
 
   @Throws(IOException::class)
   private fun onHTTPOK(
-    result: HTTPResultOKType<InputStream>,
+    stream: InputStream,
     provider: AccountProviderType
   ) {
-    return result.use { ok ->
+    return stream.use { ok ->
       this.parseFeed(ok, provider)
-      return
     }
   }
 
   @Throws(OPDSParseException::class)
   private fun parseFeed(
-    result: HTTPResultOKType<InputStream>,
+    stream: InputStream,
     provider: AccountProviderType
   ) {
-    val feed = this.feedParser.parse(provider.loansURI, result.value)
+    val feed = this.feedParser.parse(provider.loansURI, stream)
     this.updateAnnotations(feed)
 
     /*
@@ -258,10 +251,10 @@ class BookSyncTask(
 
   @Throws(Exception::class)
   private fun onHTTPError(
-    result: HTTPResultError<InputStream>,
+    result: LSHTTPResponseStatus.Responded.Error,
     provider: AccountProviderType
   ) {
-    if (result.status == HttpURLConnection.HTTP_UNAUTHORIZED) {
+    if (result.status == 401) {
       this.logger.debug("removing credentials due to 401 server response")
       this.account.setLoginState(AccountLoginState.AccountNotLoggedIn)
       return
