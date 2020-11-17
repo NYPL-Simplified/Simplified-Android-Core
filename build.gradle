@@ -8,7 +8,7 @@ buildscript {
     throw new GradleException("org.gradle.internal.publish.checksums.insecure must be 'true'")
   }
 
-  ext.kotlin_version = "1.3.72"
+  ext.kotlin_version = "1.4.10"
   ext.nav_version = "2.3.0-alpha04"
 
   repositories {
