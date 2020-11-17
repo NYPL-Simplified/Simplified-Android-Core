@@ -5,6 +5,7 @@ import one.irradia.mime.api.MIMEType
 import org.librarysimplified.http.api.LSHTTPAuthorizationBasic
 import org.librarysimplified.http.api.LSHTTPAuthorizationBearerToken
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType.AllowRedirects.ALLOW_UNSAFE_REDIRECTS
 import org.librarysimplified.http.downloads.LSHTTPDownloadRequest
 import org.librarysimplified.http.downloads.LSHTTPDownloadState
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.DownloadReceiving
@@ -47,6 +48,7 @@ object BorrowHTTP {
     val request =
       context.httpClient.newRequest(target)
         .setAuthorization(authorizationOf(context.account))
+        .allowRedirects(ALLOW_UNSAFE_REDIRECTS)
         .build()
 
     return LSHTTPDownloadRequest(
