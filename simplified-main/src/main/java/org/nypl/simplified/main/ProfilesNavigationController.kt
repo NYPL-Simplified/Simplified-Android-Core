@@ -84,7 +84,8 @@ internal class ProfilesNavigationController(
       return false
     }
     this.supportFragmentManager.popBackStack(
-      null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+      null, FragmentManager.POP_BACK_STACK_INCLUSIVE
+    )
     return true
   }
 

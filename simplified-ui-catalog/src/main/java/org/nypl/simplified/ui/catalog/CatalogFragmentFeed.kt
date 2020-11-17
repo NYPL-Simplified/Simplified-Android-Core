@@ -738,7 +738,6 @@ class CatalogFragmentFeed : Fragment() {
 
   @UiThread
   private fun configureToolbarNavigation() {
-
     fun showAccountPickerAction() {
       // Configure the 'Home Action' in the Toolbar to show the account picker when tapped.
       this.supportActionBar?.apply {

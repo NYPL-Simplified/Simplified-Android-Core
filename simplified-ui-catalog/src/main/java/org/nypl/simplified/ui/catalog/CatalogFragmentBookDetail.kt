@@ -1,6 +1,5 @@
 package org.nypl.simplified.ui.catalog
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.text.Html

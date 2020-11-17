@@ -66,7 +66,8 @@ import java.net.URI
 import java.util.ServiceLoader
 import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity(),
+class MainActivity :
+  AppCompatActivity(),
   OnBackStackChangedListener,
   SplashListenerType,
   ErrorPageListenerType {
@@ -221,7 +222,8 @@ class MainActivity : AppCompatActivity(),
     val splashService = getSplashService()
 
     this.navigationControllerDirectory.removeNavigationController(
-      AccountNavigationControllerType::class.java)
+      AccountNavigationControllerType::class.java
+    )
 
     return when (profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
