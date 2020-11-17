@@ -348,7 +348,8 @@ class TabbedNavigationController private constructor(
   }
 
   override fun backStackSize(): Int {
-    return this.navigator.currentStackSize()
+    // Note: currentStackSize() is not safe to call here as it may throw an NPE.
+    return this.navigator.stackSize(this.navigator.currentTab())
   }
 
   override fun openSettingsAccount(parameters: AccountFragmentParameters) {
