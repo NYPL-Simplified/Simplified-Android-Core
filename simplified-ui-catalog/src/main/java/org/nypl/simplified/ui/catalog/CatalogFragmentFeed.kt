@@ -746,6 +746,7 @@ class CatalogFragmentFeed : Fragment() {
       if (isRoot) {
         when (this.parameters.ownership) {
           is OwnedByAccount -> showAccountPickerAction()
+          else -> {} // do nothing
         }
       }
     } catch (e: Exception) {

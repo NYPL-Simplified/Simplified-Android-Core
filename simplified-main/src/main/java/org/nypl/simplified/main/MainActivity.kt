@@ -283,7 +283,7 @@ class MainActivity : AppCompatActivity(),
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
       .commit()
-    supportActionBar?.show()
+    this.supportActionBar?.show()
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -463,6 +463,10 @@ class MainActivity : AppCompatActivity(),
         }
 
         override fun openSettingsAccount(parameters: AccountFragmentParameters) {
+          throw UnreachableCodeException()
+        }
+
+        override fun openErrorPage(parameters: ErrorPageParameters) {
           throw UnreachableCodeException()
         }
 
