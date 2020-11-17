@@ -2,7 +2,8 @@ dependencies {
   api project(":simplified-presentableerror-api")
   api project(":simplified-reports")
   api project(":simplified-taskrecorder-api")
-  api project(":simplified-ui-toolbar")
+
+  implementation project(":simplified-android-ktx")
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout

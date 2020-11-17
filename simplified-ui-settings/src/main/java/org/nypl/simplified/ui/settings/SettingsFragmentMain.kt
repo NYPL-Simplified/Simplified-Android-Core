@@ -9,10 +9,10 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
@@ -109,20 +109,9 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureToolbar() {
-    val host = this.activity
-    if (host is ToolbarHostType) {
-      host.toolbarClearMenu()
-      host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.settings),
-        subtitle = ""
-      )
-      host.toolbarSetBackArrowConditionally(
-        context = host,
-        shouldArrowBePresent = { this.navigationController.backStackSize() > 1 },
-        onArrowClicked = { this.navigationController.popBackStack() }
-      )
-    } else {
-      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    this.supportActionBar?.apply {
+      title = getString(R.string.settings)
+      subtitle = null
     }
   }
 

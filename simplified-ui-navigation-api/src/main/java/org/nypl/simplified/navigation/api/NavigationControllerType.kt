@@ -15,6 +15,12 @@ interface NavigationControllerType {
   fun popBackStack(): Boolean
 
   /**
+   * A screen wants to pop to the root of the current navigation stack.
+   */
+
+  fun popToRoot(): Boolean
+
+  /**
    * @return The current size of the backstack
    */
 

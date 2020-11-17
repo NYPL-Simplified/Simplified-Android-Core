@@ -1,7 +1,11 @@
 package org.nypl.simplified.ui.accounts
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
@@ -18,13 +22,13 @@ import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletio
 import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletionSucceeded
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 /**
  * A fragment that shows the set of accounts in the current profile.
@@ -62,6 +66,7 @@ class AccountsFragment : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    setHasOptionsMenu(true)
 
     this.parameters = this.requireArguments()[PARAMETERS_ID] as AccountsFragmentParameters
     this.accountListData = mutableListOf()
@@ -130,8 +135,7 @@ class AccountsFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
-    this.configureToolbar()
+    this.configureToolbar(this.requireActivity())
 
     this.accountSubscription =
       this.profilesController.accountEvents()
@@ -154,40 +158,27 @@ class AccountsFragment : Fragment() {
     )
   }
 
-  private fun configureToolbar() {
-    val host = this.activity
-    if (host is ToolbarHostType) {
-      val toolbar = host.findToolbar()
+  override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    inflater.inflate(R.menu.accounts, menu)
 
-      host.toolbarClearMenu()
-      toolbar.inflateMenu(R.menu.accounts)
+    val accountAdd = menu.findItem(R.id.accountsMenuActionAccountAdd)
+    accountAdd.isVisible = this.parameters.shouldShowLibraryRegistryMenu
+  }
 
-      val accountAdd = toolbar.menu.findItem(R.id.accountsMenuActionAccountAdd)
-      if (this.parameters.shouldShowLibraryRegistryMenu) {
-        accountAdd.setOnMenuItemClickListener {
-          this.findNavigationController().openSettingsAccountRegistry()
-          true
-        }
-        accountAdd.isVisible = true
-      } else {
-        accountAdd.isVisible = false
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      R.id.accountsMenuActionAccountAdd -> {
+        this.findNavigationController().openSettingsAccountRegistry()
+        true
       }
+      else -> super.onOptionsItemSelected(item)
+    }
+  }
 
-      host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.accounts),
-        subtitle = ""
-      )
-      host.toolbarSetBackArrowConditionally(
-        context = host,
-        shouldArrowBePresent = {
-          this.findNavigationController().backStackSize() > 1
-        },
-        onArrowClicked = {
-          this.findNavigationController().popBackStack()
-        }
-      )
-    } else {
-      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+  private fun configureToolbar(activity: Activity) {
+    this.supportActionBar?.apply {
+      title = getString(R.string.accounts)
+      subtitle = null
     }
   }
 

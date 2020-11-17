@@ -12,8 +12,6 @@ import android.widget.ProgressBar
 import android.widget.TableLayout
 import android.widget.TextView
 import androidx.annotation.UiThread
-import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.common.base.Preconditions
@@ -22,6 +20,7 @@ import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
@@ -52,7 +51,6 @@ import org.nypl.simplified.ui.catalog.R.string
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -252,14 +250,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.onBookChangedUI(status)
     this.onOPDSFeedEntryUI(this.parameters.feedEntry)
-
-    val toolbarHost = this.activity
-    if (toolbarHost is ToolbarHostType) {
-      val toolbar = (toolbarHost as ToolbarHostType).findToolbar()
-      this.configureToolbar(toolbarHost, toolbar)
-    } else {
-      throw IllegalStateException("The activity ($toolbarHost) hosting this fragment must implement ${ToolbarHostType::class.java}")
-    }
+    this.configureToolbar()
 
     this.bookRegistrySubscription =
       this.bookRegistry.bookEvents()
@@ -282,35 +273,20 @@ class CatalogFragmentBookDetail : Fragment() {
     return BookWithStatus(book, status)
   }
 
-  private fun configureToolbar(
-    toolbarHost: ToolbarHostType,
-    toolbar: Toolbar
-  ) {
-    val context = this.requireContext()
-    toolbarHost.toolbarClearMenu()
-    this.configureToolbarTitles(context, toolbar)
-  }
-
-  @UiThread
-  private fun configureToolbarTitles(
-    context: Context,
-    toolbar: Toolbar
-  ) {
-    toolbar.title = this.parameters.feedEntry.feedEntry.title
-
-    try {
-      val accountProvider =
-        this.profilesController.profileCurrent()
-          .account(this.parameters.feedEntry.accountID)
-          .provider
-
-      toolbar.subtitle = accountProvider.displayName
+  private fun configureToolbar() {
+    val accountProvider = try {
+      this.profilesController.profileCurrent()
+        .account(this.parameters.feedEntry.accountID)
+        .provider
     } catch (e: Exception) {
-      toolbar.subtitle = ""
-    } finally {
-      val color = ContextCompat.getColor(context, R.color.simplifiedColorBackground)
-      toolbar.setTitleTextColor(color)
-      toolbar.setSubtitleTextColor(color)
+      this.logger.debug("Couldn't load account provider from profile", e)
+      null
+    }
+
+    val feedTitle = this.parameters.feedArguments.title
+    this.supportActionBar?.apply {
+      title = feedTitle
+      subtitle = accountProvider?.displayName
     }
   }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
   <color name="simplifiedColorPrimaryLight">#5472d3</color>
   <color name="simplifiedColorPrimary">#0d47a1</color>
@@ -55,7 +55,7 @@
     <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
 
-    <item name="android:actionBarStyle">@style/SimplifiedActionBar</item>
+    <item name="android:actionBarStyle">@style/Simplified.ActionBar</item>
     <item name="android:alertDialogStyle">@style/SimplifiedAlertDialog</item>
     <item name="android:alertDialogTheme">@style/SimplifiedAlertDialog</item>
     <item name="android:buttonStyle">@style/SimplifiedButton</item>
@@ -63,10 +63,6 @@
     <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-    <item name="toolbarStyle">@style/SimplifiedToolBarStyle</item>
-
-    <item name="windowActionBar">false</item>
-    <item name="windowNoTitle">true</item>
   </style>
 
   <!--
@@ -88,7 +84,7 @@
     <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
 
-    <item name="android:actionBarStyle">@style/SimplifiedActionBar</item>
+    <item name="android:actionBarStyle">@style/Simplified.ActionBar</item>
     <item name="android:alertDialogStyle">@style/SimplifiedAlertDialog</item>
     <item name="android:alertDialogTheme">@style/SimplifiedAlertDialog</item>
     <item name="android:buttonStyle">@style/SimplifiedButton</item>
@@ -96,13 +92,46 @@
     <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-    <item name="toolbarStyle">@style/SimplifiedToolBarStyle</item>
   </style>
 
-  <style name="SimplifiedActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+  <!-- Empty root style; for nesting. -->
+
+  <style name="Simplified" />
+
+  <!-- Action Bar -->
+
+  <style name="Simplified.ActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+    <item name="android:background">?attr/colorPrimary</item>
     <item name="android:displayOptions">homeAsUp|showTitle</item>
-    <item name="android:homeAsUpIndicator">@drawable/ic_drawer</item>
+    <item name="titleTextAppearance">@style/Simplified.Toolbar.Title</item>
+    <item name="subtitleTextAppearance">@style/Simplified.Toolbar.Subtitle</item>
+    <item name="popupTheme">@style/Simplified.Toolbar.PopupTheme</item>
   </style>
+
+  <!-- Toolbar -->
+
+  <style name="Simplified.Toolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+  <style name="Simplified.Toolbar.PopupTheme" parent="ThemeOverlay.AppCompat.Light" />
+  <style name="Simplified.Toolbar.Title" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <item name="android:textSize" tools:ignore="SpUsage">18dp</item>
+  </style>
+  <style name="Simplified.Toolbar.Subtitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+    <item name="android:textSize" tools:ignore="SpUsage">12dp</item>
+  </style>
+
+  <!-- Bottom Navigation -->
+
+  <style name="Simplified.BottomNav">
+    <item name="itemTextAppearanceActive">@style/Simplified.BottomNav.TextAppearance.Active</item>
+    <item name="itemTextAppearanceInactive">@style/Simplified.BottomNav.TextAppearance.Inactive</item>
+  </style>
+  <style name="Simplified.BottomNav.TextAppearance">
+    <item name="android:textSize" tools:ignore="SpUsage">12dp</item>
+  </style>
+  <style name="Simplified.BottomNav.TextAppearance.Active" />
+  <style name="Simplified.BottomNav.TextAppearance.Inactive" />
+
+  <!-- Widgets -->
 
   <style name="SimplifiedButton" parent="@android:style/Widget.Button">
     <item name="android:background">@drawable/simplified_button</item>
@@ -138,19 +167,6 @@
     <item name="colorAccent">?attr/simplifiedColorPrimary</item>
     <item name="colorControlActivated">?attr/simplifiedColorPrimary</item>
     <item name="colorControlNormal">?attr/simplifiedColorPrimary</item>
-  </style>
-
-  <style name="SimplifiedToolBarStyle" parent="Widget.AppCompat.Toolbar">
-    <item name="titleTextAppearance">@style/SimplifiedTitleTextAppearance</item>
-    <item name="subtitleTextAppearance">@style/SimplifiedSubTitleTextAppearance</item>
-  </style>
-
-  <style name="SimplifiedTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-    <item name="android:textColor">#ffffff</item>
-  </style>
-
-  <style name="SimplifiedSubTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
-    <item name="android:textSize">11sp</item>
   </style>
 
   <!-- Material Design Color Palette -->
@@ -373,7 +389,8 @@
   <style name="hs_editText_defaultStyle">
     <item name="android:inputType">textCapSentences</item>
   </style>
+
   <!-- Edit text Style in new user and new issue screen -->
-  <style name="hs_editTextStyle" parent="@style/hs_editText_defaultStyle"></style>
+  <style name="hs_editTextStyle" parent="@style/hs_editText_defaultStyle" />
 
 </resources>

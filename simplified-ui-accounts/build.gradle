@@ -1,5 +1,6 @@
 dependencies {
   implementation project(":simplified-accounts-api")
+  implementation project(":simplified-android-ktx")
   implementation project(":simplified-buildconfig-api")
   implementation project(":simplified-cardcreator")
   implementation project(":simplified-documents")
@@ -12,7 +13,6 @@ dependencies {
   implementation project(":simplified-ui-navigation-api")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
-  implementation project(":simplified-ui-toolbar")
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout

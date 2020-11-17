@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.settings
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Color
@@ -13,7 +14,6 @@ import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
@@ -24,6 +24,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
@@ -40,7 +41,6 @@ import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
@@ -91,7 +91,6 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var showErrorButton: Button
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
-  private lateinit var toolbar: Toolbar
   private lateinit var uiThread: UIThreadServiceType
 
   private var adeptExecutor: AdobeAdeptExecutorType? = null
@@ -164,7 +163,7 @@ class SettingsFragmentDebug : Fragment() {
 
   override fun onStart() {
     super.onStart()
-    this.configureToolbar()
+    this.configureToolbar(this.requireActivity())
 
     this.crashButton.setOnClickListener {
       throw OutOfMemoryError("Pretending to have run out of memory!")
@@ -330,25 +329,10 @@ class SettingsFragmentDebug : Fragment() {
     }
   }
 
-  private fun configureToolbar() {
-    val host = this.activity
-    if (host is ToolbarHostType) {
-      host.toolbarClearMenu()
-      host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.settingsDebug),
-        subtitle = ""
-      )
-      host.toolbarSetBackArrowConditionally(
-        context = host,
-        shouldArrowBePresent = {
-          this.navigationController.backStackSize() > 1
-        },
-        onArrowClicked = {
-          this.navigationController.popBackStack()
-        }
-      )
-    } else {
-      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+  private fun configureToolbar(activity: Activity) {
+    this.supportActionBar?.apply {
+      title = getString(R.string.settingsVersion)
+      subtitle = null
     }
   }
 

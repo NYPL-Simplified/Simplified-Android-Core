@@ -48,6 +48,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -71,7 +72,6 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.atomic.AtomicBoolean
@@ -401,7 +401,7 @@ class AccountFragment : Fragment() {
       return
     }
 
-    this.configureToolbar()
+    this.configureToolbar(requireActivity())
     this.hideCardCreatorForNonNYPL()
 
     this.accountTitle.text =
@@ -604,23 +604,11 @@ class AccountFragment : Fragment() {
     this.startActivity(i)
   }
 
-  private fun configureToolbar() {
-    val host = this.activity
-    if (host is ToolbarHostType) {
-      host.toolbarClearMenu()
-      host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.accounts),
-        subtitle = this.account.provider.displayName
-      )
-      host.toolbarSetBackArrowConditionally(
-        context = host,
-        shouldArrowBePresent = {
-          this.findNavigationController().backStackSize() > 1
-        },
-        onArrowClicked = this@AccountFragment::explicitlyClose
-      )
-    } else {
-      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+  private fun configureToolbar(activity: Activity) {
+    val providerName = this.account.provider.displayName
+    this.supportActionBar?.apply {
+      title = getString(R.string.accounts)
+      subtitle = providerName
     }
   }
 

@@ -18,7 +18,6 @@
   <string name="catalogAccessibilityCoverEpub">%1$s, ebook, by %2$s</string>
   <string name="catalogAccessibilityCoverPdf">%1$s, pdf, by %2$s</string>
   <string name="catalogAccessibilityCoverUnknownFormat">%1$s, by %2$s</string>
-  <string name="catalogAccessibilityReloadFeed">Reload feed</string>
   <string name="catalogAccounts">Choose another library catalog…</string>
   <string name="catalogBookAvailabilityHeldIndefinite">You have this book on hold.</string>
   <string name="catalogBookAvailabilityHeldQueue">You are at position %1$d in the queue for this book.</string>
@@ -71,6 +70,5 @@
   <string name="catalogRetry">Retry</string>
   <string name="catalogReturn">Return</string>
   <string name="catalogSearch">Search</string>
-  <string name="catalogSearchIn">Search in %1$s…</string>
   <string name="catalogDelete">Delete</string>
 </resources>

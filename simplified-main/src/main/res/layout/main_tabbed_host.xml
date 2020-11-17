@@ -1,37 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  android:orientation="vertical">
 
   <FrameLayout
     android:id="@+id/tabbedFragmentHolder"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="0dp"
-    app:layout_constraintBottom_toTopOf="@id/bottomDivider"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    android:layout_weight="1" />
 
   <View
     android:id="@+id/bottomDivider"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="1dp"
-    android:background="?android:attr/listDivider"
-    app:layout_constraintBottom_toTopOf="@+id/bottomNavigator"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
+    android:background="?android:attr/listDivider" />
 
   <com.google.android.material.bottomnavigation.BottomNavigationView
     android:id="@+id/bottomNavigator"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="64dp"
+    style="@style/Simplified.BottomNav"
     android:background="?android:attr/windowBackground"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
     app:menu="@menu/navigation_items" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
 

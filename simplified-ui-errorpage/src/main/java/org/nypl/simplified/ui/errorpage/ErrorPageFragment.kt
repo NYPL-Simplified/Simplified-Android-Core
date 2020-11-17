@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.errorpage
 
+import android.app.Activity
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Spannable
@@ -14,7 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.slf4j.LoggerFactory
 
 /**
@@ -123,21 +124,7 @@ class ErrorPageFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
-    run {
-      val className = ToolbarHostType::class.java.canonicalName
-      val activity = this.requireActivity()
-      if (activity is ToolbarHostType) {
-        val toolbar = activity.findToolbar()
-        toolbar.menu.clear()
-        toolbar.setTitle(R.string.errorDetailsTitle)
-        toolbar.subtitle = ""
-      } else {
-        throw IllegalStateException(
-          "The activity hosting this fragment must implement $className"
-        )
-      }
-    }
+    this.configureToolbar(this.requireActivity())
 
     this.sendButton.isEnabled = true
     this.sendButton.setOnClickListener {
@@ -148,7 +135,13 @@ class ErrorPageFragment : Fragment() {
 
   override fun onStop() {
     super.onStop()
-
     this.sendButton.setOnClickListener(null)
+  }
+
+  private fun configureToolbar(activity: Activity) {
+    this.supportActionBar?.apply {
+      title = getString(R.string.errorDetailsTitle)
+      subtitle = null
+    }
   }
 }

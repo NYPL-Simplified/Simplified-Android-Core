@@ -35,7 +35,6 @@ import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
@@ -162,9 +161,6 @@ class MainFragment : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    val toolbar = (this.requireActivity() as ToolbarHostType).findToolbar()
-    toolbar.visibility = View.VISIBLE
-
     this.uiThread.runOnUIThread {
       this.navigationControllerDirectory.updateNavigationController(
         CatalogNavigationControllerType::class.java, this.bottomNavigator
@@ -260,7 +256,7 @@ class MainFragment : Fragment() {
         this.bottomNavigator.popBackStack()
         this.bottomNavigator.openFeed(
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
-            title = account.provider.displayName,
+            title = getString(R.string.tabCatalog),
             ownership = CatalogFeedOwnership.OwnedByAccount(id),
             feedURI = account.catalogURIForAge(age),
             isSearchResults = false
