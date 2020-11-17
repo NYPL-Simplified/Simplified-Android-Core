@@ -101,6 +101,9 @@
   <string name="pref_title_readium2">Enable Readium2</string>
   <string name="pref_summary_readium2" />
 
+  <string name="pref_title_show_unsupported">Show unsupported books</string>
+  <string name="pref_summary_show_unsupported" />
+
   <string name="pref_module_enabled">Enabled</string>
   <string name="pref_module_disabled">Not supported</string>
 </resources>

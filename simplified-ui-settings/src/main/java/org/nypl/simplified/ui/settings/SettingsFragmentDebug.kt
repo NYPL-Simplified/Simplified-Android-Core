@@ -5,13 +5,13 @@ import android.os.Bundle
 import android.text.format.Formatter
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
+import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileUpdated.Succeeded
 import org.slf4j.LoggerFactory
@@ -37,6 +37,10 @@ class SettingsFragmentDebug : PreferenceFragmentCompat() {
     )
   }
 
+  private val feedLoader by lazy {
+    Services.serviceDirectory().requireService(FeedLoaderType::class.java)
+  }
+
   private lateinit var showErrorPage: Preference
   private lateinit var sendErrorLogs: Preference
   private lateinit var sendAnalytics: Preference
@@ -48,6 +52,7 @@ class SettingsFragmentDebug : PreferenceFragmentCompat() {
   private lateinit var showTestingLibraries: SwitchPreference
   private lateinit var locationNyc: SwitchPreference
   private lateinit var enableR2: SwitchPreference
+  private lateinit var showUnsupported: SwitchPreference
   private lateinit var adobeAcsModule: Preference
 
   override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -68,6 +73,7 @@ class SettingsFragmentDebug : PreferenceFragmentCompat() {
     this.showTestingLibraries = this.findPreference("pref_key_testing_libraries")!!
     this.locationNyc = this.findPreference("pref_key_location_nyc")!!
     this.enableR2 = this.findPreference("pref_key_readium2")!!
+    this.showUnsupported = this.findPreference("pref_key_show_unsupported")!!
     this.adobeAcsModule = this.findPreference("pref_key_adobe_acs")!!
   }
 
@@ -156,11 +162,20 @@ class SettingsFragmentDebug : PreferenceFragmentCompat() {
       }
       true
     }
+    this.showUnsupported.setOnPreferenceClickListener {
+      this.feedLoader.showOnlySupportedBooks = !this.showUnsupported.isChecked
+      true
+    }
   }
 
   override fun onStart() {
     super.onStart()
     this.configureToolbar(this.requireActivity())
+  }
+
+  override fun onResume() {
+    super.onResume()
+    this.showUnsupported.isChecked = !feedLoader.showOnlySupportedBooks
   }
 
   private fun configureToolbar(activity: Activity) {

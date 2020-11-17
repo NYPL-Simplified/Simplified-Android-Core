@@ -56,6 +56,10 @@
       android:key="pref_key_readium2"
       android:summary="@string/pref_summary_readium2"
       android:title="@string/pref_title_readium2" />
+    <SwitchPreference
+      android:key="pref_key_show_unsupported"
+      android:summary="@string/pref_summary_show_unsupported"
+      android:title="@string/pref_title_show_unsupported" />
   </PreferenceCategory>
 
   <PreferenceCategory android:title="@string/pref_category_modules">
