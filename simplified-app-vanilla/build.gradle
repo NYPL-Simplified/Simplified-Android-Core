@@ -24,10 +24,10 @@ android {
 
   signingConfigs {
     release {
-      keyAlias findProperty("org.librarysimplified.keyAlias")
-      keyPassword findProperty("org.librarysimplified.keyPassword")
+      keyAlias nyplSigningKeyAlias
+      keyPassword nyplSigningKeyPassword
       storeFile file("keystore.jks")
-      storePassword findProperty("org.librarysimplified.storePassword")
+      storePassword nyplSigningStorePassword
     }
   }
 
