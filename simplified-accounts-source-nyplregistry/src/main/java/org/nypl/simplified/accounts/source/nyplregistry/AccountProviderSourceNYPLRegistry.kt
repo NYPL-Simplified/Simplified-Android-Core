@@ -304,9 +304,9 @@ class AccountProviderSourceNYPLRegistry(
       is LSHTTPResponseStatus.Responded.Error ->
         throw ServerReturnedError(
           uri = target,
-          errorCode = status.status,
-          message = status.message,
-          problemReport = status.problemReport
+          errorCode = status.properties.status,
+          message = status.properties.message,
+          problemReport = status.properties.problemReport
         )
       is LSHTTPResponseStatus.Failed ->
         throw ServerConnectionFailure(

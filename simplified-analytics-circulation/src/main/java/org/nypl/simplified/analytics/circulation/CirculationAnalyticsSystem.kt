@@ -54,7 +54,7 @@ class CirculationAnalyticsSystem(
       is LSHTTPResponseStatus.Responded.OK ->
         Unit
       is LSHTTPResponseStatus.Responded.Error -> {
-        val problemReport = status.problemReport
+        val problemReport = status.properties.problemReport
         if (problemReport != null) {
           this.logger.debug("status: {}", problemReport.status)
           this.logger.debug("title:  {}", problemReport.title)

@@ -129,9 +129,9 @@ object BorrowHTTP {
     result: DownloadFailedServer
   ): BorrowSubtaskFailed {
     val status = result.responseStatus
-    context.taskRecorder.addAttributes(status.problemReport?.toMap() ?: emptyMap())
+    context.taskRecorder.addAttributes(status.properties.problemReport?.toMap() ?: emptyMap())
     context.taskRecorder.currentStepFailed(
-      message = "HTTP request failed: ${status.originalStatus} ${status.message}",
+      message = "HTTP request failed: ${status.properties.originalStatus} ${status.properties.message}",
       errorCode = BorrowErrorCodes.httpRequestFailed,
       exception = null
     )

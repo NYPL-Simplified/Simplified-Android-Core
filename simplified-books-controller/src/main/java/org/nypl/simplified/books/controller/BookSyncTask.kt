@@ -254,12 +254,12 @@ class BookSyncTask(
     result: LSHTTPResponseStatus.Responded.Error,
     provider: AccountProviderType
   ) {
-    if (result.status == 401) {
+    if (result.properties.status == 401) {
       this.logger.debug("removing credentials due to 401 server response")
       this.account.setLoginState(AccountLoginState.AccountNotLoggedIn)
       return
     }
 
-    throw IOException(String.format("%s: %d: %s", provider.loansURI, result.status, result.message))
+    throw IOException(String.format("%s: %d: %s", provider.loansURI, result.properties.status, result.properties.message))
   }
 }
