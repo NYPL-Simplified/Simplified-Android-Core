@@ -48,7 +48,7 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
-import org.nypl.simplified.ui.accounts.AccountRegistryFragment
+import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
@@ -480,7 +480,7 @@ class MainActivity :
       }
     )
 
-    val fragment = AccountRegistryFragment()
+    val fragment = AccountListRegistryFragment()
     fm.beginTransaction()
       .replace(R.id.mainFragmentHolder, fragment, "MAIN")
       .addToBackStack(null)

@@ -6,7 +6,7 @@ import java.io.Serializable
  * Parameters for the accounts screen.
  */
 
-data class AccountsFragmentParameters(
+data class AccountListFragmentParameters(
 
   /**
    * If set to `true`, then show the library registry menu in the toolbar.
