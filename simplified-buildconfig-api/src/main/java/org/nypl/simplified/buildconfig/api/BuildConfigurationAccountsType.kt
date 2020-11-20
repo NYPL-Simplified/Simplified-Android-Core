@@ -22,4 +22,11 @@ interface BuildConfigurationAccountsType {
    */
 
   val allowAccountsRegistryAccess: Boolean
+
+  /**
+   * If set to `true`, users will be shown the option to switch accounts on the
+   * catalog screen.
+   */
+
+  val showChangeAccountsUi: Boolean
 }
