@@ -2,18 +2,24 @@ package org.nypl.simplified.ui.accounts
 
 import android.app.Activity
 import android.os.Bundle
+import android.text.InputType
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.MenuItem.OnActionExpandListener
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.view.inputmethod.EditorInfo
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
@@ -42,8 +48,7 @@ class AccountRegistryFragment : Fragment() {
   private var errorDialog: AlertDialog? = null
   private lateinit var backgroundExecutor: ListeningScheduledExecutorService
   private lateinit var accountList: RecyclerView
-  private lateinit var accountListAdapter: AccountProviderDescriptionAdapter
-  private lateinit var accountListData: MutableList<AccountProviderDescription>
+  private lateinit var accountListAdapter: FilterableAccountListAdapter
   private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var imageLoader: ImageLoaderType
@@ -52,12 +57,13 @@ class AccountRegistryFragment : Fragment() {
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var progress: ProgressBar
   private lateinit var progressText: TextView
-  private lateinit var refresh: Button
   private lateinit var title: TextView
   private lateinit var uiThread: UIThreadServiceType
+
   private val logger = LoggerFactory.getLogger(AccountRegistryFragment::class.java)
   private var accountCreationSubscription: Disposable? = null
   private var accountRegistrySubscription: Disposable? = null
+  private var reload: MenuItem? = null
 
   private val navigationController by lazy<AccountNavigationControllerType> {
     NavigationControllers.find(
@@ -68,6 +74,7 @@ class AccountRegistryFragment : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    setHasOptionsMenu(true)
 
     val services = Services.serviceDirectory()
 
@@ -82,10 +89,8 @@ class AccountRegistryFragment : Fragment() {
     this.buildConfig =
       services.requireService(BuildConfigurationServiceType::class.java)
 
-    this.accountListData = mutableListOf()
     this.accountListAdapter =
-      AccountProviderDescriptionAdapter(
-        this.accountListData,
+      FilterableAccountListAdapter(
         this.imageLoader,
         this::onAccountClicked
       )
@@ -120,7 +125,6 @@ class AccountRegistryFragment : Fragment() {
 
     this.logger.debug("selected account: {} ({})", account.id, account.title)
 
-    this.refresh.isEnabled = false
     this.accountList.visibility = View.INVISIBLE
     this.title.setText(R.string.accountRegistryCreating)
     this.progressText.text = ""
@@ -167,8 +171,6 @@ class AccountRegistryFragment : Fragment() {
     val layout =
       inflater.inflate(R.layout.account_registry, container, false)
 
-    this.refresh =
-      layout.findViewById(R.id.accountRegistryRefreshButton)
     this.title =
       layout.findViewById(R.id.accountRegistryTitle)
     this.progress =
@@ -181,24 +183,6 @@ class AccountRegistryFragment : Fragment() {
     this.accountList.setHasFixedSize(true)
     this.accountList.layoutManager = LinearLayoutManager(this.context)
     this.accountList.adapter = this.accountListAdapter
-    (this.accountList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-
-    this.refresh.setOnClickListener {
-      this.refresh.isEnabled = false
-
-      this.backgroundExecutor.execute {
-        try {
-          this.accountRegistry.refresh(
-            includeTestingLibraries = this.profilesController
-              .profileCurrent()
-              .preferences()
-              .showTestingLibraries
-          )
-        } catch (e: Exception) {
-          this.logger.error("failed to refresh registry: ", e)
-        }
-      }
-    }
 
     return layout
   }
@@ -233,10 +217,86 @@ class AccountRegistryFragment : Fragment() {
     }
   }
 
+  override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    inflater.inflate(R.menu.account_registry, menu)
+    this.reload = menu.findItem(R.id.accountMenuActionReload)
+
+    val search = menu.findItem(R.id.accountMenuActionSearch)
+    val searchView = search.actionView as SearchView
+
+    searchView.imeOptions = EditorInfo.IME_ACTION_DONE
+    searchView.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+    searchView.queryHint = getString(R.string.accountSearchHint)
+
+    searchView.setOnQueryTextListener(object : OnQueryTextListener {
+      override fun onQueryTextSubmit(query: String): Boolean {
+        search.collapseActionView()
+        return true
+      }
+
+      override fun onQueryTextChange(newText: String): Boolean {
+        when {
+          newText.isEmpty() -> {
+            this@AccountRegistryFragment.accountListAdapter.resetFilter()
+          }
+          newText.equals("NYPL", ignoreCase = true) -> {
+            this@AccountRegistryFragment.accountListAdapter.filterList { account ->
+              account.title.contains("New York Public Library", ignoreCase = true)
+            }
+          }
+          else -> {
+            this@AccountRegistryFragment.accountListAdapter.filterList { account ->
+              account.title.contains(newText, ignoreCase = true)
+            }
+          }
+        }
+        return true
+      }
+    })
+
+    search.setOnActionExpandListener(object : OnActionExpandListener {
+      override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+        // Do nothing
+        return true
+      }
+
+      override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+        this@AccountRegistryFragment.accountListAdapter.resetFilter()
+        return true
+      }
+    })
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      R.id.accountMenuActionReload -> {
+        this.reload()
+        true
+      }
+      else -> super.onOptionsItemSelected(item)
+    }
+  }
+
   private fun configureToolbar(activity: Activity) {
     this.supportActionBar?.apply {
       title = getString(R.string.accountAdd)
       subtitle = null
+    }
+  }
+
+  private fun reload() {
+    this.reload?.isEnabled = false
+    this.backgroundExecutor.execute {
+      try {
+        this.accountRegistry.refresh(
+          includeTestingLibraries = this.profilesController
+            .profileCurrent()
+            .preferences()
+            .showTestingLibraries
+        )
+      } catch (e: Exception) {
+        this.logger.error("failed to refresh registry: ", e)
+      }
     }
   }
 
@@ -265,7 +325,7 @@ class AccountRegistryFragment : Fragment() {
         this.title.setText(R.string.accountRegistrySelect)
         this.accountList.visibility = View.VISIBLE
         this.progress.visibility = View.INVISIBLE
-        this.refresh.isEnabled = true
+        this.reload?.isEnabled = true
 
         val availableDescriptions =
           this.determineAvailableAccountProviderDescriptions()
@@ -276,10 +336,7 @@ class AccountRegistryFragment : Fragment() {
         } else {
           this.progressText.visibility = View.INVISIBLE
         }
-
-        this.accountListData.clear()
-        this.accountListData.addAll(availableDescriptions)
-        this.accountListAdapter.notifyDataSetChanged()
+        this.accountListAdapter.submitList(availableDescriptions)
       }
 
       AccountProviderRegistryStatus.Refreshing -> {
@@ -288,7 +345,7 @@ class AccountRegistryFragment : Fragment() {
         this.progress.visibility = View.VISIBLE
         this.progressText.visibility = View.VISIBLE
         this.progressText.setText(R.string.accountRegistryRetrieving)
-        this.refresh.isEnabled = false
+        this.reload?.isEnabled = false
       }
     }
   }
