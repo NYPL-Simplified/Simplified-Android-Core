@@ -741,9 +741,14 @@ class CatalogFragmentFeed : Fragment() {
     fun showAccountPickerAction() {
       // Configure the 'Home Action' in the Toolbar to show the account picker when tapped.
       this.supportActionBar?.apply {
-        setHomeAsUpIndicator(R.drawable.accounts)
-        setHomeActionContentDescription(R.string.catalogAccounts)
-        setDisplayHomeAsUpEnabled(true)
+        // Configure whether or not the user should be able to change accounts
+        if (configurationService.showChangeAccountsUi) {
+          setHomeAsUpIndicator(R.drawable.accounts)
+          setHomeActionContentDescription(R.string.catalogAccounts)
+          setDisplayHomeAsUpEnabled(true)
+        } else {
+          setDisplayHomeAsUpEnabled(false)
+        }
       }
     }
 
