@@ -743,10 +743,12 @@ class CatalogFragmentFeed : Fragment() {
       this.supportActionBar?.apply {
         // Configure whether or not the user should be able to change accounts
         if (configurationService.showChangeAccountsUi) {
-            setHomeAsUpIndicator(R.drawable.accounts)
-            setHomeActionContentDescription(R.string.catalogAccounts)
+          setHomeAsUpIndicator(R.drawable.accounts)
+          setHomeActionContentDescription(R.string.catalogAccounts)
+          setDisplayHomeAsUpEnabled(true)
+        } else {
+          setDisplayHomeAsUpEnabled(false)
         }
-        setDisplayHomeAsUpEnabled(configurationService.showChangeAccountsUi)
       }
     }
 
