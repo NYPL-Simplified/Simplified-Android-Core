@@ -308,6 +308,15 @@ class AudioBookManifestStrategy(
               targetURI = OPAManifestURI.Indirect(this.request.targetURI),
               userAgent = this.request.userAgent
             )
+          is AudioBookCredentials.UsernameOnly ->
+            OPAParameters(
+              userName = credentials.userName,
+              password = OPAPassword.NotRequired,
+              clientKey = secretService.clientKey,
+              clientPass = secretService.clientPass,
+              targetURI = OPAManifestURI.Indirect(this.request.targetURI),
+              userAgent = this.request.userAgent
+            )
           is AudioBookCredentials.BearerToken ->
             throw UnsupportedOperationException("Can't use bearer tokens for Overdrive fulfillment")
           null ->
@@ -332,6 +341,11 @@ class AudioBookManifestStrategy(
                 ManifestFulfillmentBasicCredentials(
                   userName = credentials.userName,
                   password = credentials.password
+                )
+              is AudioBookCredentials.UsernameOnly ->
+                ManifestFulfillmentBasicCredentials(
+                  userName = credentials.userName,
+                  password = ""
                 )
               is AudioBookCredentials.BearerToken ->
                 throw UnsupportedOperationException(
