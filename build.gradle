@@ -81,33 +81,39 @@ ext {
     logger.warn("org.librarysimplified.no_signing is not set: We will attempt to sign artifacts")
   }
 
-  if (!project.hasProperty("org.librarysimplified.simplye.keyPassword")) {
-    throw new IllegalArgumentException(
-      "Missing project property: org.librarysimplified.simplye.keyPassword")
-  } else {
-    nyplSigningKeyPassword = project.property("org.librarysimplified.simplye.keyPassword")
-    assert (nyplSigningKeyPassword != null)
-  }
+  if (!disableSigning) {
+    if (!project.hasProperty("org.librarysimplified.simplye.keyPassword")) {
+      throw new IllegalArgumentException(
+        "Missing project property: org.librarysimplified.simplye.keyPassword")
+    } else {
+      nyplSigningKeyPassword = project.property("org.librarysimplified.simplye.keyPassword")
+      assert (nyplSigningKeyPassword != null)
+    }
 
-  if (!project.hasProperty("org.librarysimplified.simplye.storePassword")) {
-    throw new IllegalArgumentException(
-      "Missing project property: org.librarysimplified.simplye.storePassword")
-  } else {
-    nyplSigningStorePassword = project.property("org.librarysimplified.simplye.storePassword")
-    assert (nyplSigningStorePassword != null)
-  }
+    if (!project.hasProperty("org.librarysimplified.simplye.storePassword")) {
+      throw new IllegalArgumentException(
+        "Missing project property: org.librarysimplified.simplye.storePassword")
+    } else {
+      nyplSigningStorePassword = project.property("org.librarysimplified.simplye.storePassword")
+      assert (nyplSigningStorePassword != null)
+    }
 
-  if (!project.hasProperty("org.librarysimplified.simplye.keyAlias")) {
-    throw new IllegalArgumentException(
-      "Missing project property: org.librarysimplified.simplye.keyAlias")
+    if (!project.hasProperty("org.librarysimplified.simplye.keyAlias")) {
+      throw new IllegalArgumentException(
+        "Missing project property: org.librarysimplified.simplye.keyAlias")
+    } else {
+      nyplSigningKeyAlias = project.property("org.librarysimplified.simplye.keyAlias")
+      assert (nyplSigningKeyAlias != null)
+    }
   } else {
-    nyplSigningKeyAlias = project.property("org.librarysimplified.simplye.keyAlias")
-    assert (nyplSigningKeyAlias != null)
+    nyplSigningKeyPassword = ""
+    nyplSigningStorePassword = ""
+    nyplSigningKeyAlias = ""
   }
 
   nyplAudioBookAPIVersion = "6.1.0"
   nyplR2Version = "0.0.5"
-  nyplHTTPVersion = "0.0.17-SNAPSHOT"
+  nyplHTTPVersion = "0.0.18-SNAPSHOT"
   irradiaMimeVersion = "1.1.1"
 }
 

@@ -53,7 +53,6 @@ class AccountsAdapter(
         View.GONE
       }
 
-    holder.accountIcon.setImageDrawable(null)
     holder.accountTitleView.text = account.provider.displayName
     holder.accountSubtitleView.text = account.provider.subtitle
     holder.parent.setOnClickListener {

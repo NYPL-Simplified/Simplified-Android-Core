@@ -159,17 +159,17 @@ internal object PatronUserProfiles {
     patronSettingsURI: URI,
     result: LSHTTPResponseStatus.Responded.Error
   ): T {
-    this.logger.error("received http error: {}: {}: {}", patronSettingsURI, result.message, result.status)
+    this.logger.error("received http error: {}: {}: {}", patronSettingsURI, result.properties.message, result.properties.status)
 
     val exception = Exception()
-    when (result.status) {
+    when (result.properties.status) {
       HttpURLConnection.HTTP_UNAUTHORIZED -> {
         taskRecorder.currentStepFailed("Invalid credentials!", "invalidCredentials", exception)
         throw exception
       }
       else -> {
-        taskRecorder.addAttributesIfPresent(result.problemReport?.toMap())
-        taskRecorder.currentStepFailed("Server error: ${result.status} ${result.message}", "httpError ${result.status} $patronSettingsURI", exception)
+        taskRecorder.addAttributesIfPresent(result.properties.problemReport?.toMap())
+        taskRecorder.currentStepFailed("Server error: ${result.properties.status} ${result.properties.message}", "httpError ${result.properties.status} $patronSettingsURI", exception)
         throw exception
       }
     }

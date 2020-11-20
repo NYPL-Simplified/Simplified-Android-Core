@@ -117,7 +117,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     context: BorrowContextType,
     status: LSHTTPResponseStatus.Responded.Error
   ) {
-    val report = status.problemReport
+    val report = status.properties.problemReport
     if (report != null) {
       context.taskRecorder.addAttributes(report.toMap())
 
@@ -135,7 +135,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     }
 
     context.taskRecorder.currentStepFailed(
-      message = "HTTP request failed: ${status.originalStatus} ${status.message}",
+      message = "HTTP request failed: ${status.properties.originalStatus} ${status.properties.message}",
       errorCode = httpRequestFailed,
       exception = null
     )
@@ -147,7 +147,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     uri: URI,
     status: LSHTTPResponseStatus.Responded.OK
   ) {
-    if (!isMimeTypeAcceptable(context, status.contentType)) {
+    if (!isMimeTypeAcceptable(context, status.properties.contentType)) {
       throw BorrowSubtaskFailed()
     }
 

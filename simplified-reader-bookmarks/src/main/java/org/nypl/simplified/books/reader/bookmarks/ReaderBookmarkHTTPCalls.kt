@@ -162,14 +162,14 @@ class ReaderBookmarkHTTPCalls(
     uri: URI,
     error: LSHTTPResponseStatus.Responded.Error
   ): T {
-    val problemReport = error.problemReport
+    val problemReport = error.properties.problemReport
     if (problemReport != null) {
       this.logger.error("detail: {}", problemReport.detail)
       this.logger.error("status: {}", problemReport.status)
       this.logger.error("title:  {}", problemReport.title)
       this.logger.error("type:   {}", problemReport.type)
     }
-    throw IOException("$uri received ${error.status} ${error.message}")
+    throw IOException("$uri received ${error.properties.status} ${error.properties.message}")
   }
 
   private fun deserializeBookmarksFromStream(value: InputStream): List<BookmarkAnnotation> {

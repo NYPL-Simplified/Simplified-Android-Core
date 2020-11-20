@@ -45,9 +45,9 @@ class FeedHTTPTransport(
 
       is LSHTTPResponseStatus.Responded.Error ->
         throw FeedHTTPTransportException(
-          message = status.message,
-          code = status.status,
-          report = status.problemReport
+          message = status.properties.message,
+          code = status.properties.status,
+          report = status.properties.problemReport
         )
 
       is LSHTTPResponseStatus.Failed ->

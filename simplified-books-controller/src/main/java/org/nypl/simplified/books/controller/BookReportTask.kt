@@ -72,7 +72,7 @@ class BookReportTask(
             "[{}]: http error for {}: ",
             this.account.id.uuid,
             this.feedEntry.bookID.brief(),
-            status.status
+            status.properties.status
           )
         }
         is LSHTTPResponseStatus.Failed -> {

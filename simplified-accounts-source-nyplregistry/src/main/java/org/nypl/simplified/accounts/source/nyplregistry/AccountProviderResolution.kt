@@ -339,7 +339,7 @@ class AccountProviderResolution(
 
         val result = request.execute()
         taskRecorder.addAttribute("Authentication Document", targetLink.href.toString())
-        taskRecorder.addAttributes(result.status.problemReport?.toMap() ?: emptyMap())
+        taskRecorder.addAttributes(result.status.properties?.problemReport?.toMap() ?: emptyMap())
 
         when (val status = result.status) {
           is LSHTTPResponseStatus.Responded.OK -> {
@@ -351,7 +351,7 @@ class AccountProviderResolution(
           }
 
           is LSHTTPResponseStatus.Responded.Error -> {
-            if (MIMECompatibility.isCompatibleStrictWithoutAttributes(status.contentType, authDocumentType)) {
+            if (MIMECompatibility.isCompatibleStrictWithoutAttributes(status.properties.contentType, authDocumentType)) {
               this.parseAuthenticationDocument(
                 targetURI = targetLink.href,
                 stream = status.bodyStream ?: emptyStream(),
@@ -361,7 +361,7 @@ class AccountProviderResolution(
               val message = this.stringResources.resolvingAuthDocumentRetrievalFailed
               taskRecorder.currentStepFailed(
                 message,
-                httpRequestFailed(targetLink.hrefURI, status.originalStatus, status.message)
+                httpRequestFailed(targetLink.hrefURI, status.properties.originalStatus, status.properties.message)
               )
               throw IOException(message)
             }

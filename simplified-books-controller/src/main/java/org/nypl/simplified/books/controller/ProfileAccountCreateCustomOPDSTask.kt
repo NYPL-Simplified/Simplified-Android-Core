@@ -182,7 +182,7 @@ class ProfileAccountCreateCustomOPDSTask(
         .build()
 
     return request.execute().use { response ->
-      this.taskRecorder.addAttributes(response.status.problemReport?.toMap() ?: emptyMap())
+      this.taskRecorder.addAttributes(response.status.properties?.problemReport?.toMap() ?: emptyMap())
 
       when (val status = response.status) {
         is LSHTTPResponseStatus.Responded.OK -> {
@@ -217,7 +217,7 @@ class ProfileAccountCreateCustomOPDSTask(
            * well... We've found the authentication document.
            */
 
-          val contentTypes = status.headers["content-type"]
+          val contentTypes = status.properties.headers["content-type"]
           if (contentTypes != null) {
             if (contentTypes.contains("application/vnd.opds.authentication.v1.0+json")) {
               this.logger.debug("delivered authentication document instead of error")
