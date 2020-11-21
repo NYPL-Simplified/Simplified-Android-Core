@@ -5,7 +5,6 @@
   android:layout_height="?android:listPreferredItemHeight"
   android:background="?attr/selectableItemBackground"
   android:clickable="true"
-  android:clipChildren="false"
   android:focusable="true"
   android:orientation="horizontal"
   android:paddingStart="16dp"
@@ -22,8 +21,9 @@
     android:src="@drawable/account_default" />
 
   <LinearLayout
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="match_parent"
+    android:layout_weight="1"
     android:gravity="center_vertical"
     android:orientation="vertical">
 
@@ -51,4 +51,18 @@
       tools:text="Inspire lifelong learning, advance knowledge, and strengthen our communities."
       tools:visibility="visible" />
   </LinearLayout>
+
+  <ImageButton
+    android:id="@+id/popupMenuIcon"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
+    android:layout_gravity="center_vertical"
+    android:layout_marginStart="16dp"
+    android:background="?selectableItemBackgroundBorderless"
+    android:contentDescription="@string/accountMore"
+    android:focusable="true"
+    android:foregroundTint="@android:color/primary_text_light"
+    android:src="@drawable/ic_more_vert"
+    android:visibility="gone"
+    tools:visibility="visible" />
 </LinearLayout>

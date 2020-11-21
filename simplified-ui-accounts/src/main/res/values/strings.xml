@@ -31,8 +31,8 @@
   <string name="accountReportIssue">Report an issue…</string>
   <string name="accounts">Accounts</string>
   <string name="accountsDelete">@string/accountDelete</string>
-  <string name="accountsDeleteConfirm">Are you sure you want to remove your \"%1$s\" account from this device?</string>
-  <string name="accountsDeleteConfirmTitle">Remove account?</string>
+  <string name="accountsDeleteConfirm">Are you sure you want to remove \"%1$s\" from this device?</string>
+  <string name="accountsDeleteConfirmTitle">Remove account</string>
   <string name="accountsDeletionFailed">Account deletion failed</string>
   <string name="accountsDeletionFailedMessage">The account \'%1$s\' could not be deleted.</string>
   <string name="accountsDetails">Details</string>
@@ -41,4 +41,5 @@
   <string name="accountCustomOPDS">Custom OPDS Feed URL</string>
   <string name="currentlyBrowsing">You\'re currently browsing</string>
   <string name="accountSearchHint">Search accounts&#8230;</string>
+  <string name="accountMore">More options</string>
 </resources>

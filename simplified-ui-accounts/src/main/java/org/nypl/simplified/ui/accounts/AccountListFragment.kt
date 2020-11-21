@@ -84,7 +84,7 @@ class AccountListFragment : Fragment() {
   }
 
   @UiThread
-  private fun onAccountLongClicked(account: AccountType) {
+  private fun onAccountDeleteClicked(account: AccountType) {
     this.uiThread.checkIsUIThread()
 
     val context = this.requireContext()
@@ -96,6 +96,9 @@ class AccountListFragment : Fragment() {
           account.provider.displayName
         )
       )
+      .setNegativeButton(R.string.cancel) { dialog, _ ->
+        dialog.dismiss()
+      }
       .setPositiveButton(R.string.accountsDelete) { dialog, _ ->
         this.profilesController.profileAccountDeleteByProvider(account.provider.id)
         dialog.dismiss()
@@ -146,7 +149,7 @@ class AccountListFragment : Fragment() {
         accounts = this.accountListData,
         imageLoader = this.imageLoader,
         onItemClicked = this::onAccountClicked,
-        onItemLongClicked = this::onAccountLongClicked
+        onItemDeleteClicked = this::onAccountDeleteClicked
       )
 
     this.accountList.adapter = this.accountListAdapter
