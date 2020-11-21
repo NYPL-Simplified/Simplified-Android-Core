@@ -124,6 +124,8 @@ class AccountFragment : Fragment() {
   private lateinit var signUpLabel: TextView
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var viewModel: AccountFragmentViewModel
+  private lateinit var reportIssueGroup: ViewGroup
+  private lateinit var reportIssueItem: View
 
   private val cardCreatorResultCode = 101
   private val closing = AtomicBoolean(false)
@@ -254,6 +256,11 @@ class AccountFragment : Fragment() {
       layout.findViewById(R.id.accountCustomOPDS)
     this.accountCustomOPDSField =
       this.accountCustomOPDS.findViewById(R.id.accountCustomOPDSField)
+
+    this.reportIssueGroup =
+      layout.findViewById(R.id.accountReportIssue)
+    this.reportIssueItem =
+      this.reportIssueGroup.findViewById(R.id.accountReportIssueText)
 
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginProgress.visibility = View.INVISIBLE
@@ -500,6 +507,12 @@ class AccountFragment : Fragment() {
         View.GONE
       }
 
+    /*
+     * Configure the "Report issue..." item.
+     */
+
+    this.configureReportIssue()
+
     this.accountSubscription =
       this.profilesController.accountEvents()
         .subscribe(this::onAccountEvent)
@@ -541,6 +554,26 @@ class AccountFragment : Fragment() {
           this.authenticationAlternativesButtons.addView(layout)
         }
       }
+    }
+  }
+
+  /**
+   * If there's a support email, enable an option to use it.
+   */
+
+  private fun configureReportIssue() {
+    val email = this.account.provider.supportEmail
+    if (email != null) {
+      this.reportIssueGroup.visibility = View.VISIBLE
+      this.reportIssueItem.setOnClickListener {
+        val emailIntent =
+          Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null))
+        startActivity(
+          Intent.createChooser(emailIntent, resources.getString(R.string.accountReportIssue))
+        )
+      }
+    } else {
+      this.reportIssueGroup.visibility = View.GONE
     }
   }
 
