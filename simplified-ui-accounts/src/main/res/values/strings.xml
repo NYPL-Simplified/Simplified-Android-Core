@@ -40,4 +40,5 @@
   <string name="accountUserName">User Name</string>
   <string name="accountCustomOPDS">Custom OPDS Feed URL</string>
   <string name="currentlyBrowsing">You\'re currently browsing</string>
+  <string name="accountSearchHint">Search accounts&#8230;</string>
 </resources>

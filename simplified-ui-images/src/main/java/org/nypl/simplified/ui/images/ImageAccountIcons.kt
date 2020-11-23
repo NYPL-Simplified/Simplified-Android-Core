@@ -27,8 +27,13 @@ object ImageAccountIcons {
     @DrawableRes defaultIcon: Int,
     iconView: ImageView
   ) {
-    val uri = account.logoURI?.hrefURI ?: return
+    val uri = account.logoURI?.hrefURI
     this.logger.debug("configuring account logo: {}", uri)
+
+    if (uri == null) {
+      iconView.setImageResource(defaultIcon)
+      return
+    }
 
     loader
       .load(uri.toString())

@@ -7,9 +7,10 @@
 
   <TextView
     android:id="@+id/accountRegistryTitle"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="16dp"
+    android:gravity="center"
+    android:padding="16dp"
     android:text="@string/accountRegistrySelect"
     android:textStyle="bold"
     app:layout_constraintLeft_toLeftOf="parent"
@@ -22,9 +23,9 @@
     android:layout_width="256dp"
     android:layout_height="32dp"
     android:indeterminate="true"
+    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 
   <TextView
@@ -32,45 +33,25 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="@string/accountRegistryRetrieving"
+    app:layout_constraintBottom_toTopOf="@id/accountRegistryProgress"
     app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintBottom_toTopOf="@id/accountRegistryProgress" />
+    app:layout_constraintRight_toRightOf="parent" />
 
   <View
     android:layout_width="0dp"
     android:layout_height="1dp"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintRight_toRightOf="parent"
+    android:background="?android:attr/listDivider"
     app:layout_constraintBottom_toTopOf="@id/accountRegistryList"
-    android:background="?android:attr/listDivider" />
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent" />
 
   <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/accountRegistryList"
     android:layout_width="match_parent"
     android:layout_height="0dp"
-    android:layout_marginTop="16dp"
-    android:layout_marginBottom="16dp"
-    app:layout_constraintBottom_toTopOf="@id/accountRegistryRefreshButton"
+    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/accountRegistryTitle" />
-
-  <View
-    android:layout_width="0dp"
-    android:layout_height="1dp"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/accountRegistryList"
-    android:background="?android:attr/listDivider" />
-
-  <Button
-    android:id="@+id/accountRegistryRefreshButton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="16dp"
-    android:text="@string/accountRegistryRefresh"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
