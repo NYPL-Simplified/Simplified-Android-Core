@@ -34,14 +34,14 @@ import org.nypl.simplified.ui.thread.api.UIThreadServiceType
  * A fragment that shows the set of accounts in the current profile.
  */
 
-class AccountsFragment : Fragment() {
+class AccountListFragment : Fragment() {
 
   private lateinit var accountList: RecyclerView
-  private lateinit var accountListAdapter: AccountsAdapter
+  private lateinit var accountListAdapter: AccountListAdapter
   private lateinit var accountListData: MutableList<AccountType>
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var imageLoader: ImageLoaderType
-  private lateinit var parameters: AccountsFragmentParameters
+  private lateinit var parameters: AccountListFragmentParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var uiThread: UIThreadServiceType
   private var accountSubscription: Disposable? = null
@@ -55,10 +55,10 @@ class AccountsFragment : Fragment() {
      * Create a new accounts fragment for the given parameters.
      */
 
-    fun create(parameters: AccountsFragmentParameters): AccountsFragment {
+    fun create(parameters: AccountListFragmentParameters): AccountListFragment {
       val arguments = Bundle()
       arguments.putSerializable(PARAMETERS_ID, parameters)
-      val fragment = AccountsFragment()
+      val fragment = AccountListFragment()
       fragment.arguments = arguments
       return fragment
     }
@@ -68,7 +68,7 @@ class AccountsFragment : Fragment() {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
 
-    this.parameters = this.requireArguments()[PARAMETERS_ID] as AccountsFragmentParameters
+    this.parameters = this.requireArguments()[PARAMETERS_ID] as AccountListFragmentParameters
     this.accountListData = mutableListOf()
 
     val services = Services.serviceDirectory()
@@ -84,7 +84,7 @@ class AccountsFragment : Fragment() {
   }
 
   @UiThread
-  private fun onAccountLongClicked(account: AccountType) {
+  private fun onAccountDeleteClicked(account: AccountType) {
     this.uiThread.checkIsUIThread()
 
     val context = this.requireContext()
@@ -96,6 +96,9 @@ class AccountsFragment : Fragment() {
           account.provider.displayName
         )
       )
+      .setNegativeButton(R.string.cancel) { dialog, _ ->
+        dialog.dismiss()
+      }
       .setPositiveButton(R.string.accountsDelete) { dialog, _ ->
         this.profilesController.profileAccountDeleteByProvider(account.provider.id)
         dialog.dismiss()
@@ -122,7 +125,7 @@ class AccountsFragment : Fragment() {
     savedInstanceState: Bundle?
   ): View? {
     val layout =
-      inflater.inflate(R.layout.accounts, container, false)
+      inflater.inflate(R.layout.account_list, container, false)
 
     this.accountList =
       layout.findViewById(R.id.accountList)
@@ -142,11 +145,11 @@ class AccountsFragment : Fragment() {
         .subscribe(this::onAccountEvent)
 
     this.accountListAdapter =
-      AccountsAdapter(
+      AccountListAdapter(
         accounts = this.accountListData,
         imageLoader = this.imageLoader,
         onItemClicked = this::onAccountClicked,
-        onItemLongClicked = this::onAccountLongClicked
+        onItemDeleteClicked = this::onAccountDeleteClicked
       )
 
     this.accountList.adapter = this.accountListAdapter
@@ -159,7 +162,7 @@ class AccountsFragment : Fragment() {
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-    inflater.inflate(R.menu.accounts, menu)
+    inflater.inflate(R.menu.account_list, menu)
 
     val accountAdd = menu.findItem(R.id.accountsMenuActionAccountAdd)
     accountAdd.isVisible = this.parameters.shouldShowLibraryRegistryMenu

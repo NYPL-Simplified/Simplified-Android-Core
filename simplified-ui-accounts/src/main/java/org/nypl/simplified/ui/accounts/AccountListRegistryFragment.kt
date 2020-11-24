@@ -11,12 +11,12 @@ import android.view.MenuItem.OnActionExpandListener
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
+import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory
  * A fragment that shows the account registry and allows for account creation.
  */
 
-class AccountRegistryFragment : Fragment() {
+class AccountListRegistryFragment : Fragment() {
 
   private var errorDialog: AlertDialog? = null
   private lateinit var backgroundExecutor: ListeningScheduledExecutorService
@@ -55,12 +55,11 @@ class AccountRegistryFragment : Fragment() {
 
   @Volatile
   private lateinit var profilesController: ProfilesControllerType
-  private lateinit var progress: ProgressBar
-  private lateinit var progressText: TextView
+  private lateinit var progress: ContentLoadingProgressBar
   private lateinit var title: TextView
   private lateinit var uiThread: UIThreadServiceType
 
-  private val logger = LoggerFactory.getLogger(AccountRegistryFragment::class.java)
+  private val logger = LoggerFactory.getLogger(AccountListRegistryFragment::class.java)
   private var accountCreationSubscription: Disposable? = null
   private var accountRegistrySubscription: Disposable? = null
   private var reload: MenuItem? = null
@@ -127,8 +126,7 @@ class AccountRegistryFragment : Fragment() {
 
     this.accountList.visibility = View.INVISIBLE
     this.title.setText(R.string.accountRegistryCreating)
-    this.progressText.text = ""
-    this.progress.visibility = View.VISIBLE
+    this.progress.show()
 
     this.profilesController.profileAccountCreate(account.id)
   }
@@ -139,8 +137,8 @@ class AccountRegistryFragment : Fragment() {
         this.uiThread.runOnUIThread(
           Runnable {
             this.accountList.visibility = View.INVISIBLE
-            this.progress.visibility = View.VISIBLE
-            this.progressText.text = event.message
+            this.progress.show()
+            this.title.text = event.message
           }
         )
 
@@ -169,14 +167,12 @@ class AccountRegistryFragment : Fragment() {
     savedInstanceState: Bundle?
   ): View? {
     val layout =
-      inflater.inflate(R.layout.account_registry, container, false)
+      inflater.inflate(R.layout.account_list_registry, container, false)
 
     this.title =
       layout.findViewById(R.id.accountRegistryTitle)
     this.progress =
       layout.findViewById(R.id.accountRegistryProgress)
-    this.progressText =
-      layout.findViewById(R.id.accountRegistryProgressText)
     this.accountList =
       layout.findViewById(R.id.accountRegistryList)
 
@@ -218,7 +214,7 @@ class AccountRegistryFragment : Fragment() {
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-    inflater.inflate(R.menu.account_registry, menu)
+    inflater.inflate(R.menu.account_list_registry, menu)
     this.reload = menu.findItem(R.id.accountMenuActionReload)
 
     val search = menu.findItem(R.id.accountMenuActionSearch)
@@ -237,15 +233,15 @@ class AccountRegistryFragment : Fragment() {
       override fun onQueryTextChange(newText: String): Boolean {
         when {
           newText.isEmpty() -> {
-            this@AccountRegistryFragment.accountListAdapter.resetFilter()
+            this@AccountListRegistryFragment.accountListAdapter.resetFilter()
           }
           newText.equals("NYPL", ignoreCase = true) -> {
-            this@AccountRegistryFragment.accountListAdapter.filterList { account ->
+            this@AccountListRegistryFragment.accountListAdapter.filterList { account ->
               account.title.contains("New York Public Library", ignoreCase = true)
             }
           }
           else -> {
-            this@AccountRegistryFragment.accountListAdapter.filterList { account ->
+            this@AccountListRegistryFragment.accountListAdapter.filterList { account ->
               account.title.contains(newText, ignoreCase = true)
             }
           }
@@ -261,7 +257,7 @@ class AccountRegistryFragment : Fragment() {
       }
 
       override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-        this@AccountRegistryFragment.accountListAdapter.resetFilter()
+        this@AccountListRegistryFragment.accountListAdapter.resetFilter()
         return true
       }
     })
@@ -324,17 +320,16 @@ class AccountRegistryFragment : Fragment() {
       AccountProviderRegistryStatus.Idle -> {
         this.title.setText(R.string.accountRegistrySelect)
         this.accountList.visibility = View.VISIBLE
-        this.progress.visibility = View.INVISIBLE
+        this.progress.hide()
         this.reload?.isEnabled = true
 
         val availableDescriptions =
           this.determineAvailableAccountProviderDescriptions()
 
         if (availableDescriptions.isEmpty()) {
-          this.progressText.visibility = View.VISIBLE
-          this.progressText.setText(R.string.accountRegistryEmpty)
+          this.title.setText(R.string.accountRegistryEmpty)
         } else {
-          this.progressText.visibility = View.INVISIBLE
+          this.title.setText(R.string.accountRegistrySelect)
         }
         this.accountListAdapter.submitList(availableDescriptions)
       }
@@ -342,9 +337,8 @@ class AccountRegistryFragment : Fragment() {
       AccountProviderRegistryStatus.Refreshing -> {
         this.title.setText(R.string.accountRegistrySelect)
         this.accountList.visibility = View.INVISIBLE
-        this.progress.visibility = View.VISIBLE
-        this.progressText.visibility = View.VISIBLE
-        this.progressText.setText(R.string.accountRegistryRetrieving)
+        this.progress.show()
+        this.title.setText(R.string.accountRegistryRetrieving)
         this.reload?.isEnabled = false
       }
     }

@@ -117,7 +117,7 @@ class AccountPickerDialogFragment : BottomSheetDialogFragment(), OnAccountClickL
   }
 }
 
-class AccountViewHolder(
+class AccountPickerViewHolder(
   view: View,
   private val imageLoader: ImageLoaderType,
   private val listener: OnAccountClickListener
@@ -194,7 +194,7 @@ class AccountPickerAdapter(
     val view = inflater.inflate(R.layout.account_picker_item, parent, false)
     return when (viewType) {
       LIST_FOOTER -> FooterViewHolder(view, listener)
-      else -> AccountViewHolder(view, imageLoader, listener)
+      else -> AccountPickerViewHolder(view, imageLoader, listener)
     }
   }
 
@@ -213,7 +213,7 @@ class AccountPickerAdapter(
     when (holder.itemViewType) {
       LIST_ITEM -> {
         val item = accounts[position]
-        (holder as AccountViewHolder).bind(item, item.id == currentId)
+        (holder as AccountPickerViewHolder).bind(item, item.id == currentId)
       }
     }
   }

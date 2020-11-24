@@ -8,5 +8,5 @@
     android:id="@+id/accountList"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:listitem="@layout/account_cell" />
+    tools:listitem="@layout/account_list_item" />
 </FrameLayout>
