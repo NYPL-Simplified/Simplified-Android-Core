@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.profiles
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -20,7 +22,6 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileSelection
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 
 /**
  * A fragment that displays a profile selection screen.
@@ -111,20 +112,20 @@ class ProfileSelectionFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
-    val toolbarHost = this.requireActivity() as ToolbarHostType
-    val toolbar = toolbarHost.findToolbar()
-    toolbarHost.toolbarClearMenu()
-    toolbarHost.toolbarUnsetArrow()
-    toolbar.visibility = View.VISIBLE
-    toolbar.setTitle(R.string.profilesTitle)
-    toolbar.subtitle = ""
+    configureToolbar(this.requireActivity())
 
     this.profilesSubscription =
       this.profilesController.profileEvents()
         .subscribe(this::onProfileEvent)
 
     this.updateProfilesList()
+  }
+
+  private fun configureToolbar(activity: Activity) {
+    this.supportActionBar?.apply {
+      title = getString(R.string.profilesTitle)
+      subtitle = null
+    }
   }
 
   private fun onProfileEvent(event: ProfileEvent) {

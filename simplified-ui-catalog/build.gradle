@@ -7,10 +7,10 @@ dependencies {
 
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-analytics-api")
+  implementation project(":simplified-android-ktx")
   implementation project(":simplified-books-controller-api")
   implementation project(":simplified-books-registry-api")
   implementation project(":simplified-buildconfig-api")
-  implementation project(":simplified-documents")
   implementation project(":simplified-futures")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
@@ -19,7 +19,6 @@ dependencies {
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
-  implementation project(":simplified-ui-toolbar")
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXCardView

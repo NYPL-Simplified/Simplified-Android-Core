@@ -140,8 +140,8 @@ class AccountInformationFragment : Fragment() {
     )
     viewModel.validateUsername(
       binding.usernameEt.text.toString(),
-      requireActivity().intent.extras.getString("username"),
-      requireActivity().intent.extras.getString("password")
+      requireActivity().intent.getStringExtra("username")!!,
+      requireActivity().intent.getStringExtra("password")!!
     )
   }
 

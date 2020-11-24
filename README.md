@@ -1,7 +1,7 @@
 Library Simplified
 ===
 
-[![Build Status](https://img.shields.io/travis/com/NYPL-Simplified/Simplified-Android-Core?style=flat-square)](https://www.travis-ci.com/NYPL-Simplified/Simplified-Android-Core)
+[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Authenticated)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Authenticated%29%22)
 [![Maven Central](https://img.shields.io/maven-central/v/org.librarysimplified/org.librarysimplified.main?style=flat-square)](https://repo1.maven.org/maven2/org/librarysimplified/)
 [![Maven Central (snapshot)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.librarysimplified/org.librarysimplified.main.svg?style=flat-square)](https://oss.sonatype.org/content/repositories/snapshots/org.librarysimplified/)
 
@@ -249,15 +249,13 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.boot.api](simplified-boot-api)|Application boot API|
 |[org.librarysimplified.buildconfig.api](simplified-buildconfig-api)|Build-time configuration API|
 |[org.librarysimplified.cardcreator](simplified-cardcreator)|NYPL card creator|
-|[org.librarysimplified.clock](simplified-clock)|Clock API|
 |[org.librarysimplified.content.api](simplified-content-api)|Content resolver API|
 |[org.librarysimplified.crashlytics](simplified-crashlytics)|Crashlytics|
 |[org.librarysimplified.crashlytics.api](simplified-crashlytics-api)|Crashlytics functionality|
-|[org.librarysimplified.documents](simplified-documents)|Documents API|
+|[org.librarysimplified.documents](simplified-documents)|Documents|
 |[org.librarysimplified.feeds.api](simplified-feeds-api)|Feed API|
 |[org.librarysimplified.files](simplified-files)|File utilities|
 |[org.librarysimplified.futures](simplified-futures)|Guava Future extensions|
-|[org.librarysimplified.http.core](simplified-http-core)|HTTP API|
 |[org.librarysimplified.json.core](simplified-json-core)|JSON utilities|
 |[org.librarysimplified.links](simplified-links)|Link types|
 |[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|
@@ -303,7 +301,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
 |[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
 |[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
-|[org.librarysimplified.ui.toolbar](simplified-ui-toolbar)|Sane toolbar handling|
 |[org.librarysimplified.viewer.api](simplified-viewer-api)|Viewer API|
 |[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|
 |[org.librarysimplified.viewer.epub.readium1](simplified-viewer-epub-readium1)|Readium 1 EPUB reader|

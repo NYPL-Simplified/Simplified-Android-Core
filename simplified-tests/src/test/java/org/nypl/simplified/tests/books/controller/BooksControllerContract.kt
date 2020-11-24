@@ -3,8 +3,10 @@ package org.nypl.simplified.tests.books.controller
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.Option
 import io.reactivex.subjects.PublishSubject
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okio.Buffer
 import org.hamcrest.core.IsInstanceOf
 import org.junit.After
 import org.junit.Assert
@@ -12,7 +14,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -41,17 +45,11 @@ import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
-import org.nypl.simplified.clock.Clock
-import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.http.core.HTTPProblemReport
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -78,9 +76,7 @@ import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -88,7 +84,6 @@ import java.io.InputStream
 import java.net.URI
 import java.util.ArrayList
 import java.util.Collections
-import java.util.HashMap
 import java.util.NoSuchElementException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
@@ -119,12 +114,12 @@ abstract class BooksControllerContract {
   private lateinit var executorDownloads: ListeningExecutorService
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
-  private lateinit var http: MockingHTTP
   private lateinit var lsHTTP: LSHTTPClientType
   private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
   private lateinit var profileEvents: PublishSubject<ProfileEvent>
   private lateinit var profileEventsReceived: MutableList<ProfileEvent>
   private lateinit var profiles: ProfilesDatabaseType
+  private lateinit var server: MockWebServer
 
   protected abstract fun context(): Context
 
@@ -157,7 +152,7 @@ abstract class BooksControllerContract {
     feedExecutor: ListeningExecutorService,
     accountEvents: PublishSubject<AccountEvent>,
     profileEvents: PublishSubject<ProfileEvent>,
-    http: HTTPType,
+    http: LSHTTPClientType,
     books: BookRegistryType,
     profiles: ProfilesDatabaseType,
     accountProviders: AccountProviderRegistryType,
@@ -166,7 +161,7 @@ abstract class BooksControllerContract {
     val parser =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
     val transport =
-      FeedHTTPTransport.newTransport(http)
+      FeedHTTPTransport(http)
 
     val bundledContent =
       BundledContentResolverType { uri -> throw FileNotFoundException(uri.toString()) }
@@ -196,11 +191,9 @@ abstract class BooksControllerContract {
     services.putService(BorrowSubtaskDirectoryType::class.java, this.borrowSubtasks)
     services.putService(BookRevokeStringResourcesType::class.java, revokeStringResources)
     services.putService(BundledContentResolverType::class.java, bundledContent)
-    services.putService(ClockType::class.java, Clock)
     services.putService(ContentResolverType::class.java, this.contentResolver)
     services.putService(FeedLoaderType::class.java, feedLoader)
     services.putService(LSHTTPClientType::class.java, this.lsHTTP)
-    services.putService(HTTPType::class.java, http)
     services.putService(OPDSFeedParserType::class.java, parser)
     services.putService(PatronUserProfileParsersType::class.java, patronUserProfileParsers)
     services.putService(ProfileAccountCreationStringResourcesType::class.java, profileAccountCreationStringResources)
@@ -239,12 +232,20 @@ abstract class BooksControllerContract {
     this.executorDownloads = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorTimer = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
-    this.http = MockingHTTP()
-    this.lsHTTP = Mockito.mock(LSHTTPClientType::class.java)
     this.patronUserProfileParsers = Mockito.mock(PatronUserProfileParsersType::class.java)
     this.profileEvents = PublishSubject.create<ProfileEvent>()
     this.profileEventsReceived = Collections.synchronizedList(ArrayList())
     this.profiles = profilesDatabaseWithoutAnonymous(this.accountEvents, this.directoryProfiles)
+
+    this.lsHTTP =
+      LSHTTPClients()
+        .create(
+          context = Mockito.mock(Context::class.java),
+          configuration = LSHTTPClientConfiguration("simplified-test", "1.0.0")
+        )
+
+    this.server = MockWebServer()
+    this.server.start()
   }
 
   @After
@@ -254,6 +255,7 @@ abstract class BooksControllerContract {
     this.executorFeeds.shutdown()
     this.executorDownloads.shutdown()
     this.executorTimer.shutdown()
+    this.server.close()
   }
 
   /**
@@ -271,30 +273,29 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
+    val provider =
+      MockAccountProviders.fakeAuthProvider(
+        uri = "urn:fake-auth:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
-    this.http.addResponse(
-      "http://www.example.com/accounts0/loans.xml",
-      HTTPResultError(
-        400,
-        "BAD REQUEST",
-        0L,
-        HashMap(),
-        0L,
-        ByteArrayInputStream(ByteArray(0)),
-        Option.none<HTTPProblemReport>()
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(400)
+        .setBody("")
     )
 
     this.expected.expect(ExecutionException::class.java)
@@ -317,30 +318,29 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
+    val provider =
+      MockAccountProviders.fakeAuthProvider(
+        uri = "urn:fake-auth:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
-    this.http.addResponse(
-      "http://www.example.com/accounts0/loans.xml",
-      HTTPResultError(
-        401,
-        "UNAUTHORIZED",
-        0L,
-        HashMap(),
-        0L,
-        ByteArrayInputStream(ByteArray(0)),
-        Option.none<HTTPProblemReport>()
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(401)
+        .setBody("")
     )
 
     controller.booksSync(account).get()
@@ -362,14 +362,20 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeProvider("urn:fake:0")
+    val provider =
+      MockAccountProviders.fakeProvider(
+        providerId = "urn:fake:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
@@ -395,14 +401,20 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
+    val provider =
+      MockAccountProviders.fakeAuthProvider(
+        uri = "urn:fake-auth:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
@@ -427,29 +439,29 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
+    val provider =
+      MockAccountProviders.fakeAuthProvider(
+        uri = "urn:fake-auth:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
-    this.http.addResponse(
-      "http://www.example.com/accounts0/loans.xml",
-      HTTPResultOK<InputStream>(
-        "OK",
-        200,
-        ByteArrayInputStream(byteArrayOf(0x23, 0x10, 0x39, 0x59)),
-        4L,
-        HashMap(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("Unlikely!")
     )
 
     this.expected.expect(ExecutionException::class.java)
@@ -472,29 +484,29 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
+    val provider =
+      MockAccountProviders.fakeAuthProvider(
+        uri = "urn:fake-auth:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
-    this.http.addResponse(
-      "http://www.example.com/accounts0/loans.xml",
-      HTTPResultOK(
-        "OK",
-        200,
-        resource("testBooksSyncNewEntries.xml"),
-        resourceSize("testBooksSyncNewEntries.xml"),
-        HashMap(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(resource("testBooksSyncNewEntries.xml")))
     )
 
     this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
@@ -545,14 +557,20 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
+    val provider =
+      MockAccountProviders.fakeAuthProvider(
+        uri = "urn:fake-auth:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
@@ -562,16 +580,10 @@ abstract class BooksControllerContract {
      * Populate the database by syncing against a feed that contains books.
      */
 
-    this.http.addResponse(
-      "http://www.example.com/accounts0/loans.xml",
-      HTTPResultOK(
-        "OK",
-        200,
-        resource("testBooksSyncNewEntries.xml"),
-        resourceSize("testBooksSyncNewEntries.xml"),
-        HashMap(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(resource("testBooksSyncNewEntries.xml")))
     )
 
     controller.booksSync(account).get()
@@ -592,16 +604,10 @@ abstract class BooksControllerContract {
      * Now run the sync again but this time with a feed that removes books.
      */
 
-    this.http.addResponse(
-      "http://www.example.com/accounts0/loans.xml",
-      HTTPResultOK(
-        "OK",
-        200,
-        resource("testBooksSyncRemoveEntries.xml"),
-        resourceSize("testBooksSyncRemoveEntries.xml"),
-        HashMap(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(resource("testBooksSyncRemoveEntries.xml")))
     )
 
     controller.booksSync(account).get()
@@ -655,29 +661,29 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
+    val provider =
+      MockAccountProviders.fakeAuthProvider(
+        uri = "urn:fake-auth:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
-    this.http.addResponse(
-      "http://www.example.com/accounts0/loans.xml",
-      HTTPResultOK(
-        "OK",
-        200,
-        resource("testBooksDelete.xml"),
-        resourceSize("testBooksDelete.xml"),
-        HashMap(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(resource("testBooksDelete.xml")))
     )
 
     controller.booksSync(account).get()
@@ -739,29 +745,29 @@ abstract class BooksControllerContract {
         feedExecutor = this.executorFeeds,
         accountEvents = this.accountEvents,
         profileEvents = this.profileEvents,
-        http = http,
+        http = this.lsHTTP,
         books = this.bookRegistry,
         profiles = this.profiles,
         accountProviders = MockAccountProviders.fakeAccountProviders(),
         patronUserProfileParsers = this.patronUserProfileParsers
       )
 
-    val provider = MockAccountProviders.fakeAuthProvider("urn:fake-auth:0")
+    val provider =
+      MockAccountProviders.fakeAuthProvider(
+        uri = "urn:fake-auth:0",
+        host = this.server.hostName,
+        port = this.server.port
+      )
+
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
-    this.http.addResponse(
-      "http://www.example.com/accounts0/loans.xml",
-      HTTPResultOK(
-        "OK",
-        200,
-        resource("testBooksSyncNewEntries.xml"),
-        resourceSize("testBooksSyncNewEntries.xml"),
-        HashMap(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(resource("testBooksSyncNewEntries.xml")))
     )
 
     controller.booksSync(account).get()
@@ -778,7 +784,7 @@ abstract class BooksControllerContract {
   }
 
   private fun resource(file: String): InputStream {
-    return BooksControllerContract::class.java.getResourceAsStream(file)
+    return BooksControllerContract::class.java.getResourceAsStream(file)!!
   }
 
   @Throws(IOException::class)

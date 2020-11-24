@@ -240,7 +240,7 @@ class MigrationFrom3Master(
       this.publishStepSucceeded(this.strings.successDeletedOldData)
       return MigrationReport(
         this.services.applicationVersion,
-        this.javaClass.canonicalName,
+        this.javaClass.canonicalName ?: "unknown",
         time,
         this.noticesLog.toList()
       )

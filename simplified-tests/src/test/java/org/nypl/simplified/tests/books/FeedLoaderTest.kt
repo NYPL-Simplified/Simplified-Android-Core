@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.books
 
 import com.google.common.util.concurrent.ListeningExecutorService
-import com.io7m.jfunctional.OptionType
+import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.mockito.Mockito
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -10,7 +10,6 @@ import org.nypl.simplified.books.formats.BookFormatSupportParameters
 import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
-import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSFeedTransportType
@@ -25,9 +24,10 @@ class FeedLoaderTest : FeedLoaderContract() {
       OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
       OPDSFeedParser.newParser(entryParser)
-    val transport = OPDSFeedTransportType<OptionType<HTTPAuthType>> { context, uri, method ->
-      uri.toURL().openStream()
-    }
+    val transport =
+      OPDSFeedTransportType<LSHTTPAuthorizationType?> { context, uri, method ->
+        uri.toURL().openStream()
+      }
 
     val searchParser = OPDSSearchParser.newParser()
     val bookRegistry = BookRegistry.create()
@@ -60,6 +60,6 @@ class FeedLoaderTest : FeedLoaderContract() {
   }
 
   override fun resource(name: String): URI {
-    return FeedLoaderContract::class.java.getResource(name).toURI()
+    return FeedLoaderContract::class.java.getResource(name)!!.toURI()
   }
 }

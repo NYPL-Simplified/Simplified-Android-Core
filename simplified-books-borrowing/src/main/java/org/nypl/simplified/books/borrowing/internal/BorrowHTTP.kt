@@ -5,7 +5,7 @@ import one.irradia.mime.api.MIMEType
 import org.librarysimplified.http.api.LSHTTPAuthorizationBasic
 import org.librarysimplified.http.api.LSHTTPAuthorizationBearerToken
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
-import org.librarysimplified.http.api.LSHTTPProblemReport
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType.AllowRedirects.ALLOW_UNSAFE_REDIRECTS
 import org.librarysimplified.http.downloads.LSHTTPDownloadRequest
 import org.librarysimplified.http.downloads.LSHTTPDownloadState
 import org.librarysimplified.http.downloads.LSHTTPDownloadState.DownloadReceiving
@@ -36,26 +36,6 @@ import java.net.URI
 object BorrowHTTP {
 
   /**
-   * Encode the given problem report as a set of presentable attributes.
-   */
-
-  fun problemReportAsAttributes(
-    problemReport: LSHTTPProblemReport?
-  ): Map<String, String> {
-    return when (problemReport) {
-      null -> mapOf()
-      else -> {
-        val attributes = mutableMapOf<String, String>()
-        attributes["HTTP problem detail"] = problemReport.detail ?: ""
-        attributes["HTTP problem status"] = problemReport.status.toString()
-        attributes["HTTP problem title"] = problemReport.title ?: ""
-        attributes["HTTP problem type"] = problemReport.type.toString()
-        attributes.toMap()
-      }
-    }
-  }
-
-  /**
    * Create a download request for the given URI, downloading content to the given output file.
    * Events will be delivered to the given borrow context.
    */
@@ -68,6 +48,7 @@ object BorrowHTTP {
     val request =
       context.httpClient.newRequest(target)
         .setAuthorization(authorizationOf(context.account))
+        .allowRedirects(ALLOW_UNSAFE_REDIRECTS)
         .build()
 
     return LSHTTPDownloadRequest(
@@ -148,9 +129,9 @@ object BorrowHTTP {
     result: DownloadFailedServer
   ): BorrowSubtaskFailed {
     val status = result.responseStatus
-    context.taskRecorder.addAttributes(BorrowHTTP.problemReportAsAttributes(status.problemReport))
+    context.taskRecorder.addAttributes(status.properties.problemReport?.toMap() ?: emptyMap())
     context.taskRecorder.currentStepFailed(
-      message = "HTTP request failed: ${status.originalStatus} ${status.message}",
+      message = "HTTP request failed: ${status.properties.originalStatus} ${status.properties.message}",
       errorCode = BorrowErrorCodes.httpRequestFailed,
       exception = null
     )

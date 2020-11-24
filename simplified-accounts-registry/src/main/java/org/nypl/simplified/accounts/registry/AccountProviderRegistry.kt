@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.common.base.Preconditions
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import org.librarysimplified.http.api.LSHTTPClientType
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
@@ -15,6 +16,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.Idle
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.Refreshing
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.accounts.source.spi.AccountProviderSourceFactoryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -179,7 +181,7 @@ class AccountProviderRegistry private constructor(
       return taskRecorder.finishFailure()
     } catch (e: Exception) {
       this.logger.error("resolution exception: ", e)
-      val message = e.message ?: e.javaClass.canonicalName
+      val message = e.message ?: e.javaClass.canonicalName ?: "unknown"
       taskRecorder.currentStepFailedAppending(message, "unexpectedException", e)
       return taskRecorder.finishFailure()
     }
@@ -193,12 +195,13 @@ class AccountProviderRegistry private constructor(
 
     fun createFromServiceLoader(
       context: Context,
+      http: LSHTTPClientType,
       defaultProvider: AccountProviderType
     ): AccountProviderRegistryType {
       val loader =
-        ServiceLoader.load(AccountProviderSourceType::class.java)
+        ServiceLoader.load(AccountProviderSourceFactoryType::class.java)
       val sources =
-        loader.toList()
+        loader.toList().map { it.create(context, http) }
       return this.createFrom(context, sources, defaultProvider)
     }
 

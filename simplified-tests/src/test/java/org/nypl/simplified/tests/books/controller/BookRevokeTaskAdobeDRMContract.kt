@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.controller
 
+import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.Option
@@ -15,6 +16,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.mockito.internal.verification.Times
 import org.nypl.drm.core.AdobeAdeptConnectorType
@@ -64,7 +68,6 @@ import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MockRevokeStringResources
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -107,7 +110,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var http: MockingHTTP
+  private lateinit var http: LSHTTPClientType
 
   private val bookRevokeStrings = MockRevokeStringResources()
 
@@ -140,7 +143,13 @@ abstract class BookRevokeTaskAdobeDRMContract {
   @Before
   @Throws(Exception::class)
   fun setUp() {
-    this.http = MockingHTTP()
+    this.http =
+      LSHTTPClients()
+        .create(
+          context = Mockito.mock(Context::class.java),
+          configuration = LSHTTPClientConfiguration("simplified-tests", "1.0.0")
+        )
+
     this.adobeExecutor = Mockito.mock(AdobeAdeptExecutorType::class.java)
     this.adobeConnector = Mockito.mock(AdobeAdeptConnectorType::class.java)
     this.executorBooks = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
@@ -177,7 +186,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     val searchParser =
       OPDSSearchParser.newParser()
     val transport =
-      FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport(this.http)
 
     return FeedLoader.create(
       bookFormatSupport = this.bookFormatSupport,

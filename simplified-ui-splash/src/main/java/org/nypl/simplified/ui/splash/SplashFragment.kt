@@ -26,8 +26,8 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
 import org.joda.time.format.DateTimeFormat
+import org.librarysimplified.documents.EULAType
 import org.nypl.simplified.boot.api.BootEvent
-import org.nypl.simplified.documents.eula.EULAType
 import org.nypl.simplified.migration.api.MigrationReportXML
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
@@ -228,15 +228,15 @@ class SplashFragment : Fragment() {
     if (activity.isFinishing) return
 
     this.viewsForEULA.eulaAgree.setOnClickListener {
-      eula.eulaSetHasAgreed(true)
+      eula.hasAgreed = true
       this.onFinishEULASuccessfully()
     }
     this.viewsForEULA.eulaDisagree.setOnClickListener {
-      eula.eulaSetHasAgreed(false)
+      eula.hasAgreed = false
       this.activity?.finish()
     }
 
-    val url = eula.documentGetReadableURL()
+    val url = eula.readableURL
     this.logger.debug("eula:     {}", eula)
     this.logger.debug("eula URL: {}", url)
 
@@ -458,7 +458,7 @@ class SplashFragment : Fragment() {
     }
 
     val eula = this.listener.onSplashEULARequested()
-    if (eula.eulaHasAgreed()) {
+    if (eula.hasAgreed) {
       this.onFinishEULASuccessfully()
       return
     }

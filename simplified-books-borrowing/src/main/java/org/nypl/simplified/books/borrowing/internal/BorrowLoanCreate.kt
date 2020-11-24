@@ -117,10 +117,10 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     context: BorrowContextType,
     status: LSHTTPResponseStatus.Responded.Error
   ) {
-    context.taskRecorder.addAttributes(BorrowHTTP.problemReportAsAttributes(status.problemReport))
-
-    val report = status.problemReport
+    val report = status.properties.problemReport
     if (report != null) {
+      context.taskRecorder.addAttributes(report.toMap())
+
       if (report.type == "http://librarysimplified.org/terms/problem/loan-already-exists") {
         context.taskRecorder.currentStepSucceeded("It turns out we already had a loan for this book.")
         context.bookPublishStatus(
@@ -135,7 +135,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     }
 
     context.taskRecorder.currentStepFailed(
-      message = "HTTP request failed: ${status.originalStatus} ${status.message}",
+      message = "HTTP request failed: ${status.properties.originalStatus} ${status.properties.message}",
       errorCode = httpRequestFailed,
       exception = null
     )
@@ -147,7 +147,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
     uri: URI,
     status: LSHTTPResponseStatus.Responded.OK
   ) {
-    if (!isMimeTypeAcceptable(context, status.contentType)) {
+    if (!isMimeTypeAcceptable(context, status.properties.contentType)) {
       throw BorrowSubtaskFailed()
     }
 

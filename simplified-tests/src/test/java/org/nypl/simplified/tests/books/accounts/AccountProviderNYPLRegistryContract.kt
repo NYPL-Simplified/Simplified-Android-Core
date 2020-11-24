@@ -2,27 +2,32 @@ package org.nypl.simplified.tests.books.accounts
 
 import android.content.Context
 import android.content.res.Resources
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okio.Buffer
 import org.joda.time.DateTimeUtils
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistry
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult.SourceSucceeded
-import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.opds.auth_document.AuthenticationDocumentParsers
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 
 abstract class AccountProviderNYPLRegistryContract {
 
+  private lateinit var server: MockWebServer
+  private lateinit var http: LSHTTPClientType
   private lateinit var resources: Resources
   private lateinit var cacheDir: File
   private lateinit var context: Context
@@ -32,7 +37,7 @@ abstract class AccountProviderNYPLRegistryContract {
   @Throws(Exception::class)
   private fun readAllFromResource(name: String): InputStream {
     return AccountProviderNYPLRegistryContract::class.java
-      .getResource("/org/nypl/simplified/tests/books/accounts/descriptions/$name")
+      .getResource("/org/nypl/simplified/tests/books/accounts/descriptions/$name")!!
       .openStream()
   }
 
@@ -51,11 +56,22 @@ abstract class AccountProviderNYPLRegistryContract {
       .thenReturn(this.resources)
     Mockito.`when`(this.resources.getString(Mockito.anyInt()))
       .thenReturn("A STRING RESOURCE")
+
+    this.http =
+      LSHTTPClients()
+        .create(
+          context = Mockito.mock(Context::class.java),
+          configuration = LSHTTPClientConfiguration("simplified-tests", "1.0")
+        )
+
+    this.server = MockWebServer()
+    this.server.start()
   }
 
   @After
   fun testTearDown() {
     this.cacheDir.deleteRecursively()
+    this.server.close()
   }
 
   /**
@@ -64,26 +80,20 @@ abstract class AccountProviderNYPLRegistryContract {
 
   @Test
   fun testProductionProvidersFromServerOK() {
-    val mockHTTP = MockingHTTP()
-
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries",
-      HTTPResultOK(
-        "OK",
-        200,
-        readAllFromResource("libraryregistry.json"),
-        0L,
-        mapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry.json")))
     )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        http = mockHTTP,
+        http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers()
+        serializers = AccountProviderDescriptionCollectionSerializers(),
+        uriProduction = this.server.url("production").toUri(),
+        uriQA = this.server.url("qa").toUri()
       )
 
     val result = provider.load(this.context, false)
@@ -99,38 +109,26 @@ abstract class AccountProviderNYPLRegistryContract {
 
   @Test
   fun testAllProvidersFromServerOK() {
-    val mockHTTP = MockingHTTP()
-
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries",
-      HTTPResultOK(
-        "OK",
-        200,
-        readAllFromResource("libraryregistry.json"),
-        0L,
-        mapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry-qa.json")))
     )
 
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries/qa",
-      HTTPResultOK(
-        "OK",
-        200,
-        readAllFromResource("libraryregistry-qa.json"),
-        0L,
-        mapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry.json")))
     )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        http = mockHTTP,
+        http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers()
+        serializers = AccountProviderDescriptionCollectionSerializers(),
+        uriProduction = this.server.url("production").toUri(),
+        uriQA = this.server.url("qa").toUri()
       )
 
     val result = provider.load(this.context, true)
@@ -151,14 +149,14 @@ abstract class AccountProviderNYPLRegistryContract {
       readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
     }
 
-    val mockHTTP = MockingHTTP()
-
     val provider =
       AccountProviderSourceNYPLRegistry(
-        http = mockHTTP,
+        http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers()
+        serializers = AccountProviderDescriptionCollectionSerializers(),
+        uriProduction = this.server.url("production").toUri(),
+        uriQA = this.server.url("qa").toUri()
       )
 
     val result = provider.load(this.context, true)
@@ -178,38 +176,20 @@ abstract class AccountProviderNYPLRegistryContract {
     val cacheFile = File(this.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json")
     cacheFile.outputStream().use { output -> output.write("Nonsense!".toByteArray()) }
 
-    val mockHTTP = MockingHTTP()
-
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries",
-      HTTPResultOK(
-        "OK",
-        200,
-        readAllFromResource("libraryregistry.json"),
-        0L,
-        mapOf(),
-        0L
-      )
-    )
-
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries/qa",
-      HTTPResultOK(
-        "OK",
-        200,
-        readAllFromResource("libraryregistry-qa.json"),
-        0L,
-        mapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry-qa.json")))
     )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        http = mockHTTP,
+        http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers()
+        serializers = AccountProviderDescriptionCollectionSerializers(),
+        uriProduction = this.server.url("production").toUri(),
+        uriQA = this.server.url("qa").toUri()
       )
 
     val result = provider.load(this.context, true)
@@ -226,38 +206,20 @@ abstract class AccountProviderNYPLRegistryContract {
 
   @Test
   fun testProvidersBadEverywhere() {
-    val mockHTTP = MockingHTTP()
-
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries",
-      HTTPResultOK(
-        "OK",
-        200,
-        ByteArrayInputStream("Nonsense!".toByteArray()) as InputStream,
-        0L,
-        mapOf(),
-        0L
-      )
-    )
-
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries/qa",
-      HTTPResultOK(
-        "OK",
-        200,
-        ByteArrayInputStream("Nonsense!".toByteArray()) as InputStream,
-        0L,
-        mapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("Nonsense! Tripe! Ungood data!")
     )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
-        http = mockHTTP,
+        http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers()
+        serializers = AccountProviderDescriptionCollectionSerializers(),
+        uriProduction = this.server.url("production").toUri(),
+        uriQA = this.server.url("qa").toUri()
       )
 
     val result = provider.load(this.context, true)
@@ -278,14 +240,14 @@ abstract class AccountProviderNYPLRegistryContract {
       readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
     }
 
-    val mockHTTP = MockingHTTP()
-
     val provider =
       AccountProviderSourceNYPLRegistry(
-        http = mockHTTP,
+        http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers()
+        serializers = AccountProviderDescriptionCollectionSerializers(),
+        uriProduction = this.server.url("production").toUri(),
+        uriQA = this.server.url("qa").toUri()
       )
 
     run {
@@ -296,28 +258,16 @@ abstract class AccountProviderNYPLRegistryContract {
       Assert.assertEquals(43, success.results.size)
     }
 
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries",
-      HTTPResultOK(
-        "OK",
-        200,
-        readAllFromResource("libraryregistry.json"),
-        0L,
-        mapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry-qa.json")))
     )
 
-    mockHTTP.addResponse(
-      "https://libraryregistry.librarysimplified.org/libraries/qa",
-      HTTPResultOK(
-        "OK",
-        200,
-        readAllFromResource("libraryregistry-qa.json"),
-        0L,
-        mapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry.json")))
     )
 
     // Expire the cache
@@ -346,14 +296,14 @@ abstract class AccountProviderNYPLRegistryContract {
       readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
     }
 
-    val mockHTTP = MockingHTTP()
-
     val provider =
       AccountProviderSourceNYPLRegistry(
-        http = mockHTTP,
+        http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
         parsers = AccountProviderDescriptionCollectionParsers(),
-        serializers = AccountProviderDescriptionCollectionSerializers()
+        serializers = AccountProviderDescriptionCollectionSerializers(),
+        uriProduction = this.server.url("production").toUri(),
+        uriQA = this.server.url("qa").toUri()
       )
 
     run {

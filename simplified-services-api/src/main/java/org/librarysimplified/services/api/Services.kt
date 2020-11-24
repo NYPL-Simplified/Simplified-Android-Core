@@ -2,29 +2,27 @@ package org.librarysimplified.services.api
 
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
-import java.lang.IllegalStateException
+import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
 object Services : ServiceDirectoryProviderType {
 
+  private val logger = LoggerFactory.getLogger(Services::class.java)
   private val servicesLock: Any = Any()
   private var servicesDirectory: ServiceDirectoryType? = null
   private val servicesFuture: SettableFuture<ServiceDirectoryType> = SettableFuture.create()
 
   override fun serviceDirectory(): ServiceDirectoryType {
-    return synchronized(this.servicesLock) {
-      this.servicesDirectory ?: throw IllegalStateException("No service directory has been created!")
+    try {
+      return this.servicesFuture.get(30L, TimeUnit.SECONDS)
+    } catch (e: Exception) {
+      this.logger.error("unable to fetch service directory: ", e)
+      throw e
     }
   }
 
   fun serviceDirectoryFuture(): ListenableFuture<ServiceDirectoryType> =
     this.servicesFuture
-
-  fun serviceDirectoryWaiting(
-    time: Long,
-    timeUnit: TimeUnit
-  ): ServiceDirectoryType =
-    this.servicesFuture.get(time, timeUnit)
 
   fun isInitialized(): Boolean {
     return synchronized(this.servicesLock) {

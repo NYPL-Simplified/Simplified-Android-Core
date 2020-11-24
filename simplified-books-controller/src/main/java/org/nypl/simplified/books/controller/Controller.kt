@@ -11,6 +11,7 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.Subject
 import org.joda.time.Instant
+import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -40,7 +41,6 @@ import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.futures.FluentFutureExtensions
 import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
 import org.nypl.simplified.futures.FluentFutureExtensions.map
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
@@ -110,8 +110,8 @@ class Controller private constructor(
     this.services.requireService(FeedLoaderType::class.java)
   private val feedParser =
     this.services.requireService(OPDSFeedParserType::class.java)
-  private val http =
-    this.services.requireService(HTTPType::class.java)
+  private val lsHttp =
+    this.services.requireService(LSHTTPClientType::class.java)
   private val patronUserProfileParsers =
     this.services.requireService(PatronUserProfileParsersType::class.java)
   private val profileAccountCreationStringResources =
@@ -318,7 +318,7 @@ class Controller private constructor(
     val account = profile.account(request.accountId)
     return ProfileAccountLoginTask(
       adeptExecutor = this.adobeDrm,
-      http = this.http,
+      http = this.lsHttp,
       profile = profile,
       account = account,
       loginStrings = this.accountLoginStringResources,
@@ -366,7 +366,7 @@ class Controller private constructor(
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviders,
-        http = this.http,
+        httpClient = this.lsHttp,
         opdsURI = opdsFeed,
         opdsFeedParser = this.feedParser,
         profiles = this.profiles,
@@ -434,7 +434,8 @@ class Controller private constructor(
         adeptExecutor = this.adobeDrm,
         account = account,
         bookRegistry = this.bookRegistry,
-        http = this.http,
+        patronParsers = this.patronUserProfileParsers,
+        http = this.lsHttp,
         logoutStrings = this.accountLogoutStringResources,
         profile = profile
       ).call()
@@ -590,7 +591,7 @@ class Controller private constructor(
   ): FluentFuture<Unit> {
     return this.submitTask(
       BookReportTask(
-        http = this.http,
+        http = this.lsHttp,
         account = account,
         feedEntry = feedEntry,
         reportType = reportType
@@ -608,7 +609,7 @@ class Controller private constructor(
         bookRegistry = this.bookRegistry,
         booksController = this,
         feedParser = this.feedParser,
-        http = this.http
+        http = this.lsHttp
       )
     )
   }

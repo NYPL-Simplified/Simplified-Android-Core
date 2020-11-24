@@ -2,9 +2,9 @@
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  xmlns:tools="http://schemas.android.com/tools">
+  android:layout_height="match_parent">
 
   <LinearLayout
     android:layout_width="match_parent"
@@ -22,8 +22,8 @@
         android:id="@+id/bookDetailCover"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/cover_thumbnail_height"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         app:cardCornerRadius="@dimen/cover_corner_radius"
         app:cardElevation="2dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -48,12 +48,27 @@
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="3"
-        android:text="@string/catalogPlaceholder"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/bookDetailCover"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="The Modern Prometheus" />
+
+      <TextView
+        android:id="@+id/bookDetailAuthors"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/bookDetailCover"
+        app:layout_constraintTop_toBottomOf="@id/bookDetailTitle"
+        tools:text="Mary Shelley" />
 
       <TextView
         android:id="@+id/bookDetailFormat"
@@ -62,26 +77,14 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
-        android:maxLines="3"
-        android:text="@string/catalogPlaceholder"
-        android:textSize="12sp"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textSize="14sp"
+        android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/bookDetailCover"
-        app:layout_constraintTop_toBottomOf="@id/bookDetailTitle" />
-
-      <TextView
-        android:id="@+id/bookDetailAuthors"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:ellipsize="end"
-        android:maxLines="3"
-        android:text="@string/catalogPlaceholder"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/bookDetailCover"
-        app:layout_constraintTop_toBottomOf="@id/bookDetailFormat" />
+        app:layout_constraintTop_toBottomOf="@id/bookDetailAuthors"
+        tools:text="eBook" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
@@ -216,12 +219,11 @@
     <View
       android:layout_width="match_parent"
       android:layout_height="1dp"
-      android:visibility="gone"
       android:layout_marginBottom="16dp"
-      android:background="?android:attr/listDivider" />
+      android:background="?android:attr/listDivider"
+      android:visibility="gone" />
 
     <TextView
-      android:visibility="gone"
       android:id="@+id/bookDetailReport"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -231,7 +233,8 @@
       android:enabled="false"
       android:text="@string/catalogReportIssue"
       android:textSize="18sp"
-      android:textStyle="bold" />
+      android:textStyle="bold"
+      android:visibility="gone" />
 
     <View
       android:layout_width="match_parent"

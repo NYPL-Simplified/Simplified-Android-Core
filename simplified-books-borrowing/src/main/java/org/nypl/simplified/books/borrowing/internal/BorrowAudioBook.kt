@@ -16,7 +16,6 @@ import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.Borro
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
 import org.nypl.simplified.books.formats.api.StandardFormatNames
-import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import java.io.File
 import java.net.URI
@@ -82,11 +81,18 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
     val audioBookCredentials: AudioBookCredentials? =
       context.account.loginState.credentials?.let { credentials ->
         when (credentials) {
-          is AccountAuthenticationCredentials.Basic ->
-            AudioBookCredentials.UsernamePassword(
-              userName = credentials.userName.value,
-              password = credentials.password.value
-            )
+          is AccountAuthenticationCredentials.Basic -> {
+            if (credentials.password.value.isBlank()) {
+              AudioBookCredentials.UsernameOnly(
+                userName = credentials.userName.value
+              )
+            } else {
+              AudioBookCredentials.UsernamePassword(
+                userName = credentials.userName.value,
+                password = credentials.password.value
+              )
+            }
+          }
           is AccountAuthenticationCredentials.OAuthWithIntermediary ->
             AudioBookCredentials.BearerToken(accessToken = credentials.accessToken)
         }
@@ -97,7 +103,7 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
         AudioBookManifestRequest(
           targetURI = currentURI,
           contentType = context.currentAcquisitionPathElement.mimeType,
-          userAgent = PlayerUserAgent(HTTP.userAgent()),
+          userAgent = PlayerUserAgent(context.httpClient.userAgent()),
           credentials = audioBookCredentials,
           services = context.services,
           cacheDirectory = context.cacheDirectory()

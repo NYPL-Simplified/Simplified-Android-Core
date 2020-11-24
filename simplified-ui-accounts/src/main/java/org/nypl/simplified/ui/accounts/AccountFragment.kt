@@ -23,11 +23,11 @@ import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
-import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
+import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -48,10 +48,9 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
-import org.nypl.simplified.documents.eula.EULAType
-import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
@@ -73,7 +72,6 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.atomic.AtomicBoolean
@@ -87,6 +85,8 @@ class AccountFragment : Fragment() {
   private val logger = LoggerFactory.getLogger(AccountFragment::class.java)
 
   private lateinit var account: AccountType
+  private lateinit var accountCustomOPDS: ViewGroup
+  private lateinit var accountCustomOPDSField: TextView
   private lateinit var accountIcon: ImageView
   private lateinit var accountSubtitle: TextView
   private lateinit var accountTitle: TextView
@@ -124,6 +124,8 @@ class AccountFragment : Fragment() {
   private lateinit var signUpLabel: TextView
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var viewModel: AccountFragmentViewModel
+  private lateinit var reportIssueGroup: ViewGroup
+  private lateinit var reportIssueItem: View
 
   private val cardCreatorResultCode = 101
   private val closing = AtomicBoolean(false)
@@ -250,6 +252,16 @@ class AccountFragment : Fragment() {
     this.settingsCardCreator =
       layout.findViewById(R.id.accountCardCreator)
 
+    this.accountCustomOPDS =
+      layout.findViewById(R.id.accountCustomOPDS)
+    this.accountCustomOPDSField =
+      this.accountCustomOPDS.findViewById(R.id.accountCustomOPDSField)
+
+    this.reportIssueGroup =
+      layout.findViewById(R.id.accountReportIssue)
+    this.reportIssueItem =
+      this.reportIssueGroup.findViewById(R.id.accountReportIssueText)
+
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginProgress.visibility = View.INVISIBLE
     this.loginProgressText.text = ""
@@ -314,9 +326,9 @@ class AccountFragment : Fragment() {
   }
 
   private fun determineEULAIsSatisfied(): Boolean {
-    val eulaOpt = this.documents.eula
-    return if (eulaOpt is Some<EULAType>) {
-      eulaOpt.get().eulaHasAgreed()
+    val eula = this.documents.eula
+    return if (eula != null) {
+      eula.hasAgreed
     } else {
       true
     }
@@ -396,7 +408,7 @@ class AccountFragment : Fragment() {
       return
     }
 
-    this.configureToolbar()
+    this.configureToolbar(requireActivity())
     this.hideCardCreatorForNonNYPL()
 
     this.accountTitle.text =
@@ -415,13 +427,12 @@ class AccountFragment : Fragment() {
      * Only show a EULA checkbox if there's actually a EULA.
      */
 
-    val eulaOpt = this.documents.eula
-    if (eulaOpt is Some<EULAType>) {
-      val eula = eulaOpt.get()
+    val eula = this.documents.eula
+    if (eula != null) {
       this.eulaCheckbox.visibility = View.VISIBLE
-      this.eulaCheckbox.isChecked = eula.eulaHasAgreed()
+      this.eulaCheckbox.isChecked = eula.hasAgreed
       this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
-        eula.eulaSetHasAgreed(checked)
+        eula.hasAgreed = checked
         this.setLoginButtonStatus(this.determineLoginIsSatisfied())
       }
     } else {
@@ -483,6 +494,25 @@ class AccountFragment : Fragment() {
 
     this.authenticationAlternativesMake()
 
+    /*
+     * Show/hide the custom OPDS feed section.
+     */
+
+    val catalogURIOverride = this.account.preferences.catalogURIOverride
+    this.accountCustomOPDSField.text = catalogURIOverride?.toString() ?: ""
+    this.accountCustomOPDS.visibility =
+      if (catalogURIOverride != null) {
+        View.VISIBLE
+      } else {
+        View.GONE
+      }
+
+    /*
+     * Configure the "Report issue..." item.
+     */
+
+    this.configureReportIssue()
+
     this.accountSubscription =
       this.profilesController.accountEvents()
         .subscribe(this::onAccountEvent)
@@ -524,6 +554,26 @@ class AccountFragment : Fragment() {
           this.authenticationAlternativesButtons.addView(layout)
         }
       }
+    }
+  }
+
+  /**
+   * If there's a support email, enable an option to use it.
+   */
+
+  private fun configureReportIssue() {
+    val email = this.account.provider.supportEmail
+    if (email != null) {
+      this.reportIssueGroup.visibility = View.VISIBLE
+      this.reportIssueItem.setOnClickListener {
+        val emailIntent =
+          Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null))
+        startActivity(
+          Intent.createChooser(emailIntent, resources.getString(R.string.accountReportIssue))
+        )
+      }
+    } else {
+      this.reportIssueGroup.visibility = View.GONE
     }
   }
 
@@ -587,23 +637,11 @@ class AccountFragment : Fragment() {
     this.startActivity(i)
   }
 
-  private fun configureToolbar() {
-    val host = this.activity
-    if (host is ToolbarHostType) {
-      host.toolbarClearMenu()
-      host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.accounts),
-        subtitle = this.account.provider.displayName
-      )
-      host.toolbarSetBackArrowConditionally(
-        context = host,
-        shouldArrowBePresent = {
-          this.findNavigationController().backStackSize() > 1
-        },
-        onArrowClicked = this@AccountFragment::explicitlyClose
-      )
-    } else {
-      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+  private fun configureToolbar(activity: Activity) {
+    val providerName = this.account.provider.displayName
+    this.supportActionBar?.apply {
+      title = getString(R.string.accounts)
+      subtitle = providerName
     }
   }
 

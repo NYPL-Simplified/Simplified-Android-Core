@@ -3,10 +3,10 @@ package org.nypl.simplified.feeds.api
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
-import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import net.jodah.expiringmap.ExpiringMap
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener
+import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -17,7 +17,6 @@ import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
 import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
-import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
@@ -58,7 +57,7 @@ class FeedLoader private constructor(
   private val exec: ListeningExecutorService,
   private val parser: OPDSFeedParserType,
   private val searchParser: OPDSSearchParserType,
-  private val transport: OPDSFeedTransportType<OptionType<HTTPAuthType>>
+  private val transport: OPDSFeedTransportType<LSHTTPAuthorizationType?>
 ) : FeedLoaderType, ExpirationListener<URI, Feed> {
 
   init {
@@ -70,7 +69,7 @@ class FeedLoader private constructor(
   private fun fetchURICore(
     accountId: AccountID,
     uri: URI,
-    auth: OptionType<HTTPAuthType>,
+    auth: LSHTTPAuthorizationType?,
     updateFromRegistry: Boolean
   ): FluentFuture<FeedLoaderResult> {
     if (this.cache.containsKey(uri)) {
@@ -107,12 +106,12 @@ class FeedLoader private constructor(
     }
 
   override fun fetchURI(
-    accountId: AccountID,
+    account: AccountID,
     uri: URI,
-    auth: OptionType<HTTPAuthType>
+    auth: LSHTTPAuthorizationType?
   ): FluentFuture<FeedLoaderResult> {
     return this.fetchURICore(
-      accountId = accountId,
+      accountId = account,
       uri = uri,
       auth = auth,
       updateFromRegistry = false
@@ -120,14 +119,14 @@ class FeedLoader private constructor(
   }
 
   override fun fetchURIRefreshing(
-    accountId: AccountID,
+    account: AccountID,
     uri: URI,
-    auth: OptionType<HTTPAuthType>,
+    auth: LSHTTPAuthorizationType?,
     method: String
   ): FluentFuture<FeedLoaderResult> {
     this.invalidate(uri)
     return this.fetchURICore(
-      accountId = accountId,
+      accountId = account,
       uri = uri,
       auth = auth,
       updateFromRegistry = false
@@ -135,12 +134,12 @@ class FeedLoader private constructor(
   }
 
   override fun fetchURIWithBookRegistryEntries(
-    accountId: AccountID,
+    account: AccountID,
     uri: URI,
-    auth: OptionType<HTTPAuthType>
+    auth: LSHTTPAuthorizationType?
   ): FluentFuture<FeedLoaderResult> {
     return this.fetchURICore(
-      accountId = accountId,
+      accountId = account,
       uri = uri,
       auth = auth,
       updateFromRegistry = true
@@ -187,7 +186,7 @@ class FeedLoader private constructor(
   private fun fetchSynchronously(
     accountId: AccountID,
     uri: URI,
-    auth: OptionType<HTTPAuthType>,
+    auth: LSHTTPAuthorizationType?,
     method: String,
     updateFromRegistry: Boolean
   ): FeedLoaderResult {
@@ -241,17 +240,17 @@ class FeedLoader private constructor(
 
       if (e.code == 401) {
         return FeedLoaderFailure.FeedLoaderFailedAuthentication(
-          problemReport = this.someOrNull(e.problemReport),
+          problemReport = e.report,
           exception = e,
           attributesInitial = this.errorAttributesOf(uri, method),
-          message = e.localizedMessage
+          message = e.localizedMessage ?: ""
         )
       }
       return FeedLoaderFailure.FeedLoaderFailedGeneral(
-        problemReport = this.someOrNull(e.problemReport),
+        problemReport = e.report,
         exception = e,
         attributesInitial = this.errorAttributesOf(uri, method),
-        message = e.localizedMessage
+        message = e.localizedMessage ?: ""
       )
     } catch (e: Exception) {
       this.log.error("feed exception: ", e)
@@ -260,7 +259,7 @@ class FeedLoader private constructor(
         problemReport = null,
         exception = e,
         attributesInitial = this.errorAttributesOf(uri, method),
-        message = e.localizedMessage
+        message = e.localizedMessage ?: ""
       )
     }
   }
@@ -303,14 +302,6 @@ class FeedLoader private constructor(
     )
   }
 
-  private fun <T> someOrNull(x: OptionType<T>): T? {
-    return if (x is Some<T>) {
-      x.get()
-    } else {
-      null
-    }
-  }
-
   private fun parseFromBundledContent(
     accountId: AccountID,
     uri: URI
@@ -329,7 +320,7 @@ class FeedLoader private constructor(
 
   private fun fetchSearchLink(
     opdsFeed: OPDSAcquisitionFeed,
-    auth: OptionType<HTTPAuthType>,
+    auth: LSHTTPAuthorizationType?,
     method: String
   ): OPDSOpenSearch1_1? {
     val searchLinkOpt = opdsFeed.feedSearchURI
@@ -398,7 +389,7 @@ class FeedLoader private constructor(
       exec: ListeningExecutorService,
       parser: OPDSFeedParserType,
       searchParser: OPDSSearchParserType,
-      transport: OPDSFeedTransportType<OptionType<HTTPAuthType>>,
+      transport: OPDSFeedTransportType<LSHTTPAuthorizationType?>,
       bookRegistry: BookRegistryReadableType,
       bundledContent: BundledContentResolverType
     ): FeedLoaderType {

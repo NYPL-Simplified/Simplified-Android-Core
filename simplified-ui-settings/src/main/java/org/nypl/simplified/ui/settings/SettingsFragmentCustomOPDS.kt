@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.settings
 
+import android.app.Activity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -17,11 +18,11 @@ import io.reactivex.disposables.Disposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -83,8 +84,7 @@ class SettingsFragmentCustomOPDS : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
-    this.configureToolbar()
+    this.configureToolbar(this.requireActivity())
 
     this.uriTextWatcher =
       this.URITextWatcher()
@@ -113,25 +113,10 @@ class SettingsFragmentCustomOPDS : Fragment() {
     this.feedURL.addTextChangedListener(this.uriTextWatcher)
   }
 
-  private fun configureToolbar() {
-    val host = this.activity
-    if (host is ToolbarHostType) {
-      host.toolbarClearMenu()
-      host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.settingsCustomOPDS),
-        subtitle = ""
-      )
-      host.toolbarSetBackArrowConditionally(
-        context = host,
-        shouldArrowBePresent = {
-          this.findNavigationController().backStackSize() > 1
-        },
-        onArrowClicked = {
-          this.findNavigationController().popBackStack()
-        }
-      )
-    } else {
-      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+  private fun configureToolbar(activity: Activity) {
+    this.supportActionBar?.apply {
+      title = getString(R.string.settingsCustomOPDS)
+      subtitle = null
     }
   }
 

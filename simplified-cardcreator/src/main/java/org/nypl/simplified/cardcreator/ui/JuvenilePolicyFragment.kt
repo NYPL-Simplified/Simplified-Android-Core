@@ -205,7 +205,7 @@ class JuvenilePolicyFragment : Fragment() {
    */
   private fun getEligibility() {
     platformViewModel.getDependentEligibility(
-      requireActivity().intent.extras.getString("userIdentifier"),
+      requireActivity().intent.getStringExtra("userIdentifier")!!,
       getCache().token.toString()
     )
   }
@@ -216,8 +216,8 @@ class JuvenilePolicyFragment : Fragment() {
   private fun getToken() {
     binding.progress.visibility = View.VISIBLE
     viewModel.getToken(
-      requireActivity().intent.extras.getString("clientId"),
-      requireActivity().intent.extras.getString("clientSecret")
+      requireActivity().intent.getStringExtra("clientId")!!,
+      requireActivity().intent.getStringExtra("clientSecret")!!
     )
   }
 

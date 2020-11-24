@@ -24,10 +24,10 @@ android {
 
   signingConfigs {
     release {
-      keyAlias findProperty("org.librarysimplified.keyAlias")
-      keyPassword findProperty("org.librarysimplified.keyPassword")
+      keyAlias nyplSigningKeyAlias
+      keyPassword nyplSigningKeyPassword
       storeFile file("keystore.jks")
-      storePassword findProperty("org.librarysimplified.storePassword")
+      storePassword nyplSigningStorePassword
     }
   }
 
@@ -52,6 +52,19 @@ android {
       dimension 'mode'
       applicationIdSuffix ".with_profiles"
     }
+  }
+}
+
+afterEvaluate {
+  def properties = new Properties()
+  properties.setProperty("versionCode", versionCode(version).toString())
+
+  def writer = new FileWriter(file("version.properties"))
+  try {
+    properties.store(writer, '')
+    writer.flush()
+  } finally {
+    writer.close()
   }
 }
 

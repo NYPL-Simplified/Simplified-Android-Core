@@ -1,11 +1,18 @@
 package org.nypl.simplified.tests.books.reader.bookmarks
 
+import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.reactivex.subjects.Subject
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.LocalDateTime
 import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -15,9 +22,11 @@ import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
@@ -26,8 +35,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
-import org.nypl.simplified.http.core.HTTPResultOK
-import org.nypl.simplified.http.core.HTTPResultType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileType
@@ -37,12 +44,7 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
-import java.io.ByteArrayInputStream
-import java.io.InputStream
-import java.net.URI
-import java.nio.charset.Charset
 import java.util.UUID
 
 abstract class ReaderBookmarkServiceContract {
@@ -61,6 +63,8 @@ abstract class ReaderBookmarkServiceContract {
 
   private val objectMapper = ObjectMapper()
   private var readerBookmarkService: ReaderBookmarkServiceType? = null
+  private lateinit var server: MockWebServer
+  private lateinit var http: LSHTTPClientType
 
   private val accountCredentials =
     AccountAuthenticationCredentials.Basic(
@@ -70,22 +74,34 @@ abstract class ReaderBookmarkServiceContract {
       authenticationDescription = null
     )
 
-  private fun okResponse(text: String): HTTPResultType<InputStream> {
-    val bytes = text.toByteArray(Charset.forName("UTF-8"))
-    val stream = ByteArrayInputStream(bytes)
-    return HTTPResultOK<InputStream>(
-      "OK",
-      200,
-      stream,
-      bytes.size.toLong(),
-      mutableMapOf(),
-      0L
+  private fun addResponse(
+    uri: String,
+    response: String
+  ) {
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(response)
     )
+  }
+
+  @Before
+  fun setup() {
+    this.http =
+      LSHTTPClients()
+        .create(
+          context = Mockito.mock(Context::class.java),
+          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+        )
+
+    this.server = MockWebServer()
+    this.server.start()
   }
 
   @After
   fun tearDown() {
     this.readerBookmarkService?.close()
+    this.server.close()
   }
 
   /**
@@ -93,45 +109,40 @@ abstract class ReaderBookmarkServiceContract {
    * but has no books, succeeds quietly.
    */
 
-  @Test
+  @Test(timeout = 10_000L)
   fun testInitializeEmpty() {
-    val http = MockingHTTP()
-    http.addResponse(
+    addResponse(
       "http://www.example.com/patron",
-      this.okResponse(
-        """
-    {
-      "settings": {
-        "simplified:synchronize_annotations": true
-      }
+      """
+  {
+    "settings": {
+      "simplified:synchronize_annotations": true
     }
-    """
-      )
+  }
+  """
     )
 
-    http.addResponse(
+    addResponse(
       "http://www.example.com/annotations",
-      this.okResponse(
-        """
-    {
-       "id" : "http://www.example.com/annotations/",
-       "type" : [
-          "BasicContainer",
-          "AnnotationCollection"
-       ],
-       "@context" : [
-          "http://www.w3.org/ns/anno.jsonld",
-          "http://www.w3.org/ns/ldp.jsonld"
-       ],
-       "total" : 0,
-       "first" : {
-          "items" : [],
-          "type" : "AnnotationPage",
-          "id" : "http://www.example.com/annotations/"
-       }
-    }
-    """
-      )
+      """
+  {
+     "id" : "http://www.example.com/annotations/",
+     "type" : [
+        "BasicContainer",
+        "AnnotationCollection"
+     ],
+     "@context" : [
+        "http://www.w3.org/ns/anno.jsonld",
+        "http://www.w3.org/ns/ldp.jsonld"
+     ],
+     "total" : 0,
+     "first" : {
+        "items" : [],
+        "type" : "AnnotationPage",
+        "id" : "http://www.example.com/annotations/"
+     }
+  }
+  """
     )
 
     val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, http)
@@ -155,15 +166,18 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(accountProvider.supportsSimplyESynchronization)
       .thenReturn(true)
     Mockito.`when`(accountProvider.annotationsURI)
-      .thenReturn(URI.create("http://www.example.com/annotations"))
+      .thenReturn(this.server.url("annotations").toUri())
     Mockito.`when`(accountProvider.patronSettingsURI)
-      .thenReturn(URI.create("http://www.example.com/patron"))
+      .thenReturn(this.server.url("patron").toUri())
 
     val accountPreferences =
-      AccountPreferences(bookmarkSyncingPermitted = true)
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = null
+      )
 
     val account =
-      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
+      Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
@@ -223,60 +237,55 @@ abstract class ReaderBookmarkServiceContract {
 
   @Test(timeout = 5_000L)
   fun testInitializeReceive() {
-    val http = MockingHTTP()
-    http.addResponse(
+    addResponse(
       "http://www.example.com/patron",
-      this.okResponse(
-        """
-    {
-      "settings": {
-        "simplified:synchronize_annotations": true
-      }
+      """
+  {
+    "settings": {
+      "simplified:synchronize_annotations": true
     }
-    """
-      )
+  }
+  """
     )
 
-    http.addResponse(
+    addResponse(
       "http://www.example.com/annotations",
-      this.okResponse(
-        """
-    {
-       "id" : "http://www.example.com/annotations/",
-       "type" : [
-          "BasicContainer",
-          "AnnotationCollection"
-       ],
-       "@context" : [
-          "http://www.w3.org/ns/anno.jsonld",
-          "http://www.w3.org/ns/ldp.jsonld"
-       ],
-       "total" : 0,
-       "first" : {
-          "items" : [
-             {
-                "body" : {
-                   "http://librarysimplified.org/terms/device" : "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",
-                   "http://librarysimplified.org/terms/time" : "2018-12-03T16:29:03"
-                },
-                "id" : "http://www.example.com/annotations/100000",
-                "type" : "Annotation",
-                "motivation" : "http://www.w3.org/ns/oa#bookmarking",
-                "target" : {
-                   "selector" : {
-                      "value" : "{\"idref\":\"n-1\",\"contentCFI\":\"/4/14,/1:0,/1:1\"}",
-                      "type" : "FragmentSelector"
-                   },
-                   "source" : "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a"
-                }
-             }
-          ],
-          "type" : "AnnotationPage",
-          "id" : "http://www.example.com/annotations/"
-       }
-    }
-    """
-      )
+      """
+  {
+     "id" : "http://www.example.com/annotations/",
+     "type" : [
+        "BasicContainer",
+        "AnnotationCollection"
+     ],
+     "@context" : [
+        "http://www.w3.org/ns/anno.jsonld",
+        "http://www.w3.org/ns/ldp.jsonld"
+     ],
+     "total" : 0,
+     "first" : {
+        "items" : [
+           {
+              "body" : {
+                 "http://librarysimplified.org/terms/device" : "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",
+                 "http://librarysimplified.org/terms/time" : "2018-12-03T16:29:03"
+              },
+              "id" : "http://www.example.com/annotations/100000",
+              "type" : "Annotation",
+              "motivation" : "http://www.w3.org/ns/oa#bookmarking",
+              "target" : {
+                 "selector" : {
+                    "value" : "{\"idref\":\"n-1\",\"contentCFI\":\"/4/14,/1:0,/1:1\"}",
+                    "type" : "FragmentSelector"
+                 },
+                 "source" : "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a"
+              }
+           }
+        ],
+        "type" : "AnnotationPage",
+        "id" : "http://www.example.com/annotations/"
+     }
+  }
+  """
     )
 
     val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, http)
@@ -289,7 +298,7 @@ abstract class ReaderBookmarkServiceContract {
       EventLogging.create<AccountEvent>(this.logger, 1)
 
     val bookID =
-      org.nypl.simplified.books.api.BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
+      BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
 
     val receivedBookmarks =
       mutableListOf<Bookmark>()
@@ -336,15 +345,18 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(accountProvider.supportsSimplyESynchronization)
       .thenReturn(true)
     Mockito.`when`(accountProvider.annotationsURI)
-      .thenReturn(URI.create("http://www.example.com/annotations"))
+      .thenReturn(this.server.url("annotations").toUri())
     Mockito.`when`(accountProvider.patronSettingsURI)
-      .thenReturn(URI.create("http://www.example.com/patron"))
+      .thenReturn(this.server.url("patron").toUri())
 
     val accountPreferences =
-      AccountPreferences(bookmarkSyncingPermitted = true)
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = null
+      )
 
     val account =
-      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
+      Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
@@ -417,18 +429,15 @@ abstract class ReaderBookmarkServiceContract {
 
   @Test(timeout = 5_000L)
   fun testInitializeSendBookmarks() {
-    val http = MockingHTTP()
-    http.addResponse(
+    addResponse(
       "http://www.example.com/patron",
-      this.okResponse(
-        """
-    {
-      "settings": {
-        "simplified:synchronize_annotations": true
-      }
+      """
+  {
+    "settings": {
+      "simplified:synchronize_annotations": true
     }
-    """
-      )
+  }
+  """
     )
 
     val responseText = """
@@ -468,7 +477,7 @@ abstract class ReaderBookmarkServiceContract {
     }
     """
 
-    http.addResponse("http://www.example.com/annotations", this.okResponse(responseText))
+    addResponse("http://www.example.com/annotations", responseText)
 
     val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, http)
 
@@ -480,7 +489,7 @@ abstract class ReaderBookmarkServiceContract {
       EventLogging.create<AccountEvent>(this.logger, 1)
 
     val bookID =
-      org.nypl.simplified.books.api.BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
+      BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
 
     val receivedBookmarks =
       mutableListOf<Bookmark>()
@@ -541,15 +550,18 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(accountProvider.supportsSimplyESynchronization)
       .thenReturn(true)
     Mockito.`when`(accountProvider.annotationsURI)
-      .thenReturn(URI.create("http://www.example.com/annotations"))
+      .thenReturn(this.server.url("annotations").toUri())
     Mockito.`when`(accountProvider.patronSettingsURI)
-      .thenReturn(URI.create("http://www.example.com/patron"))
+      .thenReturn(this.server.url("patron").toUri())
 
     val accountPreferences =
-      AccountPreferences(bookmarkSyncingPermitted = true)
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = null
+      )
 
     val account =
-      Mockito.mock(org.nypl.simplified.accounts.database.api.AccountType::class.java)
+      Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))

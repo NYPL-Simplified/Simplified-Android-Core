@@ -7,6 +7,7 @@ import android.graphics.Color
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomnavigation.LabelVisibilityMode
 import com.io7m.junreachable.UnreachableCodeException
@@ -24,9 +25,9 @@ import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo.Sorting.SortBy.SO
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountFragment
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountRegistryFragment
-import org.nypl.simplified.ui.accounts.AccountsFragment
-import org.nypl.simplified.ui.accounts.AccountsFragmentParameters
+import org.nypl.simplified.ui.accounts.AccountListFragment
+import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
+import org.nypl.simplified.ui.accounts.AccountListFragmentParameters
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
@@ -56,10 +57,16 @@ import org.slf4j.LoggerFactory
 class TabbedNavigationController private constructor(
   private val settingsConfiguration: BuildConfigurationServiceType,
   private val profilesController: ProfilesControllerType,
-  private val navigator: BottomNavigator
+  private val navigator: BottomNavigator,
+  private val listener: OnBackStackChangedListener?
 ) : SettingsNavigationControllerType, CatalogNavigationControllerType {
 
   private val logger = LoggerFactory.getLogger(TabbedNavigationController::class.java)
+
+  private val infoStream = this.navigator.infoStream().subscribe { action ->
+    this.logger.debug(action.toString())
+    this.listener?.onBackStackChanged()
+  }
 
   companion object {
 
@@ -130,7 +137,8 @@ class TabbedNavigationController private constructor(
       return TabbedNavigationController(
         navigator = navigator,
         settingsConfiguration = settingsConfiguration,
-        profilesController = profilesController
+        profilesController = profilesController,
+        listener = activity as? OnBackStackChangedListener
       )
     }
 
@@ -186,7 +194,7 @@ class TabbedNavigationController private constructor(
       val account = this.pickDefaultAccount(profilesController, defaultProvider)
       return CatalogFeedArguments.CatalogFeedArgumentsRemote(
         ownership = CatalogFeedOwnership.OwnedByAccount(account.id),
-        feedURI = account.provider.catalogURIForAge(age),
+        feedURI = account.catalogURIForAge(age),
         isSearchResults = false,
         title = context.getString(R.string.tabCatalog)
       )
@@ -274,12 +282,13 @@ class TabbedNavigationController private constructor(
   }
 
   override fun openSettingsAbout() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsAccounts() {
     this.navigator.addFragment(
-      fragment = AccountsFragment.create(
-        AccountsFragmentParameters(
+      fragment = AccountListFragment.create(
+        AccountListFragmentParameters(
           shouldShowLibraryRegistryMenu = this.settingsConfiguration.allowAccountsRegistryAccess
         )
       ),
@@ -288,15 +297,19 @@ class TabbedNavigationController private constructor(
   }
 
   override fun openSettingsAcknowledgements() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsEULA() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsFaq() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsLicense() {
+    throw NotImplementedError()
   }
 
   override fun openSettingsVersion() {
@@ -310,10 +323,20 @@ class TabbedNavigationController private constructor(
     return this.navigator.pop()
   }
 
+  override fun popToRoot(): Boolean {
+    val isAtRootOfStack = (1 == this.navigator.currentStackSize())
+    if (isAtRootOfStack) {
+      return false // Nothing to do
+    }
+    val currentTab = this.navigator.currentTab()
+    this.navigator.reset(currentTab, false)
+    return true
+  }
+
   override fun openSettingsCustomOPDS() {
     this.navigator.addFragment(
       fragment = SettingsFragmentCustomOPDS(),
-      tab = this.navigator.currentTab()
+      tab = R.id.tabSettings
     )
   }
 
@@ -325,6 +348,7 @@ class TabbedNavigationController private constructor(
   }
 
   override fun backStackSize(): Int {
+    // Note: currentStackSize() is not safe to call here as it may throw an NPE.
     return this.navigator.stackSize(this.navigator.currentTab())
   }
 
@@ -339,14 +363,13 @@ class TabbedNavigationController private constructor(
     feedArguments: CatalogFeedArguments,
     entry: FeedEntry.FeedEntryOPDS
   ) {
-    val parameters =
-      CatalogFragmentBookDetailParameters(
-        feedEntry = entry,
-        feedArguments = feedArguments
-      )
-
     this.navigator.addFragment(
-      fragment = CatalogFragmentBookDetail.create(parameters),
+      fragment = CatalogFragmentBookDetail.create(
+        CatalogFragmentBookDetailParameters(
+          feedEntry = entry,
+          feedArguments = feedArguments
+        )
+      ),
       tab = this.navigator.currentTab()
     )
   }
@@ -360,7 +383,7 @@ class TabbedNavigationController private constructor(
 
   override fun openSettingsAccountRegistry() {
     this.navigator.addFragment(
-      fragment = AccountRegistryFragment(),
+      fragment = AccountListRegistryFragment(),
       tab = R.id.tabSettings
     )
   }

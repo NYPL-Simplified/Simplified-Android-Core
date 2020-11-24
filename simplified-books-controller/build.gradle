@@ -10,11 +10,9 @@ dependencies {
   implementation project(":simplified-books-audio")
   implementation project(":simplified-books-borrowing")
   implementation project(":simplified-books-registry-api")
-  implementation project(":simplified-clock")
   implementation project(":simplified-feeds-api")
   implementation project(":simplified-files")
   implementation project(":simplified-futures")
-  implementation project(":simplified-http-core")
   implementation project(":simplified-json-core")
   implementation project(":simplified-opds-auth-document-api")
   implementation project(":simplified-opds-core")
@@ -26,6 +24,7 @@ dependencies {
 
   implementation libraries.kotlinStdlib
   implementation libraries.nyplAudiobookManifestFulfillAPI
+  implementation libraries.nyplHttpAPI
   implementation libraries.slf4j
 
   compileOnly libraries.autoValue

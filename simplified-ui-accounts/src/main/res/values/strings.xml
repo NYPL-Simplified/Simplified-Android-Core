@@ -21,7 +21,7 @@
   <string name="accountLogout">Log out</string>
   <string name="accountPassword">Password</string>
   <string name="accountPasswordShow">Show %1$s</string>
-  <string name="accountPickerTitle">Switch account</string>
+  <string name="accountPickerTitle">Switch catalog</string>
   <string name="accountPlaceholder">Lorem ipsum dolor sit amet, probatus volutpat has at, vis adhuc iuvaret omittantur an, sadipscing conclusionemque his ad. Eam ut simul tempor. Primis consetetur appellantur vim eu, eum an iudico dolorum. Ad vis utamur honestatis, sanctus debitis referrentur an eam.</string>
   <string name="accountRegistryCreating">Creating an account…</string>
   <string name="accountRegistryEmpty">No accounts are available.</string>
@@ -31,12 +31,15 @@
   <string name="accountReportIssue">Report an issue…</string>
   <string name="accounts">Accounts</string>
   <string name="accountsDelete">@string/accountDelete</string>
-  <string name="accountsDeleteConfirm">Are you sure you want to remove your \"%1$s\" account from this device?</string>
-  <string name="accountsDeleteConfirmTitle">Remove account?</string>
+  <string name="accountsDeleteConfirm">Are you sure you want to remove \"%1$s\" from this device?</string>
+  <string name="accountsDeleteConfirmTitle">Remove account</string>
   <string name="accountsDeletionFailed">Account deletion failed</string>
   <string name="accountsDeletionFailedMessage">The account \'%1$s\' could not be deleted.</string>
   <string name="accountsDetails">Details</string>
   <string name="accountSyncBookmarks">Sync bookmarks</string>
   <string name="accountUserName">User Name</string>
+  <string name="accountCustomOPDS">Custom OPDS Feed URL</string>
   <string name="currentlyBrowsing">You\'re currently browsing</string>
+  <string name="accountSearchHint">Search accounts&#8230;</string>
+  <string name="accountMore">More options</string>
 </resources>

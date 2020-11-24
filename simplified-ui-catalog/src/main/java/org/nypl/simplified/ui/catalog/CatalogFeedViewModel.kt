@@ -179,7 +179,7 @@ class CatalogFeedViewModel(
     val loginState =
       account.loginState
     val authentication =
-      AccountAuthenticatedHTTP.createAuthenticatedHTTPOptional(loginState.credentials)
+      AccountAuthenticatedHTTP.createAuthorizationIfPresent(loginState.credentials)
 
     val future =
       this.feedLoader.fetchURIWithBookRegistryEntries(

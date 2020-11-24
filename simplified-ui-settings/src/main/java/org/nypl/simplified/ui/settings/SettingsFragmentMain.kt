@@ -7,13 +7,12 @@ import android.widget.Toast
 import androidx.core.view.postDelayed
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.io7m.jfunctional.Some
+import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.documents.store.DocumentStoreType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
 
 /**
@@ -110,25 +109,14 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureToolbar() {
-    val host = this.activity
-    if (host is ToolbarHostType) {
-      host.toolbarClearMenu()
-      host.toolbarSetTitleSubtitle(
-        title = this.requireContext().getString(R.string.settings),
-        subtitle = ""
-      )
-      host.toolbarSetBackArrowConditionally(
-        context = host,
-        shouldArrowBePresent = { this.navigationController.backStackSize() > 1 },
-        onArrowClicked = { this.navigationController.popBackStack() }
-      )
-    } else {
-      throw IllegalStateException("The activity ($host) hosting this fragment must implement ${ToolbarHostType::class.java}")
+    this.supportActionBar?.apply {
+      title = getString(R.string.settings)
+      subtitle = null
     }
   }
 
   private fun configureAcknowledgements(preference: Preference) {
-    preference.isEnabled = this.documents.acknowledgements is Some
+    preference.isEnabled = this.documents.acknowledgements != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
         this.navigationController.openSettingsAcknowledgements()
@@ -166,7 +154,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureLicense(preference: Preference) {
-    preference.isEnabled = this.documents.licenses is Some
+    preference.isEnabled = this.documents.licenses != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
         this.navigationController.openSettingsLicense()
@@ -184,7 +172,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureEULA(preference: Preference) {
-    preference.isEnabled = this.documents.eula is Some
+    preference.isEnabled = this.documents.eula != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
         this.navigationController.openSettingsEULA()
@@ -207,7 +195,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureAbout(preference: Preference) {
-    preference.isEnabled = this.documents.about is Some
+    preference.isEnabled = this.documents.about != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
         this.navigationController.openSettingsAbout()

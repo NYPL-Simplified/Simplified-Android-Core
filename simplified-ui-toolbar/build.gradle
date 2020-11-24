@@ -1,5 +1,0 @@
-dependencies {
-  api libraries.androidXAppCompat
-
-  implementation libraries.kotlinStdlib
-}

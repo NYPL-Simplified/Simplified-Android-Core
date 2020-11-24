@@ -35,9 +35,7 @@ import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.ui.toolbar.ToolbarHostType
 import org.slf4j.LoggerFactory
-import java.util.concurrent.TimeUnit
 
 /**
  * The main application fragment.
@@ -68,7 +66,7 @@ class MainFragment : Fragment() {
       NavigationControllers.findDirectory(this.requireActivity())
 
     val services =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
 
     this.accountProviders =
       services.requireService(AccountProviderRegistryType::class.java)
@@ -162,9 +160,6 @@ class MainFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-
-    val toolbar = (this.requireActivity() as ToolbarHostType).findToolbar()
-    toolbar.visibility = View.VISIBLE
 
     this.uiThread.runOnUIThread {
       this.navigationControllerDirectory.updateNavigationController(
@@ -261,9 +256,9 @@ class MainFragment : Fragment() {
         this.bottomNavigator.popBackStack()
         this.bottomNavigator.openFeed(
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
-            title = account.provider.displayName,
+            title = getString(R.string.tabCatalog),
             ownership = CatalogFeedOwnership.OwnedByAccount(id),
-            feedURI = account.provider.catalogURIForAge(age),
+            feedURI = account.catalogURIForAge(age),
             isSearchResults = false
           )
         )

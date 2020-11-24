@@ -42,6 +42,7 @@ import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
 import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
+import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -51,7 +52,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
@@ -116,7 +116,7 @@ class AudioBookPlayerActivity :
   private lateinit var downloadExecutor: ListeningExecutorService
   private lateinit var downloadProvider: PlayerDownloadProviderType
   private lateinit var formatHandle: BookDatabaseEntryFormatHandleAudioBook
-  private lateinit var http: HTTPType
+  private lateinit var http: LSHTTPClientType
   private lateinit var loadingFragment: AudioBookLoadingFragment
   private lateinit var networkConnectivity: NetworkConnectivityType
   private lateinit var parameters: AudioBookPlayerParameters
@@ -150,7 +150,7 @@ class AudioBookPlayerActivity :
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
 
     this.setTheme(
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
         .requireService(ThemeServiceType::class.java)
         .findCurrentTheme()
         .themeWithActionBar
@@ -168,7 +168,7 @@ class AudioBookPlayerActivity :
     this.profiles =
       services.requireService(ProfilesControllerType::class.java)
     this.http =
-      services.requireService(HTTPType::class.java)
+      services.requireService(LSHTTPClientType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
     this.screenSize =

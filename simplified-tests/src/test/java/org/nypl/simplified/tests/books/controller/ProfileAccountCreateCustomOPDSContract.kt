@@ -3,9 +3,9 @@ package org.nypl.simplified.tests.books.controller
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.Option
 import io.reactivex.subjects.PublishSubject
-import org.joda.time.DateTime
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.Instant
 import org.junit.After
 import org.junit.Assert
@@ -13,9 +13,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.librarysimplified.http.api.LSHTTPClientConfiguration
+import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseIOException
@@ -29,20 +33,13 @@ import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.ProfileAccountCreateCustomOPDSTask
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.content.api.ContentResolverType
-import org.nypl.simplified.feeds.api.FeedHTTPTransport
-import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.http.core.HTTPResultError
-import org.nypl.simplified.http.core.HTTPResultException
-import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
-import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -50,14 +47,12 @@ import org.nypl.simplified.tests.MockAccountCreationStringResources
 import org.nypl.simplified.tests.MockAccountProviderRegistry
 import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
-import java.net.URI
 import java.util.ArrayList
 import java.util.Collections
 import java.util.UUID
@@ -97,16 +92,17 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ListeningExecutorService
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var http: MockingHTTP
+  private lateinit var http: LSHTTPClientType
   private lateinit var opdsFeedParser: OPDSFeedParserType
   private lateinit var profileAccountCreationStrings: MockAccountCreationStringResources
   private lateinit var profilesDatabase: ProfilesDatabaseType
+  private lateinit var server: MockWebServer
 
   @Before
   @Throws(Exception::class)
   fun setUp() {
-    this.http = MockingHTTP()
     this.context = Mockito.mock(Context::class.java)
+    this.http = LSHTTPClients().create(this.context, LSHTTPClientConfiguration("test", "1.0.0"))
     this.defaultProvider = MockAccountProviders.fakeProvider("urn:fake:0")
     this.accountProviderRegistry = AccountProviderRegistry.createFrom(this.context, listOf(), this.defaultProvider)
     this.accountEvents = PublishSubject.create()
@@ -124,12 +120,13 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     this.cacheDirectory = File.createTempFile("book-borrow-tmp", "dir")
     this.cacheDirectory.delete()
     this.cacheDirectory.mkdirs()
-    this.feedLoader = this.createFeedLoader(this.executorFeeds)
     this.opdsFeedParser = Mockito.mock(OPDSFeedParserType::class.java)
     this.profilesDatabase = Mockito.mock(ProfilesDatabaseType::class.java)
     this.accountProviderResolutionStrings = MockAccountProviderResolutionStrings()
     this.profileAccountCreationStrings = MockAccountCreationStringResources()
     this.clock = { Instant.now() }
+    this.server = MockWebServer()
+    this.server.start()
   }
 
   @After
@@ -138,30 +135,25 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     this.executorBooks.shutdown()
     this.executorFeeds.shutdown()
     this.executorTimer.shutdown()
+    this.server.close()
   }
 
   @Test
   fun testOPDSFeedFails() {
-    val opdsURI = URI("urn:test:0")
+    val opdsURI = this.server.url("/").toUri()
 
-    this.http.addResponse(
-      "urn:test:0",
-      HTTPResultError(
-        400,
-        "BAD!",
-        0L,
-        mutableMapOf(),
-        0L,
-        ByteArrayInputStream(ByteArray(0)),
-        Option.none()
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(400)
+        .setStatus("BAD!")
+        .setBody("")
     )
 
     val task =
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviderRegistry,
-        http = this.http,
+        httpClient = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
@@ -175,21 +167,13 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
   @Test
   fun testOPDSFeedFailsExceptional() {
-    val opdsURI = URI("urn:test:0")
-
-    this.http.addResponse(
-      "urn:test:0",
-      HTTPResultException(
-        opdsURI,
-        java.lang.Exception()
-      )
-    )
+    val opdsURI = this.server.url("/").toUri()
 
     val task =
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviderRegistry,
-        http = this.http,
+        httpClient = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
@@ -203,21 +187,14 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
   @Test
   fun testOPDSFeedUnparseable() {
-    val opdsURI = URI("urn:test:0")
+    val opdsURI = this.server.url("/").toUri()
 
     val stream =
       ByteArrayInputStream(ByteArray(0))
 
-    this.http.addResponse(
-      "urn:test:0",
-      HTTPResultOK<InputStream>(
-        "OK",
-        200,
-        stream,
-        0L,
-        mutableMapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
     )
 
     Mockito.`when`(this.opdsFeedParser.parse(opdsURI, stream))
@@ -227,7 +204,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviderRegistry,
-        http = this.http,
+        httpClient = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
@@ -241,35 +218,41 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
   @Test
   fun testOPDSFeedNoAuthentication() {
-    val opdsURI = URI("urn:test:0")
+    this.opdsFeedParser =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
+
+    val opdsURI = this.server.url("/").toUri()
     val accountId = AccountID.generate()
 
-    val stream =
-      ByteArrayInputStream(ByteArray(0))
-
-    this.http.addResponse(
-      "urn:test:0",
-      HTTPResultOK<InputStream>(
-        "OK",
-        200,
-        stream,
-        0L,
-        mutableMapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>http://circulation.alpha.librarysimplified.org/loans/</id>
+  <title>Active loans and holds</title>
+  <updated>2020-01-01T00:00:00Z</updated>
+</feed>
+          """.trimIndent()
+        )
     )
-
-    val feed =
-      OPDSAcquisitionFeed.newBuilder(opdsURI, "id", DateTime.now(), "Title")
-        .build()
-
-    Mockito.`when`(this.opdsFeedParser.parse(opdsURI, stream))
-      .thenReturn(feed)
 
     val profile =
       Mockito.mock(ProfileType::class.java)
     val account =
       Mockito.mock(AccountType::class.java)
+
+    val preferences =
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = null
+      )
+    val preferencesWithURI =
+      AccountPreferences(
+        bookmarkSyncingPermitted = true,
+        catalogURIOverride = opdsURI
+      )
 
     Mockito.`when`(this.profilesDatabase.currentProfileUnsafe())
       .thenReturn(profile)
@@ -277,6 +260,8 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       .thenReturn(account)
     Mockito.`when`(account.id)
       .thenReturn(accountId)
+    Mockito.`when`(account.preferences)
+      .thenReturn(preferences)
 
     val accountProvider =
       MockAccountProviders.fakeProvider("urn:fake:0")
@@ -289,7 +274,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = accountProviders,
-        http = this.http,
+        httpClient = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
@@ -303,49 +288,35 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
     Mockito.verify(profile, Mockito.times(1))
       .createAccount(anyNonNull())
+    Mockito.verify(account, Mockito.times(1))
+      .setPreferences(preferencesWithURI)
   }
 
   @Test
   fun testProviderResolutionFails() {
-    val opdsURI = URI("urn:test:0")
-    val authURI = URI("urn:auth:0")
+    this.opdsFeedParser =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
+
+    val authURI = this.server.url("/auth").toUri()
+    val opdsURI = this.server.url("/").toUri()
     val accountId = AccountID.generate()
 
-    val stream =
-      ByteArrayInputStream(ByteArray(0))
-
-    this.http.addResponse(
-      "urn:test:0",
-      HTTPResultOK<InputStream>(
-        "OK",
-        200,
-        stream,
-        0L,
-        mutableMapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>http://circulation.alpha.librarysimplified.org/loans/</id>
+  <title>Active loans and holds</title>
+  <updated>2020-01-01T00:00:00Z</updated>
+  <link href="https://circulation.librarysimplified.org/NYNYPL/authentication_document" rel="http://opds-spec.org/auth/document"/>
+</feed>
+          """.trimIndent()
+        )
     )
 
-    this.http.addResponse(
-      authURI,
-      HTTPResultError(
-        400,
-        "BAD!",
-        0L,
-        mutableMapOf(),
-        0L,
-        ByteArrayInputStream(ByteArray(0)),
-        Option.none()
-      )
-    )
-
-    val feed =
-      OPDSAcquisitionFeed.newBuilder(opdsURI, "id", DateTime.now(), "Title")
-        .setAuthenticationDocumentLink(Option.some(authURI))
-        .build()
-
-    Mockito.`when`(this.opdsFeedParser.parse(opdsURI, stream))
-      .thenReturn(feed)
+    this.server.enqueue(MockResponse().setResponseCode(400))
 
     val profile =
       Mockito.mock(ProfileType::class.java)
@@ -363,7 +334,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = this.accountProviderRegistry,
-        http = this.http,
+        httpClient = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
@@ -377,29 +348,25 @@ abstract class ProfileAccountCreateCustomOPDSContract {
 
   @Test
   fun testAccountCreationFails() {
-    val opdsURI = URI("urn:test:0")
+    this.opdsFeedParser =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
 
-    val stream =
-      ByteArrayInputStream(ByteArray(0))
+    val opdsURI = this.server.url("/").toUri()
+    val accountId = AccountID.generate()
 
-    this.http.addResponse(
-      "urn:test:0",
-      HTTPResultOK<InputStream>(
-        "OK",
-        200,
-        stream,
-        0L,
-        mutableMapOf(),
-        0L
-      )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(
+          """
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>http://circulation.alpha.librarysimplified.org/loans/</id>
+  <title>Active loans and holds</title>
+  <updated>2020-01-01T00:00:00Z</updated>
+</feed>
+          """.trimIndent()
+        )
     )
-
-    val feed =
-      OPDSAcquisitionFeed.newBuilder(opdsURI, "id", DateTime.now(), "Title")
-        .build()
-
-    Mockito.`when`(this.opdsFeedParser.parse(opdsURI, stream))
-      .thenReturn(feed)
 
     val profile =
       Mockito.mock(ProfileType::class.java)
@@ -420,7 +387,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
       ProfileAccountCreateCustomOPDSTask(
         accountEvents = this.accountEvents,
         accountProviderRegistry = accountProviders,
-        http = this.http,
+        httpClient = this.http,
         opdsURI = opdsURI,
         opdsFeedParser = this.opdsFeedParser,
         profiles = this.profilesDatabase,
@@ -430,28 +397,6 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     val result = task.call()
     val failure = result as TaskResult.Failure
     Assert.assertEquals("creatingAccountFailed", failure.lastErrorCode)
-  }
-
-  private fun createFeedLoader(executorFeeds: ListeningExecutorService): FeedLoaderType {
-    val entryParser =
-      OPDSAcquisitionFeedEntryParser.newParser()
-    val parser =
-      OPDSFeedParser.newParser(entryParser)
-    val searchParser =
-      OPDSSearchParser.newParser()
-    val transport =
-      FeedHTTPTransport.newTransport(this.http)
-
-    return FeedLoader.create(
-      bookFormatSupport = this.bookFormatSupport,
-      bookRegistry = this.bookRegistry,
-      bundledContent = this.bundledContent,
-      contentResolver = this.contentResolver,
-      exec = executorFeeds,
-      parser = parser,
-      searchParser = searchParser,
-      transport = transport
-    )
   }
 
   private fun <T> anyNonNull(): T =
@@ -466,7 +411,7 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   }
 
   private fun resource(file: String): InputStream {
-    return ProfileAccountCreateCustomOPDSContract::class.java.getResourceAsStream(file)
+    return ProfileAccountCreateCustomOPDSContract::class.java.getResourceAsStream(file)!!
   }
 
   @Throws(IOException::class)

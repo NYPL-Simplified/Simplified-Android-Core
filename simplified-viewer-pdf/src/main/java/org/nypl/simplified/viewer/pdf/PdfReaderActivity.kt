@@ -22,7 +22,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStream
-import java.util.concurrent.TimeUnit
 
 class PdfReaderActivity :
   AppCompatActivity(),
@@ -78,7 +77,7 @@ class PdfReaderActivity :
     this.id = intentParams.id
 
     val services =
-      Services.serviceDirectoryWaiting(30L, TimeUnit.SECONDS)
+      Services.serviceDirectory()
 
     this.currentProfile =
       services.requireService(ProfilesControllerType::class.java).profileCurrent()

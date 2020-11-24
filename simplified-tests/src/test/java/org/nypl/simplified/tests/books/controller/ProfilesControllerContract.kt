@@ -30,15 +30,12 @@ import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.controller.Controller
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
-import org.nypl.simplified.clock.Clock
-import org.nypl.simplified.clock.ClockType
 import org.nypl.simplified.content.api.ContentResolverType
 import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -80,7 +77,6 @@ import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
-import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -110,7 +106,6 @@ abstract class ProfilesControllerContract {
   private lateinit var executorBooks: ExecutorService
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorTimer: ExecutorService
-  private lateinit var http: MockingHTTP
   private lateinit var lsHTTP: LSHTTPClientType
   private lateinit var patronUserProfileParsers: PatronUserProfileParsersType
   private lateinit var profileEvents: PublishSubject<ProfileEvent>
@@ -143,7 +138,7 @@ abstract class ProfilesControllerContract {
     val parser =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
     val transport =
-      FeedHTTPTransport.newTransport(this.http)
+      FeedHTTPTransport(this.lsHTTP)
     val bundledContent = BundledContentResolverType { uri ->
       throw FileNotFoundException(uri.toString())
     }
@@ -173,10 +168,8 @@ abstract class ProfilesControllerContract {
     services.putService(BookRevokeStringResourcesType::class.java, this.bookRevokeStringResources)
     services.putService(BorrowSubtaskDirectoryType::class.java, BorrowSubtasks.directory())
     services.putService(BundledContentResolverType::class.java, bundledContent)
-    services.putService(ClockType::class.java, Clock)
     services.putService(ContentResolverType::class.java, this.contentResolver)
     services.putService(FeedLoaderType::class.java, feedLoader)
-    services.putService(HTTPType::class.java, this.http)
     services.putService(LSHTTPClientType::class.java, this.lsHTTP)
     services.putService(OPDSFeedParserType::class.java, parser)
     services.putService(PatronUserProfileParsersType::class.java, this.patronUserProfileParsers)
@@ -199,7 +192,6 @@ abstract class ProfilesControllerContract {
   fun setUp() {
     this.audioBookManifestStrategies = Mockito.mock(AudioBookManifestStrategiesType::class.java)
     this.credentialsStore = FakeAccountCredentialStorage()
-    this.http = MockingHTTP()
     this.lsHTTP = Mockito.mock(LSHTTPClientType::class.java)
     this.authDocumentParsers = Mockito.mock(AuthenticationDocumentParsersType::class.java)
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())

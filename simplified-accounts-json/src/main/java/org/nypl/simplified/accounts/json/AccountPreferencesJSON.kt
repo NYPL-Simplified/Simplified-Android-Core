@@ -3,6 +3,7 @@ package org.nypl.simplified.accounts.json
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
+import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 
@@ -18,10 +19,13 @@ object AccountPreferencesJSON {
 
   fun serializeToJSON(
     objectMapper: ObjectMapper,
-    preferences: org.nypl.simplified.accounts.api.AccountPreferences
+    preferences: AccountPreferences
   ): ObjectNode {
     val node = objectMapper.createObjectNode()
     node.put("bookmarkSyncingPermitted", preferences.bookmarkSyncingPermitted)
+    preferences.catalogURIOverride?.let {
+      node.put("catalogURIOverride", it.toString())
+    }
     return node
   }
 
@@ -30,9 +34,10 @@ object AccountPreferencesJSON {
    */
 
   @Throws(JSONParseException::class)
-  fun deserializeFromJSON(node: ObjectNode): org.nypl.simplified.accounts.api.AccountPreferences {
-    return org.nypl.simplified.accounts.api.AccountPreferences(
-      bookmarkSyncingPermitted = JSONParserUtilities.getBoolean(node, "bookmarkSyncingPermitted")
+  fun deserializeFromJSON(node: ObjectNode): AccountPreferences {
+    return AccountPreferences(
+      bookmarkSyncingPermitted = JSONParserUtilities.getBoolean(node, "bookmarkSyncingPermitted"),
+      catalogURIOverride = JSONParserUtilities.getURIOrNull(node, "catalogURIOverride")
     )
   }
 
@@ -41,7 +46,7 @@ object AccountPreferencesJSON {
    */
 
   @Throws(JSONParseException::class)
-  fun deserializeFromJSON(node: JsonNode): org.nypl.simplified.accounts.api.AccountPreferences {
+  fun deserializeFromJSON(node: JsonNode): AccountPreferences {
     return deserializeFromJSON(JSONParserUtilities.checkObject(null, node))
   }
 }

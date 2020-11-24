@@ -8,7 +8,6 @@ dependencies {
   api libraries.nyplDRMCore
   api libraries.rxjava2
 
-  implementation project(':simplified-http-core')
   implementation project(':simplified-files')
   implementation project(':simplified-json-core')
   implementation project(':simplified-accounts-json')

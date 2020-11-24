@@ -8,9 +8,9 @@ dependencies {
 
   implementation project(":simplified-accounts-json")
   implementation project(":simplified-files")
-  implementation project(":simplified-http-core")
   implementation project(":simplified-opds-auth-document-api")
 
+  implementation libraries.nyplHttpAPI
   implementation libraries.slf4j
   implementation libraries.kotlinStdlib
 
