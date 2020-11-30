@@ -4,6 +4,7 @@ dependencies {
   api project(":simplified-feeds-api")
   api project(":simplified-ui-accounts")
   api project(":simplified-ui-errorpage")
+  api project(":simplified-webview")
 
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-analytics-api")

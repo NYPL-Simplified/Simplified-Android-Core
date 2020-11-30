@@ -13,6 +13,7 @@ class BorrowSubtaskDirectory : BorrowSubtaskDirectoryType {
       BorrowAudioBook,
       BorrowBearerToken,
       BorrowCopy,
+      BorrowSAMLDownload,
       BorrowDirectDownload,
       BorrowLoanCreate
     )

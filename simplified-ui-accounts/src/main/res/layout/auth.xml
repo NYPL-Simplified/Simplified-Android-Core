@@ -5,7 +5,10 @@
   android:layout_width="match_parent"
   android:layout_height="wrap_content">
 
+  <include layout="@layout/auth_anon" />
   <include layout="@layout/auth_basic" />
   <include layout="@layout/auth_coppa" />
+  <include layout="@layout/auth_oauth" />
+  <include layout="@layout/auth_saml" />
 
 </FrameLayout>

@@ -8,13 +8,13 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
     android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:id="@+id/accountTitleAnnounce"
       android:layout_width="match_parent"
-      android:layout_height="48dp">
+      android:layout_height="64dp"
+      android:visibility="visible">
 
       <TextView
         android:layout_width="wrap_content"
@@ -32,9 +32,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+      <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include layout="@layout/account_cell" />
+
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="?android:attr/listDivider" />
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="16dp" />
+
+    <CheckBox
+      android:id="@+id/accountEULACheckbox"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:gravity="center"
+      android:text="@string/accountEULAStatement" />
 
     <Space
       android:layout_width="match_parent"
@@ -42,27 +69,16 @@
 
     <include layout="@layout/auth" />
 
-    <CheckBox
-      android:id="@+id/accountEULACheckbox"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
-      android:layout_marginTop="16dp"
-      android:layout_marginEnd="16dp"
-      android:gravity="center"
-      android:text="@string/accountEULAStatement"
-      android:textSize="12sp" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/accountLogin"
+      android:id="@+id/accountLoginProgress"
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
 
       <ProgressBar
-        android:id="@+id/accountLoginProgress"
+        android:id="@+id/accountLoginProgressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="24dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
@@ -87,52 +103,22 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/accountLoginProgress" />
+        app:layout_constraintTop_toBottomOf="@id/accountLoginProgressBar" />
 
-      <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+      <Button
+        android:id="@+id/accountLoginButtonErrorDetails"
+        android:layout_width="256dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:enabled="true"
+        android:lines="1"
+        android:text="@string/errorDetailsTitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/accountLoginProgressText">
+        app:layout_constraintTop_toBottomOf="@+id/accountLoginProgressText" />
 
-        <Space
-          android:id="@+id/accountLoginButtonSpaceStart"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="0.5" />
-
-        <Button
-          android:id="@+id/accountLoginButtonErrorDetails"
-          android:layout_width="0dp"
-          android:layout_height="48dp"
-          android:layout_marginEnd="16dp"
-          android:layout_weight="1"
-          android:enabled="true"
-          android:lines="1"
-          android:text="@string/errorDetailsTitle"
-          android:visibility="visible" />
-
-        <Button
-          android:id="@+id/accountLoginButton"
-          android:layout_width="0dp"
-          android:layout_height="48dp"
-          android:layout_marginEnd="16dp"
-          android:layout_weight="1"
-          android:enabled="true"
-          android:lines="1"
-          android:text="@string/accountLogin"
-          android:visibility="visible" />
-
-        <Space
-          android:id="@+id/accountLoginButtonSpaceEnd"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="0.5" />
-
-      </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout

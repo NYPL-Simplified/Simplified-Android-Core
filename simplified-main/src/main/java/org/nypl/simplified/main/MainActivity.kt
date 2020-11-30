@@ -49,6 +49,7 @@ import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
+import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
@@ -166,10 +167,20 @@ class MainActivity :
               taskRecorder.currentStepFailed(message, "missingInformation")
               return taskRecorder.finishFailure()
             }
+            is AccountAuthenticationCredentials.SAML2_0 -> {
+              val message = "Can't use SAML 2.0 authentication during migrations."
+              taskRecorder.currentStepFailed(message, "missingInformation")
+              return taskRecorder.finishFailure()
+            }
           }
         }
         is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
           val message = "Can't use OAuth authentication during migrations."
+          taskRecorder.currentStepFailed(message, "missingInformation")
+          return taskRecorder.finishFailure()
+        }
+        is AccountProviderAuthenticationDescription.SAML2_0 -> {
+          val message = "Can't use SAML 2.0 authentication during migrations."
           taskRecorder.currentStepFailed(message, "missingInformation")
           return taskRecorder.finishFailure()
         }
@@ -471,6 +482,10 @@ class MainActivity :
         }
 
         override fun openErrorPage(parameters: ErrorPageParameters) {
+          throw UnreachableCodeException()
+        }
+
+        override fun openSAML20Login(parameters: AccountSAML20FragmentParameters) {
           throw UnreachableCodeException()
         }
 

@@ -40,6 +40,8 @@
   <string name="accountUserName">User Name</string>
   <string name="accountCustomOPDS">Custom OPDS Feed URL</string>
   <string name="currentlyBrowsing">You\'re currently browsing</string>
+  <string name="accountSAML20NoAccessToken">Failed to retrieve an access token from the URI: %1$s</string>
+  <string name="accountSAML20NoPatronInfo">Failed to retrieve patron info from the URI: %1$s</string>
   <string name="accountSearchHint">Search accounts&#8230;</string>
   <string name="accountMore">More options</string>
 </resources>

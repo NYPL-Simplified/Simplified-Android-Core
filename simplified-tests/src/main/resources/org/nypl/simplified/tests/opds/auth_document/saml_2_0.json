@@ -1,0 +1,121 @@
+{
+   "announcements" : [],
+   "authentication" : [
+      {
+         "description" : "Library Barcode",
+         "inputs" : {
+            "login" : {
+               "keyboard" : "Default"
+            },
+            "password" : {
+               "keyboard" : "Default"
+            }
+         },
+         "labels" : {
+            "login" : "Barcode",
+            "password" : "PIN"
+         },
+         "type" : "http://opds-spec.org/auth/basic"
+      },
+      {
+         "description" : "SAML 2.0 Web SSO",
+         "links" : [
+            {
+               "descriptions" : [
+                  {
+                     "language" : "en",
+                     "value" : "Shibboleth Test IdP"
+                  }
+               ],
+               "display_names" : [
+                  {
+                     "language" : "en",
+                     "value" : "Shibboleth Test IdP"
+                  }
+               ],
+               "href" : "http://cm.hilbertteam.net/SAML/saml_authenticate?idp_entity_id=http%3A%2F%2Fidp.hilbertteam.net%2Fidp%2Fshibboleth&provider=SAML+2.0+Web+SSO",
+               "information_urls" : [],
+               "logo_urls" : [],
+               "privacy_statement_urls" : [],
+               "rel" : "authenticate"
+            },
+            {
+               "descriptions" : [
+                  {
+                     "language" : "en",
+                     "value" : "Shibboleth Test IdP 2"
+                  }
+               ],
+               "display_names" : [
+                  {
+                     "language" : "en",
+                     "value" : "Shibboleth Test IdP 2"
+                  }
+               ],
+               "href" : "http://cm.hilbertteam.net/SAML/saml_authenticate?idp_entity_id=http%3A%2F%2Fidp2.hilbertteam.net%2Fidp%2Fshibboleth&provider=SAML+2.0+Web+SSO",
+               "information_urls" : [],
+               "logo_urls" : [],
+               "privacy_statement_urls" : [],
+               "rel" : "authenticate"
+            }
+         ],
+         "type" : "http://librarysimplified.org/authtype/SAML-2.0"
+      }
+   ],
+   "color_scheme" : "blue",
+   "features" : {
+      "disabled" : [],
+      "enabled" : [
+         "https://librarysimplified.org/rel/policy/reservations"
+      ]
+   },
+   "focus_area" : {
+      "CA" : [],
+      "US" : []
+   },
+   "id" : "http://cm.hilbertteam.net/SAML/authentication_document",
+   "links" : [
+      {
+         "href" : "http://cm.hilbertteam.net/SAML/",
+         "rel" : "start",
+         "type" : "application/atom+xml;profile=opds-catalog;kind=acquisition"
+      },
+      {
+         "href" : "http://cm.hilbertteam.net/SAML/loans/",
+         "rel" : "http://opds-spec.org/shelf",
+         "type" : "application/atom+xml;profile=opds-catalog;kind=acquisition"
+      },
+      {
+         "href" : "http://cm.hilbertteam.net/SAML/patrons/me/",
+         "rel" : "http://librarysimplified.org/terms/rel/user-profile",
+         "type" : "vnd.librarysimplified/user-profile+json"
+      },
+      {
+         "href" : "mailto:noreply@librarysimplified.org",
+         "rel" : "http://librarysimplified.org/rel/designated-agent/copyright"
+      },
+      {
+         "href" : "mailto:noreply@librarysimplified.org",
+         "rel" : "help",
+         "type" : null
+      },
+      {
+         "href" : "https://saml-library.org",
+         "rel" : "alternate",
+         "type" : "text/html"
+      }
+   ],
+   "public_key" : {
+      "type" : "RSA",
+      "value" : "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmPO24t3D76ii4olaCtIy\n1GfI4ISemGlfNqCIE2ZEszOpk/HEXcGL6MVVeJDf+Nbt5frIwoC2MKkGKsLwuFHx\naLBxyWrZSsB3hJLpy6FCX3GmgCuhkxhwDwxYgqAYJ4eo7RzPrm9jbbH0LZ7M7iIn\n70XqMwgO2UE5THLxK7CIE+gZGQ/nl5g5Wt5/dw2f7PU2C/A7EczNCqVeqzopiwCt\nbIs11ICrnvzgyR4kXiETs5g1tVFifld1QV01YBeRDtIqqstajRWS+GjJlMQO58fd\nIOP5iqHdrRst+FgO4DtGWeNUhNwU+QnWECPc6VAOmLhnV+U4Rj/6RCS7LspOact8\nKQIDAQAB\n-----END PUBLIC KEY-----"
+   },
+   "service_area" : {
+      "CA" : [],
+      "US" : []
+   },
+   "title" : "SAML Library",
+   "web_color_scheme" : {
+      "background" : "#000000",
+      "foreground" : "#ffffff"
+   }
+}

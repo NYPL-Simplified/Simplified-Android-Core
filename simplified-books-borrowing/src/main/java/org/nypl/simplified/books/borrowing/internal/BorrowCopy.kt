@@ -2,6 +2,7 @@ package org.nypl.simplified.books.borrowing.internal
 
 import com.io7m.junreachable.UnreachableCodeException
 import one.irradia.mime.api.MIMEType
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
@@ -33,7 +34,8 @@ class BorrowCopy private constructor() : BorrowSubtaskType {
 
     override fun isApplicableFor(
       type: MIMEType,
-      target: URI?
+      target: URI?,
+      account: AccountReadableType?
     ): Boolean {
       return if (target != null) {
         target.scheme == "content"

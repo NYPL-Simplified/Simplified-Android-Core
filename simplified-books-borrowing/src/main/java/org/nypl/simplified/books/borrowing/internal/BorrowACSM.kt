@@ -13,6 +13,7 @@ import org.nypl.drm.core.AdobeAdeptFulfillmentToken
 import org.nypl.drm.core.AdobeAdeptNetProviderType
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillmentException
 import org.nypl.simplified.books.api.BookDRMKind.ACS
@@ -60,7 +61,8 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
 
     override fun isApplicableFor(
       type: MIMEType,
-      target: URI?
+      target: URI?,
+      account: AccountReadableType?
     ): Boolean {
       return MIMECompatibility.isCompatibleStrictWithoutAttributes(type, adobeACSMFiles)
     }
