@@ -41,9 +41,11 @@ abstract class WebViewCookieDatabase(
 
       return when (version) {
         "12" -> WebViewCookieDatabaseV12(db)
+        "11" -> WebViewCookieDatabaseV11(db)
         "10" -> WebViewCookieDatabaseV10(db)
+        "9" -> WebViewCookieDatabaseV9(db)
         else -> {
-          logger.warn("no reader found for cookie database version {} -- cookies may not be read correctly")
+          logger.warn("no reader found for cookie database version {} -- cookies may not be read correctly", version)
 
           WebViewCookieDatabaseVUnknown(db)
         }
@@ -89,7 +91,7 @@ abstract class WebViewCookieDatabase(
         db.query(
           DB_META_TABLE_NAME,
           arrayOf("value"),
-          "key = 'last_compatible_version'",
+          "key = 'version'",
           null,
           null,
           null,
