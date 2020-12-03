@@ -57,7 +57,7 @@ class SettingsFragmentDebug : Fragment() {
       val context = this.requireContext()
       val pkgManager = context.packageManager
       val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+      pkgInfo.versionName
     } catch (e: NameNotFoundException) {
       "Unavailable"
     }

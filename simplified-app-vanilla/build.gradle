@@ -3,13 +3,13 @@ android {
     versionName = project.version
     versionCode = versionCode(project.version)
 
-    // Append build number to version name, if on Travis CI
-    def buildNumber = (System.getenv('TRAVIS_BUILD_NUMBER') ?: "0").toInteger()
-    if (buildNumber > 0) {
-      versionName = "$versionName+$buildNumber"
+    // Append build number to version name, if on CI
+    def runNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: "0").toInteger()
+    if (runNumber > 0) {
+      versionName = "$versionName+$runNumber"
     }
 
-    setProperty("archivesBaseName", "$versionName-$versionCode")
+    setProperty("archivesBaseName", versionName)
   }
 
   packagingOptions {
