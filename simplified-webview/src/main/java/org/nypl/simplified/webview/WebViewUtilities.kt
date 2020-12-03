@@ -24,9 +24,10 @@ object WebViewUtilities {
    */
 
   fun dumpCookiesAsAccountCookies(
+    cookieManager: CookieManager,
     dataDir: File
   ): List<AccountCookie> {
-    CookieManager.getInstance().flush()
+    cookieManager.flush()
 
     return try {
       WebViewCookieDatabase.open(dataDir).use {
@@ -48,6 +49,7 @@ object WebViewUtilities {
    * Convert a webkit timestamp (microseconds since 1 Jan 1601) to a unix timestamp (milliseconds
    * since 1 Jan 1970).
    */
+
   private fun webkitTimeToUnixTime(
     time: Long
   ): Long {

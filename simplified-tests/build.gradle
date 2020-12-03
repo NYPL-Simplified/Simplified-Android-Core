@@ -1,3 +1,11 @@
+android {
+  testOptions {
+    unitTests {
+      includeAndroidResources = true
+    }
+  }
+}
+
 dependencies {
 
   api project(":simplified-accounts-api")
@@ -49,6 +57,7 @@ dependencies {
   api project(":simplified-ui-branding")
   api project(":simplified-ui-splash")
   api project(":simplified-ui-theme")
+  api project(":simplified-webview")
 
   api libraries.nyplAudiobookAPI
   api libraries.nyplAudiobookDownloads
@@ -77,4 +86,5 @@ dependencies {
 
   testImplementation libraries.logbackClassic
   testImplementation libraries.junit
+  testImplementation libraries.robolectric
 }

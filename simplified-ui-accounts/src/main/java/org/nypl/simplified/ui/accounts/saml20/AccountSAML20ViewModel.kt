@@ -115,7 +115,10 @@ class AccountSAML20ViewModel(
           return true
         }
 
-        val cookies = WebViewUtilities.dumpCookiesAsAccountCookies(this.webViewDataDir)
+        val cookies = WebViewUtilities.dumpCookiesAsAccountCookies(
+          CookieManager.getInstance(),
+          this.webViewDataDir
+        )
 
         this.logger.debug("obtained access token")
         this.authInfo.set(

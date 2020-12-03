@@ -121,7 +121,10 @@ class CatalogSAML20ViewModel(
           )
         )
 
-        val cookies = WebViewUtilities.dumpCookiesAsAccountCookies(this.webViewDataDir)
+        val cookies = WebViewUtilities.dumpCookiesAsAccountCookies(
+          CookieManager.getInstance(),
+          this.webViewDataDir
+        )
 
         val loginState = account.loginState
 
