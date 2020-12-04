@@ -72,6 +72,10 @@ class MainActivity :
   SplashListenerType,
   ErrorPageListenerType {
 
+  companion object {
+    private const val STATE_ACTION_BAR_IS_SHOWING = "ACTION_BAR_IS_SHOWING"
+  }
+
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
 
   private val migrationExecutor: ListeningScheduledExecutorService =
@@ -318,7 +322,18 @@ class MainActivity :
     if (savedInstanceState == null) {
       this.mainViewModel.clearHistory = true
       this.showSplashScreen()
+    } else {
+      if (savedInstanceState.getBoolean(STATE_ACTION_BAR_IS_SHOWING)) {
+        this.supportActionBar?.show()
+      } else {
+        this.supportActionBar?.hide()
+      }
     }
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putBoolean(STATE_ACTION_BAR_IS_SHOWING, this.supportActionBar?.isShowing ?: false)
   }
 
   override fun getActionBar(): ActionBar? {
