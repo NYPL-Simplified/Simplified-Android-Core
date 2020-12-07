@@ -233,6 +233,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.adobe.extensions](simplified-adobe-extensions)|Adobe DRM convenience functions|
 |[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
+|[org.librarysimplified.android.ktx](simplified-android-ktx)|Kotlin Android Extensions|
+|[org.librarysimplified.announcements](simplified-announcements)|Announcements API|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
 |[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
@@ -289,6 +291,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.tests.sandbox](simplified-tests-sandbox)|Sandbox for informal testing|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 |[org.librarysimplified.ui.accounts](simplified-ui-accounts)|Accounts UI components|
+|[org.librarysimplified.ui.announcements](simplified-ui-announcements)|Announcements UI components|
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
 |[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|

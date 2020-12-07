@@ -47,8 +47,9 @@ import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
@@ -61,6 +62,7 @@ import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashParameters
 import org.nypl.simplified.ui.splash.SplashSelectionFragment
 import org.nypl.simplified.ui.theme.ThemeControl
+import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.ServiceLoader
@@ -286,6 +288,18 @@ class MainActivity :
       .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
       .commit()
     this.supportActionBar?.show()
+
+    /*
+     * Register an announcements controller.
+     */
+
+    val services = Services.serviceDirectory()
+    this.lifecycle.addObserver(
+      AnnouncementsController(
+        context = this,
+        uiThread = services.requireService(UIThreadServiceType::class.java),
+        profileController = services.requireService(ProfilesControllerType::class.java)
+      ))
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {

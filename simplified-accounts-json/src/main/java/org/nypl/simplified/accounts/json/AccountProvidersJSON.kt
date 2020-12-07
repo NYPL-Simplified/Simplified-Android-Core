@@ -18,6 +18,8 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.announcements.Announcement
+import org.nypl.simplified.announcements.AnnouncementJSON
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.slf4j.LoggerFactory
@@ -76,12 +78,26 @@ object AccountProvidersJSON {
       "authentication",
       this.serializeAuthentication(mapper, provider.authentication)
     )
-
+    node.set<ObjectNode>(
+      "announcements",
+      this.serializeAnnouncements(mapper, provider.announcements)
+    )
     node.set<ArrayNode>(
       "authenticationAlternatives",
       this.serializeAuthenticationAlternatives(mapper, provider.authenticationAlternatives)
     )
     return node
+  }
+
+  private fun serializeAnnouncements(
+    mapper: ObjectMapper,
+    announcements: List<Announcement>
+  ): JsonNode {
+    val array = mapper.createArrayNode()
+    for (announcement in announcements) {
+      array.add(AnnouncementJSON.serializeToJSON(mapper, announcement))
+    }
+    return array
   }
 
   private fun serializeAuthenticationAlternatives(
@@ -179,6 +195,8 @@ object AccountProvidersJSON {
         JSONParserUtilities.getURIOrNull(obj, "cardCreatorURI")
       val catalogURI =
         JSONParserUtilities.getURIOrNull(obj, "catalogURI")!!
+      val announcements =
+        this.parseAnnouncements(obj)
       val authentication =
         this.parseAuthentication(obj)
       val authenticationAlternatives =
@@ -218,6 +236,7 @@ object AccountProvidersJSON {
       return AccountProvider(
         addAutomatically = addAutomatically,
         annotationsURI = annotationsURI,
+        announcements = announcements,
         authentication = authentication,
         authenticationAlternatives = authenticationAlternatives,
         authenticationDocumentURI = authenticationDocumentURI,
@@ -229,9 +248,9 @@ object AccountProvidersJSON {
         idNumeric = idNumeric,
         isProduction = isProduction,
         license = license,
+        loansURI = loansURI,
         logo = logo,
         mainColor = mainColor,
-        loansURI = loansURI,
         patronSettingsURI = patronSettingsURI,
         privacyPolicy = privacyPolicy,
         subtitle = subtitle,
@@ -241,6 +260,25 @@ object AccountProvidersJSON {
       )
     } catch (e: JSONParseException) {
       throw JSONParseException("Unable to parse provider $idUUID", e)
+    }
+  }
+
+  private fun parseAnnouncements(
+    obj: ObjectNode
+  ): List<Announcement> {
+    return if (obj.has("announcements")) {
+      val array = JSONParserUtilities.getArray(obj, "announcements")
+      val items = mutableListOf<Announcement>()
+      for (node in array) {
+        try {
+          items.add(AnnouncementJSON.deserializeFromJSON(node))
+        } catch (e: Exception) {
+          this.logger.error("unable to parse announcement: ", e)
+        }
+      }
+      items.toList()
+    } else {
+      listOf()
     }
   }
 

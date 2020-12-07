@@ -38,6 +38,7 @@ class MockAccount(override val id: AccountID) : AccountType {
 
       AccountProvider(
         addAutomatically = false,
+        announcements = emptyList(),
         annotationsURI = null,
         authentication = authentication,
         authenticationAlternatives = listOf(),
@@ -93,6 +94,7 @@ class MockAccount(override val id: AccountID) : AccountType {
   override val preferences: AccountPreferences
     get() = AccountPreferences(
       bookmarkSyncingPermitted = true,
-      catalogURIOverride = null
+      catalogURIOverride = null,
+      announcementsAcknowledged = listOf()
     )
 }

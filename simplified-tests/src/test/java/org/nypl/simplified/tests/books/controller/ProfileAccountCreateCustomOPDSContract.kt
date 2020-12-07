@@ -246,12 +246,14 @@ abstract class ProfileAccountCreateCustomOPDSContract {
     val preferences =
       AccountPreferences(
         bookmarkSyncingPermitted = true,
-        catalogURIOverride = null
+        catalogURIOverride = null,
+        announcementsAcknowledged = listOf()
       )
     val preferencesWithURI =
       AccountPreferences(
         bookmarkSyncingPermitted = true,
-        catalogURIOverride = opdsURI
+        catalogURIOverride = opdsURI,
+        announcementsAcknowledged = listOf()
       )
 
     Mockito.`when`(this.profilesDatabase.currentProfileUnsafe())

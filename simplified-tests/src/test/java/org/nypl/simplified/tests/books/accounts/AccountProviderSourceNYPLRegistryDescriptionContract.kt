@@ -288,6 +288,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
     val authDocument =
       AuthenticationDocument(
+        announcements = emptyList(),
         id = URI("http://www.example.com/auth"),
         title = "Auth",
         mainColor = "blue",
@@ -377,6 +378,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
     val provider = AccountProvider(
       addAutomatically = false,
+      announcements = emptyList(),
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Basic(
         description = "Basic Auth",
@@ -457,6 +459,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
     val authDocument =
       AuthenticationDocument(
         id = URI("http://www.example.com/auth"),
+        announcements = emptyList(),
         title = "Auth",
         mainColor = "blue",
         description = "Some library you've never heard of",
@@ -533,6 +536,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
     val provider = AccountProvider(
       addAutomatically = false,
+      announcements = emptyList(),
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
         greaterEqual13 = URI("http://www.example.com/feed-13.xml"),
@@ -605,6 +609,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
     val authDocument =
       AuthenticationDocument(
         id = URI("http://www.example.com/auth"),
+        announcements = emptyList(),
         title = "Auth",
         mainColor = "blue",
         description = "Some library you've never heard of",
@@ -664,6 +669,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
 
     val provider = AccountProvider(
       addAutomatically = false,
+      announcements = emptyList(),
       annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Anonymous,
       authenticationAlternatives = listOf(),
@@ -740,6 +746,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           enabled = setOf("https://librarysimplified.org/rel/policy/reservations"),
           disabled = setOf()
         ),
+        announcements = emptyList(),
         authentication = listOf(
           AuthenticationObject(
             type = URI(COPPA_TYPE),
@@ -851,6 +858,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
           enabled = setOf("https://librarysimplified.org/rel/policy/reservations"),
           disabled = setOf()
         ),
+        announcements = emptyList(),
         authentication = listOf(
           AuthenticationObject(
             type = URI("urn:unknown"),
@@ -959,6 +967,7 @@ abstract class AccountProviderSourceNYPLRegistryDescriptionContract {
         mainColor = "blue",
         description = "Some library you've never heard of",
         authentication = listOf(),
+        announcements = emptyList(),
         features = AuthenticationObjectNYPLFeatures(
           enabled = setOf("https://librarysimplified.org/rel/policy/reservations"),
           disabled = setOf()

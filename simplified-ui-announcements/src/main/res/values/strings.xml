@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+  <string name="announcementTitle">%1$s (%2$d of %3$d)</string>
+  <string name="ok">OK</string>
+</resources>

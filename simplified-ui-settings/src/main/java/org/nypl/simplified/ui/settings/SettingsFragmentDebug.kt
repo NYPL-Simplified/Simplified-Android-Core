@@ -83,12 +83,13 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var enableR2: SwitchCompat
   private lateinit var failNextBoot: SwitchCompat
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var showOnlySupportedBooks: SwitchCompat
+  private lateinit var forgetAnnouncementsButton: Button
   private lateinit var hasSeenLibrarySelection: SwitchCompat
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendAnalyticsButton: Button
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
+  private lateinit var showOnlySupportedBooks: SwitchCompat
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
   private lateinit var uiThread: UIThreadServiceType
@@ -139,6 +140,8 @@ class SettingsFragmentDebug : Fragment() {
       view.findViewById(R.id.settingsVersionDevSyncAnalytics)
     this.syncAccountsButton =
       view.findViewById(R.id.settingsVersionDevSyncAccounts)
+    this.forgetAnnouncementsButton =
+      view.findViewById(R.id.settingsVersionDevUnacknowledgeAnnouncements)
     this.drmTable =
       view.findViewById(R.id.settingsVersionDrmSupport)
     this.adobeDRMActivationTable =
@@ -327,6 +330,26 @@ class SettingsFragmentDebug : Fragment() {
     this.showOnlySupportedBooks.setOnClickListener {
       this.feedLoader.showOnlySupportedBooks = this.showOnlySupportedBooks.isChecked
     }
+
+    /*
+     * Forget announcements when the button is clicked.
+     */
+
+    this.forgetAnnouncementsButton.setOnClickListener {
+      this.forgetAllAnnouncements()
+    }
+  }
+
+  private fun forgetAllAnnouncements() {
+    try {
+      val profile = this.profilesController.profileCurrent()
+      val accounts = profile.accounts()
+      for ((_, account) in accounts) {
+        account.setPreferences(account.preferences.copy(announcementsAcknowledged = listOf()))
+      }
+    } catch (e: Exception) {
+      this.logger.error("could not forget announcements: ", e)
+    }
   }
 
   private fun configureToolbar(activity: Activity) {
@@ -335,10 +358,6 @@ class SettingsFragmentDebug : Fragment() {
       subtitle = null
     }
   }
-
-  data class ExampleError(
-    override val message: String
-  ) : PresentableErrorType
 
   private fun showErrorPage() {
     val attributes = sortedMapOf(

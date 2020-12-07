@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
+import org.nypl.simplified.announcements.Announcement
 import org.nypl.simplified.links.Link
 import org.nypl.simplified.opds.core.OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
 import java.net.URI
@@ -201,6 +202,12 @@ interface AccountProviderType : Comparable<AccountProviderType> {
         }
       }
     }
+
+  /**
+   * @return A list of the most recently published announcements
+   */
+
+  val announcements: List<Announcement>
 
   fun toDescription(): AccountProviderDescription {
     val imageLinks = mutableListOf<Link>()

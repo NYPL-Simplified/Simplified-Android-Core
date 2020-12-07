@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.nypl.simplified.links.json.LinkParsing
+import org.nypl.simplified.announcements.Announcement
+import org.nypl.simplified.announcements.AnnouncementJSON
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.links.Link
+import org.nypl.simplified.links.json.LinkParsing
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocument
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParserType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObject
@@ -93,6 +95,8 @@ internal class AuthenticationDocumentParser(
           ?.let { obj -> parseFeatures(obj) }
           ?: AuthenticationObjectNYPLFeatures(setOf(), setOf())
 
+      val announcements =
+        this.parseAnnouncements(root)
       val authentication =
         this.parseAuthentications(root)
       val links =
@@ -108,7 +112,8 @@ internal class AuthenticationDocumentParser(
             id = id,
             links = links,
             mainColor = mainColor,
-            title = title
+            title = title,
+            announcements = announcements
           )
         )
       } else {
@@ -117,6 +122,28 @@ internal class AuthenticationDocumentParser(
     } catch (e: Exception) {
       this.publishErrorForException(e)
       ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
+    }
+  }
+
+  private fun parseAnnouncements(root: ObjectNode): List<Announcement> {
+    return try {
+      val announcements = JSONParserUtilities.getArrayOrNull(root, "announcements")
+      if (announcements != null) {
+        val results = mutableListOf<Announcement>()
+        for (announcement in announcements) {
+          try {
+            results.add(AnnouncementJSON.deserializeFromJSON(announcement))
+          } catch (e: Exception) {
+            this.publishErrorForException(e)
+          }
+        }
+        results.toList()
+      } else {
+        listOf()
+      }
+    } catch (e: java.lang.Exception) {
+      this.publishErrorForException(e)
+      emptyList()
     }
   }
 
@@ -248,11 +275,11 @@ internal class AuthenticationDocumentParser(
       AuthenticationObjectNYPLInput(
         fieldName = fieldName,
         keyboardType =
-          JSONParserUtilities.getStringOrNull(root, "keyboard")?.toUpperCase(),
+        JSONParserUtilities.getStringOrNull(root, "keyboard")?.toUpperCase(),
         maximumLength =
-          JSONParserUtilities.getIntegerDefault(root, "maximum_length", 0),
+        JSONParserUtilities.getIntegerDefault(root, "maximum_length", 0),
         barcodeFormat =
-          JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase()
+        JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase()
       )
     } catch (e: Exception) {
       this.publishErrorForException(e)
