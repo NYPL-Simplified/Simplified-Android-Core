@@ -27,9 +27,11 @@ object AnnouncementJSON {
     node.put("id", announcement.id.toString())
     node.put("content", announcement.content)
     announcement.expires?.let {
-      node.put("expires",
+      node.put(
+        "expires",
         ISODateTimeFormat.dateTime()
-          .print(it.toDateTime(DateTimeZone.UTC)))
+          .print(it.toDateTime(DateTimeZone.UTC))
+      )
     }
     return node
   }

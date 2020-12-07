@@ -95,9 +95,11 @@ class AnnouncementsController(
 
     if (notYetAcknowledged.isNotEmpty()) {
       this.showDialogForAnnouncements(account, notYetAcknowledged)
-      account.setPreferences(account.preferences.copy(
-        announcementsAcknowledged = account.provider.announcements.map(Announcement::id)
-      ))
+      account.setPreferences(
+        account.preferences.copy(
+          announcementsAcknowledged = account.provider.announcements.map(Announcement::id)
+        )
+      )
     }
   }
 
@@ -125,7 +127,8 @@ class AnnouncementsController(
         R.string.announcementTitle,
         account.provider.displayName,
         indexNumber + 1,
-        announcements.size)
+        announcements.size
+      )
 
     val dialog =
       AlertDialog.Builder(this.context)
@@ -147,7 +150,8 @@ class AnnouncementsController(
             R.string.announcementTitle,
             account.provider.displayName,
             indexNumber + 1,
-            announcements.size)
+            announcements.size
+          )
         dialog.setMessage(announcements[indexNumber].content)
         dialog.setTitle(newTitle)
       }

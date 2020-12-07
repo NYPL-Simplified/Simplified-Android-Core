@@ -299,7 +299,8 @@ class MainActivity :
         context = this,
         uiThread = services.requireService(UIThreadServiceType::class.java),
         profileController = services.requireService(ProfilesControllerType::class.java)
-      ))
+      )
+    )
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {

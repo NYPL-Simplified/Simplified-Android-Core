@@ -275,11 +275,11 @@ internal class AuthenticationDocumentParser(
       AuthenticationObjectNYPLInput(
         fieldName = fieldName,
         keyboardType =
-        JSONParserUtilities.getStringOrNull(root, "keyboard")?.toUpperCase(),
+          JSONParserUtilities.getStringOrNull(root, "keyboard")?.toUpperCase(),
         maximumLength =
-        JSONParserUtilities.getIntegerDefault(root, "maximum_length", 0),
+          JSONParserUtilities.getIntegerDefault(root, "maximum_length", 0),
         barcodeFormat =
-        JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase()
+          JSONParserUtilities.getStringOrNull(root, "barcode_format")?.toUpperCase()
       )
     } catch (e: Exception) {
       this.publishErrorForException(e)

@@ -31,7 +31,6 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfileUpdated.Succeeded
