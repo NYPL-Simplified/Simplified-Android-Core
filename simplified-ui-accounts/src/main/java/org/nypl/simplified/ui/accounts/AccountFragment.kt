@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.accounts
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -17,6 +16,7 @@ import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -572,9 +572,19 @@ class AccountFragment : Fragment() {
       this.reportIssueGroup.setOnClickListener {
         val emailIntent =
           Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null))
-        startActivity(
-          Intent.createChooser(emailIntent, resources.getString(R.string.accountReportIssue))
-        )
+        val chosenIntent =
+          Intent.createChooser(emailIntent, this.resources.getString(R.string.accountReportIssue))
+
+        try {
+          this.startActivity(chosenIntent)
+        } catch (e: Exception) {
+          this.logger.error("unable to start activity: ", e)
+          val context = this.requireContext()
+          AlertDialog.Builder(context)
+            .setMessage(context.getString(R.string.accountReportFailed, email))
+            .create()
+            .show()
+        }
       }
     } else {
       this.reportIssueGroup.visibility = View.GONE
