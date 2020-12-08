@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.accounts
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -17,6 +16,7 @@ import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -119,13 +119,14 @@ class AccountFragment : Fragment() {
   private lateinit var loginTitle: ViewGroup
   private lateinit var parameters: AccountFragmentParameters
   private lateinit var profilesController: ProfilesControllerType
+  private lateinit var reportIssueEmail: TextView
+  private lateinit var reportIssueGroup: ViewGroup
+  private lateinit var reportIssueItem: View
   private lateinit var settingsCardCreator: ConstraintLayout
   private lateinit var signUpButton: Button
   private lateinit var signUpLabel: TextView
   private lateinit var uiThread: UIThreadServiceType
   private lateinit var viewModel: AccountFragmentViewModel
-  private lateinit var reportIssueGroup: ViewGroup
-  private lateinit var reportIssueItem: View
 
   private val cardCreatorResultCode = 101
   private val closing = AtomicBoolean(false)
@@ -261,6 +262,8 @@ class AccountFragment : Fragment() {
       layout.findViewById(R.id.accountReportIssue)
     this.reportIssueItem =
       this.reportIssueGroup.findViewById(R.id.accountReportIssueText)
+    this.reportIssueEmail =
+      this.reportIssueGroup.findViewById(R.id.accountReportIssueEmail)
 
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginProgress.visibility = View.INVISIBLE
@@ -565,12 +568,23 @@ class AccountFragment : Fragment() {
     val email = this.account.provider.supportEmail
     if (email != null) {
       this.reportIssueGroup.visibility = View.VISIBLE
-      this.reportIssueItem.setOnClickListener {
+      this.reportIssueEmail.text = email.removePrefix("mailto:")
+      this.reportIssueGroup.setOnClickListener {
         val emailIntent =
           Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null))
-        startActivity(
-          Intent.createChooser(emailIntent, resources.getString(R.string.accountReportIssue))
-        )
+        val chosenIntent =
+          Intent.createChooser(emailIntent, this.resources.getString(R.string.accountReportIssue))
+
+        try {
+          this.startActivity(chosenIntent)
+        } catch (e: Exception) {
+          this.logger.error("unable to start activity: ", e)
+          val context = this.requireContext()
+          AlertDialog.Builder(context)
+            .setMessage(context.getString(R.string.accountReportFailed, email))
+            .create()
+            .show()
+        }
       }
     } else {
       this.reportIssueGroup.visibility = View.GONE

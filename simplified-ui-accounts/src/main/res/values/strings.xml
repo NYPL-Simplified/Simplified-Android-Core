@@ -42,4 +42,5 @@
   <string name="currentlyBrowsing">You\'re currently browsing</string>
   <string name="accountSearchHint">Search accounts&#8230;</string>
   <string name="accountMore">More options</string>
+  <string name="accountReportFailed">Sorry, we weren\'t able to find a usable email app. Please send email to %1$s if you need to report an issue.</string>
 </resources>
