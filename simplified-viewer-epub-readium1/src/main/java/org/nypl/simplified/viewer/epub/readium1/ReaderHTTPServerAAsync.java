@@ -145,6 +145,7 @@ public final class ReaderHTTPServerAAsync
   {
     try {
       final ReaderNativeCodeReadLock read_lock = ReaderNativeCodeReadLock.get();
+      disableCache(response);
 
       /**
        * Determine if the current request is a range request.
@@ -281,6 +282,10 @@ public final class ReaderHTTPServerAAsync
     } finally {
       ReaderHTTPServerAAsync.LOG.trace("request: done {}", request.getPath());
     }
+  }
+
+  private Headers disableCache(AsyncHttpServerResponse response) {
+    return response.getHeaders().add("Cache-Control", "no-store");
   }
 
   private boolean isRangeRequest(Headers headers) {
