@@ -18,6 +18,7 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -28,6 +29,8 @@ import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountListFragment
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountListFragmentParameters
+import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Fragment
+import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
@@ -35,6 +38,8 @@ import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
 import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
+import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Fragment
+import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20FragmentParameters
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
@@ -46,6 +51,7 @@ import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.viewer.api.Viewers
 import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.slf4j.LoggerFactory
+import java.net.URI
 
 /**
  * A tabbed navigation controller based on Pandora's BottomNavigator.
@@ -359,6 +365,13 @@ class TabbedNavigationController private constructor(
     )
   }
 
+  override fun openSAML20Login(parameters: AccountSAML20FragmentParameters) {
+    this.navigator.addFragment(
+      fragment = AccountSAML20Fragment.create(parameters),
+      tab = this.navigator.currentTab()
+    )
+  }
+
   override fun openBookDetail(
     feedArguments: CatalogFeedArguments,
     entry: FeedEntry.FeedEntryOPDS
@@ -368,6 +381,21 @@ class TabbedNavigationController private constructor(
         CatalogFragmentBookDetailParameters(
           feedEntry = entry,
           feedArguments = feedArguments
+        )
+      ),
+      tab = this.navigator.currentTab()
+    )
+  }
+
+  override fun openBookDownloadLogin(
+    bookID: BookID,
+    downloadURI: URI
+  ) {
+    this.navigator.addFragment(
+      fragment = CatalogSAML20Fragment.create(
+        CatalogSAML20FragmentParameters(
+          bookID = bookID,
+          downloadURI = downloadURI
         )
       ),
       tab = this.navigator.currentTab()

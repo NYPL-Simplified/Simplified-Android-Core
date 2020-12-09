@@ -18,6 +18,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import java.net.URI
 
 sealed class BookStatus {
 
@@ -314,6 +315,29 @@ sealed class BookStatus {
 
     override val priority: BookStatusPriorityOrdering
       get() = BookStatusPriorityOrdering.BOOK_STATUS_DOWNLOAD_IN_PROGRESS
+  }
+
+  /**
+   * The given book is downloading, and external authentication has been required by the provider.
+   */
+
+  data class DownloadWaitingForExternalAuthentication(
+    override val id: BookID,
+    val downloadURI: URI
+  ) : BookStatus() {
+    override val priority: BookStatusPriorityOrdering
+      get() = BookStatusPriorityOrdering.BOOK_STATUS_WAITING_FOR_EXTERNAL_AUTHENTICATION
+  }
+
+  /**
+   * The given book is downloading, and a required external authentication is in progress.
+   */
+
+  data class DownloadExternalAuthenticationInProgress(
+    override val id: BookID
+  ) : BookStatus() {
+    override val priority: BookStatusPriorityOrdering
+      get() = BookStatusPriorityOrdering.BOOK_STATUS_DOWNLOAD_EXTERNAL_AUTHENTICATION_IN_PROGRESS
   }
 
   /**

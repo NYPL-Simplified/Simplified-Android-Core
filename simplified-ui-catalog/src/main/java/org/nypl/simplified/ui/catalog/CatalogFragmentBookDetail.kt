@@ -484,6 +484,10 @@ class CatalogFragmentBookDetail : Fragment() {
         this.onBookStatusRequestingDownloadUI()
       is BookStatus.Downloading ->
         this.onBookStatusDownloadingUI(status, book.book)
+      is BookStatus.DownloadWaitingForExternalAuthentication ->
+        this.onBookStatusDownloadWaitingForExternalAuthenticationUI(status, book.book)
+      is BookStatus.DownloadExternalAuthenticationInProgress ->
+        this.onBookStatusDownloadExternalAuthenticationInProgressUI(book.book)
     }
   }
 
@@ -794,6 +798,48 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgressText.text = "${bookStatus.progressPercent.toInt()}%"
     this.statusInProgressBar.isIndeterminate = false
     this.statusInProgressBar.progress = bookStatus.progressPercent.toInt()
+  }
+
+  @UiThread
+  private fun onBookStatusDownloadWaitingForExternalAuthenticationUI(
+    status: BookStatus.DownloadWaitingForExternalAuthentication,
+    book: Book
+  ) {
+    this.uiThread.checkIsUIThread()
+
+    this.buttons.removeAllViews()
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogLoginRequired))
+    this.checkButtonViewCount()
+
+    this.statusInProgress.visibility = View.VISIBLE
+    this.statusIdle.visibility = View.INVISIBLE
+    this.statusFailed.visibility = View.INVISIBLE
+    this.statusInProgressText.visibility = View.GONE
+    this.statusInProgressBar.isIndeterminate = true
+
+    this.uiThread.runOnUIThread({
+      this.findNavigationController().openBookDownloadLogin(
+        bookID = book.id,
+        downloadURI = status.downloadURI
+      )
+    })
+  }
+
+  @UiThread
+  private fun onBookStatusDownloadExternalAuthenticationInProgressUI(
+    book: Book
+  ) {
+    this.uiThread.checkIsUIThread()
+
+    this.buttons.removeAllViews()
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogLoginRequired))
+    this.checkButtonViewCount()
+
+    this.statusInProgress.visibility = View.VISIBLE
+    this.statusIdle.visibility = View.INVISIBLE
+    this.statusFailed.visibility = View.INVISIBLE
+    this.statusInProgressText.visibility = View.GONE
+    this.statusInProgressBar.isIndeterminate = true
   }
 
   @UiThread

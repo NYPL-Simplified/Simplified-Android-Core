@@ -65,6 +65,7 @@ interface AccountReadableType {
       is AccountProviderAuthenticationDescription.COPPAAgeGate -> false
       is AccountProviderAuthenticationDescription.Basic -> true
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> true
+      is AccountProviderAuthenticationDescription.SAML2_0 -> true
       is AccountProviderAuthenticationDescription.Anonymous -> false
     }
 }

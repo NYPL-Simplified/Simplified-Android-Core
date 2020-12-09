@@ -31,6 +31,12 @@ interface AccountProviderResolutionStringsType {
   val resolvingAuthDocumentOAuthMalformed: String
 
   /**
+   * The description of as SAML 2.0 system is malformed.
+   */
+
+  val resolvingAuthDocumentSAML20Malformed: String
+
+  /**
    * The authentication document contained authentication types but we couldn't understand any of them.
    */
 

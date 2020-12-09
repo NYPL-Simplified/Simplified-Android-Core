@@ -108,6 +108,28 @@ public abstract class AccountProvidersJSONContract {
   }
 
   @Test
+  public final void testSAML2()
+          throws Exception {
+    Map<URI, AccountProvider> providers =
+            AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
+                    readAllFromResource("providers-saml.json"));
+
+    Assert.assertEquals(1, providers.size());
+
+    final AccountProvider provider =
+            providers.get(URI.create("urn:uuid:b67588ef-d3ce-4187-9709-04e6f4c01a13"));
+
+    Assert.assertEquals(AccountProviderAuthenticationDescription.SAML2_0.class, provider.getAuthentication().getClass());
+    Assert.assertEquals(0, provider.getAuthenticationAlternatives().size());
+
+    final AccountProvider providerAfter =
+            AccountProvidersJSON.INSTANCE.deserializeFromJSON(
+                    AccountProvidersJSON.INSTANCE.serializeToJSON(provider));
+
+    Assert.assertEquals(providerAfter, provider);
+  }
+
+  @Test
   public final void testAll()
       throws Exception {
     final Map<URI, AccountProvider> c =

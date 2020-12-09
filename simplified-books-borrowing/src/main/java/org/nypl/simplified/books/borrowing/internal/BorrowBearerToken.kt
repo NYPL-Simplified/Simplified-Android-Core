@@ -2,6 +2,7 @@ package org.nypl.simplified.books.borrowing.internal
 
 import one.irradia.mime.api.MIMECompatibility
 import one.irradia.mime.api.MIMEType
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.borrowing.BorrowContextType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
@@ -26,7 +27,8 @@ class BorrowBearerToken : BorrowSubtaskType {
 
     override fun isApplicableFor(
       type: MIMEType,
-      target: URI?
+      target: URI?,
+      account: AccountReadableType?
     ): Boolean {
       return MIMECompatibility.isCompatibleStrictWithoutAttributes(
         type,

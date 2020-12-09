@@ -203,6 +203,7 @@ ext.libraries = [
   picasso                          : "com.squareup.picasso:picasso:2.71828",
   readium                          : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
   readiumSharedJS                  : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",
+  robolectric                      : "org.robolectric:robolectric:4.4",
   rxjava2                          : "io.reactivex.rxjava2:rxjava:2.1.13",
   slf4j                            : "org.slf4j:slf4j-api:1.7.25",
 ]

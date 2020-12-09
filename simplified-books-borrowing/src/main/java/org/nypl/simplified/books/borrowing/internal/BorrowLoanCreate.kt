@@ -6,6 +6,7 @@ import one.irradia.mime.api.MIMECompatibility.applicationOctetStream
 import one.irradia.mime.api.MIMEType
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Put
 import org.librarysimplified.http.api.LSHTTPResponseStatus
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldInQueue
 import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldReady
 import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedNotDownloaded
@@ -57,7 +58,8 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
 
     override fun isApplicableFor(
       type: MIMEType,
-      target: URI?
+      target: URI?,
+      account: AccountReadableType?
     ): Boolean {
       for (opdsType in allOPDSFeeds) {
         if (MIMECompatibility.isCompatibleStrictWithoutAttributes(opdsType, type)) {

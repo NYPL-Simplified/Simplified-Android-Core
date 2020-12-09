@@ -431,6 +431,25 @@ abstract class AuthenticationDocumentContract {
     Assert.assertEquals("http://librarysimplified.org/authtype/OAuth-with-intermediary", document.authentication[1].type.toString())
   }
 
+  @Test
+  fun testSAML2_0_20200707() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("saml_2_0.json"))
+
+    val result =
+      parser.use { parser.parse() }
+
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Success::class.java))
+
+    val success = result as Success
+    val document = success.result
+
+    Assert.assertEquals(2, document.authentication.size)
+    Assert.assertEquals("http://opds-spec.org/auth/basic", document.authentication[0].type.toString())
+    Assert.assertEquals("http://librarysimplified.org/authtype/SAML-2.0", document.authentication[1].type.toString())
+  }
+
   private fun resource(file: String): InputStream {
     val path = "/org/nypl/simplified/tests/opds/auth_document/$file"
     return AuthenticationDocumentContract::class.java.getResourceAsStream(path)!!

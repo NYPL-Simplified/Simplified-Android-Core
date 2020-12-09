@@ -1,13 +1,14 @@
 package org.nypl.simplified.accounts.api
 
 import com.google.common.base.Preconditions
+import java.io.Serializable
 import java.net.URI
 
 /**
  * A description of the details of authentication.
  */
 
-sealed class AccountProviderAuthenticationDescription {
+sealed class AccountProviderAuthenticationDescription : Serializable {
 
   companion object {
 
@@ -39,7 +40,20 @@ sealed class AccountProviderAuthenticationDescription {
 
     const val OAUTH_INTERMEDIARY_TYPE =
       "http://librarysimplified.org/authtype/OAuth-with-intermediary"
+
+    /**
+     * The type used to identify SAML 2.0.
+     */
+
+    const val SAML_2_0_TYPE =
+      "http://librarysimplified.org/authtype/SAML-2.0"
   }
+
+  /**
+   * `true` if this type of authentication involves a "login" operation
+   */
+
+  abstract val isLoginPossible: Boolean
 
   /**
    * The authentication description.
@@ -72,6 +86,9 @@ sealed class AccountProviderAuthenticationDescription {
         "URIs ${this.greaterEqual13} and ${this.under13} must differ"
       )
     }
+
+    override val isLoginPossible: Boolean =
+      false
 
     override val description: String =
       COPPA_TYPE
@@ -164,6 +181,9 @@ sealed class AccountProviderAuthenticationDescription {
     val logoURI: URI?
   ) : AccountProviderAuthenticationDescription() {
 
+    override val isLoginPossible: Boolean =
+      true
+
     init {
       Preconditions.checkArgument(
         this.barcodeFormat?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
@@ -190,14 +210,42 @@ sealed class AccountProviderAuthenticationDescription {
      */
 
     val logoURI: URI?
-  ) : AccountProviderAuthenticationDescription()
+  ) : AccountProviderAuthenticationDescription() {
+    override val isLoginPossible: Boolean =
+      true
+  }
 
   /**
    * Anonymous authentication (equivalent to no authentication)
    */
 
   object Anonymous : AccountProviderAuthenticationDescription() {
+    override val isLoginPossible: Boolean =
+      false
     override val description: String =
       ANONYMOUS_TYPE
+  }
+
+  /**
+   * SAML 2.0.
+   */
+
+  data class SAML2_0(
+    override val description: String,
+
+    /**
+     * The URI used to perform authentication.
+     */
+
+    val authenticate: URI,
+
+    /**
+     * The URI of the authentication logo.
+     */
+
+    val logoURI: URI?
+  ) : AccountProviderAuthenticationDescription() {
+    override val isLoginPossible: Boolean =
+      true
   }
 }

@@ -163,6 +163,13 @@ interface BorrowContextType {
   val bookCurrent: Book
 
   /**
+   * Indicate that downloading of the current book is stopped because external authentication is
+   * required.
+   */
+
+  fun bookDownloadIsWaitingForExternalAuthentication()
+
+  /**
    * Called by subtasks to indicate that a book is currently in the process of being downloaded.
    */
 

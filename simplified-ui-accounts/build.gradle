@@ -13,6 +13,7 @@ dependencies {
   implementation project(":simplified-ui-navigation-api")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-webview")
 
   implementation libraries.androidXAppCompat
   implementation libraries.androidXConstraintLayout

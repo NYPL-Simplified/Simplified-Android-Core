@@ -171,7 +171,9 @@ interface AccountProviderType : Comparable<AccountProviderType> {
         } else {
           auth.under13
         }
-      is AccountProviderAuthenticationDescription.Anonymous,
+
+      is AccountProviderAuthenticationDescription.SAML2_0,
+      AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.Basic,
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
         this.catalogURI
@@ -190,6 +192,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
 
   val supportsBarcodeDisplay: Boolean
     get() = when (val auth = this.authentication) {
+      is AccountProviderAuthenticationDescription.SAML2_0,
       AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->

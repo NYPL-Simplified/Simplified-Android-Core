@@ -89,6 +89,15 @@ class MockBorrowContext(
     )
   }
 
+  override fun bookDownloadIsWaitingForExternalAuthentication() {
+    this.bookPublishStatus(
+      BookStatus.DownloadWaitingForExternalAuthentication(
+        id = this.bookCurrent.id,
+        downloadURI = this.currentURICheck()
+      )
+    )
+  }
+
   override fun bookDownloadFailed() {
     this.bookPublishStatus(
       BookStatus.FailedDownload(

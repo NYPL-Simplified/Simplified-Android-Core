@@ -23,6 +23,10 @@ object AccountAuthenticatedHTTP {
         LSHTTPAuthorizationBearerToken.ofToken(
           token = credentials.accessToken
         )
+      is AccountAuthenticationCredentials.SAML2_0 ->
+        LSHTTPAuthorizationBearerToken.ofToken(
+          token = credentials.accessToken
+        )
     }
   }
 

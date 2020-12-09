@@ -112,6 +112,8 @@ class CatalogPagedViewHolder(
   private var feedEntry: FeedEntry? = null
   private var loginSubscription: Disposable? = null
 
+  private var isDownloadLoginVisible = false
+
   fun bindTo(item: FeedEntry?) {
     this.feedEntry = item
     this.unbind()
@@ -256,7 +258,8 @@ class CatalogPagedViewHolder(
       this.idle.visibility == View.VISIBLE ||
         this.progress.visibility == View.VISIBLE ||
         this.corrupt.visibility == View.VISIBLE ||
-        this.error.visibility == View.VISIBLE,
+        this.error.visibility == View.VISIBLE ||
+        this.isDownloadLoginVisible,
       "Something must be visible!"
     )
   }
@@ -307,6 +310,10 @@ class CatalogPagedViewHolder(
 
       is BookStatus.Downloading ->
         this.onBookStatusDownloading(book, status)
+      is BookStatus.DownloadWaitingForExternalAuthentication ->
+        this.onBookStatusDownloadWaitingForExternalAuthentication(status, book.book)
+      is BookStatus.DownloadExternalAuthenticationInProgress ->
+        this.onBookStatusDownloadExternalAuthenticationInProgress(book.book)
     }
   }
 
@@ -539,6 +546,42 @@ class CatalogPagedViewHolder(
     this.progressText.text = book.book.entry.title
     this.progressProgress.isIndeterminate = false
     this.progressProgress.progress = status.progressPercent.toInt()
+  }
+
+  @UiThread
+  private fun onBookStatusDownloadWaitingForExternalAuthentication(
+    status: BookStatus.DownloadWaitingForExternalAuthentication,
+    book: Book
+  ) {
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
+    this.setVisibilityIfNecessary(this.idle, View.GONE)
+    this.setVisibilityIfNecessary(this.progress, View.VISIBLE)
+
+    this.progressText.text = book.entry.title
+    this.progressProgress.isIndeterminate = true
+
+    if (!this.isDownloadLoginVisible) {
+      this.isDownloadLoginVisible = true
+
+      this.navigation().openBookDownloadLogin(
+        bookID = status.id,
+        downloadURI = status.downloadURI
+      )
+    }
+  }
+
+  @UiThread
+  private fun onBookStatusDownloadExternalAuthenticationInProgress(
+    book: Book
+  ) {
+    this.setVisibilityIfNecessary(this.corrupt, View.GONE)
+    this.setVisibilityIfNecessary(this.error, View.GONE)
+    this.setVisibilityIfNecessary(this.idle, View.GONE)
+    this.setVisibilityIfNecessary(this.progress, View.VISIBLE)
+
+    this.progressText.text = book.entry.title
+    this.progressProgress.isIndeterminate = true
   }
 
   @UiThread

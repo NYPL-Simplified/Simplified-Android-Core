@@ -28,6 +28,19 @@ public enum BookStatusPriorityOrdering
   BOOK_STATUS_DOWNLOAD_FAILED(90),
 
   /**
+   * {@link BookStatus.Loaned.Downloading.Downloading.DownloadExternalAuthenticationInProgress}
+   */
+
+  BOOK_STATUS_DOWNLOAD_EXTERNAL_AUTHENTICATION_IN_PROGRESS(80),
+
+  /**
+   * {@link BookStatus.Loaned.Downloading.Downloading.DownloadWaitingForExternalAuthentication}
+   */
+
+  BOOK_STATUS_WAITING_FOR_EXTERNAL_AUTHENTICATION(70),
+
+
+  /**
    * {@link BookStatus.Loaned.Downloading.DownloadInProgress}
    */
 
