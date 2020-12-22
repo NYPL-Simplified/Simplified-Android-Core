@@ -20,6 +20,7 @@
       android:id="@+id/authBasicUserField"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:autofillHints="username"
       android:inputType="text" />
   </com.google.android.material.textfield.TextInputLayout>
 
@@ -36,6 +37,7 @@
       android:id="@+id/authBasicPassField"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:autofillHints="password"
       android:imeOptions="actionDone"
       android:inputType="textPassword" />
   </com.google.android.material.textfield.TextInputLayout>
