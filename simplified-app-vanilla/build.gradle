@@ -59,7 +59,7 @@ dependencies {
   implementation project(":simplified-main")
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
-  annotationProcessor libraries.autoValueProcessor
+  annotationProcessor libraries.google_autovalue_processor
 
   vanillaWithProfilesImplementation project(":simplified-accounts-source-filebased")
 }

@@ -1,4 +1,4 @@
 dependencies {
-  api libraries.googleGuava
-  api libraries.kotlinStdlib
+  api libraries.google_guava
+  api libraries.kotlin_stdlib
 }

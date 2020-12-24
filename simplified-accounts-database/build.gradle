@@ -4,20 +4,20 @@ dependencies {
   api project(':simplified-accounts-registry-api')
   api project(':simplified-books-database-api')
 
-  api libraries.io7mJFunctional
-  api libraries.nyplDRMCore
+  api libraries.io7m_jfunctional
+  api libraries.nypl_drm_core
   api libraries.rxjava2
 
   implementation project(':simplified-files')
   implementation project(':simplified-json-core')
   implementation project(':simplified-accounts-json')
 
-  implementation libraries.googleGuava
-  implementation libraries.jacksonDatabind
-  implementation libraries.jcipAnnotations
-  implementation libraries.kotlinStdlib
+  implementation libraries.google_guava
+  implementation libraries.jackson_databind
+  implementation libraries.jcip_annotations
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 
-  compileOnly libraries.autoValue
-  annotationProcessor libraries.autoValueProcessor
+  compileOnly libraries.google_autovalue
+  annotationProcessor libraries.google_autovalue_processor
 }

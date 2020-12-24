@@ -21,13 +21,13 @@ dependencies {
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
 
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXCardView
-  implementation libraries.androidXConstraintLayout
-  implementation libraries.androidXLifecycle
-  implementation libraries.androidXPaging
-  implementation libraries.androidXRecyclerView
-  implementation libraries.googleAndroidMaterial
-  implementation libraries.kotlinStdlib
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_cardview
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_lifecycle
+  implementation libraries.androidx_paging
+  implementation libraries.androidx_recyclerview
+  implementation libraries.google_material
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 }

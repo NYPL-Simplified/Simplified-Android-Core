@@ -2,10 +2,10 @@ dependencies {
   api project(":simplified-ui-accounts")
   api project(":simplified-ui-errorpage")
 
-  api libraries.androidXAppCompat
-  api libraries.androidXConstraintLayout
-  api libraries.androidXPreference
-  api libraries.androidXRecyclerView
+  api libraries.androidx_appcompat
+  api libraries.androidx_constraintlayout
+  api libraries.androidx_preference
+  api libraries.androidx_recyclerview
 
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-analytics-api")
@@ -26,6 +26,6 @@ dependencies {
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
 
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 }

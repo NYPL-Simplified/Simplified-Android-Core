@@ -1,5 +1,5 @@
 dependencies {
   api project(":simplified-accounts-api")
 
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
 }

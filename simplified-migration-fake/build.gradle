@@ -1,14 +1,14 @@
 dependencies {
   api project(":simplified-migration-spi")
 
-  api libraries.googleGuava
-  api libraries.jodaTime
-  api libraries.nyplDRMCore
+  api libraries.google_guava
+  api libraries.joda_time
+  api libraries.nypl_drm_core
 
-  implementation libraries.jacksonDatabind
-  implementation libraries.kotlinStdlib
+  implementation libraries.jackson_databind
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 
-  compileOnly libraries.autoValue
-  annotationProcessor libraries.autoValueProcessor
+  compileOnly libraries.google_autovalue
+  annotationProcessor libraries.google_autovalue_processor
 }

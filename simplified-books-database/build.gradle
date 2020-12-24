@@ -6,8 +6,8 @@ dependencies {
   implementation project(':simplified-opds-core')
   implementation project(':simplified-json-core')
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.nyplAudiobookAPI
-  implementation libraries.nyplAudiobookManifestParserAPI
+  implementation libraries.kotlin_stdlib
+  implementation libraries.nypl_audiobook_api
+  implementation libraries.nypl_audiobook_manifest_parser_api
   implementation libraries.slf4j
 }
