@@ -12,18 +12,18 @@ dependencies {
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-spi")
 
-  annotationProcessor libraries.autoValueProcessor
+  annotationProcessor libraries.google_autovalue_processor
 
-  compileOnly libraries.autoValue
+  compileOnly libraries.google_autovalue
 
-  implementation libraries.androidAsync
-  implementation libraries.androidXActivity
-  implementation libraries.androidXAppCompat
-  implementation libraries.googleAndroidMaterial
-  implementation libraries.kotlinStdlib
-  implementation libraries.nyplDRMCore
-  implementation libraries.readium
-  implementation libraries.readiumSharedJS
+  implementation libraries.koush_async
+  implementation libraries.androidx_activity
+  implementation libraries.androidx_appcompat
+  implementation libraries.google_material
+  implementation libraries.kotlin_stdlib
+  implementation libraries.nypl_drm_core
+  implementation libraries.nypl_readium
+  implementation libraries.nypl_readium_js
 
   testImplementation libraries.junit
   testImplementation libraries.mockito

@@ -11,7 +11,7 @@ dependencies {
   implementation project(":simplified-viewer-api")
   implementation project(":simplified-viewer-spi")
 
-  api libraries.bottomNavigator
+  api libraries.pandora_bottom_navigator
 
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
 }

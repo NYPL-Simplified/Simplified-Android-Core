@@ -8,13 +8,13 @@ dependencies {
   api project(":simplified-content-api")
   api project(":simplified-json-core")
 
-  api libraries.io7mJFunctional
+  api libraries.io7m_jfunctional
 
-  implementation libraries.jodahExpiringMap
-  implementation libraries.kotlinStdlib
-  implementation libraries.nyplHttpAPI
+  implementation libraries.jodah_expiringmap
+  implementation libraries.kotlin_stdlib
+  implementation libraries.nypl_http_api
   implementation libraries.slf4j
 
-  compileOnly libraries.autoValue
-  annotationProcessor libraries.autoValueProcessor
+  compileOnly libraries.google_autovalue
+  annotationProcessor libraries.google_autovalue_processor
 }

@@ -1,12 +1,12 @@
 dependencies {
   api project(":simplified-presentableerror-api")
 
-  api libraries.googleGuava
+  api libraries.google_guava
   api libraries.rxjava2
 
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 
-  compileOnly libraries.autoValue
-  annotationProcessor libraries.autoValueProcessor
+  compileOnly libraries.google_autovalue
+  annotationProcessor libraries.google_autovalue_processor
 }

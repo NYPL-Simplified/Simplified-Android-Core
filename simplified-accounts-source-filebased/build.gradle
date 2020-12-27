@@ -2,15 +2,15 @@ dependencies {
   api project(':simplified-accounts-api')
   api project(':simplified-accounts-source-spi')
 
-  api libraries.io7mJFunctional
-  api libraries.jodaTime
-  api libraries.nyplDRMCore
+  api libraries.io7m_jfunctional
+  api libraries.joda_time
+  api libraries.nypl_drm_core
 
   implementation project(":simplified-accounts-json")
 
   implementation libraries.slf4j
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
 
-  compileOnly libraries.autoValue
-  annotationProcessor libraries.autoValueProcessor
+  compileOnly libraries.google_autovalue
+  annotationProcessor libraries.google_autovalue_processor
 }

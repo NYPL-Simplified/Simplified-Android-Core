@@ -1,4 +1,4 @@
 dependencies {
-  implementation libraries.kotlinStdlib
-  api libraries.androidXAppCompat
+  implementation libraries.kotlin_stdlib
+  api libraries.androidx_appcompat
 }
