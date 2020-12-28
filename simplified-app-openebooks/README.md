@@ -58,9 +58,17 @@ repository.
 
 |Source|Copy To|Description|
 |------|-------|-----------|
-|[google-services.json](https://github.com/NYPL-Simplified/Certificates/blob/master/SimplyE/Android/google-services.json)|`app/google-services.json`|Crashlytics service configuration|
-|[keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`app/keystore.jks`|NYPL APK signing keystore|
+|[keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`release.jks`|NYPL APK signing keystore|
 |[ReaderClientCert.sig](https://github.com/NYPL-Simplified/Certificates/tree/master/OpenEbooks/Android/ReaderClientCert.sig)|`app/src/main/assets/ReaderClientCert.sig`|Adobe DRM certificate|
+
+Once you have cloned the repository, the following line must be added to `$HOME/.gradle/gradle.properties`:
+
+~~~
+# Replace /path/to/ with the path to the local Certificates repo.
+org.librarysimplified.app.assets.openebooks=/path/to/Certificates/OpenEbooks/Android/
+~~~
+
+Make sure to copy `nypl-keystore.jks` to the root of the repository as `release.jks`.
 
 #### Credentials
 

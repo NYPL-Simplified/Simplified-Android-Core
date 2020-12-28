@@ -21,6 +21,7 @@ ReaderClientCert.sig
 *.jks
 cardcreator.conf
 overdrive.json
+feedbooks.conf
 
 # backup files
 *~

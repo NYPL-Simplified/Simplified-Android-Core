@@ -20,9 +20,7 @@ class OEIAccountFallback : AccountProviderFallbackType {
       keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
       passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
       passwordMaximumLength = -1,
-      labels = mapOf(
-
-      ),
+      labels = mapOf(),
       logoURI = URI.create("https://circulation.openebooks.us/images/FirstBookLoginButton280.png")
     )
 

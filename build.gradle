@@ -1,9 +1,6 @@
 buildscript {
-  // https://github.com/gradle/gradle/issues/11308#issuecomment-554317655
-  if (System.properties['org.gradle.internal.publish.checksums.insecure'] != 'true') {
-    throw new GradleException("org.gradle.internal.publish.checksums.insecure must be 'true'")
-  }
-
+  // Load in our list of dependencies.
+  //
   apply from: file("$rootDir/libraries.gradle")
 
   repositories {
@@ -18,96 +15,92 @@ buildscript {
     classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.androidx_navigation}"
     classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.2.0"
     classpath "com.nabilhachicha:android-native-dependencies:0.1.2"
-    classpath "digital.wup:android-maven-publish:3.6.3"
+    classpath 'com.google.gms:google-services:4.3.4'
+    classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
   }
 }
 
 plugins {
   id "com.github.ben-manes.versions" version "0.27.0"
   id "ru.vyarus.animalsniffer" version "1.5.0"
-
-  // Deprecated: Migrate to maven-publish.
-  //             https://developer.android.com/studio/build/maven-publish-plugin
-  id "digital.wup.android-maven-publish" version "3.6.3"
 }
 
 ext {
-  if (!project.hasProperty("mavenCentralUsername")) {
-    logger.warn("No mavenCentralUsername property specified: Using an empty value")
-    mavenCentralUsername = ""
+  // Required for some dependencies only available from our private nexus
+  //
+  nyplNexusDepend =
+    project.hasProperty('org.librarysimplified.nexus.depend')
+  nyplNexusUsername =
+    project.findProperty('org.librarysimplified.nexus.username') ?: ''
+  nyplNexusPassword =
+    project.findProperty('org.librarysimplified.nexus.password') ?: ''
+  nyplNexusUrl =
+    'https://nexus.librarysimplified.org:8443/nexus/content/groups/external/'
+
+  if (nyplNexusDepend && !nyplNexusUsername) {
+    throw new GradleException(
+      'org.librarysimplified.nexus.depend is set but org.librarysimplified.nexus.username is undefined!')
   }
-  if (!project.hasProperty("mavenCentralPassword")) {
-    logger.warn("No mavenCentralPassword property specified: Using an empty value")
-    mavenCentralPassword = ""
-  }
-
-  if (!project.hasProperty("org.librarysimplified.nexus.publish")) {
-    logger.warn("org.librarysimplified.nexus.publish is not set: We will publish artifacts to Maven Central")
-    useNYPLNexusPublish = false
-  } else {
-    logger.warn("org.librarysimplified.nexus.publish is set: We will publish artifacts to the NYPL Nexus")
-    useNYPLNexusPublish = true
-  }
-
-  if (project.hasProperty("org.librarysimplified.directory.publish")) {
-    useDirectoryPublishPath = project.property("org.librarysimplified.directory.publish")
-    useDirectoryPublish = true
-    logger.warn("org.librarysimplified.directory.publish is set: We will publish artifacts to ${useDirectoryPublishPath}")
-  } else {
-    logger.warn("org.librarysimplified.directory.publish is not set: We will not publish artifacts to a custom directory")
-    useDirectoryPublish = false
-    useDirectoryPublishPath = null
-  }
-
-  if (!project.hasProperty("org.librarysimplified.nexus.depend")) {
-    logger.warn("org.librarysimplified.nexus.depend is not set: We will not depend on artifacts on the NYPL Nexus")
-    useNYPLNexusDepend = false
-  } else {
-    logger.warn("org.librarysimplified.nexus.depend is set: We will depend on artifacts on the NYPL Nexus")
-    useNYPLNexusDepend = true
-  }
-
-  if (project.hasProperty("org.librarysimplified.no_signing")) {
-    disableSigning = true
-    logger.warn("org.librarysimplified.no_signing is set: We will not sign artifacts")
-  } else {
-    disableSigning = false
-    logger.warn("org.librarysimplified.no_signing is not set: We will attempt to sign artifacts")
-  }
-
-  if (!disableSigning) {
-    if (!project.hasProperty("org.librarysimplified.simplye.keyPassword")) {
-      throw new IllegalArgumentException(
-        "Missing project property: org.librarysimplified.simplye.keyPassword")
-    } else {
-      nyplSigningKeyPassword = project.property("org.librarysimplified.simplye.keyPassword")
-      assert (nyplSigningKeyPassword != null)
-    }
-
-    if (!project.hasProperty("org.librarysimplified.simplye.storePassword")) {
-      throw new IllegalArgumentException(
-        "Missing project property: org.librarysimplified.simplye.storePassword")
-    } else {
-      nyplSigningStorePassword = project.property("org.librarysimplified.simplye.storePassword")
-      assert (nyplSigningStorePassword != null)
-    }
-
-    if (!project.hasProperty("org.librarysimplified.simplye.keyAlias")) {
-      throw new IllegalArgumentException(
-        "Missing project property: org.librarysimplified.simplye.keyAlias")
-    } else {
-      nyplSigningKeyAlias = project.property("org.librarysimplified.simplye.keyAlias")
-      assert (nyplSigningKeyAlias != null)
-    }
-  } else {
-    nyplSigningKeyPassword = ""
-    nyplSigningStorePassword = ""
-    nyplSigningKeyAlias = ""
+  if (nyplNexusDepend && !nyplNexusPassword) {
+    throw new GradleException(
+      'org.librarysimplified.nexus.depend is set but org.librarysimplified.nexus.password is undefined!')
   }
 }
 
-subprojects {
+subprojects { project ->
+  group = project.ext["GROUP"]
+  version = project.ext["VERSION_NAME"]
+
+  switch (POM_PACKAGING) {
+    case "aar":
+      apply from: file("$rootDir/build_aar.gradle")
+      break
+    case "apk":
+      apply from: file("$rootDir/build_apk.gradle")
+      break
+    case "jar":
+      apply from: file("$rootDir/build_jar.gradle")
+      break
+    default:
+      throw new IllegalStateException(
+        "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
+  }
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    google()
+
+    if (nyplNexusDepend) {
+      maven {
+        credentials {
+          username nyplNexusUsername
+          password nyplNexusPassword
+        }
+        url nyplNexusUrl
+      }
+    }
+
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "http://maven.findawayworld.com/artifactory/libs-release/" }
+    maven { url "https://jitpack.io" }
+    jcenter()
+  }
+
+  // Configure publishing for java projects
   //
+  pluginManager.withPlugin("java") {
+    println("Configuring publishing for ${project} (${POM_PACKAGING})")
+    apply from: file("$rootDir/.publishing/publishing.gradle")
+  }
+
+  // Configure publishing for android-library projects
+  //
+  pluginManager.withPlugin("com.android.library") {
+    println("Configuring publishing for ${project} (${POM_PACKAGING})")
+    apply from: file("$rootDir/.publishing/publishing.gradle")
+  }
+
   // We currently have transitive dependencies that specify dependencies on newer versions
   // of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
   // new versions appear of both artifacts. Remove this when both are updated!
@@ -117,159 +110,30 @@ subprojects {
   }
 }
 
-allprojects {
-  group = project.ext["GROUP"]
-  version = project.ext["VERSION_NAME"]
-}
-
-// Configure all projects
-
-subprojects { project ->
-  switch (POM_PACKAGING) {
-    case "jar":
-      logger.info("Configuring ${project} (${POM_PACKAGING}) as jar project")
-
-      apply plugin: "java"
-      apply plugin: "java-library"
-      apply plugin: "kotlin"
-
-      /*
-       * Apply the Animal Sniffer plugin to check that code is Android compatible.
-       */
-
-      apply plugin: "ru.vyarus.animalsniffer"
-
-      dependencies {
-        signature "org.codehaus.mojo.signature:java16:1.1@signature"
-        signature "net.sf.androidscents.signature:android-api-level-21:5.0.1_r2@signature"
-      }
-
-      /*
-       * Build an OSGi bundle.
-       */
-
-      apply plugin: "biz.aQute.bnd.builder"
-
-      jar {
-        bnd """
-Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
-
--removeheaders: Bnd-LastModified, Tool, Private-Package
-"""
-      }
-      break
-
-    case "apk":
-      logger.info("Configuring ${project} (${POM_PACKAGING}) as Android application project")
-
-      apply plugin: "com.android.application"
-      apply plugin: "kotlin-android"
-
-      android {
-        compileSdkVersion android_compile_sdk_version
-        buildToolsVersion android_build_tools_version
-
-        defaultConfig {
-          minSdkVersion android_min_sdk_version
-          targetSdkVersion android_target_sdk_version
-        }
-        compileOptions {
-          encoding 'UTF-8'
-          sourceCompatibility JavaVersion.VERSION_1_8
-          targetCompatibility JavaVersion.VERSION_1_8
-        }
-      }
-      break
-
-    case "aar":
-      logger.info("Configuring ${project} (${POM_PACKAGING}) as Android library project")
-
-      apply plugin: "com.android.library"
-      apply plugin: "kotlin-android"
-      apply plugin: "androidx.navigation.safeargs.kotlin"
-
-      android {
-        compileSdkVersion android_compile_sdk_version
-        buildToolsVersion android_build_tools_version
-
-        defaultConfig {
-          minSdkVersion android_min_sdk_version
-          targetSdkVersion android_target_sdk_version
-          testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-          useLibrary 'org.apache.http.legacy'
-        }
-        compileOptions {
-          encoding 'UTF-8'
-          sourceCompatibility JavaVersion.VERSION_1_8
-          targetCompatibility JavaVersion.VERSION_1_8
-        }
-        testOptions {
-          execution 'ANDROIDX_TEST_ORCHESTRATOR'
-          animationsDisabled = true
-        }
-      }
-      break
-
-    default:
-      throw new IllegalStateException(
-        "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
-  }
-
-  task javadocsJar(type: Jar) {
-    classifier = "javadoc"
-  }
-
-  task sourcesJar(type: Jar) {
-    classifier = "sources"
-    from "src/main/java", "src/main/resources"
-  }
-
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    google()
-
-    if (useNYPLNexusDepend) {
-      maven {
-        credentials {
-          username findProperty("org.librarysimplified.nexus.username")
-          password findProperty("org.librarysimplified.nexus.password")
-        }
-        url "https://nexus.librarysimplified.org:8443/nexus/content/groups/external/"
-      }
-    }
-
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url "http://maven.findawayworld.com/artifactory/libs-release/" }
-    maven { url "https://jitpack.io" }
-    jcenter()
-  }
-}
-
 /**
  * An empty task called by CI. We don't do semantic versioning analysis here yet.
  */
+task verifySemanticVersioning {}
 
-task verifySemanticVersioning {
-
+/**
+ * Displays properties starting with 'org.librarysimplified'.
+ */
+task listProperties(group: 'NYPL') {
+  description = "Displays properties starting with 'org.librarysimplified'."
+  doLast {
+    project.properties
+      .findAll { p ->
+        p.key.startsWith('org.librarysimplified')
+      }
+      .each { p ->
+        println(p)
+      }
+  }
 }
 
-// Configure publishing for appropriate projects
-
-subprojects { project ->
-  pluginManager.withPlugin("java") {
-    println("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/publishing.gradle")
-  }
-  pluginManager.withPlugin("com.android.library") {
-    println("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/publishing.gradle")
-  }
-}
-
-// Add ktlint tasks to root project. This executes faster than configuring
-// the tasks for each subproject individually.
-
+// Add ktlint tasks to root project. This executes faster than
+// configuring the task for each individual subproject.
+//
 apply from: file("$rootDir/ktlint.gradle")
 
 /**

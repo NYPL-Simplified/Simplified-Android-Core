@@ -11,34 +11,12 @@ android {
 
     setProperty("archivesBaseName", versionName)
   }
-
-  packagingOptions {
-    doNotStrip 'lib/**/*.so'
-
-    // Readium and the PDF reader both provide this shared library. This causes
-    // the build to fail with an error because Gradle doesn't know which to pick.
-    pickFirst 'lib/x86/libc++_shared.so'
-    pickFirst 'lib/arm64-v8a/libc++_shared.so'
-    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-  }
-
-  signingConfigs {
-    release {
-      keyAlias nyplSigningKeyAlias
-      keyPassword nyplSigningKeyPassword
-      storeFile file("$rootDir/release.jks")
-      storePassword nyplSigningStorePassword
-    }
-  }
-
-  buildTypes {
-    debug {
-      ndk { abiFilters 'x86', 'arm64-v8a', 'armeabi-v7a' }
-      versionNameSuffix '-debug'
-    }
-    release {
-      ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
-      signingConfig signingConfigs.release
+  sourceSets {
+    main {
+      if (project.hasProperty('org.librarysimplified.app.assets.vanilla')) {
+        assets.srcDirs +=
+          project.getProperty('org.librarysimplified.app.assets.vanilla')
+      }
     }
   }
 
