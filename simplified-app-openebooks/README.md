@@ -59,7 +59,7 @@ repository.
 |Source|Copy To|Description|
 |------|-------|-----------|
 |[google-services.json](https://github.com/NYPL-Simplified/Certificates/blob/master/SimplyE/Android/google-services.json)|`app/google-services.json`|Crashlytics service configuration|
-|[keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`release.jks`|NYPL APK signing keystore|
+|[nypl-keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`release.jks`|NYPL APK signing keystore|
 |[ReaderClientCert.sig](https://github.com/NYPL-Simplified/Certificates/tree/master/OpenEbooks/Android/ReaderClientCert.sig)|`app/src/main/assets/ReaderClientCert.sig`|Adobe DRM certificate|
 
 #### Credentials

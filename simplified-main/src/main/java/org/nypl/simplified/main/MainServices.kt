@@ -514,20 +514,6 @@ internal object MainServices {
     )
   }
 
-  private fun createCardCreatorService(context: Context): CardCreatorServiceType? {
-    return try {
-      context.assets.open("cardcreator.conf").use { stream ->
-        CardCreatorService.create(stream)
-      }
-    } catch (e: FileNotFoundException) {
-      this.logger.debug("could not initialize card creator; cardcreator.conf not found")
-      null
-    } catch (e: IOException) {
-      this.logger.debug("could not initialize card creator: ", e)
-      null
-    }
-  }
-
   private fun publishApplicationStartupEvent(
     context: Context,
     analytics: AnalyticsType
@@ -1026,7 +1012,7 @@ internal object MainServices {
     addServiceOptionally(
       message = strings.bootingGeneral("card creator service"),
       interfaceType = CardCreatorServiceType::class.java,
-      serviceConstructor = { this.createCardCreatorService(context) }
+      serviceConstructor = { CardCreatorService.createConditionally(context) }
     )
 
     this.showThreads()
