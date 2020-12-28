@@ -48,9 +48,12 @@ dependencies {
   implementation project(":simplified-migration-from3master")
   implementation libraries.firebase_analytics
   implementation libraries.firebase_crashlytics
-  implementation libraries.nypl_drm_adobe
   implementation libraries.nypl_drm_core
   implementation libraries.nypl_findaway
   implementation libraries.nypl_overdrive
+
+  if (project.hasProperty("org.librarysimplified.nexus.depend")) {
+    implementation libraries.nypl_drm_adobe
+  }
   annotationProcessor libraries.google_autovalue_processor
 }
