@@ -2,13 +2,6 @@ android {
   defaultConfig {
     versionName = project.version
     versionCode = versionCode(project.version)
-
-    // Append build number to version name, if on CI
-    def runNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: "0").toInteger()
-    if (runNumber > 0) {
-      versionName = "$versionName+$runNumber"
-    }
-
     setProperty("archivesBaseName", versionName)
   }
 
@@ -51,10 +44,11 @@ dependencies {
   implementation project(":simplified-main")
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
+  implementation project(":simplified-crashlytics")
+  implementation libraries.firebase_analytics
+  implementation libraries.firebase_crashlytics
   implementation libraries.nypl_drm_adobe
   implementation libraries.nypl_drm_core
   implementation libraries.nypl_findaway
-  implementation libraries.firebase_analytics
-  implementation libraries.firebase_crashlytics
   annotationProcessor libraries.google_autovalue_processor
 }
