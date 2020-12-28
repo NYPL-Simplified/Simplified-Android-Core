@@ -18,7 +18,6 @@
 # Certificates and API Keys
 #
 ReaderClientCert.sig 
-instabug.conf
 *.jks
 cardcreator.conf
 overdrive.json
@@ -27,4 +26,3 @@ overdrive.json
 *~
 
 simplified-tests-sandbox/src/main/*
-simplified-app-vanilla/version.properties
