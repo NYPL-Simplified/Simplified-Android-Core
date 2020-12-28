@@ -15,6 +15,7 @@ class SimplyEThemeService : BrandingThemeOverrideServiceType {
       colorDark = R.color.simplified_material_red_primary_dark,
       color = R.color.simplified_material_red_primary,
       themeWithActionBar = R.style.SimplifiedTheme_ActionBar_Red,
-      themeWithNoActionBar = R.style.SimplifiedTheme_NoActionBar_Red)
+      themeWithNoActionBar = R.style.SimplifiedTheme_NoActionBar_Red
+    )
   }
 }
