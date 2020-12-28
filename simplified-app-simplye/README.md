@@ -75,7 +75,7 @@ repository.
 |Source|Copy To|Description|
 |------|-------|-----------|
 |[google-services.json](https://github.com/NYPL-Simplified/Certificates/blob/master/SimplyE/Android/google-services.json)|`app/google-services.json`|Crashlytics service configuration|
-|[keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`app/keystore.jks`|NYPL APK signing keystore|
+|[keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`release.jks`|NYPL APK signing keystore|
 |[cardcreator.conf](https://github.com/NYPL-Simplified/Certificates/blob/master/SimplyE/Android/cardcreator.conf)|`app/src/main/assets/cardcreator.conf`|NYPL card creator configuration|
 |[overdrive.json](https://github.com/NYPL-Simplified/Certificates/blob/master/Overdrive/audiobook_fulfillment.json)|`app/src/main/assets/overdrive.json`|Overdrive audio books configuration file|
 |[ReaderClientCert.sig](https://github.com/NYPL-Simplified/Certificates/blob/master/SimplyE/Android/ReaderClientCert.sig)|`app/src/main/assets/ReaderClientCert.sig`|Adobe DRM certificate|
