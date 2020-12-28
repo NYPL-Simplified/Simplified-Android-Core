@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <!-- A non-empty string here will override the package name given to
+       the Adobe DRM implementation. An empty string will cause the
+       implementation to use the package name defined in the Android manifest. -->
+  <string name="feature_adobe_package_override">org.nypl.simplified.simplye</string>
+
+  <!-- The default email address used for migration reports. -->
+  <string name="feature_migration_report_email">simplyemigrationreports@nypl.org</string>
+
+  <!-- Enable extra DRM logging. -->
+  <bool name="debug_adobe_drm_logging">true</bool>
+
+</resources>
