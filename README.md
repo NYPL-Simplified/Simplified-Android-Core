@@ -95,7 +95,7 @@ org.librarysimplified.nexus.depend=true
 #### APK signing
 
 If you wish to generate a signed APK for publishing the Vanilla application, you will need to copy
-a keystore to `simplified-app-vanilla/keystore.jks` and set the following values correctly in
+a keystore to `release.jks` and set the following values correctly in
 `$HOME/.gradle/gradle.properties`:
 
 ~~~

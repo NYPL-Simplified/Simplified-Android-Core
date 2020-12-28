@@ -26,7 +26,7 @@ android {
     release {
       keyAlias nyplSigningKeyAlias
       keyPassword nyplSigningKeyPassword
-      storeFile file("keystore.jks")
+      storeFile file("$rootDir/release.jks")
       storePassword nyplSigningStorePassword
     }
   }

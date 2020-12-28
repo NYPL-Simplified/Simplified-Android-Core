@@ -229,11 +229,6 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     mavenCentral()
     google()
 
-    // Sonatype snapshots
-    maven {
-      url "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-
     if (useNYPLNexusDepend) {
       maven {
         credentials {
@@ -244,6 +239,8 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
       }
     }
 
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "http://maven.findawayworld.com/artifactory/libs-release/" }
     maven { url "https://jitpack.io" }
     jcenter()
   }
@@ -290,4 +287,4 @@ static Integer versionCode(String versionName) {
 
   // Return version code padded with leading zeros
   return String.format('%02d%02d%02d', major, minor, patch).toInteger()
-}
+s.grad}

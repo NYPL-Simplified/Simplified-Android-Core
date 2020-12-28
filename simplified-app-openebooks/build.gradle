@@ -1,81 +1,60 @@
-
-def versionValues() {
-    def propsFile = file("version.properties")
-    def Properties props = new Properties()
-    def name
-    def code
-    if (propsFile.canRead()) {
-        props.load(new FileInputStream(propsFile))
-        name = props["versionName"]
-        code = props["versionCode"].toInteger()
-    } else {
-        throw new FileNotFoundException("Could not read version.properties!")
-    }
-
-    props["versionCode"] = (code + 1).toString()
-    props.save(new FileOutputStream(propsFile), "")
-
-    logger.info("incrementing build version ${code} -> ${code + 1}")
-    return new Tuple(name, code)
-}
-
 android {
-    def version = versionValues()
+  defaultConfig {
+    versionName = project.version
+    versionCode = versionCode(project.version)
 
-    packagingOptions {
-        exclude "META-INF/LICENSE"
-
-        doNotStrip "*/armeabi-v7a/*.so"
-        doNotStrip '*/arm64-v8a/*.so'
-
-        exclude ('/lib/mips/**')
-        exclude ('/lib/mips64/**')
-        exclude ('/lib/x86_64/**')
-        exclude ('/lib/x86/**')
-
-        // The PDF library and Readium both provide this shared library. This will
-        // cause the build to fail because Gradle doesn"t know which one to pick.
-        pickFirst "lib/arm64-v8a/libc++_shared.so"
-        pickFirst "lib/armeabi-v7a/libc++_shared.so"
+    // Append build number to version name, if on CI
+    def runNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: "0").toInteger()
+    if (runNumber > 0) {
+      versionName = "$versionName+$runNumber"
     }
 
-    signingConfigs {
-        release {
-          keyAlias nyplSigningKeyAlias
-          keyPassword nyplSigningKeyPassword
-          storeFile file("keystore.jks")
-          storePassword nyplSigningStorePassword
-        }
-    }
+    setProperty("archivesBaseName", versionName)
+  }
 
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
-        }
-    }
+  packagingOptions {
+    doNotStrip 'lib/**/*.so'
 
-    defaultConfig {
-        multiDexEnabled true
-        versionName = version.get(0)
-        versionCode = version.get(1)
-        setProperty("archivesBaseName", "open-ebooks-${versionName}-${versionCode}")
-    }
+    // Readium and the PDF reader both provide this shared library. This causes
+    // the build to fail with an error because Gradle doesn't know which to pick.
+    pickFirst 'lib/x86/libc++_shared.so'
+    pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+  }
 
-    lintOptions {
-        checkReleaseBuilds false
+  signingConfigs {
+    release {
+      keyAlias nyplSigningKeyAlias
+      keyPassword nyplSigningKeyPassword
+      storeFile file("$rootDir/release.jks")
+      storePassword nyplSigningStorePassword
     }
+  }
+
+  buildTypes {
+    debug {
+      ndk { abiFilters 'x86', 'arm64-v8a', 'armeabi-v7a' }
+      versionNameSuffix '-debug'
+    }
+    release {
+      ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
+      signingConfig signingConfigs.release
+    }
+  }
+
+  lintOptions {
+    checkReleaseBuilds false
+  }
 }
 
 dependencies {
-    implementation libraries.nyplDRMAdobeProvider
-    implementation libraries.nyplDRMCore
-    implementation libraries.nyplFindaway
-    implementation libraries.simplifiedAccountSourceNYPLRegistry
-    implementation libraries.simplifiedAnalyticsCirculation
-    implementation libraries.simplifiedMain
-    implementation libraries.instabug
-    implementation libraries.firebaseAnalytics
-    implementation libraries.firebaseCrashlytics
-
-    annotationProcessor libraries.googleAutoValue
+  implementation project(":simplified-main")
+  implementation project(":simplified-accounts-source-nyplregistry")
+  implementation project(":simplified-analytics-circulation")
+  implementation libraries.nypl_drm_adobe
+  implementation libraries.nypl_drm_core
+  implementation libraries.nypl_findaway
+  implementation libraries.firebase_analytics
+  implementation libraries.firebase_crashlytics
+  annotationProcessor libraries.google_autovalue_processor
 }

@@ -85,7 +85,7 @@ org.librarysimplified.nexus.password=PASSWORD
 #### APK signing
 
 For signing releases, a keystore must be copied to
-`app/keystore.jks` and the following values set correctly in
+`release.jks` and the following values set correctly in
 `$HOME/.gradle/gradle.properties`:
 
 ~~~
