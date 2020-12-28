@@ -57,3 +57,46 @@ dependencies {
   }
   annotationProcessor libraries.google_autovalue_processor
 }
+
+task preFlightChecks {
+  def requiredFiles = [:]
+  requiredFiles["$rootDir/release.jks"] =
+    "ce7c883508ff259682fbdb5eb462e7bf43937d42c7fcc6aa73eb9120d56d48b7"
+  requiredFiles["$projectDir/google-services.json"] =
+    "98cf50e0ed5fea9e371990d58b0bbbdb797dc8189d7ca52e7b89a48e82ac96e3"
+  requiredFiles["$projectDir/src/main/assets/cardcreator.conf"] =
+    "a51c45891eb599076c456a54d748eaf45cd7b093ec6a4fe2660378fab8915d86"
+  requiredFiles["$projectDir/src/main/assets/overdrive.json"] =
+    "ba5b2678f0e44744df33917ec342a76a7580f58186157ba804ba3ac63516a37a"
+  requiredFiles["$projectDir/src/main/assets/ReaderClientCert.sig"] =
+    "280838a4cb5c2ca4a2c8cf14e93f8ff72dbc6046cf188b5e83cf830f5159ce1e"
+  requiredFiles["$projectDir/src/main/assets/feedbooks.conf"] =
+    "1a8b5992a2c2d35b9daf14f02a6088ad55f860609e77c9ffed6c11ec7da14c0c"
+
+  doLast {
+    logger.info("running pre-flight checks")
+
+    def missingFiles = []
+    for (entry in requiredFiles) {
+      logger.info("Checking ${entry.key} exists and has expected digest value")
+
+      try {
+        def received = sha256Of(file(entry.key))
+        def expected = entry.value
+        if (received != expected) {
+          logger.error("ERROR: File ${entry.key} has incorrect SHA-256 hash")
+          logger.error("  Expected: ${expected}")
+          logger.error("  Received: ${received}")
+          missingFiles.add(entry.key)
+        }
+      } catch (Exception e) {
+        logger.error("ERROR: File not found ${entry.key}: ${e.getClass()}: ${e.getMessage()}")
+        missingFiles.add(entry.key)
+      }
+    }
+
+    if (!missingFiles.isEmpty()) {
+      throw new FileNotFoundException("One or more required files are missing or have incorrect contents.")
+    }
+  }
+}

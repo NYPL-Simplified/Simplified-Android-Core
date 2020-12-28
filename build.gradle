@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 buildscript {
   // https://github.com/gradle/gradle/issues/11308#issuecomment-554317655
   if (System.properties['org.gradle.internal.publish.checksums.insecure'] != 'true') {
@@ -287,4 +289,11 @@ static Integer versionCode(String versionName) {
 
   // Return version code padded with leading zeros
   return String.format('%02d%02d%02d', major, minor, patch).toInteger()
+}
+
+@SuppressWarnings('unused')
+static def sha256Of(File file) {
+  MessageDigest digest = MessageDigest.getInstance("SHA-256")
+  digest.update(file.getBytes())
+  return digest.digest().encodeHex().toString()
 }
