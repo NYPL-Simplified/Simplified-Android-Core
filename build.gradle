@@ -21,6 +21,8 @@ buildscript {
     classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.2.0"
     classpath "com.nabilhachicha:android-native-dependencies:0.1.2"
     classpath "digital.wup:android-maven-publish:3.6.3"
+    classpath 'com.google.gms:google-services:4.3.4'
+    classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
   }
 }
 
@@ -166,6 +168,8 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
 
       apply plugin: "com.android.application"
       apply plugin: "kotlin-android"
+      apply plugin: 'com.google.gms.google-services'
+      apply plugin: 'com.google.firebase.crashlytics'
 
       android {
         compileSdkVersion android_compile_sdk_version
