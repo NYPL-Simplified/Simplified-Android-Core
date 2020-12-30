@@ -7,7 +7,7 @@ Library Simplified
 
 The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android client.
 
-![simplified](./src/site/resources/simplified.jpg?raw=true)
+![simplified](./docs/images/simplified.jpg?raw=true)
 
 _Image by [Predrag Kezic](https://pixabay.com/users/PredragKezic-582203/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=581229) from [Pixabay](https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=581229)_
 
@@ -308,7 +308,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|
 |[org.librarysimplified.viewer.spi](simplified-viewer-spi)|Viewer SPI|
 
-_The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
+_The above table is generated with [ReadMe.java](docs/ReadMe.java)._
 
 #### Adobe DRM Support
 

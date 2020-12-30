@@ -241,7 +241,7 @@ it's sometimes reassuring to be able to observe the state of the staging
 process. In the `Staging Repositories` tab in the [Sonatype web interface](https://oss.sonatype.org),
 you will be able to see output such as this:
 
-![Sonatype staging](./src/site/resources/stages.png?raw=true)
+![Sonatype staging](./docs/images/stages.png?raw=true)
 
 When the _release_ phase completes successfully, artifacts will be
 permanently visible on Maven Central within 15 minutes. The artifacts
