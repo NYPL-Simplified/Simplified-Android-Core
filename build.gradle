@@ -90,14 +90,14 @@ subprojects { project ->
   // Configure publishing for java projects
   //
   pluginManager.withPlugin("java") {
-    println("Configuring publishing for ${project} (${POM_PACKAGING})")
+    logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
     apply from: file("$rootDir/.publishing/publishing.gradle")
   }
 
   // Configure publishing for android-library projects
   //
   pluginManager.withPlugin("com.android.library") {
-    println("Configuring publishing for ${project} (${POM_PACKAGING})")
+    logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
     apply from: file("$rootDir/.publishing/publishing.gradle")
   }
 
