@@ -22,7 +22,7 @@ task preReleaseCheck(group: 'NYPL') {
   doLast {
     if (!nyplKeyStore.exists()) {
       throw new GradleException(
-        "${nyplKeyStore} must exist to sign release builds")
+        "Keystore file '${nyplKeyStore}' must exist to sign release builds")
     }
     if (!nyplKeyAlias) {
       throw new GradleException(
@@ -87,7 +87,11 @@ android {
   }
   applicationVariants.all { variant ->
     if (variant.buildType.name == 'release') {
-      variant.preBuild.dependsOn preReleaseCheck
+      Task validateSigningRelease =
+        tasks.findByName('validateSigningRelease')
+      if (validateSigningRelease) {
+        validateSigningRelease.dependsOn preReleaseCheck
+      }
     }
   }
 }
