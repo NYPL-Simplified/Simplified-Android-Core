@@ -123,9 +123,8 @@ task listProperties(group: 'NYPL') {
       .findAll { p ->
         p.key.startsWith('org.librarysimplified')
       }
-      .each { p ->
-        println(p)
-      }
+      .sort()
+      .each { println(it) }
   }
 }
 
