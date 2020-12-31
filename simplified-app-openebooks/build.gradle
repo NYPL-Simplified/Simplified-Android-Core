@@ -1,5 +1,14 @@
+import org.librarysimplified.gradle.RequiredAssetsTask
+
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
+
+// Fail the build if these assets aren't present and
+// org.librarysimplified.strictmode is enabled.
+//
+def requiredFiles = [:]
+requiredFiles["ReaderClientCert.sig"] =
+  "633ef827f8815c40f077ffcdb8edae7a7ad00aedd5806438abdaf48e9c3b59fe"
 
 android {
   defaultConfig {
@@ -14,6 +23,16 @@ android {
           project.getProperty('org.librarysimplified.app.assets.openebooks')
       }
     }
+  }
+  applicationVariants.all { variant ->
+    def strictModeTask =
+      tasks.create(name: "strictMode${variant.name.capitalize()}", type: RequiredAssetsTask) {
+        required = requiredFiles
+        apkFiles = variant.outputs.collect { out ->
+          out.outputFile
+        }
+      }
+    variant.assemble.finalizedBy strictModeTask
   }
 }
 
