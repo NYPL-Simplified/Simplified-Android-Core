@@ -32,7 +32,9 @@ android {
           out.outputFile
         }
       }
-    variant.assemble.finalizedBy strictModeTask
+    variant.assembleProvider.configure {
+      finalizedBy strictModeTask
+    }
   }
 }
 
