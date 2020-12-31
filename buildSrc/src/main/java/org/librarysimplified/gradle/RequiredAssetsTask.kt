@@ -57,31 +57,34 @@ open class RequiredAssetsTask : DefaultTask() {
 
       // Iterate over each match and check the file's signature
       //
-      zipTree.files.forEach { apkFile ->
-        missing[apkFile.name]?.let { digest ->
+      required.forEach { (filename, digest) ->
+        val apkFile = zipTree.files.find {
+          it.name == filename
+        }
+
+        if (apkFile != null) {
           val apkFileDigest = sha256(apkFile)
 
           if (digest == apkFileDigest) {
+            println("  [+] ${apkFile.name} sha256($apkFileDigest")
             missing.remove(apkFile.name)
           } else {
-            project.logger.error(
-              """
-              ERROR: '${apkFile.name}' has an invalid digest
-                Expected: sha256($digest)
-                Found:    sha256($apkFileDigest)
-              """.trimIndent()
-            )
+            println("  [!] ${apkFile.name} found with an invalid digest")
+            println("        Expected: sha256($digest)")
+            println("        Found:    sha256($apkFileDigest)")
           }
+        } else {
+          println("  [-] $filename sha256($digest)")
         }
       }
 
       // Throw an error if we're missing any files
       //
       if (missing.isNotEmpty()) {
-        var message = "ERROR: ${missing.count()} assets missing from '${apk.name}'\n"
+        var message = "ERROR: ${missing.count()} asset(s) missing from '${apk.name}'\n"
         missing.forEach { (file, digest) ->
-          message += "$file\n"
-          message += "  sha256($digest)\n"
+          message += "[!] $file\n"
+          message += "      sha256($digest)\n"
         }
         message += "\nThis check can be disabled by removing the '$STRICT_MODE' property."
         throw GradleException(message.trimEnd())
