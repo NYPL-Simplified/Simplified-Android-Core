@@ -89,14 +89,14 @@ subprojects { project ->
   //
   pluginManager.withPlugin("java") {
     logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/.publishing/publishing.gradle")
+    apply from: file("$rootDir/.publish/publishing.gradle")
   }
 
   // Configure publishing for android-library projects
   //
   pluginManager.withPlugin("com.android.library") {
     logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/.publishing/publishing.gradle")
+    apply from: file("$rootDir/.publish/publishing.gradle")
   }
 
   // We currently have transitive dependencies that specify dependencies on newer versions
