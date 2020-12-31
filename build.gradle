@@ -148,4 +148,13 @@ static Integer versionCode(String versionName) {
 
   // Return version code padded with leading zeros
   return String.format('%02d%02d%02d', major, minor, patch).toInteger()
-s.grad}
+}
+
+/**
+ * Expand the 'tilde' character to user.home.
+ */
+@SuppressWarnings('unused')
+static String expandUserHome(String path) {
+  if (path == null) return
+  return path.replaceFirst("~", System.getProperty("user.home"))
+}

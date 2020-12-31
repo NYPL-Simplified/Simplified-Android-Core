@@ -1,5 +1,19 @@
 logger.info("Configuring ${project} (${POM_PACKAGING}) as Android application project")
 
+def projectNameSuffix = project.name.split("-").last()
+
+// Configure extra assets, if provided
+//
+def extraAssetsProperty =
+  "org.librarysimplified.app.assets.$projectNameSuffix"
+def extraAssets =
+  expandUserHome(project.findProperty(extraAssetsProperty))
+if (extraAssets != null && !file(extraAssets).exists()) {
+  throw new GradleException(
+    "'$extraAssetsProperty' was defined but '$extraAssets' does not exist"
+  )
+}
+
 // Required for generating signed release builds suitable for
 // publishing in the app store
 //
@@ -49,6 +63,11 @@ android {
   defaultConfig {
     minSdkVersion android_min_sdk_version
     targetSdkVersion android_target_sdk_version
+  }
+  sourceSets {
+    main {
+      if (extraAssets) { assets.srcDirs += extraAssets }
+    }
   }
   compileOptions {
     encoding 'UTF-8'

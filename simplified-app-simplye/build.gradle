@@ -22,14 +22,6 @@ android {
     versionCode = versionCode(project.version)
     setProperty("archivesBaseName", "simplye-${versionName}")
   }
-  sourceSets {
-    main {
-      if (project.hasProperty('org.librarysimplified.app.assets.simplye')) {
-        assets.srcDirs +=
-          project.getProperty('org.librarysimplified.app.assets.simplye')
-      }
-    }
-  }
   applicationVariants.all { variant ->
     def strictModeTask =
       tasks.create(name: "strictMode${variant.name.capitalize()}", type: RequiredAssetsTask) {
