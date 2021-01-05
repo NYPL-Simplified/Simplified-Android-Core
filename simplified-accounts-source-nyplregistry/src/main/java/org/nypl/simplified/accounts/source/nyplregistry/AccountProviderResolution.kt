@@ -83,6 +83,9 @@ class AccountProviderResolution(
           Pair(AccountProviderAuthenticationDescription.Anonymous, listOf())
         }
 
+      val announcements =
+        authDocument?.announcements ?: emptyList()
+
       val updated =
         DateTime.now()
 
@@ -107,6 +110,7 @@ class AccountProviderResolution(
       val accountProvider =
         AccountProvider(
           addAutomatically = this.description.isAutomatic,
+          announcements = announcements,
           annotationsURI = annotationsURI,
           authentication = authentications.first,
           authenticationAlternatives = authentications.second,

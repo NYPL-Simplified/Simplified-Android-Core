@@ -1,4 +1,5 @@
 dependencies {
+  api project(":simplified-announcements")
   api project(":simplified-links")
   api project(":simplified-parser-api")
 

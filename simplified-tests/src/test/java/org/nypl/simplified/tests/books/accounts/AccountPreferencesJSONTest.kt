@@ -11,6 +11,7 @@ import org.nypl.simplified.accounts.json.AccountAuthenticationCredentialsJSON.de
 import org.nypl.simplified.accounts.json.AccountAuthenticationCredentialsJSON.serializeToJSON
 import org.nypl.simplified.accounts.json.AccountPreferencesJSON
 import java.net.URI
+import java.util.UUID
 
 /**
  * @see AccountPreferencesJSON
@@ -35,7 +36,8 @@ class AccountPreferencesJSONTest {
     val prefs0 =
       AccountPreferences(
         bookmarkSyncingPermitted = false,
-        catalogURIOverride = null
+        catalogURIOverride = null,
+        announcementsAcknowledged = listOf()
       )
 
     val prefs1 =
@@ -51,7 +53,8 @@ class AccountPreferencesJSONTest {
     val prefs0 =
       AccountPreferences(
         bookmarkSyncingPermitted = false,
-        catalogURIOverride = URI.create("https://www.example.com/")
+        catalogURIOverride = URI.create("https://www.example.com/"),
+        announcementsAcknowledged = listOf(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
       )
 
     val prefs1 =
