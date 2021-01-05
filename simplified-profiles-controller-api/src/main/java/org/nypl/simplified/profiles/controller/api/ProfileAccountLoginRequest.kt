@@ -1,5 +1,6 @@
 package org.nypl.simplified.profiles.controller.api
 
+import org.nypl.simplified.accounts.api.AccountCookie
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
@@ -54,5 +55,35 @@ sealed class ProfileAccountLoginRequest {
   data class OAuthWithIntermediaryCancel(
     override val accountId: AccountID,
     val description: AccountProviderAuthenticationDescription.OAuthWithIntermediary
+  ) : ProfileAccountLoginRequest()
+
+  /**
+   * A request to begin a login using SAML 2.0 authentication.
+   */
+
+  data class SAML20Initiate(
+    override val accountId: AccountID,
+    val description: AccountProviderAuthenticationDescription.SAML2_0
+  ) : ProfileAccountLoginRequest()
+
+  /**
+   * A request to complete a login using SAML 2.0 authentication. In other
+   * words, a set of SAML information has been passed to the application.
+   */
+
+  data class SAML20Complete(
+    override val accountId: AccountID,
+    val accessToken: String,
+    val patronInfo: String,
+    val cookies: List<AccountCookie>
+  ) : ProfileAccountLoginRequest()
+
+  /**
+   * A request to cancel waiting for a login using SAML 2.0 authentication.
+   */
+
+  data class SAML20Cancel(
+    override val accountId: AccountID,
+    val description: AccountProviderAuthenticationDescription.SAML2_0
   ) : ProfileAccountLoginRequest()
 }

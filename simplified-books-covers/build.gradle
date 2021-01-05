@@ -6,8 +6,8 @@ dependencies {
 
   api libraries.picasso
 
-  implementation libraries.io7mJFunctional
-  implementation libraries.kotlinStdlib
-  implementation libraries.nyplHttpURI
+  implementation libraries.io7m_jfunctional
+  implementation libraries.kotlin_stdlib
+  implementation libraries.nypl_http_uri
   implementation libraries.slf4j
 }

@@ -15,8 +15,10 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_INTERMEDIARY_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.SAML_2_0_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.SAML2_0
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.announcements.Announcement
 import org.nypl.simplified.announcements.AnnouncementJSON
@@ -137,7 +139,7 @@ object AccountProvidersJSON {
       is Basic -> {
         val authObject = mapper.createObjectNode()
         authObject.put("type", BASIC_TYPE)
-        this.putConditionally(authObject, "barcodeFormat", authentication.barcodeFormat?.toUpperCase())
+        this.putConditionally(authObject, "barcodeFormat", authentication.barcodeFormat?.toUpperCase(Locale.ROOT))
         this.putConditionally(authObject, "description", authentication.description)
         this.putConditionally(authObject, "keyboard", authentication.keyboard.name)
         this.putConditionally(authObject, "passwordKeyboard", authentication.passwordKeyboard.name)
@@ -152,6 +154,17 @@ object AccountProvidersJSON {
       is Anonymous -> {
         val authObject = mapper.createObjectNode()
         authObject.put("type", ANONYMOUS_TYPE)
+        authObject
+      }
+      is SAML2_0 -> {
+        val authObject = mapper.createObjectNode()
+        authObject.put("description", authentication.description)
+        authObject.put("type", SAML_2_0_TYPE)
+        authObject.put("authenticate", authentication.authenticate.toString())
+        val logo = authentication.logoURI
+        if (logo != null) {
+          authObject.put("logo", logo.toString())
+        }
         authObject
       }
     }
@@ -313,6 +326,21 @@ object AccountProvidersJSON {
     container: ObjectNode
   ): AccountProviderAuthenticationDescription {
     return when (val authType = JSONParserUtilities.getString(container, "type")) {
+      SAML_2_0_TYPE -> {
+        val authURI =
+          JSONParserUtilities.getURI(container, "authenticate")
+        val logoURI =
+          JSONParserUtilities.getURIOrNull(container, "logo")
+        val description =
+          JSONParserUtilities.getStringOrNull(container, "description") ?: ""
+
+        SAML2_0(
+          authenticate = authURI,
+          description = description,
+          logoURI = logoURI
+        )
+      }
+
       OAUTH_INTERMEDIARY_TYPE -> {
         val authURI =
           JSONParserUtilities.getURI(container, "authenticate")

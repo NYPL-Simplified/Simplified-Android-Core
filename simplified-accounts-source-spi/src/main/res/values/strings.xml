@@ -8,6 +8,7 @@
   <string name="resolvingAuthDocumentNoStartURI">The authentication document did not provide a starting catalog URI.</string>
   <string name="resolvingAuthDocumentNoUsableAuthenticationTypes">The account did not specify an authentication type that we can understand.</string>
   <string name="resolvingAuthDocumentOAuthMalformed">The description of an OAuth system must contain an authentication URI.</string>
+  <string name="resolvingAuthDocumentSAML20Malformed">The description of a SAML 2.0 system must contain an authentication URI.</string>
   <string name="resolvingAuthDocumentParseFailed">The authentication document was malformed and could not be parsed.</string>
   <string name="resolvingAuthDocumentRetrievalFailed">The authentication document could not be retrieved from the server.</string>
   <string name="resolvingAuthDocumentRetrievalFailedWithProblem">

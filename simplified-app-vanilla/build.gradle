@@ -3,13 +3,13 @@ android {
     versionName = project.version
     versionCode = versionCode(project.version)
 
-    // Append build number to version name, if on Travis CI
-    def buildNumber = (System.getenv('TRAVIS_BUILD_NUMBER') ?: "0").toInteger()
-    if (buildNumber > 0) {
-      versionName = "$versionName+$buildNumber"
+    // Append build number to version name, if on CI
+    def runNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: "0").toInteger()
+    if (runNumber > 0) {
+      versionName = "$versionName+$runNumber"
     }
 
-    setProperty("archivesBaseName", "$versionName-$versionCode")
+    setProperty("archivesBaseName", versionName)
   }
 
   packagingOptions {
@@ -55,24 +55,11 @@ android {
   }
 }
 
-afterEvaluate {
-  def properties = new Properties()
-  properties.setProperty("versionCode", versionCode(version).toString())
-
-  def writer = new FileWriter(file("version.properties"))
-  try {
-    properties.store(writer, '')
-    writer.flush()
-  } finally {
-    writer.close()
-  }
-}
-
 dependencies {
   implementation project(":simplified-main")
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
-  annotationProcessor libraries.autoValueProcessor
+  annotationProcessor libraries.google_autovalue_processor
 
   vanillaWithProfilesImplementation project(":simplified-accounts-source-filebased")
 }

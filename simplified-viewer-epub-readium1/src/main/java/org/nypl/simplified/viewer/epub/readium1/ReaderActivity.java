@@ -446,6 +446,7 @@ public final class ReaderActivity extends AppCompatActivity implements
       LOG.debug("ignoring long click on web view");
       return true;
     });
+    clearWebCache();
 
     // Allow the webview to be debuggable only if this is a dev build
     if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
@@ -579,6 +580,7 @@ public final class ReaderActivity extends AppCompatActivity implements
     this.current_location = bookmark;
 
     uiThread.runOnUIThread(this::configureBookmarkButtonUI);
+
     Services.INSTANCE.serviceDirectory()
       .requireService(ReaderBookmarkServiceType.class)
       .bookmarkCreate(this.current_account.getId(), bookmark);
@@ -613,6 +615,8 @@ public final class ReaderActivity extends AppCompatActivity implements
         .requireService(ReaderBookmarkServiceType.class)
         .bookmarkCreate(this.current_account.getId(), location);
     }
+
+    clearWebCache();
   }
 
   @Override
@@ -649,6 +653,13 @@ public final class ReaderActivity extends AppCompatActivity implements
       sub.dispose();
     }
     this.profile_subscription = null;
+
+    clearWebCache();
+  }
+
+  private void clearWebCache() {
+    LOG.debug("clearing the webview cache");
+    this.view_web_view.clearCache(true);
   }
 
   @Override

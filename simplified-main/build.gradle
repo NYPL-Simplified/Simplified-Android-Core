@@ -68,13 +68,13 @@ dependencies {
   api project(":simplified-viewer-pdf")
   api project(":simplified-viewer-spi")
 
-  api libraries.androidAsync
-  api libraries.androidXAppCompat
-  api libraries.kotlinStdlib
-  api libraries.nyplHttpAPI
-  api libraries.nyplHttpBearerToken
-  api libraries.nyplHttpVanilla
+  api libraries.koush_async
+  api libraries.androidx_appcompat
+  api libraries.kotlin_stdlib
+  api libraries.nypl_http_api
+  api libraries.nypl_http_bearer_token
+  api libraries.nypl_http_vanilla
   api libraries.slf4j
 
-  api libraries.logbackAndroid
+  api libraries.logback_android
 }

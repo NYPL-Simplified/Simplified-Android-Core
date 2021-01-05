@@ -1,7 +1,7 @@
 dependencies {
-  api libraries.androidXAppCompat
-  api libraries.androidXLifecycle
+  api libraries.androidx_appcompat
+  api libraries.androidx_lifecycle
 
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 }

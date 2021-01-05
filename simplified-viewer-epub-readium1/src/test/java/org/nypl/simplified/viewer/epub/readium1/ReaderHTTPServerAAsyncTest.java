@@ -94,6 +94,7 @@ public class ReaderHTTPServerAAsyncTest {
         XHTML_MANIFEST_ITEM_RELATIVE_PATH);
 
     AsyncHttpServerResponse mockResponse = mock(AsyncHttpServerResponse.class);
+    when(mockResponse.getHeaders()).thenReturn(new Headers());
 
     httpServer.onRequest(mockRequest, mockResponse);
 
@@ -106,6 +107,7 @@ public class ReaderHTTPServerAAsyncTest {
         NULL_MANIFEST_ITEM_RELATIVE_PATH);
 
     AsyncHttpServerResponse mockResponse = mock(AsyncHttpServerResponse.class);
+    when(mockResponse.getHeaders()).thenReturn(new Headers());
 
     httpServer.onRequest(mockRequest, mockResponse);
 
@@ -118,6 +120,7 @@ public class ReaderHTTPServerAAsyncTest {
         NULL_TYPE_MANIFEST_ITEM_RELATIVE_PATH);
 
     AsyncHttpServerResponse mockResponse = mock(AsyncHttpServerResponse.class);
+    when(mockResponse.getHeaders()).thenReturn(new Headers());
 
     httpServer.onRequest(mockRequest, mockResponse);
 

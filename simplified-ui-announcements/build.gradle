@@ -3,7 +3,7 @@ dependencies {
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-ui-thread-api")
 
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXConstraintLayout
-  implementation libraries.androidXLifecycle
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_lifecycle
 }

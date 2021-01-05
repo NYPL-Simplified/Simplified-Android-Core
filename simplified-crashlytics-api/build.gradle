@@ -1,4 +1,4 @@
 dependencies {
-  implementation libraries.kotlinStdlib
-  implementation libraries.logbackAndroid
+  implementation libraries.kotlin_stdlib
+  implementation libraries.logback_android
 }

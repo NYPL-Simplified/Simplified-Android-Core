@@ -9,13 +9,13 @@ android {
 }
 
 dependencies {
-  implementation libraries.androidXLegacySupport
+  implementation libraries.androidx_legacy_support_v4
   implementation libraries.slf4j
-  implementation libraries.androidXActivity
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXConstraintLayout
-  implementation libraries.kotlinStdlib
-  implementation libraries.jodaTime
+  implementation libraries.androidx_activity
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.kotlin_stdlib
+  implementation libraries.joda_time
 
   def nav_version = "2.3.0"
   implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.72"

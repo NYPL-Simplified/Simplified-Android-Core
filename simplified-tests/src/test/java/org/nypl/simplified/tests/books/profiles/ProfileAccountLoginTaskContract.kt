@@ -4,6 +4,7 @@ import android.content.Context
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -22,6 +23,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountCookie
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
@@ -1595,6 +1597,359 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result1 = task1.call()
     TaskDumps.dump(this.logger, result1)
+
+    val state =
+      this.account.loginState as AccountNotLoggedIn
+
+    assertEquals(0, this.server.requestCount)
+  }
+
+  /**
+   * Logging in with SAML20 succeeds.
+   */
+
+  @Test
+  fun testLoginSAML20CompleteNoDRM() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.SAML2_0(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.SAML20Initiate(
+        accountId = this.accountID,
+        description = authDescription
+      )
+    val request1 =
+      ProfileAccountLoginRequest.SAML20Complete(
+        accountId = this.accountID,
+        accessToken = "A TOKEN!",
+        patronInfo = "{}",
+        cookies = listOf(
+          AccountCookie("https://example", "cookie0=23"),
+          AccountCookie("https://fake", "cookie1=24; Path=/; Secure"),
+          AccountCookie("http://something", "cookie2=25; Path=/abc; Expires=Wed, 23 Dec 2020 07:28:00 GMT")
+        )
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithoutDRM.trimIndent())
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request0
+      )
+
+    val result0 = task0.call()
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountLoggingInWaitingForExternalAuthentication
+
+    val task1 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request1
+      )
+
+    val result1 = task1.call()
+    TaskDumps.dump(logger, result1)
+
+    val state =
+      this.account.loginState as AccountLoggedIn
+
+    Assert.assertEquals(
+      AccountAuthenticationCredentials.SAML2_0(
+        adobeCredentials = null,
+        authenticationDescription = "Description",
+        accessToken = "A TOKEN!",
+        patronInfo = "{}",
+        cookies = listOf(
+          AccountCookie("https://example", "cookie0=23"),
+          AccountCookie("https://fake", "cookie1=24; Path=/; Secure"),
+          AccountCookie("http://something", "cookie2=25; Path=/abc; Expires=Wed, 23 Dec 2020 07:28:00 GMT")
+        )
+      ),
+      state.credentials
+    )
+
+    val req0 = this.server.takeRequest()
+    assertEquals(this.server.url("patron"), req0.requestUrl)
+    assertEquals(1, this.server.requestCount)
+  }
+
+  /**
+   * Receiving an SAML20 token in an account that wasn't waiting for one ignores the request.
+   */
+
+  @Test
+  fun testLoginSAML20NotWaiting() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.SAML2_0(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.SAML20Complete(
+        accountId = this.accountID,
+        accessToken = "A TOKEN!",
+        patronInfo = "{}",
+        cookies = listOf(
+          AccountCookie("https://example", "cookie0=23"),
+          AccountCookie("https://fake", "cookie1=24; Path=/; Secure"),
+          AccountCookie("http://something", "cookie2=25; Path=/abc; Expires=Wed, 23 Dec 2020 07:28:00 GMT")
+        )
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithoutDRM.trimIndent())
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request0
+      )
+
+    this.loginState = AccountNotLoggedIn
+
+    val result0 = task0.call() as TaskResult.Success
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountNotLoggedIn
+
+    assertEquals(0, this.server.requestCount)
+  }
+
+  /**
+   * Cancelling an SAML20 request in an account that wasn't waiting for one ignores the request.
+   */
+
+  @Test
+  fun testLoginSAML20NotWaitingCancel() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.SAML2_0(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.SAML20Cancel(
+        accountId = this.accountID,
+        description = authDescription
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithoutDRM.trimIndent())
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request0
+      )
+
+    this.loginState = AccountNotLoggedIn
+
+    val result0 = task0.call() as TaskResult.Success
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountNotLoggedIn
+
+    assertEquals(0, this.server.requestCount)
+  }
+
+  /**
+   * Cancelling SAML20 works.
+   */
+
+  @Test
+  fun testLoginSAML20Cancel() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.SAML2_0(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.SAML20Initiate(
+        accountId = this.accountID,
+        description = authDescription
+      )
+    val request1 =
+      ProfileAccountLoginRequest.SAML20Cancel(
+        accountId = this.accountID,
+        description = authDescription
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithoutDRM.trimIndent())
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request0
+      )
+
+    val result0 = task0.call()
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountLoggingInWaitingForExternalAuthentication
+
+    val task1 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request1
+      )
+
+    val result1 = task1.call()
+    TaskDumps.dump(logger, result1)
 
     val state =
       this.account.loginState as AccountNotLoggedIn

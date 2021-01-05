@@ -31,6 +31,7 @@
   <string name="catalogBookAvailabilityReservedTimed">Your reservation expires in %1$s.</string>
   <string name="catalogBookAvailabilityRevoked">This book is waiting to be returned.</string>
   <string name="catalogBookCoverDescription">Book cover image</string>
+
   <string name="catalogBookFormatAudioBook">Audiobook</string>
   <string name="catalogBookFormatEPUB">eBook</string>
   <string name="catalogBookFormatPDF">PDF</string>
@@ -50,6 +51,7 @@
   <string name="catalogDetails">Details</string>
   <string name="catalogDismiss">Dismiss</string>
   <string name="catalogDownload">Download</string>
+  <string name="catalogLoginRequired">Please log in to continue.</string>
   <string name="catalogGet">Get</string>
   <string name="catalogHoldCannotCancel">This reservation cannot be cancelled.</string>
   <string name="catalogInformation">Information</string>

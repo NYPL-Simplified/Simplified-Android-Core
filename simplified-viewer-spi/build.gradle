@@ -1,5 +1,5 @@
 dependencies {
   api project(":simplified-books-api")
 
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
 }

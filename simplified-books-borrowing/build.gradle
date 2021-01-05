@@ -11,8 +11,8 @@ dependencies {
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-taskrecorder-api")
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.nyplHttpAPI
-  implementation libraries.nyplHttpDownloads
+  implementation libraries.kotlin_stdlib
+  implementation libraries.nypl_http_api
+  implementation libraries.nypl_http_downloads
   implementation libraries.slf4j
 }

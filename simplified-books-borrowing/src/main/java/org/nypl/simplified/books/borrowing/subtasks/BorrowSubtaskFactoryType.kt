@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.borrowing.subtasks
 
 import one.irradia.mime.api.MIMEType
+import org.nypl.simplified.accounts.api.AccountReadableType
 import java.net.URI
 
 /**
@@ -29,6 +30,7 @@ interface BorrowSubtaskFactoryType {
 
   fun isApplicableFor(
     type: MIMEType,
-    target: URI?
+    target: URI?,
+    account: AccountReadableType?
   ): Boolean
 }

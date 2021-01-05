@@ -5,6 +5,7 @@ import one.irradia.mime.api.MIMECompatibility
 import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.audio.AudioBookCredentials
 import org.nypl.simplified.books.audio.AudioBookManifestRequest
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -36,7 +37,8 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
 
     override fun isApplicableFor(
       type: MIMEType,
-      target: URI?
+      target: URI?,
+      account: AccountReadableType?
     ): Boolean {
       for (audioType in StandardFormatNames.allAudioBooks) {
         if (MIMECompatibility.isCompatibleStrictWithoutAttributes(type, audioType)) {
@@ -94,6 +96,8 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
             }
           }
           is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+            AudioBookCredentials.BearerToken(accessToken = credentials.accessToken)
+          is AccountAuthenticationCredentials.SAML2_0 ->
             AudioBookCredentials.BearerToken(accessToken = credentials.accessToken)
         }
       }

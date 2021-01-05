@@ -76,4 +76,28 @@ sealed class AccountAuthenticationCredentials {
       return this.copy(adobeCredentials = newCredentials)
     }
   }
+
+  /**
+   * The user used SAML 2.0 authentication to authenticate.
+   */
+
+  data class SAML2_0(
+    val accessToken: String,
+    val patronInfo: String,
+    val cookies: List<AccountCookie>,
+    override val adobeCredentials: AccountAuthenticationAdobePreActivationCredentials?,
+    override val authenticationDescription: String?
+  ) : AccountAuthenticationCredentials() {
+    override fun withoutAdobePostActivationCredentials(): AccountAuthenticationCredentials {
+      return this.copy(
+        adobeCredentials = this.adobeCredentials?.copy(postActivationCredentials = null)
+      )
+    }
+
+    override fun withAdobePreActivationCredentials(
+      newCredentials: AccountAuthenticationAdobePreActivationCredentials
+    ): AccountAuthenticationCredentials {
+      return this.copy(adobeCredentials = newCredentials)
+    }
+  }
 }

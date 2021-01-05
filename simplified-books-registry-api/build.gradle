@@ -6,6 +6,6 @@ dependencies {
 
   implementation libraries.slf4j
 
-  compileOnly libraries.autoValue
-  annotationProcessor libraries.autoValueProcessor
+  compileOnly libraries.google_autovalue
+  annotationProcessor libraries.google_autovalue_processor
 }

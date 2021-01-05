@@ -237,6 +237,8 @@ internal class ProfileFeedTask(
         false
 
       is BookStatus.Downloading,
+      is BookStatus.DownloadWaitingForExternalAuthentication,
+      is BookStatus.DownloadExternalAuthenticationInProgress,
       is BookStatus.FailedDownload,
       is BookStatus.FailedLoan,
       is BookStatus.FailedRevoke,
@@ -255,6 +257,8 @@ internal class ProfileFeedTask(
         true
 
       is BookStatus.Downloading,
+      is BookStatus.DownloadWaitingForExternalAuthentication,
+      is BookStatus.DownloadExternalAuthenticationInProgress,
       is BookStatus.FailedDownload,
       is BookStatus.FailedLoan,
       is BookStatus.FailedRevoke,
