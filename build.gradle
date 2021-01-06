@@ -99,12 +99,16 @@ subprojects { project ->
     apply from: file("$rootDir/.publish/publishing.gradle")
   }
 
-  // We currently have transitive dependencies that specify dependencies on newer versions
-  // of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
-  // new versions appear of both artifacts. Remove this when both are updated!
-  //
   configurations.all {
+    // We currently have transitive dependencies that specify dependencies on newer versions
+    // of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
+    // new versions appear of both artifacts. Remove this when both are updated!
+    //
     resolutionStrategy.force libraries.slf4j
+
+    // one.irradia.mime.api depends on an outdated version of kotlin-reflect
+    //
+    resolutionStrategy.force libraries.kotlin_reflect
   }
 
   // Skip tasks for projects that require drm; unless drm is enabled

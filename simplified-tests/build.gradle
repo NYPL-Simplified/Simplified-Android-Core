@@ -76,7 +76,7 @@ dependencies {
   implementation libraries.jodah_expiringmap
   implementation libraries.junit
   implementation libraries.kotlin_stdlib
-  implementation libraries.okhttp_mockwebserver
+  implementation libraries.okhttp3_mockwebserver
   implementation libraries.mockito_android
   implementation libraries.nypl_drm_core
   implementation libraries.nypl_http_api

@@ -1,8 +1,4 @@
 android {
-  kotlinOptions {
-    jvmTarget = '1.8'
-    noStdlib = true
-  }
   buildFeatures {
     viewBinding = true
   }
@@ -14,15 +10,13 @@ dependencies {
   implementation libraries.androidx_activity
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_navigation_fragment
+  implementation libraries.androidx_navigation_ui
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.joda_time
-
-  def nav_version = "2.3.0"
-  implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.72"
-  implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
-  implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-  implementation 'com.squareup.retrofit2:retrofit:2.8.1'
-  implementation "com.squareup.moshi:moshi:1.8.0"
-  implementation "com.squareup.retrofit2:converter-moshi:2.5.0"
-  implementation "com.squareup.okhttp3:logging-interceptor:4.7.0"
+  implementation libraries.moshi
+  implementation libraries.retrofit2
+  implementation libraries.retrofit2_moshi
+  implementation libraries.okhttp3_logging_interceptor
 }
