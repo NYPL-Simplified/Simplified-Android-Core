@@ -31,18 +31,8 @@ open class RequiredAssetsTask : DefaultTask() {
   @get:InputFiles
   var apkFiles: List<File> = emptyList()
 
-  companion object {
-    const val STRICT_MODE = "org.librarysimplified.strictmode"
-  }
-
-  private val strictMode by lazy {
-    project.findProperty(STRICT_MODE)?.toString()?.toBoolean() ?: false
-  }
-
   @TaskAction
   fun execute() {
-    if (!strictMode) return // Nothing to do
-
     apkFiles.forEach { apk ->
       // Filter the file tree by our required assets
       //
@@ -86,7 +76,6 @@ open class RequiredAssetsTask : DefaultTask() {
           message += "[!] $file\n"
           message += "      sha256($digest)\n"
         }
-        message += "\nThis check can be disabled by removing the '$STRICT_MODE' property."
         throw GradleException(message.trimEnd())
       }
     }

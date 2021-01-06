@@ -3,8 +3,7 @@ import org.librarysimplified.gradle.RequiredAssetsTask
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
-// Fail the build if these assets aren't present and
-// org.librarysimplified.strictmode is enabled.
+// Fail the build if these assets aren't present
 //
 def requiredFiles = [:]
 requiredFiles["cardcreator.conf"] =
@@ -23,15 +22,15 @@ android {
     setProperty("archivesBaseName", "simplye-${versionName}")
   }
   applicationVariants.all { variant ->
-    def strictModeTask =
-      tasks.create(name: "strictMode${variant.name.capitalize()}", type: RequiredAssetsTask) {
+    def finalizerTask =
+      tasks.create(name: "requiredFiles${variant.name.capitalize()}", type: RequiredAssetsTask) {
         required = requiredFiles
         apkFiles = variant.outputs.collect { out ->
           out.outputFile
         }
       }
     variant.assembleProvider.configure {
-      finalizedBy strictModeTask
+      finalizedBy finalizerTask
     }
   }
 }
