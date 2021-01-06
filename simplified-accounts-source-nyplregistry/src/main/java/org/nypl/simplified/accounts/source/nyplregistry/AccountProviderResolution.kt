@@ -149,7 +149,8 @@ class AccountProviderResolution(
 
   private fun findAnnotationsLink(): URI? {
     return this.description.links.firstOrNull {
-      link -> link.relation == "http://www.w3.org/ns/oa#annotationService"
+      link ->
+      link.relation == "http://www.w3.org/ns/oa#annotationService"
     }?.hrefURI
   }
 
