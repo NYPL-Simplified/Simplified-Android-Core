@@ -100,12 +100,8 @@ class AccountProviderResolution(
       val title =
         this.findTitle(authDocument)
 
-      /*
-       * The annotations URI can only be located by an authenticated user. We'll update
-       * this account provider instance when the user views their loans feed.
-       */
-
-      val annotationsURI = null
+      val annotationsURI =
+        this.findAnnotationsLink()
 
       val accountProvider =
         AccountProvider(
@@ -144,6 +140,17 @@ class AccountProviderResolution(
       )
       taskRecorder.finishFailure()
     }
+  }
+
+  /*
+   * The annotations URI can only be located by an authenticated user, but there _might_ be
+   * one left over from the original description. We'll use that if one exists.
+   */
+
+  private fun findAnnotationsLink(): URI? {
+    return this.description.links.firstOrNull {
+      link -> link.relation == "http://www.w3.org/ns/oa#annotationService"
+    }?.hrefURI
   }
 
   private fun findTitle(
