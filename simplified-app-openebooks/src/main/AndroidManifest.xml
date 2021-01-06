@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.nypl.labs.OpenEbooks.app">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name="org.nypl.simplified.main.MainApplication"
+        android:allowBackup="true"
+        android:contentDescription="@string/appName"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/appName"
+        android:launchMode="singleTop"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:theme="@style/OEI_NoActionBar"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:allowBackup">
+
+        <!-- Main entry point for the application. -->
+        <activity
+            android:name="org.nypl.simplified.main.MainActivity"
+            android:contentDescription="@string/appName"
+            android:exported="true"
+            android:label="@string/appName"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="simplified-openebooks-oauth" />
+            </intent-filter>
+        </activity>
+
+        <!-- A file provider that exposes everything in the app. -->
+        <!-- The purpose of this is for sending error reports. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <activity
+            android:name="org.nypl.simplified.viewer.epub.readium1.ReaderActivity"
+            android:contentDescription="@string/appName"
+            android:exported="false"
+            android:label="@string/appName" />
+
+        <activity
+            android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
+            android:contentDescription="@string/appName"
+            android:exported="false"
+            android:label="@string/appName" />
+
+        <activity
+            android:name="org.nypl.simplified.viewer.epub.readium2.ReaderActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:exported="false"
+            android:parentActivityName="org.nypl.simplified.main.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/OEI_ActionBar" />
+
+        <activity
+            android:name="org.nypl.simplified.viewer.pdf.PdfReaderActivity"
+            android:contentDescription="@string/appName"
+            android:exported="false"
+            android:label="@string/appName" />
+
+        <activity
+            android:name="org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity"
+            android:contentDescription="@string/appName"
+            android:exported="false"
+            android:label="@string/appName" />
+
+        <activity
+            android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"
+            android:contentDescription="@string/appName"
+            android:exported="false"
+            android:label="@string/appName" />
+
+    </application>
+</manifest>

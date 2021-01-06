@@ -22,9 +22,9 @@ info()
 info "installing keystore"
 
 cp -v ".ci/credentials/APK Signing/nypl-keystore.jks" \
-  "simplified-app-vanilla/keystore.jks" || exit 1
+  "release.jks" || exit 1
 
-#
+#------------------------------------------------------------------------
 # Add the NYPL nexus properties to the project properties.
 #
 

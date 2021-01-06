@@ -130,6 +130,10 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private fun configureVersionCore(preference: Preference) {
     preference.setSummaryProvider { this.buildConfig.simplifiedVersion }
+
+    // Hide the Core version if it's similar to the app version
+    preference.isVisible =
+      !this.appVersion.startsWith(this.buildConfig.simplifiedVersion)
   }
 
   private fun configureBuild(preference: Preference) {

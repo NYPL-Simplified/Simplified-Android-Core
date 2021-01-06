@@ -3,8 +3,8 @@ android {
     jvmTarget = '1.8'
     noStdlib = true
   }
-  viewBinding {
-    enabled = true
+  buildFeatures {
+    viewBinding = true
   }
 }
 

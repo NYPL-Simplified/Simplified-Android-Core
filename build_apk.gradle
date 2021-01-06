@@ -1,0 +1,116 @@
+logger.info("Configuring ${project} (${POM_PACKAGING}) as Android application project")
+
+def projectNameSuffix = project.name.split("-").last()
+
+// Configure extra assets, if provided
+//
+def extraAssetsProperty =
+  "org.librarysimplified.app.assets.$projectNameSuffix"
+def extraAssets =
+  expandUserHome(project.findProperty(extraAssetsProperty))
+if (extraAssets != null && !file(extraAssets).exists()) {
+  throw new GradleException(
+    "'$extraAssetsProperty' was defined but '$extraAssets' does not exist"
+  )
+}
+
+// Required for generating signed release builds suitable for
+// publishing in the app store
+//
+def nyplKeyStore =
+  file("$rootDir/release.jks")
+def nyplKeyAlias =
+  project.findProperty('org.librarysimplified.keyAlias')
+def nyplKeyPassword =
+  project.findProperty('org.librarysimplified.keyPassword')
+def nyplStorePassword =
+  project.findProperty('org.librarysimplified.storePassword')
+
+/**
+ * This task is run before a release build is assembled.
+ */
+task preReleaseCheck(group: 'NYPL') {
+  description =
+    'Verify signing information is present before generating a release build.'
+
+  doLast {
+    if (!nyplKeyStore.exists()) {
+      throw new GradleException(
+        "Keystore file '${nyplKeyStore}' must exist to sign release builds")
+    }
+    if (!nyplKeyAlias) {
+      throw new GradleException(
+        'org.librarysimplified.keyAlias must be defined to sign release builds')
+    }
+    if (!nyplKeyPassword) {
+      throw new GradleException(
+        'org.librarysimplified.keyPassword must be defined to sign release builds')
+    }
+    if (!nyplStorePassword) {
+      throw new GradleException(
+        'org.librarysimplified.storePassword must be defined to sign release builds')
+    }
+  }
+}
+
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
+
+android {
+  compileSdkVersion android_compile_sdk_version
+  buildToolsVersion android_build_tools_version
+
+  defaultConfig {
+    minSdkVersion android_min_sdk_version
+    targetSdkVersion android_target_sdk_version
+  }
+  sourceSets {
+    main {
+      if (extraAssets) { assets.srcDirs += extraAssets }
+    }
+  }
+  compileOptions {
+    encoding 'UTF-8'
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+  packagingOptions {
+    doNotStrip 'lib/**/*.so'
+
+    // Readium and the PDF reader both provide this shared library. This causes
+    // the build to fail with an error because Gradle doesn't know which to pick.
+    pickFirst 'lib/x86/libc++_shared.so'
+    pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+  }
+  signingConfigs {
+    release {
+      keyAlias nyplKeyAlias
+      keyPassword nyplKeyPassword
+      storeFile file("$rootDir/release.jks")
+      storePassword nyplStorePassword
+    }
+  }
+  buildTypes {
+    debug {
+      ndk { abiFilters 'x86', 'arm64-v8a', 'armeabi-v7a' }
+      versionNameSuffix '-debug'
+    }
+    release {
+      ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
+      signingConfig signingConfigs.release
+    }
+  }
+  lintOptions {
+    checkReleaseBuilds false
+  }
+  applicationVariants.all { variant ->
+    if (variant.buildType.name == 'release') {
+      Task validateSigningRelease =
+        tasks.findByName('validateSigningRelease')
+      if (validateSigningRelease) {
+        validateSigningRelease.dependsOn preReleaseCheck
+      }
+    }
+  }
+}

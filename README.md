@@ -32,8 +32,6 @@ repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
 The short version: Install an [Android SDK](#android-sdk) and run:
 
 ~~~
-$ echo "systemProp.org.gradle.internal.publish.checksums.insecure=true" >> "$HOME/.gradle/gradle.properties"
-
 $ ./gradlew clean assembleDebug test
 ~~~
 
@@ -95,7 +93,7 @@ org.librarysimplified.nexus.depend=true
 #### APK signing
 
 If you wish to generate a signed APK for publishing the Vanilla application, you will need to copy
-a keystore to `simplified-app-vanilla/keystore.jks` and set the following values correctly in
+a keystore to `release.jks` and set the following values correctly in
 `$HOME/.gradle/gradle.properties`:
 
 ~~~
@@ -111,19 +109,8 @@ need to use either of these commands to produce signed APK files:
 
 ~~~
 $ ./gradlew clean assembleRelease test
-
 $ ./gradlew clean assemble test
 ~~~
-
-#### Insecure checksums?
-
-Astute readers may have noticed the `org.gradle.internal.publish.checksums.insecure` property
-in the initial build instructions. This is necessary because Gradle 6 currently publishes
-checksums that [Maven Central doesn't like](https://github.com/gradle/gradle/issues/11308#issuecomment-554317655).
-Until Maven Central is updated to accept SHA256 and SHA512 checksums, this flag is necessary.
-As all artifacts published to Maven Central are PGP signed, this is not a serious issue; PGP
-signatures combine integrity checking and authentication, so checksum files are essentially
-redundant nowadays.
 
 ### Branching/Merging
 
@@ -134,11 +121,6 @@ automate some of the work of branching and tagging. Using `gitflow-avh`
 is not required, but by automating the underlying repository operations,
 it eliminates the possibility of making mistakes, and keeps the various
 branches consistent.
-
-### Releasing
-
-See our [RELEASING.md](RELEASING.md) document for information on how
-to perform releases.
 
 ### Project Structure / Architecture
 
