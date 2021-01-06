@@ -4,6 +4,12 @@ apply plugin: "java"
 apply plugin: "java-library"
 apply plugin: "kotlin"
 
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+
 /*
  * Apply the Animal Sniffer plugin to check that code is Android compatible.
  */
