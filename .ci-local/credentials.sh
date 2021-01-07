@@ -47,7 +47,7 @@ CREDENTIALS_PATH=$(realpath ".ci/credentials") ||
   fatal "could not resolve credentials path"
 
 SIMPLYE_CREDENTIALS="${CREDENTIALS_PATH}/SimplyE/Android"
-OPENEBOOKS_CREDENTIALS="${CREDENTIALS_PATH}/OpenEBooks/Android"
+OPENEBOOKS_CREDENTIALS="${CREDENTIALS_PATH}/OpenEbooks/Android"
 
 if [ ! -d "${SIMPLYE_CREDENTIALS}" ]
 then
