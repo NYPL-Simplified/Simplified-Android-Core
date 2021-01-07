@@ -4,10 +4,8 @@ import android.content.Context
 import org.nypl.simplified.books.audio.AudioBookOverdriveSecretServiceType
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
-import java.io.IOException
 import java.io.InputStream
 import java.lang.NullPointerException
-import java.util.Objects
 import java.util.Properties
 
 /**

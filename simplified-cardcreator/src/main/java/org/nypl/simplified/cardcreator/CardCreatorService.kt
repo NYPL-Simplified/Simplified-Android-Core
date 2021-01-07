@@ -5,11 +5,8 @@ import android.content.Intent
 import androidx.fragment.app.Fragment
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
-import java.io.IOError
-import java.io.IOException
 import java.io.InputStream
 import java.lang.NullPointerException
-import java.util.Objects
 import java.util.Properties
 
 class CardCreatorService(
@@ -42,7 +39,7 @@ class CardCreatorService(
       stream: InputStream
     ): CardCreatorServiceType {
       val properties =
-        Properties().apply{ load(stream) }
+        Properties().apply { load(stream) }
 
       val username =
         properties.getProperty("cardcreator.prod.username")
