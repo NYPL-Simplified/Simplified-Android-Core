@@ -37,11 +37,29 @@ ext {
 
   if (nyplNexusDepend && !nyplNexusUsername) {
     throw new GradleException(
-      'org.librarysimplified.nexus.depend is set but org.librarysimplified.nexus.username is undefined!')
+      """\
+      'org.librarysimplified.nexus.username' is undefined!
+        ^ required by 'org.librarysimplified.nexus.depend'\
+      """.stripIndent())
   }
   if (nyplNexusDepend && !nyplNexusPassword) {
     throw new GradleException(
-      'org.librarysimplified.nexus.depend is set but org.librarysimplified.nexus.password is undefined!')
+      """\
+      'org.librarysimplified.nexus.password' is undefined!
+        ^ required by 'org.librarysimplified.nexus.depend'\
+      """.stripIndent())
+  }
+
+  // Required by some projects to build with drm support
+  //
+  nyplDrmEnabled =
+    project.findProperty('org.librarysimplified.drm.enabled') as Boolean
+  if (nyplDrmEnabled && !nyplNexusDepend) {
+    throw new GradleException(
+      """\
+      'org.librarysimplified.nexus.depend' is undefined!
+        ^ required by 'org.librarysimplified.drm.enabled'\
+      """.stripIndent())
   }
 }
 
@@ -115,9 +133,6 @@ subprojects { project ->
   //
   def nyplDrmRequired =
     project.findProperty('org.librarysimplified.drm.required') as Boolean
-  def nyplDrmEnabled =
-    project.findProperty('org.librarysimplified.drm.enabled') as Boolean
-
   if (nyplDrmRequired) {
     project.tasks.all { task ->
       task.onlyIf { nyplDrmEnabled }
