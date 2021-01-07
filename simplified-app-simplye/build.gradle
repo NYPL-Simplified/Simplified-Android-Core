@@ -15,7 +15,7 @@ android {
   defaultConfig {
     versionName = project.version
     versionCode = versionCode(project.version)
-    setProperty("archivesBaseName", "simplye-${versionName}")
+    setProperty("archivesBaseName", "$versionName-simplye")
   }
   applicationVariants.all { variant ->
     def finalizerTask =
