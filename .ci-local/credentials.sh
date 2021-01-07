@@ -15,6 +15,15 @@ info()
   echo "credentials-local.sh: info: $1" 1>&2
 }
 
+if [ -z "${NYPL_NEXUS_USER}" ]
+then
+  fatal "NYPL_NEXUS_USER is not defined"
+fi
+if [ -z "${NYPL_NEXUS_PASSWORD}" ]
+then
+  fatal "NYPL_NEXUS_PASSWORD is not defined"
+fi
+
 #------------------------------------------------------------------------
 # Copy credentials into place.
 #
@@ -39,6 +48,11 @@ CREDENTIALS_PATH=$(realpath ".ci/credentials") ||
 
 cat >> "${HOME}/.gradle/gradle.properties" <<EOF
 org.librarysimplified.drm.enabled=true
+
+org.librarysimplified.nexus.depend=true
+org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
+org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
+
 org.librarysimplified.app.assets.openebooks=${CREDENTIALS_PATH}/OpenEBooks/Android/
 org.librarysimplified.app.assets.simplye=${CREDENTIALS_PATH}/credentials/SimplyE/Android/
 EOF
