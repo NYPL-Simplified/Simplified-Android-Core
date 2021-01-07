@@ -113,30 +113,6 @@ afterEvaluate {
           password mavenCentralPassword
         }
       }
-      maven {
-        name = "centralReleases"
-        url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-        credentials(PasswordCredentials) {
-          username mavenCentralUsername
-          password mavenCentralPassword
-        }
-      }
-      maven {
-        name = "nyplSnapshots"
-        url = "https://nexus.librarysimplified.org:8443/nexus/content/repositories/snapshots-no-drm/"
-        credentials(PasswordCredentials) {
-          username nyplNexusUsername
-          password nyplNexusPassword
-        }
-      }
-      maven {
-        name = "nyplReleases"
-        url = "https://nexus.librarysimplified.org:8443/nexus/content/repositories/releases-no-drm/"
-        credentials(PasswordCredentials) {
-          username nyplNexusUsername
-          password nyplNexusPassword
-        }
-      }
     }
   }
 
