@@ -44,11 +44,17 @@ support the use of any other IDE at the moment.
 
 #### JDK
 
-Install a reasonably modern JDK: Java 8 is the current recommendation for Android Studio.
-You must have Java SE 8u101 or [a newer version of Java SE 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-installed. This is because older versions of Java do not trust
-[Let's Encrypt](https://letsencrypt.org/) which provides the SSL certificate on our Nexus
-repository instance.
+Install a reasonably modern JDK: Java 11 is the current long-term support (LTS) release of Java. We
+perform nightly builds using the current LTS Java release, and the current bleeding-edge Java
+release in order to try to detect any upcoming compatibility issues, but we don't recommend building
+on anything other than the current LTS JDK for everyday usage.
+
+Any of the following JDKs should work:
+
+  * [OpenJDK](https://jdk.java.net/java-se-ri/11)
+  * [Adoptium](https://adoptopenjdk.net/)
+  * [Amazon Coretto](https://aws.amazon.com/corretto/)
+  * [Zulu](https://www.azul.com/downloads/zulu-community/?package=jdk)
 
 The `JAVA_HOME` environment variable must be set correctly. You can check what it is set to in
 most shells with `echo $JAVA_HOME`. If that command does not show anything, adding the following
@@ -56,8 +62,8 @@ line to `$HOME/.profile` and then executing `source $HOME/.profile` or opening a
 should suffice:
 
 ~~~w
-# Replace NNN with your particular version of 1.8.0.
-export JAVA_HOME=/path/to/jdk1.8.0_NNN
+# Replace NNN with your particular version of 11.
+export JAVA_HOME=/path/to/jdk-11+NNN
 ~~~
 
 You can verify that everything is set up correctly by inspecting the results of both
@@ -65,9 +71,9 @@ You can verify that everything is set up correctly by inspecting the results of 
 
 ~~~
 $ java -version
-openjdk version "1.8.0_222"
-OpenJDK Runtime Environment (build 1.8.0_222-b05)
-OpenJDK 64-Bit Server VM (build 25.222-b05, mixed mode)
+openjdk version "11.0.8" 2020-07-14
+OpenJDK Runtime Environment (build 11.0.8+10)
+OpenJDK 64-Bit Server VM (build 11.0.8+10, mixed mode)
 ~~~
 
 #### Nexus Credentials
