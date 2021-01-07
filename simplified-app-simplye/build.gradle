@@ -6,9 +6,9 @@ apply plugin: 'com.google.firebase.crashlytics'
 // Fail the build if these assets aren't present
 //
 def requiredFiles = [:]
-requiredFiles["$projectDir/src/main/assets/ReaderClientCert.sig"] =
+requiredFiles["ReaderClientCert.sig"] =
   "280838a4cb5c2ca4a2c8cf14e93f8ff72dbc6046cf188b5e83cf830f5159ce1e"
-requiredFiles["$projectDir/src/main/assets/secrets.conf"] =
+requiredFiles["secrets.conf"] =
   "dde8800740b5c776df043b48a66be2952d4c6954d58f31ec42afcebba66383ca"
 
 android {
