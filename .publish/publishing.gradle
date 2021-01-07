@@ -136,17 +136,8 @@ afterEvaluate {
         repository == publishing.repositories.directory
       } else {
         switch (repository) {
-          case publishing.repositories.nyplSnapshots:
-            isSnapshot && (nyplNexusUsername && nyplNexusPassword)
-            break
-          case publishing.repositories.nyplReleases:
-            isRelease && (nyplNexusUsername && nyplNexusPassword)
-            break
           case publishing.repositories.centralSnapshots:
             isSnapshot && (mavenCentralUsername && mavenCentralPassword)
-            break
-          case publishing.repositories.centralReleases:
-            isRelease && (mavenCentralUsername && mavenCentralPassword)
             break
           default: false
         }
