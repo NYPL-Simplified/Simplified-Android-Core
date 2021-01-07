@@ -38,6 +38,7 @@ CREDENTIALS_PATH=$(realpath ".ci/credentials") ||
   fatal "could not resolve credentials path"
 
 cat >> "${HOME}/.gradle/gradle.properties" <<EOF
+org.librarysimplified.drm.enabled=true
 org.librarysimplified.app.assets.openebooks=${CREDENTIALS_PATH}/OpenEBooks/Android/
 org.librarysimplified.app.assets.simplye=${CREDENTIALS_PATH}/credentials/SimplyE/Android/
 EOF
