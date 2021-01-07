@@ -11,6 +11,13 @@ The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android clien
 
 _Image by [Predrag Kezic](https://pixabay.com/users/PredragKezic-582203/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=581229) from [Pixabay](https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=581229)_
 
+|Project|Status|
+|-------|------|
+|[Nightly, DRM, JDK 11](https://www.github.com/NYPL-Simplified/Simplified-Android-Core)|[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Daily%20Authenticated,%20JDK%2011)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+Authenticated%2C+JDK+11%29%22)|
+|[Nightly, DRM-Free, JDK 11](https://www.github.com/NYPL-Simplified/Simplified-Android-Core)|[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Daily%20DRM-Free,%20JDK%2011)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+DRM-Free%2C+JDK+11%29%22)|
+|[Nightly, DRM-Free, JDK 15](https://www.github.com/NYPL-Simplified/Simplified-Android-Core)|[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Daily%20DRM-Free,%20JDK%2015)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+DRM-Free%2C+JDK+15%29%22)|
+|[Current](https://www.github.com/NYPL-Simplified/Simplified-Android-Core)|[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Authenticated)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Authenticated%29%22)|
+
 ### What Is This?
 
 The contents of this repository provide the framework of an application used to build,
