@@ -74,11 +74,9 @@ repository.
 
 |Source|Copy To|Description|
 |------|-------|-----------|
-|[keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`release.jks`|NYPL APK signing keystore|
-|[cardcreator.conf](https://github.com/NYPL-Simplified/Certificates/blob/master/SimplyE/Android/cardcreator.conf)|`app/src/main/assets/cardcreator.conf`|NYPL card creator configuration|
-|[overdrive.json](https://github.com/NYPL-Simplified/Certificates/blob/master/Overdrive/audiobook_fulfillment.json)|`app/src/main/assets/overdrive.json`|Overdrive audio books configuration file|
+|[nypl-keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`release.jks`|NYPL APK signing keystore|
+|[secrets.conf](https://github.com/NYPL-Simplified/Certificates/blob/master/SimplyE/Android/secrets.conf)|`app/src/main/assets/secrets.conf`|Various secrets|
 |[ReaderClientCert.sig](https://github.com/NYPL-Simplified/Certificates/blob/master/SimplyE/Android/ReaderClientCert.sig)|`app/src/main/assets/ReaderClientCert.sig`|Adobe DRM certificate|
-|[feedbooks.conf](https://github.com/NYPL-Simplified/Certificates/blob/master/Feedbooks/feedbooks.conf)|`app/src/main/resources/org/nypl/simplified/simplye/feedbooks.conf`|Feedbooks audio books configuration file|
 
 Once you have cloned the repository, the following line must be added to `$HOME/.gradle/gradle.properties`:
 
@@ -112,7 +110,7 @@ org.librarysimplified.nexus.password=PASSWORD
 #### APK signing
 
 For signing releases, a keystore must be copied to
-`app/keystore.jks` and the following values set correctly in
+`release.jks` and the following values set correctly in
 `$HOME/.gradle/gradle.properties`:
 
 ~~~

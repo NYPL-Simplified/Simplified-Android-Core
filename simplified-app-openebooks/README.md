@@ -58,7 +58,7 @@ repository.
 
 |Source|Copy To|Description|
 |------|-------|-----------|
-|[keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`release.jks`|NYPL APK signing keystore|
+|[nypl-keystore.jks](https://github.com/NYPL-Simplified/Certificates/blob/master/APK%20Signing/nypl-keystore.jks)|`release.jks`|NYPL APK signing keystore|
 |[ReaderClientCert.sig](https://github.com/NYPL-Simplified/Certificates/tree/master/OpenEbooks/Android/ReaderClientCert.sig)|`app/src/main/assets/ReaderClientCert.sig`|Adobe DRM certificate|
 
 Once you have cloned the repository, the following line must be added to `$HOME/.gradle/gradle.properties`:

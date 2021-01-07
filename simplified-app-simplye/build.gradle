@@ -6,14 +6,10 @@ apply plugin: 'com.google.firebase.crashlytics'
 // Fail the build if these assets aren't present
 //
 def requiredFiles = [:]
-requiredFiles["cardcreator.conf"] =
-  "a51c45891eb599076c456a54d748eaf45cd7b093ec6a4fe2660378fab8915d86"
-requiredFiles["overdrive.json"] =
-  "ba5b2678f0e44744df33917ec342a76a7580f58186157ba804ba3ac63516a37a"
-requiredFiles["ReaderClientCert.sig"] =
+requiredFiles["$projectDir/src/main/assets/ReaderClientCert.sig"] =
   "280838a4cb5c2ca4a2c8cf14e93f8ff72dbc6046cf188b5e83cf830f5159ce1e"
-requiredFiles["feedbooks.conf"] =
-  "1a8b5992a2c2d35b9daf14f02a6088ad55f860609e77c9ffed6c11ec7da14c0c"
+requiredFiles["$projectDir/src/main/assets/secrets.conf"] =
+  "dde8800740b5c776df043b48a66be2952d4c6954d58f31ec42afcebba66383ca"
 
 android {
   defaultConfig {

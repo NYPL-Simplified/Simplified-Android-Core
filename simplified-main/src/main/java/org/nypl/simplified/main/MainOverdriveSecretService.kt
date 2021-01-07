@@ -1,13 +1,14 @@
 package org.nypl.simplified.main
 
 import android.content.Context
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.nypl.simplified.books.audio.AudioBookOverdriveSecretServiceType
-import org.nypl.simplified.json.core.JSONParserUtilities
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
+import java.lang.NullPointerException
+import java.util.Objects
+import java.util.Properties
 
 /**
  * A service for providing Overdrive secrets.
@@ -27,27 +28,29 @@ class MainOverdriveSecretService private constructor(
       context: Context
     ): AudioBookOverdriveSecretServiceType? {
       return try {
-        context.assets.open("overdrive.json").use(::create)
+        context.assets.open("secrets.conf").use(::create)
       } catch (e: FileNotFoundException) {
-        this.logger.debug("Overdrive configuration not present: ", e)
+        this.logger.warn("failed to initialize Overdrive; secrets.conf not found")
         null
-      } catch (e: IOException) {
-        this.logger.debug("could not initialize Overdrive secret service: ", e)
-        throw IllegalStateException("could not initialize Overdrive secret service", e)
+      } catch (e: Exception) {
+        this.logger.warn("failed to initialize Overdrive", e)
+        null
       }
     }
 
     fun create(
       stream: InputStream
     ): AudioBookOverdriveSecretServiceType {
-      val objectMapper = ObjectMapper()
-      val root = objectMapper.readTree(stream)
-      val rootObject =
-        JSONParserUtilities.checkObject(null, root)
+      val properties =
+        Properties().apply { load(stream) }
+
       val clientKey =
-        JSONParserUtilities.getString(rootObject, "clientKey")
+        properties.getProperty("overdrive.prod.client.key")
+          ?: throw NullPointerException("overdrive.prod.client.key is missing")
       val clientPass =
-        JSONParserUtilities.getString(rootObject, "clientSecret")
+        properties.getProperty("overdrive.prod.client.secret")
+          ?: throw NullPointerException("overdrive.prod.client.secret is missing")
+
       return MainOverdriveSecretService(
         clientKey = clientKey,
         clientPass = clientPass
