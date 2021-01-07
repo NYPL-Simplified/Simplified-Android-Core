@@ -46,6 +46,18 @@ cat ".ci/credentials/APK Signing/nypl-keystore.properties" >> "${HOME}/.gradle/g
 CREDENTIALS_PATH=$(realpath ".ci/credentials") ||
   fatal "could not resolve credentials path"
 
+SIMPLYE_CREDENTIALS="${CREDENTIALS_PATH}/SimplyE/Android"
+OPENEBOOKS_CREDENTIALS="${CREDENTIALS_PATH}/OpenEBooks/Android"
+
+if [ ! -d "${SIMPLYE_CREDENTIALS}" ]
+then
+  fatal "${SIMPLYE_CREDENTIALS} does not exist, or is not a directory"
+fi
+if [ ! -d "${OPENEBOOKS_CREDENTIALS}" ]
+then
+  fatal "${OPENEBOOKS_CREDENTIALS} does not exist, or is not a directory"
+fi
+
 cat >> "${HOME}/.gradle/gradle.properties" <<EOF
 org.librarysimplified.drm.enabled=true
 
@@ -53,6 +65,6 @@ org.librarysimplified.nexus.depend=true
 org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
 org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 
-org.librarysimplified.app.assets.openebooks=${CREDENTIALS_PATH}/OpenEBooks/Android/
-org.librarysimplified.app.assets.simplye=${CREDENTIALS_PATH}/credentials/SimplyE/Android/
+org.librarysimplified.app.assets.openebooks=${OPENEBOOKS_CREDENTIALS}
+org.librarysimplified.app.assets.simplye=${SIMPLYE_CREDENTIALS}
 EOF
