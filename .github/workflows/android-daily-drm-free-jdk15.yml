@@ -1,8 +1,8 @@
-name: Android CI (Pull Requests)
+name: Android CI (Daily DRM-Free, JDK 15)
 
 on:
-  pull_request:
-    branches: [ develop ]
+  schedule:
+    - cron:  '0 22 * * *'
 
 jobs:
   build:
@@ -12,9 +12,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
-      - name: set up JDK 11
+      - name: set up JDK 15
         uses: actions/setup-java@v1
         with:
-          java-version: 11
-      - name: Build PR
+          java-version: 15
+      - name: Build
         run: .ci/ci-main.sh pull-request
