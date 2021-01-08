@@ -40,15 +40,15 @@ task preReleaseCheck(group: 'NYPL') {
     }
     if (!nyplKeyAlias) {
       throw new GradleException(
-        'org.librarysimplified.keyAlias must be defined to sign release builds')
+        "'org.librarysimplified.keyAlias' must be defined to sign release builds")
     }
     if (!nyplKeyPassword) {
       throw new GradleException(
-        'org.librarysimplified.keyPassword must be defined to sign release builds')
+        "'org.librarysimplified.keyPassword' must be defined to sign release builds")
     }
     if (!nyplStorePassword) {
       throw new GradleException(
-        'org.librarysimplified.storePassword must be defined to sign release builds')
+        "'org.librarysimplified.storePassword' must be defined to sign release builds")
     }
   }
 }
@@ -109,10 +109,10 @@ android {
   }
   applicationVariants.all { variant ->
     if (variant.buildType.name == 'release') {
-      Task validateSigningRelease =
-        tasks.findByName('validateSigningRelease')
-      if (validateSigningRelease) {
-        validateSigningRelease.dependsOn preReleaseCheck
+      def preBuildTask =
+        tasks.findByName("pre${variant.name.capitalize()}Build")
+      if (preBuildTask) {
+        preBuildTask.dependsOn preReleaseCheck
       }
     }
   }
