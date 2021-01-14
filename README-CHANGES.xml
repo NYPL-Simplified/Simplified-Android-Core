@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<c:changelog project="LibrarySimplified" xmlns:c="urn:com.io7m.changelog:4.0">
+  <c:releases>
+    <c:release date="2021-01-14T10:24:26+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.0">
+      <c:changes>
+        <c:change date="2021-01-14T00:00:00+00:00" summary="Implemented announcements">
+          <c:tickets>
+            <c:ticket id="SIMPLY-2936"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-01-14T00:00:00+00:00" summary="Improved behaviour of login fields for password managers"/>
+        <c:change date="2021-01-14T10:24:26+00:00" summary="Bookmark syncing support is now correctly remembered for all accounts">
+          <c:tickets>
+            <c:ticket id="SIMPLY-2403"/>
+          </c:tickets>
+        </c:change>
+      </c:changes>
+    </c:release>
+  </c:releases>
+  <c:ticket-systems>
+    <c:ticket-system default="true" id="org.nypl.jira" url="https://jira.nypl.org/browse/"/>
+  </c:ticket-systems>
+</c:changelog>

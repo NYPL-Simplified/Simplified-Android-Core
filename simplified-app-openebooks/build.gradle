@@ -13,7 +13,7 @@ android {
   defaultConfig {
     versionName = project.version
     versionCode = versionCode(project.version)
-    setProperty("archivesBaseName", "$versionName-openebooks")
+    setProperty("archivesBaseName", "openebooks")
   }
   applicationVariants.all { variant ->
     def finalizerTask =
