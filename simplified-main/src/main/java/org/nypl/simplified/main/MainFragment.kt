@@ -15,6 +15,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
@@ -195,6 +196,11 @@ class MainFragment : Fragment() {
         this.profilesController.profileIdleTimer().start()
       }
     }
+
+    /*
+     * Show the Toolbar
+     */
+    this.supportActionBar?.show()
   }
 
   private fun onAccountEvent(event: AccountEvent) {

@@ -23,6 +23,7 @@ dependencies {
   api project(":simplified-accounts-source-spi")
   api project(":simplified-adobe-extensions")
   api project(":simplified-analytics-api")
+  api project(":simplified-android-ktx")
   api project(":simplified-announcements")
   api project(":simplified-books-audio")
   api project(":simplified-books-borrowing")

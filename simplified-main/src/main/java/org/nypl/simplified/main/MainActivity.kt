@@ -302,7 +302,6 @@ class MainActivity :
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
       .commit()
-    this.supportActionBar?.show()
 
     /*
      * Register an announcements controller.
