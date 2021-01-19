@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:padding="16dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
-
-  <Button
-    android:id="@+id/splashEulaAgree"
-    android:text="@string/eula_agree"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentEnd="true"
-    android:layout_width="100dp"
-    android:layout_height="48dp" />
-
-  <Button
-    android:id="@+id/splashEulaDisagree"
-    android:text="@string/eula_disagree"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentStart="true"
-    android:layout_width="100dp"
-    android:layout_height="48dp" />
+  android:layout_height="match_parent"
+  android:divider="?android:dividerHorizontal"
+  android:orientation="vertical"
+  android:showDividers="middle">
 
   <WebView
     android:id="@+id/splashEulaWebView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_above="@id/splashEulaAgree"
-    android:layout_marginBottom="16dp"
-    android:layout_alignParentTop="true"
-    android:layout_alignParentStart="true"/>
+    android:layout_height="0dp"
+    android:layout_weight="1" />
 
-</RelativeLayout>
+  <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <Button
+      android:id="@+id/splashEulaAgree"
+      android:layout_width="100dp"
+      android:layout_height="48dp"
+      android:layout_alignParentEnd="true"
+      android:text="@string/eula_agree" />
+
+    <Button
+      android:id="@+id/splashEulaDisagree"
+      android:layout_width="100dp"
+      android:layout_height="48dp"
+      android:layout_alignParentStart="true"
+      android:text="@string/eula_disagree" />
+  </RelativeLayout>
+</LinearLayout>
