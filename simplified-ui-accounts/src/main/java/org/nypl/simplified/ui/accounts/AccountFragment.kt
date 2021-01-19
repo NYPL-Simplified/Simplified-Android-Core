@@ -157,6 +157,10 @@ class AccountFragment : Fragment() {
     this.buildConfig =
       services.requireService(BuildConfigurationServiceType::class.java)
 
+    this.account =
+      this.profilesController.profileCurrent()
+        .account(this.parameters.accountId)
+
     this.viewModel =
       ViewModelProviders.of(this)
         .get(AccountFragmentViewModel::class.java)
@@ -328,16 +332,6 @@ class AccountFragment : Fragment() {
 
     this.backgroundExecutor =
       NamedThreadPools.namedThreadPool(1, "simplified-accounts-io", 19)
-
-    try {
-      this.account =
-        this.profilesController.profileCurrent()
-          .account(this.parameters.accountId)
-    } catch (e: AccountsDatabaseNonexistentException) {
-      this.logger.error("account no longer exists: ", e)
-      this.explicitlyClose()
-      return
-    }
 
     this.configureToolbar(requireActivity())
     this.hideCardCreatorForNonNYPL()
