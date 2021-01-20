@@ -49,7 +49,7 @@ ext.versions = [
   moshi                         : '1.8.0',
   nypl_audiobook_api            : '6.3.0',
   nypl_drm_adobe                : '1.1.27',
-  nypl_drm_core                 : '1.1.1',
+  nypl_drm_core                 : '1.1.2',
   nypl_findaway                 : '6.0.0',
   nypl_http                     : '0.0.18-SNAPSHOT',
   nypl_overdrive                : '1.0.3',
