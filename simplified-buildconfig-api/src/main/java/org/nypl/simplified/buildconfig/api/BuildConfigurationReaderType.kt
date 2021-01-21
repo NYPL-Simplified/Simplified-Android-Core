@@ -10,5 +10,5 @@ interface BuildConfigurationReaderType {
    * Allow access to external URLs in readers.
    */
 
-  val allowExternalReaderLinks : Boolean
+  val allowExternalReaderLinks: Boolean
 }
