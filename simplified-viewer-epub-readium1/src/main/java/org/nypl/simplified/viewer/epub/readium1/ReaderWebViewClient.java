@@ -7,6 +7,7 @@ import android.webkit.WebViewClient;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,18 +32,26 @@ final class ReaderWebViewClient extends WebViewClient {
   private final Activity activity;
   private final ReaderSimplifiedFeedbackListenerType simplified_listener;
   private final ReaderReadiumFeedbackListenerType readium_listener;
+  private final AllowExternalLinks allow_external_links;
+
+  public enum AllowExternalLinks {
+    ALLOW_EXTERNAL_LINKS,
+    DISALLOW_EXTERNAL_LINKS
+  }
 
   public ReaderWebViewClient(
     final Activity in_activity,
     final ReaderSimplifiedFeedbackDispatcherType in_simplified_dispatcher,
     final ReaderSimplifiedFeedbackListenerType in_simplified_listener,
     final ReaderReadiumFeedbackDispatcherType in_readium_dispatcher,
-    final ReaderReadiumFeedbackListenerType in_readium_listener) {
+    final ReaderReadiumFeedbackListenerType in_readium_listener,
+    final AllowExternalLinks in_allow_external_links) {
     this.activity = NullCheck.notNull(in_activity);
     this.simplified_dispatcher = NullCheck.notNull(in_simplified_dispatcher);
     this.simplified_listener = NullCheck.notNull(in_simplified_listener);
     this.readium_dispatcher = NullCheck.notNull(in_readium_dispatcher);
     this.readium_listener = NullCheck.notNull(in_readium_listener);
+    this.allow_external_links = NullCheck.notNull(in_allow_external_links);
   }
 
   private static @Nullable
@@ -88,12 +97,19 @@ final class ReaderWebViewClient extends WebViewClient {
       return true;
     }
 
-    if (!isLocalhost(uu.getHost())) {
-      LOG.debug("rejecting request to non-localhost URI");
-      return true;
+    switch (this.allow_external_links) {
+      case ALLOW_EXTERNAL_LINKS:
+        return super.shouldOverrideUrlLoading(view, url);
+      case DISALLOW_EXTERNAL_LINKS: {
+        if (!isLocalhost(uu.getHost())) {
+          LOG.debug("rejecting request to non-localhost URI");
+          return true;
+        }
+        return super.shouldOverrideUrlLoading(view, url);
+      }
     }
 
-    return super.shouldOverrideUrlLoading(view, url);
+    throw new UnreachableCodeException();
   }
 
   private static boolean isLocalhost(String host) {
@@ -114,22 +130,30 @@ final class ReaderWebViewClient extends WebViewClient {
       }
     }
 
-    try {
-      if (!isLocalhost(new URI(url).getHost())) {
-        LOG.debug("rejecting request to non-localhost URI");
-        return new WebResourceResponse(
-          "text/plain",
-          "UTF-8",
-          403,
-          "FORBIDDEN",
-          new HashMap<>(),
-          new ByteArrayInputStream(new byte[0])
-        );
+    switch (this.allow_external_links) {
+      case ALLOW_EXTERNAL_LINKS: {
+        return super.shouldInterceptRequest(view, url);
       }
-    } catch (URISyntaxException e) {
-      LOG.error("invalid URI: ", e);
+      case DISALLOW_EXTERNAL_LINKS: {
+        try {
+          if (!isLocalhost(new URI(url).getHost())) {
+            LOG.debug("rejecting request to non-localhost URI");
+            return new WebResourceResponse(
+              "text/plain",
+              "UTF-8",
+              403,
+              "FORBIDDEN",
+              new HashMap<>(),
+              new ByteArrayInputStream(new byte[0])
+            );
+          }
+        } catch (URISyntaxException e) {
+          LOG.error("invalid URI: ", e);
+        }
+        return super.shouldInterceptRequest(view, url);
+      }
     }
 
-    return super.shouldInterceptRequest(view, url);
+    throw new UnreachableCodeException();
   }
 }

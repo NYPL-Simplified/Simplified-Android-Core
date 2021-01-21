@@ -25,6 +25,8 @@ class VanillaBuildConfigurationService : BuildConfigurationServiceType {
     get() = "[vanilla-error]"
   override val oauthCallbackScheme: BuildConfigOAuthScheme
     get() = BuildConfigOAuthScheme("simplified-vanilla-oauth")
+  override val allowExternalReaderLinks: Boolean
+    get() = false
   override val showChangeAccountsUi: Boolean
     get() = true
 }
