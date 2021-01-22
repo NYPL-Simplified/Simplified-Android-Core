@@ -441,6 +441,31 @@ class CatalogFeedViewModel(
     }
   }
 
+  override fun resolveFeedFromBook(
+    accountID: AccountID,
+    title: String,
+    uri: URI
+  ): CatalogFeedArguments {
+    return when (val arguments = this.feedArguments) {
+      is CatalogFeedArgumentsRemote ->
+        CatalogFeedArgumentsRemote(
+          feedURI = arguments.feedURI.resolve(uri).normalize(),
+          isSearchResults = false,
+          ownership = CatalogFeedOwnership.OwnedByAccount(accountID),
+          title = title
+        )
+
+      is CatalogFeedArgumentsLocalBooks -> {
+        CatalogFeedArgumentsRemote(
+          feedURI = uri.normalize(),
+          isSearchResults = false,
+          ownership = CatalogFeedOwnership.OwnedByAccount(accountID),
+          title = title
+        )
+      }
+    }
+  }
+
   override fun reloadFeed(arguments: CatalogFeedArguments) {
     synchronized(this.stateLock) {
       this.state = null

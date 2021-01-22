@@ -379,10 +379,10 @@ class CatalogFragmentBookDetail : Fragment() {
     val context = this.requireContext()
     val feedModel = this.createOrGetFeedModel(context)
     val targetFeed =
-      feedModel.resolveFeed(
+      feedModel.resolveFeedFromBook(
+        accountID = this.parameters.feedEntry.accountID,
         title = context.resources.getString(R.string.catalogRelatedBooks),
-        uri = feedRelated,
-        isSearchResults = false
+        uri = feedRelated
       )
     this.findNavigationController().openFeed(targetFeed)
   }
