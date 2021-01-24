@@ -29,8 +29,7 @@ dependencies on the framework, custom color schemes, and logos. The repository c
 an example frontend, [Vanilla](simplified-app-vanilla), that shows how this is achieved.
 
 The application frontend for the NYPL
-SimplyE application can be found in its [own
-repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
+SimplyE application can be found in its [own module](https://github.com/NYPL-Simplified/Simplified-Android-Core/tree/develop/simplified-app-simplye).
 
 ### Building
 
