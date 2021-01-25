@@ -783,9 +783,11 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.buttons.addView(this.buttonCreator.createCancelDownloadButton {
-      this.borrowViewModel.tryCancelDownload(book.account, book.id)
-    })
+    this.buttons.addView(
+      this.buttonCreator.createCancelDownloadButton {
+        this.borrowViewModel.tryCancelDownload(book.account, book.id)
+      }
+    )
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
 
