@@ -783,13 +783,19 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.buttons.addView(
-      this.buttonCreator.createCancelDownloadButton {
-        this.borrowViewModel.tryCancelDownload(book.account, book.id)
-      }
-    )
+    this.buttons.addView(this.buttonCreator.createCancelDownloadButton {
+      this.borrowViewModel.tryCancelDownload(book.account, book.id)
+    })
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.checkButtonViewCount()
+
+    /*
+     * XXX: https://jira.nypl.org/browse/SIMPLY-3444
+     *
+     * Hide the cancel button until we can reliably support cancellation for *all* books. That is,
+     * when the Adobe DRM is dead and buried.
+     */
+    this.buttons.removeAllViews()
 
     this.statusInProgress.visibility = View.VISIBLE
     this.statusIdle.visibility = View.INVISIBLE
