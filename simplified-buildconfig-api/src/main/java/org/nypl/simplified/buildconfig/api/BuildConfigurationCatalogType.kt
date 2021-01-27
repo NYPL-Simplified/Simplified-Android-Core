@@ -29,4 +29,10 @@ interface BuildConfigurationCatalogType {
    */
 
   val showHoldsTab: Boolean
+
+  /**
+   * Should books from _all_ accounts be shown in the Books views?
+   */
+
+  val showBooksFromAllAccounts: Boolean
 }
