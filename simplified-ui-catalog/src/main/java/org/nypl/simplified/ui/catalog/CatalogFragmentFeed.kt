@@ -682,22 +682,29 @@ class CatalogFragmentFeed : Fragment() {
       is FeedLoaderFailedAuthentication -> {
         when (val ownership = this.parameters.ownership) {
           is OwnedByAccount -> {
-            /*
-             * Explicitly deferring the opening of the fragment is required due to the
-             * tabbed navigation controller eagerly instantiating fragments and causing
-             * fragment transaction exceptions. This will go away when we have a replacement
-             * for the navigator library.
-             */
+            val shouldAuthenticate =
+              this.profilesController.profileCurrent()
+                .account(ownership.accountId)
+                .requiresCredentials
 
-            this.uiThread.runOnUIThread {
-              this.navigationController
-                .openSettingsAccount(
-                  AccountFragmentParameters(
-                    accountId = ownership.accountId,
-                    closeOnLoginSuccess = true,
-                    showPleaseLogInTitle = true
+            if (shouldAuthenticate) {
+              /*
+               * Explicitly deferring the opening of the fragment is required due to the
+               * tabbed navigation controller eagerly instantiating fragments and causing
+               * fragment transaction exceptions. This will go away when we have a replacement
+               * for the navigator library.
+               */
+
+              this.uiThread.runOnUIThread {
+                this.navigationController
+                  .openSettingsAccount(
+                    AccountFragmentParameters(
+                      accountId = ownership.accountId,
+                      closeOnLoginSuccess = true,
+                      showPleaseLogInTitle = true
+                    )
                   )
-                )
+              }
             }
           }
           CollectedFromAccounts -> {
@@ -757,7 +764,8 @@ class CatalogFragmentFeed : Fragment() {
       if (isRoot) {
         when (this.parameters.ownership) {
           is OwnedByAccount -> showAccountPickerAction()
-          else -> {} // do nothing
+          else -> {
+          } // do nothing
         }
       }
     } catch (e: Exception) {
