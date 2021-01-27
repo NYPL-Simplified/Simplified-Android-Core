@@ -13,6 +13,8 @@ class SimplyEBuildConfigurationService : BuildConfigurationServiceType {
     get() = BuildConfigOAuthScheme("simplye-oauth")
   override val allowExternalReaderLinks: Boolean
     get() = true
+  override val showBooksFromAllAccounts: Boolean
+    get() = false
   override val showChangeAccountsUi: Boolean
     get() = true
   override val showDebugBookDetailStatus: Boolean

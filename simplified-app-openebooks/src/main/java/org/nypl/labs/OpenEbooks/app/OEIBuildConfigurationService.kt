@@ -11,6 +11,8 @@ class OEIBuildConfigurationService : BuildConfigurationServiceType {
     get() = true
   override val showHoldsTab: Boolean
     get() = false
+  override val showBooksFromAllAccounts: Boolean
+    get() = false
   override val supportErrorReportEmailAddress: String
     get() = "simplyemigrationreports@nypl.org"
   override val supportErrorReportSubject: String

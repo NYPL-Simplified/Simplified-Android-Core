@@ -27,8 +27,8 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountFragment
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountListFragment
-import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountListFragmentParameters
+import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Fragment
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
@@ -114,6 +114,7 @@ class TabbedNavigationController private constructor(
                 context = activity,
                 id = R.id.tabBooks,
                 profilesController = profilesController,
+                settingsConfiguration = settingsConfiguration,
                 defaultProvider = accountProviders.defaultProvider
               )
             },
@@ -122,6 +123,7 @@ class TabbedNavigationController private constructor(
                 context = activity,
                 id = R.id.tabHolds,
                 profilesController = profilesController,
+                settingsConfiguration = settingsConfiguration,
                 defaultProvider = accountProviders.defaultProvider
               )
             },
@@ -231,6 +233,7 @@ class TabbedNavigationController private constructor(
       context: Context,
       id: Int,
       profilesController: ProfilesControllerType,
+      settingsConfiguration: BuildConfigurationServiceType,
       defaultProvider: AccountProviderType
     ): Fragment {
       this.logger.debug("[{}]: creating holds fragment", id)
@@ -239,10 +242,16 @@ class TabbedNavigationController private constructor(
        * SIMPLY-2923: Filter by the default account until 'All' view is approved by UX.
        */
 
-      val account = pickDefaultAccount(profilesController, defaultProvider)
+      val filterAccountId =
+        if (settingsConfiguration.showBooksFromAllAccounts) {
+          null
+        } else {
+          pickDefaultAccount(profilesController, defaultProvider).id
+        }
+
       return CatalogFragmentFeed.create(
         CatalogFeedArgumentsLocalBooks(
-          filterAccount = account.id,
+          filterAccount = filterAccountId,
           ownership = CatalogFeedOwnership.CollectedFromAccounts,
           searchTerms = null,
           selection = FeedBooksSelection.BOOKS_FEED_HOLDS,
@@ -256,6 +265,7 @@ class TabbedNavigationController private constructor(
       context: Context,
       id: Int,
       profilesController: ProfilesControllerType,
+      settingsConfiguration: BuildConfigurationServiceType,
       defaultProvider: AccountProviderType
     ): Fragment {
       this.logger.debug("[{}]: creating books fragment", id)
@@ -264,10 +274,16 @@ class TabbedNavigationController private constructor(
        * SIMPLY-2923: Filter by the default account until 'All' view is approved by UX.
        */
 
-      val account = pickDefaultAccount(profilesController, defaultProvider)
+      val filterAccountId =
+        if (settingsConfiguration.showBooksFromAllAccounts) {
+          null
+        } else {
+          pickDefaultAccount(profilesController, defaultProvider).id
+        }
+
       return CatalogFragmentFeed.create(
         CatalogFeedArgumentsLocalBooks(
-          filterAccount = account.id,
+          filterAccount = filterAccountId,
           ownership = CatalogFeedOwnership.CollectedFromAccounts,
           searchTerms = null,
           selection = FeedBooksSelection.BOOKS_FEED_LOANED,
