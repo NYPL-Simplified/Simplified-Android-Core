@@ -432,6 +432,10 @@ class TabbedNavigationController private constructor(
     )
   }
 
+  override fun openCatalogAfterAuthentication() {
+    this.navigator.reset(R.id.tabCatalog, false)
+  }
+
   override fun clearHistory() {
     this.logger.debug("clearing bottom navigator history")
     this.navigator.clearAll()

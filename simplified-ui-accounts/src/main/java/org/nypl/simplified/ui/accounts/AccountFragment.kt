@@ -608,7 +608,9 @@ class AccountFragment : Fragment() {
 
   private fun explicitlyClose() {
     if (this.closing.compareAndSet(false, true)) {
-      this.findNavigationController().popBackStack()
+      this.logger.debug("explicitlyClose: popping backstack")
+      this.findNavigationController()
+        .openCatalogAfterAuthentication()
     }
   }
 
