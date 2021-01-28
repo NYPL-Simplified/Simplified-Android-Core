@@ -362,7 +362,8 @@ class MainActivity :
   }
 
   override fun getActionBar(): ActionBar? {
-    throw UnsupportedOperationException("Use 'getSupportActionBar' instead")
+    this.logger.warn("Use 'getSupportActionBar' instead")
+    return super.getActionBar()
   }
 
   override fun onBackPressed() {
