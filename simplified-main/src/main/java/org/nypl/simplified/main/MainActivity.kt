@@ -521,6 +521,10 @@ class MainActivity :
         override fun openSettingsAccountRegistry() {
           throw UnreachableCodeException()
         }
+
+        override fun openCatalogAfterAuthentication() {
+          throw UnreachableCodeException()
+        }
       }
     )
 

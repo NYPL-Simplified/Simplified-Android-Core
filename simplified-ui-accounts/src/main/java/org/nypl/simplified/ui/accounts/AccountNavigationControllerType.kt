@@ -33,4 +33,10 @@ interface AccountNavigationControllerType : NavigationControllerType {
    */
 
   fun openSettingsAccountRegistry()
+
+  /**
+   * Switch to whichever tab contains the catalog, forcing a reset of the tab.
+   */
+
+  fun openCatalogAfterAuthentication()
 }
