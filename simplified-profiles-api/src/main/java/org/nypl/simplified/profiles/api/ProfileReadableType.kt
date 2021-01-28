@@ -3,7 +3,6 @@ package org.nypl.simplified.profiles.api
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseNonexistentException
-
 import java.io.File
 import java.net.URI
 import java.util.SortedMap
@@ -91,4 +90,14 @@ interface ProfileReadableType : Comparable<ProfileReadableType> {
 
   @Throws(AccountsDatabaseNonexistentException::class)
   fun account(accountId: AccountID): AccountType
+
+  /**
+   * @return The most recently used account, or null.
+   */
+
+  fun mostRecentAccount(): AccountType? {
+    return this.preferences().mostRecentAccount?.let { accountId ->
+      this.account(accountId)
+    }
+  }
 }

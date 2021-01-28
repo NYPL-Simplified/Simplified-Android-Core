@@ -38,6 +38,12 @@ interface ProfilesControllerType {
   fun profiles(): SortedMap<ProfileID, ProfileReadableType>
 
   /**
+   * @return The profile, or null.
+   */
+
+  fun profile(id: ProfileID) = this.profiles()[id]
+
+  /**
    * @return [ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED] if the anonymous profile is enabled
    */
 
