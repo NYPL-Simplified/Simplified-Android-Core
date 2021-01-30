@@ -2,7 +2,7 @@ package org.nypl.simplified.main
 
 import androidx.lifecycle.ViewModel
 import com.io7m.junreachable.UnreachableCodeException
-import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.CompositeDisposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials.Basic
@@ -29,7 +29,7 @@ class MainFragmentViewModel : ViewModel() {
 
   private val logger = LoggerFactory.getLogger(MainFragmentViewModel::class.java)
 
-  private val disposables = mutableListOf<Disposable>()
+  private val disposable = CompositeDisposable()
   private val services = Services.serviceDirectory()
   private val accountProviders by lazy {
     this.services.requireService(AccountProviderRegistryType::class.java)
@@ -42,11 +42,9 @@ class MainFragmentViewModel : ViewModel() {
   }
 
   init {
-    this.disposables.add(
+    this.disposable.addAll(
       this.profilesController.accountEvents()
-        .subscribe(this::onAccountEvent)
-    )
-    this.disposables.add(
+        .subscribe(this::onAccountEvent),
       this.profilesController.profileEvents()
         .subscribe(this::onProfileEvent)
     )
@@ -72,9 +70,7 @@ class MainFragmentViewModel : ViewModel() {
 
   override fun onCleared() {
     super.onCleared()
-
-    // Clear any disposables before the view model is destroyed
-    this.disposables.forEach { it.dispose() }
+    this.disposable.dispose()
   }
 
   private fun onAccountLoginStateChanged(event: AccountEventLoginStateChanged) {
