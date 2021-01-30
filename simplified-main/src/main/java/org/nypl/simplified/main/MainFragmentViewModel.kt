@@ -38,16 +38,16 @@ class MainFragmentViewModel : ViewModel() {
     this.services.requireService(ProfilesControllerType::class.java)
   }
   private val crashlytics by lazy {
-    services.optionalService(CrashlyticsServiceType::class.java)
+    this.services.optionalService(CrashlyticsServiceType::class.java)
   }
 
   init {
     this.disposables.add(
-      profilesController.accountEvents()
+      this.profilesController.accountEvents()
         .subscribe(this::onAccountEvent)
     )
     this.disposables.add(
-      profilesController.profileEvents()
+      this.profilesController.profileEvents()
         .subscribe(this::onProfileEvent)
     )
   }
@@ -74,7 +74,7 @@ class MainFragmentViewModel : ViewModel() {
     super.onCleared()
 
     // Clear any disposables before the view model is destroyed
-    disposables.forEach { it.dispose() }
+    this.disposables.forEach { it.dispose() }
   }
 
   private fun onAccountLoginStateChanged(event: AccountEventLoginStateChanged) {
@@ -161,7 +161,7 @@ class MainFragmentViewModel : ViewModel() {
 
   var clearHistory: Boolean = true
     set(value) {
-      logger.debug("clearHistory set to {}", value)
+      this.logger.debug("clearHistory set to {}", value)
       field = value
     }
 }
