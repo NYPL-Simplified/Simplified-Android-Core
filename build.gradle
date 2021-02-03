@@ -6,7 +6,6 @@ buildscript {
   repositories {
     mavenCentral()
     google()
-    jcenter()
   }
 
   dependencies {
@@ -100,7 +99,6 @@ subprojects { project ->
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     maven { url "http://maven.findawayworld.com/artifactory/libs-release/" }
     maven { url "https://jitpack.io" }
-    jcenter()
   }
 
   // Configure publishing for java projects

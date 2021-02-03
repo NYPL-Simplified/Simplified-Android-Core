@@ -7,5 +7,5 @@ kotlinDslPluginOptions {
 }
 
 repositories {
-  jcenter()
+  mavenCentral()
 }
