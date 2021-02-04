@@ -876,6 +876,8 @@ public final class ReaderActivity extends AppCompatActivity implements
           this.readium_js_api.mediaOverlayPrevious();
         });
     });
+
+    clearWebCache();
   }
 
   @Override
