@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <c:changelog project="LibrarySimplified" xmlns:c="urn:com.io7m.changelog:4.0">
   <c:releases>
-    <c:release date="2021-01-22T13:30:58+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.0">
+    <c:release date="2021-02-10T13:33:27+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.1">
       <c:changes>
         <c:change date="2021-01-14T00:00:00+00:00" summary="Implemented announcements">
           <c:tickets>
@@ -14,7 +14,7 @@
             <c:ticket id="SIMPLY-2403"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-01-22T13:30:58+00:00" summary="Fix a crash when viewing Related Books in My Books">
+        <c:change date="2021-01-22T00:00:00+00:00" summary="Fix a crash when viewing Related Books in My Books">
           <c:tickets>
             <c:ticket id="SIMPLY-3471"/>
           </c:tickets>
