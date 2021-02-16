@@ -29,6 +29,7 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
+import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -77,6 +78,7 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var cacheButton: Button
   private lateinit var cardCreatorFakeLocation: SwitchCompat
   private lateinit var crashButton: Button
+  private lateinit var crashlyticsId: TextView
   private lateinit var customOPDS: Button
   private lateinit var drmTable: TableLayout
   private lateinit var enableR2: SwitchCompat
@@ -92,7 +94,7 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
   private lateinit var uiThread: UIThreadServiceType
-
+  private var crashlytics: CrashlyticsServiceType? = null
   private var adeptExecutor: AdobeAdeptExecutorType? = null
   private var profileEventSubscription: Disposable? = null
 
@@ -117,6 +119,8 @@ class SettingsFragmentDebug : Fragment() {
       services.requireService(BuildConfigurationServiceType::class.java)
     this.adeptExecutor =
       services.optionalService(AdobeAdeptExecutorType::class.java)
+    this.crashlytics =
+      services.optionalService(CrashlyticsServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -159,6 +163,8 @@ class SettingsFragmentDebug : Fragment() {
       view.findViewById(R.id.settingsVersionDevShowOnlySupported)
     this.customOPDS =
       view.findViewById(R.id.settingsVersionDevCustomOPDS)
+    this.crashlyticsId =
+      view.findViewById<TextView>(R.id.settingsVersionCrashlyticsID)
 
     return view
   }
@@ -336,6 +342,22 @@ class SettingsFragmentDebug : Fragment() {
 
     this.forgetAnnouncementsButton.setOnClickListener {
       this.forgetAllAnnouncements()
+    }
+
+    /*
+     * Show the current Crashlytics user ID.
+     */
+
+    val crash = this.crashlytics
+    if (crash != null) {
+      val id = crash.userId
+      if (id == "") {
+        this.crashlyticsId.text = "(Unassigned)"
+      } else {
+        this.crashlyticsId.text = crash.userId
+      }
+    } else {
+      this.crashlyticsId.text = "Crashlytics is not enabled."
     }
   }
 

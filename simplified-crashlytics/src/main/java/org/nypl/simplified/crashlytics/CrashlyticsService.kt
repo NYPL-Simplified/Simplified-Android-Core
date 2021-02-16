@@ -4,9 +4,16 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 
 class CrashlyticsService : CrashlyticsServiceType {
+
+  @Volatile
+  private var userIdMostRecent: String = ""
+
   private val instance by lazy {
     FirebaseCrashlytics.getInstance()
   }
+
+  override val userId: String
+    get() = this.userIdMostRecent
 
   override fun log(message: String) {
     this.instance.log(message)
@@ -21,6 +28,7 @@ class CrashlyticsService : CrashlyticsServiceType {
   }
 
   override fun setUserId(identifier: String) {
+    this.userIdMostRecent = identifier
     this.instance.setUserId(identifier)
   }
 

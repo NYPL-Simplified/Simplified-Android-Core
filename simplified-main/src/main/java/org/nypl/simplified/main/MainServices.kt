@@ -69,6 +69,7 @@ import org.nypl.simplified.cardcreator.CardCreatorService
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.content.api.ContentResolverSane
 import org.nypl.simplified.content.api.ContentResolverType
+import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -604,6 +605,20 @@ internal object MainServices {
       return service
     }
 
+    fun <T : Any> addServiceFromServiceLoaderOptionally(
+      message: String,
+      interfaceType: Class<T>
+    ): T? {
+      publishEvent(message)
+      val service = ServiceLoader.load(interfaceType).firstOrNull()
+      if (service != null) {
+        services.addService(interfaceType, service)
+      } else {
+        logger.debug("no services of type {} available in ServiceLoader", interfaceType)
+      }
+      return service
+    }
+
     addService(
       message = strings.bootingGeneral("login strings"),
       interfaceType = AccountLoginStringResourcesType::class.java,
@@ -640,6 +655,11 @@ internal object MainServices {
       message = strings.bootingGeneral("book revocation strings"),
       interfaceType = BookRevokeStringResourcesType::class.java,
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) }
+    )
+
+    addServiceFromServiceLoaderOptionally(
+      message = strings.bootingGeneral("Crashlytics"),
+      interfaceType = CrashlyticsServiceType::class.java
     )
 
     val lsHTTP =
