@@ -11,6 +11,9 @@ package org.nypl.simplified.crashlytics.api
 
 interface CrashlyticsServiceType {
 
+  /** The most recently configured user ID. */
+  val userId: String
+
   /** Logs a message with the next fatal or non-fatal report. */
   fun log(message: String)
 

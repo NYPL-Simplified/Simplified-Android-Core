@@ -15,6 +15,7 @@ import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
@@ -35,6 +36,7 @@ import org.nypl.simplified.books.borrowing.BorrowRequirements
 import org.nypl.simplified.books.borrowing.BorrowTask
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -124,12 +126,16 @@ class Controller private constructor(
     this.services.requireService(BookRevokeStringResourcesType::class.java)
   private val profileIdleTimer =
     this.services.requireService(ProfileIdleTimerType::class.java)
+  private val crashlytics =
+    this.services.optionalService(CrashlyticsServiceType::class.java)
 
   private val temporaryDirectory =
     File(this.cacheDirectory, "tmp")
 
-  private val profileSelectionSubscription: Disposable
   private val accountRegistrySubscription: Disposable
+  private val accountSubscription: Disposable
+  private val profileSelectionSubscription: Disposable
+  private val profileUpdateSubscription: Disposable
 
   private val logger =
     LoggerFactory.getLogger(Controller::class.java)
@@ -147,10 +153,19 @@ class Controller private constructor(
       ConcurrentHashMap()
 
     this.accountRegistrySubscription =
-      this.accountProviders.events.subscribe { event -> this.onAccountRegistryEvent(event) }
+      this.accountProviders.events.subscribe(this::onAccountRegistryEvent)
+
+    this.accountSubscription =
+      this.accountEvents.ofType(AccountEventUpdated::class.java)
+        .subscribe(this::onAccountUpdated)
+
+    this.profileUpdateSubscription =
+      this.profileEvents.ofType(ProfileUpdated::class.java)
+        .subscribe(this::onProfileUpdated)
+
     this.profileSelectionSubscription =
       this.profileEvents.ofType(ProfileSelection.ProfileSelectionCompleted::class.java)
-        .subscribe { event -> this.onProfileSelectionCompleted(event) }
+        .subscribe(this::onProfileSelectionCompleted)
 
     /*
      * If the anonymous profile is enabled, then ensure that it is "selected" and will
@@ -161,6 +176,14 @@ class Controller private constructor(
       this.logger.debug("initializing anonymous profile")
       this.profileSelect(this.profileCurrent().id)
     }
+  }
+
+  private fun onProfileUpdated(event: ProfileUpdated) {
+    this.updateCrashlytics()
+  }
+
+  private fun onAccountUpdated(event: AccountEventUpdated) {
+    this.updateCrashlytics()
   }
 
   private fun onProfileSelectionCompleted(
@@ -182,6 +205,25 @@ class Controller private constructor(
         .forEach { this.booksSync(it) }
     } catch (e: Exception) {
       this.logger.error("failed to trigger book syncing: ", e)
+    }
+
+    this.updateCrashlytics()
+  }
+
+  private fun updateCrashlytics() {
+    try {
+      val profile = this.profileCurrent()
+      val crash = this.crashlytics
+      if (crash != null) {
+        ControllerCrashlytics.configureCrashlytics(
+          profile = profile,
+          accountProviders = accountProviders,
+          crashlytics = crash
+        )
+      }
+    } catch (e: ProfileNoneCurrentException) {
+      // No profile is current!
+      return
     }
   }
 

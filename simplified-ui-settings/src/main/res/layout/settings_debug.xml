@@ -123,6 +123,33 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
+      android:text="Crashlytics"
+      android:textSize="24sp"
+      android:textStyle="bold" />
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Current Crashlytics User ID"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
+    <TextView
+      android:id="@+id/settingsVersionCrashlyticsID"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:fontFamily="monospace"
+      android:text="PLACEHOLDER"
+      android:textIsSelectable="true"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
       android:text="Testing Features"
       android:textSize="24sp"
       android:textStyle="bold" />
