@@ -37,7 +37,8 @@ import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusEvent
+import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventChanged
+import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventRemoved
 import org.nypl.simplified.books.borrowing.BorrowSubtasks
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -525,21 +526,21 @@ abstract class BooksControllerContract {
       BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
     )
 
-    EventAssertions.isTypeAndMatches(
-      BookStatusEvent::class.java,
+    EventAssertions.isType(
+      BookStatusEventChanged::class.java,
       this.bookEvents,
       0
-    ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_CHANGED) }
-    EventAssertions.isTypeAndMatches(
-      BookStatusEvent::class.java,
+    )
+    EventAssertions.isType(
+      BookStatusEventChanged::class.java,
       this.bookEvents,
       1
-    ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_CHANGED) }
-    EventAssertions.isTypeAndMatches(
-      BookStatusEvent::class.java,
+    )
+    EventAssertions.isType(
+      BookStatusEventChanged::class.java,
       this.bookEvents,
       2
-    ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_CHANGED) }
+    )
   }
 
   /**
@@ -613,21 +614,21 @@ abstract class BooksControllerContract {
     controller.booksSync(account).get()
     Assert.assertEquals(1L, this.bookRegistry.books().size.toLong())
 
-    EventAssertions.isTypeAndMatches(
-      BookStatusEvent::class.java,
+    EventAssertions.isType(
+      BookStatusEventChanged::class.java,
       this.bookEvents,
       0
-    ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_CHANGED) }
-    EventAssertions.isTypeAndMatches(
-      BookStatusEvent::class.java,
+    )
+    EventAssertions.isType(
+      BookStatusEventRemoved::class.java,
       this.bookEvents,
       1
-    ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_REMOVED) }
-    EventAssertions.isTypeAndMatches(
-      BookStatusEvent::class.java,
+    )
+    EventAssertions.isType(
+      BookStatusEventRemoved::class.java,
       this.bookEvents,
       2
-    ) { e -> Assert.assertEquals(e.type(), BookStatusEvent.Type.BOOK_REMOVED) }
+    )
 
     this.bookRegistry.bookOrException(
       BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")

@@ -127,7 +127,7 @@ class CatalogPagedViewHolder(
       is FeedEntryOPDS -> {
         val newBookSubscription =
           this.bookRegistry.bookEvents().subscribe { bookEvent ->
-            if (bookEvent.book() == item.bookID) {
+            if (bookEvent.bookId == item.bookID) {
               this.onBookChanged(bookEvent)
             }
           }
@@ -237,7 +237,7 @@ class CatalogPagedViewHolder(
       this.feedEntry as FeedEntryOPDS
 
     val bookWithStatus =
-      this.bookRegistry.bookOrNull(event.book())
+      this.bookRegistry.bookOrNull(event.bookId)
         ?: this.synthesizeBookWithStatus(previousEntry)
 
     // Update the cached parameters with the feed entry. We'll need this later if the availability

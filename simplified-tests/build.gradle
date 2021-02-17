@@ -8,6 +8,7 @@ android {
 
 dependencies {
 
+  api project(":simplified-accessibility")
   api project(":simplified-accounts-api")
   api project(":simplified-accounts-database")
   api project(":simplified-accounts-database-api")

@@ -20,6 +20,7 @@ import io.reactivex.disposables.Disposable
 import org.joda.time.LocalDateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.simplified.accessibility.AccessibilityDebugging
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.analytics.api.AnalyticsEvent
@@ -89,13 +90,14 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendAnalyticsButton: Button
   private lateinit var sendReportButton: Button
+  private lateinit var showAccessibilityToasts: SwitchCompat
   private lateinit var showErrorButton: Button
   private lateinit var showOnlySupportedBooks: SwitchCompat
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
   private lateinit var uiThread: UIThreadServiceType
-  private var crashlytics: CrashlyticsServiceType? = null
   private var adeptExecutor: AdobeAdeptExecutorType? = null
+  private var crashlytics: CrashlyticsServiceType? = null
   private var profileEventSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,7 +166,9 @@ class SettingsFragmentDebug : Fragment() {
     this.customOPDS =
       view.findViewById(R.id.settingsVersionDevCustomOPDS)
     this.crashlyticsId =
-      view.findViewById<TextView>(R.id.settingsVersionCrashlyticsID)
+      view.findViewById(R.id.settingsVersionCrashlyticsID)
+    this.showAccessibilityToasts =
+      view.findViewById(R.id.settingsVersionDevShowAccessibilityToasts)
 
     return view
   }
@@ -358,6 +362,15 @@ class SettingsFragmentDebug : Fragment() {
       }
     } else {
       this.crashlyticsId.text = "Crashlytics is not enabled."
+    }
+
+    /*
+     * Update accessibility debug settings when the toggle is changed.
+     */
+
+    this.showAccessibilityToasts.isChecked = AccessibilityDebugging.alwaysShowToasts
+    this.showAccessibilityToasts.setOnClickListener {
+      AccessibilityDebugging.alwaysShowToasts = this.showAccessibilityToasts.isChecked
     }
   }
 
