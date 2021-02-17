@@ -20,11 +20,13 @@ import io.reactivex.Observable
 import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.documents.EULAType
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.migration.api.Migrations
@@ -313,6 +315,18 @@ class MainActivity :
         context = this,
         uiThread = services.requireService(UIThreadServiceType::class.java),
         profileController = services.requireService(ProfilesControllerType::class.java)
+      )
+    )
+
+    /*
+     * Register an accessibility controller.
+     */
+
+    this.lifecycle.addObserver(
+      AccessibilityService.create(
+        context = this,
+        bookRegistry = services.requireService(BookRegistryType::class.java),
+        uiThread = services.requireService(UIThreadServiceType::class.java)
       )
     )
   }

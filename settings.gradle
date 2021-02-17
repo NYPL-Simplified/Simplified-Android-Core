@@ -1,5 +1,6 @@
 rootProject.name = 'simplified'
 
+include ':simplified-accessibility'
 include ':simplified-accounts-api'
 include ':simplified-accounts-database'
 include ':simplified-accounts-database-api'

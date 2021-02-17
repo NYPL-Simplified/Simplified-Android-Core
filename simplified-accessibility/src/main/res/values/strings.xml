@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="bookIsDownloading">The book \'%1$s\' has started downloading</string>
+  <string name="bookHasDownloaded">The book \'%1$s\' has finished downloading</string>
+</resources>
