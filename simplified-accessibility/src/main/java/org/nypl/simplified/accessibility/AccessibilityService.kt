@@ -98,17 +98,52 @@ class AccessibilityService private constructor(
         if (!(event.statusPrevious is BookStatus.Downloading)) {
           this.speak(this.strings.bookIsDownloading(book.entry.title))
         } else {
-          // Already downloading.
+          // Nothing to do
         }
       }
 
-      is BookStatus.Held.HeldInQueue,
-      is BookStatus.Held.HeldReady,
-      is BookStatus.FailedRevoke,
-      is BookStatus.FailedDownload,
-      is BookStatus.FailedLoan,
+      is BookStatus.Held.HeldInQueue -> {
+        if (!(event.statusPrevious is BookStatus.Held.HeldInQueue)) {
+          this.speak(this.strings.bookIsOnHold(book.entry.title))
+        } else {
+          // Nothing to do
+        }
+      }
+
       is BookStatus.Holdable,
-      is BookStatus.Loanable,
+      is BookStatus.Loanable -> {
+        if (event.statusPrevious is BookStatus.RequestingRevoke) {
+          this.speak(this.strings.bookReturned(book.entry.title))
+        } else {
+          // Nothing to do
+        }
+      }
+
+      is BookStatus.FailedRevoke -> {
+        if (!(event.statusPrevious is BookStatus.FailedRevoke)) {
+          this.speak(this.strings.bookFailedReturn(book.entry.title))
+        } else {
+          // Nothing to do
+        }
+      }
+
+      is BookStatus.FailedLoan -> {
+        if (!(event.statusPrevious is BookStatus.FailedLoan)) {
+          this.speak(this.strings.bookFailedLoan(book.entry.title))
+        } else {
+          // Nothing to do
+        }
+      }
+
+      is BookStatus.FailedDownload -> {
+        if (!(event.statusPrevious is BookStatus.FailedDownload)) {
+          this.speak(this.strings.bookFailedDownload(book.entry.title))
+        } else {
+          // Nothing to do
+        }
+      }
+
+      is BookStatus.Held.HeldReady,
       is BookStatus.Loaned.LoanedNotDownloaded,
       is BookStatus.RequestingRevoke,
       is BookStatus.RequestingLoan,

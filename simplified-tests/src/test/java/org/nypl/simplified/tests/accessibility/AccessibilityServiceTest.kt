@@ -24,6 +24,7 @@ import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedDownloade
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.mocking.MockAccessibilityStrings
 import org.nypl.simplified.tests.mocking.MockAccessibilityToasts
 import org.nypl.simplified.tests.mocking.MockLifecycle
@@ -43,6 +44,9 @@ class AccessibilityServiceTest {
   private lateinit var strings: MockAccessibilityStrings
   private lateinit var toasts: MockAccessibilityToasts
   private lateinit var uiThread: UIThreadServiceType
+
+  private val failure =
+    TaskResult.fail<Unit>("x", "x", "x") as TaskResult.Failure<Unit>
 
   @Before
   fun setup() {
@@ -258,6 +262,156 @@ class AccessibilityServiceTest {
 
     assertEquals("bookIsDownloading Book", this.toasts.messages.removeAt(0))
     assertEquals("bookHasDownloaded Book", this.toasts.messages.removeAt(0))
+    assertEquals(0, this.toasts.messages.size)
+  }
+
+  /**
+   * Failed loans show the right events.
+   */
+
+  @Test
+  fun testBookFailedLoan() {
+    assertEquals(0, this.toasts.messages.size)
+
+    this.lifecycle.state = Lifecycle.State.STARTED
+    this.service.onViewAvailable(this.lifecycleOwner)
+
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.RequestingDownload(this.book0.id)
+      )
+    )
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.FailedLoan(this.book0.id, failure)
+      )
+    )
+
+    this.service.onViewUnavailable(this.lifecycleOwner)
+
+    assertEquals("bookFailedLoan Book", this.toasts.messages.removeAt(0))
+    assertEquals(0, this.toasts.messages.size)
+  }
+
+  /**
+   * Failed downloads show the right events.
+   */
+
+  @Test
+  fun testBookFailedDownload() {
+    assertEquals(0, this.toasts.messages.size)
+
+    this.lifecycle.state = Lifecycle.State.STARTED
+    this.service.onViewAvailable(this.lifecycleOwner)
+
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.RequestingDownload(this.book0.id)
+      )
+    )
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.FailedDownload(this.book0.id, failure)
+      )
+    )
+
+    this.service.onViewUnavailable(this.lifecycleOwner)
+
+    assertEquals("bookFailedDownload Book", this.toasts.messages.removeAt(0))
+    assertEquals(0, this.toasts.messages.size)
+  }
+
+  /**
+   * Failed returns show the right events.
+   */
+
+  @Test
+  fun testBookFailedReturn() {
+    assertEquals(0, this.toasts.messages.size)
+
+    this.lifecycle.state = Lifecycle.State.STARTED
+    this.service.onViewAvailable(this.lifecycleOwner)
+
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.RequestingRevoke(this.book0.id)
+      )
+    )
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.FailedRevoke(this.book0.id, failure)
+      )
+    )
+
+    this.service.onViewUnavailable(this.lifecycleOwner)
+
+    assertEquals("bookFailedReturn Book", this.toasts.messages.removeAt(0))
+    assertEquals(0, this.toasts.messages.size)
+  }
+
+  /**
+   * Placing a book on hold shows the right events.
+   */
+
+  @Test
+  fun testBookOnHold() {
+    assertEquals(0, this.toasts.messages.size)
+
+    this.lifecycle.state = Lifecycle.State.STARTED
+    this.service.onViewAvailable(this.lifecycleOwner)
+
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.RequestingLoan(this.book0.id, "x")
+      )
+    )
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.Held.HeldInQueue(this.book0.id, null, null, false, null)
+      )
+    )
+
+    this.service.onViewUnavailable(this.lifecycleOwner)
+
+    assertEquals("bookIsOnHold Book", this.toasts.messages.removeAt(0))
+    assertEquals(0, this.toasts.messages.size)
+  }
+
+  /**
+   * Returning a book shows the right events.
+   */
+
+  @Test
+  fun testBookReturn() {
+    assertEquals(0, this.toasts.messages.size)
+
+    this.lifecycle.state = Lifecycle.State.STARTED
+    this.service.onViewAvailable(this.lifecycleOwner)
+
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.RequestingRevoke(this.book0.id)
+      )
+    )
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.Loanable(this.book0.id)
+      )
+    )
+
+    this.service.onViewUnavailable(this.lifecycleOwner)
+
+    assertEquals("bookReturned Book", this.toasts.messages.removeAt(0))
     assertEquals(0, this.toasts.messages.size)
   }
 }
