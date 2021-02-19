@@ -1,0 +1,36 @@
+<fulfillmentToken fulfillmentType="loan" auth="user" xmlns="http://ns.adobe.com/adept">
+  <distributor>urn:uuid:32b23326-4407-421c-bb4f-fbbb7b2ee2b5</distributor>
+  <operatorURL>http://ebookfs.3m.com/fulfillment</operatorURL>
+  <transaction>3m.us_07062223</transaction>
+  <expiration>2015-08-13T21:33:25-05:00</expiration>
+  <resourceItemInfo>
+    <resource>urn:uuid:f587a814-e0ec-4b35-a793-54fdbf82c1d8</resource>
+    <resourceItem>0</resourceItem>
+    <metadata>
+      <dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">Overtime</dc:title>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Tom Holt</dc:creator>
+      <dc:publisher xmlns:dc="http://purl.org/dc/elements/1.1/">Orbit</dc:publisher>
+      <dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/">9780316232982</dc:identifier>
+      <dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">application/epub+zip</dc:format>
+      <dc:language xmlns:dc="http://purl.org/dc/elements/1.1/">en</dc:language>
+    </metadata>
+    <licenseToken>
+      <resource>urn:uuid:f587a814-e0ec-4b35-a793-54fdbf82c1d8</resource>
+      <permissions>
+        <display>
+          <until>2015-09-03T15:33:23-05:00</until>
+        </display>
+        <excerpt>
+          <until>2015-09-03T15:33:23-05:00</until>
+        </excerpt>
+        <print>
+          <until>2015-09-03T15:33:23-05:00</until>
+        </print>
+        <play>
+          <until>2015-09-03T15:33:23-05:00</until>
+        </play>
+      </permissions>
+    </licenseToken>
+  </resourceItemInfo>
+  <hmac>AtbOhKZNAh7iDyErNP4SS8RXagQ=</hmac>
+</fulfillmentToken>
