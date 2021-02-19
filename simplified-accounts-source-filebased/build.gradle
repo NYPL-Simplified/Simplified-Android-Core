@@ -4,7 +4,7 @@ dependencies {
 
   api libraries.io7m_jfunctional
   api libraries.joda_time
-  api libraries.nypl_drm_core
+  api project(':simplified-drm-core')
 
   implementation project(":simplified-accounts-json")
 

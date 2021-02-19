@@ -4,7 +4,7 @@ dependencies {
 
   api libraries.google_guava
   api libraries.joda_time
-  api libraries.nypl_drm_core
+  api project(':simplified-drm-core')
 
   implementation libraries.jackson_databind
   implementation libraries.kotlin_stdlib

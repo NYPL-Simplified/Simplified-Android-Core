@@ -1,0 +1,15 @@
+dependencies {
+  api libraries.slf4j
+  api libraries.junreachable
+  implementation libraries.kotlin_stdlib
+  implementation libraries.readium2_shared
+  testImplementation libraries.junit
+}
+
+android {
+  testOptions {
+    unitTests {
+      includeAndroidResources = true
+    }
+  }
+}

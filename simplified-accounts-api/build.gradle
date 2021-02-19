@@ -9,7 +9,7 @@ dependencies {
   api libraries.io7m_jfunctional
   api libraries.jackson_databind
   api libraries.joda_time
-  api libraries.nypl_drm_core
+  api project(':simplified-drm-core')
   api libraries.nypl_http_api
 
   implementation project(':simplified-opds-core')

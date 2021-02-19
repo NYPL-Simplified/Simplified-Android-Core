@@ -22,7 +22,7 @@ dependencies {
   implementation libraries.androidx_appcompat
   implementation libraries.google_material
   implementation libraries.kotlin_stdlib
-  implementation libraries.nypl_drm_core
+  implementation project(':simplified-drm-core')
   implementation libraries.nypl_readium
   implementation libraries.nypl_readium_js
 

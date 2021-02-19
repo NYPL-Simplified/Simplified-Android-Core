@@ -36,7 +36,7 @@ dependencies {
   implementation project(":simplified-crashlytics")
   implementation libraries.firebase_analytics
   implementation libraries.firebase_crashlytics
-  implementation libraries.nypl_drm_core
+  implementation project(':simplified-drm-core')
   implementation libraries.nypl_findaway
 
   if (nyplNexusDepend) {

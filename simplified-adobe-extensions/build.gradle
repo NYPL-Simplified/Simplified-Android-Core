@@ -2,7 +2,7 @@ dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-files")
 
-  api libraries.nypl_drm_core
+  api project(':simplified-drm-core')
 
   implementation project(":simplified-json-core")
 

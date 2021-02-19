@@ -78,7 +78,7 @@ dependencies {
   implementation libraries.kotlin_stdlib
   implementation libraries.okhttp3_mockwebserver
   implementation libraries.mockito_android
-  implementation libraries.nypl_drm_core
+  implementation project(':simplified-drm-core')
   implementation libraries.nypl_http_api
   implementation libraries.nypl_http_vanilla
   implementation libraries.nypl_http_bearer_token
