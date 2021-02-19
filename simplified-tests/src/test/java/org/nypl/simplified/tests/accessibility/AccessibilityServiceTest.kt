@@ -11,7 +11,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
-import org.nypl.simplified.accessibility.AccessibilityDebugging
 import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accessibility.AccessibilityServiceType
 import org.nypl.simplified.accounts.api.AccountID
@@ -26,7 +25,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.mocking.MockAccessibilityStrings
-import org.nypl.simplified.tests.mocking.MockAccessibilityToasts
+import org.nypl.simplified.tests.mocking.MockAccessibilityEvents
 import org.nypl.simplified.tests.mocking.MockLifecycle
 import org.nypl.simplified.tests.mocking.MockUIThreadService
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -42,7 +41,7 @@ class AccessibilityServiceTest {
   private lateinit var mockAccessService: AccessibilityManager
   private lateinit var service: AccessibilityServiceType
   private lateinit var strings: MockAccessibilityStrings
-  private lateinit var toasts: MockAccessibilityToasts
+  private lateinit var events: MockAccessibilityEvents
   private lateinit var uiThread: UIThreadServiceType
 
   private val failure =
@@ -56,8 +55,8 @@ class AccessibilityServiceTest {
       MockUIThreadService()
     this.strings =
       MockAccessibilityStrings()
-    this.toasts =
-      MockAccessibilityToasts()
+    this.events =
+      MockAccessibilityEvents()
     this.bookRegistry =
       BookRegistry.create()
     this.mockAccessService =
@@ -79,7 +78,7 @@ class AccessibilityServiceTest {
         bookRegistry = this.bookRegistry,
         uiThread = this.uiThread,
         strings = this.strings,
-        toasts = this.toasts
+        events = this.events
       )
 
     this.book0 =
@@ -113,7 +112,7 @@ class AccessibilityServiceTest {
 
   @Test
   fun testBookDownloadedButNotAttached() {
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
 
     this.bookRegistry.update(
       BookWithStatus(
@@ -122,7 +121,31 @@ class AccessibilityServiceTest {
       )
     )
 
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
+  }
+
+  /**
+   * If a book becomes downloaded, but wasn't previously in any particular state, then no
+   * event will be published.
+   */
+
+  @Test
+  fun testBookDownloadedNoPrior() {
+    assertEquals(0, this.events.events.size)
+
+    this.lifecycle.state = Lifecycle.State.STARTED
+    this.service.onViewAvailable(this.lifecycleOwner)
+
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = LoanedDownloaded(this.book0.id, null, false)
+      )
+    )
+
+    this.service.onViewUnavailable(this.lifecycleOwner)
+
+    assertEquals(0, this.events.events.size)
   }
 
   /**
@@ -131,11 +154,17 @@ class AccessibilityServiceTest {
 
   @Test
   fun testBookDownloaded() {
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
 
     this.lifecycle.state = Lifecycle.State.STARTED
     this.service.onViewAvailable(this.lifecycleOwner)
 
+    this.bookRegistry.update(
+      BookWithStatus(
+        book = this.book0,
+        status = BookStatus.Downloading(this.book0.id, 0, 100, "OK")
+      )
+    )
     this.bookRegistry.update(
       BookWithStatus(
         book = this.book0,
@@ -145,35 +174,8 @@ class AccessibilityServiceTest {
 
     this.service.onViewUnavailable(this.lifecycleOwner)
 
-    assertEquals("bookHasDownloaded Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
-  }
-
-  /**
-   * If a book suddenly becomes downloaded, then a toast is shown with the right message.
-   */
-
-  @Test
-  fun testBookDownloadedForced() {
-    assertEquals(0, this.toasts.messages.size)
-
-    this.lifecycle.state = Lifecycle.State.STARTED
-    this.service.onViewAvailable(this.lifecycleOwner)
-
-    this.turnOffScreenReader()
-    AccessibilityDebugging.alwaysShowToasts = true
-
-    this.bookRegistry.update(
-      BookWithStatus(
-        book = this.book0,
-        status = LoanedDownloaded(this.book0.id, null, false)
-      )
-    )
-
-    this.service.onViewUnavailable(this.lifecycleOwner)
-
-    assertEquals("bookHasDownloaded Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals("bookHasDownloaded Book", this.events.events.removeAt(0))
+    assertEquals(0, this.events.events.size)
   }
 
   /**
@@ -182,7 +184,7 @@ class AccessibilityServiceTest {
 
   @Test
   fun testBookDownloadingDownloaded() {
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
 
     this.lifecycle.state = Lifecycle.State.STARTED
     this.service.onViewAvailable(this.lifecycleOwner)
@@ -214,55 +216,9 @@ class AccessibilityServiceTest {
 
     this.service.onViewUnavailable(this.lifecycleOwner)
 
-    assertEquals("bookIsDownloading Book", this.toasts.messages.removeAt(0))
-    assertEquals("bookHasDownloaded Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
-  }
-
-  /**
-   * Book downloads show the right events.
-   */
-
-  @Test
-  fun testBookDownloadingDownloadedForced() {
-    assertEquals(0, this.toasts.messages.size)
-
-    this.lifecycle.state = Lifecycle.State.STARTED
-    this.service.onViewAvailable(this.lifecycleOwner)
-
-    this.turnOffScreenReader()
-    AccessibilityDebugging.alwaysShowToasts = true
-
-    this.bookRegistry.update(
-      BookWithStatus(
-        book = this.book0,
-        status = BookStatus.RequestingDownload(this.book0.id)
-      )
-    )
-    this.bookRegistry.update(
-      BookWithStatus(
-        book = this.book0,
-        status = BookStatus.Downloading(this.book0.id, 0, 100, "OK")
-      )
-    )
-    this.bookRegistry.update(
-      BookWithStatus(
-        book = this.book0,
-        status = BookStatus.Downloading(this.book0.id, 0, 100, "OK")
-      )
-    )
-    this.bookRegistry.update(
-      BookWithStatus(
-        book = this.book0,
-        status = LoanedDownloaded(this.book0.id, null, false)
-      )
-    )
-
-    this.service.onViewUnavailable(this.lifecycleOwner)
-
-    assertEquals("bookIsDownloading Book", this.toasts.messages.removeAt(0))
-    assertEquals("bookHasDownloaded Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals("bookIsDownloading Book", this.events.events.removeAt(0))
+    assertEquals("bookHasDownloaded Book", this.events.events.removeAt(0))
+    assertEquals(0, this.events.events.size)
   }
 
   /**
@@ -271,7 +227,7 @@ class AccessibilityServiceTest {
 
   @Test
   fun testBookFailedLoan() {
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
 
     this.lifecycle.state = Lifecycle.State.STARTED
     this.service.onViewAvailable(this.lifecycleOwner)
@@ -291,8 +247,8 @@ class AccessibilityServiceTest {
 
     this.service.onViewUnavailable(this.lifecycleOwner)
 
-    assertEquals("bookFailedLoan Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals("bookFailedLoan Book", this.events.events.removeAt(0))
+    assertEquals(0, this.events.events.size)
   }
 
   /**
@@ -301,7 +257,7 @@ class AccessibilityServiceTest {
 
   @Test
   fun testBookFailedDownload() {
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
 
     this.lifecycle.state = Lifecycle.State.STARTED
     this.service.onViewAvailable(this.lifecycleOwner)
@@ -321,8 +277,8 @@ class AccessibilityServiceTest {
 
     this.service.onViewUnavailable(this.lifecycleOwner)
 
-    assertEquals("bookFailedDownload Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals("bookFailedDownload Book", this.events.events.removeAt(0))
+    assertEquals(0, this.events.events.size)
   }
 
   /**
@@ -331,7 +287,7 @@ class AccessibilityServiceTest {
 
   @Test
   fun testBookFailedReturn() {
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
 
     this.lifecycle.state = Lifecycle.State.STARTED
     this.service.onViewAvailable(this.lifecycleOwner)
@@ -351,8 +307,8 @@ class AccessibilityServiceTest {
 
     this.service.onViewUnavailable(this.lifecycleOwner)
 
-    assertEquals("bookFailedReturn Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals("bookFailedReturn Book", this.events.events.removeAt(0))
+    assertEquals(0, this.events.events.size)
   }
 
   /**
@@ -361,7 +317,7 @@ class AccessibilityServiceTest {
 
   @Test
   fun testBookOnHold() {
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
 
     this.lifecycle.state = Lifecycle.State.STARTED
     this.service.onViewAvailable(this.lifecycleOwner)
@@ -381,8 +337,8 @@ class AccessibilityServiceTest {
 
     this.service.onViewUnavailable(this.lifecycleOwner)
 
-    assertEquals("bookIsOnHold Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals("bookIsOnHold Book", this.events.events.removeAt(0))
+    assertEquals(0, this.events.events.size)
   }
 
   /**
@@ -391,7 +347,7 @@ class AccessibilityServiceTest {
 
   @Test
   fun testBookReturn() {
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals(0, this.events.events.size)
 
     this.lifecycle.state = Lifecycle.State.STARTED
     this.service.onViewAvailable(this.lifecycleOwner)
@@ -411,7 +367,7 @@ class AccessibilityServiceTest {
 
     this.service.onViewUnavailable(this.lifecycleOwner)
 
-    assertEquals("bookReturned Book", this.toasts.messages.removeAt(0))
-    assertEquals(0, this.toasts.messages.size)
+    assertEquals("bookReturned Book", this.events.events.removeAt(0))
+    assertEquals(0, this.events.events.size)
   }
 }

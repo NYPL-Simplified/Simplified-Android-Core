@@ -209,15 +209,6 @@
       android:enabled="true"
       android:text="Only show supported books (Uncheck to show unsupported books)" />
 
-    <androidx.appcompat.widget.SwitchCompat
-      android:id="@+id/settingsVersionDevShowAccessibilityToasts"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"
-      android:checked="false"
-      android:enabled="true"
-      android:text="Always show accessibility toasts" />
-
     <Button
       android:id="@+id/settingsVersionDevCustomOPDS"
       android:layout_width="match_parent"

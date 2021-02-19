@@ -1,9 +1,6 @@
 package org.nypl.simplified.accessibility
 
-import android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_SPOKEN
 import android.content.Context
-import android.content.Context.ACCESSIBILITY_SERVICE
-import android.view.accessibility.AccessibilityManager
 import androidx.annotation.UiThread
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -13,18 +10,21 @@ import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.slf4j.LoggerFactory
 
 /**
  * The default accessibility service.
  */
 
 class AccessibilityService private constructor(
-  private val accessibilityManager: AccessibilityManager,
   private val bookRegistry: BookRegistryReadableType,
   private val strings: AccessibilityStringsType,
-  private val toasts: AccessibilityToastsType,
+  private val events: AccessibilityEventsType,
   private val uiThread: UIThreadServiceType,
 ) : AccessibilityServiceType {
+
+  private val logger =
+    LoggerFactory.getLogger(AccessibilityService::class.java)
 
   companion object {
     fun create(
@@ -32,28 +32,19 @@ class AccessibilityService private constructor(
       bookRegistry: BookRegistryReadableType,
       uiThread: UIThreadServiceType,
       strings: AccessibilityStringsType = AccessibilityStrings(context.resources),
-      toasts: AccessibilityToastsType = AccessibilityToasts(context)
+      events: AccessibilityEventsType = AccessibilityEvents(context)
     ): AccessibilityServiceType {
-      val accessibilityManager =
-        context.getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
       return AccessibilityService(
-        accessibilityManager = accessibilityManager,
         bookRegistry = bookRegistry,
         strings = strings,
-        toasts = toasts,
+        events = events,
         uiThread = uiThread
       )
     }
   }
 
-  private fun isSpokenFeedbackEnabled(): Boolean {
-    return this.accessibilityManager
-      .getEnabledAccessibilityServiceList(FEEDBACK_SPOKEN)
-      .isNotEmpty()
-  }
-
   override val spokenFeedbackEnabled: Boolean
-    get() = this.isSpokenFeedbackEnabled()
+    get() = this.events.spokenFeedbackEnabled
 
   @Volatile
   private var lifecycleOwner: LifecycleOwner? = null
@@ -62,13 +53,15 @@ class AccessibilityService private constructor(
   @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
   override fun onViewAvailable(owner: LifecycleOwner) {
     this.lifecycleOwner = owner
+    this.logger.debug("subscribing to book registry")
     this.subscriptions.add(this.bookRegistry.bookEvents().subscribe(this::onBookEvent))
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
   override fun onViewUnavailable(owner: LifecycleOwner) {
     this.lifecycleOwner = owner
-    this.subscriptions.dispose()
+    this.logger.debug("unsubscribing from book registry")
+    this.subscriptions.clear()
   }
 
   private fun speak(message: String) {
@@ -82,9 +75,15 @@ class AccessibilityService private constructor(
 
   @UiThread
   private fun speakUI(message: String) {
-    if (this.spokenFeedbackEnabled || AccessibilityDebugging.alwaysShowToasts) {
-      this.toasts.show(message)
-    }
+    this.events.show(message)
+  }
+
+  private fun <C : BookStatus> previousStatusIsNot(
+    event: BookStatusEvent,
+    statusClass: Class<C>
+  ): Boolean {
+    val statusPrevious = event.statusPrevious ?: return false
+    return statusPrevious::class.java != statusClass
   }
 
   private fun onBookEvent(event: BookStatusEvent) {
@@ -92,56 +91,57 @@ class AccessibilityService private constructor(
 
     return when (event.statusNow) {
       is BookStatus.Loaned.LoanedDownloaded ->
-        this.speak(this.strings.bookHasDownloaded(book.entry.title))
+        if (this.previousStatusIsNot(event, BookStatus.Loaned.LoanedDownloaded::class.java)) {
+          this.speak(this.strings.bookHasDownloaded(book.entry.title))
+        } else {
+          // Nothing to do
+        }
 
-      is BookStatus.Downloading -> {
-        if (!(event.statusPrevious is BookStatus.Downloading)) {
+      is BookStatus.Downloading ->
+        if (this.previousStatusIsNot(event, BookStatus.Downloading::class.java)) {
           this.speak(this.strings.bookIsDownloading(book.entry.title))
         } else {
           // Nothing to do
         }
-      }
 
-      is BookStatus.Held.HeldInQueue -> {
-        if (!(event.statusPrevious is BookStatus.Held.HeldInQueue)) {
+      is BookStatus.Held.HeldInQueue ->
+        if (this.previousStatusIsNot(event, BookStatus.Held.HeldInQueue::class.java)) {
           this.speak(this.strings.bookIsOnHold(book.entry.title))
         } else {
           // Nothing to do
         }
-      }
 
       is BookStatus.Holdable,
       is BookStatus.Loanable -> {
-        if (event.statusPrevious is BookStatus.RequestingRevoke) {
+        val notHoldable = this.previousStatusIsNot(event, BookStatus.Holdable::class.java)
+        val notLoanable = this.previousStatusIsNot(event, BookStatus.Loanable::class.java)
+        if (notHoldable && notLoanable) {
           this.speak(this.strings.bookReturned(book.entry.title))
         } else {
           // Nothing to do
         }
       }
 
-      is BookStatus.FailedRevoke -> {
-        if (!(event.statusPrevious is BookStatus.FailedRevoke)) {
+      is BookStatus.FailedRevoke ->
+        if (this.previousStatusIsNot(event, BookStatus.FailedRevoke::class.java)) {
           this.speak(this.strings.bookFailedReturn(book.entry.title))
         } else {
           // Nothing to do
         }
-      }
 
-      is BookStatus.FailedLoan -> {
-        if (!(event.statusPrevious is BookStatus.FailedLoan)) {
+      is BookStatus.FailedLoan ->
+        if (this.previousStatusIsNot(event, BookStatus.FailedLoan::class.java)) {
           this.speak(this.strings.bookFailedLoan(book.entry.title))
         } else {
           // Nothing to do
         }
-      }
 
-      is BookStatus.FailedDownload -> {
-        if (!(event.statusPrevious is BookStatus.FailedDownload)) {
+      is BookStatus.FailedDownload ->
+        if (this.previousStatusIsNot(event, BookStatus.FailedDownload::class.java)) {
           this.speak(this.strings.bookFailedDownload(book.entry.title))
         } else {
           // Nothing to do
         }
-      }
 
       is BookStatus.Held.HeldReady,
       is BookStatus.Loaned.LoanedNotDownloaded,
