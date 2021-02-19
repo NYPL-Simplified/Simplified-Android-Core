@@ -94,8 +94,8 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
   private lateinit var uiThread: UIThreadServiceType
-  private var crashlytics: CrashlyticsServiceType? = null
   private var adeptExecutor: AdobeAdeptExecutorType? = null
+  private var crashlytics: CrashlyticsServiceType? = null
   private var profileEventSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,7 +164,7 @@ class SettingsFragmentDebug : Fragment() {
     this.customOPDS =
       view.findViewById(R.id.settingsVersionDevCustomOPDS)
     this.crashlyticsId =
-      view.findViewById<TextView>(R.id.settingsVersionCrashlyticsID)
+      view.findViewById(R.id.settingsVersionCrashlyticsID)
 
     return view
   }

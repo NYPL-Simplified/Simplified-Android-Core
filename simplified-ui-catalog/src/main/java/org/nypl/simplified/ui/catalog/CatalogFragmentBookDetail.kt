@@ -292,7 +292,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
   private fun onBookChanged(event: BookStatusEvent) {
     val bookWithStatus =
-      this.bookRegistry.bookOrNull(event.book())
+      this.bookRegistry.bookOrNull(event.bookId)
         ?: synthesizeBookWithStatus(this.parameters.feedEntry)
 
     // Update the cached parameters with the feed entry. We'll need this later if the availability

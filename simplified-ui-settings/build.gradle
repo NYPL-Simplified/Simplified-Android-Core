@@ -7,6 +7,7 @@ dependencies {
   api libraries.androidx_preference
   api libraries.androidx_recyclerview
 
+  implementation project(":simplified-accessibility")
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-android-ktx")

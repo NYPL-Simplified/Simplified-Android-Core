@@ -186,7 +186,7 @@ class BorrowLoanCreateTest {
 
   private fun recordBookEvent(event: BookStatusEvent) {
     this.logger.debug("event: {}", event)
-    val status = this.bookRegistry.bookStatusOrNull(event.book())!!
+    val status = event.statusNow!!
     this.logger.debug("status: {}", status)
     this.bookStates.add(status)
     this.bookEvents.add(event)

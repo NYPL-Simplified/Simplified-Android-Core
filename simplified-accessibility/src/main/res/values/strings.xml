@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="bookFailedDownload">@string/bookFailedLoan</string>
+  <string name="bookFailedLoan">The book \'%1$s\' could not be downloaded</string>
+  <string name="bookFailedReturn">The book \'%1$s\' could not be returned</string>
+  <string name="bookHasDownloaded">The book \'%1$s\' has finished downloading</string>
+  <string name="bookIsDownloading">The book \'%1$s\' has started downloading</string>
+  <string name="bookIsOnHold">A reservation has been placed for the book \'%1$s\'</string>
+  <string name="bookReturned">The book \'%1$s\' has been successfully returned</string>
+</resources>
