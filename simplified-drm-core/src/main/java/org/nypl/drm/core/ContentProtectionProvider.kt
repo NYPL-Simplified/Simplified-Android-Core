@@ -5,6 +5,5 @@ import org.readium.r2.shared.publication.ContentProtection
 
 interface ContentProtectionProvider {
 
-    fun create(context: Context): ContentProtection?
-
+  fun create(context: Context): ContentProtection?
 }
