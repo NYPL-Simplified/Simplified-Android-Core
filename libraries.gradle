@@ -51,7 +51,7 @@ ext.versions = [
   nypl_drm_adobe                : '1.1.27',
   nypl_drm_core                 : '1.1.2',
   nypl_findaway                 : '6.0.0',
-  nypl_http                     : '0.0.19',
+  nypl_http                     : '0.0.20',
   nypl_overdrive                : '1.0.3',
   nypl_pdf                      : '0.1.0',
   nypl_readium                  : '0.30.0',
