@@ -85,6 +85,9 @@ android {
     pickFirst 'lib/x86/libc++_shared.so'
     pickFirst 'lib/arm64-v8a/libc++_shared.so'
     pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+
+    // Provided by both simplified-drm-core and nypl-drm-adobe
+    pickFirst 'org/nypl/drm/core/AdobeAdeptJoinAccountsInjected.js'
   }
   signingConfigs {
     release {
