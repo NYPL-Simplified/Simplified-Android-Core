@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+  <string name="app_name">SR2 Demo</string>
+  <string name="text_pick_epub">Please select an EPUB</string>
+  <string name="btn_browse_files">Browse files</string>
+</resources>

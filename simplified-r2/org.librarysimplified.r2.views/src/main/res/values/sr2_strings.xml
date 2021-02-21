@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="bookmarkEnd">At the end of the chapter.</string>
+  <string name="bookmarkProgressPercent">%1$d%% through chapter.</string>
+  <string name="placeholder">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eu leo laoreet, mattis augue ac, placerat nibh. Sed odio nunc, tempor sed justo eu, condimentum eleifend lectus. Sed at leo iaculis, euismod neque nec, rhoncus diam. Pellentesque molestie hendrerit massa ac cursus. Proin sed feugiat mi. Morbi sollicitudin, nulla vitae eleifend laoreet, ligula dolor pretium nunc, ac feugiat nibh sapien vitae augue. Pellentesque ut sollicitudin magna. Ut ac purus pellentesque, venenatis turpis id, auctor augue. Aliquam bibendum lectus id urna placerat auctor. Nullam faucibus molestie neque. Etiam in ligula eget tellus dictum ullamcorper volutpat vel erat. Mauris ut nulla urna.</string>
+  <string name="progress_page">Page %1$d of %2$d</string>
+  <string name="progress_percent">%1$d%%</string>
+  <string name="readerAccessAddBookmark">Create a bookmark for the current page</string>
+  <string name="readerAccessSettings">Open the settings dialog</string>
+  <string name="readerAccessTOC">Open the table of contents and bookmarks screen</string>
+  <string name="readerAddBookmark">Add A Bookmark</string>
+  <string name="readerSettings">Settings</string>
+  <string name="readerTableOfContents">Table Of Contents &amp; Bookmarks</string>
+  <string name="tocAccessBookmarkDelete">Delete A Bookmark</string>
+  <string name="tocBookmarkDeleteMessage">Are you sure you want to delete this bookmark?</string>
+  <string name="tocBookmarkDelete">Delete</string>
+  <string name="tocBookmarks">Bookmarks</string>
+  <string name="tocChapterIndexed">%1$d. %2$s</string>
+  <string name="tocTitle">Table Of Contents</string>
+</resources>

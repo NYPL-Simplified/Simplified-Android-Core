@@ -1,0 +1,6 @@
+dependencies {
+  api libraries.kotlinStdlib
+
+  implementation libraries.androidXAnnotation
+  implementation libraries.slf4j
+}

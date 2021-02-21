@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+    android:id="@+id/readerMenuSettings"
+    android:icon="@drawable/sr2_settings"
+    android:contentDescription="@string/readerAccessSettings"
+    android:title="@string/readerSettings"
+    app:showAsAction="ifRoom" />
+  <item
+    android:id="@+id/readerMenuAddBookmark"
+    android:icon="@drawable/sr2_bookmark_inactive"
+    android:contentDescription="@string/readerAccessAddBookmark"
+    android:title="@string/readerAddBookmark"
+    app:showAsAction="ifRoom" />
+  <item
+    android:id="@+id/readerMenuTOC"
+    android:icon="@drawable/sr2_toc"
+    android:contentDescription="@string/readerAccessTOC"
+    android:title="@string/readerTableOfContents"
+    app:showAsAction="ifRoom" />
+</menu>
