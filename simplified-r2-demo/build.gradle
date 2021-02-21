@@ -1,0 +1,11 @@
+dependencies {
+  api libraries.androidx_appcompat
+  api libraries.kotlin_stdlib
+
+  api libraries.slf4j
+  api libraries.logback_android
+
+  api project(":simplified-r2-api")
+  api project(":simplified-r2-vanilla")
+  api project(":simplified-r2-views")
+}

@@ -1,0 +1,14 @@
+dependencies {
+  api libraries.kotlin_stdlib
+  api libraries.kotlin_coroutines
+  api libraries.nano_httpd
+  api libraries.nano_httpd_nanolets
+  api libraries.readium2_shared
+  api libraries.readium2_streamer
+
+  implementation libraries.androidx_annotation
+  implementation libraries.slf4j
+
+  api project(":simplified-r2-api")
+  api project(":simplified-ui-thread-api")
+}

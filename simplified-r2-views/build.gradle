@@ -1,0 +1,16 @@
+dependencies {
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_core
+  implementation libraries.androidx_lifecycle
+  implementation libraries.androidx_lifecycle_viewmodel
+  implementation libraries.androidx_viewpager2
+  implementation libraries.google_material
+  implementation libraries.kotlin_stdlib
+  implementation libraries.slf4j
+  implementation libraries.readium2_shared
+  implementation libraries.readium2_streamer
+
+  api project(":simplified-r2-api")
+  api project(":simplified-ui-thread-api")
+}

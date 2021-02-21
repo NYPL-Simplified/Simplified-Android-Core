@@ -1,0 +1,8 @@
+dependencies {
+  api libraries.google_guava
+  api libraries.joda_time
+  api libraries.kotlin_stdlib
+  api libraries.rxjava2
+  api libraries.readium2_shared
+  api libraries.readium2_streamer
+}

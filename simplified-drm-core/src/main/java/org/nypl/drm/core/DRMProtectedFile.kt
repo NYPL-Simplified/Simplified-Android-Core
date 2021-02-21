@@ -1,6 +1,9 @@
 package org.nypl.drm.core
 
-import java.io.File
 
-class DRMProtectedFile(file: File, val adobeRightsFile: File?) :
-  org.readium.r2.shared.util.File(path = file.path)
+// class DRMProtectedFile(file: File, val adobeRightsFile: File?) :
+//   FileAsset(file)
+//
+
+// FIXME: ContentProtection now takes a PublicationAsset instead of
+//        a File/FileAsset
