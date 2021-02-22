@@ -25,11 +25,13 @@ internal class SR2ReaderViewModel : ViewModel() {
    */
 
   val ioExecutor: ListeningExecutorService =
-    MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1) { runnable ->
-      val thread = Thread(runnable)
-      thread.name = "org.librarysimplified.r2.io"
-      thread
-    })
+    MoreExecutors.listeningDecorator(
+      Executors.newFixedThreadPool(1) { runnable ->
+        val thread = Thread(runnable)
+        thread.name = "org.librarysimplified.r2.io"
+        thread
+      }
+    )
 
   override fun onCleared() {
     super.onCleared()
@@ -51,7 +53,6 @@ internal class SR2ReaderViewModel : ViewModel() {
     configuration: SR2ControllerConfiguration,
     controllers: SR2ControllerProviderType
   ): ListenableFuture<SR2ControllerReference> {
-
     /*
      * If there's an existing controller, then return it.
      */
@@ -59,10 +60,12 @@ internal class SR2ReaderViewModel : ViewModel() {
     synchronized(this.controllerLock) {
       val existing = this.controller
       if (existing != null) {
-        return Futures.immediateFuture(SR2ControllerReference(
-          controller = existing,
-          isFirstStartup = false
-        ))
+        return Futures.immediateFuture(
+          SR2ControllerReference(
+            controller = existing,
+            isFirstStartup = false
+          )
+        )
       }
     }
 
@@ -82,16 +85,19 @@ internal class SR2ReaderViewModel : ViewModel() {
           synchronized(this.controllerLock) {
             this.controller = newController
           }
-          refFuture.set(SR2ControllerReference(
-            controller = newController,
-            isFirstStartup = true
-          ))
+          refFuture.set(
+            SR2ControllerReference(
+              controller = newController,
+              isFirstStartup = true
+            )
+          )
         } catch (e: Throwable) {
           this.logger.error("unable to create controller: ", e)
           refFuture.setException(e)
         }
       },
-      MoreExecutors.directExecutor())
+      MoreExecutors.directExecutor()
+    )
 
     return refFuture
   }

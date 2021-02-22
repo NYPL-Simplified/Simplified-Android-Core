@@ -63,7 +63,7 @@ class SR2ReaderFragment(
       when (className) {
         SR2ReaderFragment::javaClass.name -> SR2ReaderFragment(parameters)
         else -> super.instantiate(classLoader, className)
-    }
+      }
   }
 
   private lateinit var controllerHost: SR2ControllerHostType
@@ -171,7 +171,8 @@ class SR2ReaderFragment(
         Throwable::class.java,
         Function<Throwable, Unit> { e ->
           this.onBookOpenFailed(e!!)
-        }, MoreExecutors.directExecutor()
+        },
+        MoreExecutors.directExecutor()
       )
   }
 

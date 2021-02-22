@@ -51,7 +51,8 @@ internal class SR2TOCChapterAdapter(
       this.resources.getString(
         R.string.tocChapterIndexed,
         chapter.chapterIndex + 1,
-        chapter.title)
+        chapter.title
+      )
   }
 
   fun setChapters(chaptersNow: List<SR2BookChapter>) {

@@ -1,6 +1,5 @@
 package org.nypl.drm.core
 
-
 // class DRMProtectedFile(file: File, val adobeRightsFile: File?) :
 //   FileAsset(file)
 //

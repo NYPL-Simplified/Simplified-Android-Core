@@ -43,7 +43,8 @@ internal class SR2TOCBookmarksFragment : Fragment() {
         },
         onBookmarkDeleteRequested = {
           this.onBookmarkDeleteRequested(it)
-        })
+        }
+      )
   }
 
   override fun onCreateView(
@@ -82,7 +83,8 @@ internal class SR2TOCBookmarksFragment : Fragment() {
 
     this.bookmarkSubscriptions.add(
       this.controller.events.ofType(SR2BookmarkEvent::class.java)
-        .subscribe { this.reloadBookmarks() })
+        .subscribe { this.reloadBookmarks() }
+    )
 
     this.reloadBookmarks()
   }
@@ -118,9 +120,12 @@ internal class SR2TOCBookmarksFragment : Fragment() {
   private fun onBookmarkSelected(bookmark: SR2Bookmark) {
     this.controller.submitCommand(SR2Command.OpenChapter(bookmark.locator))
 
-    UIThread.runOnUIThreadDelayed(Runnable {
-      this.controllerHost.onNavigationClose()
-    }, 1_000L)
+    UIThread.runOnUIThreadDelayed(
+      Runnable {
+        this.controllerHost.onNavigationClose()
+      },
+      1_000L
+    )
   }
 
   private fun onBookmarkDeleteRequested(bookmark: SR2Bookmark) {

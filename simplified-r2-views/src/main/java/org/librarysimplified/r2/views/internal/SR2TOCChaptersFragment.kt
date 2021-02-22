@@ -30,7 +30,8 @@ internal class SR2TOCChaptersFragment : Fragment() {
     this.chapterAdapter =
       SR2TOCChapterAdapter(
         resources = this.resources,
-        onChapterSelected = { this.onChapterSelected(it) })
+        onChapterSelected = { this.onChapterSelected(it) }
+      )
   }
 
   override fun onCreateView(
@@ -65,13 +66,20 @@ internal class SR2TOCChaptersFragment : Fragment() {
   }
 
   private fun onChapterSelected(chapter: SR2BookChapter) {
-    this.controller.submitCommand(SR2Command.OpenChapter(SR2LocatorPercent(
-      chapterIndex = chapter.chapterIndex,
-      chapterProgress = 0.0
-    )))
+    this.controller.submitCommand(
+      SR2Command.OpenChapter(
+        SR2LocatorPercent(
+          chapterIndex = chapter.chapterIndex,
+          chapterProgress = 0.0
+        )
+      )
+    )
 
-    UIThread.runOnUIThreadDelayed(Runnable {
-      this.controllerHost.onNavigationClose()
-    }, 1_000L)
+    UIThread.runOnUIThreadDelayed(
+      Runnable {
+        this.controllerHost.onNavigationClose()
+      },
+      1_000L
+    )
   }
 }

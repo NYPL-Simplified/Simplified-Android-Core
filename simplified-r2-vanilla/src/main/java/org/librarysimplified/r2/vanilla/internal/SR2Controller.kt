@@ -97,8 +97,9 @@ internal class SR2Controller private constructor(
         throw IOException("Failed to open EPUB", it)
       }
 
-      if (publication.isRestricted)
+      if (publication.isRestricted) {
         throw IOException("Failed to unlock EPUB", publication.protectionError)
+      }
 
       this.logger.debug("publication title: {}", publication.metadata.title)
       val port = this.fetchUnusedHTTPPort()
@@ -351,7 +352,6 @@ internal class SR2Controller private constructor(
     if (webViewRef != null) {
       this.configuration.uiExecutor.invoke { exec.invoke(webViewRef) }
     } else {
-
       /*
        * If the web view isn't connected, submit a delay and then submit a retry of the
        * existing command. Either the web view will be reconnected shortly, or the controller
@@ -360,11 +360,13 @@ internal class SR2Controller private constructor(
 
       this.eventSubject.onNext(SR2WebViewInaccessible("No web view is connected"))
       this.submitCommandActual(SR2CommandInternalDelay(timeMilliseconds = 1_000L))
-      this.submitCommandActual(command.copy(
-        id = UUID.randomUUID(),
-        submitted = DateTime.now(),
-        isRetryOf = command.id
-      ))
+      this.submitCommandActual(
+        command.copy(
+          id = UUID.randomUUID(),
+          submitted = DateTime.now(),
+          isRetryOf = command.id
+        )
+      )
     }
   }
 
@@ -483,7 +485,8 @@ internal class SR2Controller private constructor(
             locator = SR2LocatorPercent(
               chapterIndex = chapterIndex,
               chapterProgress = chapterProgress
-            ))
+            )
+          )
         }
       }
 

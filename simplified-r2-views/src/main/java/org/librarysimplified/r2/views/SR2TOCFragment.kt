@@ -42,7 +42,9 @@ class SR2TOCFragment : Fragment() {
           SR2TOCPage(
             title = this.resources.getString(R.string.tocBookmarks),
             fragmentConstructor = { SR2TOCBookmarksFragment() }
-          )))
+          )
+        )
+      )
 
     this.viewPager.adapter = this.viewPagerAdapter
 

@@ -24,7 +24,6 @@ internal class SR2WebViewConnection(
       jsReceiver: SR2JavascriptAPIReceiverType,
       commandQueue: SR2ControllerCommandQueueType
     ): SR2WebViewConnection {
-
       val webViewClient = SR2WebViewClient()
       val webChromeClient = SR2WebChromeClient()
 
