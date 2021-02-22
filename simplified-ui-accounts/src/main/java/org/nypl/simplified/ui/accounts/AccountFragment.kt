@@ -477,11 +477,13 @@ class AccountFragment : Fragment() {
   private fun configureReportIssue() {
     val email = this.account.provider.supportEmail
     if (email != null) {
+      val address = email.removePrefix("mailto:")
+
       this.reportIssueGroup.visibility = View.VISIBLE
-      this.reportIssueEmail.text = email.removePrefix("mailto:")
+      this.reportIssueEmail.text = address
       this.reportIssueGroup.setOnClickListener {
         val emailIntent =
-          Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null))
+          Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", address, null))
         val chosenIntent =
           Intent.createChooser(emailIntent, this.resources.getString(R.string.accountReportIssue))
 
@@ -491,7 +493,7 @@ class AccountFragment : Fragment() {
           this.logger.error("unable to start activity: ", e)
           val context = this.requireContext()
           AlertDialog.Builder(context)
-            .setMessage(context.getString(R.string.accountReportFailed, email))
+            .setMessage(context.getString(R.string.accountReportFailed, address))
             .create()
             .show()
         }
