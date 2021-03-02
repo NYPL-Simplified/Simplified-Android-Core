@@ -52,16 +52,24 @@ class ReaderViewerR2 : ViewerProviderType {
     book: Book,
     format: BookFormat
   ) {
-    val bookId = book.id
-    val file = (format as BookFormat.BookFormatEPUB).file!!
-    val entry = FeedEntry.FeedEntryOPDS(book.account, book.entry)
+    val bookId =
+      book.id
+    val file =
+      (format as BookFormat.BookFormatEPUB).file!!
+    val entry =
+      FeedEntry.FeedEntryOPDS(book.account, book.entry)
 
-    ReaderActivity.startActivity(
-      accountId = book.account,
-      bookId = bookId,
+    val parameters =
+      Reader2ActivityParameters(
+        accountId = book.account,
+        bookId = bookId,
+        file = file,
+        entry = entry
+      )
+
+    Reader2Activity.startActivity(
       context = activity,
-      entry = entry,
-      file = file
+      parameters = parameters
     )
   }
 }

@@ -62,12 +62,12 @@
       android:exported="false" />
 
     <activity
-      android:name="org.nypl.simplified.viewer.epub.readium2.ReaderActivity"
+      android:name="org.nypl.simplified.viewer.epub.readium2.Reader2Activity"
       android:configChanges="orientation|keyboardHidden"
       android:exported="false"
       android:parentActivityName="org.nypl.simplified.main.MainActivity"
       android:screenOrientation="portrait"
-      android:theme="@style/VanillaTheme_ActionBar" />
+      android:theme="@style/VanillaTheme_NoActionBar" />
 
     <activity
       android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
