@@ -102,7 +102,7 @@ object Reports {
       val compressedFiles =
         files.mapNotNull(this::compressFile)
       val contentUris =
-        compressedFiles.map { file -> this.mapFileToContentURI(context, file) }
+        compressedFiles.toSet().map { file -> this.mapFileToContentURI(context, file) }
 
       this.logger.debug("attaching {} files", compressedFiles.size)
 
@@ -112,7 +112,7 @@ object Reports {
           this.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
           this.putExtra(Intent.EXTRA_SUBJECT, subject)
           this.putExtra(Intent.EXTRA_TEXT, body)
-          this.putExtra(Intent.EXTRA_STREAM, arrayListOf(contentUris))
+          this.putExtra(Intent.EXTRA_STREAM, ArrayList(contentUris))
           this.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(intent)
