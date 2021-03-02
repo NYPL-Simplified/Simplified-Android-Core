@@ -391,8 +391,21 @@ class ProfileAccountLoginTask(
         "Must have returned at least one activation"
       )
 
+      /*
+       * Find the newly activated credentials (the one whose user id is not associated with any
+       * account). There should only be one, and it should be the last in the list, but this check
+       * makes sure.
+       */
+
+      val newPostCredentials = postCredentials.last { credentials ->
+        this.profile.accounts().values.none { account ->
+          account.loginState.credentials?.adobeCredentials?.postActivationCredentials?.userID ==
+            credentials.userID
+        }
+      }
+
       this.credentials = this.credentials.withAdobePreActivationCredentials(
-        adobePreCredentials.copy(postActivationCredentials = postCredentials.first())
+        adobePreCredentials.copy(postActivationCredentials = newPostCredentials)
       )
       this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivated)
     } catch (e: ExecutionException) {
