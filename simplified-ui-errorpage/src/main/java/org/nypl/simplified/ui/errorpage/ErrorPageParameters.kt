@@ -1,6 +1,7 @@
 package org.nypl.simplified.ui.errorpage
 
 import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import java.io.Serializable
 import java.util.SortedMap
 
@@ -40,4 +41,42 @@ data class ErrorPageParameters(
    */
 
   val taskSteps: List<TaskStep>
-) : Serializable
+) : Serializable {
+  /**
+   * The text of an error report to send to technical support, consisting of the body, attributes,
+   * and task steps.
+   */
+
+  val report get() =
+    listOf(this.body, this.reportAttributes, this.reportTaskSteps)
+      .filterNot { part -> part.isNullOrEmpty() }
+      .joinToString("\n\n")
+
+  /**
+   * The attributes, formatted as a string for use in an error report.
+   */
+
+  val reportAttributes get() =
+    this.attributes
+      .map { entry -> "${entry.key}:\n${entry.value}" }
+      .joinToString("\n\n")
+
+  /**
+   * The task steps, formatted as a string for use in an error report.
+   */
+
+  val reportTaskSteps get() =
+    this.taskSteps
+      .mapIndexed { index, step ->
+        val icon = if (step.resolution is TaskStepResolution.TaskStepFailed) "❌" else "✔️"
+        val stepNumber = index + 1
+        val description = step.description
+        val resolution = step.resolution.message
+
+        "$stepNumber. $description\n$icon $resolution"
+      }
+      .joinToString("\n\n")
+      .let {
+        if (it.isNotEmpty()) "Steps:\n$it" else it
+      }
+}

@@ -573,7 +573,7 @@ class MainActivity :
       context = this,
       address = parameters.emailAddress,
       subject = parameters.subject,
-      body = parameters.body
+      body = parameters.report
     )
   }
 
