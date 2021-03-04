@@ -10,5 +10,6 @@ data class Reader2ActivityParameters(
   val accountId: AccountID,
   val bookId: BookID,
   val file: File,
+  val adobeRightsFile: File?,
   val entry: FeedEntry.FeedEntryOPDS
 ) : Serializable
