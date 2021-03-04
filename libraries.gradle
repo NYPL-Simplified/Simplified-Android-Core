@@ -55,7 +55,7 @@ ext.versions = [
   nypl_overdrive                : '1.0.3',
   nypl_pdf                      : '0.1.0',
   nypl_readium                  : '0.30.0',
-  nypl_readium2                 : '0.0.7',
+  nypl_readium2                 : '0.0.8-SNAPSHOT',
   okhttp3                       : '4.8.1',
   pandora_bottom_navigator      : '1.8',
   picasso                       : '2.71828',

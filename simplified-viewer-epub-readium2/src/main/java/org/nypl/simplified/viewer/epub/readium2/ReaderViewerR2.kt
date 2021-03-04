@@ -34,11 +34,7 @@ class ReaderViewerR2 : ViewerProviderType {
       is BookFormat.BookFormatAudioBook ->
         false
       is BookFormat.BookFormatEPUB ->
-        when (format.drmInformation) {
-          is BookDRMInformation.ACS -> false
-          is BookDRMInformation.LCP -> true
-          BookDRMInformation.None -> true
-        }
+        true
     }
   }
 
@@ -59,9 +55,17 @@ class ReaderViewerR2 : ViewerProviderType {
     val entry =
       FeedEntry.FeedEntryOPDS(book.account, book.entry)
 
+    val adobeRightsFile =
+      when (val drm = format.drmInformation) {
+        is BookDRMInformation.ACS -> drm.rights?.first
+        is BookDRMInformation.LCP -> null
+        BookDRMInformation.None -> null
+      }
+
     val parameters =
       Reader2ActivityParameters(
         accountId = book.account,
+        adobeRightsFile = adobeRightsFile,
         bookId = bookId,
         file = file,
         entry = entry

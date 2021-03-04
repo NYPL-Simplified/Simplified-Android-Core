@@ -39,6 +39,8 @@ import org.librarysimplified.r2.views.SR2ReaderViewModel
 import org.librarysimplified.r2.views.SR2ReaderViewModelFactory
 import org.librarysimplified.r2.views.SR2TOCFragment
 import org.librarysimplified.services.api.Services
+import org.nypl.drm.core.ContentProtectionProvider
+import org.nypl.drm.core.DRMProtectedFile
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
@@ -49,6 +51,7 @@ import org.readium.r2.shared.publication.asset.FileAsset
 import org.readium.r2.streamer.Streamer
 import org.readium.r2.streamer.parser.epub.EpubParser
 import org.slf4j.LoggerFactory
+import java.util.ServiceLoader
 import java.util.concurrent.ExecutionException
 
 /**
@@ -85,6 +88,7 @@ class Reader2Activity : AppCompatActivity() {
   private lateinit var account: AccountType
   private lateinit var analyticsService: AnalyticsType
   private lateinit var bookmarkService: ReaderBookmarkServiceType
+  private lateinit var contentProtectionProviders: List<ContentProtectionProvider>
   private lateinit var parameters: Reader2ActivityParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var readerBookmarks: ReaderBookmarkServiceType
@@ -117,6 +121,14 @@ class Reader2Activity : AppCompatActivity() {
       services.requireService(ReaderBookmarkServiceType::class.java)
     this.uiThread =
       services.requireService(UIThreadServiceType::class.java)
+    this.contentProtectionProviders =
+      ServiceLoader.load(ContentProtectionProvider::class.java)
+        .toList()
+
+    this.logger.debug("loaded {} content protection providers", this.contentProtectionProviders.size)
+    this.contentProtectionProviders.forEachIndexed { index, provider ->
+      this.logger.debug("[{}] available provider {}", index, provider.javaClass.canonicalName)
+    }
 
     val intent =
       this.intent ?: throw IllegalStateException("ReaderActivity2 requires an intent")
@@ -179,20 +191,49 @@ class Reader2Activity : AppCompatActivity() {
   private fun startReader() {
     this.uiThread.checkIsUIThread()
 
+    /*
+     * Instantiate any content protections that might be needed for DRM...
+     */
+
+    val contentProtections =
+      this.contentProtectionProviders.mapNotNull { provider ->
+        this.logger.debug("instantiating content protection provider {}", provider.javaClass.canonicalName)
+        provider.create(this)
+      }
+
     val streamer =
       Streamer(
         context = this,
         parsers = listOf(EpubParser()),
+        contentProtections = contentProtections,
         ignoreDefaultParsers = true
       )
 
+    /*
+     * Load the most recently configured theme from the profile's preferences.
+     */
+
     val initialTheme =
-      Reader2Themes.toSR2(profilesController.profileCurrent().preferences().readerPreferences)
+      Reader2Themes.toSR2(
+        this.profilesController.profileCurrent()
+          .preferences()
+          .readerPreferences
+      )
+
+    val bookFile =
+      if (this.parameters.adobeRightsFile != null) {
+        DRMProtectedFile(
+          fileAsset = FileAsset(this.parameters.file),
+          adobeRightsFile = this.parameters.adobeRightsFile
+        )
+      } else {
+        FileAsset(this.parameters.file)
+      }
 
     val readerParameters =
       SR2ReaderParameters(
         streamer = streamer,
-        bookFile = FileAsset(this.parameters.file),
+        bookFile = bookFile,
         theme = initialTheme,
         controllers = SR2Controllers()
       )
