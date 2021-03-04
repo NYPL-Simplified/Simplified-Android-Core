@@ -343,8 +343,9 @@ class MainActivity :
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
     if (configurationService.showAgeGateUi &&
-      this.profilesController.profileCurrent().preferences().dateOfBirth == null) {
-        this.showAgeGate()
+      this.profilesController.profileCurrent().preferences().dateOfBirth == null
+    ) {
+      this.showAgeGate()
     }
   }
 
