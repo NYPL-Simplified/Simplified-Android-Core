@@ -7,7 +7,7 @@
   <string name="accountCardCreatorSignUp">Create Card</string>
   <string name="accountCOPPADeleteBooks">Delete books?</string>
   <string name="accountCOPPADeleteBooksConfirm">Changing your age will remove all books downloaded from the current account.</string>
-  <string name="accountCOPPAOver13">I am over 13</string>
+  <string name="accountAgeVerification">Age Verification</string>
   <string name="accountCreationFailed">Account creation failed</string>
   <string name="accountCreationFailedMessage">The account could not be created.</string>
   <string name="accountDelete">Delete</string>

@@ -55,8 +55,6 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
 import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.profiles.api.ProfileDateOfBirth
-import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
@@ -113,9 +111,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var configurationService: BuildConfigurationServiceType
-  private lateinit var feedCOPPAGate: ViewGroup
-  private lateinit var feedCOPPAOver13: Button
-  private lateinit var feedCOPPAUnder13: Button
   private lateinit var feedEmpty: ViewGroup
   private lateinit var feedError: ViewGroup
   private lateinit var feedErrorDetails: Button
@@ -145,6 +140,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
+  private lateinit var ageGateDialog: AgeGateDialog
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
@@ -200,8 +196,6 @@ class CatalogFragmentFeed : Fragment() {
     val layout =
       inflater.inflate(R.layout.feed, container, false)
 
-    this.feedCOPPAGate =
-      layout.findViewById(R.id.feedCOPPAGate)
     this.feedEmpty =
       layout.findViewById(R.id.feedEmpty)
     this.feedError =
@@ -253,12 +247,6 @@ class CatalogFragmentFeed : Fragment() {
     this.feedErrorDetails =
       this.feedError.findViewById(R.id.feedErrorDetails)
 
-    this.feedCOPPAOver13 =
-      this.feedCOPPAGate.findViewById(R.id.feedAgeGateOver)
-    this.feedCOPPAUnder13 =
-      this.feedCOPPAGate.findViewById(R.id.feedAgeGateUnder)
-
-    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
     this.feedNavigation.visibility = View.INVISIBLE
@@ -473,7 +461,10 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
-    this.feedCOPPAGate.visibility = View.VISIBLE
+//    if (configurationService.showAgeGateUi &&
+//      this.profilesController.profileCurrent().preferences().dateOfBirth == null) {
+//        showAgeGate()
+//    }
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -482,24 +473,6 @@ class CatalogFragmentFeed : Fragment() {
     this.feedWithoutGroups.visibility = View.INVISIBLE
 
     this.configureToolbar()
-
-    this.feedCOPPAOver13.setOnClickListener {
-      this.feedCOPPAUnder13.isEnabled = false
-      this.feedCOPPAOver13.isEnabled = false
-
-      this.profilesController.profileUpdate { description ->
-        this.synthesizeDateOfBirthDescription(description, 14)
-      }
-    }
-
-    this.feedCOPPAUnder13.setOnClickListener {
-      this.feedCOPPAUnder13.isEnabled = false
-      this.feedCOPPAOver13.isEnabled = false
-
-      this.profilesController.profileUpdate { description ->
-        this.synthesizeDateOfBirthDescription(description, 0)
-      }
-    }
   }
 
   private fun onAgeUpdateSuccess(
@@ -523,21 +496,21 @@ class CatalogFragmentFeed : Fragment() {
     }
   }
 
-  private fun synthesizeDateOfBirthDescription(
-    description: ProfileDescription,
-    years: Int
-  ): ProfileDescription {
-    val newPreferences =
-      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
-    return description.copy(preferences = newPreferences)
-  }
-
-  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
-    return ProfileDateOfBirth(
-      date = DateTime.now().minusYears(years),
-      isSynthesized = true
-    )
-  }
+//  private fun synthesizeDateOfBirthDescription(
+//    description: ProfileDescription,
+//    years: Int
+//  ): ProfileDescription {
+//    val newPreferences =
+//      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
+//    return description.copy(preferences = newPreferences)
+//  }
+//
+//  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
+//    return ProfileDateOfBirth(
+//      date = DateTime.now().minusYears(years),
+//      isSynthesized = true
+//    )
+//  }
 
   @UiThread
   private fun onCatalogFeedEmpty(
@@ -545,7 +518,6 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
-    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.VISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -562,7 +534,6 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
-    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.VISIBLE
@@ -579,7 +550,6 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
-    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -596,7 +566,6 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
-    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -641,7 +610,6 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
-    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -714,7 +682,6 @@ class CatalogFragmentFeed : Fragment() {
       }
     }
 
-    this.feedCOPPAGate.visibility = View.INVISIBLE
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.VISIBLE
     this.feedLoading.visibility = View.INVISIBLE

@@ -31,4 +31,6 @@ class SimplyEBuildConfigurationService : BuildConfigurationServiceType {
     get() = BuildConfig.GIT_COMMIT
   override val simplifiedVersion: String
     get() = BuildConfig.SIMPLIFIED_VERSION
+  override val showAgeGateUi: Boolean
+    get() = true
 }
