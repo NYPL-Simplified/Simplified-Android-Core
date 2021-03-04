@@ -31,4 +31,6 @@ class OEIBuildConfigurationService : BuildConfigurationServiceType {
     false
   override val showChangeAccountsUi: Boolean =
     false
+  override val showAgeGateUi: Boolean
+    get() = false
 }

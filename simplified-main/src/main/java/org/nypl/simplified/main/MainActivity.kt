@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.Observable
+import org.joda.time.DateTime
 import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.documents.EULAType
 import org.librarysimplified.services.api.Services
@@ -38,6 +39,8 @@ import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
@@ -54,6 +57,7 @@ import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
+import org.nypl.simplified.ui.catalog.AgeGateDialog
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -75,7 +79,8 @@ class MainActivity :
   AppCompatActivity(),
   OnBackStackChangedListener,
   SplashListenerType,
-  ErrorPageListenerType {
+  ErrorPageListenerType,
+  AgeGateDialog.BirthYearSelectedListener {
 
   companion object {
     private const val STATE_ACTION_BAR_IS_SHOWING = "ACTION_BAR_IS_SHOWING"
@@ -89,6 +94,9 @@ class MainActivity :
   private lateinit var mainViewModel: MainFragmentViewModel
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesNavigationController: ProfilesNavigationController
+  private lateinit var configurationService: BuildConfigurationServiceType
+  private lateinit var profilesController: ProfilesControllerType
+  private lateinit var ageGateDialog: AgeGateDialog
 
   private val navigationController: NavigationControllerType?
     get() {
@@ -329,6 +337,16 @@ class MainActivity :
         uiThread = services.requireService(UIThreadServiceType::class.java)
       )
     )
+
+    this.configurationService =
+      services.requireService(BuildConfigurationServiceType::class.java)
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    if (configurationService.showAgeGateUi &&
+      this.profilesController.profileCurrent().preferences().dateOfBirth == null
+    ) {
+      this.showAgeGate()
+    }
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -636,5 +654,44 @@ class MainActivity :
         .profileIdleTimer()
         .reset()
     }
+  }
+
+  /**
+   * Shows age gate for verification
+   */
+  private fun showAgeGate() {
+    ageGateDialog = AgeGateDialog()
+    ageGateDialog.show(supportFragmentManager, AgeGateDialog.TAG)
+  }
+
+  /**
+   * Handle birth year sent back from Age Gate dialog
+   */
+  override fun onBirthYearSelected(isOver13: Boolean) {
+    if (isOver13) {
+      this.profilesController.profileUpdate { description ->
+        this.synthesizeDateOfBirthDescription(description, 14)
+      }
+    } else {
+      this.profilesController.profileUpdate { description ->
+        this.synthesizeDateOfBirthDescription(description, 0)
+      }
+    }
+  }
+
+  private fun synthesizeDateOfBirthDescription(
+    description: ProfileDescription,
+    years: Int
+  ): ProfileDescription {
+    val newPreferences =
+      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
+    return description.copy(preferences = newPreferences)
+  }
+
+  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
+    return ProfileDateOfBirth(
+      date = DateTime.now().minusYears(years),
+      isSynthesized = true
+    )
   }
 }
