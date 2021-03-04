@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <c:changelog project="LibrarySimplified" xmlns:c="urn:com.io7m.changelog:4.0">
   <c:releases>
-    <c:release date="2021-03-04T14:03:29+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.1">
+    <c:release date="2021-03-04T19:53:37+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.1">
       <c:changes>
         <c:change date="2021-01-14T00:00:00+00:00" summary="Implemented announcements">
           <c:tickets>
@@ -40,9 +40,14 @@
             <c:ticket id="SIMPLY-2979"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-03-04T14:03:29+00:00" summary="Enable ACS DRM for Readium 2">
+        <c:change date="2021-03-04T00:00:00+00:00" summary="Enable ACS DRM for Readium 2">
           <c:tickets>
             <c:ticket id="SIMPLY-3138"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-03-04T19:53:37+00:00" summary="Add a neutral age gate for the Play Store">
+          <c:tickets>
+            <c:ticket id="SIMPLY-3493"/>
           </c:tickets>
         </c:change>
       </c:changes>
