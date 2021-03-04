@@ -461,10 +461,6 @@ class CatalogFragmentFeed : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
-//    if (configurationService.showAgeGateUi &&
-//      this.profilesController.profileCurrent().preferences().dateOfBirth == null) {
-//        showAgeGate()
-//    }
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -495,22 +491,6 @@ class CatalogFragmentFeed : Fragment() {
       this.uiThread.runOnUIThread { this.feedModel.reloadFeed(newParameters) }
     }
   }
-
-//  private fun synthesizeDateOfBirthDescription(
-//    description: ProfileDescription,
-//    years: Int
-//  ): ProfileDescription {
-//    val newPreferences =
-//      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
-//    return description.copy(preferences = newPreferences)
-//  }
-//
-//  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
-//    return ProfileDateOfBirth(
-//      date = DateTime.now().minusYears(years),
-//      isSynthesized = true
-//    )
-//  }
 
   @UiThread
   private fun onCatalogFeedEmpty(
