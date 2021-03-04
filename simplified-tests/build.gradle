@@ -56,6 +56,7 @@ dependencies {
   api project(":simplified-tenprint")
   api project(":simplified-threads")
   api project(":simplified-ui-branding")
+  api project(":simplified-ui-errorpage")
   api project(":simplified-ui-splash")
   api project(":simplified-ui-theme")
   api project(":simplified-webview")
