@@ -230,7 +230,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-      <Switch
+      <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/accountSyncBookmarksCheck"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

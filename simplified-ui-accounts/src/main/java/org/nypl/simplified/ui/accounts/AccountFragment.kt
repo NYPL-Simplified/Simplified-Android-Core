@@ -11,10 +11,10 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -89,7 +89,7 @@ class AccountFragment : Fragment() {
   private lateinit var authenticationViews: AccountAuthenticationViews
   private lateinit var backgroundExecutor: ListeningScheduledExecutorService
   private lateinit var bookmarkSync: ViewGroup
-  private lateinit var bookmarkSyncCheck: Switch
+  private lateinit var bookmarkSyncCheck: SwitchCompat
   private lateinit var bookmarkSyncLabel: View
   private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var documents: DocumentStoreType

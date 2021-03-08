@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.Switch
 import android.widget.TextView.BufferType.EDITABLE
+import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.nypl.simplified.accounts.api.AccountPassword
@@ -381,7 +381,7 @@ sealed class AccountAuthenticationViewBindings {
 
   class ViewsForCOPPAAgeGate(
     override val viewGroup: ViewGroup,
-    val over13: Switch
+    val over13: SwitchCompat
   ) : Base() {
 
     override fun lock() {
