@@ -19,6 +19,7 @@ import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillme
 import org.nypl.simplified.books.api.BookDRMKind.ACS
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle.ACSHandle
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle.LCPHandle
+import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle.AxisHandle
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle.NoneHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -235,6 +236,7 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
         )
       }
       is LCPHandle,
+      is AxisHandle,
       is NoneHandle ->
         throw UnreachableCodeException()
     }
@@ -401,6 +403,7 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
         }
       }
       is LCPHandle,
+      is AxisHandle,
       is NoneHandle ->
         throw UnreachableCodeException()
     }

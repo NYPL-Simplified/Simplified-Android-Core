@@ -55,17 +55,12 @@ class ReaderViewerR2 : ViewerProviderType {
     val entry =
       FeedEntry.FeedEntryOPDS(book.account, book.entry)
 
-    val adobeRightsFile =
-      when (val drm = format.drmInformation) {
-        is BookDRMInformation.ACS -> drm.rights?.first
-        is BookDRMInformation.LCP -> null
-        BookDRMInformation.None -> null
-      }
-
     val parameters =
       Reader2ActivityParameters(
         accountId = book.account,
-        adobeRightsFile = adobeRightsFile,
+        adobeRightsFile = (format.drmInformation as? BookDRMInformation.ACS)?.rights?.first,
+        axisLicense = (format.drmInformation as? BookDRMInformation.AXIS)?.license,
+        axisUserKey = (format.drmInformation as? BookDRMInformation.AXIS)?.userKey,
         bookId = bookId,
         file = file,
         entry = entry

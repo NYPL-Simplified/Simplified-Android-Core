@@ -220,14 +220,22 @@ class Reader2Activity : AppCompatActivity() {
           .readerPreferences
       )
 
+    val bookFileAsset = FileAsset(this.parameters.file)
+
     val bookFile =
-      if (this.parameters.adobeRightsFile != null) {
-        DRMProtectedFile(
-          fileAsset = FileAsset(this.parameters.file),
-          adobeRightsFile = this.parameters.adobeRightsFile
-        )
-      } else {
-        FileAsset(this.parameters.file)
+      when {
+        this.parameters.adobeRightsFile != null ->
+          DRMProtectedFile(
+            fileAsset = FileAsset(this.parameters.file),
+            adobeRightsFile = this.parameters.adobeRightsFile
+          )
+        this.parameters.axisUserKey != null && this.parameters.axisLicense != null ->
+          DRMProtectedFile(
+            fileAsset = bookFileAsset,
+            axisLicense = this.parameters.axisLicense,
+            axisUserKey = this.parameters.axisUserKey
+          )
+        else -> bookFileAsset
       }
 
     val readerParameters =

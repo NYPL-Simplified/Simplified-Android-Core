@@ -38,6 +38,9 @@ class BookFormatSupport private constructor(
     if (this.parameters.supportsPDF) {
       types.add(StandardFormatNames.genericPDFFiles)
     }
+    if (this.parameters.supportsAxisNow) {
+      types.add(StandardFormatNames.axisNow)
+    }
     return types.toSet()
   }
 
@@ -48,6 +51,9 @@ class BookFormatSupport private constructor(
 
     if (this.parameters.supportsPDF) {
       types.add(StandardFormatNames.genericPDFFiles)
+    }
+    if (this.parameters.supportsAxisNow) {
+      types.add(StandardFormatNames.axisNow)
     }
     return types.toSet()
   }

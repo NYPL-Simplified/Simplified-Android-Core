@@ -26,6 +26,13 @@ object StandardFormatNames {
     mimeOf("application/vnd.librarysimplified.bearer-token+json")
 
   /**
+   * The standard format name for AxisNow fulfillment tokens..
+   */
+
+  val axisNow: MIMEType =
+    mimeOf("application/vnd.librarysimplified.axisnow+json")
+
+  /**
    * The standard format name for Findaway audio books.
    *
    * @see "https://findaway.com"

@@ -54,6 +54,28 @@ sealed class BookDRMInformation {
   }
 
   /**
+   * The AXIS information associated with a book.
+   */
+
+  data class AXIS(
+
+    /**
+     * The license file. This is only present if an attempt has been made to fulfill the book.
+     */
+
+    val license: File?,
+
+    /**
+     * The file containing the key used to fulfill the book. This is only present
+     * if an attempt has been made to fulfill the book.
+     */
+
+    val userKey: File?
+  ) : BookDRMInformation() {
+    override val kind: BookDRMKind = BookDRMKind.AXIS
+  }
+
+  /**
    * The book either has no DRM, or uses some kind of external DRM system that the book database
    * doesn't know about (such as proprietary AudioBook DRM).
    */

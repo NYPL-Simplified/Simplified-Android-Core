@@ -50,7 +50,8 @@ object BookFormats {
 
   private val EPUB_MIME_TYPES =
     mimesOf(
-      "application/epub+zip"
+      "application/epub+zip",
+      "application/vnd.librarysimplified.axisnow+json"
     )
 
   private val PDF_MIME_TYPES =

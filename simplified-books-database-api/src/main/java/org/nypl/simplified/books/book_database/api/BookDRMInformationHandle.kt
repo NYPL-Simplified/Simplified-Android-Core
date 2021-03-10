@@ -63,6 +63,40 @@ sealed class BookDRMInformationHandle {
   }
 
   /**
+   * The handle used to read/write AxisNow information.
+   */
+
+  abstract class AxisHandle : BookDRMInformationHandle() {
+    abstract override val info: BookDRMInformation.AXIS
+
+    /**
+     * Copy the given file into the directory as the Axis license.
+     *
+     * @param file The file to be copied
+     *
+     * @throws IOException On I/O errors
+     */
+
+    @Throws(IOException::class)
+    abstract fun copyInAxisLicense(
+      file: File
+    ): BookDRMInformation.AXIS
+
+    /**
+     * Copy the given file into the directory as the Axis user key.
+     *
+     * @param file The file to be copied
+     *
+     * @throws IOException On I/O errors
+     */
+
+    @Throws(IOException::class)
+    abstract fun copyInAxisUserKey(
+      file: File
+    ): BookDRMInformation.AXIS
+  }
+
+  /**
    * The handle that represents no DRM.
    */
 

@@ -4,6 +4,7 @@ import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AxisNowServiceType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
@@ -54,6 +55,7 @@ class MockBorrowContext(
     BorrowTimeoutConfiguration(2L, TimeUnit.SECONDS)
 
   override var adobeExecutor: AdobeAdeptExecutorType? = null
+  override var axisNowService: AxisNowServiceType? = null
   override lateinit var currentAcquisitionPathElement: OPDSAcquisitionPathElement
   override lateinit var opdsAcquisitionPath: OPDSAcquisitionPath
   override var bookCurrent: Book = bookInitial

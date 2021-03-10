@@ -40,6 +40,7 @@ class FeedLoaderTest : FeedLoaderContract() {
         BookFormatSupportParameters(
           supportsPDF = false,
           supportsAdobeDRM = false,
+          supportsAxisNow = false,
           supportsAudioBooks = null
         )
       )

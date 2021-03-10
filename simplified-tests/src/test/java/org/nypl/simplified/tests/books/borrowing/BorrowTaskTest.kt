@@ -75,6 +75,7 @@ import org.nypl.simplified.tests.MockAdobeAdeptConnector
 import org.nypl.simplified.tests.MockAdobeAdeptExecutor
 import org.nypl.simplified.tests.MockAdobeAdeptNetProvider
 import org.nypl.simplified.tests.MockAdobeAdeptResourceProvider
+import org.nypl.simplified.tests.MockAxisNowService
 import org.nypl.simplified.tests.MockAudioBookManifestStrategies
 import org.nypl.simplified.tests.MockBookFormatSupport
 import org.nypl.simplified.tests.MockBorrowSubtaskDirectory
@@ -115,6 +116,7 @@ class BorrowTaskTest {
   private lateinit var adobeExecutorService: ExecutorService
   private lateinit var adobeNetProvider: MockAdobeAdeptNetProvider
   private lateinit var adobeResourceProvider: MockAdobeAdeptResourceProvider
+  private lateinit var axisNowService: MockAxisNowService
   private lateinit var audioBookManifestStrategies: MockAudioBookManifestStrategies
   private lateinit var book: Book
   private lateinit var bookDatabase: BookDatabaseType
@@ -153,6 +155,7 @@ class BorrowTaskTest {
     return BorrowTask.createBorrowTask(
       requirements = BorrowRequirements(
         adobeExecutor = this.adobeExecutor,
+        axisNowService = this.axisNowService,
         audioBookManifestStrategies = this.audioBookManifestStrategies,
         bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
@@ -314,6 +317,8 @@ class BorrowTaskTest {
       Executors.newSingleThreadExecutor()
     this.adobeExecutor =
       MockAdobeAdeptExecutor(this.adobeExecutorService, this.adobeConnector)
+    this.axisNowService =
+      MockAxisNowService()
   }
 
   @After

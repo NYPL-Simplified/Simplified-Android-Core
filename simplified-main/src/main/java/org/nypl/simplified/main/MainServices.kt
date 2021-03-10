@@ -20,6 +20,8 @@ import org.librarysimplified.services.api.ServiceDirectory
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AxisNowServiceFactoryType
+import org.nypl.drm.core.AxisNowServiceType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -248,6 +250,13 @@ internal object MainServices {
       override val dataDirectoryName: String
         get() = this@MainServices.CURRENT_DATA_VERSION
     }
+  }
+
+  private fun createAxisNowService(
+    httpClient: LSHTTPClientType
+  ): AxisNowServiceType? {
+    return optionalFromServiceLoader(AxisNowServiceFactoryType::class.java)
+      ?.create(httpClient)
   }
 
   private fun createLocalImageLoader(context: Context): ImageLoaderType {
@@ -680,6 +689,13 @@ internal object MainServices {
         serviceConstructor = { AdobeDRMServices.newAdobeDRMOrNull(context, adobeConfiguration) }
       )
 
+    val axisNowDRM =
+      addServiceOptionally(
+        message = strings.bootingGeneral("AxisNow DRM"),
+        interfaceType = AxisNowServiceType::class.java,
+        serviceConstructor = { this.createAxisNowService(lsHTTP) }
+      )
+
     val screenSize =
       addService(
         message = strings.bootingGeneral("screen size"),
@@ -879,6 +895,7 @@ internal object MainServices {
         serviceConstructor = {
           MainBookFormatSupport.createBookFormatSupport(
             adobeDRM = adobeDRM,
+            axisNowService = axisNowDRM,
             feedbooksSecretService = feedbooksSecretService,
             overdriveSecretService = overdriveSecretService
           )

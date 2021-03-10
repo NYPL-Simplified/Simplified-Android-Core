@@ -4,6 +4,7 @@ import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AxisNowServiceType
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
@@ -19,6 +20,7 @@ import java.io.File
 
 data class BorrowRequirements(
   val adobeExecutor: AdobeAdeptExecutorType?,
+  val axisNowService: AxisNowServiceType?,
   val audioBookManifestStrategies: AudioBookManifestStrategiesType,
   val bookFormatSupport: BookFormatSupportType,
   val bookRegistry: BookRegistryType,
@@ -42,6 +44,7 @@ data class BorrowRequirements(
     ): BorrowRequirements {
       return BorrowRequirements(
         adobeExecutor = services.optionalService(AdobeAdeptExecutorType::class.java),
+        axisNowService = services.optionalService(AxisNowServiceType::class.java),
         audioBookManifestStrategies = services.requireService(AudioBookManifestStrategiesType::class.java),
         bookFormatSupport = services.requireService(BookFormatSupportType::class.java),
         bookRegistry = services.requireService(BookRegistryType::class.java),
