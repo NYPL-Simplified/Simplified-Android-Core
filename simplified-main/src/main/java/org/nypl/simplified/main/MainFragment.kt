@@ -256,7 +256,7 @@ class MainFragment : Fragment() {
 
     if (oldAccountId != newAccountId ||
       event.oldDescription.preferences.dateOfBirth != event.newDescription.preferences.dateOfBirth
-      ) {
+    ) {
       newAccountId?.let { id ->
         val profile = this.profilesController.profileCurrent()
         val account = profile.account(id)
