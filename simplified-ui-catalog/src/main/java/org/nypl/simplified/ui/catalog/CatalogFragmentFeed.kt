@@ -140,7 +140,6 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
-  private lateinit var ageGateDialog: AgeGateDialog
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID

@@ -252,8 +252,11 @@ class MainFragment : Fragment() {
     this.logger.debug("oldAccountId={}, newAccountId={}", oldAccountId, newAccountId)
 
     // Reload the catalog feed, the patron's account preference has changed
+    // Or if the user's age has changed
 
-    if (oldAccountId != newAccountId) {
+    if (oldAccountId != newAccountId ||
+      event.oldDescription.preferences.dateOfBirth != event.newDescription.preferences.dateOfBirth
+      ) {
       newAccountId?.let { id ->
         val profile = this.profilesController.profileCurrent()
         val account = profile.account(id)
