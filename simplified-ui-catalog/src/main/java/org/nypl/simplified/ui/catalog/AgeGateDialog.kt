@@ -60,7 +60,7 @@ class AgeGateDialog : DialogFragment(), AdapterView.OnItemSelectedListener {
         val selection = birthYearSpinner.selectedItem.toString()
         if (selection != getString(R.string.ageVerification)) {
           val birthYear = selection.toInt()
-          birthYearSelectedListener.onBirthYearSelected(currentYear - birthYear < 13)
+          birthYearSelectedListener.onBirthYearSelected(currentYear - birthYear > 13)
         }
       }
     val view = layoutInflater.inflate(R.layout.age_gate_dialog, null)
