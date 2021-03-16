@@ -1,3 +1,7 @@
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+
 buildscript {
   // Load in our list of dependencies.
   //
@@ -166,27 +170,19 @@ task listProperties(group: 'NYPL') {
 apply from: file("$rootDir/ktlint.gradle")
 
 /**
- * Translate a semantic version into a numeric version code.
- */
-@SuppressWarnings('unused')
-static Integer versionCode(String versionName) {
-  def (major, minor, patch) = versionName
-    .replaceAll('[-+].*', '') // strip all metadata from version
-    .tokenize('.')
-
-  major = major.toInteger()
-  minor = minor.toInteger()
-  patch = patch.toInteger()
-
-  // Return version code padded with leading zeros
-  return String.format('%02d%02d%02d', major, minor, patch).toInteger()
-}
-
-/**
  * Expand the 'tilde' character to user.home.
  */
 @SuppressWarnings('unused')
 static String expandUserHome(String path) {
   if (path == null) return
   return path.replaceFirst("~", System.getProperty("user.home"))
+}
+
+@SuppressWarnings('unused')
+static Integer calculateVersionCode(Project project) {
+  def now = LocalDateTime.now(ZoneId.of("UTC"))
+  def nowSeconds = now.toEpochSecond(ZoneOffset.UTC)
+  // Seconds since 2021-03-15 09:20:00 UTC
+  def nowReduced = nowSeconds - 1615800000
+  return nowReduced
 }

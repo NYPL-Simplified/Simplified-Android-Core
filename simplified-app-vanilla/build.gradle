@@ -1,7 +1,7 @@
 android {
   defaultConfig {
     versionName = project.version
-    versionCode = versionCode(project.version)
+    versionCode = calculateVersionCode(project)
     setProperty("archivesBaseName", "vanilla")
   }
   sourceSets {
