@@ -336,7 +336,7 @@ class MigrationFrom3Master(
     val rootObject = JSONParserUtilities.checkObject(null, rootNode)
     val loanID = AdobeLoanID(JSONParserUtilities.getString(rootObject, "loan-id"))
     val returnable = JSONParserUtilities.getBoolean(rootObject, "returnable")
-    return AdobeAdeptLoan(loanID, ByteBuffer.wrap(serialized), returnable)
+    return AdobeAdeptLoan(loanID, serialized, returnable)
   }
 
   /**

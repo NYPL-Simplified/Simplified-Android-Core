@@ -58,9 +58,7 @@ class ReaderViewerR2 : ViewerProviderType {
     val parameters =
       Reader2ActivityParameters(
         accountId = book.account,
-        adobeRightsFile = (format.drmInformation as? BookDRMInformation.ACS)?.rights?.first,
-        axisLicense = (format.drmInformation as? BookDRMInformation.AXIS)?.license,
-        axisUserKey = (format.drmInformation as? BookDRMInformation.AXIS)?.userKey,
+        drmInfo = format.drmInformation,
         bookId = bookId,
         file = file,
         entry = entry

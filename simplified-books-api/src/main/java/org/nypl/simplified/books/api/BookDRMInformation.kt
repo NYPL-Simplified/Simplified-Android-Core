@@ -2,13 +2,14 @@ package org.nypl.simplified.books.api
 
 import org.nypl.drm.core.AdobeAdeptLoan
 import java.io.File
+import java.io.Serializable
 
 /**
  * The `BookDRMInformation` class represents an immutable snapshot of the current DRM
  * information associated with a book.
  */
 
-sealed class BookDRMInformation {
+sealed class BookDRMInformation : Serializable {
 
   /**
    * The kind of DRM
