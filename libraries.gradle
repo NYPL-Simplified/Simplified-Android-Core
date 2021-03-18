@@ -18,7 +18,7 @@ ext.versions = [
   androidx_legacy_support_v4    : '1.0.0',
   androidx_lifecycle            : '2.2.0',
   androidx_lifecycle_viewmodel  : '2.2.0',
-  androidx_navigation           : '2.3.0',
+  androidx_navigation           : '2.3.4',
   androidx_paging               : '2.1.0',
   androidx_preference           : '1.1.1',
   androidx_recyclerview         : '1.1.0',
