@@ -51,6 +51,7 @@ data class Bookmark(
    * An estimate of the current book progress, in the range [0, 1]
    */
 
+  @Deprecated("Use progress information from the BookLocation")
   val bookProgress: Double,
 
   /**
@@ -71,7 +72,10 @@ data class Bookmark(
    */
 
   val chapterProgress: Double =
-    this.location.progress?.chapterProgress ?: 0.0
+    when (this.location) {
+      is BookLocation.BookLocationR2 -> this.location.progress.chapterProgress
+      is BookLocation.BookLocationR1 -> this.location.progress ?: 0.0
+    }
 
   /**
    * The ID of the book to which the bookmark belongs.
@@ -117,21 +121,25 @@ data class Bookmark(
         val utf8 = Charset.forName("UTF-8")
         messageDigest.update(book.value().toByteArray(utf8))
 
-        val chapterProgress = location.progress
-        if (chapterProgress != null) {
-          messageDigest.update(chapterProgress.chapterIndex.toString().toByteArray(utf8))
-          val truncatedProgress = String.format("%.6f", chapterProgress.chapterProgress)
-          messageDigest.update(truncatedProgress.toByteArray(utf8))
+        when (location) {
+          is BookLocation.BookLocationR2 -> {
+            val chapterProgress = location.progress
+            messageDigest.update(chapterProgress.chapterHref.toByteArray(utf8))
+            val truncatedProgress = String.format("%.6f", chapterProgress.chapterProgress)
+            messageDigest.update(truncatedProgress.toByteArray(utf8))
+          }
+          is BookLocation.BookLocationR1 -> {
+            val cfi = location.contentCFI
+            if (cfi != null) {
+              messageDigest.update(cfi.toByteArray(utf8))
+            }
+            val idRef = location.idRef
+            if (idRef != null) {
+              messageDigest.update(idRef.toByteArray(utf8))
+            }
+          }
         }
 
-        val cfi = location.contentCFI
-        if (cfi != null) {
-          messageDigest.update(cfi.toByteArray(utf8))
-        }
-        val idRef = location.idRef
-        if (idRef != null) {
-          messageDigest.update(idRef.toByteArray(utf8))
-        }
         messageDigest.update(kind.motivationURI.toByteArray(utf8))
 
         val digestResult = messageDigest.digest()

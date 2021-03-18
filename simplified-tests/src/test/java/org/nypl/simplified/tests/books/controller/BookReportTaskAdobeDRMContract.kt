@@ -24,6 +24,7 @@ import org.nypl.simplified.books.controller.BookReportTask
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
+import java.util.concurrent.TimeUnit
 
 abstract class BookReportTaskAdobeDRMContract {
 
@@ -36,7 +37,12 @@ abstract class BookReportTaskAdobeDRMContract {
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-test",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.server = MockWebServer()

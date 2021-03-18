@@ -1,0 +1,16 @@
+{
+  "@version": 20210317,
+  "opdsId" : "urn:isbn:9781683607144",
+  "location" : {
+    "@type": "BookLocationR2",
+    "@version": 20210317,
+    "progress" : {
+      "chapterHref" : "/title-page.xhtml",
+      "chapterProgress" : 0.25
+    }
+  },
+  "time" : "2021-01-21T19:16:54.066",
+  "chapterTitle" : "Another title",
+  "bookProgress" : 0.11,
+  "deviceID" : "null"
+}

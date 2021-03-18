@@ -47,6 +47,7 @@ import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 class BorrowCopyTest {
 
@@ -111,8 +112,10 @@ class BorrowCopyTest {
         .create(
           context = androidContext,
           configuration = LSHTTPClientConfiguration(
-            "simplified-tests",
-            "999.999.0"
+            applicationName = "simplified-tests",
+            applicationVersion = "999.999.0",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
           )
         )
 

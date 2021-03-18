@@ -289,7 +289,8 @@ class Reader2Activity : AppCompatActivity() {
         Reader2Bookmarks.loadBookmarks(
           bookmarkService = this.bookmarkService,
           accountID = this.parameters.accountId,
-          bookID = this.parameters.bookId
+          bookID = this.parameters.bookId,
+          bookMetadata = reference.controller.bookMetadata
         )
 
       val lastRead = bookmarks.find { bookmark -> bookmark.type == SR2Bookmark.Type.LAST_READ }
@@ -297,7 +298,10 @@ class Reader2Activity : AppCompatActivity() {
       if (lastRead != null) {
         reference.controller.submitCommand(SR2Command.OpenChapter(lastRead.locator))
       } else {
-        reference.controller.submitCommand(SR2Command.OpenChapter(SR2Locator.SR2LocatorPercent(0, 0.0)))
+        val first = reference.controller.bookMetadata.readingOrder.first()
+        reference.controller.submitCommand(
+          SR2Command.OpenChapter(SR2Locator.SR2LocatorPercent(first.chapterHref, 0.0))
+        )
       }
     } else {
       // Refresh whatever the controller was looking at previously.

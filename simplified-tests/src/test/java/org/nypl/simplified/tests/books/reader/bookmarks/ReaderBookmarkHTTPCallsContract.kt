@@ -23,6 +23,7 @@ import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationBodyNode
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationSelectorNode
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationTargetNode
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 abstract class ReaderBookmarkHTTPCallsContract {
 
@@ -95,7 +96,12 @@ abstract class ReaderBookmarkHTTPCallsContract {
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-test",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.server = MockWebServer()

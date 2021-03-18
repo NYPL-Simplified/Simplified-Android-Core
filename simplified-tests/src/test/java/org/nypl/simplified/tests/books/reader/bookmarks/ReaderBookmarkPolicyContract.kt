@@ -3,7 +3,6 @@ package org.nypl.simplified.tests.books.reader.bookmarks
 import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
-import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
@@ -24,7 +23,7 @@ open class ReaderBookmarkPolicyContract {
   val bookmark0 =
     Bookmark(
       opdsId = "opdsid",
-      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
+      location = BookLocation.BookLocationR1(0.5, null, "id"),
       time = LocalDateTime.now(),
       kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
@@ -36,7 +35,7 @@ open class ReaderBookmarkPolicyContract {
   val bookmark0Idle =
     Bookmark(
       opdsId = "opdsid",
-      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
+      location = BookLocation.BookLocationR1(0.5, null, "id"),
       time = LocalDateTime.now(),
       kind = BookmarkKind.ReaderBookmarkLastReadLocation,
       chapterTitle = "A Title",
@@ -48,7 +47,7 @@ open class ReaderBookmarkPolicyContract {
   val bookmark1 =
     Bookmark(
       opdsId = "opdsid-x",
-      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
+      location = BookLocation.BookLocationR1(0.5, null, "id"),
       time = LocalDateTime.now(),
       kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",

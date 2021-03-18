@@ -57,6 +57,7 @@ import java.util.ArrayList
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Contract for the `ProfileAccountCreateCustomOPDSTask` class.
@@ -102,7 +103,19 @@ abstract class ProfileAccountCreateCustomOPDSContract {
   @Throws(Exception::class)
   fun setUp() {
     this.context = Mockito.mock(Context::class.java)
-    this.http = LSHTTPClients().create(this.context, LSHTTPClientConfiguration("test", "1.0.0"))
+
+    this.http =
+      LSHTTPClients()
+        .create(
+          this.context,
+          LSHTTPClientConfiguration(
+            applicationName = "test",
+            applicationVersion = "1.0.0",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
+        )
+
     this.defaultProvider = MockAccountProviders.fakeProvider("urn:fake:0")
     this.accountProviderRegistry = AccountProviderRegistry.createFrom(this.context, listOf(), this.defaultProvider)
     this.accountEvents = PublishSubject.create()

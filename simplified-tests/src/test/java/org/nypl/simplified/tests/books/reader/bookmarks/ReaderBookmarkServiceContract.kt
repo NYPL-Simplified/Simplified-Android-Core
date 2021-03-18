@@ -23,7 +23,6 @@ import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -46,6 +45,7 @@ import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
 import org.slf4j.Logger
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 abstract class ReaderBookmarkServiceContract {
 
@@ -91,7 +91,12 @@ abstract class ReaderBookmarkServiceContract {
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-test",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.server = MockWebServer()
@@ -500,7 +505,7 @@ abstract class ReaderBookmarkServiceContract {
       listOf(
         Bookmark(
           opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-          location = BookLocation(BookChapterProgress(0, 0.5), null, "x"),
+          location = BookLocation.BookLocationR1(0.5, null, "x"),
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
           time = LocalDateTime.now(),
           chapterTitle = "A Title",

@@ -8,7 +8,6 @@ import org.joda.time.LocalDateTime
 import org.junit.Assert
 import org.junit.Test
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookIDs
@@ -71,8 +70,8 @@ abstract class BookDatabaseEPUBContract {
       val bookmark =
         Bookmark(
           opdsId = "abcd",
-          location = BookLocation(
-            progress = BookChapterProgress(0, 0.5),
+          location = BookLocation.BookLocationR1(
+            progress = 0.5,
             contentCFI = "xyz",
             idRef = "abc"
           ),
@@ -112,8 +111,8 @@ abstract class BookDatabaseEPUBContract {
     val bookmark0 =
       Bookmark(
         opdsId = "abcd",
-        location = BookLocation(
-          progress = BookChapterProgress(0, 0.5),
+        location = BookLocation.BookLocationR1(
+          progress = 0.5,
           contentCFI = "xyz",
           idRef = "abc"
         ),
@@ -128,8 +127,8 @@ abstract class BookDatabaseEPUBContract {
     val bookmark1 =
       Bookmark(
         opdsId = "abcd",
-        location = BookLocation(
-          progress = BookChapterProgress(0, 0.6),
+        location = BookLocation.BookLocationR1(
+          progress = 0.6,
           contentCFI = "xyz",
           idRef = "abc"
         ),
@@ -144,8 +143,8 @@ abstract class BookDatabaseEPUBContract {
     val bookmark2 =
       Bookmark(
         opdsId = "abcd",
-        location = BookLocation(
-          progress = BookChapterProgress(0, 0.7),
+        location = BookLocation.BookLocationR1(
+          progress = 0.7,
           contentCFI = "xyz",
           idRef = "abc"
         ),

@@ -1,0 +1,16 @@
+{
+  "opdsId" : "urn:isbn:9781683607144",
+  "location" : {
+    "contentCFI" : "/4/2[title-page]/2/2/1:0",
+    "idref" : "title-page-xhtml",
+    "progress" : {
+      "chapterIndex" : 0,
+      "chapterProgress" : 0.25
+    }
+  },
+  "time" : "2021-01-21T19:16:54.066",
+  "chapterTitle" : "Some title",
+  "chapterProgress" : 0.30,
+  "bookProgress" : 0.11,
+  "deviceID" : "70c47074-c048-48c0-8eae-286b9738c108"
+}

@@ -664,7 +664,7 @@ class MigrationFrom3Master(
 
     return try {
       val bookLocation =
-        BookLocation(null, null, "x")
+        BookLocation.BookLocationR1(null, null, "x")
       val kind =
         BookmarkKind.ofMotivation(annotation.motivation)
       val time =
