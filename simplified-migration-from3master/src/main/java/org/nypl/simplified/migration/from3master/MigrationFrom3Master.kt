@@ -668,7 +668,7 @@ class MigrationFrom3Master(
       val kind =
         BookmarkKind.ofMotivation(annotation.motivation)
       val time =
-        formatter.parseLocalDateTime(annotation.body.timestamp)
+        formatter.parseDateTime(annotation.body.timestamp)
       val chapterTitle =
         annotation.body.chapterTitle ?: ""
       val bookProgress =

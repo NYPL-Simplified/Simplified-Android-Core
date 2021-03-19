@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -18,6 +19,9 @@ import java.io.IOException
  */
 
 object BookmarkJSON {
+
+  private val dateFormatter =
+    ISODateTimeFormat.dateTime()
 
   /**
    * Deserialize bookmarks from the given JSON node.
@@ -85,7 +89,7 @@ object BookmarkJSON {
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
       location = location,
-      time = LocalDateTime.parse(JSONParserUtilities.getString(node, "time")),
+      time = DateTime.parse(JSONParserUtilities.getString(node, "time")),
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
       uri = this.toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
@@ -126,7 +130,7 @@ object BookmarkJSON {
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
       location = locationMax,
-      time = LocalDateTime.parse(JSONParserUtilities.getString(node, "time")),
+      time = DateTime.parse(JSONParserUtilities.getString(node, "time")),
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
       uri = this.toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
@@ -159,7 +163,7 @@ object BookmarkJSON {
     node.put("opdsId", description.opdsId)
     val location = BookLocationJSON.serializeToJSON(objectMapper, description.location)
     node.set<ObjectNode>("location", location)
-    node.put("time", description.time.toString())
+    node.put("time", this.dateFormatter.print(description.time))
     node.put("chapterTitle", description.chapterTitle)
     node.put("bookProgress", description.bookProgress)
     description.deviceID.let { device -> node.put("deviceID", device) }

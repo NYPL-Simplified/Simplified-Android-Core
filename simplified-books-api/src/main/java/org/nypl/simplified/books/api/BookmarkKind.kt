@@ -31,7 +31,7 @@ sealed class BookmarkKind(
    */
 
   object ReaderBookmarkExplicit :
-    BookmarkKind("http://www.w3.org/ns/oa#bookmarking") {
+    BookmarkKind("https://www.w3.org/ns/oa#bookmarking") {
     override fun toString(): String {
       return "ReaderBookmarkExplicit"
     }
@@ -39,11 +39,19 @@ sealed class BookmarkKind(
 
   companion object {
 
+    val obsoleteBookmarkingURI =
+      "http://www.w3.org/ns/oa#bookmarking"
+
     fun ofMotivation(motivationURI: String): BookmarkKind {
       return when (motivationURI) {
-        ReaderBookmarkLastReadLocation.motivationURI -> ReaderBookmarkLastReadLocation
-        ReaderBookmarkExplicit.motivationURI -> ReaderBookmarkExplicit
-        else -> throw IllegalArgumentException("Unrecognized motivation: $motivationURI")
+        ReaderBookmarkLastReadLocation.motivationURI ->
+          ReaderBookmarkLastReadLocation
+        ReaderBookmarkExplicit.motivationURI ->
+          ReaderBookmarkExplicit
+        obsoleteBookmarkingURI ->
+          ReaderBookmarkExplicit
+        else ->
+          throw IllegalArgumentException("Unrecognized motivation: $motivationURI")
       }
     }
   }

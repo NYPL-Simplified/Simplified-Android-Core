@@ -4,7 +4,7 @@ import android.content.Context
 import com.io7m.jfunctional.Option
 import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTimeZone
 import org.junit.Assert
 import org.junit.Test
 import org.nypl.simplified.accounts.api.AccountID
@@ -75,7 +75,7 @@ abstract class BookDatabaseEPUBContract {
             contentCFI = "xyz",
             idRef = "abc"
           ),
-          time = LocalDateTime.now(),
+          time = DateTime.now(DateTimeZone.UTC),
           chapterTitle = "A title",
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
           bookProgress = 0.25,
@@ -116,7 +116,7 @@ abstract class BookDatabaseEPUBContract {
           contentCFI = "xyz",
           idRef = "abc"
         ),
-        time = LocalDateTime.now(),
+        time = DateTime.now(DateTimeZone.UTC),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         bookProgress = 0.25,
@@ -132,7 +132,7 @@ abstract class BookDatabaseEPUBContract {
           contentCFI = "xyz",
           idRef = "abc"
         ),
-        time = LocalDateTime.now(),
+        time = DateTime.now(DateTimeZone.UTC),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         bookProgress = 0.25,
@@ -148,7 +148,7 @@ abstract class BookDatabaseEPUBContract {
           contentCFI = "xyz",
           idRef = "abc"
         ),
-        time = LocalDateTime.now(),
+        time = DateTime.now(DateTimeZone.UTC),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         bookProgress = 0.25,

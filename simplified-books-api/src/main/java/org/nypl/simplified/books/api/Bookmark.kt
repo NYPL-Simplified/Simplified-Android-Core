@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.api
 
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import java.io.Serializable
 import java.net.URI
 import java.nio.charset.Charset
@@ -39,7 +40,7 @@ data class Bookmark(
    * The time the bookmark was created.
    */
 
-  val time: LocalDateTime,
+  val time: DateTime,
 
   /**
    * The title of the chapter.
@@ -66,6 +67,12 @@ data class Bookmark(
 
   val uri: URI?
 ) : Serializable {
+
+  init {
+    check(this.time.zone == DateTimeZone.UTC) {
+      "Bookmark time zones must be UTC"
+    }
+  }
 
   /**
    * An estimate of the current chapter progress, in the range [0, 1]

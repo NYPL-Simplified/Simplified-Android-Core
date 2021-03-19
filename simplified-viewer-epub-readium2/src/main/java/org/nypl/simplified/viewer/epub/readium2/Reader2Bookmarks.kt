@@ -1,5 +1,6 @@
 package org.nypl.simplified.viewer.epub.readium2
 
+import org.joda.time.DateTimeZone
 import org.librarysimplified.r2.api.SR2BookChapter
 import org.librarysimplified.r2.api.SR2BookMetadata
 import org.librarysimplified.r2.api.SR2Bookmark
@@ -94,10 +95,13 @@ object Reader2Bookmarks {
         BookmarkKind.ReaderBookmarkLastReadLocation
     }
 
+    val utcDateTime =
+      source.date.toDateTime(DateTimeZone.UTC)
+
     return Bookmark(
       opdsId = bookEntry.feedEntry.id,
       location = location,
-      time = source.date.toLocalDateTime(),
+      time = utcDateTime,
       kind = kind,
       chapterTitle = source.title,
       bookProgress = source.bookProgress,

@@ -197,7 +197,6 @@ abstract class ReaderBookmarkHTTPCallsContract {
           timestamp = "2019-02-08T15:37:46+0000",
           device = "urn:uuid:d8c5a487-646b-4c75-a83f-80599e8cf9d1",
           chapterTitle = null,
-          chapterProgress = null,
           bookProgress = null
         ),
       id = "https://example.com/annotations/book0",
@@ -207,7 +206,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
         source = "urn:book0",
         selector = BookmarkAnnotationSelectorNode(
           type = "FragmentSelector",
-          value = "zoom!"
+          value = "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
         )
       )
     )
@@ -220,7 +219,6 @@ abstract class ReaderBookmarkHTTPCallsContract {
           timestamp = "2019-02-08T15:37:47+0000",
           device = "urn:uuid:d8c5a487-646b-4c75-a83f-80599e8cf9d1",
           chapterTitle = null,
-          chapterProgress = null,
           bookProgress = null
         ),
       id = "https://example.com/annotations/book0",
@@ -230,7 +228,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
         source = "urn:book0",
         selector = BookmarkAnnotationSelectorNode(
           type = "FragmentSelector",
-          value = "zoom!"
+          value = "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
         )
       )
     )
@@ -258,7 +256,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
                 "target" : {
                    "source" : "urn:book0",
                    "selector" : {
-                      "value" : "zoom!",
+                      "value" : "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n",
                       "type" : "FragmentSelector"
                    }
                 }
@@ -274,7 +272,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
                 "target" : {
                    "source" : "urn:book0",
                    "selector" : {
-                      "value" : "zoom!",
+                      "value" : "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n",
                       "type" : "FragmentSelector"
                    }
                 }

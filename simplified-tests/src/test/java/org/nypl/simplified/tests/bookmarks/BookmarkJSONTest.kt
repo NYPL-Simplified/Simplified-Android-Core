@@ -1,4 +1,4 @@
-package org.nypl.simplified.tests.books.api
+package org.nypl.simplified.tests.bookmarks
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Assert
@@ -102,7 +102,7 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066", bookmark.time.toString())
+    Assert.assertEquals("2021-01-21T19:16:54.066Z", bookmark.time.toString())
     Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
     Assert.assertEquals("A title!", bookmark.chapterTitle)
     Assert.assertEquals("fc4f5d19-43a2-4181-99a0-7579e0a4935b", bookmark.deviceID)
@@ -125,7 +125,7 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066", bookmark.time.toString())
+    Assert.assertEquals("2021-01-21T19:16:54.066Z", bookmark.time.toString())
     Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
     Assert.assertEquals("Another title", bookmark.chapterTitle)
     Assert.assertEquals("null", bookmark.deviceID)
@@ -147,7 +147,7 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066", bookmark.time.toString())
+    Assert.assertEquals("2021-01-21T19:16:54.066Z", bookmark.time.toString())
     Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
     Assert.assertEquals("Some title", bookmark.chapterTitle)
     Assert.assertEquals("70c47074-c048-48c0-8eae-286b9738c108", bookmark.deviceID)
@@ -170,7 +170,7 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-03-17T15:19:56.465", bookmark.time.toString())
+    Assert.assertEquals("2021-03-17T15:19:56.465Z", bookmark.time.toString())
     Assert.assertEquals("urn:isbn:9781683606123", bookmark.opdsId)
     Assert.assertEquals("Unknown", bookmark.chapterTitle)
     Assert.assertEquals("null", bookmark.deviceID)
@@ -222,7 +222,7 @@ class BookmarkJSONTest {
     val fileName =
       "/org/nypl/simplified/tests/bookmarks/$name"
     val url =
-      BookmarkJSONTest::class.java.getResource(fileName)
+      BookmarkAnnotationsJSONTest::class.java.getResource(fileName)
         ?: throw FileNotFoundException("No such resource: $fileName")
     return url.openStream()
   }

@@ -1,6 +1,7 @@
 package org.nypl.simplified.tests.books.reader.bookmarks
 
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.junit.Assert
 import org.junit.Test
 import org.nypl.simplified.books.api.BookLocation
@@ -24,7 +25,7 @@ open class ReaderBookmarkPolicyContract {
     Bookmark(
       opdsId = "opdsid",
       location = BookLocation.BookLocationR1(0.5, null, "id"),
-      time = LocalDateTime.now(),
+      time = DateTime.now(DateTimeZone.UTC),
       kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
       bookProgress = 0.25,
@@ -36,7 +37,7 @@ open class ReaderBookmarkPolicyContract {
     Bookmark(
       opdsId = "opdsid",
       location = BookLocation.BookLocationR1(0.5, null, "id"),
-      time = LocalDateTime.now(),
+      time = DateTime.now(DateTimeZone.UTC),
       kind = BookmarkKind.ReaderBookmarkLastReadLocation,
       chapterTitle = "A Title",
       bookProgress = 0.25,
@@ -48,7 +49,7 @@ open class ReaderBookmarkPolicyContract {
     Bookmark(
       opdsId = "opdsid-x",
       location = BookLocation.BookLocationR1(0.5, null, "id"),
-      time = LocalDateTime.now(),
+      time = DateTime.now(DateTimeZone.UTC),
       kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
       bookProgress = 0.25,

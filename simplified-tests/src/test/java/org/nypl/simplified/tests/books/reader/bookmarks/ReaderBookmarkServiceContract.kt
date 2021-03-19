@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.reactivex.subjects.Subject
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -507,7 +508,7 @@ abstract class ReaderBookmarkServiceContract {
           opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
           location = BookLocation.BookLocationR1(0.5, null, "x"),
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
-          time = LocalDateTime.now(),
+          time = DateTime.now(DateTimeZone.UTC),
           chapterTitle = "A Title",
           bookProgress = 0.5,
           deviceID = "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",

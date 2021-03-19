@@ -31,6 +31,8 @@ import com.io7m.jfunctional.Some;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 import org.librarysimplified.services.api.Services;
 import org.nypl.drm.core.AdobeAdeptLoan;
@@ -579,11 +581,12 @@ public final class ReaderActivity extends AppCompatActivity implements
         this.feed_entry.getID(),
         currentLocation,
         BookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
-        LocalDateTime.now(),
+        DateTime.now(DateTimeZone.UTC),
         this.current_chapter_title,
         currentBookProgress(),
         getDeviceIDString(),
-        null);
+        null
+      );
 
     this.current_location = bookmark;
 
