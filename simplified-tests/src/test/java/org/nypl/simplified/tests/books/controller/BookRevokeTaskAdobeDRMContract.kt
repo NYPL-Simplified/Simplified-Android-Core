@@ -121,7 +121,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
         File("loan"),
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
+          ByteArray(32),
           true
         )
       )
@@ -134,7 +134,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
         File("loan"),
         AdobeAdeptLoan(
           AdobeLoanID("a6a0f12f-cae0-46fd-afc8-e52b8b024e6c"),
-          ByteBuffer.allocate(32),
+          ByteArray(32),
           false
         )
       )

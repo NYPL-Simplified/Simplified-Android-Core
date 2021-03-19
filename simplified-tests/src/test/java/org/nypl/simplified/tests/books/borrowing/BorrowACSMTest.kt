@@ -842,7 +842,7 @@ class BorrowACSMTest {
         temporaryFile,
         AdobeAdeptLoan(
           adobeLoanID,
-          ByteBuffer.wrap("You're a blank. You don't have rights.".toByteArray()),
+          "You're a blank. You don't have rights.".toByteArray(),
           false
         )
       )
@@ -899,7 +899,7 @@ class BorrowACSMTest {
         temporaryFile,
         AdobeAdeptLoan(
           adobeLoanID,
-          ByteBuffer.wrap("You're a blank. You don't have rights.".toByteArray()),
+          "You're a blank. You don't have rights.".toByteArray(),
           false
         )
       )

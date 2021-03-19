@@ -175,12 +175,10 @@ abstract class BookDRMInformationHandleACSContract {
       )
     assertEquals("ACS", File(this.directory0, "epub-drm.txt").readText())
 
-    val data =
-      ByteBuffer.allocate(23)
     val loan =
       AdobeAdeptLoan(
         AdobeLoanID("1e2869c2-1fd3-47d2-a5ac-a4e24093a64a"),
-        data,
+        ByteArray(23),
         true
       )
 
@@ -231,12 +229,10 @@ abstract class BookDRMInformationHandleACSContract {
       )
     assertEquals("ACS", File(this.directory0, "pdf-drm.txt").readText())
 
-    val data =
-      ByteBuffer.allocate(23)
     val loan =
       AdobeAdeptLoan(
         AdobeLoanID("1e2869c2-1fd3-47d2-a5ac-a4e24093a64a"),
-        data,
+        ByteArray(233),
         true
       )
 
