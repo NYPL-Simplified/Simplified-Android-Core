@@ -577,7 +577,7 @@ public final class ReaderActivity extends AppCompatActivity implements
     );
 
     final Bookmark bookmark =
-      new Bookmark(
+      Bookmark.Companion.create(
         this.feed_entry.getID(),
         currentLocation,
         BookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,

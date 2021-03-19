@@ -678,7 +678,7 @@ class MigrationFrom3Master(
       val uri =
         annotation.id?.let(::URI)
 
-      Bookmark(
+      Bookmark.create(
         opdsId = annotation.target.source,
         location = bookLocation,
         kind = kind,

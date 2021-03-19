@@ -85,7 +85,7 @@ object BookmarkJSON {
         JSONParserUtilities.getObject(node, "location")
       )
 
-    return Bookmark(
+    return Bookmark.create(
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
       location = location,
@@ -126,7 +126,7 @@ object BookmarkJSON {
           location.copy(progress = Math.max(location.progress ?: 0.0, chapterProgress))
       }
 
-    return Bookmark(
+    return Bookmark.create(
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
       location = locationMax,

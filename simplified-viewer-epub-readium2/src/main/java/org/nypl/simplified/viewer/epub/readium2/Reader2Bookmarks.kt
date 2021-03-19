@@ -95,13 +95,10 @@ object Reader2Bookmarks {
         BookmarkKind.ReaderBookmarkLastReadLocation
     }
 
-    val utcDateTime =
-      source.date.toDateTime(DateTimeZone.UTC)
-
-    return Bookmark(
+    return Bookmark.create(
       opdsId = bookEntry.feedEntry.id,
       location = location,
-      time = utcDateTime,
+      time = source.date,
       kind = kind,
       chapterTitle = source.title,
       bookProgress = source.bookProgress,

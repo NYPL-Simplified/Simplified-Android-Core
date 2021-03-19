@@ -16,7 +16,7 @@ import java.security.NoSuchAlgorithmException
  * that serialized values of this class will be compatible with future releases.</p>
  */
 
-data class Bookmark(
+data class Bookmark private constructor(
 
   /**
    * The identifier of the book taken from the OPDS entry that provided it.
@@ -113,6 +113,42 @@ data class Bookmark(
   }
 
   companion object {
+
+    /**
+     * Create a bookmark.
+     */
+
+    fun create(
+      opdsId: String,
+      location: BookLocation,
+      kind: BookmarkKind,
+      time: DateTime,
+      chapterTitle: String,
+      bookProgress: Double,
+      deviceID: String?,
+      uri: URI?
+    ): Bookmark {
+      return Bookmark(
+        opdsId = opdsId,
+        location = location,
+        kind = kind,
+        time = ensureUTC(time),
+        chapterTitle = chapterTitle,
+        bookProgress = bookProgress,
+        deviceID = deviceID,
+        uri = uri
+      )
+    }
+
+    /**
+     * Ensure a timestamp has a UTC timezone.
+     */
+
+    private fun ensureUTC(
+      dateTime: DateTime
+    ): DateTime {
+      return dateTime.toDateTime(DateTimeZone.UTC)
+    }
 
     /**
      * Create a bookmark ID from the given book ID, location, and kind.

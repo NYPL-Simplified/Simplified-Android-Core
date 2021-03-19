@@ -68,7 +68,7 @@ abstract class BookDatabaseEPUBContract {
       Assert.assertEquals(null, formatHandle.format.lastReadLocation)
 
       val bookmark =
-        Bookmark(
+        Bookmark.create(
           opdsId = "abcd",
           location = BookLocation.BookLocationR1(
             progress = 0.5,
@@ -109,7 +109,7 @@ abstract class BookDatabaseEPUBContract {
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val bookmark0 =
-      Bookmark(
+      Bookmark.create(
         opdsId = "abcd",
         location = BookLocation.BookLocationR1(
           progress = 0.5,
@@ -125,7 +125,7 @@ abstract class BookDatabaseEPUBContract {
       )
 
     val bookmark1 =
-      Bookmark(
+      Bookmark.create(
         opdsId = "abcd",
         location = BookLocation.BookLocationR1(
           progress = 0.6,
@@ -141,7 +141,7 @@ abstract class BookDatabaseEPUBContract {
       )
 
     val bookmark2 =
-      Bookmark(
+      Bookmark.create(
         opdsId = "abcd",
         location = BookLocation.BookLocationR1(
           progress = 0.7,

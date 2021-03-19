@@ -84,7 +84,7 @@ object BookmarkAnnotations {
         DateTime.now(DateTimeZone.UTC)
       }
 
-    return Bookmark(
+    return Bookmark.create(
       opdsId = annotation.target.source,
       location = locationJSON,
       kind = BookmarkKind.ofMotivation(annotation.motivation),

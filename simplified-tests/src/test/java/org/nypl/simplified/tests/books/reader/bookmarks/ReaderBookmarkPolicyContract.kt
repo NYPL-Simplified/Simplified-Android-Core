@@ -22,7 +22,7 @@ open class ReaderBookmarkPolicyContract {
     org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
   val bookmark0 =
-    Bookmark(
+    Bookmark.create(
       opdsId = "opdsid",
       location = BookLocation.BookLocationR1(0.5, null, "id"),
       time = DateTime.now(DateTimeZone.UTC),
@@ -34,7 +34,7 @@ open class ReaderBookmarkPolicyContract {
     )
 
   val bookmark0Idle =
-    Bookmark(
+    Bookmark.create(
       opdsId = "opdsid",
       location = BookLocation.BookLocationR1(0.5, null, "id"),
       time = DateTime.now(DateTimeZone.UTC),
@@ -46,7 +46,7 @@ open class ReaderBookmarkPolicyContract {
     )
 
   val bookmark1 =
-    Bookmark(
+    Bookmark.create(
       opdsId = "opdsid-x",
       location = BookLocation.BookLocationR1(0.5, null, "id"),
       time = DateTime.now(DateTimeZone.UTC),

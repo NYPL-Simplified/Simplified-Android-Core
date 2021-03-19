@@ -504,7 +504,7 @@ abstract class ReaderBookmarkServiceContract {
 
     val startingBookmarks =
       listOf(
-        Bookmark(
+        Bookmark.create(
           opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
           location = BookLocation.BookLocationR1(0.5, null, "x"),
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
