@@ -1,6 +1,5 @@
 package org.nypl.simplified.viewer.epub.readium2
 
-import org.joda.time.DateTimeZone
 import org.librarysimplified.r2.api.SR2BookChapter
 import org.librarysimplified.r2.api.SR2BookMetadata
 import org.librarysimplified.r2.api.SR2Bookmark
