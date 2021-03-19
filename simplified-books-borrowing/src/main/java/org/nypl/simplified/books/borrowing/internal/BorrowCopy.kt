@@ -47,7 +47,7 @@ class BorrowCopy private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Copying from content...")
-    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
+    context.bookDownloadIsRunning("Requesting download...", receivedSize = 0L)
 
     return try {
       val currentURI = context.currentURICheck()
@@ -121,10 +121,9 @@ class BorrowCopy private constructor() : BorrowSubtaskType {
         var consumed = 0L
 
         context.bookDownloadIsRunning(
-          expectedSize = size,
+          message = "Copying...",
           receivedSize = consumed,
-          bytesPerSecond = 0L,
-          message = "Copying..."
+          expectedSize = size,
         )
 
         val perSecond = BorrowUnitsPerSecond(context.clock)
@@ -139,10 +138,9 @@ class BorrowCopy private constructor() : BorrowSubtaskType {
 
           if (perSecond.update(r.toLong())) {
             context.bookDownloadIsRunning(
-              expectedSize = size,
+              message = "Copying...",
               receivedSize = consumed,
-              bytesPerSecond = 0L,
-              message = "Copying..."
+              expectedSize = size,
             )
           }
         }

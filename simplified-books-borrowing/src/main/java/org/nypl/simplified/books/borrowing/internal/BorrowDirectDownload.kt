@@ -43,7 +43,11 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Downloading directly...")
-    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
+    context.bookDownloadIsRunning(
+      "Requesting download...",
+      receivedSize = 0,
+      bytesPerSecond = 0
+    )
 
     BorrowHTTP.download(context)
   }

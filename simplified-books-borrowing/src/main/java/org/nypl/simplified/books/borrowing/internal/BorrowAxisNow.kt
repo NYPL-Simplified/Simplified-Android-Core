@@ -42,7 +42,6 @@ class BorrowAxisNow private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     try {
-      context.bookDownloadIsRunning(100L, 0L, 1L, "Downloading...")
       checkDRMSupport(context)
 
       context.taskRecorder.beginNewStep("Downloading AxisNow token...")
@@ -105,6 +104,7 @@ class BorrowAxisNow private constructor() : BorrowSubtaskType {
   }
 
   private fun fulfill(context: BorrowContextType, token: ByteArray) {
+    context.bookDownloadIsRunning("Downloading...")
     context.taskRecorder.beginNewStep("Fulfilling book...")
     context.checkCancelled()
 

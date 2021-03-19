@@ -47,7 +47,11 @@ class BorrowSAMLDownload private constructor() : BorrowSubtaskType {
     context: BorrowContextType
   ) {
     context.taskRecorder.beginNewStep("Downloading with SAML auth...")
-    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
+    context.bookDownloadIsRunning(
+      "Requesting download...",
+      receivedSize = 0L,
+      bytesPerSecond = 0L
+    )
 
     val cookieStore = createAccountCookieStore(context.account)
 

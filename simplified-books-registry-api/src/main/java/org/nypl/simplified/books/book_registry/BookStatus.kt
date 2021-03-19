@@ -300,18 +300,21 @@ sealed class BookStatus {
      * The current number of downloaded bytes
      */
 
-    val currentTotalBytes: Long,
+    val currentTotalBytes: Long?,
 
     /**
      * The expected total bytes
      */
 
-    val expectedTotalBytes: Long,
+    val expectedTotalBytes: Long?,
     val detailMessage: String
   ) : BookStatus() {
 
-    val progressPercent: Double =
-      (this.currentTotalBytes.toDouble() / this.expectedTotalBytes.toDouble()) * 100.0
+    val progressPercent: Double? =
+      this.currentTotalBytes?.let { currentTotalBytes ->
+        val expectedTotalBytes = this.expectedTotalBytes ?: 100.0
+        (currentTotalBytes.toDouble() / expectedTotalBytes.toDouble()) * 100.0
+      }
 
     override val priority: BookStatusPriorityOrdering
       get() = BookStatusPriorityOrdering.BOOK_STATUS_DOWNLOAD_IN_PROGRESS

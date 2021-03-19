@@ -51,7 +51,11 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Downloading audio book...")
-    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
+    context.bookDownloadIsRunning(
+      "Requesting download...",
+      receivedSize = 0L,
+      expectedSize = 100L,
+      bytesPerSecond = 0L)
 
     return try {
       val currentURI = context.currentURICheck()
@@ -117,10 +121,10 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
     val subscription =
       strategy.events.subscribe { message ->
         context.bookDownloadIsRunning(
-          expectedSize = 100L,
+          message = message,
           receivedSize = 50L,
-          bytesPerSecond = 0L,
-          message = message
+          expectedSize = 100L,
+          bytesPerSecond = 0L
         )
       }
 

@@ -74,10 +74,10 @@ class MockBorrowContext(
   }
 
   override fun bookDownloadIsRunning(
+    message: String,
+    receivedSize: Long?,
     expectedSize: Long?,
-    receivedSize: Long,
-    bytesPerSecond: Long,
-    message: String
+    bytesPerSecond: Long?
   ) {
     this.logDebug("downloading: {} {} {}", expectedSize, receivedSize, bytesPerSecond)
 
@@ -85,7 +85,7 @@ class MockBorrowContext(
       BookStatus.Downloading(
         id = this.bookCurrent.id,
         currentTotalBytes = receivedSize,
-        expectedTotalBytes = expectedSize ?: 100L,
+        expectedTotalBytes = expectedSize,
         detailMessage = message
       )
     )

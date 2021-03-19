@@ -176,10 +176,10 @@ interface BorrowContextType {
    */
 
   fun bookDownloadIsRunning(
-    expectedSize: Long?,
-    receivedSize: Long,
-    bytesPerSecond: Long,
-    message: String
+    message: String,
+    receivedSize: Long? = null,
+    expectedSize: Long? = null,
+    bytesPerSecond: Long? = null
   )
 
   /**
