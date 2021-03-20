@@ -10,7 +10,6 @@ dependencies {
 
   api libraries.io7m_jfunctional
 
-  implementation libraries.jodah_expiringmap
   implementation libraries.kotlin_stdlib
   implementation libraries.nypl_http_api
   implementation libraries.slf4j

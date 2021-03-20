@@ -979,11 +979,11 @@ abstract class BookRevokeTaskContract {
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
     Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
+      feedLoader.fetchURI(
+        account = this.anyNonNull(),
+        uri = this.anyNonNull(),
+        auth = this.anyNonNull(),
+        method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
@@ -1395,11 +1395,11 @@ abstract class BookRevokeTaskContract {
       FeedLoaderResult.FeedLoaderSuccess(feed)
 
     Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
+      feedLoader.fetchURI(
+        account = this.anyNonNull(),
+        uri = this.anyNonNull(),
+        auth = this.anyNonNull(),
+        method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
@@ -1493,11 +1493,11 @@ abstract class BookRevokeTaskContract {
       )
 
     Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
+      feedLoader.fetchURI(
+        account = this.anyNonNull(),
+        uri = this.anyNonNull(),
+        auth = this.anyNonNull(),
+        method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
@@ -1583,11 +1583,11 @@ abstract class BookRevokeTaskContract {
       Mockito.mock(FeedLoaderType::class.java)
 
     Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
+      feedLoader.fetchURI(
+        account = this.anyNonNull(),
+        uri = this.anyNonNull(),
+        auth = this.anyNonNull(),
+        method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(SettableFuture.create()))
 
@@ -1849,11 +1849,11 @@ abstract class BookRevokeTaskContract {
       Mockito.mock(FeedLoaderType::class.java)
 
     Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
+      feedLoader.fetchURI(
+        account = this.anyNonNull(),
+        uri = this.anyNonNull(),
+        auth = this.anyNonNull(),
+        method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
 
@@ -1942,11 +1942,11 @@ abstract class BookRevokeTaskContract {
       Mockito.mock(FeedLoaderType::class.java)
 
     Mockito.`when`(
-      feedLoader.fetchURIRefreshing(
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull(),
-        this.anyNonNull()
+      feedLoader.fetchURI(
+        account = this.anyNonNull(),
+        uri = this.anyNonNull(),
+        auth = this.anyNonNull(),
+        method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
 

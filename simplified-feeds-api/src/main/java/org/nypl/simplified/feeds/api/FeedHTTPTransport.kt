@@ -1,7 +1,9 @@
 package org.nypl.simplified.feeds.api
 
+import one.irradia.mime.api.MIMECompatibility
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.opds.core.OPDSFeedTransportException
 import org.nypl.simplified.opds.core.OPDSFeedTransportIOException
@@ -11,6 +13,7 @@ import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
+import java.util.Locale
 
 /**
  * An implementation of the [OPDSFeedTransportType] interface that uses an
@@ -36,6 +39,7 @@ class FeedHTTPTransport(
     val request =
       this.http.newRequest(uri)
         .setAuthorization(auth)
+        .setMethod(this.methodOfName(method))
         .build()
 
     val response = request.execute()
@@ -55,6 +59,17 @@ class FeedHTTPTransport(
           message = "Connection failed",
           cause = IOException(status.exception)
         )
+    }
+  }
+
+  private fun methodOfName(method: String): LSHTTPRequestBuilderType.Method {
+    return when (method.toUpperCase(Locale.ROOT)) {
+      "GET" -> LSHTTPRequestBuilderType.Method.Get
+      "HEAD" -> LSHTTPRequestBuilderType.Method.Head
+      "POST" -> LSHTTPRequestBuilderType.Method.Post(ByteArray(0), MIMECompatibility.applicationOctetStream)
+      "PUT" -> LSHTTPRequestBuilderType.Method.Put(ByteArray(0), MIMECompatibility.applicationOctetStream)
+      "DELETE" -> LSHTTPRequestBuilderType.Method.Delete
+      else -> throw IllegalArgumentException("Unsupported request method: $method")
     }
   }
 }

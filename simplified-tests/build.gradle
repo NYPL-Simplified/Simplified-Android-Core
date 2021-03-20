@@ -75,7 +75,6 @@ dependencies {
   implementation libraries.io7m_jfunctional
   implementation libraries.io7m_jnull
   implementation libraries.jackson_databind
-  implementation libraries.jodah_expiringmap
   implementation libraries.junit
   implementation libraries.kotlin_stdlib
   implementation libraries.okhttp3_mockwebserver

@@ -183,9 +183,10 @@ class CatalogFeedViewModel(
 
     val future =
       this.feedLoader.fetchURIWithBookRegistryEntries(
-        account.id,
-        arguments.feedURI,
-        authentication
+        account = account.id,
+        uri = arguments.feedURI,
+        auth = authentication,
+        method = "GET"
       )
 
     return this.createNewStatus(
