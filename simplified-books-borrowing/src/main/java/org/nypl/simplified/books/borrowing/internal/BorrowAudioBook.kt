@@ -55,7 +55,8 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
       "Requesting download...",
       receivedSize = 0L,
       expectedSize = 100L,
-      bytesPerSecond = 0L)
+      bytesPerSecond = 0L
+    )
 
     return try {
       val currentURI = context.currentURICheck()

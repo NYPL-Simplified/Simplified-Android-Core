@@ -13,7 +13,6 @@ import org.nypl.simplified.json.core.JSONSerializerUtilities
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**

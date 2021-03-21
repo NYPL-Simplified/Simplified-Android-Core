@@ -797,7 +797,7 @@ class CatalogFragmentBookDetail : Fragment() {
     val progressPercent = bookStatus.progressPercent?.toInt()
     if (progressPercent != null) {
       this.statusInProgressText.visibility = View.VISIBLE
-      this.statusInProgressText.text = "${progressPercent}%"
+      this.statusInProgressText.text = "$progressPercent%"
       this.statusInProgressBar.isIndeterminate = false
       this.statusInProgressBar.progress = progressPercent
     } else {

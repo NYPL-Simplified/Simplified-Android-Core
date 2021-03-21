@@ -14,7 +14,6 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.tests.TestDirectories
 import java.io.File
-import java.nio.ByteBuffer
 
 abstract class BookDRMInformationHandleACSContract {
 
