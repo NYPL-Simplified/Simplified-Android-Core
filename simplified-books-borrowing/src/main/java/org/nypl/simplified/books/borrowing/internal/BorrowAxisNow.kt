@@ -44,6 +44,13 @@ class BorrowAxisNow private constructor() : BorrowSubtaskType {
     try {
       checkDRMSupport(context)
 
+      context.bookDownloadIsRunning(
+        "Downloading...",
+        receivedSize = 0L,
+        expectedSize = 100L,
+        bytesPerSecond = 1L
+      )
+
       context.taskRecorder.beginNewStep("Downloading AxisNow token...")
 
       val currentURI = context.currentURICheck()
