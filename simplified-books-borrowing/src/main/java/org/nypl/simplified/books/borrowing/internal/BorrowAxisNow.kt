@@ -10,6 +10,7 @@ import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.borrowing.BorrowContextType
+import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.axisNowNotSupported
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
@@ -42,14 +43,14 @@ class BorrowAxisNow private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     try {
-      checkDRMSupport(context)
-
       context.bookDownloadIsRunning(
         "Downloading...",
         receivedSize = 0L,
         expectedSize = 100L,
         bytesPerSecond = 1L
       )
+
+      this.checkDRMSupport(context)
 
       context.taskRecorder.beginNewStep("Downloading AxisNow token...")
 
@@ -104,7 +105,7 @@ class BorrowAxisNow private constructor() : BorrowSubtaskType {
     if (context.axisNowService == null) {
       context.taskRecorder.currentStepFailed(
         message = "This build of the application does not support AxisNow DRM.",
-        errorCode = BorrowErrorCodes.axisNowNotSupported
+        errorCode = axisNowNotSupported
       )
       throw BorrowSubtaskFailed()
     }
