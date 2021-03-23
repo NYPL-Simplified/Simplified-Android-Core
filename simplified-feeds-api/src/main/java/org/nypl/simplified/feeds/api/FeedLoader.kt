@@ -1,11 +1,8 @@
 package org.nypl.simplified.feeds.api
 
 import com.google.common.util.concurrent.FluentFuture
-import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.Some
-import net.jodah.expiringmap.ExpiringMap
-import net.jodah.expiringmap.ExpiringMap.ExpirationListener
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
@@ -38,7 +35,6 @@ import java.io.FileNotFoundException
 import java.net.URI
 import java.util.SortedMap
 import java.util.concurrent.Callable
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -52,17 +48,12 @@ class FeedLoader private constructor(
   private val bookFormatSupport: BookFormatSupportType,
   private val bookRegistry: BookRegistryReadableType,
   private val bundledContent: BundledContentResolverType,
-  private val cache: ExpiringMap<URI, Feed>,
   private val contentResolver: ContentResolverType,
   private val exec: ListeningExecutorService,
   private val parser: OPDSFeedParserType,
   private val searchParser: OPDSSearchParserType,
   private val transport: OPDSFeedTransportType<LSHTTPAuthorizationType?>
-) : FeedLoaderType, ExpirationListener<URI, Feed> {
-
-  init {
-    this.cache.addExpirationListener(this)
-  }
+) : FeedLoaderType {
 
   private val log = LoggerFactory.getLogger(FeedLoader::class.java)
 
@@ -70,16 +61,9 @@ class FeedLoader private constructor(
     accountId: AccountID,
     uri: URI,
     auth: LSHTTPAuthorizationType?,
-    updateFromRegistry: Boolean
+    updateFromRegistry: Boolean,
+    method: String
   ): FluentFuture<FeedLoaderResult> {
-    if (this.cache.containsKey(uri)) {
-      return FluentFuture.from(
-        Futures.immediateFuture(
-          FeedLoaderSuccess(this.cache[uri]!!) as FeedLoaderResult
-        )
-      )
-    }
-
     return FluentFuture.from(
       this.exec.submit(
         Callable {
@@ -87,7 +71,7 @@ class FeedLoader private constructor(
             accountId = accountId,
             uri = uri,
             auth = auth,
-            method = "GET",
+            method = method,
             updateFromRegistry = updateFromRegistry
           )
         }
@@ -102,56 +86,36 @@ class FeedLoader private constructor(
     get() = this.filterFlag.get()
     set(value) {
       this.filterFlag.set(value)
-      this.cache.clear()
     }
 
   override fun fetchURI(
     account: AccountID,
     uri: URI,
-    auth: LSHTTPAuthorizationType?
-  ): FluentFuture<FeedLoaderResult> {
-    return this.fetchURICore(
-      accountId = account,
-      uri = uri,
-      auth = auth,
-      updateFromRegistry = false
-    )
-  }
-
-  override fun fetchURIRefreshing(
-    account: AccountID,
-    uri: URI,
     auth: LSHTTPAuthorizationType?,
-    method: String
+    method: String,
   ): FluentFuture<FeedLoaderResult> {
-    this.invalidate(uri)
     return this.fetchURICore(
       accountId = account,
       uri = uri,
       auth = auth,
-      updateFromRegistry = false
+      updateFromRegistry = false,
+      method = method
     )
   }
 
   override fun fetchURIWithBookRegistryEntries(
     account: AccountID,
     uri: URI,
-    auth: LSHTTPAuthorizationType?
+    auth: LSHTTPAuthorizationType?,
+    method: String
   ): FluentFuture<FeedLoaderResult> {
     return this.fetchURICore(
       accountId = account,
       uri = uri,
       auth = auth,
-      updateFromRegistry = true
+      updateFromRegistry = true,
+      method = method
     )
-  }
-
-  override fun invalidate(uri: URI) {
-    this.cache.remove(uri)
-  }
-
-  override fun expired(key: URI, value: Feed) {
-    this.log.debug("expired feed: {}", key)
   }
 
   private fun isEntrySupported(
@@ -233,7 +197,6 @@ class FeedLoader private constructor(
         this.updateFeedFromBookRegistry(feed)
       }
 
-      this.cache[uri] = feed
       return FeedLoaderSuccess(feed)
     } catch (e: FeedHTTPTransportException) {
       this.log.error("feed transport exception: ", e)
@@ -393,17 +356,10 @@ class FeedLoader private constructor(
       bookRegistry: BookRegistryReadableType,
       bundledContent: BundledContentResolverType
     ): FeedLoaderType {
-      val cache =
-        ExpiringMap.builder()
-          .expirationPolicy(ExpiringMap.ExpirationPolicy.CREATED)
-          .expiration(5L, TimeUnit.MINUTES)
-          .build<URI, Feed>()
-
       return FeedLoader(
         bookFormatSupport = bookFormatSupport,
         bookRegistry = bookRegistry,
         bundledContent = bundledContent,
-        cache = cache,
         contentResolver = contentResolver,
         exec = exec,
         parser = parser,
