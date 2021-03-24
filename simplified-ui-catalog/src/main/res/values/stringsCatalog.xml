@@ -68,6 +68,7 @@
   <string name="catalogReload">Reload</string>
   <string name="catalogReportIssue">Report issue…</string>
   <string name="catalogRequesting">Requesting…</string>
+  <string name="catalogDownloading">Downloading…</string>
   <string name="catalogReserve">Reserve</string>
   <string name="catalogRetry">Retry</string>
   <string name="catalogReturn">Return</string>

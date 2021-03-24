@@ -3,7 +3,6 @@ package org.nypl.simplified.viewer.epub.readium2
 import android.app.Activity
 import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.Book
-import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.viewer.spi.ViewerPreferences
@@ -55,17 +54,10 @@ class ReaderViewerR2 : ViewerProviderType {
     val entry =
       FeedEntry.FeedEntryOPDS(book.account, book.entry)
 
-    val adobeRightsFile =
-      when (val drm = format.drmInformation) {
-        is BookDRMInformation.ACS -> drm.rights?.first
-        is BookDRMInformation.LCP -> null
-        BookDRMInformation.None -> null
-      }
-
     val parameters =
       Reader2ActivityParameters(
         accountId = book.account,
-        adobeRightsFile = adobeRightsFile,
+        drmInfo = format.drmInformation,
         bookId = bookId,
         file = file,
         entry = entry

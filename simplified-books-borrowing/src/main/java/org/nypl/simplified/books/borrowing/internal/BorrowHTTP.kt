@@ -185,14 +185,14 @@ object BorrowHTTP {
     when (event) {
       is DownloadReceiving -> {
         context.bookDownloadIsRunning(
-          expectedSize = event.expectedSize,
-          receivedSize = event.receivedSize,
-          bytesPerSecond = event.bytesPerSecond,
           message = this.downloadingMessage(
             expectedSize = event.expectedSize,
             currentSize = event.receivedSize,
             perSecond = event.bytesPerSecond
-          )
+          ),
+          receivedSize = event.receivedSize,
+          expectedSize = event.expectedSize,
+          bytesPerSecond = event.bytesPerSecond
         )
       }
 

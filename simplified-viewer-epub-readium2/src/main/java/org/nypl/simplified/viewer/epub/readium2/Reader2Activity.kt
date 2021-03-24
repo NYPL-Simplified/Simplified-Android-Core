@@ -39,11 +39,13 @@ import org.librarysimplified.r2.views.SR2ReaderViewModel
 import org.librarysimplified.r2.views.SR2ReaderViewModelFactory
 import org.librarysimplified.r2.views.SR2TOCFragment
 import org.librarysimplified.services.api.Services
+import org.nypl.drm.core.AdobeAdeptFileAsset
+import org.nypl.drm.core.AxisNowFileAsset
 import org.nypl.drm.core.ContentProtectionProvider
-import org.nypl.drm.core.DRMProtectedFile
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -221,13 +223,19 @@ class Reader2Activity : AppCompatActivity() {
       )
 
     val bookFile =
-      if (this.parameters.adobeRightsFile != null) {
-        DRMProtectedFile(
-          fileAsset = FileAsset(this.parameters.file),
-          adobeRightsFile = this.parameters.adobeRightsFile
-        )
-      } else {
-        FileAsset(this.parameters.file)
+      when (val drmInfo = this.parameters.drmInfo) {
+        is BookDRMInformation.ACS ->
+          AdobeAdeptFileAsset(
+            fileAsset = FileAsset(this.parameters.file),
+            adobeRightsFile = drmInfo.rights?.first
+          )
+        is BookDRMInformation.AXIS ->
+          AxisNowFileAsset(
+            fileAsset = FileAsset(this.parameters.file),
+            axisLicense = drmInfo.license,
+            axisUserKey = drmInfo.userKey
+          )
+        else -> FileAsset(this.parameters.file)
       }
 
     val readerParameters =

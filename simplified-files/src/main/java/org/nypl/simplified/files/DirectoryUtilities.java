@@ -75,4 +75,28 @@ public final class DirectoryUtilities
       }
     }
   }
+
+  /**
+   * Copy the directory {@code from} to {@code to}, including all subdirectories and files.
+   *
+   * @param from The source directory
+   * @param to   The target directory
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static void directoryCopy(
+    final File from,
+    final File to)
+    throws IOException
+  {
+    if (from.isDirectory()) {
+      directoryCreate(to);
+      for (String child : from.list()) {
+        directoryCopy(new File(from, child), new File(to, child));
+      }
+    } else {
+      FileUtilities.fileCopy(from, to);
+    }
+  }
 }

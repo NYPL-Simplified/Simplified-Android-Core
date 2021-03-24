@@ -39,7 +39,7 @@ class BorrowBearerToken : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Handling bearer token negotiation...")
-    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
+    context.bookDownloadIsRunning("Requesting download...", receivedSize = 0L)
 
     return try {
       val currentURI = context.currentURICheck()

@@ -55,7 +55,6 @@ import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.net.URI
-import java.nio.ByteBuffer
 
 /**
  * A migration from version 3.0 of the app (2019 pre-LFA master branch).
@@ -336,7 +335,7 @@ class MigrationFrom3Master(
     val rootObject = JSONParserUtilities.checkObject(null, rootNode)
     val loanID = AdobeLoanID(JSONParserUtilities.getString(rootObject, "loan-id"))
     val returnable = JSONParserUtilities.getBoolean(rootObject, "returnable")
-    return AdobeAdeptLoan(loanID, ByteBuffer.wrap(serialized), returnable)
+    return AdobeAdeptLoan(loanID, serialized, returnable)
   }
 
   /**

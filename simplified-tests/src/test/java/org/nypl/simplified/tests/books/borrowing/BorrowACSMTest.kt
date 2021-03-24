@@ -79,7 +79,6 @@ import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.TestDirectories.temporaryFileOf
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -842,7 +841,7 @@ class BorrowACSMTest {
         temporaryFile,
         AdobeAdeptLoan(
           adobeLoanID,
-          ByteBuffer.wrap("You're a blank. You don't have rights.".toByteArray()),
+          "You're a blank. You don't have rights.".toByteArray(),
           false
         )
       )
@@ -899,7 +898,7 @@ class BorrowACSMTest {
         temporaryFile,
         AdobeAdeptLoan(
           adobeLoanID,
-          ByteBuffer.wrap("You're a blank. You don't have rights.".toByteArray()),
+          "You're a blank. You don't have rights.".toByteArray(),
           false
         )
       )

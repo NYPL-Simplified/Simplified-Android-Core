@@ -13,6 +13,7 @@ import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkExplicit
 import org.nypl.simplified.books.api.BookmarkKind.ReaderBookmarkLastReadLocation
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
 import java.io.File
@@ -93,7 +94,11 @@ internal class DatabaseFormatHandleEPUB internal constructor(
 
   override fun deleteBookData() {
     val newFormat = synchronized(this.dataLock) {
-      FileUtilities.fileDelete(this.fileBook)
+      if (this.fileBook.isDirectory) {
+        DirectoryUtilities.directoryDelete(this.fileBook)
+      } else {
+        FileUtilities.fileDelete(this.fileBook)
+      }
       this.formatRef = this.formatRef.copy(file = null)
       this.formatRef
     }
@@ -103,7 +108,12 @@ internal class DatabaseFormatHandleEPUB internal constructor(
 
   override fun copyInBook(file: File) {
     val newFormat = synchronized(this.dataLock) {
-      FileUtilities.fileCopy(file, this.fileBook)
+      if (file.isDirectory) {
+        DirectoryUtilities.directoryCopy(file, this.fileBook)
+      } else {
+        FileUtilities.fileCopy(file, this.fileBook)
+      }
+
       this.formatRef = this.formatRef.copy(file = this.fileBook)
       this.formatRef
     }
@@ -162,7 +172,7 @@ internal class DatabaseFormatHandleEPUB internal constructor(
     ): BookFormat.BookFormatEPUB {
       return BookFormat.BookFormatEPUB(
         bookmarks = loadBookmarksIfPresent(objectMapper, fileBookmarks),
-        file = if (fileBook.isFile) fileBook else null,
+        file = if (fileBook.exists()) fileBook else null,
         lastReadLocation = loadLastReadLocationIfPresent(objectMapper, fileLastRead),
         contentType = contentType,
         drmInformation = drmInfo

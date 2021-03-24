@@ -22,5 +22,11 @@ enum class BookDRMKind {
    * See [BookDRMInformation.ACS]
    */
 
-  ACS
+  ACS,
+
+  /**
+   * See [BookDRMInformation.AXIS]
+   */
+
+  AXIS
 }

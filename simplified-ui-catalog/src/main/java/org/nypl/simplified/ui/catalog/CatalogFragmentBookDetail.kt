@@ -793,10 +793,19 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgress.visibility = View.VISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.INVISIBLE
-    this.statusInProgressText.visibility = View.VISIBLE
-    this.statusInProgressText.text = "${bookStatus.progressPercent.toInt()}%"
-    this.statusInProgressBar.isIndeterminate = false
-    this.statusInProgressBar.progress = bookStatus.progressPercent.toInt()
+
+    val progressPercent = bookStatus.progressPercent?.toInt()
+    if (progressPercent != null) {
+      this.statusInProgressText.visibility = View.VISIBLE
+      this.statusInProgressText.text = "$progressPercent%"
+      this.statusInProgressBar.isIndeterminate = false
+      this.statusInProgressBar.progress = progressPercent
+    } else {
+      this.statusInProgressText.visibility = View.GONE
+      this.statusInProgressBar.isIndeterminate = true
+      this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogDownloading))
+      this.checkButtonViewCount()
+    }
   }
 
   @UiThread

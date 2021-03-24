@@ -397,6 +397,7 @@ class BookRevokeTask(
         }
       }
       is BookDRMInformationHandle.LCPHandle,
+      is BookDRMInformationHandle.AxisHandle,
       is BookDRMInformationHandle.NoneHandle -> {
         // Nothing required
       }

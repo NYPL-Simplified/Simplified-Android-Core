@@ -19,6 +19,7 @@ import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions.AdobeDRMFulfillme
 import org.nypl.simplified.books.api.BookDRMKind.ACS
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle.ACSHandle
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle.LCPHandle
+import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle.AxisHandle
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle.NoneHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -81,7 +82,12 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     try {
-      context.bookDownloadIsRunning(100L, 0L, 1L, "Downloading...")
+      context.bookDownloadIsRunning(
+        "Downloading...",
+        receivedSize = 0L,
+        expectedSize = 100L,
+        bytesPerSecond = 1L
+      )
 
       this.checkDRMSupport(context)
       val credentials = this.checkRequiredCredentials(context)
@@ -235,6 +241,7 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
         )
       }
       is LCPHandle,
+      is AxisHandle,
       is NoneHandle ->
         throw UnreachableCodeException()
     }
@@ -291,14 +298,14 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
             netProvider = it.netProvider
 
             context.bookDownloadIsRunning(
-              expectedSize = 100L,
-              receivedSize = 0L,
-              bytesPerSecond = 1L,
               message = BorrowHTTP.downloadingMessage(
                 expectedSize = 100,
                 currentSize = 0L,
                 perSecond = 1L
-              )
+              ),
+              receivedSize = 0L,
+              expectedSize = 100L,
+              bytesPerSecond = 1L
             )
           },
           progress = { progress ->
@@ -308,14 +315,14 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
 
             if (unitsPerSecond.update(progress.toLong())) {
               context.bookDownloadIsRunning(
-                expectedSize = 100L,
-                receivedSize = progress.toLong(),
-                bytesPerSecond = 1L,
                 message = BorrowHTTP.downloadingMessage(
                   expectedSize = 100,
                   currentSize = progress.toLong(),
                   perSecond = 1L
-                )
+                ),
+                receivedSize = progress.toLong(),
+                expectedSize = 100L,
+                bytesPerSecond = 1L
               )
             }
           },
@@ -401,6 +408,7 @@ class BorrowACSM private constructor() : BorrowSubtaskType {
         }
       }
       is LCPHandle,
+      is AxisHandle,
       is NoneHandle ->
         throw UnreachableCodeException()
     }

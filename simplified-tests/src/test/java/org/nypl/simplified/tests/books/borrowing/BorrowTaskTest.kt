@@ -75,6 +75,7 @@ import org.nypl.simplified.tests.MockAdobeAdeptConnector
 import org.nypl.simplified.tests.MockAdobeAdeptExecutor
 import org.nypl.simplified.tests.MockAdobeAdeptNetProvider
 import org.nypl.simplified.tests.MockAdobeAdeptResourceProvider
+import org.nypl.simplified.tests.MockAxisNowService
 import org.nypl.simplified.tests.MockAudioBookManifestStrategies
 import org.nypl.simplified.tests.MockBookFormatSupport
 import org.nypl.simplified.tests.MockBorrowSubtaskDirectory
@@ -91,7 +92,6 @@ import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.Status.LOANED
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URI
-import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -115,6 +115,7 @@ class BorrowTaskTest {
   private lateinit var adobeExecutorService: ExecutorService
   private lateinit var adobeNetProvider: MockAdobeAdeptNetProvider
   private lateinit var adobeResourceProvider: MockAdobeAdeptResourceProvider
+  private lateinit var axisNowService: MockAxisNowService
   private lateinit var audioBookManifestStrategies: MockAudioBookManifestStrategies
   private lateinit var book: Book
   private lateinit var bookDatabase: BookDatabaseType
@@ -153,6 +154,7 @@ class BorrowTaskTest {
     return BorrowTask.createBorrowTask(
       requirements = BorrowRequirements(
         adobeExecutor = this.adobeExecutor,
+        axisNowService = this.axisNowService,
         audioBookManifestStrategies = this.audioBookManifestStrategies,
         bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
@@ -314,6 +316,8 @@ class BorrowTaskTest {
       Executors.newSingleThreadExecutor()
     this.adobeExecutor =
       MockAdobeAdeptExecutor(this.adobeExecutorService, this.adobeConnector)
+    this.axisNowService =
+      MockAxisNowService()
   }
 
   @After
@@ -561,7 +565,7 @@ class BorrowTaskTest {
         temporaryFile,
         AdobeAdeptLoan(
           adobeLoanID,
-          ByteBuffer.wrap("You're a blank. You don't have rights.".toByteArray()),
+          "You're a blank. You don't have rights.".toByteArray(),
           false
         )
       )

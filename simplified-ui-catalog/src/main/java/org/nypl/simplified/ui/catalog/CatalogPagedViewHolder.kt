@@ -544,8 +544,14 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.progress, View.VISIBLE)
 
     this.progressText.text = book.book.entry.title
-    this.progressProgress.isIndeterminate = false
-    this.progressProgress.progress = status.progressPercent.toInt()
+
+    val progressPercent = status.progressPercent?.toInt()
+    if (progressPercent != null) {
+      this.progressProgress.isIndeterminate = false
+      this.progressProgress.progress = progressPercent
+    } else {
+      this.progressProgress.isIndeterminate = true
+    }
   }
 
   @UiThread

@@ -194,7 +194,8 @@ class Simply3635Test {
         BookFormatSupportParameters(
           supportsPDF = false,
           supportsAdobeDRM = false,
-          supportsAudioBooks = null
+          supportsAudioBooks = null,
+          supportsAxisNow = false
         )
       )
 
