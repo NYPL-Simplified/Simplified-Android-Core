@@ -76,6 +76,8 @@ object BookDRMInformationHandles {
         BookDRMInformationHandleLCP(directory, format)
       BookDRMKind.ACS ->
         BookDRMInformationHandleACS(directory, format, onUpdate)
+      BookDRMKind.AXIS ->
+        BookDRMInformationHandleAxis(directory, format, onUpdate)
     }
   }
 

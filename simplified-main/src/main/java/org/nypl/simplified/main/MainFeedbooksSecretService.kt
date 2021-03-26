@@ -6,8 +6,8 @@ import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtensionConfigu
 import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
-import java.io.IOException
 import java.io.InputStream
+import java.lang.NullPointerException
 import java.util.Properties
 
 class MainFeedbooksSecretService private constructor(
@@ -23,30 +23,34 @@ class MainFeedbooksSecretService private constructor(
       context: Context
     ): AudioBookFeedbooksSecretServiceType? {
       return try {
-        context.assets.open("feedbooks.conf").use(::create)
+        context.assets.open("secrets.conf").use(::create)
       } catch (e: FileNotFoundException) {
-        this.logger.debug("could not initialize Feedbooks; feedbooks.conf not found")
+        this.logger.warn("failed to initialize Feedbooks; secrets.conf not found")
         null
-      } catch (e: IOException) {
-        this.logger.debug("could not initialize Feedbooks secret service: ", e)
-        throw IllegalStateException("could not initialize Feedbooks secret service", e)
+      } catch (e: Exception) {
+        this.logger.warn("failed to initialize Feedbooks", e)
+        null
       }
     }
 
     fun create(
       stream: InputStream
     ): AudioBookFeedbooksSecretServiceType {
-      val properties = Properties()
-      properties.load(stream)
+      val properties =
+        Properties().apply { load(stream) }
 
       val issuerURI =
-        properties.getProperty("issuerURL")
+        properties.getProperty("feedbooks.prod.issuer")
+          ?: throw NullPointerException("feedbooks.prod.issuer is missing")
       val sharedSecret =
-        Base64.decode(properties.getProperty("sharedSecret"), Base64.DEFAULT)
+        properties.getProperty("feedbooks.prod.secret")
+          ?: throw NullPointerException("feedbooks.prod.secret is missing")
+      val decodedSecret =
+        Base64.decode(sharedSecret, Base64.DEFAULT)
 
       return MainFeedbooksSecretService(
         FeedbooksPlayerExtensionConfiguration(
-          bearerTokenSecret = sharedSecret,
+          bearerTokenSecret = decodedSecret,
           issuerURL = issuerURI
         )
       )

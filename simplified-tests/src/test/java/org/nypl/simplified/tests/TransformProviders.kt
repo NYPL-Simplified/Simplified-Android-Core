@@ -51,6 +51,7 @@ class TransformProviders {
         val provider =
           AccountProvider(
             addAutomatically = false,
+            announcements = emptyList(),
             annotationsURI = null,
             authenticationDocumentURI = null,
             authentication = authentication,

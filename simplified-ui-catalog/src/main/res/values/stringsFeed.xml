@@ -18,4 +18,8 @@
   <string name="feedTitleBooks">Books</string>
   <string name="feedTitleCatalog">Catalog</string>
   <string name="feedTitleHolds">Holds</string>
+  <string name="ageGateBirthYearPrompt">Please enter your birth year</string>
+  <string name="selectYear">Select Year</string>
+  <string name="ageVerification">Age Verification</string>
+  <string name="next">Next</string>
 </resources>

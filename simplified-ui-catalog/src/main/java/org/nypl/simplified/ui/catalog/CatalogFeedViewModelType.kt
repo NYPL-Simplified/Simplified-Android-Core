@@ -2,6 +2,7 @@ package org.nypl.simplified.ui.catalog
 
 import android.os.Parcelable
 import io.reactivex.Observable
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedSearch
 import java.net.URI
@@ -37,6 +38,24 @@ interface CatalogFeedViewModelType {
     title: String,
     uri: URI,
     isSearchResults: Boolean
+  ): CatalogFeedArguments
+
+  /**
+   * Resolve a given URI as a remote feed. The URI, if non-absolute, is resolved against
+   * the current feed arguments in order to produce new arguments to load another feed. This
+   * method is intended to be called from book detail contexts, where there may not be a
+   * feed accessible that has unambiguous account ownership information (ownership can be
+   * per-book, and feeds can contain a mix of accounts).
+   *
+   * @param accountID The account ID that owns the book
+   * @param title The title of the target feed
+   * @param uri The URI of the target feed
+   */
+
+  fun resolveFeedFromBook(
+    accountID: AccountID,
+    title: String,
+    uri: URI
   ): CatalogFeedArguments
 
   /**

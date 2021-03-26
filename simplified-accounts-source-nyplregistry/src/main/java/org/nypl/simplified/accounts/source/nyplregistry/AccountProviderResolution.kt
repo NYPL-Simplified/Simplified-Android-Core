@@ -11,6 +11,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_INTERMEDIARY_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.SAML_2_0_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
@@ -82,6 +83,9 @@ class AccountProviderResolution(
           Pair(AccountProviderAuthenticationDescription.Anonymous, listOf())
         }
 
+      val announcements =
+        authDocument?.announcements ?: emptyList()
+
       val updated =
         DateTime.now()
 
@@ -96,16 +100,13 @@ class AccountProviderResolution(
       val title =
         this.findTitle(authDocument)
 
-      /*
-       * The annotations URI can only be located by an authenticated user. We'll update
-       * this account provider instance when the user views their loans feed.
-       */
-
-      val annotationsURI = null
+      val annotationsURI =
+        this.findAnnotationsLink()
 
       val accountProvider =
         AccountProvider(
           addAutomatically = this.description.isAutomatic,
+          announcements = announcements,
           annotationsURI = annotationsURI,
           authentication = authentications.first,
           authenticationAlternatives = authentications.second,
@@ -139,6 +140,18 @@ class AccountProviderResolution(
       )
       taskRecorder.finishFailure()
     }
+  }
+
+  /*
+   * The annotations URI can only be located by an authenticated user, but there _might_ be
+   * one left over from the original description. We'll use that if one exists.
+   */
+
+  private fun findAnnotationsLink(): URI? {
+    return this.description.links.firstOrNull {
+      link ->
+      link.relation == "http://www.w3.org/ns/oa#annotationService"
+    }?.hrefURI
   }
 
   private fun findTitle(
@@ -216,6 +229,11 @@ class AccountProviderResolution(
           authObjects.add(AccountProviderAuthenticationDescription.Anonymous)
           break@accumulateAuthentications
         }
+        SAML_2_0_TYPE -> {
+          authObjects.add(
+            this.extractAuthenticationDescriptionSAML20(taskRecorder, authObject)
+          )
+        }
         else -> {
           this.logger.warn("encountered unrecognized authentication type: {}", authType)
         }
@@ -230,6 +248,29 @@ class AccountProviderResolution(
     val message = this.stringResources.resolvingAuthDocumentNoUsableAuthenticationTypes
     taskRecorder.currentStepFailed(message, authDocumentUnusable(this.description))
     throw IOException(message)
+  }
+
+  private fun extractAuthenticationDescriptionSAML20(
+    taskRecorder: TaskRecorderType,
+    authObject: AuthenticationObject
+  ): AccountProviderAuthenticationDescription {
+    val authenticate =
+      authObject.links.find { link -> link.relation == "authenticate" }
+    val logo =
+      authObject.links.find { link -> link.relation == "logo" }
+
+    val authenticateURI = authenticate?.hrefURI
+    if (authenticateURI == null) {
+      val message = this.stringResources.resolvingAuthDocumentSAML20Malformed
+      taskRecorder.currentStepFailed(message, authDocumentUnusable(this.description))
+      throw IOException(message)
+    }
+
+    return AccountProviderAuthenticationDescription.SAML2_0(
+      authenticate = authenticateURI,
+      description = authObject.description,
+      logoURI = logo?.hrefURI
+    )
   }
 
   private fun extractAuthenticationDescriptionOAuthIntermediary(

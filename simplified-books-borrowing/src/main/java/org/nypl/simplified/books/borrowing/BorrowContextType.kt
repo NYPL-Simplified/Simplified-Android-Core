@@ -4,6 +4,7 @@ import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AxisNowServiceType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
@@ -28,6 +29,7 @@ import java.net.URI
 interface BorrowContextType {
   val account: AccountReadableType
   val adobeExecutor: AdobeAdeptExecutorType?
+  val axisNowService: AxisNowServiceType?
   val audioBookManifestStrategies: AudioBookManifestStrategiesType
   val bundledContent: BundledContentResolverType
   val clock: () -> Instant
@@ -163,14 +165,21 @@ interface BorrowContextType {
   val bookCurrent: Book
 
   /**
+   * Indicate that downloading of the current book is stopped because external authentication is
+   * required.
+   */
+
+  fun bookDownloadIsWaitingForExternalAuthentication()
+
+  /**
    * Called by subtasks to indicate that a book is currently in the process of being downloaded.
    */
 
   fun bookDownloadIsRunning(
-    expectedSize: Long?,
-    receivedSize: Long,
-    bytesPerSecond: Long,
-    message: String
+    message: String,
+    receivedSize: Long? = null,
+    expectedSize: Long? = null,
+    bytesPerSecond: Long? = null
   )
 
   /**

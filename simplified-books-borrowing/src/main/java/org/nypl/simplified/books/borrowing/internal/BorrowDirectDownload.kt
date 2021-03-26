@@ -1,25 +1,13 @@
 package org.nypl.simplified.books.borrowing.internal
 
-import com.io7m.junreachable.UnreachableCodeException
 import one.irradia.mime.api.MIMECompatibility
 import one.irradia.mime.api.MIMEType
-import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadCancelled
-import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadCompletedSuccessfully
-import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadFailed.DownloadFailedExceptionally
-import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadFailed.DownloadFailedServer
-import org.librarysimplified.http.downloads.LSHTTPDownloadState.LSHTTPDownloadResult.DownloadFailed.DownloadFailedUnacceptableMIME
-import org.librarysimplified.http.downloads.LSHTTPDownloads
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.borrowing.BorrowContextType
-import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskCancelled
-import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskFactoryType
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskType
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericPDFFiles
-import java.io.File
 import java.net.URI
 
 /**
@@ -40,7 +28,8 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
 
     override fun isApplicableFor(
       type: MIMEType,
-      target: URI?
+      target: URI?,
+      account: AccountReadableType?
     ): Boolean {
       if (MIMECompatibility.isCompatibleStrictWithoutAttributes(type, genericEPUBFiles)) {
         return true
@@ -54,63 +43,12 @@ class BorrowDirectDownload private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Downloading directly...")
-    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
+    context.bookDownloadIsRunning(
+      "Requesting download...",
+      receivedSize = 0,
+      bytesPerSecond = 0
+    )
 
-    return try {
-      val currentURI = context.currentURICheck()
-      context.logDebug("downloading {}", currentURI)
-      context.taskRecorder.beginNewStep("Downloading $currentURI...")
-      context.taskRecorder.addAttribute("URI", currentURI.toString())
-
-      val temporaryFile = context.temporaryFile()
-
-      try {
-        val downloadRequest =
-          BorrowHTTP.createDownloadRequest(
-            context = context,
-            target = currentURI,
-            outputFile = temporaryFile
-          )
-
-        when (val result = LSHTTPDownloads.download(downloadRequest)) {
-          DownloadCancelled ->
-            throw BorrowSubtaskCancelled()
-          is DownloadFailedServer ->
-            throw BorrowHTTP.onDownloadFailedServer(context, result)
-          is DownloadFailedUnacceptableMIME ->
-            throw BorrowSubtaskFailed()
-          is DownloadFailedExceptionally ->
-            throw BorrowHTTP.onDownloadFailedExceptionally(context, result)
-          is DownloadCompletedSuccessfully ->
-            this.saveDownloadedContent(context, temporaryFile)
-        }
-      } finally {
-        temporaryFile.delete()
-      }
-    } catch (e: BorrowSubtaskFailed) {
-      context.bookDownloadFailed()
-      throw e
-    }
-  }
-
-  private fun saveDownloadedContent(
-    context: BorrowContextType,
-    temporaryFile: File
-  ) {
-    context.taskRecorder.beginNewStep("Saving book...")
-
-    return when (val formatHandle = context.bookDatabaseEntry.findFormatHandleForContentType(context.currentAcquisitionPathElement.mimeType)) {
-      is BookDatabaseEntryFormatHandleEPUB -> {
-        formatHandle.copyInBook(temporaryFile)
-        context.bookDownloadSucceeded()
-      }
-      is BookDatabaseEntryFormatHandlePDF -> {
-        formatHandle.copyInBook(temporaryFile)
-        context.bookDownloadSucceeded()
-      }
-      is BookDatabaseEntryFormatHandleAudioBook,
-      null ->
-        throw UnreachableCodeException()
-    }
+    BorrowHTTP.download(context)
   }
 }

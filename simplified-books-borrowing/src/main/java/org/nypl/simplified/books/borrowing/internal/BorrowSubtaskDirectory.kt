@@ -10,9 +10,11 @@ class BorrowSubtaskDirectory : BorrowSubtaskDirectoryType {
   override val subtasks =
     listOf(
       BorrowACSM,
+      BorrowAxisNow,
       BorrowAudioBook,
       BorrowBearerToken,
       BorrowCopy,
+      BorrowSAMLDownload,
       BorrowDirectDownload,
       BorrowLoanCreate
     )

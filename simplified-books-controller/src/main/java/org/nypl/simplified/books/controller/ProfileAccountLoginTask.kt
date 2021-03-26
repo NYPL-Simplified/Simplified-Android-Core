@@ -20,6 +20,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.SAML2_0
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.patron.api.PatronDRM
@@ -31,6 +32,9 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Ba
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.SAML20Cancel
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.SAML20Complete
+import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.SAML20Initiate
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
@@ -114,6 +118,12 @@ class ProfileAccountLoginTask(
           this.runOAuthWithIntermediaryComplete(this.request)
         is OAuthWithIntermediaryCancel ->
           this.runOAuthWithIntermediaryCancel(this.request)
+        is SAML20Initiate ->
+          this.runSAML20Initiate(this.request)
+        is SAML20Complete ->
+          this.runSAML20Complete(this.request)
+        is SAML20Cancel ->
+          this.runSAML20Cancel(this.request)
       }
     } catch (e: Throwable) {
       this.logger.error("error during login process: ", e)
@@ -124,6 +134,77 @@ class ProfileAccountLoginTask(
       this.account.setLoginState(AccountLoginFailed(failure))
       failure
     }
+  }
+
+  private fun runSAML20Cancel(
+    request: SAML20Cancel
+  ): TaskResult<Unit> {
+    this.steps.beginNewStep("Cancelling login...")
+    return when (this.account.loginState) {
+      is AccountLoggingIn,
+      is AccountLoggingInWaitingForExternalAuthentication -> {
+        this.account.setLoginState(AccountNotLoggedIn)
+        this.steps.finishSuccess(Unit)
+      }
+
+      AccountNotLoggedIn,
+      is AccountLoginFailed,
+      is AccountLoggedIn,
+      is AccountLoggingOut,
+      is AccountLogoutFailed -> {
+        this.steps.currentStepSucceeded(
+          "Ignored the cancellation attempt because the account wasn't waiting for authentication."
+        )
+        this.steps.finishSuccess(Unit)
+      }
+    }
+  }
+
+  private fun runSAML20Complete(
+    request: SAML20Complete
+  ): TaskResult<Unit> {
+    this.steps.beginNewStep("Accepting login token...")
+    return when (this.account.loginState) {
+      is AccountLoggingIn,
+      is AccountLoggingInWaitingForExternalAuthentication -> {
+        this.credentials =
+          AccountAuthenticationCredentials.SAML2_0(
+            accessToken = request.accessToken,
+            adobeCredentials = null,
+            authenticationDescription = this.findCurrentDescription().description,
+            patronInfo = request.patronInfo,
+            cookies = request.cookies
+          )
+
+        this.handlePatronUserProfile()
+        this.runDeviceActivation()
+        this.account.setLoginState(AccountLoggedIn(this.credentials))
+        this.steps.finishSuccess(Unit)
+      }
+
+      AccountNotLoggedIn,
+      is AccountLoginFailed,
+      is AccountLoggedIn,
+      is AccountLoggingOut,
+      is AccountLogoutFailed -> {
+        this.steps.currentStepSucceeded(
+          "Ignored the authentication token because the account wasn't waiting for one."
+        )
+        this.steps.finishSuccess(Unit)
+      }
+    }
+  }
+
+  private fun runSAML20Initiate(
+    request: SAML20Initiate
+  ): TaskResult<Unit> {
+    this.account.setLoginState(
+      AccountLoggingInWaitingForExternalAuthentication(
+        description = request.description,
+        status = "Waiting for authentication..."
+      )
+    )
+    return this.steps.finishSuccess(Unit)
   }
 
   private fun runOAuthWithIntermediaryCancel(
@@ -138,7 +219,6 @@ class ProfileAccountLoginTask(
       }
 
       AccountNotLoggedIn,
-      is AccountLoggingIn,
       is AccountLoginFailed,
       is AccountLoggedIn,
       is AccountLoggingOut,
@@ -233,17 +313,25 @@ class ProfileAccountLoginTask(
         (this.account.provider.authentication == this.request.description) ||
           (this.account.provider.authenticationAlternatives.any { it == this.request.description })
       }
+
       is OAuthWithIntermediaryInitiate -> {
         (this.account.provider.authentication == this.request.description) ||
           (this.account.provider.authenticationAlternatives.any { it == this.request.description })
       }
+      is OAuthWithIntermediaryCancel,
       is OAuthWithIntermediaryComplete -> {
-        return this.account.provider.authentication is OAuthWithIntermediary ||
+        this.account.provider.authentication is OAuthWithIntermediary ||
           (this.account.provider.authenticationAlternatives.any { it is OAuthWithIntermediary })
       }
-      is OAuthWithIntermediaryCancel -> {
-        return this.account.provider.authentication is OAuthWithIntermediary ||
-          (this.account.provider.authenticationAlternatives.any { it is OAuthWithIntermediary })
+
+      is SAML20Initiate -> {
+        (this.account.provider.authentication == this.request.description) ||
+          (this.account.provider.authenticationAlternatives.any { it == this.request.description })
+      }
+      is SAML20Cancel,
+      is SAML20Complete -> {
+        this.account.provider.authentication is SAML2_0 ||
+          (this.account.provider.authenticationAlternatives.any { it is SAML2_0 })
       }
     }
   }
@@ -303,8 +391,21 @@ class ProfileAccountLoginTask(
         "Must have returned at least one activation"
       )
 
+      /*
+       * Find the newly activated credentials (the one whose user id is not associated with any
+       * account). There should only be one, and it should be the last in the list, but this check
+       * makes sure.
+       */
+
+      val newPostCredentials = postCredentials.last { credentials ->
+        this.profile.accounts().values.none { account ->
+          account.loginState.credentials?.adobeCredentials?.postActivationCredentials?.userID ==
+            credentials.userID
+        }
+      }
+
       this.credentials = this.credentials.withAdobePreActivationCredentials(
-        adobePreCredentials.copy(postActivationCredentials = postCredentials.first())
+        adobePreCredentials.copy(postActivationCredentials = newPostCredentials)
       )
       this.steps.currentStepSucceeded(this.loginStrings.loginDeviceActivated)
     } catch (e: ExecutionException) {
@@ -403,6 +504,7 @@ class ProfileAccountLoginTask(
   private fun updateLoggingInState(step: TaskStep): Boolean {
     return when (this.request) {
       is Basic,
+      is SAML20Initiate,
       is OAuthWithIntermediaryInitiate -> {
         this.account.setLoginState(
           AccountLoggingIn(
@@ -413,6 +515,9 @@ class ProfileAccountLoginTask(
         )
         true
       }
+
+      is SAML20Cancel,
+      is SAML20Complete,
       is OAuthWithIntermediaryComplete,
       is OAuthWithIntermediaryCancel -> {
         when (this.account.loginState) {
@@ -452,6 +557,23 @@ class ProfileAccountLoginTask(
       is OAuthWithIntermediaryCancel ->
         this.request.description
       is OAuthWithIntermediaryComplete ->
+        when (val loginState = this.account.loginState) {
+          is AccountLoggingIn ->
+            loginState.description
+          is AccountLoggingInWaitingForExternalAuthentication ->
+            loginState.description
+          AccountNotLoggedIn,
+          is AccountLoginFailed,
+          is AccountLoggedIn,
+          is AccountLoggingOut,
+          is AccountLogoutFailed ->
+            throw NoCurrentDescription()
+        }
+      is SAML20Initiate ->
+        this.request.description
+      is SAML20Cancel ->
+        this.request.description
+      is SAML20Complete ->
         when (val loginState = this.account.loginState) {
           is AccountLoggingIn ->
             loginState.description

@@ -3,7 +3,6 @@ package org.nypl.simplified.viewer.epub.readium2
 import android.app.Activity
 import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.Book
-import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.viewer.spi.ViewerPreferences
@@ -34,11 +33,7 @@ class ReaderViewerR2 : ViewerProviderType {
       is BookFormat.BookFormatAudioBook ->
         false
       is BookFormat.BookFormatEPUB ->
-        when (format.drmInformation) {
-          is BookDRMInformation.ACS -> false
-          is BookDRMInformation.LCP -> true
-          BookDRMInformation.None -> true
-        }
+        true
     }
   }
 
@@ -52,16 +47,25 @@ class ReaderViewerR2 : ViewerProviderType {
     book: Book,
     format: BookFormat
   ) {
-    val bookId = book.id
-    val file = (format as BookFormat.BookFormatEPUB).file!!
-    val entry = FeedEntry.FeedEntryOPDS(book.account, book.entry)
+    val bookId =
+      book.id
+    val file =
+      (format as BookFormat.BookFormatEPUB).file!!
+    val entry =
+      FeedEntry.FeedEntryOPDS(book.account, book.entry)
 
-    ReaderActivity.startActivity(
-      accountId = book.account,
-      bookId = bookId,
+    val parameters =
+      Reader2ActivityParameters(
+        accountId = book.account,
+        drmInfo = format.drmInformation,
+        bookId = bookId,
+        file = file,
+        entry = entry
+      )
+
+    Reader2Activity.startActivity(
       context = activity,
-      entry = entry,
-      file = file
+      parameters = parameters
     )
   }
 }

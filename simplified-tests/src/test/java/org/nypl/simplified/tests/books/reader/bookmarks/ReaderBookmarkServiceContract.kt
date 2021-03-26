@@ -173,7 +173,8 @@ abstract class ReaderBookmarkServiceContract {
     val accountPreferences =
       AccountPreferences(
         bookmarkSyncingPermitted = true,
-        catalogURIOverride = null
+        catalogURIOverride = null,
+        announcementsAcknowledged = listOf()
       )
 
     val account =
@@ -352,7 +353,8 @@ abstract class ReaderBookmarkServiceContract {
     val accountPreferences =
       AccountPreferences(
         bookmarkSyncingPermitted = true,
-        catalogURIOverride = null
+        catalogURIOverride = null,
+        announcementsAcknowledged = listOf()
       )
 
     val account =
@@ -557,7 +559,8 @@ abstract class ReaderBookmarkServiceContract {
     val accountPreferences =
       AccountPreferences(
         bookmarkSyncingPermitted = true,
-        catalogURIOverride = null
+        catalogURIOverride = null,
+        announcementsAcknowledged = listOf()
       )
 
     val account =

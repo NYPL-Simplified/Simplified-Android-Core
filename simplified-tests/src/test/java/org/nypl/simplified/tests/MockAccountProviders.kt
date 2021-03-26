@@ -52,6 +52,7 @@ object MockAccountProviders {
   ): AccountProvider {
     return AccountProvider(
       addAutomatically = false,
+      announcements = emptyList(),
       annotationsURI = URI.create("http://$host:$port/accounts0/annotations"),
       authentication = AccountProviderAuthenticationDescription.Anonymous,
       authenticationAlternatives = listOf(),

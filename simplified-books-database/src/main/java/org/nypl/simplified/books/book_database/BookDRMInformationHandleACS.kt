@@ -13,7 +13,6 @@ import org.nypl.simplified.json.core.JSONSerializerUtilities
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -111,7 +110,7 @@ class BookDRMInformationHandleACS(
     val o = JSONParserUtilities.checkObject(null, jn)
     val loanID = AdobeLoanID(JSONParserUtilities.getString(o, "loan-id"))
     val returnable = JSONParserUtilities.getBoolean(o, "returnable")
-    val loan = AdobeAdeptLoan(loanID, ByteBuffer.wrap(serialized), returnable)
+    val loan = AdobeAdeptLoan(loanID, serialized, returnable)
     return Pair(fileAdobeRights, loan)
   }
 
@@ -161,7 +160,7 @@ class BookDRMInformationHandleACS(
           FileUtilities.fileWriteBytesAtomically(
             this.fileAdobeRights,
             this.fileAdobeRightsTmp,
-            loan.serialized.array()
+            loan.serialized
           )
 
           val o = this.objectMapper.createObjectNode()

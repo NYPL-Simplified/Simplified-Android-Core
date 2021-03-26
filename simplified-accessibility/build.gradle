@@ -1,0 +1,8 @@
+dependencies {
+  api libraries.androidx_lifecycle
+  api project(":simplified-books-registry-api")
+  api project(":simplified-ui-thread-api")
+
+  implementation libraries.kotlin_stdlib
+  implementation libraries.rxjava2
+}

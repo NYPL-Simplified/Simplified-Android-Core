@@ -1,0 +1,41 @@
+logger.info("Configuring ${project} (${POM_PACKAGING}) as jar project")
+
+apply plugin: "java"
+apply plugin: "java-library"
+apply plugin: "kotlin"
+
+java {
+  sourceCompatibility JavaVersion.VERSION_1_8
+  targetCompatibility JavaVersion.VERSION_1_8
+}
+
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+
+/*
+ * Apply the Animal Sniffer plugin to check that code is Android compatible.
+ */
+
+apply plugin: "ru.vyarus.animalsniffer"
+
+dependencies {
+  signature "org.codehaus.mojo.signature:java16:1.1@signature"
+  signature "net.sf.androidscents.signature:android-api-level-21:5.0.1_r2@signature"
+}
+
+/*
+ * Build an OSGi bundle.
+ */
+
+apply plugin: "biz.aQute.bnd.builder"
+
+jar {
+  bnd """
+Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
+
+-removeheaders: Bnd-LastModified, Tool, Private-Package
+"""
+}

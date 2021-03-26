@@ -10,6 +10,7 @@ dependencies {
   implementation project(":simplified-books-audio")
   implementation project(":simplified-books-borrowing")
   implementation project(":simplified-books-registry-api")
+  implementation project(":simplified-crashlytics-api")
   implementation project(":simplified-feeds-api")
   implementation project(":simplified-files")
   implementation project(":simplified-futures")
@@ -22,11 +23,11 @@ dependencies {
   implementation project(":simplified-services-api")
   implementation project(":simplified-taskrecorder-api")
 
-  implementation libraries.kotlinStdlib
-  implementation libraries.nyplAudiobookManifestFulfillAPI
-  implementation libraries.nyplHttpAPI
+  implementation libraries.kotlin_stdlib
+  implementation libraries.nypl_audiobook_manifest_fulfill_api
+  implementation libraries.nypl_http_api
   implementation libraries.slf4j
 
-  compileOnly libraries.autoValue
-  annotationProcessor libraries.autoValueProcessor
+  compileOnly libraries.google_autovalue
+  annotationProcessor libraries.google_autovalue_processor
 }

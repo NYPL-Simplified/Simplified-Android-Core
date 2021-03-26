@@ -1,10 +1,11 @@
 package org.nypl.simplified.opds.auth_document.api
 
+import org.nypl.simplified.announcements.Announcement
 import org.nypl.simplified.links.Link
 import java.net.URI
 
 /**
- * An authentication directory.
+ * An authentication document.
  *
  * @see "https://drafts.opds.io/authentication-for-opds-1.0.html#2-authentication-document"
  */
@@ -57,7 +58,15 @@ data class AuthenticationDocument(
    * @see "https://drafts.opds.io/authentication-for-opds-1.0.html#232-links"
    */
 
-  val links: List<Link>
+  val links: List<Link>,
+
+  /**
+   * Announcements provided by the library.
+   *
+   * @see "https://github.com/NYPL-Simplified/Simplified/wiki/Authentication-For-OPDS-Extensions#sitewide-announcements"
+   */
+
+  val announcements: List<Announcement>
 ) {
 
   val loansURI: URI? =

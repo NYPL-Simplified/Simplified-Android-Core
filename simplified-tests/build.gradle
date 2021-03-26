@@ -1,5 +1,14 @@
+android {
+  testOptions {
+    unitTests {
+      includeAndroidResources = true
+    }
+  }
+}
+
 dependencies {
 
+  api project(":simplified-accessibility")
   api project(":simplified-accounts-api")
   api project(":simplified-accounts-database")
   api project(":simplified-accounts-database-api")
@@ -47,34 +56,36 @@ dependencies {
   api project(":simplified-tenprint")
   api project(":simplified-threads")
   api project(":simplified-ui-branding")
+  api project(":simplified-ui-errorpage")
   api project(":simplified-ui-splash")
   api project(":simplified-ui-theme")
+  api project(":simplified-webview")
 
-  api libraries.nyplAudiobookAPI
-  api libraries.nyplAudiobookDownloads
-  api libraries.nyplAudiobookFeedbooks
-  api libraries.nyplAudiobookLicenseCheckAPI
-  api libraries.nyplAudiobookManifestFulfillAPI
-  api libraries.nyplAudiobookManifestFulfillBasic
-  api libraries.nyplAudiobookManifestWebPub
-  api libraries.nyplAudiobookOpenAccess
-  api libraries.nyplAudiobookRBDigital
-  api libraries.nyplAudiobookViews
+  api libraries.nypl_audiobook_api
+  api libraries.nypl_audiobook_downloads
+  api libraries.nypl_audiobook_feedbooks
+  api libraries.nypl_audiobook_manifest_license_check_api
+  api libraries.nypl_audiobook_manifest_fulfill_api
+  api libraries.nypl_audiobook_manifest_fulfill_basic
+  api libraries.nypl_audiobook_manifest_parser_webpub
+  api libraries.nypl_audiobook_open_access
+  api libraries.nypl_audiobook_rbdigital
+  api libraries.nypl_audiobook_views
 
-  implementation libraries.io7mJFunctional
-  implementation libraries.io7mJNull
-  implementation libraries.jacksonDatabind
-  implementation libraries.jodahExpiringMap
+  implementation libraries.io7m_jfunctional
+  implementation libraries.io7m_jnull
+  implementation libraries.jackson_databind
   implementation libraries.junit
-  implementation libraries.kotlinStdlib
-  implementation libraries.mockWebServer
-  implementation libraries.mockitoAndroid
-  implementation libraries.nyplDRMCore
-  implementation libraries.nyplHttpAPI
-  implementation libraries.nyplHttpVanilla
-  implementation libraries.nyplHttpBearerToken
+  implementation libraries.kotlin_stdlib
+  implementation libraries.okhttp3_mockwebserver
+  implementation libraries.mockito_android
+  implementation libraries.nypl_drm_core
+  implementation libraries.nypl_http_api
+  implementation libraries.nypl_http_vanilla
+  implementation libraries.nypl_http_bearer_token
   implementation libraries.slf4j
 
-  testImplementation libraries.logbackClassic
+  testImplementation libraries.logback_classic
   testImplementation libraries.junit
+  testImplementation libraries.robolectric
 }

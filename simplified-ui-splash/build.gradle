@@ -6,13 +6,13 @@ dependencies {
   api project(":simplified-profiles-controller-api")
   api project(":simplified-reports")
 
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXConstraintLayout
-  implementation libraries.androidXLegacySupport
-  implementation libraries.androidXLifecycle
-  implementation libraries.googleAndroidMaterial
-  implementation libraries.io7mJFunctional
-  implementation libraries.io7mJUnreachable
-  implementation libraries.kotlinStdlib
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_legacy_support_v4
+  implementation libraries.androidx_lifecycle
+  implementation libraries.google_material
+  implementation libraries.io7m_jfunctional
+  implementation libraries.io7m_junreachable
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 }

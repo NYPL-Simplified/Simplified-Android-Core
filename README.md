@@ -11,6 +11,13 @@ The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android clien
 
 _Image by [Predrag Kezic](https://pixabay.com/users/PredragKezic-582203/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=581229) from [Pixabay](https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=581229)_
 
+|Build|Status|
+|-----|------|
+|[Nightly, DRM, JDK 11](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+Authenticated%2C+JDK+11%29%22)|[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Daily%20Authenticated,%20JDK%2011)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+Authenticated%2C+JDK+11%29%22)|
+|[Nightly, DRM-Free, JDK 11](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+DRM-Free%2C+JDK+11%29%22)|[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Daily%20DRM-Free,%20JDK%2011)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+DRM-Free%2C+JDK+11%29%22)|
+|[Nightly, DRM-Free, JDK 15](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+DRM-Free%2C+JDK+15%29%22)|[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Daily%20DRM-Free,%20JDK%2015)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Daily+DRM-Free%2C+JDK+15%29%22)|
+|[Last Commit](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Authenticated%29%22)|[![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Authenticated)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Authenticated%29%22)|
+
 ### What Is This?
 
 The contents of this repository provide the framework of an application used to build,
@@ -22,8 +29,7 @@ dependencies on the framework, custom color schemes, and logos. The repository c
 an example frontend, [Vanilla](simplified-app-vanilla), that shows how this is achieved.
 
 The application frontend for the NYPL
-SimplyE application can be found in its [own
-repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
+SimplyE application can be found in its [own module](https://github.com/NYPL-Simplified/Simplified-Android-Core/tree/develop/simplified-app-simplye).
 
 ### Building
 
@@ -32,8 +38,6 @@ repository](https://github.com/NYPL-Simplified/Simplified-Android-SimplyE).
 The short version: Install an [Android SDK](#android-sdk) and run:
 
 ~~~
-$ echo "systemProp.org.gradle.internal.publish.checksums.insecure=true" >> "$HOME/.gradle/gradle.properties"
-
 $ ./gradlew clean assembleDebug test
 ~~~
 
@@ -46,11 +50,17 @@ support the use of any other IDE at the moment.
 
 #### JDK
 
-Install a reasonably modern JDK: Java 8 is the current recommendation for Android Studio.
-You must have Java SE 8u101 or [a newer version of Java SE 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-installed. This is because older versions of Java do not trust
-[Let's Encrypt](https://letsencrypt.org/) which provides the SSL certificate on our Nexus
-repository instance.
+Install a reasonably modern JDK: Java 11 is the current long-term support (LTS) release of Java. We
+perform nightly builds using the current LTS Java release, and the current bleeding-edge Java
+release in order to try to detect any upcoming compatibility issues, but we don't recommend building
+on anything other than the current LTS JDK for everyday usage.
+
+Any of the following JDKs should work:
+
+  * [OpenJDK](https://jdk.java.net/java-se-ri/11)
+  * [Adoptium](https://adoptopenjdk.net/)
+  * [Amazon Coretto](https://aws.amazon.com/corretto/)
+  * [Zulu](https://www.azul.com/downloads/zulu-community/?package=jdk)
 
 The `JAVA_HOME` environment variable must be set correctly. You can check what it is set to in
 most shells with `echo $JAVA_HOME`. If that command does not show anything, adding the following
@@ -58,8 +68,8 @@ line to `$HOME/.profile` and then executing `source $HOME/.profile` or opening a
 should suffice:
 
 ~~~w
-# Replace NNN with your particular version of 1.8.0.
-export JAVA_HOME=/path/to/jdk1.8.0_NNN
+# Replace NNN with your particular version of 11.
+export JAVA_HOME=/path/to/jdk-11+NNN
 ~~~
 
 You can verify that everything is set up correctly by inspecting the results of both
@@ -67,9 +77,9 @@ You can verify that everything is set up correctly by inspecting the results of 
 
 ~~~
 $ java -version
-openjdk version "1.8.0_222"
-OpenJDK Runtime Environment (build 1.8.0_222-b05)
-OpenJDK 64-Bit Server VM (build 25.222-b05, mixed mode)
+openjdk version "11.0.8" 2020-07-14
+OpenJDK Runtime Environment (build 11.0.8+10)
+OpenJDK 64-Bit Server VM (build 11.0.8+10, mixed mode)
 ~~~
 
 #### Nexus Credentials
@@ -95,7 +105,7 @@ org.librarysimplified.nexus.depend=true
 #### APK signing
 
 If you wish to generate a signed APK for publishing the Vanilla application, you will need to copy
-a keystore to `simplified-app-vanilla/keystore.jks` and set the following values correctly in
+a keystore to `release.jks` and set the following values correctly in
 `$HOME/.gradle/gradle.properties`:
 
 ~~~
@@ -111,19 +121,8 @@ need to use either of these commands to produce signed APK files:
 
 ~~~
 $ ./gradlew clean assembleRelease test
-
 $ ./gradlew clean assemble test
 ~~~
-
-#### Insecure checksums?
-
-Astute readers may have noticed the `org.gradle.internal.publish.checksums.insecure` property
-in the initial build instructions. This is necessary because Gradle 6 currently publishes
-checksums that [Maven Central doesn't like](https://github.com/gradle/gradle/issues/11308#issuecomment-554317655).
-Until Maven Central is updated to accept SHA256 and SHA512 checksums, this flag is necessary.
-As all artifacts published to Maven Central are PGP signed, this is not a serious issue; PGP
-signatures combine integrity checking and authentication, so checksum files are essentially
-redundant nowadays.
 
 ### Branching/Merging
 
@@ -134,11 +133,6 @@ automate some of the work of branching and tagging. Using `gitflow-avh`
 is not required, but by automating the underlying repository operations,
 it eliminates the possibility of making mistakes, and keeps the various
 branches consistent.
-
-### Releasing
-
-See our [RELEASING.md](RELEASING.md) document for information on how
-to perform releases.
 
 ### Project Structure / Architecture
 
@@ -233,6 +227,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.adobe.extensions](simplified-adobe-extensions)|Adobe DRM convenience functions|
 |[org.librarysimplified.analytics.api](simplified-analytics-api)|Analytics API|
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
+|[org.librarysimplified.android.ktx](simplified-android-ktx)|Kotlin Android Extensions|
+|[org.librarysimplified.announcements](simplified-announcements)|Announcements API|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
 |[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
@@ -289,6 +285,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.tests.sandbox](simplified-tests-sandbox)|Sandbox for informal testing|
 |[org.librarysimplified.threads](simplified-threads)|Thread utilities|
 |[org.librarysimplified.ui.accounts](simplified-ui-accounts)|Accounts UI components|
+|[org.librarysimplified.ui.announcements](simplified-ui-announcements)|Announcements UI components|
 |[org.librarysimplified.ui.branding](simplified-ui-branding)|Branding functionality|
 |[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|

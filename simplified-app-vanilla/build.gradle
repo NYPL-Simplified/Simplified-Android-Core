@@ -1,44 +1,15 @@
 android {
   defaultConfig {
     versionName = project.version
-    versionCode = versionCode(project.version)
-
-    // Append build number to version name, if on Travis CI
-    def buildNumber = (System.getenv('TRAVIS_BUILD_NUMBER') ?: "0").toInteger()
-    if (buildNumber > 0) {
-      versionName = "$versionName+$buildNumber"
-    }
-
-    setProperty("archivesBaseName", "$versionName-$versionCode")
+    versionCode = calculateVersionCode(project)
+    setProperty("archivesBaseName", "vanilla")
   }
-
-  packagingOptions {
-    doNotStrip 'lib/**/*.so'
-
-    // Readium and the PDF reader both provide this shared library. This causes
-    // the build to fail with an error because Gradle doesn't know which to pick.
-    pickFirst 'lib/x86/libc++_shared.so'
-    pickFirst 'lib/arm64-v8a/libc++_shared.so'
-    pickFirst 'lib/armeabi-v7a/libc++_shared.so'
-  }
-
-  signingConfigs {
-    release {
-      keyAlias nyplSigningKeyAlias
-      keyPassword nyplSigningKeyPassword
-      storeFile file("keystore.jks")
-      storePassword nyplSigningStorePassword
-    }
-  }
-
-  buildTypes {
-    debug {
-      ndk { abiFilters 'x86', 'arm64-v8a', 'armeabi-v7a' }
-      versionNameSuffix '-debug'
-    }
-    release {
-      ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
-      signingConfig signingConfigs.release
+  sourceSets {
+    main {
+      if (project.hasProperty('org.librarysimplified.app.assets.vanilla')) {
+        assets.srcDirs +=
+          project.getProperty('org.librarysimplified.app.assets.vanilla')
+      }
     }
   }
 
@@ -55,24 +26,11 @@ android {
   }
 }
 
-afterEvaluate {
-  def properties = new Properties()
-  properties.setProperty("versionCode", versionCode(version).toString())
-
-  def writer = new FileWriter(file("version.properties"))
-  try {
-    properties.store(writer, '')
-    writer.flush()
-  } finally {
-    writer.close()
-  }
-}
-
 dependencies {
   implementation project(":simplified-main")
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
-  annotationProcessor libraries.autoValueProcessor
+  annotationProcessor libraries.google_autovalue_processor
 
   vanillaWithProfilesImplementation project(":simplified-accounts-source-filebased")
 }

@@ -85,36 +85,40 @@ class CatalogPagedDataSource(
       return
     }
 
-    this.feedLoader.fetchURI(accountId, params.key, this.findAuthenticatedHTTP())
-      .map { result ->
-        return@map when (result) {
-          is FeedLoaderResult.FeedLoaderSuccess -> {
-            when (val feed = result.feed) {
-              is Feed.FeedWithoutGroups -> {
-                this.logger.debug("loadAfter: {}: received feed without groups", params.key)
-                callback.onResult(
-                  feed.entriesInOrder,
-                  feed.feedNext
-                )
-              }
-              is Feed.FeedWithGroups -> {
-                this.logger.error("loadAfter: {}: received feed with groups", params.key)
-                callback.onResult(
-                  mutableListOf(),
-                  feed.feedNext
-                )
-              }
+    this.feedLoader.fetchURI(
+      account = accountId,
+      uri = params.key,
+      auth = this.findAuthenticatedHTTP(),
+      method = "GET"
+    ).map { result ->
+      return@map when (result) {
+        is FeedLoaderResult.FeedLoaderSuccess -> {
+          when (val feed = result.feed) {
+            is Feed.FeedWithoutGroups -> {
+              this.logger.debug("loadAfter: {}: received feed without groups", params.key)
+              callback.onResult(
+                feed.entriesInOrder,
+                feed.feedNext
+              )
+            }
+            is Feed.FeedWithGroups -> {
+              this.logger.error("loadAfter: {}: received feed with groups", params.key)
+              callback.onResult(
+                mutableListOf(),
+                feed.feedNext
+              )
             }
           }
-          is FeedLoaderResult.FeedLoaderFailure -> {
-            this.logger.error("loadAfter: {}: ", params.key, result.exception)
-            callback.onResult(
-              mutableListOf(),
-              null
-            )
-          }
+        }
+        is FeedLoaderResult.FeedLoaderFailure -> {
+          this.logger.error("loadAfter: {}: ", params.key, result.exception)
+          callback.onResult(
+            mutableListOf(),
+            null
+          )
         }
       }
+    }
   }
 
   override fun loadBefore(
@@ -130,35 +134,39 @@ class CatalogPagedDataSource(
       return
     }
 
-    this.feedLoader.fetchURI(accountId, params.key, this.findAuthenticatedHTTP())
-      .map { result ->
-        return@map when (result) {
-          is FeedLoaderResult.FeedLoaderSuccess -> {
-            when (val feed = result.feed) {
-              is Feed.FeedWithoutGroups -> {
-                this.logger.debug("loadBefore: {}: received feed without groups", params.key)
-                callback.onResult(
-                  feed.entriesInOrder,
-                  feed.feedNext
-                )
-              }
-              is Feed.FeedWithGroups -> {
-                this.logger.error("loadBefore: {}: received feed with groups", params.key)
-                callback.onResult(
-                  mutableListOf(),
-                  feed.feedNext
-                )
-              }
+    this.feedLoader.fetchURI(
+      account = accountId,
+      uri = params.key,
+      auth = this.findAuthenticatedHTTP(),
+      method = "GET"
+    ).map { result ->
+      return@map when (result) {
+        is FeedLoaderResult.FeedLoaderSuccess -> {
+          when (val feed = result.feed) {
+            is Feed.FeedWithoutGroups -> {
+              this.logger.debug("loadBefore: {}: received feed without groups", params.key)
+              callback.onResult(
+                feed.entriesInOrder,
+                feed.feedNext
+              )
+            }
+            is Feed.FeedWithGroups -> {
+              this.logger.error("loadBefore: {}: received feed with groups", params.key)
+              callback.onResult(
+                mutableListOf(),
+                feed.feedNext
+              )
             }
           }
-          is FeedLoaderResult.FeedLoaderFailure -> {
-            this.logger.error("loadBefore: {}: ", params.key, result.exception)
-            callback.onResult(
-              mutableListOf(),
-              null
-            )
-          }
+        }
+        is FeedLoaderResult.FeedLoaderFailure -> {
+          this.logger.error("loadBefore: {}: ", params.key, result.exception)
+          callback.onResult(
+            mutableListOf(),
+            null
+          )
         }
       }
+    }
   }
 }

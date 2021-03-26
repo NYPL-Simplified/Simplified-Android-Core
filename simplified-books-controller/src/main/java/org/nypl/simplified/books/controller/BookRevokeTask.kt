@@ -285,7 +285,7 @@ class BookRevokeTask(
      */
 
     val feedResult = try {
-      this.feedLoader.fetchURIRefreshing(
+      this.feedLoader.fetchURI(
         this.account.id,
         targetURI,
         httpAuth,
@@ -397,6 +397,7 @@ class BookRevokeTask(
         }
       }
       is BookDRMInformationHandle.LCPHandle,
+      is BookDRMInformationHandle.AxisHandle,
       is BookDRMInformationHandle.NoneHandle -> {
         // Nothing required
       }

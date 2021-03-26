@@ -14,17 +14,18 @@
 # Ignore .so files
 **/jniLibs
 
-#
 # Certificates and API Keys
-#
-ReaderClientCert.sig 
-instabug.conf
 *.jks
-cardcreator.conf
-overdrive.json
+secrets.conf
+ReaderClientCert.sig
 
-# backup files
+# Backup files
 *~
 
+# Misc
 simplified-tests-sandbox/src/main/*
-simplified-app-vanilla/version.properties
+
+# deprecated
+cardcreator.conf
+overdrive.json
+feedbooks.conf

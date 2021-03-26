@@ -15,6 +15,7 @@ android {
 }
 
 dependencies {
+  api project(":simplified-accessibility")
   api project(":simplified-accounts-database")
   api project(":simplified-accounts-database-api")
   api project(":simplified-accounts-json")
@@ -23,6 +24,8 @@ dependencies {
   api project(":simplified-accounts-source-spi")
   api project(":simplified-adobe-extensions")
   api project(":simplified-analytics-api")
+  api project(":simplified-android-ktx")
+  api project(":simplified-announcements")
   api project(":simplified-books-audio")
   api project(":simplified-books-borrowing")
   api project(":simplified-books-controller")
@@ -51,6 +54,7 @@ dependencies {
   api project(":simplified-reader-bookmarks-api")
   api project(":simplified-services-api")
   api project(":simplified-threads")
+  api project(":simplified-ui-announcements")
   api project(":simplified-ui-branding")
   api project(":simplified-ui-images")
   api project(":simplified-ui-navigation-api")
@@ -66,13 +70,13 @@ dependencies {
   api project(":simplified-viewer-pdf")
   api project(":simplified-viewer-spi")
 
-  api libraries.androidAsync
-  api libraries.androidXAppCompat
-  api libraries.kotlinStdlib
-  api libraries.nyplHttpAPI
-  api libraries.nyplHttpBearerToken
-  api libraries.nyplHttpVanilla
+  api libraries.koush_async
+  api libraries.androidx_appcompat
+  api libraries.kotlin_stdlib
+  api libraries.nypl_http_api
+  api libraries.nypl_http_bearer_token
+  api libraries.nypl_http_vanilla
   api libraries.slf4j
 
-  api libraries.logbackAndroid
+  api libraries.logback_android
 }

@@ -1,0 +1,46 @@
+import org.librarysimplified.gradle.RequiredAssetsTask
+
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
+
+// Fail the build if these assets aren't present
+//
+def requiredFiles = [:]
+requiredFiles["ReaderClientCert.sig"] =
+  "633ef827f8815c40f077ffcdb8edae7a7ad00aedd5806438abdaf48e9c3b59fe"
+
+android {
+  defaultConfig {
+    versionName = project.version
+    versionCode = calculateVersionCode(project)
+    setProperty("archivesBaseName", "openebooks")
+  }
+  applicationVariants.all { variant ->
+    def finalizerTask =
+      tasks.create(name: "requiredFiles${variant.name.capitalize()}", type: RequiredAssetsTask) {
+        required = requiredFiles
+        apkFiles = variant.outputs.collect { out ->
+          out.outputFile
+        }
+      }
+    variant.assembleProvider.configure {
+      finalizedBy finalizerTask
+    }
+  }
+}
+
+dependencies {
+  implementation project(":simplified-main")
+  implementation project(":simplified-accounts-source-nyplregistry")
+  implementation project(":simplified-analytics-circulation")
+  implementation project(":simplified-crashlytics")
+  implementation libraries.firebase_analytics
+  implementation libraries.firebase_crashlytics
+  implementation libraries.nypl_drm_core
+  implementation libraries.nypl_findaway
+
+  if (nyplNexusDepend) {
+    implementation libraries.nypl_drm_adobe
+  }
+  annotationProcessor libraries.google_autovalue_processor
+}

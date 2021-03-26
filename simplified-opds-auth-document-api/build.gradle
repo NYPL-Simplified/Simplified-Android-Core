@@ -1,11 +1,12 @@
 dependencies {
+  api project(":simplified-announcements")
   api project(":simplified-links")
   api project(":simplified-parser-api")
 
-  api libraries.googleGuava
+  api libraries.google_guava
 
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
 
-  compileOnly libraries.autoValue
-  annotationProcessor libraries.autoValueProcessor
+  compileOnly libraries.google_autovalue
+  annotationProcessor libraries.google_autovalue_processor
 }

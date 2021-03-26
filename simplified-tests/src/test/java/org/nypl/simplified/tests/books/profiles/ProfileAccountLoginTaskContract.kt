@@ -4,6 +4,7 @@ import android.content.Context
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -22,6 +23,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountCookie
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
@@ -1023,6 +1025,164 @@ abstract class ProfileAccountLoginTaskContract {
   }
 
   /**
+   * If the Adobe DRM connector delivers multiple activations, the one that is not associated with
+   * any other accounts is used.
+   */
+
+  @Test(timeout = 5_000L)
+  fun testLoginAdobeDRMMultipleActivations() {
+    val previouslyLoggedInAccountId = AccountID(UUID.randomUUID())
+    val previouslyLoggedInAccount = Mockito.mock(AccountType::class.java, Mockito.RETURNS_DEEP_STUBS)
+
+    Mockito.`when`(
+      previouslyLoggedInAccount.loginState.credentials?.adobeCredentials?.postActivationCredentials?.userID
+    ).thenReturn(AdobeUserID("someone"))
+
+    val authDescription =
+      AccountProviderAuthenticationDescription.Basic(
+        barcodeFormat = "CODABAR",
+        keyboard = KeyboardInput.DEFAULT,
+        passwordMaximumLength = 10,
+        passwordKeyboard = KeyboardInput.DEFAULT,
+        description = "Library Login",
+        labels = mapOf(),
+        logoURI = null
+      )
+
+    val request =
+      ProfileAccountLoginRequest.Basic(
+        accountId = this.accountID,
+        description = authDescription,
+        username = AccountUsername("user"),
+        password = AccountPassword("password")
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(
+        sortedMapOf(
+          Pair(previouslyLoggedInAccountId, previouslyLoggedInAccount),
+          Pair(this.accountID, this.account)
+        )
+      )
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(this.anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithDRM.trimIndent())
+    )
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+    )
+
+    Mockito.`when`(
+      this.adeptConnector.activateDevice(
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull(),
+        this.anyNonNull()
+      )
+    ).then { invocation ->
+      val receiver = invocation.arguments[0] as AdobeAdeptActivationReceiverType
+      receiver.onActivationsCount(2)
+      receiver.onActivation(
+        0,
+        AdobeVendorID("OmniConsumerProducts"),
+        AdobeDeviceID("484799fb-d1aa-4b5d-8179-95e0b115ace4"),
+        "user",
+        AdobeUserID("someone"),
+        null
+      )
+      receiver.onActivation(
+        1,
+        AdobeVendorID("OmniConsumerProducts"),
+        AdobeDeviceID("deb213da-3dd1-4978-9642-03d1f288154c"),
+        "another.user",
+        AdobeUserID("someone.else"),
+        null
+      )
+    }
+
+    Mockito.`when`(this.adeptExecutor.execute(this.anyNonNull()))
+      .then { invocation ->
+        val procedure = invocation.arguments[0] as AdobeAdeptProcedureType
+        procedure.executeWith(this.adeptConnector)
+      }
+
+    val task =
+      ProfileAccountLoginTask(
+        adeptExecutor = this.adeptExecutor,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request
+      )
+
+    val result = task.call()
+    TaskDumps.dump(this.logger, result)
+
+    val state =
+      this.account.loginState as AccountLoggedIn
+
+    val originalCredentials =
+      AccountAuthenticationCredentials.Basic(
+        userName = request.username,
+        password = request.password,
+        adobeCredentials = null,
+        authenticationDescription = "Library Login"
+      )
+
+    val newCredentials =
+      originalCredentials.withAdobePreActivationCredentials(
+        AccountAuthenticationAdobePreActivationCredentials(
+          vendorID = AdobeVendorID("OmniConsumerProducts"),
+          clientToken = AccountAuthenticationAdobeClientToken.parse("NYNYPL|536818535|b54be3a5-385b-42eb-9496-3879cb3ac3cc|TWFuIHN1ZmZlcnMgb25seSBiZWNhdXNlIGhlIHRha2VzIHNlcmlvdXNseSB3aGF0IHRoZSBnb2RzIG1hZGUgZm9yIGZ1bi4K"),
+          deviceManagerURI = this.server.url("devices").toUri(),
+          postActivationCredentials = AccountAuthenticationAdobePostActivationCredentials(
+            deviceID = AdobeDeviceID("deb213da-3dd1-4978-9642-03d1f288154c"),
+            userID = AdobeUserID("someone.else")
+          )
+        )
+      )
+
+    assertEquals(newCredentials, state.credentials)
+
+    val req0 = this.server.takeRequest()
+    assertEquals(this.server.url("patron"), req0.requestUrl)
+    val req1 = this.server.takeRequest()
+    assertEquals(this.server.url("devices"), req1.requestUrl)
+
+    assertEquals(2, this.server.requestCount)
+  }
+
+  /**
    * If the Adobe DRM connector delivers an error, then activation fails.
    */
 
@@ -1595,6 +1755,359 @@ abstract class ProfileAccountLoginTaskContract {
 
     val result1 = task1.call()
     TaskDumps.dump(this.logger, result1)
+
+    val state =
+      this.account.loginState as AccountNotLoggedIn
+
+    assertEquals(0, this.server.requestCount)
+  }
+
+  /**
+   * Logging in with SAML20 succeeds.
+   */
+
+  @Test
+  fun testLoginSAML20CompleteNoDRM() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.SAML2_0(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.SAML20Initiate(
+        accountId = this.accountID,
+        description = authDescription
+      )
+    val request1 =
+      ProfileAccountLoginRequest.SAML20Complete(
+        accountId = this.accountID,
+        accessToken = "A TOKEN!",
+        patronInfo = "{}",
+        cookies = listOf(
+          AccountCookie("https://example", "cookie0=23"),
+          AccountCookie("https://fake", "cookie1=24; Path=/; Secure"),
+          AccountCookie("http://something", "cookie2=25; Path=/abc; Expires=Wed, 23 Dec 2020 07:28:00 GMT")
+        )
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithoutDRM.trimIndent())
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request0
+      )
+
+    val result0 = task0.call()
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountLoggingInWaitingForExternalAuthentication
+
+    val task1 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request1
+      )
+
+    val result1 = task1.call()
+    TaskDumps.dump(logger, result1)
+
+    val state =
+      this.account.loginState as AccountLoggedIn
+
+    Assert.assertEquals(
+      AccountAuthenticationCredentials.SAML2_0(
+        adobeCredentials = null,
+        authenticationDescription = "Description",
+        accessToken = "A TOKEN!",
+        patronInfo = "{}",
+        cookies = listOf(
+          AccountCookie("https://example", "cookie0=23"),
+          AccountCookie("https://fake", "cookie1=24; Path=/; Secure"),
+          AccountCookie("http://something", "cookie2=25; Path=/abc; Expires=Wed, 23 Dec 2020 07:28:00 GMT")
+        )
+      ),
+      state.credentials
+    )
+
+    val req0 = this.server.takeRequest()
+    assertEquals(this.server.url("patron"), req0.requestUrl)
+    assertEquals(1, this.server.requestCount)
+  }
+
+  /**
+   * Receiving an SAML20 token in an account that wasn't waiting for one ignores the request.
+   */
+
+  @Test
+  fun testLoginSAML20NotWaiting() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.SAML2_0(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.SAML20Complete(
+        accountId = this.accountID,
+        accessToken = "A TOKEN!",
+        patronInfo = "{}",
+        cookies = listOf(
+          AccountCookie("https://example", "cookie0=23"),
+          AccountCookie("https://fake", "cookie1=24; Path=/; Secure"),
+          AccountCookie("http://something", "cookie2=25; Path=/abc; Expires=Wed, 23 Dec 2020 07:28:00 GMT")
+        )
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithoutDRM.trimIndent())
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request0
+      )
+
+    this.loginState = AccountNotLoggedIn
+
+    val result0 = task0.call() as TaskResult.Success
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountNotLoggedIn
+
+    assertEquals(0, this.server.requestCount)
+  }
+
+  /**
+   * Cancelling an SAML20 request in an account that wasn't waiting for one ignores the request.
+   */
+
+  @Test
+  fun testLoginSAML20NotWaitingCancel() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.SAML2_0(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.SAML20Cancel(
+        accountId = this.accountID,
+        description = authDescription
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithoutDRM.trimIndent())
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request0
+      )
+
+    this.loginState = AccountNotLoggedIn
+
+    val result0 = task0.call() as TaskResult.Success
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountNotLoggedIn
+
+    assertEquals(0, this.server.requestCount)
+  }
+
+  /**
+   * Cancelling SAML20 works.
+   */
+
+  @Test
+  fun testLoginSAML20Cancel() {
+    val authDescription =
+      AccountProviderAuthenticationDescription.SAML2_0(
+        description = "Description",
+        logoURI = null,
+        authenticate = URI.create("urn:example")
+      )
+    val request0 =
+      ProfileAccountLoginRequest.SAML20Initiate(
+        accountId = this.accountID,
+        description = authDescription
+      )
+    val request1 =
+      ProfileAccountLoginRequest.SAML20Cancel(
+        accountId = this.accountID,
+        description = authDescription
+      )
+
+    val provider =
+      Mockito.mock(AccountProviderType::class.java)
+
+    Mockito.`when`(provider.patronSettingsURI)
+      .thenReturn(this.server.url("patron").toUri())
+    Mockito.`when`(provider.authentication)
+      .thenReturn(authDescription)
+
+    Mockito.`when`(this.profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(this.profile.accounts())
+      .thenReturn(sortedMapOf(Pair(this.accountID, this.account)))
+    Mockito.`when`(this.account.id)
+      .thenReturn(this.accountID)
+    Mockito.`when`(this.account.provider)
+      .thenReturn(provider)
+    Mockito.`when`(this.account.setLoginState(anyNonNull()))
+      .then {
+        val newState = it.getArgument<AccountLoginState>(0)
+        this.logger.debug("new state: {}", newState)
+        this.loginState = newState
+        this.loginState
+      }
+    Mockito.`when`(this.account.loginState)
+      .then { this.loginState }
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.profileWithoutDRM.trimIndent())
+    )
+
+    val task0 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request0
+      )
+
+    val result0 = task0.call()
+    TaskDumps.dump(logger, result0)
+
+    this.account.loginState as AccountLoggingInWaitingForExternalAuthentication
+
+    val task1 =
+      ProfileAccountLoginTask(
+        adeptExecutor = null,
+        http = this.http,
+        profile = this.profile,
+        account = this.account,
+        loginStrings = this.loginStrings,
+        patronParsers = this.patronParserFactory,
+        request = request1
+      )
+
+    val result1 = task1.call()
+    TaskDumps.dump(logger, result1)
 
     val state =
       this.account.loginState as AccountNotLoggedIn

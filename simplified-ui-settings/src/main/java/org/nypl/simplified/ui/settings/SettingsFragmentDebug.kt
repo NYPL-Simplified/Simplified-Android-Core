@@ -29,9 +29,9 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
+import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfileUpdated.Succeeded
@@ -57,7 +57,7 @@ class SettingsFragmentDebug : Fragment() {
       val context = this.requireContext()
       val pkgManager = context.packageManager
       val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+      pkgInfo.versionName
     } catch (e: NameNotFoundException) {
       "Unavailable"
     }
@@ -78,22 +78,24 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var cacheButton: Button
   private lateinit var cardCreatorFakeLocation: SwitchCompat
   private lateinit var crashButton: Button
+  private lateinit var crashlyticsId: TextView
   private lateinit var customOPDS: Button
   private lateinit var drmTable: TableLayout
   private lateinit var enableR2: SwitchCompat
   private lateinit var failNextBoot: SwitchCompat
   private lateinit var feedLoader: FeedLoaderType
-  private lateinit var showOnlySupportedBooks: SwitchCompat
+  private lateinit var forgetAnnouncementsButton: Button
   private lateinit var hasSeenLibrarySelection: SwitchCompat
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendAnalyticsButton: Button
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
+  private lateinit var showOnlySupportedBooks: SwitchCompat
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
   private lateinit var uiThread: UIThreadServiceType
-
   private var adeptExecutor: AdobeAdeptExecutorType? = null
+  private var crashlytics: CrashlyticsServiceType? = null
   private var profileEventSubscription: Disposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,6 +119,8 @@ class SettingsFragmentDebug : Fragment() {
       services.requireService(BuildConfigurationServiceType::class.java)
     this.adeptExecutor =
       services.optionalService(AdobeAdeptExecutorType::class.java)
+    this.crashlytics =
+      services.optionalService(CrashlyticsServiceType::class.java)
   }
 
   override fun onCreateView(
@@ -139,6 +143,8 @@ class SettingsFragmentDebug : Fragment() {
       view.findViewById(R.id.settingsVersionDevSyncAnalytics)
     this.syncAccountsButton =
       view.findViewById(R.id.settingsVersionDevSyncAccounts)
+    this.forgetAnnouncementsButton =
+      view.findViewById(R.id.settingsVersionDevUnacknowledgeAnnouncements)
     this.drmTable =
       view.findViewById(R.id.settingsVersionDrmSupport)
     this.adobeDRMActivationTable =
@@ -157,6 +163,8 @@ class SettingsFragmentDebug : Fragment() {
       view.findViewById(R.id.settingsVersionDevShowOnlySupported)
     this.customOPDS =
       view.findViewById(R.id.settingsVersionDevCustomOPDS)
+    this.crashlyticsId =
+      view.findViewById(R.id.settingsVersionCrashlyticsID)
 
     return view
   }
@@ -327,6 +335,42 @@ class SettingsFragmentDebug : Fragment() {
     this.showOnlySupportedBooks.setOnClickListener {
       this.feedLoader.showOnlySupportedBooks = this.showOnlySupportedBooks.isChecked
     }
+
+    /*
+     * Forget announcements when the button is clicked.
+     */
+
+    this.forgetAnnouncementsButton.setOnClickListener {
+      this.forgetAllAnnouncements()
+    }
+
+    /*
+     * Show the current Crashlytics user ID.
+     */
+
+    val crash = this.crashlytics
+    if (crash != null) {
+      val id = crash.userId
+      if (id == "") {
+        this.crashlyticsId.text = "(Unassigned)"
+      } else {
+        this.crashlyticsId.text = crash.userId
+      }
+    } else {
+      this.crashlyticsId.text = "Crashlytics is not enabled."
+    }
+  }
+
+  private fun forgetAllAnnouncements() {
+    try {
+      val profile = this.profilesController.profileCurrent()
+      val accounts = profile.accounts()
+      for ((_, account) in accounts) {
+        account.setPreferences(account.preferences.copy(announcementsAcknowledged = listOf()))
+      }
+    } catch (e: Exception) {
+      this.logger.error("could not forget announcements: ", e)
+    }
   }
 
   private fun configureToolbar(activity: Activity) {
@@ -335,10 +379,6 @@ class SettingsFragmentDebug : Fragment() {
       subtitle = null
     }
   }
-
-  data class ExampleError(
-    override val message: String
-  ) : PresentableErrorType
 
   private fun showErrorPage() {
     val attributes = sortedMapOf(

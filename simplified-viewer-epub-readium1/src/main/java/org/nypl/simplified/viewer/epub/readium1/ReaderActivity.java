@@ -51,16 +51,15 @@ import org.nypl.simplified.books.api.BookLocation;
 import org.nypl.simplified.books.api.Bookmark;
 import org.nypl.simplified.books.api.BookmarkKind;
 import org.nypl.simplified.books.book_database.api.BookDatabaseException;
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType;
 import org.nypl.simplified.feeds.api.FeedEntry;
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.profiles.api.ProfileEvent;
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException;
-import org.nypl.simplified.profiles.api.ProfilePreferences;
 import org.nypl.simplified.profiles.api.ProfileUpdated;
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType;
 import org.nypl.simplified.reader.api.ReaderColorScheme;
-import org.nypl.simplified.reader.api.ReaderFontSelection;
 import org.nypl.simplified.reader.api.ReaderPreferences;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType;
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks;
@@ -95,6 +94,8 @@ import kotlin.Pair;
 import static org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import static org.nypl.simplified.viewer.epub.readium1.ReaderReadiumViewerSettings.ScrollMode.AUTO;
 import static org.nypl.simplified.viewer.epub.readium1.ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE;
+import static org.nypl.simplified.viewer.epub.readium1.ReaderWebViewClient.AllowExternalLinks.ALLOW_EXTERNAL_LINKS;
+import static org.nypl.simplified.viewer.epub.readium1.ReaderWebViewClient.AllowExternalLinks.DISALLOW_EXTERNAL_LINKS;
 
 /**
  * The main reader activity for reading an EPUB.
@@ -437,8 +438,15 @@ public final class ReaderActivity extends AppCompatActivity implements
       }
     };
 
+    final ReaderWebViewClient.AllowExternalLinks allowExternalReaderLinks =
+      Services.INSTANCE.serviceDirectory()
+        .requireService(BuildConfigurationServiceType.class)
+        .getAllowExternalReaderLinks()
+        ? ALLOW_EXTERNAL_LINKS : DISALLOW_EXTERNAL_LINKS;
+
     final WebViewClient wv_client =
-      new ReaderWebViewClient(this, sd, this, rd, this);
+      new ReaderWebViewClient(
+        this, sd, this, rd, this, allowExternalReaderLinks);
 
     in_webview.setWebChromeClient(wc_client);
     in_webview.setWebViewClient(wv_client);
@@ -446,6 +454,7 @@ public final class ReaderActivity extends AppCompatActivity implements
       LOG.debug("ignoring long click on web view");
       return true;
     });
+    clearWebCache();
 
     // Allow the webview to be debuggable only if this is a dev build
     if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
@@ -579,6 +588,7 @@ public final class ReaderActivity extends AppCompatActivity implements
     this.current_location = bookmark;
 
     uiThread.runOnUIThread(this::configureBookmarkButtonUI);
+
     Services.INSTANCE.serviceDirectory()
       .requireService(ReaderBookmarkServiceType.class)
       .bookmarkCreate(this.current_account.getId(), bookmark);
@@ -613,6 +623,8 @@ public final class ReaderActivity extends AppCompatActivity implements
         .requireService(ReaderBookmarkServiceType.class)
         .bookmarkCreate(this.current_account.getId(), location);
     }
+
+    clearWebCache();
   }
 
   @Override
@@ -649,6 +661,13 @@ public final class ReaderActivity extends AppCompatActivity implements
       sub.dispose();
     }
     this.profile_subscription = null;
+
+    clearWebCache();
+  }
+
+  private void clearWebCache() {
+    LOG.debug("clearing the webview cache");
+    this.view_web_view.clearCache(true);
   }
 
   @Override
@@ -857,6 +876,8 @@ public final class ReaderActivity extends AppCompatActivity implements
           this.readium_js_api.mediaOverlayPrevious();
         });
     });
+
+    clearWebCache();
   }
 
   @Override

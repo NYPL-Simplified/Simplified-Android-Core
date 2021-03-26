@@ -2,13 +2,14 @@ package org.nypl.simplified.books.api
 
 import org.nypl.drm.core.AdobeAdeptLoan
 import java.io.File
+import java.io.Serializable
 
 /**
  * The `BookDRMInformation` class represents an immutable snapshot of the current DRM
  * information associated with a book.
  */
 
-sealed class BookDRMInformation {
+sealed class BookDRMInformation : Serializable {
 
   /**
    * The kind of DRM
@@ -51,6 +52,28 @@ sealed class BookDRMInformation {
     private val unused: Unit = Unit
   ) : BookDRMInformation() {
     override val kind: BookDRMKind = BookDRMKind.LCP
+  }
+
+  /**
+   * The AXIS information associated with a book.
+   */
+
+  data class AXIS(
+
+    /**
+     * The license file. This is only present if an attempt has been made to fulfill the book.
+     */
+
+    val license: File?,
+
+    /**
+     * The file containing the key used to fulfill the book. This is only present
+     * if an attempt has been made to fulfill the book.
+     */
+
+    val userKey: File?
+  ) : BookDRMInformation() {
+    override val kind: BookDRMKind = BookDRMKind.AXIS
   }
 
   /**

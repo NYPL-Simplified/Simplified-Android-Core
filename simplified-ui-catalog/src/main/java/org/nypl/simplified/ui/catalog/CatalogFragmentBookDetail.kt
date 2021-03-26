@@ -292,7 +292,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
   private fun onBookChanged(event: BookStatusEvent) {
     val bookWithStatus =
-      this.bookRegistry.bookOrNull(event.book())
+      this.bookRegistry.bookOrNull(event.bookId)
         ?: synthesizeBookWithStatus(this.parameters.feedEntry)
 
     // Update the cached parameters with the feed entry. We'll need this later if the availability
@@ -379,10 +379,10 @@ class CatalogFragmentBookDetail : Fragment() {
     val context = this.requireContext()
     val feedModel = this.createOrGetFeedModel(context)
     val targetFeed =
-      feedModel.resolveFeed(
+      feedModel.resolveFeedFromBook(
+        accountID = this.parameters.feedEntry.accountID,
         title = context.resources.getString(R.string.catalogRelatedBooks),
-        uri = feedRelated,
-        isSearchResults = false
+        uri = feedRelated
       )
     this.findNavigationController().openFeed(targetFeed)
   }
@@ -484,6 +484,10 @@ class CatalogFragmentBookDetail : Fragment() {
         this.onBookStatusRequestingDownloadUI()
       is BookStatus.Downloading ->
         this.onBookStatusDownloadingUI(status, book.book)
+      is BookStatus.DownloadWaitingForExternalAuthentication ->
+        this.onBookStatusDownloadWaitingForExternalAuthenticationUI(status, book.book)
+      is BookStatus.DownloadExternalAuthenticationInProgress ->
+        this.onBookStatusDownloadExternalAuthenticationInProgressUI(book.book)
     }
   }
 
@@ -777,23 +781,73 @@ class CatalogFragmentBookDetail : Fragment() {
   ) {
     this.uiThread.checkIsUIThread()
 
+    /*
+     * XXX: https://jira.nypl.org/browse/SIMPLY-3444
+     *
+     * Avoid creating a cancel button until we can reliably support cancellation for *all* books.
+     * That is, when the Adobe DRM is dead and buried.
+     */
+
     this.buttons.removeAllViews()
-    this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.buttons.addView(
-      this.buttonCreator.createCancelDownloadButton {
-        this.borrowViewModel.tryCancelDownload(book.account, book.id)
-      }
-    )
-    this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
+
+    this.statusInProgress.visibility = View.VISIBLE
+    this.statusIdle.visibility = View.INVISIBLE
+    this.statusFailed.visibility = View.INVISIBLE
+
+    val progressPercent = bookStatus.progressPercent?.toInt()
+    if (progressPercent != null) {
+      this.statusInProgressText.visibility = View.VISIBLE
+      this.statusInProgressText.text = "$progressPercent%"
+      this.statusInProgressBar.isIndeterminate = false
+      this.statusInProgressBar.progress = progressPercent
+    } else {
+      this.statusInProgressText.visibility = View.GONE
+      this.statusInProgressBar.isIndeterminate = true
+      this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogDownloading))
+      this.checkButtonViewCount()
+    }
+  }
+
+  @UiThread
+  private fun onBookStatusDownloadWaitingForExternalAuthenticationUI(
+    status: BookStatus.DownloadWaitingForExternalAuthentication,
+    book: Book
+  ) {
+    this.uiThread.checkIsUIThread()
+
+    this.buttons.removeAllViews()
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogLoginRequired))
     this.checkButtonViewCount()
 
     this.statusInProgress.visibility = View.VISIBLE
     this.statusIdle.visibility = View.INVISIBLE
     this.statusFailed.visibility = View.INVISIBLE
-    this.statusInProgressText.visibility = View.VISIBLE
-    this.statusInProgressText.text = "${bookStatus.progressPercent.toInt()}%"
-    this.statusInProgressBar.isIndeterminate = false
-    this.statusInProgressBar.progress = bookStatus.progressPercent.toInt()
+    this.statusInProgressText.visibility = View.GONE
+    this.statusInProgressBar.isIndeterminate = true
+
+    this.uiThread.runOnUIThread({
+      this.findNavigationController().openBookDownloadLogin(
+        bookID = book.id,
+        downloadURI = status.downloadURI
+      )
+    })
+  }
+
+  @UiThread
+  private fun onBookStatusDownloadExternalAuthenticationInProgressUI(
+    book: Book
+  ) {
+    this.uiThread.checkIsUIThread()
+
+    this.buttons.removeAllViews()
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogLoginRequired))
+    this.checkButtonViewCount()
+
+    this.statusInProgress.visibility = View.VISIBLE
+    this.statusIdle.visibility = View.INVISIBLE
+    this.statusFailed.visibility = View.INVISIBLE
+    this.statusInProgressText.visibility = View.GONE
+    this.statusInProgressBar.isIndeterminate = true
   }
 
   @UiThread

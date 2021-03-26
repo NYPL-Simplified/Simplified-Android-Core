@@ -6,12 +6,12 @@ dependencies {
   implementation project(":simplified-viewer-spi")
   implementation project(":simplified-analytics-api")
 
-  implementation libraries.androidXActivity
-  implementation libraries.androidXAppCompat
-  implementation libraries.androidXLifecycle
-  implementation libraries.androidXLifecycleViewmodel
-  implementation libraries.kotlinStdlib
-  implementation libraries.nyplR2API
-  implementation libraries.nyplR2Vanilla
-  implementation libraries.nyplR2Views
+  implementation libraries.androidx_activity
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_lifecycle
+  implementation libraries.androidx_lifecycle_viewmodel
+  implementation libraries.kotlin_stdlib
+  implementation libraries.nypl_readium2_api
+  implementation libraries.nypl_readium2_vanilla
+  implementation libraries.nypl_readium2_views
 }

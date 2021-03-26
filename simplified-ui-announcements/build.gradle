@@ -1,0 +1,9 @@
+dependencies {
+  implementation project(":simplified-announcements")
+  implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-ui-thread-api")
+
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_lifecycle
+}

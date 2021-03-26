@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
+import org.nypl.simplified.announcements.Announcement
 import java.net.URI
 
 data class AccountProvider(
@@ -25,7 +26,8 @@ data class AccountProvider(
   override val addAutomatically: Boolean,
   override val patronSettingsURI: URI?,
   override val annotationsURI: URI?,
-  override val updated: DateTime
+  override val updated: DateTime,
+  override val announcements: List<Announcement> = listOf()
 ) : AccountProviderType {
   override fun compareTo(other: AccountProviderType): Int {
     return this.id.compareTo(other.id)
@@ -68,7 +70,8 @@ data class AccountProvider(
         subtitle = other.subtitle,
         supportEmail = other.supportEmail,
         supportsReservations = other.supportsReservations,
-        updated = other.updated
+        updated = other.updated,
+        announcements = other.announcements
       )
     }
   }

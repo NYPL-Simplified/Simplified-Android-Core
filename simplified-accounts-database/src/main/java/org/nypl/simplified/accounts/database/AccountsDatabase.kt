@@ -136,7 +136,8 @@ class AccountsDatabase private constructor(
       val preferences =
         AccountPreferences(
           bookmarkSyncingPermitted = false,
-          catalogURIOverride = null
+          catalogURIOverride = null,
+          announcementsAcknowledged = listOf()
         )
 
       val accountDescription =

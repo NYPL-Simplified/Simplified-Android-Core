@@ -1,3 +1,3 @@
 dependencies {
-  implementation libraries.kotlinStdlib
+  implementation libraries.kotlin_stdlib
 }

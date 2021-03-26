@@ -1,6 +1,7 @@
 package org.nypl.simplified.accounts.api
 
 import org.joda.time.DateTime
+import org.nypl.simplified.announcements.Announcement
 import org.nypl.simplified.links.Link
 import org.nypl.simplified.opds.core.OPDSFeedConstants.AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT
 import java.net.URI
@@ -171,7 +172,9 @@ interface AccountProviderType : Comparable<AccountProviderType> {
         } else {
           auth.under13
         }
-      is AccountProviderAuthenticationDescription.Anonymous,
+
+      is AccountProviderAuthenticationDescription.SAML2_0,
+      AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.Basic,
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
         this.catalogURI
@@ -190,6 +193,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
 
   val supportsBarcodeDisplay: Boolean
     get() = when (val auth = this.authentication) {
+      is AccountProviderAuthenticationDescription.SAML2_0,
       AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
@@ -201,6 +205,12 @@ interface AccountProviderType : Comparable<AccountProviderType> {
         }
       }
     }
+
+  /**
+   * @return A list of the most recently published announcements
+   */
+
+  val announcements: List<Announcement>
 
   fun toDescription(): AccountProviderDescription {
     val imageLinks = mutableListOf<Link>()

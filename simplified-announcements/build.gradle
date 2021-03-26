@@ -1,0 +1,9 @@
+dependencies {
+  api libraries.joda_time
+
+  implementation project(':simplified-json-core')
+
+  implementation libraries.jackson_databind
+  implementation libraries.kotlin_stdlib
+  implementation libraries.slf4j
+}

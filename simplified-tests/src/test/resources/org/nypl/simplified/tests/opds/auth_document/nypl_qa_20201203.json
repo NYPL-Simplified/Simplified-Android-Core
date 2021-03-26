@@ -1,0 +1,113 @@
+{
+   "announcements" : [
+      {
+         "content" : "Mark is great! ☃",
+         "id" : "5c27014f-55f9-4f36-9c53-3694a5418552"
+      }
+   ],
+   "authentication" : [
+      {
+         "description" : "Library Barcode",
+         "inputs" : {
+            "login" : {
+               "keyboard" : "Default"
+            },
+            "password" : {
+               "keyboard" : "Default"
+            }
+         },
+         "labels" : {
+            "login" : "Barcode",
+            "password" : "PIN"
+         },
+         "type" : "http://opds-spec.org/auth/basic"
+      }
+   ],
+   "color_scheme" : "pink",
+   "features" : {
+      "disabled" : [],
+      "enabled" : [
+         "https://librarysimplified.org/rel/policy/reservations"
+      ]
+   },
+   "focus_area" : {
+      "CA" : [],
+      "US" : []
+   },
+   "id" : "http://qa.circulation.librarysimplified.org/QANYPL/authentication_document",
+   "links" : [
+      {
+         "href" : "http://www.librarysimplified.org/EULA.html",
+         "rel" : "terms-of-service",
+         "type" : "text/html"
+      },
+      {
+         "href" : "http://www.librarysimplified.org/privacypolicy.html",
+         "rel" : "privacy-policy",
+         "type" : "text/html"
+      },
+      {
+         "href" : "http://www.librarysimplified.org/acknowledgments.html",
+         "rel" : "copyright",
+         "type" : "text/html"
+      },
+      {
+         "href" : "http://www.librarysimplified.org/appabout.html",
+         "rel" : "about",
+         "type" : "text/html"
+      },
+      {
+         "href" : "http://www.librarysimplified.org/license.html",
+         "rel" : "license",
+         "type" : "text/html"
+      },
+      {
+         "href" : "nypl.card-creator:https://patrons.librarysimplified.org/",
+         "rel" : "register"
+      },
+      {
+         "href" : "http://qa.circulation.librarysimplified.org/QANYPL/",
+         "rel" : "start",
+         "type" : "application/atom+xml;profile=opds-catalog;kind=acquisition"
+      },
+      {
+         "href" : "http://qa.circulation.librarysimplified.org/QANYPL/loans/",
+         "rel" : "http://opds-spec.org/shelf",
+         "type" : "application/atom+xml;profile=opds-catalog;kind=acquisition"
+      },
+      {
+         "href" : "http://qa.circulation.librarysimplified.org/QANYPL/patrons/me/",
+         "rel" : "http://librarysimplified.org/terms/rel/user-profile",
+         "type" : "vnd.librarysimplified/user-profile+json"
+      },
+      {
+         "href" : "mailto:test@example.com",
+         "rel" : "http://librarysimplified.org/rel/designated-agent/copyright"
+      },
+      {
+         "href" : "mailto:test@example.com",
+         "rel" : "help",
+         "type" : null
+      },
+      {
+         "href" : "https://www.nypl.org/",
+         "rel" : "alternate",
+         "type" : "text/html"
+      }
+   ],
+   "public_key" : {
+      "type" : "RSA",
+      "value" : "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyBwL14I+tfPfP7PaVtIR\nyDT26GTlt7KawpoCPnHumj0RPZNEsmlZcmfEJcyU/+50n/9oaT1wzglbH/Bv6Dpg\nZ6KJyFygoxLG3XTqeNimtYhokpQNu4M9m7x9nSj6ESciRFpj7McgsIiVIxCyoUt4\npFEeNX+jW3lqYAmSydfeYzlvQ39FnyRv2VbL+4pyMbbQrLUbpNJEsITyyF2bmC9B\nqWnzdEYC+e4L0SwVg4FHVouKbsMBFb0vfzc2SsTuyajAu+7bs7DWte31WEYA0YBf\nTeHkONJ2GFtsGl6p/+jO6agf6a3DCBmkjIrIOTPMw6dgso8w3l8hXVOQ17WrofpO\nuQIDAQAB\n-----END PUBLIC KEY-----"
+   },
+   "service_area" : {
+      "CA" : [],
+      "US" : []
+   },
+   "title" : "New York Public Library - QA Server",
+   "web_color_scheme" : {
+      "background" : "#000000",
+      "foreground" : "#000000",
+      "primary" : "#000000",
+      "secondary" : "#000000"
+   }
+}

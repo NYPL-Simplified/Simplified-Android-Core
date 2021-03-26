@@ -4,6 +4,7 @@ import org.joda.time.Instant
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AxisNowServiceType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
@@ -155,6 +156,7 @@ class BorrowTask private constructor(
       BorrowContext(
         account = this.account,
         adobeExecutor = this.requirements.adobeExecutor,
+        axisNowService = this.requirements.axisNowService,
         audioBookManifestStrategies = this.requirements.audioBookManifestStrategies,
         bookDatabaseEntry = this.databaseEntry!!,
         bookInitial = book,
@@ -232,7 +234,11 @@ class BorrowTask private constructor(
   ): BorrowSubtaskFactoryType {
     this.taskRecorder.beginNewStep("Finding subtask for acquisition path element...")
     val subtaskFactory =
-      this.requirements.subtasks.findSubtaskFor(pathElement.mimeType, context.currentURI())
+      this.requirements.subtasks.findSubtaskFor(
+        pathElement.mimeType,
+        context.currentURI(),
+        context.account
+      )
     if (subtaskFactory == null) {
       this.taskRecorder.currentStepFailed(
         message = "We don't know how to handle this kind of acquisition.",
@@ -370,6 +376,7 @@ class BorrowTask private constructor(
     private val temporaryDirectory: File,
     var currentOPDSAcquisitionPathElement: OPDSAcquisitionPathElement,
     override val adobeExecutor: AdobeAdeptExecutorType?,
+    override val axisNowService: AxisNowServiceType?,
     override val services: ServiceDirectoryType,
     private val cacheDirectory: File,
     private val cancelled: AtomicBoolean
@@ -391,11 +398,20 @@ class BorrowTask private constructor(
     override val bookCurrent: Book
       get() = this.bookDatabaseEntry.book
 
+    override fun bookDownloadIsWaitingForExternalAuthentication() {
+      this.bookPublishStatus(
+        BookStatus.DownloadWaitingForExternalAuthentication(
+          id = this.bookCurrent.id,
+          downloadURI = this.currentURICheck()
+        )
+      )
+    }
+
     override fun bookDownloadIsRunning(
+      message: String,
+      receivedSize: Long?,
       expectedSize: Long?,
-      receivedSize: Long,
-      bytesPerSecond: Long,
-      message: String
+      bytesPerSecond: Long?
     ) {
       this.logDebug("downloading: {} {} {}", expectedSize, receivedSize, bytesPerSecond)
 
@@ -403,7 +419,7 @@ class BorrowTask private constructor(
         BookStatus.Downloading(
           id = this.bookCurrent.id,
           currentTotalBytes = receivedSize,
-          expectedTotalBytes = expectedSize ?: 100L,
+          expectedTotalBytes = expectedSize,
           detailMessage = message
         )
       )

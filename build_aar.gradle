@@ -1,0 +1,29 @@
+logger.info("Configuring ${project} (${POM_PACKAGING}) as Android library project")
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "androidx.navigation.safeargs.kotlin"
+
+android {
+  compileSdkVersion android_compile_sdk_version
+  buildToolsVersion android_build_tools_version
+
+  defaultConfig {
+    minSdkVersion android_min_sdk_version
+    targetSdkVersion android_target_sdk_version
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    useLibrary 'org.apache.http.legacy'
+  }
+  compileOptions {
+    encoding 'UTF-8'
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+  testOptions {
+    execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    animationsDisabled = true
+  }
+}

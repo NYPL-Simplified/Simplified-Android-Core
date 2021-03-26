@@ -5,6 +5,7 @@ import one.irradia.mime.api.MIMECompatibility
 import one.irradia.mime.api.MIMEType
 import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.audio.AudioBookCredentials
 import org.nypl.simplified.books.audio.AudioBookManifestRequest
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -36,7 +37,8 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
 
     override fun isApplicableFor(
       type: MIMEType,
-      target: URI?
+      target: URI?,
+      account: AccountReadableType?
     ): Boolean {
       for (audioType in StandardFormatNames.allAudioBooks) {
         if (MIMECompatibility.isCompatibleStrictWithoutAttributes(type, audioType)) {
@@ -49,7 +51,12 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Downloading audio book...")
-    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
+    context.bookDownloadIsRunning(
+      "Requesting download...",
+      receivedSize = 0L,
+      expectedSize = 100L,
+      bytesPerSecond = 0L
+    )
 
     return try {
       val currentURI = context.currentURICheck()
@@ -95,6 +102,8 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
           }
           is AccountAuthenticationCredentials.OAuthWithIntermediary ->
             AudioBookCredentials.BearerToken(accessToken = credentials.accessToken)
+          is AccountAuthenticationCredentials.SAML2_0 ->
+            AudioBookCredentials.BearerToken(accessToken = credentials.accessToken)
         }
       }
 
@@ -113,10 +122,10 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
     val subscription =
       strategy.events.subscribe { message ->
         context.bookDownloadIsRunning(
-          expectedSize = 100L,
+          message = message,
           receivedSize = 50L,
-          bytesPerSecond = 0L,
-          message = message
+          expectedSize = 100L,
+          bytesPerSecond = 0L
         )
       }
 

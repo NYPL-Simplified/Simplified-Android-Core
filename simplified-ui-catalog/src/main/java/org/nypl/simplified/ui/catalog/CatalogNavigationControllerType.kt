@@ -3,9 +3,11 @@ package org.nypl.simplified.ui.catalog
 import android.app.Activity
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import java.net.URI
 
 /**
  * Navigation functions for the catalog screens.
@@ -22,6 +24,15 @@ interface CatalogNavigationControllerType :
   fun openBookDetail(
     feedArguments: CatalogFeedArguments,
     entry: FeedEntryOPDS
+  )
+
+  /**
+   * The catalog wants to open an external login form for downloading a book.
+   */
+
+  fun openBookDownloadLogin(
+    bookID: BookID,
+    downloadURI: URI
   )
 
   /**

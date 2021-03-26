@@ -20,6 +20,8 @@ import org.librarysimplified.services.api.ServiceDirectory
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AxisNowServiceFactoryType
+import org.nypl.drm.core.AxisNowServiceType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -69,6 +71,7 @@ import org.nypl.simplified.cardcreator.CardCreatorService
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.content.api.ContentResolverSane
 import org.nypl.simplified.content.api.ContentResolverType
+import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -247,6 +250,13 @@ internal object MainServices {
       override val dataDirectoryName: String
         get() = this@MainServices.CURRENT_DATA_VERSION
     }
+  }
+
+  private fun createAxisNowService(
+    httpClient: LSHTTPClientType
+  ): AxisNowServiceType? {
+    return optionalFromServiceLoader(AxisNowServiceFactoryType::class.java)
+      ?.create(httpClient)
   }
 
   private fun createLocalImageLoader(context: Context): ImageLoaderType {
@@ -514,20 +524,6 @@ internal object MainServices {
     )
   }
 
-  private fun createCardCreatorService(context: Context): CardCreatorServiceType? {
-    return try {
-      context.assets.open("cardcreator.conf").use { stream ->
-        CardCreatorService.create(stream)
-      }
-    } catch (e: FileNotFoundException) {
-      this.logger.debug("could not initialize card creator; cardcreator.conf not found")
-      null
-    } catch (e: IOException) {
-      this.logger.debug("could not initialize card creator: ", e)
-      null
-    }
-  }
-
   private fun publishApplicationStartupEvent(
     context: Context,
     analytics: AnalyticsType
@@ -618,6 +614,20 @@ internal object MainServices {
       return service
     }
 
+    fun <T : Any> addServiceFromServiceLoaderOptionally(
+      message: String,
+      interfaceType: Class<T>
+    ): T? {
+      publishEvent(message)
+      val service = ServiceLoader.load(interfaceType).firstOrNull()
+      if (service != null) {
+        services.addService(interfaceType, service)
+      } else {
+        logger.debug("no services of type {} available in ServiceLoader", interfaceType)
+      }
+      return service
+    }
+
     addService(
       message = strings.bootingGeneral("login strings"),
       interfaceType = AccountLoginStringResourcesType::class.java,
@@ -656,6 +666,11 @@ internal object MainServices {
       serviceConstructor = { MainCatalogBookRevokeStrings(context.resources) }
     )
 
+    addServiceFromServiceLoaderOptionally(
+      message = strings.bootingGeneral("Crashlytics"),
+      interfaceType = CrashlyticsServiceType::class.java
+    )
+
     val lsHTTP =
       addService(
         message = strings.bootingGeneral("LSHTTP"),
@@ -672,6 +687,13 @@ internal object MainServices {
         message = strings.bootingGeneral("Adobe DRM"),
         interfaceType = AdobeAdeptExecutorType::class.java,
         serviceConstructor = { AdobeDRMServices.newAdobeDRMOrNull(context, adobeConfiguration) }
+      )
+
+    val axisNowDRM =
+      addServiceOptionally(
+        message = strings.bootingGeneral("AxisNow DRM"),
+        interfaceType = AxisNowServiceType::class.java,
+        serviceConstructor = { this.createAxisNowService(lsHTTP) }
       )
 
     val screenSize =
@@ -873,6 +895,7 @@ internal object MainServices {
         serviceConstructor = {
           MainBookFormatSupport.createBookFormatSupport(
             adobeDRM = adobeDRM,
+            axisNowService = axisNowDRM,
             feedbooksSecretService = feedbooksSecretService,
             overdriveSecretService = overdriveSecretService
           )
@@ -1026,7 +1049,7 @@ internal object MainServices {
     addServiceOptionally(
       message = strings.bootingGeneral("card creator service"),
       interfaceType = CardCreatorServiceType::class.java,
-      serviceConstructor = { this.createCardCreatorService(context) }
+      serviceConstructor = { CardCreatorService.createConditionally(context) }
     )
 
     this.showThreads()

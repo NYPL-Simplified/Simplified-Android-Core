@@ -57,6 +57,10 @@ object CatalogBookAvailabilityStrings {
         ""
       is BookStatus.Downloading ->
         ""
+      is BookStatus.DownloadWaitingForExternalAuthentication ->
+        ""
+      is BookStatus.DownloadExternalAuthenticationInProgress ->
+        ""
     }
   }
 

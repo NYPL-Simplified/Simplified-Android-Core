@@ -2,6 +2,7 @@ package org.nypl.simplified.books.borrowing.internal
 
 import com.io7m.junreachable.UnreachableCodeException
 import one.irradia.mime.api.MIMEType
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
@@ -33,7 +34,8 @@ class BorrowCopy private constructor() : BorrowSubtaskType {
 
     override fun isApplicableFor(
       type: MIMEType,
-      target: URI?
+      target: URI?,
+      account: AccountReadableType?
     ): Boolean {
       return if (target != null) {
         target.scheme == "content"
@@ -45,7 +47,7 @@ class BorrowCopy private constructor() : BorrowSubtaskType {
 
   override fun execute(context: BorrowContextType) {
     context.taskRecorder.beginNewStep("Copying from content...")
-    context.bookDownloadIsRunning(null, 0L, 0L, "Requesting download...")
+    context.bookDownloadIsRunning("Requesting download...", receivedSize = 0L)
 
     return try {
       val currentURI = context.currentURICheck()
@@ -119,10 +121,9 @@ class BorrowCopy private constructor() : BorrowSubtaskType {
         var consumed = 0L
 
         context.bookDownloadIsRunning(
-          expectedSize = size,
+          message = "Copying...",
           receivedSize = consumed,
-          bytesPerSecond = 0L,
-          message = "Copying..."
+          expectedSize = size,
         )
 
         val perSecond = BorrowUnitsPerSecond(context.clock)
@@ -137,10 +138,9 @@ class BorrowCopy private constructor() : BorrowSubtaskType {
 
           if (perSecond.update(r.toLong())) {
             context.bookDownloadIsRunning(
-              expectedSize = size,
+              message = "Copying...",
               receivedSize = consumed,
-              bytesPerSecond = 0L,
-              message = "Copying..."
+              expectedSize = size,
             )
           }
         }

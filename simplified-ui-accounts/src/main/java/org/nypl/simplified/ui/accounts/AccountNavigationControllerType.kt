@@ -1,6 +1,7 @@
 package org.nypl.simplified.ui.accounts
 
 import org.nypl.simplified.navigation.api.NavigationControllerType
+import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
 /**
@@ -10,20 +11,32 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 interface AccountNavigationControllerType : NavigationControllerType {
 
   /**
-   * The settings screen wants to open an account configuration screen for the given account.
+   * Open an account configuration screen for the given account.
    */
 
   fun openSettingsAccount(parameters: AccountFragmentParameters)
 
   /**
-   * The settings screen wants to open the error page.
+   * Open a SAML 2.0 login screen.
+   */
+
+  fun openSAML20Login(parameters: AccountSAML20FragmentParameters)
+
+  /**
+   * Open the error page.
    */
 
   fun openErrorPage(parameters: ErrorPageParameters)
 
   /**
-   * The settings screen wants to open the account registry.
+   * Open the account registry.
    */
 
   fun openSettingsAccountRegistry()
+
+  /**
+   * Switch to whichever tab contains the catalog, forcing a reset of the tab.
+   */
+
+  fun openCatalogAfterAuthentication()
 }

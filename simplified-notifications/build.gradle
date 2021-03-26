@@ -3,7 +3,7 @@ dependencies {
   api project(":simplified-profiles-api")
   api project(":simplified-threads")
 
-  implementation libraries.androidXCore
-  implementation libraries.kotlinStdlib
+  implementation libraries.androidx_core
+  implementation libraries.kotlin_stdlib
   implementation libraries.slf4j
 }

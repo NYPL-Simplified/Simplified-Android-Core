@@ -2,6 +2,7 @@ package org.nypl.simplified.books.reader.bookmarks
 
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookmarkID
+import org.nypl.simplified.books.api.BookmarkKind
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Command.LocallySaveBookmark
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Command.RemotelyDeleteBookmark
@@ -299,50 +300,75 @@ data class ReaderBookmarkPolicy<T>(
       event: Event.Local.BookmarkCreated
     ): ReaderBookmarkPolicy<Unit> {
       return getBookmarkState(event.accountID, event.bookmark.bookmarkId).flatMap { bookmarkState ->
-        if (bookmarkState != null) {
-          when (bookmarkState.localState) {
+        when (event.bookmark.kind) {
+          BookmarkKind.ReaderBookmarkLastReadLocation -> {
             /*
-             * If the bookmark was previously deleted, then recreate it and send it to the
-             * server (if possible).
+             * If the bookmark is a last-read position, then always save it.
              */
 
-            ReaderBookmarkLocalState.Deleted -> {
-              val newBookmarkState =
-                ReaderBookmarkState(
-                  account = event.accountID,
-                  bookmark = event.bookmark,
-                  localState = ReaderBookmarkLocalState.Saved,
-                  remoteState = ReaderBookmarkRemoteState.Unknown
-                )
+            val newBookmarkState =
+              ReaderBookmarkState(
+                account = event.accountID,
+                bookmark = event.bookmark,
+                localState = ReaderBookmarkLocalState.Saved,
+                remoteState = ReaderBookmarkRemoteState.Unknown
+              )
 
-              updateBookmark(newBookmarkState)
-                .andThen { remoteSendAllUnsentBookmarksIfPossible(event.accountID) }
-            }
-
-            /*
-             * If the bookmark is already locally saved, then ignore it.
-             */
-
-            ReaderBookmarkLocalState.Saved ->
-              emitOutput(LocalBookmarkAlreadyExists(event.accountID, event.bookmark))
+            updateBookmark(newBookmarkState)
+              .andThen { emitOutput(LocallySaveBookmark(event.accountID, event.bookmark)) }
+              .andThen { remoteSendAllUnsentBookmarksIfPossible(event.accountID) }
           }
-        } else {
-          /*
-           * If nothing is known about the bookmark, then save it locally and then sync
-           * with the server (if possible).
-           */
 
-          val newBookmarkState =
-            ReaderBookmarkState(
-              account = event.accountID,
-              bookmark = event.bookmark,
-              localState = ReaderBookmarkLocalState.Saved,
-              remoteState = ReaderBookmarkRemoteState.Unknown
-            )
+          BookmarkKind.ReaderBookmarkExplicit -> {
+            when (bookmarkState) {
+              null -> {
+                /*
+                 * If nothing is known about the bookmark, then save it locally and then sync
+                 * with the server (if possible).
+                 */
 
-          updateBookmark(newBookmarkState)
-            .andThen { emitOutput(LocallySaveBookmark(event.accountID, event.bookmark)) }
-            .andThen { remoteSendAllUnsentBookmarksIfPossible(event.accountID) }
+                val newBookmarkState =
+                  ReaderBookmarkState(
+                    account = event.accountID,
+                    bookmark = event.bookmark,
+                    localState = ReaderBookmarkLocalState.Saved,
+                    remoteState = ReaderBookmarkRemoteState.Unknown
+                  )
+
+                updateBookmark(newBookmarkState)
+                  .andThen { emitOutput(LocallySaveBookmark(event.accountID, event.bookmark)) }
+                  .andThen { remoteSendAllUnsentBookmarksIfPossible(event.accountID) }
+              }
+              else -> {
+                when (bookmarkState.localState) {
+                  /*
+                   * If the bookmark was previously deleted, then recreate it and send it to the
+                   * server (if possible).
+                   */
+
+                  ReaderBookmarkLocalState.Deleted -> {
+                    val newBookmarkState =
+                      ReaderBookmarkState(
+                        account = event.accountID,
+                        bookmark = event.bookmark,
+                        localState = ReaderBookmarkLocalState.Saved,
+                        remoteState = ReaderBookmarkRemoteState.Unknown
+                      )
+
+                    updateBookmark(newBookmarkState)
+                      .andThen { remoteSendAllUnsentBookmarksIfPossible(event.accountID) }
+                  }
+
+                  /*
+                   * If the bookmark is already locally saved, then ignore it.
+                   */
+
+                  ReaderBookmarkLocalState.Saved ->
+                    emitOutput(LocalBookmarkAlreadyExists(event.accountID, event.bookmark))
+                }
+              }
+            }
+          }
         }
       }
     }

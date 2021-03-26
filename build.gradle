@@ -1,11 +1,11 @@
-buildscript {
-  // https://github.com/gradle/gradle/issues/11308#issuecomment-554317655
-  if (System.properties['org.gradle.internal.publish.checksums.insecure'] != 'true') {
-    throw new GradleException("org.gradle.internal.publish.checksums.insecure must be 'true'")
-  }
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 
-  ext.kotlin_version = "1.4.10"
-  ext.nav_version = "2.3.0-alpha04"
+buildscript {
+  // Load in our list of dependencies.
+  //
+  apply from: file("$rootDir/libraries.gradle")
 
   repositories {
     mavenCentral()
@@ -16,302 +16,74 @@ buildscript {
   dependencies {
     classpath 'com.android.tools.build:gradle:4.1.1'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
+    classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.androidx_navigation}"
     classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.2.0"
     classpath "com.nabilhachicha:android-native-dependencies:0.1.2"
-    classpath "digital.wup:android-maven-publish:3.6.3"
+    classpath 'com.google.gms:google-services:4.3.4'
+    classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
   }
 }
 
 plugins {
   id "com.github.ben-manes.versions" version "0.27.0"
   id "ru.vyarus.animalsniffer" version "1.5.0"
-
-  // Deprecated: Migrate to maven-publish.
-  //             https://developer.android.com/studio/build/maven-publish-plugin
-  id "digital.wup.android-maven-publish" version "3.6.3"
 }
 
 ext {
-  androidBuildToolsVersion = "29.0.3"
-  androidCompileSDKVersion = 29
-  androidMinimumSDKVersion = 21
-  androidTargetSDKVersion = 29
-
-  if (!project.hasProperty("mavenCentralUsername")) {
-    logger.warn("No mavenCentralUsername property specified: Using an empty value")
-    mavenCentralUsername = ""
-  }
-  if (!project.hasProperty("mavenCentralPassword")) {
-    logger.warn("No mavenCentralPassword property specified: Using an empty value")
-    mavenCentralPassword = ""
-  }
-
-  if (!project.hasProperty("org.librarysimplified.nexus.publish")) {
-    logger.warn("org.librarysimplified.nexus.publish is not set: We will publish artifacts to Maven Central")
-    useNYPLNexusPublish = false
-  } else {
-    logger.warn("org.librarysimplified.nexus.publish is set: We will publish artifacts to the NYPL Nexus")
-    useNYPLNexusPublish = true
-  }
-
-  if (project.hasProperty("org.librarysimplified.directory.publish")) {
-    useDirectoryPublishPath = project.property("org.librarysimplified.directory.publish")
-    useDirectoryPublish = true
-    logger.warn("org.librarysimplified.directory.publish is set: We will publish artifacts to ${useDirectoryPublishPath}")
-  } else {
-    logger.warn("org.librarysimplified.directory.publish is not set: We will not publish artifacts to a custom directory")
-    useDirectoryPublish = false
-    useDirectoryPublishPath = null
-  }
-
-  if (!project.hasProperty("org.librarysimplified.nexus.depend")) {
-    logger.warn("org.librarysimplified.nexus.depend is not set: We will not depend on artifacts on the NYPL Nexus")
-    useNYPLNexusDepend = false
-  } else {
-    logger.warn("org.librarysimplified.nexus.depend is set: We will depend on artifacts on the NYPL Nexus")
-    useNYPLNexusDepend = true
-  }
-
-  if (project.hasProperty("org.librarysimplified.no_signing")) {
-    disableSigning = true
-    logger.warn("org.librarysimplified.no_signing is set: We will not sign artifacts")
-  } else {
-    disableSigning = false
-    logger.warn("org.librarysimplified.no_signing is not set: We will attempt to sign artifacts")
-  }
-
-  if (!disableSigning) {
-    if (!project.hasProperty("org.librarysimplified.simplye.keyPassword")) {
-      throw new IllegalArgumentException(
-        "Missing project property: org.librarysimplified.simplye.keyPassword")
-    } else {
-      nyplSigningKeyPassword = project.property("org.librarysimplified.simplye.keyPassword")
-      assert (nyplSigningKeyPassword != null)
-    }
-
-    if (!project.hasProperty("org.librarysimplified.simplye.storePassword")) {
-      throw new IllegalArgumentException(
-        "Missing project property: org.librarysimplified.simplye.storePassword")
-    } else {
-      nyplSigningStorePassword = project.property("org.librarysimplified.simplye.storePassword")
-      assert (nyplSigningStorePassword != null)
-    }
-
-    if (!project.hasProperty("org.librarysimplified.simplye.keyAlias")) {
-      throw new IllegalArgumentException(
-        "Missing project property: org.librarysimplified.simplye.keyAlias")
-    } else {
-      nyplSigningKeyAlias = project.property("org.librarysimplified.simplye.keyAlias")
-      assert (nyplSigningKeyAlias != null)
-    }
-  } else {
-    nyplSigningKeyPassword = ""
-    nyplSigningStorePassword = ""
-    nyplSigningKeyAlias = ""
-  }
-
-  nyplAudioBookAPIVersion = "6.2.0"
-  nyplR2Version = "0.0.5"
-  nyplHTTPVersion = "0.0.18-SNAPSHOT"
-  irradiaMimeVersion = "1.1.1"
-}
-
-subprojects {
+  // Required for some dependencies only available from our private nexus
   //
-  // We currently have transitive dependencies that specify dependencies on newer versions
-  // of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
-  // new versions appear of both artifacts. Remove this when both are updated!
+  nyplNexusDepend =
+    project.findProperty('org.librarysimplified.nexus.depend') as Boolean
+  nyplNexusUsername =
+    project.findProperty('org.librarysimplified.nexus.username') ?: ''
+  nyplNexusPassword =
+    project.findProperty('org.librarysimplified.nexus.password') ?: ''
+
+  if (nyplNexusDepend && !nyplNexusUsername) {
+    throw new GradleException(
+      """\
+      'org.librarysimplified.nexus.username' is undefined!
+        ^ required by 'org.librarysimplified.nexus.depend'\
+      """.stripIndent())
+  }
+  if (nyplNexusDepend && !nyplNexusPassword) {
+    throw new GradleException(
+      """\
+      'org.librarysimplified.nexus.password' is undefined!
+        ^ required by 'org.librarysimplified.nexus.depend'\
+      """.stripIndent())
+  }
+
+  // Required by some projects to build with drm support
   //
-  configurations.all {
-    resolutionStrategy.force libraries.slf4j
+  nyplDrmEnabled =
+    project.findProperty('org.librarysimplified.drm.enabled') as Boolean
+  if (nyplDrmEnabled && !nyplNexusDepend) {
+    throw new GradleException(
+      """\
+      'org.librarysimplified.nexus.depend' is undefined!
+        ^ required by 'org.librarysimplified.drm.enabled'\
+      """.stripIndent())
   }
 }
-
-ext.libraries = [
-  androidAsync                     : "com.koushikdutta.async:androidasync:2.2.1",
-  androidXActivity                 : "androidx.activity:activity:1.1.0",
-  androidXAppCompat                : "androidx.appcompat:appcompat:1.2.0",
-  androidXCardView                 : "androidx.cardview:cardview:1.0.0",
-  androidXConstraintLayout         : "androidx.constraintlayout:constraintlayout:1.1.3",
-  androidXCore                     : "androidx.core:core:1.1.0",
-  androidXFragmentTesting          : "androidx.fragment:fragment-testing:1.1.0",
-  androidXLegacyPreferenceV14      : "androidx.legacy:legacy-preference-v14:1.0.0",
-  androidXLegacySupport            : "androidx.legacy:legacy-support-v4:1.0.0",
-  androidXLifecycle                : "androidx.lifecycle:lifecycle-extensions:2.2.0",
-  androidXLifecycleViewmodel       : "androidx.lifecycle:lifecycle-viewmodel:2.2.0",
-  androidXPaging                   : "androidx.paging:paging-runtime-ktx:2.1.0",
-  androidXPreference               : "androidx.preference:preference-ktx:1.1.1",
-  androidXRecyclerView             : "androidx.recyclerview:recyclerview:1.1.0",
-  androidXTestEspressoCore         : "androidx.test.espresso:espresso-core:3.1.0",
-  androidXTestExtensions           : "androidx.test.ext:junit:1.1.1",
-  androidXTestOrchestrator         : "androidx.test:orchestrator:1.1.0",
-  androidXTestRules                : "androidx.test:rules:1.1.0",
-  androidXTestRunner               : "androidx.test:runner:1.1.0",
-  autoValue                        : "com.google.auto.value:auto-value-annotations:1.7",
-  autoValueProcessor               : "com.google.auto.value:auto-value:1.7",
-  bottomNavigator                  : "com.pandora.bottomnavigator:bottom-navigator:1.8",
-  firebaseCrashlytics              : "com.google.firebase:firebase-crashlytics:17.1.1",
-  googleAndroidMaterial            : "com.google.android.material:material:1.2.0",
-  googleGuava                      : "com.google.guava:guava:23.6.1-android",
-  iharderBase64                    : "net.iharder:base64:2.3.9",
-  io7mJFunctional                  : "com.io7m.jfunctional:io7m-jfunctional-core:1.3.0",
-  io7mJNull                        : "com.io7m.jnull:io7m-jnull-core:1.0.2",
-  io7mJUnreachable                 : "com.io7m.junreachable:io7m-junreachable-core:1.0.2",
-  irradiaMimeAPI                   : "one.irradia.mime:one.irradia.mime.api:${irradiaMimeVersion}",
-  irradiaMimeVanilla               : "one.irradia.mime:one.irradia.mime.vanilla:${irradiaMimeVersion}",
-  jacksonCore                      : "com.fasterxml.jackson.core:jackson-core:2.10.0",
-  jacksonDatabind                  : "com.fasterxml.jackson.core:jackson-databind:2.10.0",
-  jacksonKotlin                    : "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.9",
-  javaxAnnotationAPI               : "javax.annotation:javax.annotation-api:1.2-b01",
-  jcipAnnotations                  : "com.github.stephenc.jcip:jcip-annotations:1.0-1",
-  jodaTime                         : "joda-time:joda-time:2.9.9",
-  jodahExpiringMap                 : "net.jodah:expiringmap:0.4.3",
-  junit                            : "junit:junit:4.12",
-  kotlinStdlib                     : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
-  leakCanary                       : "com.squareup.leakcanary:leakcanary-android:2.1",
-  logbackAndroid                   : "com.github.tony19:logback-android:2.0.0",
-  logbackClassic                   : "ch.qos.logback:logback-classic:1.2.3",
-  mockWebServer                    : "com.squareup.okhttp3:mockwebserver:4.8.1",
-  mockito                          : "org.mockito:mockito-core:3.4.4",
-  mockitoAndroid                   : "org.mockito:mockito-android:2.22.0",
-  mockitoKotlin                    : "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0",
-  nyplAudiobookAPI                 : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.api:${nyplAudioBookAPIVersion}",
-  nyplAudiobookDownloads           : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.downloads:${nyplAudioBookAPIVersion}",
-  nyplAudiobookFeedbooks           : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.feedbooks:${nyplAudioBookAPIVersion}",
-  nyplAudiobookLicenseCheckAPI     : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.license_check.api:${nyplAudioBookAPIVersion}",
-  nyplAudiobookManifestFulfillAPI  : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.api:${nyplAudioBookAPIVersion}",
-  nyplAudiobookManifestFulfillBasic: "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.basic:${nyplAudioBookAPIVersion}",
-  nyplAudiobookManifestFulfillOPA  : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.opa:${nyplAudioBookAPIVersion}",
-  nyplAudiobookManifestParserAPI   : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.api:${nyplAudioBookAPIVersion}",
-  nyplAudiobookManifestWebPub      : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.webpub:${nyplAudioBookAPIVersion}",
-  nyplAudiobookOpenAccess          : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access:${nyplAudioBookAPIVersion}",
-  nyplAudiobookRBDigital           : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.rbdigital:${nyplAudioBookAPIVersion}",
-  nyplAudiobookViews               : "org.librarysimplified.audiobook:org.librarysimplified.audiobook.views:${nyplAudioBookAPIVersion}",
-  nyplDRMCore                      : "org.librarysimplified.drm:org.librarysimplified.drm.core:1.1.1",
-  nyplHttpAPI                      : "org.librarysimplified.http:org.librarysimplified.http.api:${nyplHTTPVersion}",
-  nyplHttpBearerToken              : "org.librarysimplified.http:org.librarysimplified.http.bearer_token:${nyplHTTPVersion}",
-  nyplHttpChucker                  : "org.librarysimplified.http:org.librarysimplified.http.chucker:${nyplHTTPVersion}",
-  nyplHttpDownloads                : "org.librarysimplified.http:org.librarysimplified.http.downloads:${nyplHTTPVersion}",
-  nyplHttpURI                      : "org.librarysimplified.http:org.librarysimplified.http.uri_builder:${nyplHTTPVersion}",
-  nyplHttpVanilla                  : "org.librarysimplified.http:org.librarysimplified.http.vanilla:${nyplHTTPVersion}",
-  nyplPDFAPI                       : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.api:0.1.0",
-  nyplPDFViewer                    : "edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer:0.1.0",
-  nyplR2API                        : "org.librarysimplified.r2:org.librarysimplified.r2.api:${nyplR2Version}",
-  nyplR2Vanilla                    : "org.librarysimplified.r2:org.librarysimplified.r2.vanilla:${nyplR2Version}",
-  nyplR2Views                      : "org.librarysimplified.r2:org.librarysimplified.r2.views:${nyplR2Version}",
-  picasso                          : "com.squareup.picasso:picasso:2.71828",
-  readium                          : "org.librarysimplified:org.librarysimplified.readium:0.30.0",
-  readiumSharedJS                  : "org.librarysimplified:org.librarysimplified.readium.shared_js:0.30.0",
-  rxjava2                          : "io.reactivex.rxjava2:rxjava:2.1.13",
-  slf4j                            : "org.slf4j:slf4j-api:1.7.25",
-]
-
-allprojects {
-  group = project.ext["GROUP"]
-  version = project.ext["VERSION_NAME"]
-}
-
-// Configure all projects
 
 subprojects { project ->
+  group = project.ext["GROUP"]
+  version = project.ext["VERSION_NAME"]
+
   switch (POM_PACKAGING) {
-    case "jar":
-      logger.info("Configuring ${project} (${POM_PACKAGING}) as jar project")
-
-      apply plugin: "java"
-      apply plugin: "java-library"
-      apply plugin: "kotlin"
-
-      /*
-       * Apply the Animal Sniffer plugin to check that code is Android compatible.
-       */
-
-      apply plugin: "ru.vyarus.animalsniffer"
-
-      dependencies {
-        signature "org.codehaus.mojo.signature:java16:1.1@signature"
-        signature "net.sf.androidscents.signature:android-api-level-21:5.0.1_r2@signature"
-      }
-
-      /*
-       * Build an OSGi bundle.
-       */
-
-      apply plugin: "biz.aQute.bnd.builder"
-
-      jar {
-        bnd """
-Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
-
--removeheaders: Bnd-LastModified, Tool, Private-Package
-"""
-      }
-      break
-
-    case "apk":
-      logger.info("Configuring ${project} (${POM_PACKAGING}) as Android application project")
-
-      apply plugin: "com.android.application"
-      apply plugin: "kotlin-android"
-
-      android {
-        compileSdkVersion androidCompileSDKVersion
-        buildToolsVersion androidBuildToolsVersion
-
-        defaultConfig {
-          minSdkVersion androidMinimumSDKVersion
-          targetSdkVersion androidTargetSDKVersion
-        }
-        compileOptions {
-          encoding 'UTF-8'
-          sourceCompatibility JavaVersion.VERSION_1_8
-          targetCompatibility JavaVersion.VERSION_1_8
-        }
-      }
-      break
-
     case "aar":
-      logger.info("Configuring ${project} (${POM_PACKAGING}) as Android library project")
-
-      apply plugin: "com.android.library"
-      apply plugin: "kotlin-android"
-      apply plugin: "androidx.navigation.safeargs.kotlin"
-
-      android {
-        compileSdkVersion androidCompileSDKVersion
-        buildToolsVersion androidBuildToolsVersion
-
-        defaultConfig {
-          minSdkVersion androidMinimumSDKVersion
-          targetSdkVersion androidTargetSDKVersion
-          testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-          useLibrary 'org.apache.http.legacy'
-        }
-        compileOptions {
-          encoding 'UTF-8'
-          sourceCompatibility JavaVersion.VERSION_1_8
-          targetCompatibility JavaVersion.VERSION_1_8
-        }
-        testOptions {
-          execution 'ANDROIDX_TEST_ORCHESTRATOR'
-          animationsDisabled = true
-        }
-      }
+      apply from: file("$rootDir/build_aar.gradle")
       break
-
+    case "apk":
+      apply from: file("$rootDir/build_apk.gradle")
+      break
+    case "jar":
+      apply from: file("$rootDir/build_jar.gradle")
+      break
     default:
       throw new IllegalStateException(
         "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
-  }
-
-  task javadocsJar(type: Jar) {
-    classifier = "javadoc"
-  }
-
-  task sourcesJar(type: Jar) {
-    classifier = "sources"
-    from "src/main/java", "src/main/resources"
   }
 
   repositories {
@@ -319,64 +91,98 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     mavenCentral()
     google()
 
-    // Sonatype snapshots
-    maven {
-      url "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-
-    if (useNYPLNexusDepend) {
+    if (nyplNexusDepend) {
       maven {
         credentials {
-          username findProperty("org.librarysimplified.nexus.username")
-          password findProperty("org.librarysimplified.nexus.password")
+          username nyplNexusUsername
+          password nyplNexusPassword
         }
-        url "https://nexus.librarysimplified.org:8443/nexus/content/groups/external/"
+        url 'https://nexus.librarysimplified.org:8443/nexus/content/groups/external/'
       }
     }
 
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "http://maven.findawayworld.com/artifactory/libs-release/" }
     maven { url "https://jitpack.io" }
     jcenter()
+  }
+
+  // Configure publishing for java projects
+  //
+  pluginManager.withPlugin("java") {
+    logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
+    apply from: file("$rootDir/.publish/publishing.gradle")
+  }
+
+  // Configure publishing for android-library projects
+  //
+  pluginManager.withPlugin("com.android.library") {
+    logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
+    apply from: file("$rootDir/.publish/publishing.gradle")
+  }
+
+  configurations.all {
+    // We currently have transitive dependencies that specify dependencies on newer versions
+    // of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
+    // new versions appear of both artifacts. Remove this when both are updated!
+    //
+    resolutionStrategy.force libraries.slf4j
+
+    // one.irradia.mime.api depends on an outdated version of kotlin-reflect
+    //
+    resolutionStrategy.force libraries.kotlin_reflect
+  }
+
+  // Skip tasks for projects that require drm; unless drm is enabled
+  //
+  def nyplDrmRequired =
+    project.findProperty('org.librarysimplified.drm.required') as Boolean
+  if (nyplDrmRequired) {
+    project.tasks.all { task ->
+      task.onlyIf { nyplDrmEnabled }
+    }
   }
 }
 
 /**
  * An empty task called by CI. We don't do semantic versioning analysis here yet.
  */
+task verifySemanticVersioning {}
 
-task verifySemanticVersioning {
-
+/**
+ * Displays properties starting with 'org.librarysimplified'.
+ */
+task listProperties(group: 'NYPL') {
+  description = "Displays properties starting with 'org.librarysimplified'."
+  doLast {
+    project.properties
+      .findAll { p ->
+        p.key.startsWith('org.librarysimplified')
+      }
+      .sort()
+      .each { println(it) }
+  }
 }
 
-// Configure publishing for appropriate projects
-
-subprojects { project ->
-  pluginManager.withPlugin("java") {
-    println("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/publishing.gradle")
-  }
-  pluginManager.withPlugin("com.android.library") {
-    println("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/publishing.gradle")
-  }
-}
-
-// Add ktlint tasks to root project. This executes faster than configuring
-// the tasks for each subproject individually.
-
+// Add ktlint tasks to root project. This executes faster than
+// configuring the task for each individual subproject.
+//
 apply from: file("$rootDir/ktlint.gradle")
 
 /**
- * Translate a semantic version into a numeric version code.
+ * Expand the 'tilde' character to user.home.
  */
-static Integer versionCode(String versionName) {
-  def (major, minor, patch) = versionName
-    .replaceAll('[-+].*', '') // strip all metadata from version
-    .tokenize('.')
+@SuppressWarnings('unused')
+static String expandUserHome(String path) {
+  if (path == null) return
+  return path.replaceFirst("~", System.getProperty("user.home"))
+}
 
-  major = major.toInteger()
-  minor = minor.toInteger()
-  patch = patch.toInteger()
-
-  // Return version code padded with leading zeros
-  return String.format('%02d%02d%02d', major, minor, patch).toInteger()
+@SuppressWarnings('unused')
+static Integer calculateVersionCode(Project project) {
+  def now = LocalDateTime.now(ZoneId.of("UTC"))
+  def nowSeconds = now.toEpochSecond(ZoneOffset.UTC)
+  // Seconds since 2021-03-15 09:20:00 UTC
+  def nowReduced = nowSeconds - 1615800000
+  return nowReduced
 }

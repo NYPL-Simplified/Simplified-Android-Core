@@ -183,9 +183,10 @@ class CatalogFeedViewModel(
 
     val future =
       this.feedLoader.fetchURIWithBookRegistryEntries(
-        account.id,
-        arguments.feedURI,
-        authentication
+        account = account.id,
+        uri = arguments.feedURI,
+        auth = authentication,
+        method = "GET"
       )
 
     return this.createNewStatus(
@@ -436,6 +437,31 @@ class CatalogFeedViewModel(
       is CatalogFeedArgumentsLocalBooks -> {
         throw IllegalStateException(
           "Can't transition local to remote feed: ${this.feedArguments.title} -> $title"
+        )
+      }
+    }
+  }
+
+  override fun resolveFeedFromBook(
+    accountID: AccountID,
+    title: String,
+    uri: URI
+  ): CatalogFeedArguments {
+    return when (val arguments = this.feedArguments) {
+      is CatalogFeedArgumentsRemote ->
+        CatalogFeedArgumentsRemote(
+          feedURI = arguments.feedURI.resolve(uri).normalize(),
+          isSearchResults = false,
+          ownership = CatalogFeedOwnership.OwnedByAccount(accountID),
+          title = title
+        )
+
+      is CatalogFeedArgumentsLocalBooks -> {
+        CatalogFeedArgumentsRemote(
+          feedURI = uri.normalize(),
+          isSearchResults = false,
+          ownership = CatalogFeedOwnership.OwnedByAccount(accountID),
+          title = title
         )
       }
     }

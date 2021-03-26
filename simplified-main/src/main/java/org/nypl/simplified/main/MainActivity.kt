@@ -17,14 +17,17 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.Observable
+import org.joda.time.DateTime
 import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.documents.EULAType
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.migration.api.Migrations
@@ -36,6 +39,8 @@ import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
@@ -47,9 +52,12 @@ import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.nypl.simplified.ui.announcements.AnnouncementsController
+import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
+import org.nypl.simplified.ui.catalog.AgeGateDialog
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -61,6 +69,7 @@ import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashParameters
 import org.nypl.simplified.ui.splash.SplashSelectionFragment
 import org.nypl.simplified.ui.theme.ThemeControl
+import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.ServiceLoader
@@ -70,7 +79,12 @@ class MainActivity :
   AppCompatActivity(),
   OnBackStackChangedListener,
   SplashListenerType,
-  ErrorPageListenerType {
+  ErrorPageListenerType,
+  AgeGateDialog.BirthYearSelectedListener {
+
+  companion object {
+    private const val STATE_ACTION_BAR_IS_SHOWING = "ACTION_BAR_IS_SHOWING"
+  }
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
 
@@ -80,6 +94,9 @@ class MainActivity :
   private lateinit var mainViewModel: MainFragmentViewModel
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesNavigationController: ProfilesNavigationController
+  private lateinit var configurationService: BuildConfigurationServiceType
+  private lateinit var profilesController: ProfilesControllerType
+  private lateinit var ageGateDialog: AgeGateDialog
 
   private val navigationController: NavigationControllerType?
     get() {
@@ -166,10 +183,20 @@ class MainActivity :
               taskRecorder.currentStepFailed(message, "missingInformation")
               return taskRecorder.finishFailure()
             }
+            is AccountAuthenticationCredentials.SAML2_0 -> {
+              val message = "Can't use SAML 2.0 authentication during migrations."
+              taskRecorder.currentStepFailed(message, "missingInformation")
+              return taskRecorder.finishFailure()
+            }
           }
         }
         is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
           val message = "Can't use OAuth authentication during migrations."
+          taskRecorder.currentStepFailed(message, "missingInformation")
+          return taskRecorder.finishFailure()
+        }
+        is AccountProviderAuthenticationDescription.SAML2_0 -> {
+          val message = "Can't use SAML 2.0 authentication during migrations."
           taskRecorder.currentStepFailed(message, "missingInformation")
           return taskRecorder.finishFailure()
         }
@@ -285,7 +312,41 @@ class MainActivity :
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
       .commit()
-    this.supportActionBar?.show()
+
+    /*
+     * Register an announcements controller.
+     */
+
+    val services = Services.serviceDirectory()
+    this.lifecycle.addObserver(
+      AnnouncementsController(
+        context = this,
+        uiThread = services.requireService(UIThreadServiceType::class.java),
+        profileController = services.requireService(ProfilesControllerType::class.java)
+      )
+    )
+
+    /*
+     * Register an accessibility controller.
+     */
+
+    this.lifecycle.addObserver(
+      AccessibilityService.create(
+        context = this,
+        bookRegistry = services.requireService(BookRegistryType::class.java),
+        uiThread = services.requireService(UIThreadServiceType::class.java)
+      )
+    )
+
+    this.configurationService =
+      services.requireService(BuildConfigurationServiceType::class.java)
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    if (configurationService.showAgeGateUi &&
+      this.profilesController.profileCurrent().preferences().dateOfBirth == null
+    ) {
+      this.showAgeGate()
+    }
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -318,11 +379,23 @@ class MainActivity :
     if (savedInstanceState == null) {
       this.mainViewModel.clearHistory = true
       this.showSplashScreen()
+    } else {
+      if (savedInstanceState.getBoolean(STATE_ACTION_BAR_IS_SHOWING)) {
+        this.supportActionBar?.show()
+      } else {
+        this.supportActionBar?.hide()
+      }
     }
   }
 
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putBoolean(STATE_ACTION_BAR_IS_SHOWING, this.supportActionBar?.isShowing ?: false)
+  }
+
   override fun getActionBar(): ActionBar? {
-    throw UnsupportedOperationException("Use 'getSupportActionBar' instead")
+    this.logger.warn("Use 'getSupportActionBar' instead")
+    return super.getActionBar()
   }
 
   override fun onBackPressed() {
@@ -474,7 +547,15 @@ class MainActivity :
           throw UnreachableCodeException()
         }
 
+        override fun openSAML20Login(parameters: AccountSAML20FragmentParameters) {
+          throw UnreachableCodeException()
+        }
+
         override fun openSettingsAccountRegistry() {
+          throw UnreachableCodeException()
+        }
+
+        override fun openCatalogAfterAuthentication() {
           throw UnreachableCodeException()
         }
       }
@@ -510,7 +591,7 @@ class MainActivity :
       context = this,
       address = parameters.emailAddress,
       subject = parameters.subject,
-      body = parameters.body
+      body = parameters.report
     )
   }
 
@@ -573,5 +654,44 @@ class MainActivity :
         .profileIdleTimer()
         .reset()
     }
+  }
+
+  /**
+   * Shows age gate for verification
+   */
+  private fun showAgeGate() {
+    ageGateDialog = AgeGateDialog()
+    ageGateDialog.show(supportFragmentManager, AgeGateDialog.TAG)
+  }
+
+  /**
+   * Handle birth year sent back from Age Gate dialog
+   */
+  override fun onBirthYearSelected(isOver13: Boolean) {
+    if (isOver13) {
+      this.profilesController.profileUpdate { description ->
+        this.synthesizeDateOfBirthDescription(description, 14)
+      }
+    } else {
+      this.profilesController.profileUpdate { description ->
+        this.synthesizeDateOfBirthDescription(description, 0)
+      }
+    }
+  }
+
+  private fun synthesizeDateOfBirthDescription(
+    description: ProfileDescription,
+    years: Int
+  ): ProfileDescription {
+    val newPreferences =
+      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
+    return description.copy(preferences = newPreferences)
+  }
+
+  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
+    return ProfileDateOfBirth(
+      date = DateTime.now().minusYears(years),
+      isSynthesized = true
+    )
   }
 }

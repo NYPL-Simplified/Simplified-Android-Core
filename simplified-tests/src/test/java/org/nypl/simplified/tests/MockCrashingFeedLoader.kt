@@ -17,14 +17,6 @@ class MockCrashingFeedLoader : FeedLoaderType {
   override fun fetchURI(
     account: AccountID,
     uri: URI,
-    auth: LSHTTPAuthorizationType?
-  ): FluentFuture<FeedLoaderResult> {
-    return FluentFuture.from(Futures.immediateFailedFuture(IOException("Ouch!")))
-  }
-
-  override fun fetchURIRefreshing(
-    account: AccountID,
-    uri: URI,
     auth: LSHTTPAuthorizationType?,
     method: String
   ): FluentFuture<FeedLoaderResult> {
@@ -34,11 +26,9 @@ class MockCrashingFeedLoader : FeedLoaderType {
   override fun fetchURIWithBookRegistryEntries(
     account: AccountID,
     uri: URI,
-    auth: LSHTTPAuthorizationType?
+    auth: LSHTTPAuthorizationType?,
+    method: String
   ): FluentFuture<FeedLoaderResult> {
     return FluentFuture.from(Futures.immediateFailedFuture(IOException("Ouch!")))
-  }
-
-  override fun invalidate(uri: URI) {
   }
 }
