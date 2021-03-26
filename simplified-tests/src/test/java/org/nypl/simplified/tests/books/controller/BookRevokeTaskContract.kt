@@ -77,6 +77,7 @@ import java.util.ArrayList
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Contract for the `BookRevokeTask` class that doesn't involve DRM.
@@ -118,7 +119,12 @@ abstract class BookRevokeTaskContract {
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-tests", "1.0.0")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-tests",
+            applicationVersion = "1.0.0",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.executorBooks = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())

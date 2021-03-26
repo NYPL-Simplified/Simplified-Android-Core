@@ -1,3 +1,6 @@
 [submodule ".ci"]
 	path = .ci
 	url = https://www.github.com/NYPL-Simplified/Simplified-Android-CI
+[submodule "simplified-tests/src/test/resources/org/nypl/simplified/tests/bookmark_annotations/spec"]
+	path = simplified-tests/src/test/resources/org/nypl/simplified/tests/bookmark_annotations/spec
+	url = https://github.com/NYPL-Simplified/Simplified-Bookmarks-Spec

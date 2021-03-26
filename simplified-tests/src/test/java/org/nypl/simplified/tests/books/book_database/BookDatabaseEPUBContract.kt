@@ -4,11 +4,10 @@ import android.content.Context
 import com.io7m.jfunctional.Option
 import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTimeZone
 import org.junit.Assert
 import org.junit.Test
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookIDs
@@ -69,14 +68,14 @@ abstract class BookDatabaseEPUBContract {
       Assert.assertEquals(null, formatHandle.format.lastReadLocation)
 
       val bookmark =
-        Bookmark(
+        Bookmark.create(
           opdsId = "abcd",
-          location = BookLocation(
-            progress = BookChapterProgress(0, 0.5),
+          location = BookLocation.BookLocationR1(
+            progress = 0.5,
             contentCFI = "xyz",
             idRef = "abc"
           ),
-          time = LocalDateTime.now(),
+          time = DateTime.now(DateTimeZone.UTC),
           chapterTitle = "A title",
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
           bookProgress = 0.25,
@@ -110,14 +109,14 @@ abstract class BookDatabaseEPUBContract {
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val bookmark0 =
-      Bookmark(
+      Bookmark.create(
         opdsId = "abcd",
-        location = BookLocation(
-          progress = BookChapterProgress(0, 0.5),
+        location = BookLocation.BookLocationR1(
+          progress = 0.5,
           contentCFI = "xyz",
           idRef = "abc"
         ),
-        time = LocalDateTime.now(),
+        time = DateTime.now(DateTimeZone.UTC),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         bookProgress = 0.25,
@@ -126,14 +125,14 @@ abstract class BookDatabaseEPUBContract {
       )
 
     val bookmark1 =
-      Bookmark(
+      Bookmark.create(
         opdsId = "abcd",
-        location = BookLocation(
-          progress = BookChapterProgress(0, 0.6),
+        location = BookLocation.BookLocationR1(
+          progress = 0.6,
           contentCFI = "xyz",
           idRef = "abc"
         ),
-        time = LocalDateTime.now(),
+        time = DateTime.now(DateTimeZone.UTC),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         bookProgress = 0.25,
@@ -142,14 +141,14 @@ abstract class BookDatabaseEPUBContract {
       )
 
     val bookmark2 =
-      Bookmark(
+      Bookmark.create(
         opdsId = "abcd",
-        location = BookLocation(
-          progress = BookChapterProgress(0, 0.7),
+        location = BookLocation.BookLocationR1(
+          progress = 0.7,
           contentCFI = "xyz",
           idRef = "abc"
         ),
-        time = LocalDateTime.now(),
+        time = DateTime.now(DateTimeZone.UTC),
         kind = BookmarkKind.ReaderBookmarkExplicit,
         chapterTitle = "A title",
         bookProgress = 0.25,

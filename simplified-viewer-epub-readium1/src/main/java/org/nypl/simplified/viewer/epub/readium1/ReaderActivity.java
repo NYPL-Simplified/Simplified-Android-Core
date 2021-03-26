@@ -31,6 +31,8 @@ import com.io7m.jfunctional.Some;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 import org.librarysimplified.services.api.Services;
 import org.nypl.drm.core.AdobeAdeptLoan;
@@ -563,27 +565,28 @@ public final class ReaderActivity extends AppCompatActivity implements
   }
 
   @Override
-  public void onCurrentPageReceived(final BookLocation location) {
+  public void onCurrentPageReceived(final BookLocation.BookLocationR1 location) {
     Objects.requireNonNull(location);
     LOG.debug("onCurrentPageReceived: {}", location);
 
     // Add the current chapter progress to the location.
-
-    BookLocation currentLocation = new BookLocation(
-      new BookChapterProgress(current_page_index, currentChapterProgress()),
+    BookLocation currentLocation = new BookLocation.BookLocationR1(
+      currentChapterProgress(),
       location.getContentCFI(),
-      location.getIdRef());
+      location.getIdRef()
+    );
 
     final Bookmark bookmark =
-      new Bookmark(
+      Bookmark.Companion.create(
         this.feed_entry.getID(),
         currentLocation,
         BookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
-        LocalDateTime.now(),
+        DateTime.now(DateTimeZone.UTC),
         this.current_chapter_title,
         currentBookProgress(),
         getDeviceIDString(),
-        null);
+        null
+      );
 
     this.current_location = bookmark;
 
@@ -1147,10 +1150,15 @@ public final class ReaderActivity extends AppCompatActivity implements
 
       try {
         LOG.debug("navigateTo: Creating Page Req for: {}", locReal);
-        final ReaderOpenPageRequestType request =
-          ReaderOpenPageRequest.fromBookLocation(locReal.getLocation());
-        this.current_location = locReal;
-        page_request = Option.of(request);
+        BookLocation locationR1 = locReal.getLocation();
+        if (locationR1 instanceof BookLocation.BookLocationR1) {
+          final ReaderOpenPageRequestType request =
+            ReaderOpenPageRequest.fromBookLocation((BookLocation.BookLocationR1) locationR1);
+          this.current_location = locReal;
+          page_request = Option.of(request);
+        } else {
+          throw new IllegalArgumentException("Cannot create an R1 page request from " + locationR1);
+        }
       } catch (Exception e) {
         LOG.error("navigateTo: failed to create page request: ", e);
         page_request = Option.none();

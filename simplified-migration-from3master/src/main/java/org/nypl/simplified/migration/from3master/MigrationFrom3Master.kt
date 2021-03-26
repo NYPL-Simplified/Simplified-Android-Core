@@ -663,11 +663,11 @@ class MigrationFrom3Master(
 
     return try {
       val bookLocation =
-        BookLocation(null, null, "x")
+        BookLocation.BookLocationR1(null, null, "x")
       val kind =
         BookmarkKind.ofMotivation(annotation.motivation)
       val time =
-        formatter.parseLocalDateTime(annotation.body.timestamp)
+        formatter.parseDateTime(annotation.body.timestamp)
       val chapterTitle =
         annotation.body.chapterTitle ?: ""
       val bookProgress =
@@ -677,7 +677,7 @@ class MigrationFrom3Master(
       val uri =
         annotation.id?.let(::URI)
 
-      Bookmark(
+      Bookmark.create(
         opdsId = annotation.target.source,
         location = bookLocation,
         kind = kind,

@@ -45,6 +45,7 @@ import org.nypl.simplified.tests.MockAccountLogoutStringResources
 import org.slf4j.Logger
 import java.io.InputStream
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 abstract class ProfileAccountLogoutTaskContract {
 
@@ -71,7 +72,12 @@ abstract class ProfileAccountLogoutTaskContract {
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-tests", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-tests",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.profile =

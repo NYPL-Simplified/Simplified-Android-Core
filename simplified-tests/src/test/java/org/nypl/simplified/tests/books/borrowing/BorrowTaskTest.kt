@@ -94,6 +94,7 @@ import java.io.File
 import java.net.URI
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class BorrowTaskTest {
 
@@ -260,8 +261,10 @@ class BorrowTaskTest {
         .create(
           context = androidContext,
           configuration = LSHTTPClientConfiguration(
-            "simplified-tests",
-            "999.999.0"
+            applicationName = "simplified-tests",
+            applicationVersion = "999.999.0",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
           )
         )
 
