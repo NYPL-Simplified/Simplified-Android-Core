@@ -1,12 +1,13 @@
 ### Releasing
 
-We currently push releases to [Maven Central](https://search.maven.org).
+We currently push releases to [Maven Central](https://search.maven.org)
+and [Firebase](https://firebase.google.com).
 
 We use the `git flow` model for development and that includes making
 releases. The release process essentially involves creating a temporary
 release branch from `develop`, incrementing version numbers, merging that
-release branch into `main`, pushing binaries to Maven Central, and then
-setting the version number for the next development cycle.
+release branch into `main`, and then setting the version number for the next 
+development cycle.
 
 The instructions in this file detail the process for producing a
 hypothetical version `99.0.0` release. The instructions assume that
@@ -105,6 +106,28 @@ $ git commit -m 'Mark version 99.0.0'
 Optionally, you can `git push` here to give continuous integration
 systems a chance to build the code and make sure everything is alright.
 
+#### Close The Changelog
+
+We currently use [changelog](https://www.io7m.com/software/changelog/) to
+maintain a humanly-readable list of changes made between releases. The
+[changelog manual](https://www.io7m.com/software/changelog/documentation/index.xhtml#d2e143)
+has a detailed usage guide, but the release process only involves a couple
+of commands.
+
+First, [set the release version](https://www.io7m.com/software/changelog/documentation/index.xhtml#id_f79aa94b-4dc7-44ee-823e-f6d1e3e8f155)
+to the version being released now. In our case, that's `99.0.0`:
+
+```
+$ changelog release-set-version --version 99.0.0
+```
+
+Then, [close the current release](https://www.io7m.com/software/changelog/documentation/index.xhtml#id_31fe1fbf-62b9-4811-93dd-252a9ebfb222).
+This marks the changelog as being finalized for the current release:
+
+```
+$ changelog release-finish
+```
+
 #### Finish And Merge The Release Branch
 
 ```
@@ -115,7 +138,17 @@ You will be prompted to add a commit message for the commit that
 merges all of the changes back to the `master` branch, and you will
 also be prompted to add a message to the new `v99.0.0` tag that `git flow`
 will create in the repository. We recommend adding changelog entries
-here.
+here. You can get a plain-text version of the changelog to insert into
+the merge message with the following command:
+
+```
+$ changelog write-plain
+Release: LibrarySimplified 99.0.0
+Change: Enable ACS DRM for Readium 2 (Ticket: #SIMPLY-3138)
+Change: Add a neutral age gate for the Play Store (Ticket: #SIMPLY-3493)
+Change: Correct an issue related to multiple accounts and Adobe DRM (thanks @ray-lee!) (Ticket: #SIMPLY-2979)
+...
+```
 
 The `git flow` tool will also make sure to clean up any `release`
 branch that you may have pushed in the previous step.
@@ -129,19 +162,51 @@ $ git push --all
 
 This updates the remote Git repository with the new branches.
 
-#### Push To Maven Central
+The release is now complete! Our [CI](https://github.com/NYPL-Simplified/Simplified-Android-CI)
+system takes care of pushing all of the pieces of the build to the right places.
+If you're morbidly curious as to what happens there, see the [epilogue](#epilogue).
+To leave things in a pleasant state for the next developer, you should now
+[prepare for the next development cycle](#prepare-for-the-next-development-cycle).
 
-Replace `username` and `password` with your Maven Central username and
-password, respectively:
+#### Prepare For The Next Development Cycle
+
+Make sure you're back on the `develop` branch. The `git flow` tool should have
+switched branches for you automatically, but it's always worth being certain:
 
 ```
-$ ./maven-central-deploy.sh username password
+$ git branch
+develop
 ```
 
-## The End
+Update the `gradle.properties` file to set a new `-SNAPSHOT` version
+for the next development cycle:
 
-You're done. The binaries will appear on Maven Central within roughly
-15 minutes.
+```
+$ $EDITOR gradle.properties
+<... edit VERSION_NAME ...>
+
+$ grep VERSION_NAME gradle.properties
+VERSION_NAME=99.0.1-SNAPSHOT
+
+$ git add gradle.properties
+```
+
+Start a [new changelog release](https://www.io7m.com/software/changelog/documentation/d2e143.xhtml#id_3be05f7b-b312-45f8-ae0c-00a0528a6273)
+(assuming the next release will be `99.0.1` - it doesn't matter if you don't
+know what the exact version number will be, because this can always be changed
+later):
+
+```
+$ changelog release-begin 99.0.1
+$ git add README-CHANGES.xml
+```
+
+Commit:
+
+```
+$ git commit -m 'Start new development cycle; mark version 99.0.1-SNAPSHOT'
+$ git push
+```
 
 ## Epilogue
 
@@ -152,7 +217,13 @@ tool to do reliable Maven Central deployments. This documentation
 makes references to a `brooklime.jar` file, and this should be understood
 to be an abbreviation for whichever is the current release of the `brooklime`
 command-line tool. At the time of writing, the exact jar file is
-[com.io7m.brooklime.cmdline-0.0.2-main.jar](https://repo1.maven.org/maven2/com/io7m/brooklime/com.io7m.brooklime.cmdline/0.0.2/com.io7m.brooklime.cmdline-0.0.2-main.jar).
+[com.io7m.brooklime.cmdline-0.1.0-main.jar](https://repo1.maven.org/maven2/com/io7m/brooklime/com.io7m.brooklime.cmdline/0.1.0/com.io7m.brooklime.cmdline-0.1.0-main.jar).
+
+We generally rely on CI to do this for us, but it can also be performed
+manually by developers on their local machine if necessary. See the
+[.ci/ci-deploy-central-release.sh](ci-deploy-central-release.sh) script
+to see how the commands described below are used by the CI system to upload
+builds.
 
 ##### Building And Deploying
 
@@ -247,18 +318,3 @@ When the _release_ phase completes successfully, artifacts will be
 permanently visible on Maven Central within 15 minutes. The artifacts
 will appear in [search results](https://search.maven.org) within an hour.
 
-#### Prepare For The Next Development Cycle
-
-Update the `gradle.properties` file to set a new `-SNAPSHOT` version
-for the next development cycle:
-
-```
-$ $EDITOR gradle.properties
-<... edit VERSION_NAME ...>
-
-$ grep VERSION_NAME gradle.properties
-VERSION_NAME=99.0.1-SNAPSHOT
-
-$ git add gradle.properties
-$ git commit -m 'Start new development cycle; mark version 99.0.1-SNAPSHOT'
-```
