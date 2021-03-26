@@ -1,9 +1,9 @@
 package org.nypl.simplified.tests.books.reader.bookmarks
 
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.junit.Assert
 import org.junit.Test
-import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
@@ -22,10 +22,10 @@ open class ReaderBookmarkPolicyContract {
     org.nypl.simplified.accounts.api.AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
   val bookmark0 =
-    Bookmark(
+    Bookmark.create(
       opdsId = "opdsid",
-      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
-      time = LocalDateTime.now(),
+      location = BookLocation.BookLocationR1(0.5, null, "id"),
+      time = DateTime.now(DateTimeZone.UTC),
       kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
       bookProgress = 0.25,
@@ -34,10 +34,10 @@ open class ReaderBookmarkPolicyContract {
     )
 
   val bookmark0Idle =
-    Bookmark(
+    Bookmark.create(
       opdsId = "opdsid",
-      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
-      time = LocalDateTime.now(),
+      location = BookLocation.BookLocationR1(0.5, null, "id"),
+      time = DateTime.now(DateTimeZone.UTC),
       kind = BookmarkKind.ReaderBookmarkLastReadLocation,
       chapterTitle = "A Title",
       bookProgress = 0.25,
@@ -46,10 +46,10 @@ open class ReaderBookmarkPolicyContract {
     )
 
   val bookmark1 =
-    Bookmark(
+    Bookmark.create(
       opdsId = "opdsid-x",
-      location = BookLocation(BookChapterProgress(0, 0.5), null, "id"),
-      time = LocalDateTime.now(),
+      location = BookLocation.BookLocationR1(0.5, null, "id"),
+      time = DateTime.now(DateTimeZone.UTC),
       kind = BookmarkKind.ReaderBookmarkExplicit,
       chapterTitle = "A Title",
       bookProgress = 0.25,

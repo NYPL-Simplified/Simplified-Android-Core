@@ -23,6 +23,7 @@ import org.nypl.simplified.opds.auth_document.AuthenticationDocumentParsers
 import org.slf4j.Logger
 import java.io.File
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 abstract class AccountProviderNYPLRegistryContract {
 
@@ -61,7 +62,12 @@ abstract class AccountProviderNYPLRegistryContract {
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-tests", "1.0")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-tests",
+            applicationVersion = "1.0",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.server = MockWebServer()

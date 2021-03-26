@@ -12,23 +12,39 @@ import java.io.Serializable
  * that serialized values of this class will be compatible with future releases.
  */
 
-data class BookLocation(
+sealed class BookLocation : Serializable {
 
   /**
-   * The progress through the chapter, if progress is known.
+   * R2-specific book locations.
    */
 
-  val progress: BookChapterProgress?,
+  data class BookLocationR2(
+    val progress: BookChapterProgress
+  ) : BookLocation()
 
   /**
-   * @return The content CFI, if any
+   * R1-specific book locations.
    */
 
-  val contentCFI: String?,
+  @Deprecated("Use R2")
+  data class BookLocationR1(
 
-  /**
-   * @return The IDRef
-   */
+    /**
+     * The chapter progress.
+     */
 
-  val idRef: String?
-) : Serializable
+    val progress: Double?,
+
+    /**
+     * @return The content CFI, if any
+     */
+
+    val contentCFI: String?,
+
+    /**
+     * @return The IDRef
+     */
+
+    val idRef: String?
+  ) : BookLocation()
+}

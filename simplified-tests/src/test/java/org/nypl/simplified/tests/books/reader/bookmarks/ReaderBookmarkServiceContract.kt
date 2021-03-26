@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.reactivex.subjects.Subject
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -23,7 +24,6 @@ import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -46,6 +46,7 @@ import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
 import org.slf4j.Logger
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 abstract class ReaderBookmarkServiceContract {
 
@@ -91,7 +92,12 @@ abstract class ReaderBookmarkServiceContract {
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-test",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.server = MockWebServer()
@@ -498,11 +504,11 @@ abstract class ReaderBookmarkServiceContract {
 
     val startingBookmarks =
       listOf(
-        Bookmark(
+        Bookmark.create(
           opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-          location = BookLocation(BookChapterProgress(0, 0.5), null, "x"),
+          location = BookLocation.BookLocationR1(0.5, null, "x"),
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
-          time = LocalDateTime.now(),
+          time = DateTime.now(DateTimeZone.UTC),
           chapterTitle = "A Title",
           bookProgress = 0.5,
           deviceID = "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",

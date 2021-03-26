@@ -48,6 +48,7 @@ import org.nypl.simplified.tests.books.controller.TaskDumps
 import org.slf4j.Logger
 import java.net.URI
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 abstract class ProfileAccountLoginTaskContract {
 
@@ -74,7 +75,12 @@ abstract class ProfileAccountLoginTaskContract {
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-test",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.profile =
