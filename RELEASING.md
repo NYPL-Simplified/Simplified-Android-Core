@@ -128,6 +128,11 @@ This marks the changelog as being finalized for the current release:
 $ changelog release-finish
 ```
 
+```
+$ git add README-CHANGES.xml
+$ git commit -m 'Close changelog'
+```
+
 #### Finish And Merge The Release Branch
 
 ```
