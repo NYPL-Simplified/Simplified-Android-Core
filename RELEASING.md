@@ -143,8 +143,9 @@ You will be prompted to add a commit message for the commit that
 merges all of the changes back to the `master` branch, and you will
 also be prompted to add a message to the new `v99.0.0` tag that `git flow`
 will create in the repository. We recommend adding changelog entries
-here. You can get a plain-text version of the changelog to insert into
-the merge message with the following command:
+here. You can get a plain-text version of the changelog for the current
+release that you can copy and paste into the merge message using the
+following command:
 
 ```
 $ changelog write-plain
