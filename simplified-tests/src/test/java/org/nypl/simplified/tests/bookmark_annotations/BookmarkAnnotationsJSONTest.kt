@@ -291,9 +291,9 @@ class BookmarkAnnotationsJSONTest {
 
     val bookmark = BookmarkAnnotations.toBookmark(this.objectMapper, annotation)
     Assert.assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
-    Assert.assertEquals(null, bookmark.deviceID)
+    Assert.assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
     Assert.assertEquals(BookmarkKind.ReaderBookmarkLastReadLocation, bookmark.kind)
-    Assert.assertEquals("1970-01-01T00:00:00.000Z", bookmark.time.toString())
+    Assert.assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
     Assert.assertEquals("", bookmark.chapterTitle)
 
     val location = bookmark.location as BookLocation.BookLocationR2
@@ -315,9 +315,9 @@ class BookmarkAnnotationsJSONTest {
 
     val bookmark = BookmarkAnnotations.toBookmark(this.objectMapper, annotation)
     Assert.assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
-    Assert.assertEquals(null, bookmark.deviceID)
+    Assert.assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
     Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
-    Assert.assertEquals("1970-01-01T00:00:00.000Z", bookmark.time.toString())
+    Assert.assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
     Assert.assertEquals("", bookmark.chapterTitle)
 
     val location = bookmark.location as BookLocation.BookLocationR2
@@ -401,6 +401,26 @@ class BookmarkAnnotationsJSONTest {
     BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
       objectMapper = this.objectMapper,
       node = this.resourceNode("invalid-bookmark-4.json")
+    )
+  }
+
+  @Test
+  fun testSpecInvalidBookmark5() {
+    this.expectedException.expect(JSONParseException::class.java)
+    this.expectedException.expectMessage("Expected: A key 'http://librarysimplified.org/terms/device'")
+    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+      objectMapper = this.objectMapper,
+      node = this.resourceNode("invalid-bookmark-5.json")
+    )
+  }
+
+  @Test
+  fun testSpecInvalidBookmark6() {
+    this.expectedException.expect(JSONParseException::class.java)
+    this.expectedException.expectMessage("Expected: A key 'http://librarysimplified.org/terms/time'")
+    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+      objectMapper = this.objectMapper,
+      node = this.resourceNode("invalid-bookmark-6.json")
     )
   }
 

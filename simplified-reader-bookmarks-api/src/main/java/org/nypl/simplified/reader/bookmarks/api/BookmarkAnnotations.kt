@@ -20,8 +20,8 @@ data class BookmarkAnnotationTargetNode(
 )
 
 data class BookmarkAnnotationBodyNode(
-  val timestamp: String?,
-  val device: String?,
+  val timestamp: String,
+  val device: String,
   val chapterTitle: String?,
   val bookProgress: Float?
 )
@@ -120,11 +120,7 @@ object BookmarkAnnotations {
       }
 
     val timestamp =
-      if (bookmark.time == DateTime(0L, DateTimeZone.UTC)) {
-        null
-      } else {
-        this.dateFormatter.print(bookmark.time)
-      }
+      this.dateFormatter.print(bookmark.time)
 
     val bodyAnnotation =
       BookmarkAnnotationBodyNode(

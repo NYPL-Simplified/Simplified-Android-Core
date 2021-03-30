@@ -113,9 +113,9 @@ object BookmarkAnnotationsJSON {
   fun deserializeBodyNodeFromJSON(node: ObjectNode): BookmarkAnnotationBodyNode {
     return BookmarkAnnotationBodyNode(
       timestamp =
-        JSONParserUtilities.getStringOrNull(node, "http://librarysimplified.org/terms/time"),
+        JSONParserUtilities.getString(node, "http://librarysimplified.org/terms/time"),
       device =
-        JSONParserUtilities.getStringOrNull(node, "http://librarysimplified.org/terms/device"),
+        JSONParserUtilities.getString(node, "http://librarysimplified.org/terms/device"),
       chapterTitle =
         JSONParserUtilities.getStringOrNull(node, "http://librarysimplified.org/terms/chapter"),
       bookProgress =
