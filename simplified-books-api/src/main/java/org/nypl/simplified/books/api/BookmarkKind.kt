@@ -31,7 +31,7 @@ sealed class BookmarkKind(
    */
 
   object ReaderBookmarkExplicit :
-    BookmarkKind("https://www.w3.org/ns/oa#bookmarking") {
+    BookmarkKind("http://www.w3.org/ns/oa#bookmarking") {
     override fun toString(): String {
       return "ReaderBookmarkExplicit"
     }
@@ -40,7 +40,7 @@ sealed class BookmarkKind(
   companion object {
 
     val obsoleteBookmarkingURI =
-      "http://www.w3.org/ns/oa#bookmarking"
+      "https://www.w3.org/ns/oa#bookmarking"
 
     fun ofMotivation(motivationURI: String): BookmarkKind {
       return when (motivationURI) {

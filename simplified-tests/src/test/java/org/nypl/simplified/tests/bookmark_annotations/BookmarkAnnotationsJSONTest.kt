@@ -34,11 +34,11 @@ class BookmarkAnnotationsJSONTest {
   private val objectMapper: ObjectMapper = ObjectMapper()
 
   private val targetValue0 =
-    "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/0.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
+    "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"href\": \"/0.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
   private val targetValue1 =
-    "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/1.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
+    "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"href\": \"/1.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
   private val targetValue2 =
-    "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/2.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
+    "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"href\": \"/2.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
 
   private val bookmarkBody0 =
     BookmarkAnnotationBodyNode(

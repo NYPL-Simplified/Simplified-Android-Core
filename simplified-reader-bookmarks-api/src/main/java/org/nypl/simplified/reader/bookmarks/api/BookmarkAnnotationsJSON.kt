@@ -281,7 +281,7 @@ object BookmarkAnnotationsJSON {
     return when (location) {
       is BookLocation.BookLocationR2 -> {
         objectNode.put("@type", "LocatorHrefProgression")
-        objectNode.put("idref", location.progress.chapterHref)
+        objectNode.put("href", location.progress.chapterHref)
         objectNode.put("progressWithinChapter", location.progress.chapterProgress)
         objectNode
       }
@@ -338,7 +338,7 @@ object BookmarkAnnotationsJSON {
   ): BookLocation.BookLocationR2 {
     val progress =
       BookChapterProgress(
-        chapterHref = JSONParserUtilities.getString(obj, "idref"),
+        chapterHref = JSONParserUtilities.getString(obj, "href"),
         chapterProgress = JSONParserUtilities.getDouble(obj, "progressWithinChapter")
       )
     return BookLocation.BookLocationR2(progress)
