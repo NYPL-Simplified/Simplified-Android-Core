@@ -206,7 +206,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
         source = "urn:book0",
         selector = BookmarkAnnotationSelectorNode(
           type = "FragmentSelector",
-          value = "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
+          value = "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"href\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
         )
       )
     )
@@ -228,7 +228,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
         source = "urn:book0",
         selector = BookmarkAnnotationSelectorNode(
           type = "FragmentSelector",
-          value = "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
+          value = "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"href\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n"
         )
       )
     )
@@ -256,7 +256,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
                 "target" : {
                    "source" : "urn:book0",
                    "selector" : {
-                      "value" : "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n",
+                      "value" : "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"href\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n",
                       "type" : "FragmentSelector"
                    }
                 }
@@ -272,7 +272,7 @@ abstract class ReaderBookmarkHTTPCallsContract {
                 "target" : {
                    "source" : "urn:book0",
                    "selector" : {
-                      "value" : "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"idref\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n",
+                      "value" : "{\n  \"@type\": \"LocatorHrefProgression\",\n  \"href\": \"/xyz.html\",\n  \"progressWithinChapter\": 0.5\n}\n",
                       "type" : "FragmentSelector"
                    }
                 }

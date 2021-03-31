@@ -59,7 +59,7 @@ data class Bookmark private constructor(
    * The identifier of the device that created the bookmark, if one is available.
    */
 
-  val deviceID: String?,
+  val deviceID: String,
 
   /**
    * The URI of this bookmark, if the bookmark exists on a remote server.
@@ -125,7 +125,7 @@ data class Bookmark private constructor(
       time: DateTime,
       chapterTitle: String,
       bookProgress: Double,
-      deviceID: String?,
+      deviceID: String,
       uri: URI?
     ): Bookmark {
       return Bookmark(
