@@ -169,6 +169,10 @@ task listProperties(group: 'NYPL') {
 //
 apply from: file("$rootDir/ktlint.gradle")
 
+subprojects {
+  assemble.dependsOn ktlint
+}
+
 /**
  * Expand the 'tilde' character to user.home.
  */
