@@ -32,9 +32,9 @@ import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNonexistentException
 import org.nypl.simplified.profiles.api.ProfileType
-import org.nypl.simplified.tests.MockAccountProviderRegistry
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
+import org.nypl.simplified.tests.mocking.MockAccountProviderRegistry
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException

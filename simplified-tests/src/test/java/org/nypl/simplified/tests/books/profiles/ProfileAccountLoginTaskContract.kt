@@ -43,7 +43,7 @@ import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockAccountLoginStringResources
+import org.nypl.simplified.tests.mocking.MockAccountLoginStringResources
 import org.nypl.simplified.tests.books.controller.TaskDumps
 import org.slf4j.Logger
 import java.net.URI

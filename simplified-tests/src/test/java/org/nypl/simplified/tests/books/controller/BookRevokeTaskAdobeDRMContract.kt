@@ -67,7 +67,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockRevokeStringResources
+import org.nypl.simplified.tests.mocking.MockRevokeStringResources
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException

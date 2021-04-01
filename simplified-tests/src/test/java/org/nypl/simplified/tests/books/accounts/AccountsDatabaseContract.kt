@@ -23,7 +23,8 @@ import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
+import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException

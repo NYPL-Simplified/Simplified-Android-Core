@@ -50,15 +50,16 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockAxisNowService
-import org.nypl.simplified.tests.MockBookDatabase
-import org.nypl.simplified.tests.MockBookDatabaseEntry
-import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.tests.MockBundledContentResolver
-import org.nypl.simplified.tests.MockContentResolver
-import org.nypl.simplified.tests.MockDRMInformationAxisHandle
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockAxisNowService
+import org.nypl.simplified.tests.mocking.MockBookDatabase
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.tests.mocking.MockBundledContentResolver
+import org.nypl.simplified.tests.mocking.MockContentResolver
+import org.nypl.simplified.tests.mocking.MockDRMInformationAxisHandle
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.mocking.MockBorrowContext
 import org.slf4j.LoggerFactory
 
 class BorrowAxisNowTest {
