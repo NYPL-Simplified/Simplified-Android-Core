@@ -52,12 +52,17 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2021-03-26T13:11:10+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.4">
+    <c:release date="2021-04-01T15:13:44+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.4">
       <c:changes>
-        <c:change date="2021-03-26T13:11:10+00:00" summary="Standardize bookmarks across platforms">
+        <c:change date="2021-03-26T00:00:00+00:00" summary="Standardize bookmarks across platforms">
           <c:tickets>
             <c:ticket id="SIMPLY-3605"/>
             <c:ticket id="SIMPLY-3604"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-04-01T15:13:44+00:00" summary="Fix DPLA audio book downloads">
+          <c:tickets>
+            <c:ticket id="SIMPLY-3666"/>
           </c:tickets>
         </c:change>
       </c:changes>
