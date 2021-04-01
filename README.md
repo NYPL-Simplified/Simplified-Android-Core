@@ -45,6 +45,7 @@ same core:
     * [JDK](#jdk)
     * [Nexus Credentials](#nexus-credentials)
     * [APK Signing](#apk-signing)
+    * [Enabling DRM](#enabling-drm)
     * [Adobe DRM](#adobe-drm-support)
     * [Findaway DRM](#findaway-audiobook-drm-support)
 * [Development](#development)
@@ -72,7 +73,7 @@ This will build all of the code and run the unit tests, but only the
 [Vanilla](simplified-app-vanilla) application will be built by default. In
 order to build the other applications such as [SimplyE](simplified-app-simplye),
 it's necessary to obtain the correct [credentials](#nexus-credentials) from the
-NYPL and [enable DRM](#drm).
+NYPL and [enable DRM](#enabling-drm).
 
 #### The Longer Version
 
@@ -157,7 +158,7 @@ $ ./gradlew clean assembleRelease test
 $ ./gradlew clean assemble test
 ~~~
 
-#### DRM
+#### Enabling DRM
 
 The application contains optional support for various DRM systems, and these
 must be enabled explicitly in order to build [SimplyE](simplified-app-simplye).
