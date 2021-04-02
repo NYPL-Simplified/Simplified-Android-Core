@@ -1,6 +1,8 @@
 package org.nypl.simplified.tests.bookmarks
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.joda.time.format.DateTimeFormatter
+import org.joda.time.format.ISODateTimeFormat
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -21,10 +23,12 @@ class BookmarkJSONTest {
   var expectedException: ExpectedException = ExpectedException.none()
 
   private lateinit var objectMapper: ObjectMapper
+  private lateinit var formatter: DateTimeFormatter
 
   @Before
   fun testSetup() {
     this.objectMapper = ObjectMapper()
+    this.formatter = ISODateTimeFormat.dateTime().withZoneUTC()
   }
 
   /**
@@ -102,7 +106,7 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", bookmark.time.toString())
+    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
     Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
     Assert.assertEquals("A title!", bookmark.chapterTitle)
     Assert.assertEquals("fc4f5d19-43a2-4181-99a0-7579e0a4935b", bookmark.deviceID)
@@ -125,7 +129,7 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", bookmark.time.toString())
+    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
     Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
     Assert.assertEquals("Another title", bookmark.chapterTitle)
     Assert.assertEquals("null", bookmark.deviceID)
@@ -147,7 +151,7 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", bookmark.time.toString())
+    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
     Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
     Assert.assertEquals("Some title", bookmark.chapterTitle)
     Assert.assertEquals("70c47074-c048-48c0-8eae-286b9738c108", bookmark.deviceID)
@@ -170,7 +174,7 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-03-17T15:19:56.465Z", bookmark.time.toString())
+    Assert.assertEquals("2021-03-17T15:19:56.465Z", this.formatter.print(bookmark.time))
     Assert.assertEquals("urn:isbn:9781683606123", bookmark.opdsId)
     Assert.assertEquals("Unknown", bookmark.chapterTitle)
     Assert.assertEquals("null", bookmark.deviceID)
