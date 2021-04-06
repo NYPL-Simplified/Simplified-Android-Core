@@ -21,6 +21,7 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -28,13 +29,16 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
 import org.joda.time.format.DateTimeFormat
+import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.documents.EULAType
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.migration.api.MigrationReportXML
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.slf4j.LoggerFactory
@@ -459,14 +463,11 @@ class SplashFragment : Fragment() {
     this.viewsForImage.progress.progress = 100
     this.viewsForImage.text.text = ""
 
-    val eulaProvided = this.listener.onSplashEULAIsProvided()
-    if (!eulaProvided) {
-      this.onFinishEULASuccessfully()
-      return
-    }
+    val eula =  Services.serviceDirectory()
+      .requireService(DocumentStoreType::class.java)
+      .eula
 
-    val eula = this.listener.onSplashEULARequested()
-    if (eula.hasAgreed) {
+    if (eula == null || eula.hasAgreed) {
       this.onFinishEULASuccessfully()
       return
     }
@@ -480,9 +481,17 @@ class SplashFragment : Fragment() {
 
   @UiThread
   private fun onFinishEULASuccessfully() {
-    when (this.listener.onSplashWantProfilesMode()) {
+    val profilesController =
+      Services.serviceDirectory()
+        .requireService(ProfilesControllerType::class.java)
+
+    val profileMode =
+      profilesController
+        .profileAnonymousEnabled()
+
+    when (profileMode) {
       ANONYMOUS_PROFILE_ENABLED -> {
-        this.listener.onSplashOpenProfileAnonymous()
+        profilesController.profileSelect(profilesController.profileCurrent().id)
       }
       ANONYMOUS_PROFILE_DISABLED -> {
       }
@@ -534,12 +543,6 @@ class SplashFragment : Fragment() {
     if (report == null) {
       this.listener.onSplashDone()
       return
-    }
-
-    try {
-      this.listener.onSplashMigrationReport(report)
-    } catch (e: Exception) {
-      this.logger.error("ignored onSplashMigrationReport exception: ", e)
     }
 
     this.logger.debug("saving migration report")

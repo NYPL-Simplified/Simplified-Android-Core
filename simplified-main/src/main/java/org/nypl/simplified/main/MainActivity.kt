@@ -11,26 +11,17 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.lifecycle.ViewModelProvider
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.Observable
 import org.joda.time.DateTime
-import org.librarysimplified.documents.DocumentStoreType
-import org.librarysimplified.documents.EULAType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accessibility.AccessibilityService
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.migration.api.Migrations
 import org.nypl.simplified.migration.api.MigrationsType
-import org.nypl.simplified.migration.spi.MigrationReport
-import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -38,15 +29,11 @@ import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDescription
-import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
-import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
-import org.nypl.simplified.taskrecorder.api.TaskRecorder
-import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
@@ -65,9 +52,7 @@ import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashSelectionFragment
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
-import java.net.URI
 import java.util.ServiceLoader
-import java.util.concurrent.TimeUnit
 
 class MainActivity :
   AppCompatActivity(),
@@ -107,89 +92,6 @@ class MainActivity :
       )
       return controllers.filterNotNull().firstOrNull()
     }
-
-  private fun getAvailableEULA(): EULAType? {
-    return Services.serviceDirectory()
-      .requireService(DocumentStoreType::class.java)
-      .eula
-  }
-
-  private fun doLoginAccount(
-    profilesController: ProfilesControllerType,
-    account: AccountType,
-    credentials: AccountAuthenticationCredentials
-  ): TaskResult<Unit> {
-    this.logger.debug("doLoginAccount")
-
-    val taskRecorder = TaskRecorder.create()
-    taskRecorder.beginNewStep("Logging in...")
-
-    if (account.provider.authenticationAlternatives.isEmpty()) {
-      when (val description = account.provider.authentication) {
-        is AccountProviderAuthenticationDescription.COPPAAgeGate,
-        AccountProviderAuthenticationDescription.Anonymous -> {
-          return taskRecorder.finishSuccess(Unit)
-        }
-        is AccountProviderAuthenticationDescription.Basic -> {
-          when (credentials) {
-            is AccountAuthenticationCredentials.Basic -> {
-              return profilesController.profileAccountLogin(
-                ProfileAccountLoginRequest.Basic(
-                  account.id,
-                  description,
-                  credentials.userName,
-                  credentials.password
-                )
-              ).get(3L, TimeUnit.MINUTES)
-            }
-            is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
-              val message = "Can't use OAuth authentication during migrations."
-              taskRecorder.currentStepFailed(message, "missingInformation")
-              return taskRecorder.finishFailure()
-            }
-            is AccountAuthenticationCredentials.SAML2_0 -> {
-              val message = "Can't use SAML 2.0 authentication during migrations."
-              taskRecorder.currentStepFailed(message, "missingInformation")
-              return taskRecorder.finishFailure()
-            }
-          }
-        }
-        is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
-          val message = "Can't use OAuth authentication during migrations."
-          taskRecorder.currentStepFailed(message, "missingInformation")
-          return taskRecorder.finishFailure()
-        }
-        is AccountProviderAuthenticationDescription.SAML2_0 -> {
-          val message = "Can't use SAML 2.0 authentication during migrations."
-          taskRecorder.currentStepFailed(message, "missingInformation")
-          return taskRecorder.finishFailure()
-        }
-      }
-    } else {
-      val message = "Can't determine which authentication method is required."
-      taskRecorder.currentStepFailed(message, "missingInformation")
-      return taskRecorder.finishFailure()
-    }
-  }
-
-  private fun doCreateAccount(
-    profilesController: ProfilesControllerType,
-    provider: URI
-  ): TaskResult<AccountType> {
-    this.logger.debug("doCreateAccount")
-    return profilesController.profileAccountCreateOrReturnExisting(provider)
-      .get(3L, TimeUnit.MINUTES)
-  }
-
-  private fun applicationVersion(): String {
-    return try {
-      val packageInfo = this.packageManager.getPackageInfo(this.packageName, 0)
-      "${packageInfo.packageName} ${packageInfo.versionName} (${packageInfo.versionCode})"
-    } catch (e: Exception) {
-      this.logger.error("could not get package info: ", e)
-      "unknown"
-    }
-  }
 
   private fun showSplashScreen() {
     this.logger.debug("showSplashScreen")
@@ -416,37 +318,9 @@ class MainActivity :
     return MainApplication.application.servicesBootEvents
   }
 
-  override fun onSplashEULAIsProvided(): Boolean {
-    this.logger.debug("onSplashEULAIsProvided")
-    return this.getAvailableEULA() != null
-  }
-
-  override fun onSplashEULARequested(): EULAType {
-    this.logger.debug("onSplashEULARequested")
-    return this.getAvailableEULA()!!
-  }
-
   override fun onSplashDone() {
     this.logger.debug("onSplashDone")
     return this.onStartupFinished()
-  }
-
-  override fun onSplashOpenProfileAnonymous() {
-    this.logger.debug("onSplashOpenProfileAnonymous")
-
-    val profilesController =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-
-    profilesController.profileSelect(profilesController.profileCurrent().id)
-  }
-
-  override fun onSplashWantProfilesMode(): ProfilesDatabaseType.AnonymousProfileEnabled {
-    this.logger.debug("onSplashWantProfilesMode")
-
-    return Services.serviceDirectory()
-      .requireService(ProfilesControllerType::class.java)
-      .profileAnonymousEnabled()
   }
 
   override fun onSplashWantMigrations(): MigrationsType {
@@ -454,33 +328,7 @@ class MainActivity :
       Services.serviceDirectory()
         .requireService(ProfilesControllerType::class.java)
 
-    val isAnonymous =
-      profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_ENABLED
-
-    val migrationServiceDependencies =
-      MigrationServiceDependencies(
-        createAccount = { uri ->
-          this.doCreateAccount(profilesController, uri)
-        },
-        loginAccount = { account, credentials ->
-          this.doLoginAccount(profilesController, account, credentials)
-        },
-        accountEvents = profilesController.accountEvents(),
-        applicationProfileIsAnonymous = isAnonymous,
-        applicationVersion = this.applicationVersion(),
-        context = this
-      )
-
-    return Migrations.create(migrationServiceDependencies)
-  }
-
-  override fun onSplashWantMigrationExecutor(): ListeningExecutorService {
-    // No longer used
-    throw NotImplementedError()
-  }
-
-  override fun onSplashMigrationReport(report: MigrationReport) {
-    // No longer used
+    return MigrationsAdapter().createMigrations(MainApplication.application, profilesController)
   }
 
   override fun onSplashLibrarySelectionWanted() {
