@@ -7,10 +7,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import org.nypl.simplified.ui.branding.BrandingSplashServiceType
+import java.util.*
 
 class SplashSelectionFragment : Fragment() {
 
-  private lateinit var parameters: SplashParameters
   private lateinit var listener: SplashListenerType
   private lateinit var selectionAlternateButton: Button
   private lateinit var selectionButton: Button
@@ -19,9 +20,8 @@ class SplashSelectionFragment : Fragment() {
   companion object {
     private const val parametersKey = "org.nypl.simplified.splash.parameters.selection"
 
-    fun newInstance(parameters: SplashParameters): SplashSelectionFragment {
+    fun newInstance(): SplashSelectionFragment {
       val args = Bundle()
-      args.putSerializable(this.parametersKey, parameters)
       val fragment = SplashSelectionFragment()
       fragment.arguments = args
       return fragment
@@ -30,8 +30,6 @@ class SplashSelectionFragment : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    this.parameters = this.arguments!!.getSerializable(parametersKey) as SplashParameters
   }
 
   override fun onCreateView(
@@ -55,7 +53,8 @@ class SplashSelectionFragment : Fragment() {
     super.onStart()
 
     this.listener = this.activity as SplashListenerType
-    this.selectionImageView.setImageResource(this.parameters.splashImageTitleResource)
+    val brandingService = getBrandingService()
+    this.selectionImageView.setImageResource(brandingService.splashImageTitleResource())
 
     this.selectionButton.setOnClickListener {
       this.listener.onSplashLibrarySelectionWanted()
@@ -70,5 +69,14 @@ class SplashSelectionFragment : Fragment() {
 
     this.selectionButton.setOnClickListener(null)
     this.selectionAlternateButton.setOnClickListener(null)
+  }
+
+  private fun getBrandingService(): BrandingSplashServiceType {
+    return ServiceLoader
+      .load(BrandingSplashServiceType::class.java)
+      .firstOrNull()
+      ?: throw IllegalStateException(
+        "No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
+      )
   }
 }

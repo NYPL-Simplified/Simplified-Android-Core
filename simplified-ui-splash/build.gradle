@@ -5,6 +5,8 @@ dependencies {
   api project(":simplified-presentableerror-api")
   api project(":simplified-profiles-controller-api")
   api project(":simplified-reports")
+  api project(":simplified-ui-branding")
+  api project(":simplified-ui-theme")
 
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_constraintlayout

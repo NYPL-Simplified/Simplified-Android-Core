@@ -2,6 +2,7 @@ package org.nypl.simplified.ui.splash
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,6 +19,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,11 +36,14 @@ import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.reports.Reports
+import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+import org.nypl.simplified.ui.theme.ThemeControl
 
 class SplashFragment : Fragment() {
 
@@ -47,9 +52,9 @@ class SplashFragment : Fragment() {
   companion object {
     private const val parametersKey = "org.nypl.simplified.splash.parameters.main"
 
-    fun newInstance(parameters: SplashParameters): SplashFragment {
+    fun newInstance(migrationReportEmail: String?): SplashFragment {
       val args = Bundle()
-      args.putSerializable(this.parametersKey, parameters)
+      args.putString(this.parametersKey, migrationReportEmail)
       val fragment = SplashFragment()
       fragment.arguments = args
       return fragment
@@ -64,6 +69,8 @@ class SplashFragment : Fragment() {
   private lateinit var viewsForMigrationRunning: ViewsMigrationRunning
   private lateinit var viewsForMigrationReport: ViewsMigrationReport
   private lateinit var bootFuture: ListenableFuture<*>
+  private lateinit var brandingService: BrandingSplashServiceType
+  private var migrationReportEmail: String? = null
   private var migrationSubscription: Disposable? = null
   private var migrationTried = false
 
@@ -102,7 +109,9 @@ class SplashFragment : Fragment() {
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
     this.retainInstance = true
-    this.parameters = this.requireArguments().getSerializable(parametersKey) as SplashParameters
+    this.brandingService = getBrandingService()
+    this.parameters = this.getSplashParams()
+    this.migrationReportEmail = this.requireArguments().getString(parametersKey)
   }
 
   override fun onAttach(context: Context) {
@@ -182,7 +191,7 @@ class SplashFragment : Fragment() {
      * Initially, only the image is shown.
      */
 
-    this.viewsForImage.image.setImageResource(this.parameters.splashImageResource)
+    this.viewsForImage.image.setImageResource(this.brandingService.splashImageResource())
     this.viewsForImage.image.visibility = View.VISIBLE
     this.viewsForImage.progress.visibility = View.INVISIBLE
     this.viewsForImage.error.visibility = View.INVISIBLE
@@ -309,7 +318,7 @@ class SplashFragment : Fragment() {
       this.viewsForMigrationReport.text.setText(R.string.migrationSuccess)
     }
 
-    val reportEmail = this.parameters.splashMigrationReportEmail
+    val reportEmail = this.migrationReportEmail
     if (reportEmail != null) {
       this.viewsForMigrationReport.sendButton.setOnClickListener {
         Reports.sendReportsDefault(
@@ -429,7 +438,7 @@ class SplashFragment : Fragment() {
     this.viewsForImage.sendError.setOnClickListener {
       Reports.sendReportsDefault(
         context = this.requireContext(),
-        address = this.parameters.splashMigrationReportEmail ?: "",
+        address = this.migrationReportEmail ?: "",
         subject = "[application startup failure]",
         body = event.message
       )
@@ -603,5 +612,25 @@ class SplashFragment : Fragment() {
     val looper = Looper.getMainLooper()
     val h = Handler(looper)
     h.post { f.invoke() }
+  }
+
+  private fun getSplashParams(): SplashParameters {
+    val brandingService = getBrandingService()
+    return SplashParameters(
+      textColor = ContextCompat.getColor(this.requireActivity(), ThemeControl.themeFallback.color),
+      background = Color.WHITE,
+      splashImageResource = brandingService.splashImageResource(),
+      splashImageTitleResource = brandingService.splashImageTitleResource(),
+      splashImageSeconds = 2L,
+    )
+  }
+
+  private fun getBrandingService(): BrandingSplashServiceType {
+    return ServiceLoader
+      .load(BrandingSplashServiceType::class.java)
+      .firstOrNull()
+      ?: throw IllegalStateException(
+        "No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
+      )
   }
 }

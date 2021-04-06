@@ -2,19 +2,16 @@ package org.nypl.simplified.main
 
 import android.app.ActionBar
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.lifecycle.ViewModelProvider
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
-import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.Observable
 import org.joda.time.DateTime
@@ -50,12 +47,11 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
-import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
+import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.AgeGateDialog
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
@@ -66,9 +62,7 @@ import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.nypl.simplified.ui.splash.SplashListenerType
-import org.nypl.simplified.ui.splash.SplashParameters
 import org.nypl.simplified.ui.splash.SplashSelectionFragment
-import org.nypl.simplified.ui.theme.ThemeControl
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -113,33 +107,6 @@ class MainActivity :
       )
       return controllers.filterNotNull().firstOrNull()
     }
-
-  private fun getSplashService(): BrandingSplashServiceType {
-    return ServiceLoader
-      .load(BrandingSplashServiceType::class.java)
-      .firstOrNull()
-      ?: throw IllegalStateException(
-        "No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
-      )
-  }
-
-  private fun getSplashParams(): SplashParameters {
-    val migrationReportEmail =
-      this.resources.getString(R.string.featureErrorEmail)
-        .trim()
-        .ifEmpty { null }
-
-    val splashService = getSplashService()
-    return SplashParameters(
-      textColor = ContextCompat.getColor(this, ThemeControl.themeFallback.color),
-      background = Color.WHITE,
-      splashMigrationReportEmail = migrationReportEmail,
-      splashImageResource = splashService.splashImageResource(),
-      splashImageTitleResource = splashService.splashImageTitleResource(),
-      splashImageSeconds = 2L,
-      showLibrarySelection = splashService.shouldShowLibrarySelectionScreen
-    )
-  }
 
   private fun getAvailableEULA(): EULAType? {
     return Services.serviceDirectory()
@@ -227,7 +194,12 @@ class MainActivity :
   private fun showSplashScreen() {
     this.logger.debug("showSplashScreen")
 
-    val splashFragment = SplashFragment.newInstance(getSplashParams())
+    val migrationReportEmail =
+      this.resources.getString(R.string.featureErrorEmail)
+        .trim()
+        .ifEmpty { null }
+
+    val splashFragment = SplashFragment.newInstance(migrationReportEmail)
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, splashFragment, "SPLASH_MAIN")
@@ -276,7 +248,7 @@ class MainActivity :
 
   private fun openLibrarySelectionScreen() {
     val fragment =
-      SplashSelectionFragment.newInstance(getSplashParams())
+      SplashSelectionFragment.newInstance()
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, fragment, "SPLASH_MAIN")
@@ -582,6 +554,15 @@ class MainActivity :
       )
     }
     this.openCatalog()
+  }
+
+  private fun getSplashService(): BrandingSplashServiceType {
+    return ServiceLoader
+      .load(BrandingSplashServiceType::class.java)
+      .firstOrNull()
+      ?: throw IllegalStateException(
+        "No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
+      )
   }
 
   override fun onErrorPageSendReport(parameters: ErrorPageParameters) {
