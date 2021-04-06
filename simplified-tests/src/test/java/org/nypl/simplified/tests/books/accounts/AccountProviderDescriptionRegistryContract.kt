@@ -20,7 +20,7 @@ import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.slf4j.Logger
 import java.net.URI
 

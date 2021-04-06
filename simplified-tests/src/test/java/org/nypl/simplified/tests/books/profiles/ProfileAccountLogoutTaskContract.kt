@@ -41,7 +41,7 @@ import org.nypl.simplified.patron.PatronUserProfileParsers
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.tests.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.mocking.MockAccountLogoutStringResources
 import org.slf4j.Logger
 import java.io.InputStream
 import java.util.UUID

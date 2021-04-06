@@ -52,12 +52,13 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockBookDatabase
-import org.nypl.simplified.tests.MockBookDatabaseEntry
-import org.nypl.simplified.tests.MockBundledContentResolver
-import org.nypl.simplified.tests.MockContentResolver
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockBookDatabase
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
+import org.nypl.simplified.tests.mocking.MockBundledContentResolver
+import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.mocking.MockBorrowContext
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
