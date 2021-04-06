@@ -3,7 +3,7 @@ package org.nypl.simplified.profiles.api.idle_timer;
 /**
  * The type of profile idle timers.
  * <p>
- * When a timer is started, it counts out exactly {@code n} seconds before publising a
+ * When a timer is started, it counts out exactly {@code n} seconds before publishing a
  * {@link ProfileIdleTimedOut} event. The timer can be reset each time the user performs some
  * action (such as interacting with the UI) that indicates that the profile is in fact still
  * active. The timer will publish a {@link ProfileIdleTimeOutSoon} event a configurable number of

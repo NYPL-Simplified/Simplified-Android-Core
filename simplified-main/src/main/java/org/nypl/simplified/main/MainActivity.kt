@@ -11,7 +11,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.ListeningScheduledExecutorService
@@ -91,7 +91,7 @@ class MainActivity :
   private val migrationExecutor: ListeningScheduledExecutorService =
     NamedThreadPools.namedThreadPool(1, "migrations", 19)
 
-  private lateinit var mainViewModel: MainFragmentViewModel
+  private lateinit var mainViewModel: MainActivityViewModel
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesNavigationController: ProfilesNavigationController
   private lateinit var configurationService: BuildConfigurationServiceType
@@ -303,8 +303,8 @@ class MainActivity :
     // transaction after the fragment manager had been destroyed.
     if (this.isFinishing || this.supportFragmentManager.isDestroyed) return
 
-    ViewModelProviders.of(this)
-      .get(MainFragmentViewModel::class.java)
+    ViewModelProvider(this)
+      .get(MainActivityViewModel::class.java)
       .clearHistory = true
 
     val mainFragment = MainFragment()
@@ -367,8 +367,8 @@ class MainActivity :
       .addOnBackStackChangedListener(this)
 
     this.mainViewModel =
-      ViewModelProviders.of(this)
-        .get(MainFragmentViewModel::class.java)
+      ViewModelProvider(this)
+        .get(MainActivityViewModel::class.java)
 
     this.profilesNavigationController =
       ProfilesNavigationController(this.supportFragmentManager, this.mainViewModel)

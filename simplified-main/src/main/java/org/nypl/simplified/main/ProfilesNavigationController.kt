@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 internal class ProfilesNavigationController(
   private val supportFragmentManager: FragmentManager,
-  private val mainViewModel: MainFragmentViewModel
+  private val mainViewModel: MainActivityViewModel
 ) : ProfilesNavigationControllerType {
 
   private val logger =
