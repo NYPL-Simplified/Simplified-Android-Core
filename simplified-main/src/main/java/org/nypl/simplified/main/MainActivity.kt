@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.lifecycle.ViewModelProvider
 import com.google.common.util.concurrent.ListenableFuture
@@ -15,10 +14,8 @@ import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.Observable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.migration.api.MigrationsType
@@ -47,7 +44,6 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
-import org.nypl.simplified.ui.splash.SplashFragment
 import org.nypl.simplified.ui.splash.SplashListenerType
 import org.nypl.simplified.ui.splash.SplashSelectionFragment
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -70,6 +66,8 @@ class MainActivity :
   private lateinit var mainViewModel: MainActivityViewModel
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesNavigationController: ProfilesNavigationController
+  private lateinit var startupNavigationController: StartupNavigationController
+  private lateinit var onboardingNavigationController: OnboardingNavigationController
   private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var ageGateDialog: AgeGateDialog
@@ -92,21 +90,6 @@ class MainActivity :
       )
       return controllers.filterNotNull().firstOrNull()
     }
-
-  private fun showSplashScreen() {
-    this.logger.debug("showSplashScreen")
-
-    val migrationReportEmail =
-      this.resources.getString(R.string.featureErrorEmail)
-        .trim()
-        .ifEmpty { null }
-
-    val splashFragment = SplashFragment.newInstance(migrationReportEmail)
-    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, splashFragment, "SPLASH_MAIN")
-      .commit()
-  }
 
   private fun onStartupFinished() {
     this.logger.debug("onStartupFinished")
@@ -143,30 +126,13 @@ class MainActivity :
         }
       }
       ANONYMOUS_PROFILE_DISABLED -> {
-        this.openProfileScreen()
+        this.startupNavigationController.openProfileSelection()
       }
     }
   }
 
   private fun openLibrarySelectionScreen() {
-    val fragment =
-      SplashSelectionFragment.newInstance()
-    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, fragment, "SPLASH_MAIN")
-      .commit()
-    this.supportActionBar?.hide()
-  }
-
-  private fun openProfileScreen() {
-    this.mainViewModel.clearHistory = true
-
-    val profilesFragment = ProfileSelectionFragment()
-    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, profilesFragment, "MAIN")
-      .commit()
-    this.supportActionBar?.hide()
+    this.onboardingNavigationController.openOnboardingStartScreen()
   }
 
   private fun openCatalog() {
@@ -178,37 +144,9 @@ class MainActivity :
       .get(MainActivityViewModel::class.java)
       .clearHistory = true
 
-    val mainFragment = MainFragment()
-    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
-      .commit()
-
-    /*
-     * Register an announcements controller.
-     */
+    this.startupNavigationController.openMainFragment()
 
     val services = Services.serviceDirectory()
-    this.lifecycle.addObserver(
-      AnnouncementsController(
-        context = this,
-        uiThread = services.requireService(UIThreadServiceType::class.java),
-        profileController = services.requireService(ProfilesControllerType::class.java)
-      )
-    )
-
-    /*
-     * Register an accessibility controller.
-     */
-
-    this.lifecycle.addObserver(
-      AccessibilityService.create(
-        context = this,
-        bookRegistry = services.requireService(BookRegistryType::class.java),
-        uiThread = services.requireService(UIThreadServiceType::class.java)
-      )
-    )
-
     this.configurationService =
       services.requireService(BuildConfigurationServiceType::class.java)
     this.profilesController =
@@ -247,9 +185,26 @@ class MainActivity :
       ProfilesNavigationControllerType::class.java, this.profilesNavigationController
     )
 
+    val migrationReportEmail =
+      this.resources.getString(R.string.featureErrorEmail)
+        .trim()
+        .ifEmpty { null }
+
+    this.startupNavigationController =
+      StartupNavigationController(this.supportFragmentManager, migrationReportEmail)
+    this.navigationControllerDirectory.updateNavigationController(
+      StartupNavigationController::class.java, this.startupNavigationController
+    )
+
+    this.onboardingNavigationController =
+      OnboardingNavigationController(this.supportFragmentManager, this.supportActionBar)
+    this.navigationControllerDirectory.updateNavigationController(
+      OnboardingNavigationController::class.java, this.onboardingNavigationController
+    )
+
     if (savedInstanceState == null) {
       this.mainViewModel.clearHistory = true
-      this.showSplashScreen()
+      this.startupNavigationController.openSplashScreen()
     } else {
       if (savedInstanceState.getBoolean(STATE_ACTION_BAR_IS_SHOWING)) {
         this.supportActionBar?.show()
@@ -379,28 +334,10 @@ class MainActivity :
       }
     )
 
-    val fragment = AccountListRegistryFragment()
-    fm.beginTransaction()
-      .replace(R.id.mainFragmentHolder, fragment, "MAIN")
-      .addToBackStack(null)
-      .commit()
-    this.supportActionBar?.show()
+    this.onboardingNavigationController.openAccountListRegistry()
   }
 
   override fun onSplashLibrarySelectionNotWanted() {
-    val profilesController =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-
-    /*
-     * Store the fact that we've seen the selection screen.
-     */
-
-    profilesController.profileUpdate { profileDescription ->
-      profileDescription.copy(
-        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
-      )
-    }
     this.openCatalog()
   }
 

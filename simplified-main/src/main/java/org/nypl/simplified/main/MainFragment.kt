@@ -13,9 +13,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.DateTime
+import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.android.ktx.supportActionBar
+import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -25,7 +28,9 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
@@ -33,6 +38,7 @@ import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
+import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
 /**
@@ -84,6 +90,31 @@ class MainFragment : Fragment() {
         viewModel.profilesController.profileIdleTimer().start()
       }
     }
+
+    /*
+    * Register an announcements controller.
+    */
+
+    val services = Services.serviceDirectory()
+    this.lifecycle.addObserver(
+      AnnouncementsController(
+        context = requireContext(),
+        uiThread = services.requireService(UIThreadServiceType::class.java),
+        profileController = services.requireService(ProfilesControllerType::class.java)
+      )
+    )
+
+    /*
+     * Register an accessibility controller.
+     */
+
+    this.lifecycle.addObserver(
+      AccessibilityService.create(
+        context = requireContext(),
+        bookRegistry = services.requireService(BookRegistryType::class.java),
+        uiThread = services.requireService(UIThreadServiceType::class.java)
+      )
+    )
   }
 
   override fun onCreateView(

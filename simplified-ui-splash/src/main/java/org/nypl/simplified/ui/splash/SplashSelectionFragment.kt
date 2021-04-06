@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import java.util.*
 
@@ -16,6 +17,7 @@ class SplashSelectionFragment : Fragment() {
   private lateinit var selectionAlternateButton: Button
   private lateinit var selectionButton: Button
   private lateinit var selectionImageView: ImageView
+  private lateinit var viewModel: SplashSelectionFragmentViewModel
 
   companion object {
     private const val parametersKey = "org.nypl.simplified.splash.parameters.selection"
@@ -30,6 +32,9 @@ class SplashSelectionFragment : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    this.viewModel =
+      ViewModelProvider(this)
+        .get(SplashSelectionFragmentViewModel::class.java)
   }
 
   override fun onCreateView(
@@ -60,6 +65,17 @@ class SplashSelectionFragment : Fragment() {
       this.listener.onSplashLibrarySelectionWanted()
     }
     this.selectionAlternateButton.setOnClickListener {
+
+      /*
+       * Store the fact that we've seen the selection screen.
+       */
+
+      viewModel.profilesController.profileUpdate { profileDescription ->
+        profileDescription.copy(
+          preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
+        )
+      }
+
       this.listener.onSplashLibrarySelectionNotWanted()
     }
   }
