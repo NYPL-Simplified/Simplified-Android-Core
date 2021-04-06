@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkJSON
@@ -20,20 +20,16 @@ import java.io.InputStream
 
 class BookmarkJSONTest {
 
-  @Rule
-  @JvmField
-  var expectedException: ExpectedException = ExpectedException.none()
-
   private lateinit var objectMapper: ObjectMapper
   private lateinit var formatter: DateTimeFormatter
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.objectMapper = ObjectMapper()
     this.formatter = ISODateTimeFormat.dateTime().withZoneUTC()
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     DateTimeZone.setDefault(DateTimeZone.getDefault())
   }
@@ -65,7 +61,7 @@ class BookmarkJSONTest {
       """
     )
 
-    Assert.assertEquals(0.4736842215061188, bookmark.chapterProgress, .0001)
+    assertEquals(0.4736842215061188, bookmark.chapterProgress, .0001)
 
     this.checkRoundTrip(bookmark)
   }
@@ -99,7 +95,7 @@ class BookmarkJSONTest {
       """
     )
 
-    Assert.assertEquals(0.4285714328289032, bookmark.chapterProgress, .0001)
+    assertEquals(0.4285714328289032, bookmark.chapterProgress, .0001)
 
     this.checkRoundTrip(bookmark)
   }
@@ -115,16 +111,16 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
-    Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
-    Assert.assertEquals("A title!", bookmark.chapterTitle)
-    Assert.assertEquals("fc4f5d19-43a2-4181-99a0-7579e0a4935b", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
+    assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
+    assertEquals("A title!", bookmark.chapterTitle)
+    assertEquals("fc4f5d19-43a2-4181-99a0-7579e0a4935b", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
 
     val location = bookmark.location as BookLocation.BookLocationR1
-    Assert.assertEquals("/4/2[title-page]/2/2/1:0", location.contentCFI)
-    Assert.assertEquals("title-page-xhtml", location.idRef)
-    Assert.assertEquals(0.25, location.progress)
+    assertEquals("/4/2[title-page]/2/2/1:0", location.contentCFI)
+    assertEquals("title-page-xhtml", location.idRef)
+    assertEquals(0.25, location.progress)
 
     this.checkRoundTrip(bookmark)
   }
@@ -140,15 +136,15 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
-    Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
-    Assert.assertEquals("Another title", bookmark.chapterTitle)
-    Assert.assertEquals("null", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
+    assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
+    assertEquals("Another title", bookmark.chapterTitle)
+    assertEquals("null", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
 
     val location = bookmark.location as BookLocation.BookLocationR2
-    Assert.assertEquals(0.25, location.progress.chapterProgress, 0.0)
-    Assert.assertEquals("/title-page.xhtml", location.progress.chapterHref)
+    assertEquals(0.25, location.progress.chapterProgress, 0.0)
+    assertEquals("/title-page.xhtml", location.progress.chapterHref)
 
     this.checkRoundTrip(bookmark)
   }
@@ -164,16 +160,16 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
-    Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
-    Assert.assertEquals("Some title", bookmark.chapterTitle)
-    Assert.assertEquals("70c47074-c048-48c0-8eae-286b9738c108", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
+    assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
+    assertEquals("Some title", bookmark.chapterTitle)
+    assertEquals("70c47074-c048-48c0-8eae-286b9738c108", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
 
     val location = bookmark.location as BookLocation.BookLocationR1
-    Assert.assertEquals("/4/2[title-page]/2/2/1:0", location.contentCFI)
-    Assert.assertEquals("title-page-xhtml", location.idRef)
-    Assert.assertEquals(0.30, location.progress)
+    assertEquals("/4/2[title-page]/2/2/1:0", location.contentCFI)
+    assertEquals("title-page-xhtml", location.idRef)
+    assertEquals(0.30, location.progress)
 
     this.checkRoundTrip(bookmark)
   }
@@ -189,16 +185,16 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-03-17T15:19:56.465Z", this.formatter.print(bookmark.time))
-    Assert.assertEquals("urn:isbn:9781683606123", bookmark.opdsId)
-    Assert.assertEquals("Unknown", bookmark.chapterTitle)
-    Assert.assertEquals("null", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-03-17T15:19:56.465Z", this.formatter.print(bookmark.time))
+    assertEquals("urn:isbn:9781683606123", bookmark.opdsId)
+    assertEquals("Unknown", bookmark.chapterTitle)
+    assertEquals("null", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
 
     val location = bookmark.location as BookLocation.BookLocationR1
-    Assert.assertEquals("/4/2[cover-image]/2", location.contentCFI)
-    Assert.assertEquals("Cover", location.idRef)
-    Assert.assertEquals(0.3, location.progress)
+    assertEquals("/4/2[cover-image]/2", location.contentCFI)
+    assertEquals("Cover", location.idRef)
+    assertEquals(0.3, location.progress)
 
     this.checkRoundTrip(bookmark)
   }
@@ -212,7 +208,7 @@ class BookmarkJSONTest {
         kind = bookmark.kind,
         serialized = serializedText
       )
-    Assert.assertEquals(bookmark, serialized)
+    assertEquals(bookmark, serialized)
   }
 
   @Test
@@ -221,14 +217,14 @@ class BookmarkJSONTest {
 
     val text = this.resourceText("bookmark-legacy-r2-0.json")
 
-    this.expectedException.expect(JSONParseException::class.java)
-    this.expectedException.expectMessage("Unsupported book location format version: (unspecified)")
-
-    BookmarkJSON.deserializeFromString(
-      objectMapper = this.objectMapper,
-      kind = BookmarkKind.ReaderBookmarkExplicit,
-      serialized = text
-    )
+    val ex = assertThrows(JSONParseException::class.java) {
+      BookmarkJSON.deserializeFromString(
+        objectMapper = this.objectMapper,
+        kind = BookmarkKind.ReaderBookmarkExplicit,
+        serialized = text
+      )
+    }
+    assertTrue(ex.message!!.contains("Unsupported book location format version: (unspecified)"))
   }
 
   private fun resourceText(
@@ -259,16 +255,16 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
-    Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
-    Assert.assertEquals("A title!", bookmark.chapterTitle)
-    Assert.assertEquals("fc4f5d19-43a2-4181-99a0-7579e0a4935b", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
+    assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
+    assertEquals("A title!", bookmark.chapterTitle)
+    assertEquals("fc4f5d19-43a2-4181-99a0-7579e0a4935b", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
 
     val location = bookmark.location as BookLocation.BookLocationR1
-    Assert.assertEquals("/4/2[title-page]/2/2/1:0", location.contentCFI)
-    Assert.assertEquals("title-page-xhtml", location.idRef)
-    Assert.assertEquals(0.25, location.progress)
+    assertEquals("/4/2[title-page]/2/2/1:0", location.contentCFI)
+    assertEquals("title-page-xhtml", location.idRef)
+    assertEquals(0.25, location.progress)
 
     this.checkRoundTrip(bookmark)
   }
@@ -284,15 +280,15 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
-    Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
-    Assert.assertEquals("Another title", bookmark.chapterTitle)
-    Assert.assertEquals("null", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
+    assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
+    assertEquals("Another title", bookmark.chapterTitle)
+    assertEquals("null", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
 
     val location = bookmark.location as BookLocation.BookLocationR2
-    Assert.assertEquals(0.25, location.progress.chapterProgress, 0.0)
-    Assert.assertEquals("/title-page.xhtml", location.progress.chapterHref)
+    assertEquals(0.25, location.progress.chapterProgress, 0.0)
+    assertEquals("/title-page.xhtml", location.progress.chapterHref)
 
     this.checkRoundTrip(bookmark)
   }
@@ -308,16 +304,16 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
-    Assert.assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
-    Assert.assertEquals("Some title", bookmark.chapterTitle)
-    Assert.assertEquals("70c47074-c048-48c0-8eae-286b9738c108", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-01-21T19:16:54.066Z", this.formatter.print(bookmark.time))
+    assertEquals("urn:isbn:9781683607144", bookmark.opdsId)
+    assertEquals("Some title", bookmark.chapterTitle)
+    assertEquals("70c47074-c048-48c0-8eae-286b9738c108", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
 
     val location = bookmark.location as BookLocation.BookLocationR1
-    Assert.assertEquals("/4/2[title-page]/2/2/1:0", location.contentCFI)
-    Assert.assertEquals("title-page-xhtml", location.idRef)
-    Assert.assertEquals(0.30, location.progress)
+    assertEquals("/4/2[title-page]/2/2/1:0", location.contentCFI)
+    assertEquals("title-page-xhtml", location.idRef)
+    assertEquals(0.30, location.progress)
 
     this.checkRoundTrip(bookmark)
   }
@@ -333,16 +329,16 @@ class BookmarkJSONTest {
       serialized = text
     )
 
-    Assert.assertEquals("2021-03-17T15:19:56.465Z", this.formatter.print(bookmark.time))
-    Assert.assertEquals("urn:isbn:9781683606123", bookmark.opdsId)
-    Assert.assertEquals("Unknown", bookmark.chapterTitle)
-    Assert.assertEquals("null", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-03-17T15:19:56.465Z", this.formatter.print(bookmark.time))
+    assertEquals("urn:isbn:9781683606123", bookmark.opdsId)
+    assertEquals("Unknown", bookmark.chapterTitle)
+    assertEquals("null", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
 
     val location = bookmark.location as BookLocation.BookLocationR1
-    Assert.assertEquals("/4/2[cover-image]/2", location.contentCFI)
-    Assert.assertEquals("Cover", location.idRef)
-    Assert.assertEquals(0.3, location.progress)
+    assertEquals("/4/2[cover-image]/2", location.contentCFI)
+    assertEquals("Cover", location.idRef)
+    assertEquals(0.3, location.progress)
 
     this.checkRoundTrip(bookmark)
   }

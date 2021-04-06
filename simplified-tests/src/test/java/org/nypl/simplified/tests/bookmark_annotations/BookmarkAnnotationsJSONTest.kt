@@ -3,10 +3,10 @@ package org.nypl.simplified.tests.bookmarks
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.joda.time.DateTimeUtils
-import org.junit.Assert
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.BookmarkKind
 import org.nypl.simplified.json.core.JSONParseException
@@ -26,10 +26,6 @@ class BookmarkAnnotationsJSONTest {
 
   private val logger =
     LoggerFactory.getLogger(BookmarkAnnotationsJSONTest::class.java)
-
-  @Rule
-  @JvmField
-  var expectedException: ExpectedException = ExpectedException.none()
 
   private val objectMapper: ObjectMapper = ObjectMapper()
 
@@ -131,10 +127,10 @@ class BookmarkAnnotationsJSONTest {
     val node =
       BookmarkAnnotationsJSON.serializeSelectorNodeToJSON(this.objectMapper, input)
 
-    Assert.assertEquals("oa:FragmentSelector", node["type"].textValue())
-    Assert.assertEquals(this.targetValue0, node["value"].textValue())
+    assertEquals("oa:FragmentSelector", node["type"].textValue())
+    assertEquals(this.targetValue0, node["value"].textValue())
 
-    Assert.assertEquals(input, BookmarkAnnotationsJSON.deserializeSelectorNodeFromJSON(this.objectMapper, node))
+    assertEquals(input, BookmarkAnnotationsJSON.deserializeSelectorNodeFromJSON(this.objectMapper, node))
   }
 
   @Test
@@ -144,11 +140,11 @@ class BookmarkAnnotationsJSONTest {
     val node =
       BookmarkAnnotationsJSON.serializeTargetNodeToJSON(this.objectMapper, input)
 
-    Assert.assertEquals("z", node["source"].textValue())
-    Assert.assertEquals("oa:FragmentSelector", node["selector"]["type"].textValue())
-    Assert.assertEquals(this.targetValue0, node["selector"]["value"].textValue())
+    assertEquals("z", node["source"].textValue())
+    assertEquals("oa:FragmentSelector", node["selector"]["type"].textValue())
+    assertEquals(this.targetValue0, node["selector"]["value"].textValue())
 
-    Assert.assertEquals(input, BookmarkAnnotationsJSON.deserializeTargetNodeFromJSON(this.objectMapper, node))
+    assertEquals(input, BookmarkAnnotationsJSON.deserializeTargetNodeFromJSON(this.objectMapper, node))
   }
 
   @Test
@@ -156,29 +152,29 @@ class BookmarkAnnotationsJSONTest {
     val node =
       BookmarkAnnotationsJSON.serializeBodyNodeToJSON(this.objectMapper, this.bookmarkBody0)
 
-    Assert.assertEquals(
+    assertEquals(
       "2019-01-25T20:00:37+0000",
       node["http://librarysimplified.org/terms/time"].textValue()
     )
-    Assert.assertEquals(
+    assertEquals(
       "cca80416-3168-4e58-b621-7964b9265ac9",
       node["http://librarysimplified.org/terms/device"].textValue()
     )
-    Assert.assertEquals(
+    assertEquals(
       null,
       node["http://librarysimplified.org/terms/progressWithinChapter"]
     )
-    Assert.assertEquals(
+    assertEquals(
       50.0,
       node["http://librarysimplified.org/terms/progressWithinBook"].doubleValue(),
       0.0
     )
-    Assert.assertEquals(
+    assertEquals(
       "A Title",
       node["http://librarysimplified.org/terms/chapter"].textValue()
     )
 
-    Assert.assertEquals(this.bookmarkBody0, BookmarkAnnotationsJSON.deserializeBodyNodeFromJSON(node))
+    assertEquals(this.bookmarkBody0, BookmarkAnnotationsJSON.deserializeBodyNodeFromJSON(node))
   }
 
   @Test
@@ -214,7 +210,7 @@ class BookmarkAnnotationsJSONTest {
     val node =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationFirstNodeToJSON(this.objectMapper, input)
 
-    Assert.assertEquals(
+    assertEquals(
       input,
       BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFirstNodeFromJSON(this.objectMapper, node)
     )
@@ -227,7 +223,7 @@ class BookmarkAnnotationsJSONTest {
         this.objectMapper, this.bookmarkAnnotationResponse
       )
 
-    Assert.assertEquals(
+    assertEquals(
       this.bookmarkAnnotationResponse,
       BookmarkAnnotationsJSON.deserializeBookmarkAnnotationResponseFromJSON(
         objectMapper = this.objectMapper,
@@ -266,15 +262,15 @@ class BookmarkAnnotationsJSONTest {
       )
 
     val bookmark = BookmarkAnnotations.toBookmark(this.objectMapper, annotation)
-    Assert.assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
-    Assert.assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkLastReadLocation, bookmark.kind)
-    Assert.assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
-    Assert.assertEquals("", bookmark.chapterTitle)
+    assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
+    assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkLastReadLocation, bookmark.kind)
+    assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
+    assertEquals("", bookmark.chapterTitle)
 
     val location = bookmark.location as BookLocation.BookLocationR2
-    Assert.assertEquals(0.5, location.progress.chapterProgress, 0.0)
-    Assert.assertEquals("/xyz.html", location.progress.chapterHref)
+    assertEquals(0.5, location.progress.chapterProgress, 0.0)
+    assertEquals("/xyz.html", location.progress.chapterHref)
 
     this.checkRoundTrip(annotation)
   }
@@ -290,15 +286,15 @@ class BookmarkAnnotationsJSONTest {
     DateTimeUtils.setCurrentMillisFixed(0L)
 
     val bookmark = BookmarkAnnotations.toBookmark(this.objectMapper, annotation)
-    Assert.assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
-    Assert.assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkLastReadLocation, bookmark.kind)
-    Assert.assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
-    Assert.assertEquals("", bookmark.chapterTitle)
+    assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
+    assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkLastReadLocation, bookmark.kind)
+    assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
+    assertEquals("", bookmark.chapterTitle)
 
     val location = bookmark.location as BookLocation.BookLocationR2
-    Assert.assertEquals(0.5, location.progress.chapterProgress, 0.0)
-    Assert.assertEquals("/xyz.html", location.progress.chapterHref)
+    assertEquals(0.5, location.progress.chapterProgress, 0.0)
+    assertEquals("/xyz.html", location.progress.chapterHref)
 
     this.checkRoundTrip(annotation)
   }
@@ -314,15 +310,15 @@ class BookmarkAnnotationsJSONTest {
     DateTimeUtils.setCurrentMillisFixed(0L)
 
     val bookmark = BookmarkAnnotations.toBookmark(this.objectMapper, annotation)
-    Assert.assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
-    Assert.assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
-    Assert.assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
-    Assert.assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
-    Assert.assertEquals("", bookmark.chapterTitle)
+    assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
+    assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
+    assertEquals("", bookmark.chapterTitle)
 
     val location = bookmark.location as BookLocation.BookLocationR2
-    Assert.assertEquals(0.5, location.progress.chapterProgress, 0.0)
-    Assert.assertEquals("/xyz.html", location.progress.chapterHref)
+    assertEquals(0.5, location.progress.chapterProgress, 0.0)
+    assertEquals("/xyz.html", location.progress.chapterHref)
 
     this.checkRoundTrip(annotation)
   }
@@ -336,8 +332,8 @@ class BookmarkAnnotationsJSONTest {
       )
 
     val locationHP = location as BookLocation.BookLocationR2
-    Assert.assertEquals(0.5, locationHP.progress.chapterProgress, 0.0)
-    Assert.assertEquals("/xyz.html", locationHP.progress.chapterHref)
+    assertEquals(0.5, locationHP.progress.chapterProgress, 0.0)
+    assertEquals("/xyz.html", locationHP.progress.chapterHref)
   }
 
   @Test
@@ -349,79 +345,86 @@ class BookmarkAnnotationsJSONTest {
       )
 
     val locationR1 = location as BookLocation.BookLocationR1
-    Assert.assertEquals(0.25, locationR1.progress!!, 0.0)
-    Assert.assertEquals("xyz-html", locationR1.idRef)
-    Assert.assertEquals("/4/2/2/2", locationR1.contentCFI)
+    assertEquals(0.25, locationR1.progress!!, 0.0)
+    assertEquals("xyz-html", locationR1.idRef)
+    assertEquals("/4/2/2/2", locationR1.contentCFI)
   }
 
   @Test
   fun testSpecInvalidBookmark0() {
-    this.expectedException.expect(JSONParseException::class.java)
-    this.expectedException.expectMessage("Expected: A key 'body'")
-    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
-      objectMapper = this.objectMapper,
-      node = this.resourceNode("invalid-bookmark-0.json")
-    )
+    val ex = assertThrows(JSONParseException::class.java) {
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+        objectMapper = this.objectMapper,
+        node = this.resourceNode("invalid-bookmark-0.json")
+      )
+    }
+    assertTrue(ex.message!!.contains("Expected: A key 'body'"))
   }
 
   @Test
   fun testSpecInvalidBookmark1() {
-    this.expectedException.expect(JSONParseException::class.java)
-    this.expectedException.expectMessage("Expected: A key 'motivation'")
-    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
-      objectMapper = this.objectMapper,
-      node = this.resourceNode("invalid-bookmark-1.json")
-    )
+    val ex = assertThrows(JSONParseException::class.java) {
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+        objectMapper = this.objectMapper,
+        node = this.resourceNode("invalid-bookmark-1.json")
+      )
+    }
+    assertTrue(ex.message!!.contains("Expected: A key 'motivation'"))
   }
 
   @Test
   fun testSpecInvalidBookmark2() {
-    this.expectedException.expect(JSONParseException::class.java)
-    this.expectedException.expectMessage("Expected: A key 'target'")
-    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
-      objectMapper = this.objectMapper,
-      node = this.resourceNode("invalid-bookmark-2.json")
-    )
+    val ex = assertThrows(JSONParseException::class.java) {
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+        objectMapper = this.objectMapper,
+        node = this.resourceNode("invalid-bookmark-2.json")
+      )
+    }
+    assertTrue(ex.message!!.contains("Expected: A key 'target'"))
   }
 
   @Test
   fun testSpecInvalidBookmark3() {
-    this.expectedException.expect(JSONParseException::class.java)
-    this.expectedException.expectMessage("Unrecognized selector node type: What?")
-    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
-      objectMapper = this.objectMapper,
-      node = this.resourceNode("invalid-bookmark-3.json")
-    )
+    val ex = assertThrows(JSONParseException::class.java) {
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+        objectMapper = this.objectMapper,
+        node = this.resourceNode("invalid-bookmark-3.json")
+      )
+    }
+    assertTrue(ex.message!!.contains("Unrecognized selector node type: What?"))
   }
 
   @Test
   fun testSpecInvalidBookmark4() {
-    this.expectedException.expect(JSONParseException::class.java)
-    this.expectedException.expectMessage("Unexpected character ('['")
-    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
-      objectMapper = this.objectMapper,
-      node = this.resourceNode("invalid-bookmark-4.json")
-    )
+    val ex = assertThrows(JSONParseException::class.java) {
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+        objectMapper = this.objectMapper,
+        node = this.resourceNode("invalid-bookmark-4.json")
+      )
+    }
+    assertTrue(ex.message!!.contains("Unexpected character ('['"))
   }
 
   @Test
   fun testSpecInvalidBookmark5() {
-    this.expectedException.expect(JSONParseException::class.java)
-    this.expectedException.expectMessage("Expected: A key 'http://librarysimplified.org/terms/device'")
-    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
-      objectMapper = this.objectMapper,
-      node = this.resourceNode("invalid-bookmark-5.json")
-    )
+    val ex = assertThrows(JSONParseException::class.java) {
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+        objectMapper = this.objectMapper,
+        node = this.resourceNode("invalid-bookmark-5.json")
+      )
+    }
+    assertTrue(ex.message!!.contains("Expected: A key 'http://librarysimplified.org/terms/device'"))
   }
 
   @Test
   fun testSpecInvalidBookmark6() {
-    this.expectedException.expect(JSONParseException::class.java)
-    this.expectedException.expectMessage("Expected: A key 'http://librarysimplified.org/terms/time'")
-    BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
-      objectMapper = this.objectMapper,
-      node = this.resourceNode("invalid-bookmark-6.json")
-    )
+    val ex = assertThrows(JSONParseException::class.java) {
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+        objectMapper = this.objectMapper,
+        node = this.resourceNode("invalid-bookmark-6.json")
+      )
+    }
+    assertTrue(ex.message!!.contains("Expected: A key 'http://librarysimplified.org/terms/time'"))
   }
 
   private fun resourceText(
@@ -461,7 +464,7 @@ class BookmarkAnnotationsJSONTest {
 
     this.compareAnnotations(bookmarkAnnotation, deserialized)
     this.compareAnnotations(bookmarkAnnotation, fromBookmark)
-    Assert.assertEquals(toBookmark, toBookmarkAgain)
+    assertEquals(toBookmark, toBookmarkAgain)
   }
 
   private fun compareAnnotations(
@@ -471,24 +474,24 @@ class BookmarkAnnotationsJSONTest {
     this.logger.debug("compareAnnotations: x: {}", x)
     this.logger.debug("compareAnnotations: y: {}", y)
 
-    Assert.assertEquals(x.body.bookProgress, y.body.bookProgress)
-    Assert.assertEquals(x.body.chapterTitle, y.body.chapterTitle)
-    Assert.assertEquals(x.body.device, y.body.device)
-    Assert.assertEquals(x.body.timestamp, y.body.timestamp)
-    Assert.assertEquals(x.context, y.context)
-    Assert.assertEquals(x.id, y.id)
-    Assert.assertEquals(x.kind, y.kind)
-    Assert.assertEquals(x.motivation, y.motivation)
-    Assert.assertEquals(x.target.selector.type, y.target.selector.type)
+    assertEquals(x.body.bookProgress, y.body.bookProgress)
+    assertEquals(x.body.chapterTitle, y.body.chapterTitle)
+    assertEquals(x.body.device, y.body.device)
+    assertEquals(x.body.timestamp, y.body.timestamp)
+    assertEquals(x.context, y.context)
+    assertEquals(x.id, y.id)
+    assertEquals(x.kind, y.kind)
+    assertEquals(x.motivation, y.motivation)
+    assertEquals(x.target.selector.type, y.target.selector.type)
 
     val xSelectorValue =
       BookmarkAnnotationsJSON.deserializeLocation(this.objectMapper, x.target.selector.value)
     val ySelectorValue =
       BookmarkAnnotationsJSON.deserializeLocation(this.objectMapper, y.target.selector.value)
 
-    Assert.assertEquals(xSelectorValue, ySelectorValue)
-    Assert.assertEquals(x.target.source, y.target.source)
-    Assert.assertEquals(x.type, y.type)
+    assertEquals(xSelectorValue, ySelectorValue)
+    assertEquals(x.target.source, y.target.source)
+    assertEquals(x.type, y.type)
   }
 
   private fun resource(

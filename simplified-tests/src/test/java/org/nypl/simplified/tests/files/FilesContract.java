@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.files;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileUtilities;
 
@@ -17,13 +17,13 @@ public abstract class FilesContract {
     final File file0 = new File(tmp, "file.txt");
 
     FileUtilities.fileWriteUTF8(file0, "Hello.");
-    Assert.assertTrue(file0 + " is file", file0.isFile());
+    Assertions.assertTrue(file0.isFile(), file0 + " is file");
     FileUtilities.fileDelete(file0);
-    Assert.assertFalse(file0 + " does not exist", file0.exists());
+    Assertions.assertFalse(file0.exists(), file0 + " does not exist");
     FileUtilities.fileWriteUTF8(file0, "Hello.");
-    Assert.assertTrue(file0 + " is file", file0.isFile());
+    Assertions.assertTrue(file0.isFile(), file0 + " is file");
     FileUtilities.fileDelete(file0);
-    Assert.assertFalse(file0 + " does not exist", file0.exists());
+    Assertions.assertFalse(file0.exists(), file0 + " does not exist");
   }
 
 }
