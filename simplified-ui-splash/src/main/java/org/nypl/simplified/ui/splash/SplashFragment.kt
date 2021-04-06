@@ -37,7 +37,6 @@ import org.nypl.simplified.reports.Reports
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
@@ -103,7 +102,7 @@ class SplashFragment : Fragment() {
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
     this.retainInstance = true
-    this.parameters = this.arguments!!.getSerializable(parametersKey) as SplashParameters
+    this.parameters = this.requireArguments().getSerializable(parametersKey) as SplashParameters
   }
 
   override fun onAttach(context: Context) {
@@ -503,10 +502,8 @@ class SplashFragment : Fragment() {
     this.migrationSubscription =
       migrations.events.subscribe { event -> this.onMigrationEvent(event) }
 
-    val executor =
-      this.listener.onSplashWantMigrationExecutor()
     val migrationFuture =
-      executor.submit(Callable { migrations.runMigrations() })
+      migrations.start()
 
     migrationFuture.addListener(
       Runnable {

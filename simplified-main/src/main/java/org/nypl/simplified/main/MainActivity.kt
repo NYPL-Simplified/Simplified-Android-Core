@@ -88,9 +88,6 @@ class MainActivity :
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
 
-  private val migrationExecutor: ListeningScheduledExecutorService =
-    NamedThreadPools.namedThreadPool(1, "migrations", 19)
-
   private lateinit var mainViewModel: MainActivityViewModel
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesNavigationController: ProfilesNavigationController
@@ -506,7 +503,8 @@ class MainActivity :
   }
 
   override fun onSplashWantMigrationExecutor(): ListeningExecutorService {
-    return this.migrationExecutor
+    // No longer used
+    throw NotImplementedError()
   }
 
   override fun onSplashMigrationReport(report: MigrationReport) {
