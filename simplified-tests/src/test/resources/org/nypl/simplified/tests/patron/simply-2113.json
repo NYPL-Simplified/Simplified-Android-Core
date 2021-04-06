@@ -1,0 +1,25 @@
+{
+  "simplified:authorization_identifier": "24",
+  "drm": [
+    {
+      "drm:vendor": "NYPL",
+      "drm:scheme": "http://librarysimplified.org/terms/drm/scheme/ACS",
+      "drm:clientToken": "NOTACLIENTTOKEN"
+    }
+  ],
+  "links": [
+    {
+      "href": "https://circulation.librarysimplified.org/NYNYPL/AdobeAuth/devices",
+      "rel": "http://librarysimplified.org/terms/drm/rel/devices"
+    },
+    {
+      "href": "https://circulation.librarysimplified.org/NYNYPL/annotations/",
+      "type": "application/ld+json; profile=\"http://www.w3.org/ns/anno.jsonld\"",
+      "rel": "http://www.w3.org/ns/oa#annotationService"
+    }
+  ],
+  "simplified:authorization_expires": "2022-08-06T00:00:00Z",
+  "settings": {
+    "simplified:synchronize_annotations": true
+  }
+}

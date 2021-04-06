@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.json.core.JSONParserUtilities
+import org.nypl.simplified.links.Link
+import org.nypl.simplified.links.json.LinkParsing
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.parser.api.ParseWarning
@@ -101,6 +103,7 @@ internal class PatronUserProfileParser(
       val settings = parseSettings(root)
       val authorization = parseAuthorization(root)
       val drm = parseDRMs(root)
+      val links = parseLinks(root)
 
       if (this.errors.isEmpty()) {
         return ParseResult.Success(
@@ -108,7 +111,8 @@ internal class PatronUserProfileParser(
           result = PatronUserProfile(
             settings = settings,
             drm = drm,
-            authorization = authorization
+            authorization = authorization,
+            links = links
           )
         )
       } else {
@@ -118,6 +122,27 @@ internal class PatronUserProfileParser(
       this.publishErrorForException(e)
       ParseResult.Failure(warnings = this.warnings.toList(), errors = this.errors.toList())
     }
+  }
+
+  private fun parseLinks(root: ObjectNode): List<org.nypl.simplified.links.Link> {
+    val linksNode =
+      JSONParserUtilities.getArrayOrNull(root, "links")
+        ?: return listOf()
+
+    val links = mutableListOf<org.nypl.simplified.links.Link>()
+    linksNode.forEach {
+      when (val result = LinkParsing.parseLink(this.uri, it)) {
+        is ParseResult.Success -> {
+          this.warnings.addAll(result.warnings)
+          links.add(result.result)
+        }
+        is ParseResult.Failure -> {
+          this.warnings.addAll(result.warnings)
+          this.errors.addAll(result.errors)
+        }
+      }
+    }
+    return links.toList()
   }
 
   private fun parseDRMs(root: ObjectNode): List<PatronDRM> {

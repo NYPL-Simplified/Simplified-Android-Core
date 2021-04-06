@@ -175,6 +175,21 @@ abstract class PatronUserProfileParserContract {
     Assert.assertEquals(0, result.warnings.size)
   }
 
+  @Test
+  fun testSimply2113() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("simply-2113.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    Assert.assertThat(result, IsInstanceOf(Success::class.java))
+
+    val success = result as Success
+    val profile = success.result
+
+    Assert.assertEquals("https://circulation.librarysimplified.org/NYNYPL/annotations/", profile.annotationsURI?.toString())
+  }
+
   private fun resource(file: String): InputStream {
     val path = "/org/nypl/simplified/tests/patron/$file"
     return PatronUserProfileParserContract::class.java.getResourceAsStream(path)!!
