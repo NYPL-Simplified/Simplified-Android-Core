@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
@@ -22,6 +23,15 @@ object BookmarkJSON {
 
   private val dateFormatter =
     ISODateTimeFormat.dateTime()
+      .withZoneUTC()
+
+  private val dateParserWithTimezone =
+    ISODateTimeFormat.dateTimeParser()
+      .withOffsetParsed()
+
+  private val dateParserWithUTC =
+    ISODateTimeFormat.dateTimeParser()
+      .withZoneUTC()
 
   /**
    * Deserialize bookmarks from the given JSON node.
@@ -85,11 +95,14 @@ object BookmarkJSON {
         JSONParserUtilities.getObject(node, "location")
       )
 
+    val timeParsed =
+      this.parseTime(JSONParserUtilities.getString(node, "time"))
+
     return Bookmark.create(
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
       location = location,
-      time = DateTime.parse(JSONParserUtilities.getString(node, "time")),
+      time = timeParsed,
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
       uri = this.toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
@@ -130,12 +143,33 @@ object BookmarkJSON {
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
       location = locationMax,
-      time = DateTime.parse(JSONParserUtilities.getString(node, "time")),
+      time = this.parseTime(JSONParserUtilities.getString(node, "time")),
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
       uri = this.toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
       deviceID = JSONParserUtilities.getStringDefault(node, "deviceID", null)
     )
+  }
+
+  /**
+   * Correctly parse a date/time value.
+   *
+   * This slightly odd function first attempts to parse the incoming string as if it was
+   * a date/time string with an included time zone. If the time string turned out not to
+   * include a time zone, Joda Time will parse it using the system's default timezone. We
+   * then detect that this has happened and, if the current system's timezone isn't UTC,
+   * we parse the string *again* but this time assuming a UTC timezone.
+   */
+
+  private fun parseTime(
+    timeText: String
+  ): DateTime {
+    val defaultZone = DateTimeZone.getDefault()
+    val timeParsedWithZone = this.dateParserWithTimezone.parseDateTime(timeText)
+    if (timeParsedWithZone.zone == defaultZone && defaultZone != DateTimeZone.UTC) {
+      return this.dateParserWithUTC.parseDateTime(timeText)
+    }
+    return timeParsedWithZone.toDateTime(DateTimeZone.UTC)
   }
 
   private fun <T> toNullable(option: OptionType<T>): T? {

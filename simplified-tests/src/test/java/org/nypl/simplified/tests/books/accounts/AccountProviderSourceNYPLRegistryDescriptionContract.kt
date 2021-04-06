@@ -30,7 +30,7 @@ import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLFeatur
 import org.nypl.simplified.opds.auth_document.api.AuthenticationObjectNYPLInput
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
+import org.nypl.simplified.tests.mocking.MockAccountProviderResolutionStrings
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.TimeUnit

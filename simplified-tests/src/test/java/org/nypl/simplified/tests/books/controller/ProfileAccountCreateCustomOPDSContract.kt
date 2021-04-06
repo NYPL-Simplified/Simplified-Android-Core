@@ -43,10 +43,10 @@ import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockAccountCreationStringResources
-import org.nypl.simplified.tests.MockAccountProviderRegistry
-import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
-import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockAccountCreationStringResources
+import org.nypl.simplified.tests.mocking.MockAccountProviderRegistry
+import org.nypl.simplified.tests.mocking.MockAccountProviderResolutionStrings
+import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
 import java.io.File
