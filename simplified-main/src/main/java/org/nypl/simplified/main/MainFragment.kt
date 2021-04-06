@@ -71,6 +71,19 @@ class MainFragment : Fragment() {
     this.viewModel =
       ViewModelProvider(this)
         .get(MainFragmentViewModel::class.java)
+
+    /*
+    * If named profiles are enabled, subscribe to profile timer events so that users are
+    * logged out after a period of inactivity.
+    */
+
+    when (viewModel.profilesController.profileAnonymousEnabled()) {
+      ANONYMOUS_PROFILE_ENABLED -> {
+      }
+      ANONYMOUS_PROFILE_DISABLED -> {
+        viewModel.profilesController.profileIdleTimer().start()
+      }
+    }
   }
 
   override fun onCreateView(
@@ -175,19 +188,6 @@ class MainFragment : Fragment() {
           .let { subscriptions.add(it) }
 
       /*
-     * If named profiles are enabled, subscribe to profile timer events so that users are
-     * logged out after a period of inactivity.
-     */
-
-      when (viewModel.profilesController.profileAnonymousEnabled()) {
-        ANONYMOUS_PROFILE_ENABLED -> {
-        }
-        ANONYMOUS_PROFILE_DISABLED -> {
-          viewModel.profilesController.profileIdleTimer().start()
-        }
-      }
-
-      /*
      * Show the Toolbar
      */
       this.supportActionBar?.show()
@@ -275,15 +275,8 @@ class MainFragment : Fragment() {
 
   override fun onPause() {
     super.onPause()
-    clearDelayedRunnables()
 
-    when (viewModel.profilesController.profileAnonymousEnabled()) {
-      ANONYMOUS_PROFILE_ENABLED -> {
-      }
-      ANONYMOUS_PROFILE_DISABLED -> {
-        viewModel.profilesController.profileIdleTimer().stop()
-      }
-    }
+    clearDelayedRunnables()
 
     this.navigationControllerDirectory.removeNavigationController(
       CatalogNavigationControllerType::class.java
@@ -299,6 +292,18 @@ class MainFragment : Fragment() {
     )
 
     this.subscriptions.clear()
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+
+    when (viewModel.profilesController.profileAnonymousEnabled()) {
+      ANONYMOUS_PROFILE_ENABLED -> {
+      }
+      ANONYMOUS_PROFILE_DISABLED -> {
+        viewModel.profilesController.profileIdleTimer().stop()
+      }
+    }
   }
 
   private fun runOnUIThread(f: () -> Unit) {
