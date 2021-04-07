@@ -8,8 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.ImageView
@@ -18,12 +16,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.joda.time.format.DateTimeFormat
 import org.librarysimplified.documents.DocumentStoreType
@@ -41,8 +37,7 @@ import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
-import java.util.concurrent.ExecutionException
+import java.util.ServiceLoader
 import java.util.concurrent.TimeUnit
 import org.nypl.simplified.ui.theme.ThemeControl
 
@@ -69,7 +64,6 @@ class SplashFragment : Fragment() {
   private lateinit var viewsForEULA: ViewsEULA
   private lateinit var viewsForMigrationRunning: ViewsMigrationRunning
   private lateinit var viewsForMigrationReport: ViewsMigrationReport
-  private lateinit var bootFuture: ListenableFuture<*>
   private lateinit var brandingService: BrandingSplashServiceType
   private var migrationReportEmail: String? = null
   private var migrationSubscription: Disposable? = null
@@ -118,7 +112,6 @@ class SplashFragment : Fragment() {
   override fun onAttach(context: Context) {
     super.onAttach(context)
     this.listener = this.activity as SplashListenerType
-    this.bootFuture = this.listener.onSplashWantBootFuture()
   }
 
   override fun onCreateView(
@@ -256,26 +249,7 @@ class SplashFragment : Fragment() {
     this.viewsForEULA.eulaWebView.settings.allowUniversalAccessFromFileURLs = false
     this.viewsForEULA.eulaWebView.settings.javaScriptEnabled = false
 
-    this.viewsForEULA.eulaWebView.webViewClient = object : MailtoWebViewClient(activity) {
-      override fun onReceivedError(
-        view: WebView?,
-        errorCode: Int,
-        description: String?,
-        failingUrl: String?
-      ) {
-        super.onReceivedError(view, errorCode, description, failingUrl)
-        this@SplashFragment.logger.error("onReceivedError: {} {} {}", errorCode, description, failingUrl)
-      }
-
-      override fun onReceivedError(
-        view: WebView?,
-        request: WebResourceRequest?,
-        error: WebResourceError?
-      ) {
-        super.onReceivedError(view, request, error)
-        this@SplashFragment.logger.error("onReceivedError: {}", error)
-      }
-    }
+    this.viewsForEULA.eulaWebView.webViewClient = MailtoWebViewClient(activity)
 
     this.viewsForEULA.eulaWebView.loadUrl(url.toString())
 
@@ -366,28 +340,17 @@ class SplashFragment : Fragment() {
   override fun onStart() {
     super.onStart()
 
+    val bootViewModel =
+      ViewModelProvider(this)
+        .get(ServiceBootingViewModel::class.java)
+
     this.bootSubscription =
-      this.listener.onSplashWantBootEvents()
-        .observeOn(AndroidSchedulers.mainThread())
+        bootViewModel.bootEvents
         .subscribe(this::onBootEvent)
 
-    /*
-     * Subscribe to the boot future specifically so that we don't risk missing the delivery
-     * of important "boot completed" or "boot failed" messages.
-     */
-
-    this.bootFuture.addListener(
-      Runnable {
-        try {
-          this.bootFuture.get(1L, TimeUnit.SECONDS)
-          this.onBootFinished()
-        } catch (e: Throwable) {
-          val actual = if (e is ExecutionException) { e.cause } else { e }
-          this.onBootEvent(BootEvent.BootFailed(actual?.message ?: "", Exception(e)))
-        }
-      },
-      MoreExecutors.directExecutor()
-    )
+    if (bootViewModel.bootFuture.isDone) {
+      this.onBootFinished()
+    }
   }
 
   override fun onStop() {
@@ -403,7 +366,7 @@ class SplashFragment : Fragment() {
       }
 
       is BootEvent.BootCompleted -> {
-        // Don't care.
+        this.onBootFinished()
       }
 
       is BootEvent.BootFailed ->
@@ -486,9 +449,11 @@ class SplashFragment : Fragment() {
   private fun doMigrations() {
     this.logger.debug("doMigrations")
 
-    val migrations = this.listener.onSplashWantMigrations()
+    val migrationsViewModel =
+      ViewModelProvider(this)
+        .get(MigrationsViewModel::class.java)
 
-    if (this.migrationTried || (!migrations.anyNeedToRun())) {
+    if (this.migrationTried || (!migrationsViewModel.anyMigrationNeedToRun())) {
       this.logger.debug("either migration has already been tried, or no migrations need to run")
       this.onMigrationsDone()
       return
@@ -498,23 +463,22 @@ class SplashFragment : Fragment() {
     this.configureViewsForMigrationProgress()
 
     this.migrationSubscription =
-      migrations.events
-        .observeOn(AndroidSchedulers.mainThread())
+      migrationsViewModel.migrationEvents
         .subscribe { event -> this.onMigrationEvent(event) }
 
-    val migrationFuture =
-      migrations.start()
+    val migrationFuture = migrationsViewModel.startMigrations()
 
-    migrationFuture.addListener(
-      Runnable {
-        try {
-          this.processMigrationReport(migrationFuture.get(1L, TimeUnit.SECONDS))
-        } catch (e: Throwable) {
-          this.processMigrationCrashed(e)
-        }
-      },
-      MoreExecutors.directExecutor()
-    )
+    migrationsViewModel.migrationsCompleted.observe(this, { completed ->
+      if (!completed) {
+        return@observe
+      }
+
+      try {
+        this.processMigrationReport(migrationFuture.get(1L, TimeUnit.SECONDS))
+      } catch (e: Throwable) {
+        this.processMigrationCrashed(e)
+      }
+    })
   }
 
   private fun onMigrationsDone() {
